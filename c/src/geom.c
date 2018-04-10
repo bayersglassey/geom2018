@@ -1,4 +1,23 @@
 
+/*
+
+
+    We probably want to have a "declarative" structure which just describes
+    patterns; and this can then be "compiled" into other structures
+    specialized for e.g. rendering.
+
+    union:
+        sq
+        add: A D union:
+            sq
+            rot: 2 tri
+            rot: 4 sq
+            rot: 7 tri
+
+*/
+
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
