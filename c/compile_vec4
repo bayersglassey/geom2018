@@ -1,0 +1,5 @@
+
+gcc -g -std=c99 \
+    -Wall -Werror -Wno-unused \
+    -o main \
+    src/vec4.c src/geom.c

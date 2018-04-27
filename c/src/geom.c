@@ -20,34 +20,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#define MAX_VEC_DIMS 4
-
-typedef int vec_t[MAX_VEC_DIMS];
-typedef int boundbox_t[MAX_VEC_DIMS*2];
-typedef int rot_t;
-typedef bool flip_t;
-typedef struct trf {
-    /* a transformation -- applied in this order: flip, rot, add */
-    flip_t flip;
-    rot_t rot;
-    vec_t add;
-} trf_t;
-
-
-typedef struct vecspace {
-    int dims;
-    int rot_max;
-
-    void (*vec_rot)(vec_t v, rot_t r);
-    void (*vec_flip)(vec_t v, flip_t flip);
-} vecspace_t;
+#include "geom.h"
 
 
 
-
-#define rot_inv(rot_max, rot) ((rot_max) - (rot))
-#define rot_flip(rot_max, rot, flip) ((flip)? rot_inv((rot_max), (rot)): (rot))
-#define flip_inv(flip) (!(flip))
 
 rot_t rot_rot(int rot_max, rot_t r1, rot_t r2){
     rot_t r3 = r1 + r2;
@@ -184,92 +160,3 @@ void trf_apply_inv(vecspace_t *space, trf_t *t, trf_t *s){
     }
 }
 
-
-
-
-
-
-void vec4_set(vec_t v, int a, int b, int c, int d){
-    v[0] = a;
-    v[1] = b;
-    v[2] = c;
-    v[3] = d;
-}
-
-bool vec4_test(vec_t v, int a, int b, int c, int d){
-    return
-        v[0] == a &&
-        v[1] == b &&
-        v[2] == c &&
-        v[3] == d
-    ;
-}
-
-void vec4_rot(vec_t v, rot_t r){
-    for(int i = r; i > 0; i--){
-        int a = v[0];
-        int b = v[1];
-        int c = v[2];
-        int d = v[3];
-        v[0] = -d;
-        v[1] = a;
-        v[2] = b + d;
-        v[3] = c;
-    }
-}
-
-void vec4_flip(vec_t v, flip_t flip){
-    if(flip){
-        int a = v[0];
-        int b = v[1];
-        int c = v[2];
-        int d = v[3];
-        v[0] = a + c;
-        v[2] = -c;
-        v[3] = -b - d;
-    }
-}
-
-vecspace_t vec4 = {4, 12, vec4_rot, vec4_flip};
-
-bool vec4_tests(){
-    vec_t A, B, C, D;
-    vec4_set(A, 1, 0, 0, 0);
-    vec4_set(B, 0, 1, 0, 0);
-    vec4_set(C, 0, 0, 1, 0);
-    vec4_set(D, 0, 0, 0, 1);
-
-    {
-        vec_t v;
-        vec_cpy(4, v, A);
-        vec4_rot(v, 1);
-        test_vecs(4, v, B);
-    }
-
-    {
-        vec_t v;
-        vec_cpy(4, v, B);
-        vec4_rot(v, vec4.rot_max-1);
-        test_vecs(4, v, A);
-    }
-
-    {
-        vec_t v;
-        vec4_set(v, -1, 0, 1, 0);
-        vec4_rot(v, vec4.rot_max-1);
-        test_vecs(4, v, D);
-    }
-
-    return true;
-}
-
-void press_a_key(){
-    printf("Hit enter...");
-    getchar();
-}
-
-int main(int n_args, char *args[]){
-    vec4_tests();
-    press_a_key();
-    return 0;
-}

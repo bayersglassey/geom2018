@@ -15,13 +15,13 @@
         if(err)return err;
 
         while(1){
-            char *token;
-            int token_len;
-            int err = fus_lexer_get_word(&lexer, &token, &token_len);
+            int err = fus_lexer_next(&lexer);
             if(err)return err;
 
-            if(token == NULL)break;
-            printf("Lexed: %.*s\n", token_len, token);
+            if(fus_lexer_done(&lexer))break;
+            printf("Lexed: ");
+            fus_lexer_show(&lexer, stdout);
+            printf("\n");
         }
 
 */
@@ -50,7 +50,11 @@ struct fus_lexer_t {
 
 
 int fus_lexer_init(struct fus_lexer_t *lexer, const char *text);
-int fus_lexer_get_word(struct fus_lexer_t *lexer, const char **token, int *token_len);
-
+int fus_lexer_next(struct fus_lexer_t *lexer);
+bool fus_lexer_done(struct fus_lexer_t *lexer);
+int fus_lexer_got(struct fus_lexer_t *lexer, const char *text);
+void fus_lexer_show(struct fus_lexer_t *lexer, FILE *f);
+int fus_lexer_expect(struct fus_lexer_t *lexer, const char *text);
+int fus_lexer_unexpected(struct fus_lexer_t *lexer);
 
 #endif

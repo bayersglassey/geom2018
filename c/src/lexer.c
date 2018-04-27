@@ -33,7 +33,7 @@ int fus_lexer_init(struct fus_lexer_t *lexer, const char *text){
     return 0;
 }
 
-static void fus_lexer_show(FILE *f, struct fus_lexer_t *lexer){
+static void fus_lexer_dump(FILE *f, struct fus_lexer_t *lexer){
     printf("lexer: %p\n", lexer);
     if(lexer == NULL)return;
     printf("  text = ...\n");
@@ -89,8 +89,8 @@ static int fus_lexer_push_indent(
 }
 
 static void fus_lexer_err_info(struct fus_lexer_t *lexer){
-    fprintf(stderr, "%s: %s: @(row=%i, col=%i, pos=%i): ",
-        __FILE__, __func__, lexer->row, lexer->col, lexer->pos);
+    fprintf(stderr, "%s: @(row=%i, col=%i, pos=%i): ",
+        __FILE__, lexer->row, lexer->col, lexer->pos);
 }
 
 static int fus_lexer_pop_indent(struct fus_lexer_t *lexer){
@@ -231,11 +231,7 @@ err_eof:
     return 2;
 }
 
-int fus_lexer_get_word(
-    struct fus_lexer_t *lexer,
-    const char **token,
-    int *token_len
-){
+int fus_lexer_next(struct fus_lexer_t *lexer){
     int err;
     while(1){
         /* return "(" or ")" token based on indents? */
@@ -303,9 +299,46 @@ int fus_lexer_get_word(
         lexer->returning_indents++;
     }
 
-    *token = lexer->token;
-    *token_len = lexer->token_len;
     return 0;
 }
 
+bool fus_lexer_done(struct fus_lexer_t *lexer){
+    return lexer->token == NULL;
+}
+
+int fus_lexer_got(struct fus_lexer_t *lexer, const char *text){
+    if(lexer->token == NULL || text == NULL){
+        return lexer->token == text;
+    }
+    return
+        lexer->token_len == strlen(text) &&
+        strncmp(lexer->token, text, lexer->token_len) == 0
+    ;
+}
+
+void fus_lexer_show(struct fus_lexer_t *lexer, FILE *f){
+    if(lexer->token == NULL){
+        fprintf(f, "NULL");
+    }else{
+        fprintf(f, "\"%.*s\"", lexer->token_len, lexer->token);
+    }
+}
+
+int fus_lexer_expect(struct fus_lexer_t *lexer, const char *text){
+    int err = fus_lexer_next(lexer);
+    if(err)return err;
+    if(!fus_lexer_got(lexer, text)){
+        fus_lexer_err_info(lexer); fprintf(stderr,
+            "Expected \"%s\", but got: ", text);
+        fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
+        return 2;
+    }
+    return 0;
+}
+
+int fus_lexer_unexpected(struct fus_lexer_t *lexer){
+    fus_lexer_err_info(lexer); fprintf(stderr, "Unexpected: ");
+    fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
+    return 2;
+}
 

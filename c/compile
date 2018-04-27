@@ -1,0 +1,5 @@
+
+gcc -g -std=c99 \
+    -Wall -Werror -Wno-unused \
+    -o main \
+    src/main.c src/lexer.c src/util.c src/geom.c src/prismel.c
