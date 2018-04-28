@@ -18,6 +18,8 @@ typedef struct prismel_image {
 } prismel_image_t;
 
 typedef struct prismel {
+    char *name;
+
     int n_images;
     struct prismel_image *images;
 

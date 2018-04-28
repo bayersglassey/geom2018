@@ -1,5 +1,6 @@
 
 
+#include "util.h"
 #include "lexer.h"
 
 
@@ -322,6 +323,20 @@ void fus_lexer_show(fus_lexer_t *lexer, FILE *f){
     }else{
         fprintf(f, "\"%.*s\"", lexer->token_len, lexer->token);
     }
+}
+
+int fus_lexer_get_name(fus_lexer_t *lexer, char **name){
+    if(lexer->token == NULL ||
+        (lexer->token[0] != '_' && !isalpha(lexer->token[0]))
+    ){
+        fus_lexer_err_info(lexer); fprintf(stderr,
+            "Expected name, but got: ");
+        fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
+        return 2;
+    }
+    *name = strndup(lexer->token, lexer->token_len);
+    if(*name == NULL)return 1;
+    return 0;
 }
 
 int fus_lexer_expect(fus_lexer_t *lexer, const char *text){

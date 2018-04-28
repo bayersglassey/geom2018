@@ -9,7 +9,7 @@
 #include "vec4.h"
 
 
-int parse_prismels(fus_lexer_t *lexer, prismelrenderer_t *prend){
+int parse_prismel(fus_lexer_t *lexer, prismelrenderer_t *prend){
     int depth = 1;
     while(1){
         int err;
@@ -25,6 +25,33 @@ int parse_prismels(fus_lexer_t *lexer, prismelrenderer_t *prend){
                 break;
             }
         }
+    }
+    return 0;
+}
+
+int parse_prismels(fus_lexer_t *lexer, prismelrenderer_t *prend){
+    while(1){
+        int err;
+        char *name;
+
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+
+        if(fus_lexer_got(lexer, ")")){
+            break;
+        }
+
+        err = fus_lexer_get_name(lexer, &name);
+        if(err)return err;
+        err = prismelrenderer_push_prismel(prend);
+        if(err)return err;
+
+        prend->prismel_list->name = name;
+
+        err = fus_lexer_expect(lexer, "(");
+        if(err)return err;
+        err = parse_prismel(lexer, prend);
+        if(err)return err;
     }
     return 0;
 }

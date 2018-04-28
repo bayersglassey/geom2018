@@ -1,6 +1,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "util.h"
 
@@ -29,3 +30,17 @@ char *load_file(const char *filename){
     return f_buffer;
 }
 
+size_t strnlen(const char *s, size_t maxlen){
+    size_t len = 0;
+    while(len < maxlen && s[len] != '\0')len++;
+    return len;
+}
+
+char *strndup(const char *s1, size_t len){
+    size_t s_len = strnlen(s1, len);
+    char *s2 = malloc(s_len + 1);
+    if(s2 == NULL)return NULL;
+    strncpy(s2, s1, len);
+    s2[s_len] = '\0';
+    return s2;
+}
