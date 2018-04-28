@@ -13,12 +13,9 @@ int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space){
 }
 
 void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f){
-    prismelrenderer_bitmap_t *bitmap;
-    prismel_t *prismel;
-
     fprintf(f, "prismelrenderer: %p\n", renderer);
     if(renderer == NULL)return;
-    fprintf(f, "  space = %p\n", renderer->space);
+    fprintf(f, "  space: %p\n", renderer->space);
 
     fprintf(f, "  prismels:\n");
     for(prismel_t *prismel = renderer->prismel_list;
@@ -30,7 +27,13 @@ void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f){
         fprintf(f, "      images:\n");
         for(int i = 0; i < prismel->n_images; i++){
             prismel_image_t *image = &prismel->images[i];
-            fprintf(f, "        image: %p\n", image);
+            fprintf(f, "        image: %p", image);
+            for(prismel_image_line_t *line = image->line_list;
+                line != NULL; line = line->next
+            ){
+                fprintf(f, " (%i %i %i)", line->x, line->y, line->w);
+            }
+            fprintf(f, "\n");
         }
     }
 
@@ -58,9 +61,12 @@ int prismel_create_images(prismel_t *prismel, int n_images){
     return 0;
 }
 
-int prismel_image_push_line(prismel_image_t *image){
+int prismel_image_push_line(prismel_image_t *image, int x, int y, int w){
     prismel_image_line_t *line = calloc(1, sizeof(prismel_image_line_t));
     if(line == NULL)return 1;
+    line->x = x;
+    line->y = y;
+    line->w = w;
     line->next = image->line_list;
     image->line_list = line;
     return 0;

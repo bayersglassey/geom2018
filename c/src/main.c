@@ -10,26 +10,74 @@
 
 
 int parse_prismel(fus_lexer_t *lexer, prismelrenderer_t *prend){
-    int depth = 1;
+    /*
+        Example data:
+
+            images:
+                : ( 0 -2  2) ( 0 -1  2)
+                : ( 0 -3  1) (-1 -2  3) ( 0 -1  1)
+                : (-1 -3  1) (-2 -2  3) (-1 -1  1)
+                : (-2 -2  2) (-2 -1  2)
+                : (-2 -2  1) (-3 -1  3) (-2  0  1)
+                : (-2 -1  1) (-3  0  3) (-2  1  1)
+                : (-2  0  2) (-2  1  2)
+                : (-1  0  1) (-2  1  3) (-1  2  1)
+                : ( 0  0  1) (-1  1  3) ( 0  2  1)
+                : ( 0  0  2) ( 0  1  2)
+                : ( 1 -1  1) ( 0  0  3) ( 1  1  1)
+                : ( 1 -2  1) ( 0 -1  3) ( 1  0  1)
+    */
+    prismel_t *prismel = prend->prismel_list;
     while(1){
         int err;
 
         err = fus_lexer_next(lexer);
         if(err)return err;
 
-        if(fus_lexer_got(lexer, "(")){
-            depth++;
-        }else if(fus_lexer_got(lexer, ")")){
-            depth--;
-            if(depth == 0){
-                break;
+        if(fus_lexer_got(lexer, ")")){
+            break;
+        }
+
+        if(fus_lexer_got(lexer, "images")){
+            err = fus_lexer_expect(lexer, "(");
+            if(err)return err;
+            for(int i = 0; i < prismel->n_images; i++){
+                prismel_image_t *image = &prismel->images[i];
+                err = fus_lexer_expect(lexer, "(");
+                if(err)return err;
+                while(1){
+                    err = fus_lexer_next(lexer);
+                    if(err)return err;
+                    if(fus_lexer_got(lexer, "(")){
+                        int x, y, w;
+                        err = fus_lexer_expect_int(lexer, &x);
+                        if(err)return err;
+                        err = fus_lexer_expect_int(lexer, &y);
+                        if(err)return err;
+                        err = fus_lexer_expect_int(lexer, &w);
+                        if(err)return err;
+                        err = fus_lexer_expect(lexer, ")");
+                        if(err)return err;
+                        err = prismel_image_push_line(image, x, y, w);
+                        if(err)return err;
+                    }else if(fus_lexer_got(lexer, ")")){
+                        break;
+                    }else{
+                        return fus_lexer_unexpected(lexer);
+                    }
+                }
             }
+            err = fus_lexer_expect(lexer, ")");
+            if(err)return err;
+        }else{
+            return fus_lexer_unexpected(lexer);
         }
     }
     return 0;
 }
 
 int parse_prismels(fus_lexer_t *lexer, prismelrenderer_t *prend){
+    int n_images = prend->space->rot_max;
     while(1){
         int err;
         char *name;
@@ -45,6 +93,8 @@ int parse_prismels(fus_lexer_t *lexer, prismelrenderer_t *prend){
         if(err)return err;
         err = prismelrenderer_push_prismel(prend);
         if(err)return err;
+        err = prismel_create_images(prend->prismel_list, n_images);
+        if(err)return err;
 
         prend->prismel_list->name = name;
 
@@ -52,26 +102,6 @@ int parse_prismels(fus_lexer_t *lexer, prismelrenderer_t *prend){
         if(err)return err;
         err = parse_prismel(lexer, prend);
         if(err)return err;
-    }
-    return 0;
-}
-
-int parse_shapes(fus_lexer_t *lexer, prismelrenderer_t *prend){
-    int depth = 1;
-    while(1){
-        int err;
-
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-
-        if(fus_lexer_got(lexer, "(")){
-            depth++;
-        }else if(fus_lexer_got(lexer, ")")){
-            depth--;
-            if(depth == 0){
-                break;
-            }
-        }
     }
     return 0;
 }
@@ -93,7 +123,7 @@ int parse_geom(fus_lexer_t *lexer, prismelrenderer_t *prend){
         }else if(fus_lexer_got(lexer, "shapes")){
             err = fus_lexer_expect(lexer, "(");
             if(err)return err;
-            err = parse_shapes(lexer, prend);
+            err = fus_lexer_parse_silent(lexer);
             if(err)return err;
         }else{
             return fus_lexer_unexpected(lexer);
