@@ -34,21 +34,21 @@ int fus_lexer_init(fus_lexer_t *lexer, const char *text){
     return 0;
 }
 
-static void fus_lexer_dump(FILE *f, fus_lexer_t *lexer){
-    printf("lexer: %p\n", lexer);
+void fus_lexer_dump(fus_lexer_t *lexer, FILE *f){
+    fprintf(f, "lexer: %p\n", lexer);
     if(lexer == NULL)return;
-    printf("  text = ...\n");
-    printf("  pos = %i\n", lexer->pos);
-    printf("  row = %i\n", lexer->row);
-    printf("  col = %i\n", lexer->col);
-    printf("  indent = %i\n", lexer->indent);
-    printf("  indents_size = %i\n", lexer->indents_size);
-    printf("  n_indents = %i\n", lexer->n_indents);
-    printf("  indents:\n");
+    fprintf(f, "  text = ...\n");
+    fprintf(f, "  pos = %i\n", lexer->pos);
+    fprintf(f, "  row = %i\n", lexer->row);
+    fprintf(f, "  col = %i\n", lexer->col);
+    fprintf(f, "  indent = %i\n", lexer->indent);
+    fprintf(f, "  indents_size = %i\n", lexer->indents_size);
+    fprintf(f, "  n_indents = %i\n", lexer->n_indents);
+    fprintf(f, "  indents:\n");
     for(int i = 0; i < lexer->n_indents; i++){
-        printf("    %i\n", lexer->indents[i]);
+        fprintf(f, "    %i\n", lexer->indents[i]);
     }
-    printf("  returning_indents = %i\n", lexer->returning_indents);
+    fprintf(f, "  returning_indents = %i\n", lexer->returning_indents);
 }
 
 static void fus_lexer_start_token(fus_lexer_t *lexer){

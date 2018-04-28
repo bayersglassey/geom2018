@@ -50,6 +50,7 @@ typedef struct fus_lexer {
 
 
 int fus_lexer_init(fus_lexer_t *lexer, const char *text);
+void fus_lexer_dump(fus_lexer_t *lexer, FILE *f);
 int fus_lexer_next(fus_lexer_t *lexer);
 bool fus_lexer_done(fus_lexer_t *lexer);
 int fus_lexer_got(fus_lexer_t *lexer, const char *text);

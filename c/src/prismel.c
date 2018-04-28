@@ -12,6 +12,36 @@ int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space){
     return 0;
 }
 
+void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f){
+    prismelrenderer_bitmap_t *bitmap;
+    prismel_t *prismel;
+
+    fprintf(f, "prismelrenderer: %p\n", renderer);
+    if(renderer == NULL)return;
+    fprintf(f, "  space = %p\n", renderer->space);
+
+    fprintf(f, "  prismels:\n");
+    for(prismel_t *prismel = renderer->prismel_list;
+        prismel != NULL; prismel = prismel->next
+    ){
+        fprintf(f, "    prismel: %p\n", prismel);
+        fprintf(f, "      name: %s\n", prismel->name);
+        fprintf(f, "      n_images: %i\n", prismel->n_images);
+        fprintf(f, "      images:\n");
+        for(int i = 0; i < prismel->n_images; i++){
+            prismel_image_t *image = &prismel->images[i];
+            fprintf(f, "        image: %p\n", image);
+        }
+    }
+
+    fprintf(f, "  bitmaps:\n");
+    for(prismelrenderer_bitmap_t *bitmap = renderer->bitmap_list;
+        bitmap != NULL; bitmap = bitmap->next
+    ){
+        fprintf(f, "    %p\n", bitmap);
+    }
+}
+
 int prismelrenderer_push_prismel(prismelrenderer_t *renderer){
     prismel_t *prismel = calloc(1, sizeof(prismel_t));
     if(prismel == NULL)return 1;

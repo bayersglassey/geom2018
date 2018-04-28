@@ -123,5 +123,7 @@ int main(int n_args, char *args[]){
     err = parse_geom(&lexer, &prend);
     if(err)return err;
 
+    prismelrenderer_dump(&prend, stdout);
+
     return 0;
 }

@@ -43,6 +43,7 @@ typedef struct prismelrenderer {
 
 
 int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space);
+void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f);
 int prismelrenderer_push_prismel(prismelrenderer_t *renderer);
 int prismel_create_images(prismel_t *prismel, int n_images);
 int prismel_image_push_line(prismel_image_t *image);
