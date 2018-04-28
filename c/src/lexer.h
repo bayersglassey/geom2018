@@ -34,6 +34,16 @@ typedef struct fus_lexer {
 
     int token_len;
     const char *token;
+    enum {
+        FUS_LEXER_TOKEN_DONE,
+        FUS_LEXER_TOKEN_INT,
+        FUS_LEXER_TOKEN_SYM,
+        FUS_LEXER_TOKEN_OP,
+        FUS_LEXER_TOKEN_STR,
+        FUS_LEXER_TOKEN_OPEN,
+        FUS_LEXER_TOKEN_CLOSE,
+        FUS_LEXER_TOKEN_TYPES
+    } token_type;
 
     int pos;
     int row;
@@ -56,7 +66,11 @@ bool fus_lexer_done(fus_lexer_t *lexer);
 int fus_lexer_got(fus_lexer_t *lexer, const char *text);
 void fus_lexer_show(fus_lexer_t *lexer, FILE *f);
 int fus_lexer_get_name(fus_lexer_t *lexer, char **name);
+int fus_lexer_get_int(fus_lexer_t *lexer, int *i);
 int fus_lexer_expect(fus_lexer_t *lexer, const char *text);
+int fus_lexer_expect_name(fus_lexer_t *lexer, char **name);
+int fus_lexer_expect_int(fus_lexer_t *lexer, int *i);
 int fus_lexer_unexpected(fus_lexer_t *lexer);
+int fus_lexer_parse_silent(fus_lexer_t *lexer);
 
 #endif

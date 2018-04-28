@@ -20,6 +20,7 @@ int fus_lexer_init(fus_lexer_t *lexer, const char *text){
     lexer->text_len = strlen(text);
     lexer->token = NULL;
     lexer->token_len = 0;
+    lexer->token_type = FUS_LEXER_TOKEN_DONE;
     lexer->pos = 0;
     lexer->row = 0;
     lexer->col = 0;
@@ -112,6 +113,12 @@ static char fus_lexer_peek(fus_lexer_t *lexer){
 static char fus_lexer_eat(fus_lexer_t *lexer){
     char c = lexer->text[lexer->pos];
     lexer->pos++;
+    if(c == '\n'){
+        lexer->col++;
+        lexer->row = 0;
+    }else{
+        lexer->row++;
+    }
     return c;
 }
 
@@ -121,12 +128,12 @@ static int fus_lexer_get_indent(fus_lexer_t *lexer){
         char c = lexer->text[lexer->pos];
         if(c == ' '){
             indent++;
-            lexer->pos++;
+            fus_lexer_eat(lexer);
         }else if(c == '\n'){
             /* blank lines don't count towards indentation --
             just reset the indentation and restart on next line */
             indent = 0;
-            lexer->pos++;
+            fus_lexer_eat(lexer);
         }else if(c != '\0' && isspace(c)){
             fus_lexer_err_info(lexer); fprintf(stderr,
                 "Indented with whitespace other than ' ' "
@@ -144,61 +151,61 @@ static void fus_lexer_eat_whitespace(fus_lexer_t *lexer){
     while(lexer->pos < lexer->text_len){
         char c = lexer->text[lexer->pos];
         if(c == '\0' || isgraph(c))break;
-        lexer->pos++;
+        fus_lexer_eat(lexer);
     }
 }
 
 static void fus_lexer_eat_comment(fus_lexer_t *lexer){
     /* eat leading '#' */
-    lexer->pos++;
+    fus_lexer_eat(lexer);
 
     while(lexer->pos < lexer->text_len){
         char c = lexer->text[lexer->pos];
         if(c == '\n')break;
-        lexer->pos++;
+        fus_lexer_eat(lexer);
     }
 }
 
-static void fus_lexer_get_sym(fus_lexer_t *lexer){
+static void fus_lexer_parse_sym(fus_lexer_t *lexer){
     fus_lexer_start_token(lexer);
     while(lexer->pos < lexer->text_len){
         char c = lexer->text[lexer->pos];
         if(c != '_' && !isalnum(c))break;
-        lexer->pos++;
+        fus_lexer_eat(lexer);
     }
     fus_lexer_end_token(lexer);
 }
 
-static void fus_lexer_get_int(fus_lexer_t *lexer){
+static void fus_lexer_parse_int(fus_lexer_t *lexer){
     fus_lexer_start_token(lexer);
 
     /* eat leading '-' if present */
-    if(lexer->text[lexer->pos] == '-')lexer->pos++;
+    if(lexer->text[lexer->pos] == '-')fus_lexer_eat(lexer);
 
     while(lexer->pos < lexer->text_len){
         char c = lexer->text[lexer->pos];
         if(!isdigit(c))break;
-        lexer->pos++;
+        fus_lexer_eat(lexer);
     }
     fus_lexer_end_token(lexer);
 }
 
-static void fus_lexer_get_op(fus_lexer_t *lexer){
+static void fus_lexer_parse_op(fus_lexer_t *lexer){
     fus_lexer_start_token(lexer);
     while(lexer->pos < lexer->text_len){
         char c = lexer->text[lexer->pos];
         if(c == '(' || c == ')' || c == ':'
             || !isgraph(c) || isalnum(c))break;
-        lexer->pos++;
+        fus_lexer_eat(lexer);
     }
     fus_lexer_end_token(lexer);
 }
 
-static int fus_lexer_get_str(fus_lexer_t *lexer){
+static int fus_lexer_parse_str(fus_lexer_t *lexer){
     fus_lexer_start_token(lexer);
 
     /* Include leading '"' */
-    lexer->pos++;
+    fus_lexer_eat(lexer);
 
     while(lexer->pos < lexer->text_len){
         char c = lexer->text[lexer->pos];
@@ -207,10 +214,10 @@ static int fus_lexer_get_str(fus_lexer_t *lexer){
         }else if(c == '\n'){
             goto err_eol;
         }else if(c == '"'){
-            lexer->pos++;
+            fus_lexer_eat(lexer);
             break;
         }else if(c == '\\'){
-            lexer->pos++;
+            fus_lexer_eat(lexer);
             char c = lexer->text[lexer->pos];
             if(c == '\0'){
                 goto err_eof;
@@ -218,7 +225,7 @@ static int fus_lexer_get_str(fus_lexer_t *lexer){
                 goto err_eol;
             }
         }
-        lexer->pos++;
+        fus_lexer_eat(lexer);
     }
     fus_lexer_end_token(lexer);
     return 0;
@@ -243,6 +250,7 @@ int fus_lexer_next(fus_lexer_t *lexer){
             /* Reached end of file; report with NULL token */
             lexer->token = NULL;
             lexer->token_len = 0;
+            lexer->token_type = FUS_LEXER_TOKEN_DONE;
             break;
         }else if(c == '\n'){
             fus_lexer_eat(lexer);
@@ -270,32 +278,39 @@ int fus_lexer_next(fus_lexer_t *lexer){
             fus_lexer_start_token(lexer);
             fus_lexer_eat(lexer);
             fus_lexer_end_token(lexer);
+            lexer->token_type = c == '('? FUS_LEXER_TOKEN_OPEN: FUS_LEXER_TOKEN_CLOSE;
             break;
         }else if(c == '_' || isalpha(c)){
-            fus_lexer_get_sym(lexer);
+            fus_lexer_parse_sym(lexer);
+            lexer->token_type = FUS_LEXER_TOKEN_SYM;
             break;
         }else if(isdigit(c) || (
             c == '-' && isdigit(fus_lexer_peek(lexer))
         )){
-            fus_lexer_get_int(lexer);
+            fus_lexer_parse_int(lexer);
+            lexer->token_type = FUS_LEXER_TOKEN_INT;
             break;
         }else if(c == '#'){
             fus_lexer_eat_comment(lexer);
         }else if(c == '"'){
-            err = fus_lexer_get_str(lexer);
+            err = fus_lexer_parse_str(lexer);
             if(err)return err;
+            lexer->token_type = FUS_LEXER_TOKEN_STR;
             break;
         }else{
-            fus_lexer_get_op(lexer);
+            fus_lexer_parse_op(lexer);
+            lexer->token_type = FUS_LEXER_TOKEN_OP;
             break;
         }
     }
 
     if(lexer->returning_indents > 0){
+        lexer->token_type = FUS_LEXER_TOKEN_OPEN;
         fus_lexer_set_token(lexer, "(");
         lexer->returning_indents--;
     }
     if(lexer->returning_indents < 0){
+        lexer->token_type = FUS_LEXER_TOKEN_CLOSE;
         fus_lexer_set_token(lexer, ")");
         lexer->returning_indents++;
     }
@@ -326,9 +341,7 @@ void fus_lexer_show(fus_lexer_t *lexer, FILE *f){
 }
 
 int fus_lexer_get_name(fus_lexer_t *lexer, char **name){
-    if(lexer->token == NULL ||
-        (lexer->token[0] != '_' && !isalpha(lexer->token[0]))
-    ){
+    if(lexer->token_type != FUS_LEXER_TOKEN_SYM){
         fus_lexer_err_info(lexer); fprintf(stderr,
             "Expected name, but got: ");
         fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
@@ -336,6 +349,17 @@ int fus_lexer_get_name(fus_lexer_t *lexer, char **name){
     }
     *name = strndup(lexer->token, lexer->token_len);
     if(*name == NULL)return 1;
+    return 0;
+}
+
+int fus_lexer_get_int(fus_lexer_t *lexer, int *i){
+    if(lexer->token_type != FUS_LEXER_TOKEN_INT){
+        fus_lexer_err_info(lexer); fprintf(stderr,
+            "Expected int, but got: ");
+        fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
+        return 2;
+    }
+    *i = atoi(lexer->token);
     return 0;
 }
 
@@ -351,9 +375,44 @@ int fus_lexer_expect(fus_lexer_t *lexer, const char *text){
     return 0;
 }
 
+int fus_lexer_expect_name(fus_lexer_t *lexer, char **name){
+    int err = fus_lexer_next(lexer);
+    if(err)return err;
+    return fus_lexer_get_name(lexer, name);
+}
+
+int fus_lexer_expect_int(fus_lexer_t *lexer, int *i){
+    int err = fus_lexer_next(lexer);
+    if(err)return err;
+    return fus_lexer_get_int(lexer, i);
+}
+
 int fus_lexer_unexpected(fus_lexer_t *lexer){
     fus_lexer_err_info(lexer); fprintf(stderr, "Unexpected: ");
     fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
     return 2;
 }
 
+int fus_lexer_parse_silent(fus_lexer_t *lexer){
+    int depth = 1;
+    while(1){
+        int err;
+
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+
+        if(fus_lexer_got(lexer, "(")){
+            depth++;
+        }else if(fus_lexer_got(lexer, ")")){
+            depth--;
+            if(depth == 0){
+                break;
+            }
+        }else if(fus_lexer_done(lexer)){
+            return fus_lexer_unexpected(lexer);
+        }else{
+            /* eat atoms silently */
+        }
+    }
+    return 0;
+}
