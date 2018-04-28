@@ -6,9 +6,10 @@
 #include "lexer.h"
 #include "util.h"
 #include "prismel.h"
+#include "vec4.h"
 
 
-int parse_prismels(struct fus_lexer_t *lexer){
+int parse_prismels(fus_lexer_t *lexer, prismelrenderer_t *prend){
     int depth = 1;
     while(1){
         int err;
@@ -28,7 +29,7 @@ int parse_prismels(struct fus_lexer_t *lexer){
     return 0;
 }
 
-int parse_shapes(struct fus_lexer_t *lexer){
+int parse_shapes(fus_lexer_t *lexer, prismelrenderer_t *prend){
     int depth = 1;
     while(1){
         int err;
@@ -48,7 +49,7 @@ int parse_shapes(struct fus_lexer_t *lexer){
     return 0;
 }
 
-int parse_geom(struct fus_lexer_t *lexer){
+int parse_geom(fus_lexer_t *lexer, prismelrenderer_t *prend){
     while(1){
         int err;
 
@@ -60,12 +61,12 @@ int parse_geom(struct fus_lexer_t *lexer){
         }else if(fus_lexer_got(lexer, "prismels")){
             err = fus_lexer_expect(lexer, "(");
             if(err)return err;
-            err = parse_prismels(lexer);
+            err = parse_prismels(lexer, prend);
             if(err)return err;
         }else if(fus_lexer_got(lexer, "shapes")){
             err = fus_lexer_expect(lexer, "(");
             if(err)return err;
-            err = parse_shapes(lexer);
+            err = parse_shapes(lexer, prend);
             if(err)return err;
         }else{
             return fus_lexer_unexpected(lexer);
@@ -76,20 +77,23 @@ int parse_geom(struct fus_lexer_t *lexer){
 
 
 int main(int n_args, char *args[]){
+    fus_lexer_t lexer;
+    prismelrenderer_t prend;
     char *text = "1 2 (3 4) 5";
+    int err;
 
     if(n_args >= 2){
         text = load_file(args[1]);
         if(text == NULL)return 1;
     }
 
-    struct fus_lexer_t lexer;
-    int err;
-
     err = fus_lexer_init(&lexer, text);
     if(err)return err;
 
-    err = parse_geom(&lexer);
+    err = prismelrenderer_init(&prend, &vec4);
+    if(err)return err;
+
+    err = parse_geom(&lexer, &prend);
     if(err)return err;
 
     return 0;

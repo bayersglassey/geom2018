@@ -6,9 +6,9 @@
 
 const int INITIAL_INDENTS_SIZE = 32;
 
-static int fus_lexer_get_indent(struct fus_lexer_t *lexer);
+static int fus_lexer_get_indent(fus_lexer_t *lexer);
 
-int fus_lexer_init(struct fus_lexer_t *lexer, const char *text){
+int fus_lexer_init(fus_lexer_t *lexer, const char *text){
     lexer->debug = false;
 
     int indents_size = INITIAL_INDENTS_SIZE;
@@ -33,7 +33,7 @@ int fus_lexer_init(struct fus_lexer_t *lexer, const char *text){
     return 0;
 }
 
-static void fus_lexer_dump(FILE *f, struct fus_lexer_t *lexer){
+static void fus_lexer_dump(FILE *f, fus_lexer_t *lexer){
     printf("lexer: %p\n", lexer);
     if(lexer == NULL)return;
     printf("  text = ...\n");
@@ -50,18 +50,18 @@ static void fus_lexer_dump(FILE *f, struct fus_lexer_t *lexer){
     printf("  returning_indents = %i\n", lexer->returning_indents);
 }
 
-static void fus_lexer_start_token(struct fus_lexer_t *lexer){
+static void fus_lexer_start_token(fus_lexer_t *lexer){
     lexer->token = lexer->text + lexer->pos;
     lexer->token_len = 0;
 }
 
-static void fus_lexer_end_token(struct fus_lexer_t *lexer){
+static void fus_lexer_end_token(fus_lexer_t *lexer){
     int token_startpos = lexer->token - lexer->text;
     lexer->token_len = lexer->pos - token_startpos;
 }
 
 static void fus_lexer_set_token(
-    struct fus_lexer_t *lexer,
+    fus_lexer_t *lexer,
     const char *token
 ){
     lexer->token = token;
@@ -69,7 +69,7 @@ static void fus_lexer_set_token(
 }
 
 static int fus_lexer_push_indent(
-    struct fus_lexer_t *lexer,
+    fus_lexer_t *lexer,
     int indent
 ){
     if(lexer->n_indents >= lexer->indents_size){
@@ -88,12 +88,12 @@ static int fus_lexer_push_indent(
     return 0;
 }
 
-static void fus_lexer_err_info(struct fus_lexer_t *lexer){
+static void fus_lexer_err_info(fus_lexer_t *lexer){
     fprintf(stderr, "%s: @(row=%i, col=%i, pos=%i): ",
         __FILE__, lexer->row, lexer->col, lexer->pos);
 }
 
-static int fus_lexer_pop_indent(struct fus_lexer_t *lexer){
+static int fus_lexer_pop_indent(fus_lexer_t *lexer){
     if(lexer->n_indents == 0){
         fus_lexer_err_info(lexer); fprintf(stderr,
             "Tried to pop an indent, but indents stack is empty\n");
@@ -104,17 +104,17 @@ static int fus_lexer_pop_indent(struct fus_lexer_t *lexer){
 }
 
 
-static char fus_lexer_peek(struct fus_lexer_t *lexer){
+static char fus_lexer_peek(fus_lexer_t *lexer){
     return lexer->text[lexer->pos + 1];
 }
 
-static char fus_lexer_eat(struct fus_lexer_t *lexer){
+static char fus_lexer_eat(fus_lexer_t *lexer){
     char c = lexer->text[lexer->pos];
     lexer->pos++;
     return c;
 }
 
-static int fus_lexer_get_indent(struct fus_lexer_t *lexer){
+static int fus_lexer_get_indent(fus_lexer_t *lexer){
     int indent = 0;
     while(lexer->pos < lexer->text_len){
         char c = lexer->text[lexer->pos];
@@ -139,7 +139,7 @@ static int fus_lexer_get_indent(struct fus_lexer_t *lexer){
     return 0;
 }
 
-static void fus_lexer_eat_whitespace(struct fus_lexer_t *lexer){
+static void fus_lexer_eat_whitespace(fus_lexer_t *lexer){
     while(lexer->pos < lexer->text_len){
         char c = lexer->text[lexer->pos];
         if(c == '\0' || isgraph(c))break;
@@ -147,7 +147,7 @@ static void fus_lexer_eat_whitespace(struct fus_lexer_t *lexer){
     }
 }
 
-static void fus_lexer_eat_comment(struct fus_lexer_t *lexer){
+static void fus_lexer_eat_comment(fus_lexer_t *lexer){
     /* eat leading '#' */
     lexer->pos++;
 
@@ -158,7 +158,7 @@ static void fus_lexer_eat_comment(struct fus_lexer_t *lexer){
     }
 }
 
-static void fus_lexer_get_sym(struct fus_lexer_t *lexer){
+static void fus_lexer_get_sym(fus_lexer_t *lexer){
     fus_lexer_start_token(lexer);
     while(lexer->pos < lexer->text_len){
         char c = lexer->text[lexer->pos];
@@ -168,7 +168,7 @@ static void fus_lexer_get_sym(struct fus_lexer_t *lexer){
     fus_lexer_end_token(lexer);
 }
 
-static void fus_lexer_get_int(struct fus_lexer_t *lexer){
+static void fus_lexer_get_int(fus_lexer_t *lexer){
     fus_lexer_start_token(lexer);
 
     /* eat leading '-' if present */
@@ -182,7 +182,7 @@ static void fus_lexer_get_int(struct fus_lexer_t *lexer){
     fus_lexer_end_token(lexer);
 }
 
-static void fus_lexer_get_op(struct fus_lexer_t *lexer){
+static void fus_lexer_get_op(fus_lexer_t *lexer){
     fus_lexer_start_token(lexer);
     while(lexer->pos < lexer->text_len){
         char c = lexer->text[lexer->pos];
@@ -193,7 +193,7 @@ static void fus_lexer_get_op(struct fus_lexer_t *lexer){
     fus_lexer_end_token(lexer);
 }
 
-static int fus_lexer_get_str(struct fus_lexer_t *lexer){
+static int fus_lexer_get_str(fus_lexer_t *lexer){
     fus_lexer_start_token(lexer);
 
     /* Include leading '"' */
@@ -231,7 +231,7 @@ err_eof:
     return 2;
 }
 
-int fus_lexer_next(struct fus_lexer_t *lexer){
+int fus_lexer_next(fus_lexer_t *lexer){
     int err;
     while(1){
         /* return "(" or ")" token based on indents? */
@@ -302,11 +302,11 @@ int fus_lexer_next(struct fus_lexer_t *lexer){
     return 0;
 }
 
-bool fus_lexer_done(struct fus_lexer_t *lexer){
+bool fus_lexer_done(fus_lexer_t *lexer){
     return lexer->token == NULL;
 }
 
-int fus_lexer_got(struct fus_lexer_t *lexer, const char *text){
+int fus_lexer_got(fus_lexer_t *lexer, const char *text){
     if(lexer->token == NULL || text == NULL){
         return lexer->token == text;
     }
@@ -316,7 +316,7 @@ int fus_lexer_got(struct fus_lexer_t *lexer, const char *text){
     ;
 }
 
-void fus_lexer_show(struct fus_lexer_t *lexer, FILE *f){
+void fus_lexer_show(fus_lexer_t *lexer, FILE *f){
     if(lexer->token == NULL){
         fprintf(f, "NULL");
     }else{
@@ -324,7 +324,7 @@ void fus_lexer_show(struct fus_lexer_t *lexer, FILE *f){
     }
 }
 
-int fus_lexer_expect(struct fus_lexer_t *lexer, const char *text){
+int fus_lexer_expect(fus_lexer_t *lexer, const char *text){
     int err = fus_lexer_next(lexer);
     if(err)return err;
     if(!fus_lexer_got(lexer, text)){
@@ -336,7 +336,7 @@ int fus_lexer_expect(struct fus_lexer_t *lexer, const char *text){
     return 0;
 }
 
-int fus_lexer_unexpected(struct fus_lexer_t *lexer){
+int fus_lexer_unexpected(fus_lexer_t *lexer){
     fus_lexer_err_info(lexer); fprintf(stderr, "Unexpected: ");
     fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
     return 2;

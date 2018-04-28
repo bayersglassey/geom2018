@@ -10,7 +10,7 @@
 /*
     Lexer usage example:
 
-        struct fus_lexer_t lexer;
+        fus_lexer_t lexer;
         int err = fus_lexer_init(&lexer, "1 2 (3 4) 5");
         if(err)return err;
 
@@ -26,7 +26,7 @@
 
 */
 
-struct fus_lexer_t {
+typedef struct fus_lexer {
     bool debug;
 
     int text_len;
@@ -46,15 +46,15 @@ struct fus_lexer_t {
     /* If positive, represents a series of "(" tokens being returned.
     If negative, represents a series of ")" tokens being returned. */
     int returning_indents;
-};
+} fus_lexer_t;
 
 
-int fus_lexer_init(struct fus_lexer_t *lexer, const char *text);
-int fus_lexer_next(struct fus_lexer_t *lexer);
-bool fus_lexer_done(struct fus_lexer_t *lexer);
-int fus_lexer_got(struct fus_lexer_t *lexer, const char *text);
-void fus_lexer_show(struct fus_lexer_t *lexer, FILE *f);
-int fus_lexer_expect(struct fus_lexer_t *lexer, const char *text);
-int fus_lexer_unexpected(struct fus_lexer_t *lexer);
+int fus_lexer_init(fus_lexer_t *lexer, const char *text);
+int fus_lexer_next(fus_lexer_t *lexer);
+bool fus_lexer_done(fus_lexer_t *lexer);
+int fus_lexer_got(fus_lexer_t *lexer, const char *text);
+void fus_lexer_show(fus_lexer_t *lexer, FILE *f);
+int fus_lexer_expect(fus_lexer_t *lexer, const char *text);
+int fus_lexer_unexpected(fus_lexer_t *lexer);
 
 #endif
