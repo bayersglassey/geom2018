@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "prismel.h"
 
@@ -46,11 +47,17 @@ void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f){
 }
 
 int prismelrenderer_push_prismel(prismelrenderer_t *renderer){
+    int err;
     prismel_t *prismel = calloc(1, sizeof(prismel_t));
     if(prismel == NULL)return 1;
     prismel->next = renderer->prismel_list;
     renderer->prismel_list = prismel;
+    err = prismel_create_images(prismel, renderer->space->rot_max);
+    if(err)goto err;
     return 0;
+err:
+    free(prismel);
+    return err;
 }
 
 int prismel_create_images(prismel_t *prismel, int n_images){
@@ -72,3 +79,11 @@ int prismel_image_push_line(prismel_image_t *image, int x, int y, int w){
     return 0;
 }
 
+prismel_t *prismelrenderer_get_prismel(prismelrenderer_t *renderer, char *name){
+    prismel_t *prismel = renderer->prismel_list;
+    while(prismel != NULL){
+        if(strcmp(prismel->name, name) == 0)return prismel;
+        prismel = prismel->next;
+    }
+    return NULL;
+}
