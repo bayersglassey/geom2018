@@ -44,10 +44,11 @@ void vec_neg(int dims, vec_t v){
 }
 
 void vec_fprintf(FILE *f, int dims, vec_t v){
-    fprintf(f, "%i", v[0]);
+    fprintf(f, "[%i", v[0]);
     for(int i = 1; i < dims; i++){
         fprintf(f, " %i", v[i]);
     }
+    fprintf(f, "]");
 }
 
 void vec_printf(int dims, vec_t v){
@@ -120,12 +121,41 @@ void vec_mul(vecspace_t *space, vec_t v, vec_t w){
 
 bool test_vecs(int dims, vec_t v, vec_t w){
     bool ok = vec_eq(dims, v, w);
-    printf("("); vec_printf(dims, v); printf(" == "); vec_printf(dims, w); printf(")? %i\n", ok);
+    vec_printf(dims, v); printf(" == "); vec_printf(dims, w); printf("? %i\n", ok);
     return ok;
 }
 
 
 
+void boundbox_init(boundbox_t box, int dims){
+    for(int i = 0; i < dims; i++){
+        box[i*2] = 0;
+        box[i*2+1] = 0;
+    }
+}
+
+void boundbox_fprintf(FILE *f, int dims, boundbox_t box){
+    fprintf(f, "[%i %i", box[0], box[1]);
+    for(int i = 1; i < dims; i++){
+        fprintf(f, " | %i %i", box[i*2], box[i*2+1]);
+    }
+    fprintf(f, "]");
+}
+
+void boundbox_printf(int dims, boundbox_t box){
+    boundbox_fprintf(stdout, dims, box);
+}
+
+
+
+void trf_fprintf(FILE *f, int dims, trf_t *trf){
+    fprintf(f, "%s %i ", trf->flip? "T": "F", trf->rot);
+    vec_fprintf(f, dims, trf->add);
+}
+
+void trf_printf(int dims, trf_t *trf){
+    trf_fprintf(stdout, dims, trf);
+}
 
 void trf_inv(vecspace_t *space, trf_t *t){
     flip_t f = flip_inv(t->flip);

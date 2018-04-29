@@ -41,6 +41,7 @@ typedef struct vecspace {
 
 
 rot_t rot_rot(int rot_max, rot_t r1, rot_t r2);
+
 void vec_zero(int dims, vec_t v);
 void vec_neg(int dims, vec_t v);
 void vec_fprintf(FILE *f, int dims, vec_t v);
@@ -56,6 +57,12 @@ void vec_apply_inv(vecspace_t *space, vec_t v, trf_t *t);
 void vec_mul(vecspace_t *space, vec_t v, vec_t w);
 bool test_vecs(int dims, vec_t v, vec_t w);
 
+void boundbox_init(boundbox_t box, int dims);
+void boundbox_fprintf(FILE *f, int dims, boundbox_t box);
+void boundbox_printf(int dims, boundbox_t box);
+
+void trf_fprintf(FILE *f, int dims, trf_t *trf);
+void trf_printf(int dims, trf_t *trf);
 void trf_inv(vecspace_t *space, trf_t *t);
 void trf_apply(vecspace_t *space, trf_t *t, trf_t *s);
 void trf_apply_inv(vecspace_t *space, trf_t *t, trf_t *s);
