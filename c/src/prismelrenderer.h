@@ -6,6 +6,7 @@
 #include <stdbool.h>
 
 #include "geom.h"
+#include "lexer.h"
 
 
 
@@ -62,6 +63,7 @@ int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space);
 void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f);
 int prismelrenderer_push_prismel(prismelrenderer_t *renderer);
 prismel_t *prismelrenderer_get_prismel(prismelrenderer_t *renderer, char *name);
+int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer);
 
 
 
