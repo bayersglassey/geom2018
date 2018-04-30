@@ -52,6 +52,11 @@ void fus_lexer_dump(fus_lexer_t *lexer, FILE *f){
     fprintf(f, "  returning_indents = %i\n", lexer->returning_indents);
 }
 
+void fus_lexer_err_info(fus_lexer_t *lexer){
+    fprintf(stderr, "Lexer error: @(row=%i, col=%i, pos=%i): ",
+        lexer->row, lexer->col, lexer->pos);
+}
+
 static void fus_lexer_start_token(fus_lexer_t *lexer){
     lexer->token = lexer->text + lexer->pos;
     lexer->token_len = 0;
@@ -88,11 +93,6 @@ static int fus_lexer_push_indent(
     lexer->n_indents++;
     lexer->indents[lexer->n_indents-1] = indent;
     return 0;
-}
-
-static void fus_lexer_err_info(fus_lexer_t *lexer){
-    fprintf(stderr, "%s: @(row=%i, col=%i, pos=%i): ",
-        __FILE__, lexer->row, lexer->col, lexer->pos);
 }
 
 static int fus_lexer_pop_indent(fus_lexer_t *lexer){
