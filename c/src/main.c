@@ -10,52 +10,6 @@
 #include "vec4.h"
 
 
-
-typedef struct rendergraph_map {
-    char *name;
-    rendergraph_t *rgraph;
-    struct rendergraph_map *next;
-} rendergraph_map_t;
-
-bool token_eq(const char *text, const char *token, size_t token_len){
-    if(text == NULL || token == NULL)return text == token;
-    return strlen(text) == token_len && strncmp(text, token, token_len) == 0;
-}
-
-bool name_eq(const char *text, const char *name){
-    if(text == NULL || name == NULL)return text == name;
-    return strcmp(text, name) == 0;
-}
-
-int rendergraph_map_push(rendergraph_map_t **map){
-    rendergraph_map_t *new_map = calloc(1, sizeof(rendergraph_map_t));
-    if(new_map == NULL)return 1;
-    new_map->next = *map;
-    *map = new_map;
-    return 0;
-}
-
-rendergraph_t *rendergraph_map_get(rendergraph_map_t *map, const char *name){
-    while(map != NULL){
-        if(name_eq(map->name, name))return map->rgraph;
-        map = map->next;
-    }
-    return NULL;
-}
-
-void rendergraph_map_dump(rendergraph_map_t *map, FILE *f){
-    fprintf(f, "rendergraph_map:\n");
-    for(rendergraph_map_t *_map = map; _map != NULL; _map = _map->next){
-        fprintf(f, "  %s: %p\n", _map->name, _map->rgraph);
-    }
-    for(rendergraph_map_t *_map = map; _map != NULL; _map = _map->next){
-        rendergraph_dump(_map->rgraph, f);
-    }
-}
-
-
-
-
 int parse_prismel(fus_lexer_t *lexer, prismel_t *prismel){
     /*
         Example data:

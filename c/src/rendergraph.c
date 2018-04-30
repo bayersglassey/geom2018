@@ -1,4 +1,7 @@
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "rendergraph.h"
 
@@ -72,5 +75,38 @@ int rendergraph_push_prismel_trf(rendergraph_t *rendergraph){
     prismel_trf->next = rendergraph->prismel_trf_list;
     rendergraph->prismel_trf_list = prismel_trf;
     return 0;
+}
+
+
+
+int rendergraph_map_push(rendergraph_map_t **map){
+    rendergraph_map_t *new_map = calloc(1, sizeof(rendergraph_map_t));
+    if(new_map == NULL)return 1;
+    new_map->next = *map;
+    *map = new_map;
+    return 0;
+}
+
+bool name_eq(const char *text, const char *name){
+    if(text == NULL || name == NULL)return text == name;
+    return strcmp(text, name) == 0;
+}
+
+rendergraph_t *rendergraph_map_get(rendergraph_map_t *map, const char *name){
+    while(map != NULL){
+        if(name_eq(map->name, name))return map->rgraph;
+        map = map->next;
+    }
+    return NULL;
+}
+
+void rendergraph_map_dump(rendergraph_map_t *map, FILE *f){
+    fprintf(f, "rendergraph_map:\n");
+    for(rendergraph_map_t *_map = map; _map != NULL; _map = _map->next){
+        fprintf(f, "  %s: %p\n", _map->name, _map->rgraph);
+    }
+    for(rendergraph_map_t *_map = map; _map != NULL; _map = _map->next){
+        rendergraph_dump(_map->rgraph, f);
+    }
 }
 
