@@ -1,0 +1,12 @@
+
+Apr 30, 2018:
+-------------
+
+We need:
+    - function for rendering a rendergraph to one of its bitmaps
+    - way to specify, each time one rendergraph refers to another, whether
+        the referee's bitmap should be used, or just its trf_lists.
+
+Test app:
+    - render the dodeca from data/test.fus in middle of screen
+
