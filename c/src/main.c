@@ -5,8 +5,7 @@
 
 #include "lexer.h"
 #include "util.h"
-#include "prismel.h"
-#include "rendergraph.h"
+#include "prismelrenderer.h"
 #include "vec4.h"
 
 
