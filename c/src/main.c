@@ -99,7 +99,7 @@ int parse_prismels(fus_lexer_t *lexer, prismelrenderer_t *prend){
     return 0;
 }
 
-int parse_shape_shapes(fus_lexer_t *lexer, rendergraph_map_t *map, rendergraph_t *rgraph){
+int parse_shape_shapes(fus_lexer_t *lexer, prismelrenderer_t *prend, rendergraph_t *rgraph){
     /*
         Example data:
 
@@ -151,7 +151,7 @@ int parse_shape_shapes(fus_lexer_t *lexer, rendergraph_map_t *map, rendergraph_t
             err = rendergraph_push_rendergraph_trf(rgraph);
             if(err)return err;
 
-            rendergraph_t *found = rendergraph_map_get(map, name);
+            rendergraph_t *found = rendergraph_map_get(prend->rendergraph_map, name);
             if(found == NULL){
                 fprintf(stderr, "Couldn't find shape: %s\n", name);
                 return 2;
@@ -245,7 +245,7 @@ int parse_shape_prismels(fus_lexer_t *lexer, prismelrenderer_t *prend, rendergra
     return 0;
 }
 
-int parse_shape(fus_lexer_t *lexer, prismelrenderer_t *prend, rendergraph_map_t *rgraphs){
+int parse_shape(fus_lexer_t *lexer, prismelrenderer_t *prend){
     int err;
     rendergraph_t *rgraph = calloc(1, sizeof(rendergraph_t));
     if(rgraph == NULL)return 1;
@@ -261,7 +261,7 @@ int parse_shape(fus_lexer_t *lexer, prismelrenderer_t *prend, rendergraph_map_t 
         }else if(fus_lexer_got(lexer, "shapes")){
             err = fus_lexer_expect(lexer, "(");
             if(err)goto err;
-            err = parse_shape_shapes(lexer, rgraphs, rgraph);
+            err = parse_shape_shapes(lexer, prend, rgraph);
             if(err)goto err;
         }else if(fus_lexer_got(lexer, "prismels")){
             err = fus_lexer_expect(lexer, "(");
@@ -273,14 +273,14 @@ int parse_shape(fus_lexer_t *lexer, prismelrenderer_t *prend, rendergraph_map_t 
             goto err;
         }
     }
-    rgraphs->rgraph = rgraph;
+    prend->rendergraph_map->rgraph = rgraph;
     return 0;
 err:
     free(rgraph);
     return err;
 }
 
-int parse_shapes(fus_lexer_t *lexer, prismelrenderer_t *prend, rendergraph_map_t **rgraphs){
+int parse_shapes(fus_lexer_t *lexer, prismelrenderer_t *prend){
     while(1){
         int err;
         char *name;
@@ -294,26 +294,25 @@ int parse_shapes(fus_lexer_t *lexer, prismelrenderer_t *prend, rendergraph_map_t
 
         err = fus_lexer_get_name(lexer, &name);
         if(err)return err;
-        printf("Got shape: %s\n", name);
 
-        if(rendergraph_map_get(*rgraphs, name) != NULL){
+        if(rendergraph_map_get(prend->rendergraph_map, name) != NULL){
             fprintf(stderr, "Shape %s already defined\n", name);
             return 2;
         }
 
-        err = rendergraph_map_push(rgraphs);
+        err = rendergraph_map_push(&prend->rendergraph_map);
         if(err)return err;
-        (*rgraphs)->name = name;
+        prend->rendergraph_map->name = name;
 
         err = fus_lexer_expect(lexer, "(");
         if(err)return err;
-        err = parse_shape(lexer, prend, *rgraphs);
+        err = parse_shape(lexer, prend);
         if(err)return err;
     }
     return 0;
 }
 
-int parse_geom(fus_lexer_t *lexer, prismelrenderer_t *prend, rendergraph_map_t **rgraphs){
+int parse_geom(fus_lexer_t *lexer, prismelrenderer_t *prend){
     while(1){
         int err;
 
@@ -330,7 +329,7 @@ int parse_geom(fus_lexer_t *lexer, prismelrenderer_t *prend, rendergraph_map_t *
         }else if(fus_lexer_got(lexer, "shapes")){
             err = fus_lexer_expect(lexer, "(");
             if(err)return err;
-            err = parse_shapes(lexer, prend, rgraphs);
+            err = parse_shapes(lexer, prend);
             if(err)return err;
         }else{
             return fus_lexer_unexpected(lexer);
@@ -343,7 +342,6 @@ int parse_geom(fus_lexer_t *lexer, prismelrenderer_t *prend, rendergraph_map_t *
 int main(int n_args, char *args[]){
     fus_lexer_t lexer;
     prismelrenderer_t prend;
-    rendergraph_map_t *rgraphs = NULL;
     char *text = "1 2 (3 4) 5";
     int err;
 
@@ -358,11 +356,10 @@ int main(int n_args, char *args[]){
     err = prismelrenderer_init(&prend, &vec4);
     if(err)return err;
 
-    err = parse_geom(&lexer, &prend, &rgraphs);
+    err = parse_geom(&lexer, &prend);
     if(err)return err;
 
     prismelrenderer_dump(&prend, stdout);
-    rendergraph_map_dump(rgraphs, stdout);
 
     return 0;
 }

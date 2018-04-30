@@ -42,6 +42,7 @@ int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space){
     renderer->space = space;
     renderer->bitmap_list = NULL;
     renderer->prismel_list = NULL;
+    renderer->rendergraph_map = NULL;
     return 0;
 }
 
@@ -75,6 +76,14 @@ void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f){
         bitmap != NULL; bitmap = bitmap->next
     ){
         fprintf(f, "    %p\n", bitmap);
+    }
+
+    fprintf(f, "  rendergraph_map:\n");
+    for(rendergraph_map_t *map = renderer->rendergraph_map;
+        map != NULL; map = map->next
+    ){
+        fprintf(f, "    %s:\n", map->name);
+        rendergraph_dump(map->rgraph, f, 6);
     }
 }
 
@@ -119,38 +128,47 @@ int rendergraph_init(rendergraph_t *rendergraph, vecspace_t *space){
     return 0;
 }
 
-void rendergraph_dump(rendergraph_t *rendergraph, FILE *f){
-    fprintf(f, "rendergraph: %p\n", rendergraph);
-    if(rendergraph == NULL)return;
-    fprintf(f, "  space: %p\n", rendergraph->space);
+void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces){
+    char spaces[20+1];
+    if(n_spaces > 20){
+        fprintf(f, "%s: %s: Can't handle %i spaces, sorry!\n",
+            __FILE__, __func__, n_spaces);
+        return;
+    }
+    for(int i = 0; i < n_spaces; i++)spaces[i] = ' ';
+    spaces[n_spaces] = '\0';
 
-    fprintf(f, "  prismel_trf_list:\n");
+    fprintf(f, "%srendergraph: %p\n", spaces, rendergraph);
+    if(rendergraph == NULL)return;
+    fprintf(f, "%s  space: %p\n", spaces, rendergraph->space);
+
+    fprintf(f, "%s  prismel_trf_list:\n", spaces);
     for(prismel_trf_t *prismel_trf = rendergraph->prismel_trf_list;
         prismel_trf != NULL; prismel_trf = prismel_trf->next
     ){
         prismel_t *prismel = prismel_trf->prismel;
-        fprintf(f, "    prismel_trf: %s ", prismel == NULL? "NULL": prismel->name);
+        fprintf(f, "%s    prismel_trf: %s ", spaces, prismel == NULL? "NULL": prismel->name);
         trf_fprintf(f, rendergraph->space->dims, &prismel_trf->trf);
             fprintf(f, " %i\n", prismel_trf->color);
     }
 
-    fprintf(f, "  rendergraph_trf_list:\n");
+    fprintf(f, "%s  rendergraph_trf_list:\n", spaces);
     for(rendergraph_trf_t *rendergraph_trf = rendergraph->rendergraph_trf_list;
         rendergraph_trf != NULL; rendergraph_trf = rendergraph_trf->next
     ){
         rendergraph_t *rendergraph = rendergraph_trf->rendergraph;
-        fprintf(f, "    rendergraph_trf: %p ", rendergraph);
+        fprintf(f, "%s    rendergraph_trf: %p ", spaces, rendergraph);
         trf_fprintf(f, rendergraph->space->dims, &rendergraph_trf->trf);
             fprintf(f, "\n");
     }
 
-    fprintf(f, "  n_bitmaps: %i\n", rendergraph->n_bitmaps);
-    fprintf(f, "  bitmaps:\n");
+    fprintf(f, "%s  n_bitmaps: %i\n", spaces, rendergraph->n_bitmaps);
+    fprintf(f, "%s  bitmaps:\n", spaces);
     for(int i = 0; i < rendergraph->n_bitmaps; i++){
-        fprintf(f, "    bitmap: %p\n", rendergraph->bitmaps[i]);
+        fprintf(f, "%s    bitmap: %p\n", spaces, rendergraph->bitmaps[i]);
     }
 
-    fprintf(f, "  boundbox: "); boundbox_fprintf(f,
+    fprintf(f, "%s  boundbox: ", spaces); boundbox_fprintf(f,
         rendergraph->space->dims, rendergraph->boundbox); fprintf(f, "\n");
 }
 
@@ -205,16 +223,6 @@ rendergraph_t *rendergraph_map_get(rendergraph_map_t *map, const char *name){
         map = map->next;
     }
     return NULL;
-}
-
-void rendergraph_map_dump(rendergraph_map_t *map, FILE *f){
-    fprintf(f, "rendergraph_map:\n");
-    for(rendergraph_map_t *_map = map; _map != NULL; _map = _map->next){
-        fprintf(f, "  %s: %p\n", _map->name, _map->rgraph);
-    }
-    for(rendergraph_map_t *_map = map; _map != NULL; _map = _map->next){
-        rendergraph_dump(_map->rgraph, f);
-    }
 }
 
 

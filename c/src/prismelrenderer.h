@@ -53,6 +53,7 @@ typedef struct prismelrenderer {
     vecspace_t *space;
     struct prismelrenderer_bitmap *bitmap_list;
     struct prismel *prismel_list;
+    struct rendergraph_map *rendergraph_map;
 } prismelrenderer_t;
 
 
@@ -92,7 +93,7 @@ typedef struct rendergraph {
 
 
 int rendergraph_init(rendergraph_t *rendergraph, vecspace_t *space);
-void rendergraph_dump(rendergraph_t *rendergraph, FILE *f);
+void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces);
 int rendergraph_create_bitmaps(rendergraph_t *rendergraph, int n_bitmaps);
 int rendergraph_push_rendergraph_trf(rendergraph_t *rendergraph);
 int rendergraph_push_prismel_trf(rendergraph_t *rendergraph);
@@ -109,12 +110,8 @@ typedef struct rendergraph_map {
     struct rendergraph_map *next;
 } rendergraph_map_t;
 
-
 int rendergraph_map_push(rendergraph_map_t **map);
 rendergraph_t *rendergraph_map_get(rendergraph_map_t *map, const char *name);
-void rendergraph_map_dump(rendergraph_map_t *map, FILE *f);
-
-
 
 
 #endif
