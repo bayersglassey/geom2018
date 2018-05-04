@@ -42,17 +42,8 @@ int prismel_image_push_line(prismel_image_t *image, int x, int y, int w);
  * PRISMELRENDERER *
  *******************/
 
-typedef struct prismelrenderer_bitmap {
-    int x, y; /* offset of bitmap's center ("origin") */
-    int w, h; /* width, height */
-    /*SDL_Surface *surface;*/
-
-    struct prismelrenderer_bitmap *next;
-} prismelrenderer_bitmap_t;
-
 typedef struct prismelrenderer {
     vecspace_t *space;
-    struct prismelrenderer_bitmap *bitmap_list;
     struct prismel *prismel_list;
     struct rendergraph_map *rendergraph_map;
 } prismelrenderer_t;
@@ -84,12 +75,18 @@ typedef struct rendergraph_trf {
     struct rendergraph_trf *next;
 } rendergraph_trf_t;
 
+typedef struct rendergraph_bitmap {
+    int x, y; /* offset of bitmap's center ("origin") */
+    int w, h; /* width, height */
+    /*SDL_Surface *surface;*/
+} rendergraph_bitmap_t;
+
 typedef struct rendergraph {
     vecspace_t *space;
     struct prismel_trf *prismel_trf_list;
     struct rendergraph_trf *rendergraph_trf_list;
     int n_bitmaps;
-    prismelrenderer_bitmap_t **bitmaps;
+    rendergraph_bitmap_t *bitmaps;
     boundbox_t boundbox;
 } rendergraph_t;
 
