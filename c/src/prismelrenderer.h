@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <SDL2/SDL.h>
 
 #include "geom.h"
 #include "lexer.h"
@@ -53,7 +54,8 @@ typedef struct prismelrenderer {
 int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space);
 void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f);
 int prismelrenderer_push_prismel(prismelrenderer_t *renderer);
-prismel_t *prismelrenderer_get_prismel(prismelrenderer_t *renderer, char *name);
+prismel_t *prismelrenderer_get_prismel(prismelrenderer_t *renderer,
+    char *name);
 int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer);
 
 
@@ -76,9 +78,9 @@ typedef struct rendergraph_trf {
 } rendergraph_trf_t;
 
 typedef struct rendergraph_bitmap {
-    int x, y; /* offset of bitmap's center ("origin") */
+    int cx, cy; /* offset of bitmap's center ("origin") */
     int w, h; /* width, height */
-    /*SDL_Surface *surface;*/
+    SDL_Surface *surface;
 } rendergraph_bitmap_t;
 
 typedef struct rendergraph {
@@ -96,6 +98,11 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces);
 int rendergraph_create_bitmaps(rendergraph_t *rendergraph, int n_bitmaps);
 int rendergraph_push_rendergraph_trf(rendergraph_t *rendergraph);
 int rendergraph_push_prismel_trf(rendergraph_t *rendergraph);
+int rendergraph_get_bitmap_i(rendergraph_t *rendergraph, trf_t *trf);
+int rendergraph_render_bitmap(rendergraph_t *rendergraph, int bitmap_i,
+    SDL_Color pal[]);
+int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
+    rendergraph_bitmap_t **bitmap_ptr, trf_t *trf, SDL_Color pal[]);
 
 
 

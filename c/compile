@@ -2,6 +2,7 @@
 gcc -g -std=c99 \
     -Wall -Werror -Wno-unused \
     -o main \
+    -D_REENTRANT -lSDL2 \
     src/main.c src/util.c src/lexer.c \
     src/geom.c src/vec4.c \
     src/prismelrenderer.c src/prismelrenderer_parse.c

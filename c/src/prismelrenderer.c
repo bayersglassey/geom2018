@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <SDL2/SDL.h>
 
 #include "prismelrenderer.h"
 
@@ -93,7 +94,9 @@ err:
     return err;
 }
 
-prismel_t *prismelrenderer_get_prismel(prismelrenderer_t *renderer, char *name){
+prismel_t *prismelrenderer_get_prismel(prismelrenderer_t *renderer,
+    char *name
+){
     prismel_t *prismel = renderer->prismel_list;
     while(prismel != NULL){
         if(strcmp(prismel->name, name) == 0)return prismel;
@@ -139,7 +142,8 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces){
         prismel_trf != NULL; prismel_trf = prismel_trf->next
     ){
         prismel_t *prismel = prismel_trf->prismel;
-        fprintf(f, "%s    prismel_trf: %7s ", spaces, prismel == NULL? "NULL": prismel->name);
+        fprintf(f, "%s    prismel_trf: %7s ", spaces,
+            prismel == NULL? "NULL": prismel->name);
         trf_fprintf(f, rendergraph->space->dims, &prismel_trf->trf);
             fprintf(f, " %i\n", prismel_trf->color);
     }
@@ -157,7 +161,9 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces){
     fprintf(f, "%s  n_bitmaps: %i\n", spaces, rendergraph->n_bitmaps);
     fprintf(f, "%s  bitmaps:\n", spaces);
     for(int i = 0; i < rendergraph->n_bitmaps; i++){
-        fprintf(f, "%s    bitmap: %p\n", spaces, &rendergraph->bitmaps[i]);
+        rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[i];
+        fprintf(f, "%s    bitmap: cx=%i cy=%i w=%i h=%i surface=%p\n", spaces,
+            bitmap->cx, bitmap->cy, bitmap->w, bitmap->h, bitmap->surface);
     }
 
     fprintf(f, "%s  boundbox: ", spaces); boundbox_fprintf(f,
@@ -174,7 +180,8 @@ int rendergraph_create_bitmaps(rendergraph_t *rendergraph, int n_bitmaps){
 }
 
 int rendergraph_push_rendergraph_trf(rendergraph_t *rendergraph){
-    rendergraph_trf_t *rendergraph_trf = calloc(1, sizeof(rendergraph_trf_t));
+    rendergraph_trf_t *rendergraph_trf =
+        calloc(1, sizeof(rendergraph_trf_t));
     if(rendergraph_trf == NULL)return 1;
     rendergraph_trf->next = rendergraph->rendergraph_trf_list;
     rendergraph->rendergraph_trf_list = rendergraph_trf;
@@ -186,6 +193,50 @@ int rendergraph_push_prismel_trf(rendergraph_t *rendergraph){
     if(prismel_trf == NULL)return 1;
     prismel_trf->next = rendergraph->prismel_trf_list;
     rendergraph->prismel_trf_list = prismel_trf;
+    return 0;
+}
+
+int rendergraph_get_bitmap_i(rendergraph_t *rendergraph, trf_t *trf){
+    int bitmap_i = rendergraph->space->rot_max * (trf->flip? 1: 0)
+        + trf->rot;
+    if(bitmap_i < 0 || bitmap_i >= rendergraph->n_bitmaps){
+        fprintf(stderr, "%s:%s:%i: Bitmap index %i out of range\n",
+            __FILE__, __func__, __LINE__, bitmap_i);
+        return -1;
+    }
+    return bitmap_i;
+}
+
+int rendergraph_render_bitmap(rendergraph_t *rendergraph, int bitmap_i,
+    SDL_Color pal[]
+){
+    int w = 16;
+    int h = 16;
+    int bpp = 32;
+
+    rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[bitmap_i];
+    SDL_Surface *surface = bitmap->surface;
+    bitmap->surface = NULL;
+    SDL_FreeSurface(surface);
+    surface = SDL_CreateRGBSurface(0, w, h, bpp, 0, 0, 0, 0);
+    bitmap->surface = surface;
+    return 0;
+}
+
+int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
+    rendergraph_bitmap_t **bitmap_ptr, trf_t *trf, SDL_Color pal[]
+){
+    int err;
+    int bitmap_i = rendergraph_get_bitmap_i(rendergraph, trf);
+    if(bitmap_i < 0)return 2;
+
+    rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[bitmap_i];
+    if(bitmap->surface == NULL){
+        err = rendergraph_render_bitmap(rendergraph, bitmap_i, pal);
+        if(err)return err;
+    }
+
+    if(bitmap_ptr != NULL)*bitmap_ptr = bitmap;
     return 0;
 }
 
@@ -209,7 +260,9 @@ bool name_eq(const char *text, const char *name){
     return strcmp(text, name) == 0;
 }
 
-rendergraph_t *rendergraph_map_get(rendergraph_map_t *map, const char *name){
+rendergraph_t *rendergraph_map_get(rendergraph_map_t *map,
+    const char *name
+){
     while(map != NULL){
         if(name_eq(map->name, name))return map->rgraph;
         map = map->next;
