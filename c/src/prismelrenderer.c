@@ -6,6 +6,7 @@
 #include <SDL2/SDL.h>
 
 #include "prismelrenderer.h"
+#include "bounds.h"
 
 
 
@@ -31,6 +32,32 @@ int prismel_image_push_line(prismel_image_t *image, int x, int y, int w){
     line->next = image->line_list;
     image->line_list = line;
     return 0;
+}
+
+void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box){
+    /* Technically, this function should take an image_i parameter,
+    but for simplicity we just union all the images together.
+    The resulting box is bigger than it needs to be for any one image,
+    which is vaguely "wasteful". */
+
+    static const int line_h = 1;
+
+    boundary_box_clear(box);
+
+    for(int i = 0; i < prismel->n_images; i++){
+        prismel_image_t *image = &prismel->images[i];
+        prismel_image_line_t *line = image->line_list;
+        while(line != NULL){
+            boundary_box_t line_box;
+            line_box.l = line->x;
+            line_box.r = line->x + line->w;
+            line_box.t = line->y;
+            line_box.b = line->y + line_h;
+            boundary_box_union(box, &line_box);
+
+            line = line->next;
+        }
+    }
 }
 
 
@@ -162,8 +189,23 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces){
     fprintf(f, "%s  bitmaps:\n", spaces);
     for(int i = 0; i < rendergraph->n_bitmaps; i++){
         rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[i];
-        fprintf(f, "%s    bitmap: cx=%i cy=%i w=%i h=%i surface=%p\n", spaces,
-            bitmap->cx, bitmap->cy, bitmap->w, bitmap->h, bitmap->surface);
+        SDL_Surface *surface = bitmap->surface;
+        fprintf(f, "%s    bitmap: x=%i y=%i w=%i h=%i bpp=%i surface=%p\n",
+            spaces,
+            bitmap->bbox.x, bitmap->bbox.y, bitmap->bbox.w, bitmap->bbox.h,
+            bitmap->bpp, surface);
+        if(surface != NULL){
+            int bpp = bitmap->bpp / 8; /* bytes, not bits, plz */
+            for(int y = 0; y < surface->h; y++){
+                fprintf(f, "%s      ", spaces);
+                for(int x = 0; x < surface->w; x++){
+                    Uint32 c = *((Uint8 *)surface->pixels
+                        + y*surface->pitch + x*bpp);
+                    fprintf(f, " %08x", c);
+                }
+                fprintf(f, "\n");
+            }
+        }
     }
 
     fprintf(f, "%s  boundbox: ", spaces); boundbox_fprintf(f,
@@ -207,18 +249,83 @@ int rendergraph_get_bitmap_i(rendergraph_t *rendergraph, trf_t *trf){
     return bitmap_i;
 }
 
-int rendergraph_render_bitmap(rendergraph_t *rendergraph, int bitmap_i,
+int rendergraph_render_bitmap(rendergraph_t *rendergraph, trf_t *trf,
     SDL_Color pal[]
 ){
-    int w = 16;
-    int h = 16;
-    int bpp = 32;
-
+    int err;
+    int bitmap_i = rendergraph_get_bitmap_i(rendergraph, trf);
     rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[bitmap_i];
-    SDL_Surface *surface = bitmap->surface;
+
+    /* bitmap->bbox should be the union of its sub-bitmap's bboxes.
+    (I mean the set-theoretic union, like the "OR" of Venn diagrams.
+    And by sub-bitmaps I mean the bitmaps of
+    rendergraph->rendergraph_trf_list.)
+    It's easy to do unions with boundary_box_t, so we use one of those
+    as an "accumulator" while iterating through sub-bitmaps.
+    We will convert it back to a position_box_t when we store it in
+    bitmap->bbox later. */
+    boundary_box_t bbox;
+    boundary_box_clear(&bbox);
+
+    prismel_trf_t *prismel_trf = rendergraph->prismel_trf_list;
+    while(prismel_trf != NULL){
+        prismel_t *prismel = prismel_trf->prismel;
+
+        /* Calculate & union prismel's bbox into our "accumulating" bbox */
+        boundary_box_t bbox2;
+        prismel_get_boundary_box(prismel, &bbox2);
+        boundary_box_union(&bbox, &bbox2);
+
+        /* Iterate */
+        prismel_trf = prismel_trf->next;
+    }
+
+    rendergraph_trf_t *rendergraph_trf = rendergraph->rendergraph_trf_list;
+    while(rendergraph_trf != NULL){
+        rendergraph_t *rendergraph2 = rendergraph_trf->rendergraph;
+
+        /* Get or render sub-bitmap for this rendergraph_trf */
+        rendergraph_bitmap_t *bitmap2;
+        err = rendergraph_get_or_render_bitmap(rendergraph2,
+            &bitmap2, trf, pal);
+        if(err)return err;
+
+        /* Union sub-bitmap's bbox into our "accumulating" bbox */
+        boundary_box_t bbox2;
+        boundary_box_from_position_box(&bbox2, &bitmap2->bbox);
+        boundary_box_union(&bbox, &bbox2);
+
+        /* Iterate */
+        rendergraph_trf = rendergraph_trf->next;
+    }
+
+    /* Store "accumulated" bbox on bitmap */
+    position_box_from_boundary_box(&bitmap->bbox, &bbox);
+
+    /* Bytes per pixel */
+    int bpp = bitmap->bpp = 32;
+
+    /* Get rid of old bitmap, create new one */
+    SDL_FreeSurface(bitmap->surface);
     bitmap->surface = NULL;
-    SDL_FreeSurface(surface);
-    surface = SDL_CreateRGBSurface(0, w, h, bpp, 0, 0, 0, 0);
+    SDL_Surface *surface = SDL_CreateRGBSurface(
+        0, bitmap->bbox.w, bitmap->bbox.h, bpp, 0, 0, 0, 0);
+    if(surface == NULL){
+        fprintf(stderr, "SDL_CreateRGBSurface failed: %s\n", SDL_GetError());
+        return 2;}
+    if(SDL_SetSurfaceRLE(surface, 1)){
+        fprintf(stderr, "SDL_SetSurfaceRLE failed: %s\n", SDL_GetError());
+        return 2;}
+    if(SDL_SetColorKey(surface, SDL_TRUE, 0)){
+        fprintf(stderr, "SDL_SetColorKey failed: %s\n", SDL_GetError());
+        return 2;}
+
+    /* Fill new bitmap with transparent colour */
+    SDL_LockSurface(surface);
+    SDL_memset(surface->pixels, 0, surface->h * surface->pitch);
+    SDL_UnlockSurface(surface);
+
+    /* LET'S GO */
     bitmap->surface = surface;
     return 0;
 }
@@ -232,7 +339,7 @@ int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
 
     rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[bitmap_i];
     if(bitmap->surface == NULL){
-        err = rendergraph_render_bitmap(rendergraph, bitmap_i, pal);
+        err = rendergraph_render_bitmap(rendergraph, trf, pal);
         if(err)return err;
     }
 

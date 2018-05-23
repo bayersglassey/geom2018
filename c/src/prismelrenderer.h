@@ -8,6 +8,7 @@
 
 #include "geom.h"
 #include "lexer.h"
+#include "bounds.h"
 
 
 
@@ -36,6 +37,7 @@ typedef struct prismel {
 
 int prismel_create_images(prismel_t *prismel, int n_images);
 int prismel_image_push_line(prismel_image_t *image, int x, int y, int w);
+void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box);
 
 
 
@@ -78,8 +80,8 @@ typedef struct rendergraph_trf {
 } rendergraph_trf_t;
 
 typedef struct rendergraph_bitmap {
-    int cx, cy; /* offset of bitmap's center ("origin") */
-    int w, h; /* width, height */
+    int bpp;
+    position_box_t bbox;
     SDL_Surface *surface;
 } rendergraph_bitmap_t;
 
@@ -99,7 +101,7 @@ int rendergraph_create_bitmaps(rendergraph_t *rendergraph, int n_bitmaps);
 int rendergraph_push_rendergraph_trf(rendergraph_t *rendergraph);
 int rendergraph_push_prismel_trf(rendergraph_t *rendergraph);
 int rendergraph_get_bitmap_i(rendergraph_t *rendergraph, trf_t *trf);
-int rendergraph_render_bitmap(rendergraph_t *rendergraph, int bitmap_i,
+int rendergraph_render_bitmap(rendergraph_t *rendergraph, trf_t *trf,
     SDL_Color pal[]);
 int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
     rendergraph_bitmap_t **bitmap_ptr, trf_t *trf, SDL_Color pal[]);
