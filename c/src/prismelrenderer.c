@@ -34,29 +34,24 @@ int prismel_image_push_line(prismel_image_t *image, int x, int y, int w){
     return 0;
 }
 
-void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box){
-    /* Technically, this function should take an image_i parameter,
-    but for simplicity we just union all the images together.
-    The resulting box is bigger than it needs to be for any one image,
-    which is vaguely "wasteful". */
-
+void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box,
+    int bitmap_i
+){
     static const int line_h = 1;
+    prismel_image_t *image = &prismel->images[bitmap_i];
 
     boundary_box_clear(box);
 
-    for(int i = 0; i < prismel->n_images; i++){
-        prismel_image_t *image = &prismel->images[i];
-        prismel_image_line_t *line = image->line_list;
-        while(line != NULL){
-            boundary_box_t line_box;
-            line_box.l = line->x;
-            line_box.r = line->x + line->w;
-            line_box.t = line->y;
-            line_box.b = line->y + line_h;
-            boundary_box_union(box, &line_box);
+    prismel_image_line_t *line = image->line_list;
+    while(line != NULL){
+        boundary_box_t line_box;
+        line_box.l = line->x;
+        line_box.r = line->x + line->w;
+        line_box.t = line->y;
+        line_box.b = line->y + line_h;
+        boundary_box_union(box, &line_box);
 
-            line = line->next;
-        }
+        line = line->next;
     }
 }
 
@@ -273,7 +268,7 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph, trf_t *trf,
 
         /* Calculate & union prismel's bbox into our "accumulating" bbox */
         boundary_box_t bbox2;
-        prismel_get_boundary_box(prismel, &bbox2);
+        prismel_get_boundary_box(prismel, &bbox2, bitmap_i);
         boundary_box_union(&bbox, &bbox2);
 
         /* Iterate */

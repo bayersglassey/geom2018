@@ -37,7 +37,8 @@ typedef struct prismel {
 
 int prismel_create_images(prismel_t *prismel, int n_images);
 int prismel_image_push_line(prismel_image_t *image, int x, int y, int w);
-void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box);
+void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box,
+    int bitmap_i);
 
 
 
