@@ -5,8 +5,17 @@
 
 #include "vec4.h"
 
+#define VEC4_DIMS 4
+#define VEC4_ROT_MAX 12
 
-vecspace_t vec4 = {4, 12, vec4_rot, vec4_flip, vec4_render};
+
+vecspace_t vec4 = {
+    VEC4_DIMS,
+    VEC4_ROT_MAX,
+    vec4_rot,
+    vec4_flip,
+    vec4_render
+};
 
 
 void vec4_set(vec_t v, int a, int b, int c, int d){
@@ -16,16 +25,10 @@ void vec4_set(vec_t v, int a, int b, int c, int d){
     v[3] = d;
 }
 
-bool vec4_test(vec_t v, int a, int b, int c, int d){
-    return
-        v[0] == a &&
-        v[1] == b &&
-        v[2] == c &&
-        v[3] == d
-    ;
-}
-
 void vec4_rot(vec_t v, rot_t r){
+    /* Let's be saaafe */
+    r = rot_contain(VEC4_ROT_MAX, r);
+
     for(int i = r; i > 0; i--){
         int a = v[0];
         int b = v[1];

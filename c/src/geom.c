@@ -23,12 +23,30 @@
 #include "geom.h"
 
 
+/* For theoretical speed boost, but possible errors, turn this off */
+#ifndef GEOM_ROT_SAFE
+#define GEOM_ROT_SAFE true
+#endif
 
+
+rot_t rot_contain(int rot_max, rot_t r){
+#   if GEOM_ROT_SAFE
+        while(r < 0)r += rot_max;
+        while(r >= rot_max)r -= rot_max;
+        return r;
+#   else
+        return r > rot_max? rot_max - r: r;
+#   endif
+}
 
 rot_t rot_rot(int rot_max, rot_t r1, rot_t r2){
-    rot_t r3 = r1 + r2;
-    return r3 > rot_max? rot_max - r3: r3;
+    return rot_contain(rot_max, r1 + r2);
 }
+
+bool rot_eq(int rot_max, rot_t r1, rot_t r2){
+    return rot_contain(rot_max, r1) == rot_contain(rot_max, r2);
+}
+
 
 
 void vec_zero(int dims, vec_t v){
@@ -102,7 +120,7 @@ void vec_apply(vecspace_t *space, vec_t v, trf_t *t){
 void vec_apply_inv(vecspace_t *space, vec_t v, trf_t *t){
     vec_sub(space->dims, v, t->add);
     space->vec_rot(v, rot_inv(space->rot_max, t->rot));
-    space->vec_flip(v, flip_inv(t->flip));
+    space->vec_flip(v, t->flip);
 }
 
 void vec_mul(vecspace_t *space, vec_t v, vec_t w){
@@ -117,12 +135,6 @@ void vec_mul(vecspace_t *space, vec_t v, vec_t w){
         space->vec_rot(v0, 1);
         vec_addn(dims, v, v0, w[i]);
     }
-}
-
-bool test_vecs(int dims, vec_t v, vec_t w){
-    bool ok = vec_eq(dims, v, w);
-    vec_printf(dims, v); printf(" == "); vec_printf(dims, w); printf("? %c\n", ok? 'y': 'n');
-    return ok;
 }
 
 
@@ -157,8 +169,15 @@ void trf_printf(int dims, trf_t *trf){
     trf_fprintf(stdout, dims, trf);
 }
 
+bool trf_eq(vecspace_t *space, trf_t *t, trf_t *s){
+    return
+        !!t->flip == !!s->flip &&
+        rot_eq(space->rot_max, t->rot, s->rot) &&
+        vec_eq(space->dims, t->add, s->add);
+}
+
 void trf_inv(vecspace_t *space, trf_t *t){
-    flip_t f = flip_inv(t->flip);
+    flip_t f = t->flip;
     rot_t r = rot_inv(space->rot_max, t->rot);
     space->vec_rot(t->add, r);
     space->vec_flip(t->add, f);

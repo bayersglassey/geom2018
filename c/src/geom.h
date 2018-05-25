@@ -35,13 +35,15 @@ typedef struct vecspace {
 
 
 
-#define rot_inv(rot_max, rot) ((rot_max) - (rot))
+#define rot_inv(rot_max, rot) ((rot) == 0? 0: (rot_max) - (rot))
 #define rot_flip(rot_max, rot, flip) ((flip)? rot_inv((rot_max), (rot)): (rot))
 #define flip_inv(flip) (!(flip))
 
 
 
+rot_t rot_contain(int rot_max, rot_t r);
 rot_t rot_rot(int rot_max, rot_t r1, rot_t r2);
+bool rot_eq(int rot_max, rot_t r1, rot_t r2);
 
 void vec_zero(int dims, vec_t v);
 void vec_neg(int dims, vec_t v);
@@ -56,7 +58,6 @@ void vec_nmul(int dims, vec_t v, int n);
 void vec_apply(vecspace_t *space, vec_t v, trf_t *t);
 void vec_apply_inv(vecspace_t *space, vec_t v, trf_t *t);
 void vec_mul(vecspace_t *space, vec_t v, vec_t w);
-bool test_vecs(int dims, vec_t v, vec_t w);
 
 void boundbox_init(boundbox_t box, int dims);
 void boundbox_fprintf(FILE *f, int dims, boundbox_t box);
@@ -64,6 +65,7 @@ void boundbox_printf(int dims, boundbox_t box);
 
 void trf_fprintf(FILE *f, int dims, trf_t *trf);
 void trf_printf(int dims, trf_t *trf);
+bool trf_eq(vecspace_t *space, trf_t *t, trf_t *s);
 void trf_inv(vecspace_t *space, trf_t *t);
 void trf_apply(vecspace_t *space, trf_t *t, trf_t *s);
 void trf_apply_inv(vecspace_t *space, trf_t *t, trf_t *s);
