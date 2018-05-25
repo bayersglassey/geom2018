@@ -19,7 +19,7 @@ char *load_file(const char *filename){
     f_size = ftell(f);
     fseek(f, 0, SEEK_SET);
 
-    f_buffer = malloc(f_size + 1);
+    f_buffer = calloc(f_size + 1, 1);
     if(f_buffer == NULL){
         fprintf(stderr, "Could not allocate buffer for file: %s (%li bytes)\n", filename, f_size);
         fclose(f);
