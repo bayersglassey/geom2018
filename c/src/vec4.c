@@ -6,7 +6,7 @@
 #include "vec4.h"
 
 
-vecspace_t vec4 = {4, 12, vec4_rot, vec4_flip};
+vecspace_t vec4 = {4, 12, vec4_rot, vec4_flip, vec4_render};
 
 
 void vec4_set(vec_t v, int a, int b, int c, int d){
@@ -50,4 +50,8 @@ void vec4_flip(vec_t v, flip_t flip){
     }
 }
 
+void vec4_render(vec_t v, int *x, int *y){
+    *x = (v[0] + v[1]) * 2 + v[2];
+    *y = (v[3] + v[2]) * 2 + v[1];
+}
 

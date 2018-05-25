@@ -29,6 +29,7 @@ typedef struct vecspace {
 
     void (*vec_rot)(vec_t v, rot_t r);
     void (*vec_flip)(vec_t v, flip_t flip);
+    void (*vec_render)(vec_t v, int *x, int *y);
 } vecspace_t;
 
 
