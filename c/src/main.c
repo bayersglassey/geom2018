@@ -12,6 +12,8 @@
 int main(int n_args, char *args[]){
     int err;
 
+    SDL_Color pal[] = {};
+
     fus_lexer_t lexer;
     prismelrenderer_t prend;
 
@@ -30,14 +32,13 @@ int main(int n_args, char *args[]){
     err = prismelrenderer_parse(&prend, &lexer);
     if(err)return err;
 
-    rendergraph_t *rgraph = rendergraph_map_get(
-        prend.rendergraph_map, "dodeca");
-    if(rgraph == NULL)return 2;
-    trf_t trf = {false, 0, {0, 0, 0, 0}};
-    SDL_Color pal[] = {};
-    err = rendergraph_get_or_render_bitmap(rgraph, NULL, &trf, pal);
-    if(err)return err;
-
+    rendergraph_map_t *rgraph_map = prend.rendergraph_map;
+    while(rgraph_map != NULL){
+        trf_t trf = {false, 0, {0, 0, 0, 0}};
+        err = rendergraph_get_or_render_bitmap(rgraph_map->rgraph, NULL, &trf, pal);
+        if(err)return err;
+        rgraph_map = rgraph_map->next;
+    }
 
     prismelrenderer_dump(&prend, stdout);
 
