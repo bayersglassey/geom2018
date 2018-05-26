@@ -11,6 +11,13 @@
 #include "bounds.h"
 
 
+/***********
+ * GENERAL *
+ ***********/
+
+int get_n_bitmaps(vecspace_t *space);
+int get_bitmap_i(vecspace_t *space, trf_t *trf);
+
 
 /***********
  * PRISMEL *
@@ -35,7 +42,7 @@ typedef struct prismel {
 } prismel_t;
 
 
-int prismel_create_images(prismel_t *prismel, int n_images);
+int prismel_create_images(prismel_t *prismel, vecspace_t *space);
 int prismel_image_push_line(prismel_image_t *image, int x, int y, int w);
 void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box,
     int bitmap_i);
@@ -98,7 +105,7 @@ typedef struct rendergraph {
 
 int rendergraph_init(rendergraph_t *rendergraph, vecspace_t *space);
 void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces);
-int rendergraph_create_bitmaps(rendergraph_t *rendergraph, int n_bitmaps);
+int rendergraph_create_bitmaps(rendergraph_t *rendergraph);
 int rendergraph_push_rendergraph_trf(rendergraph_t *rendergraph);
 int rendergraph_push_prismel_trf(rendergraph_t *rendergraph);
 int rendergraph_get_bitmap_i(rendergraph_t *rendergraph, trf_t *trf);

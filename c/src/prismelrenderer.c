@@ -9,13 +9,28 @@
 #include "bounds.h"
 
 
+/***********
+ * GENERAL *
+ ***********/
+
+int get_n_bitmaps(vecspace_t *space){
+    return space->rot_max;
+}
+
+int get_bitmap_i(vecspace_t *space, trf_t *trf){
+    rot_t rot = rot_contain(space->rot_max, trf->rot);
+    return rot_flip(space->rot_max, rot, trf->flip);
+}
+
+
 
 /***********
  * PRISMEL *
  ***********/
 
 
-int prismel_create_images(prismel_t *prismel, int n_images){
+int prismel_create_images(prismel_t *prismel, vecspace_t *space){
+    int n_images = get_n_bitmaps(space);
     prismel_image_t *images = calloc(n_images, sizeof(prismel_image_t));
     if(images == NULL)return 1;
     prismel->n_images = n_images;
@@ -108,7 +123,7 @@ int prismelrenderer_push_prismel(prismelrenderer_t *renderer){
     if(prismel == NULL)return 1;
     prismel->next = renderer->prismel_list;
     renderer->prismel_list = prismel;
-    err = prismel_create_images(prismel, renderer->space->rot_max);
+    err = prismel_create_images(prismel, renderer->space);
     if(err)goto err;
     return 0;
 err:
@@ -139,7 +154,7 @@ int rendergraph_init(rendergraph_t *rendergraph, vecspace_t *space){
     rendergraph->space = space;
     rendergraph->prismel_trf_list = NULL;
     rendergraph->rendergraph_trf_list = NULL;
-    err = rendergraph_create_bitmaps(rendergraph, space->rot_max);
+    err = rendergraph_create_bitmaps(rendergraph);
     if(err)return err;
     boundbox_init(rendergraph->boundbox, space->dims);
     return 0;
@@ -207,7 +222,8 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces){
         rendergraph->space->dims, rendergraph->boundbox); fprintf(f, "\n");
 }
 
-int rendergraph_create_bitmaps(rendergraph_t *rendergraph, int n_bitmaps){
+int rendergraph_create_bitmaps(rendergraph_t *rendergraph){
+    int n_bitmaps = get_n_bitmaps(rendergraph->space);
     rendergraph_bitmap_t *bitmaps = calloc(n_bitmaps,
         sizeof(rendergraph_bitmap_t));
     if(bitmaps == NULL)return 1;
@@ -234,14 +250,7 @@ int rendergraph_push_prismel_trf(rendergraph_t *rendergraph){
 }
 
 int rendergraph_get_bitmap_i(rendergraph_t *rendergraph, trf_t *trf){
-    int bitmap_i = rendergraph->space->rot_max * (trf->flip? 1: 0)
-        + trf->rot;
-    if(bitmap_i < 0 || bitmap_i >= rendergraph->n_bitmaps){
-        fprintf(stderr, "%s:%s:%i: Bitmap index %i out of range\n",
-            __FILE__, __func__, __LINE__, bitmap_i);
-        return -1;
-    }
-    return bitmap_i;
+    return get_bitmap_i(rendergraph->space, trf);
 }
 
 int rendergraph_render_bitmap(rendergraph_t *rendergraph, trf_t *trf,
@@ -260,15 +269,32 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph, trf_t *trf,
     We will convert it back to a position_box_t when we store it in
     bitmap->bbox later. */
     boundary_box_t bbox;
+
+    /* NOTE: Clearing sets all values to zero, which basically describes
+    a single point at the origin. But it would actually make
+    sense to have a separate "empty" state.
+    Because e.g. if a rendergraph consists of a single prismel whose
+    boundary does not contain the origin, we will end up unioning
+    that with a boundary consisting of just the origin.
+    Whereas it would have been "less wasteful" to just use the
+    prismel's boundary. */
     boundary_box_clear(&bbox);
 
     prismel_trf_t *prismel_trf = rendergraph->prismel_trf_list;
     while(prismel_trf != NULL){
         prismel_t *prismel = prismel_trf->prismel;
 
+        /* Combine the transformations: trf and prismel_trf->trf */
+        trf_t trf2 = prismel_trf->trf;
+        trf_apply(rendergraph->space, &trf2, trf);
+        int bitmap_i2 = get_bitmap_i(rendergraph->space, &trf2);
+        int shift_x, shift_y;
+        rendergraph->space->vec_render(trf2.add, &shift_x, &shift_y);
+
         /* Calculate & union prismel's bbox into our "accumulating" bbox */
         boundary_box_t bbox2;
-        prismel_get_boundary_box(prismel, &bbox2, bitmap_i);
+        prismel_get_boundary_box(prismel, &bbox2, bitmap_i2);
+        boundary_box_shift(&bbox2, shift_x, shift_y);
         boundary_box_union(&bbox, &bbox2);
 
         /* Iterate */
@@ -279,15 +305,22 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph, trf_t *trf,
     while(rendergraph_trf != NULL){
         rendergraph_t *rendergraph2 = rendergraph_trf->rendergraph;
 
+        /* Combine the transformations: trf and prismel_trf->trf */
+        trf_t trf2 = rendergraph_trf->trf;
+        trf_apply(rendergraph->space, &trf2, trf);
+        int shift_x, shift_y;
+        rendergraph->space->vec_render(trf2.add, &shift_x, &shift_y);
+
         /* Get or render sub-bitmap for this rendergraph_trf */
         rendergraph_bitmap_t *bitmap2;
         err = rendergraph_get_or_render_bitmap(rendergraph2,
-            &bitmap2, trf, pal);
+            &bitmap2, &trf2, pal);
         if(err)return err;
 
         /* Union sub-bitmap's bbox into our "accumulating" bbox */
         boundary_box_t bbox2;
         boundary_box_from_position_box(&bbox2, &bitmap2->bbox);
+        boundary_box_shift(&bbox2, shift_x, shift_y);
         boundary_box_union(&bbox, &bbox2);
 
         /* Iterate */
@@ -330,7 +363,6 @@ int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
 ){
     int err;
     int bitmap_i = rendergraph_get_bitmap_i(rendergraph, trf);
-    if(bitmap_i < 0)return 2;
 
     rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[bitmap_i];
     if(bitmap->surface == NULL){
