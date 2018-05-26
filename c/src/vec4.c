@@ -54,7 +54,7 @@ void vec4_flip(vec_t v, flip_t flip){
 }
 
 void vec4_render(vec_t v, int *x, int *y){
-    *x = (v[0] + v[1]) * 2 + v[2];
-    *y = (v[3] + v[2]) * 2 + v[1];
+    *x =  (v[0] + v[1]) * 2 + v[2];
+    *y = -(v[3] + v[2]) * 2 - v[1];
 }
 

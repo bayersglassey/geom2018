@@ -1,20 +1,55 @@
 
 #include <stdio.h>
-#include "vec4.h"
 
+#include "vec4.h"
+#include "bounds.h"
+
+
+char ok_char(bool ok){
+    return ok? '.': 'X';
+}
 
 int vec4_test(vec_t v, int a, int b, int c, int d){
     vec_t w;
     vec4_set(w, a, b, c, d);
     bool ok = vec_eq(4, v, w);
-    printf("%c ", ok? '.': 'X'); vec_printf(4, v); printf(" == "); vec_printf(4, w); printf("\n");
+    printf("%c ", ok_char(ok)); vec_printf(4, v);
+    printf(" == "); vec_printf(4, w); printf("\n");
+    return ok? 0: 1;
+}
+
+void renderpair_printf(int x, int y){
+    printf("(% 2i, % 2i)", x, y);
+}
+
+int renderpair_test(int x1, int y1, int x2, int y2){
+    bool ok = x1 == x2 && y1 == y2;
+    printf("%c ", ok_char(ok)); renderpair_printf(x1, y1);
+    printf(" == "); renderpair_printf(x2, y2); printf("\n");
     return ok? 0: 1;
 }
 
 int trf4_test(trf_t *t, bool flip, int rot, int a, int b, int c, int d){
     trf_t s = {flip, rot, {a, b, c, d}};
     bool ok = trf_eq(&vec4, t, &s);
-    printf("%c (", ok? '.': 'X'); trf_printf(4, t); printf(") == ("); trf_printf(4, &s); printf(")\n");
+    printf("%c (", ok_char(ok)); trf_printf(4, t);
+    printf(") == ("); trf_printf(4, &s); printf(")\n");
+    return ok? 0: 1;
+}
+
+int boundary_box_test(boundary_box_t *b1, int l, int r, int t, int b){
+    boundary_box_t b2 = {.l=l, .r=r, .t=t, .b=b};
+    bool ok = boundary_box_eq(b1, &b2);
+    printf("%c ", ok_char(ok)); boundary_box_printf(b1);
+    printf(" == "); boundary_box_printf(&b2); printf("\n");
+    return ok? 0: 1;
+}
+
+int position_box_test(position_box_t *b1, int x, int y, int w, int h){
+    position_box_t b2 = {.x=x, .y=y, .w=w, .h=h};
+    bool ok = position_box_eq(b1, &b2);
+    printf("%c ", ok_char(ok)); position_box_printf(b1);
+    printf(" == "); position_box_printf(&b2); printf("\n");
     return ok? 0: 1;
 }
 
@@ -27,6 +62,8 @@ int vec4_tests(){
     int fails = 0;
     vec_t v, w;
     trf_t t, s;
+    boundary_box_t bbox;
+    position_box_t pbox;
 
 
     /****** VEC_T TESTS ******/
@@ -68,6 +105,14 @@ int vec4_tests(){
         vec_mul(&vec4, v, w);
         fails += vec4_test(v, -88, -36, 95, 112);
 
+        print_title("Test of render");
+        vec4_set(v, 1, 2, 3, 4);
+        {
+            int x, y;
+            vec4_render(v, &x, &y);
+            fails += renderpair_test(x, y, 9, -16);
+        }
+
     /****** TRF_T TESTS ******/
 
         print_title("Test identity trf");
@@ -102,6 +147,22 @@ int vec4_tests(){
         trf_apply_inv(&vec4, &t, &s);
         fails += vec4_test(v, 2, 3, 4, 5);
         fails += trf4_test(&t, false, 7, 2, 3, 4, 5);
+
+    /****** BOUNDS TESTS ******/
+
+        /*
+            #####
+            ##X##
+            #####
+            #####
+        */
+        print_title("Conversion back & forth between position and "
+            "boundary boxes");
+        position_box_set(&pbox, 2, 1, 5, 4);
+        boundary_box_from_position_box(&bbox, &pbox);
+        fails += boundary_box_test(&bbox, -2, 3, -1, 3);
+        position_box_from_boundary_box(&pbox, &bbox);
+        fails += position_box_test(&pbox, 2, 1, 5, 4);
 
     /****** RESULTS ******/
 
