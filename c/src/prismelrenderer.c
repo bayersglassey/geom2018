@@ -374,7 +374,75 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph, trf_t *trf,
     /* Fill new bitmap with transparent colour */
     SDL_LockSurface(surface);
     SDL_memset(surface->pixels, 0, surface->h * surface->pitch);
+
+    /* Render prismels */
+    for(
+        prismel_trf_t *prismel_trf = rendergraph->prismel_trf_list;
+        prismel_trf != NULL;
+        prismel_trf = prismel_trf->next
+    ){
+        prismel_t *prismel = prismel_trf->prismel;
+        int color_i = prismel_trf->color;
+        SDL_Color *color = &pal[color_i];
+        Uint32 c = SDL_MapRGB(surface->format,
+            color->r, color->g, color->b);
+
+        /* Combine the transformations: trf and prismel_trf->trf */
+        trf_t trf2 = prismel_trf->trf;
+        trf_apply(rendergraph->space, &trf2, trf);
+        int bitmap_i2 = get_bitmap_i(rendergraph->space, &trf2);
+        int shift_x, shift_y;
+        rendergraph->space->vec_render(trf2.add, &shift_x, &shift_y);
+
+        /* Draw prismel's image onto SDL surface */
+        prismel_image_t *image = &prismel->images[bitmap_i2];
+        prismel_image_line_t *line = image->line_list;
+        while(line != NULL){
+            int x = line->x + bitmap->bbox.x + shift_x;
+            int y = line->y + bitmap->bbox.y + shift_y;
+            Uint32 *p = surface_get_pixel_ptr(surface, x, y);
+            for(int xx = 0; xx < line->w; xx++){
+                // p[xx] = c;
+                p[xx] = (color_i+1) * 0x11111111; /* for debugging */
+            }
+            line = line->next;
+        }
+
+    }
+
+    /* Unlock surface so we can blit to it */
     SDL_UnlockSurface(surface);
+
+    /* Render sub-rendergraphs */
+    for(
+        rendergraph_trf_t *rendergraph_trf =
+            rendergraph->rendergraph_trf_list;
+        rendergraph_trf != NULL;
+        rendergraph_trf = rendergraph_trf->next
+    ){
+        rendergraph_t *rendergraph2 = rendergraph_trf->rendergraph;
+
+        /* Combine the transformations: trf and prismel_trf->trf */
+        trf_t trf2 = rendergraph_trf->trf;
+        trf_apply(rendergraph->space, &trf2, trf);
+        int shift_x, shift_y;
+        rendergraph->space->vec_render(trf2.add, &shift_x, &shift_y);
+
+        /* Blit sub-bitmap's surface onto ours */
+        int bitmap_i2 = rendergraph_get_bitmap_i(rendergraph2, &trf2);
+        rendergraph_bitmap_t *bitmap2 = &rendergraph2->bitmaps[bitmap_i2];
+        SDL_Surface *surface2 = bitmap2->surface;
+        position_box_t *bbox2 = &bitmap2->bbox;
+        SDL_Rect dst_rect = {
+            bitmap->bbox.x + shift_x - bbox2->x,
+            bitmap->bbox.y + shift_y - bbox2->y,
+            bbox2->w,
+            bbox2->h
+        };
+        if(SDL_BlitSurface(bitmap2->surface, NULL, surface, &dst_rect)){
+            fprintf(stderr, "SDL_BlitSurface failed: %s\n", SDL_GetError());
+            return 2;}
+    }
 
     /* LET'S GO */
     bitmap->surface = surface;
