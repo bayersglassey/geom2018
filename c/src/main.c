@@ -12,7 +12,11 @@
 int main(int n_args, char *args[]){
     int err;
 
-    SDL_Color pal[] = {};
+    SDL_Color pal[] = {
+        {.r=255, .g= 60, .b= 60},
+        {.r= 60, .g=255, .b= 60},
+        {.r= 60, .g= 60, .b=255},
+    };
 
     fus_lexer_t lexer;
     prismelrenderer_t prend;
@@ -66,7 +70,7 @@ int main(int n_args, char *args[]){
         }
     }
 
-    if(1){
+    if(0){
         const char *name = "dodeca";
         rendergraph_t *rgraph = rendergraph_map_get(
             prend.rendergraph_map, name);

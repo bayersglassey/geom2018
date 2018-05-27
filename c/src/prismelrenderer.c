@@ -22,6 +22,22 @@ int get_bitmap_i(vecspace_t *space, trf_t *trf){
     return rot_flip(space->rot_max, rot, trf->flip);
 }
 
+Uint32 *surface_get_pixel_ptr(SDL_Surface *surface, int x, int y){
+    return (Uint32 *)(
+        (Uint8 *)surface->pixels + y*surface->pitch + x*(32/8)
+    );
+}
+
+void get_spaces(char *spaces, int max_spaces, int n_spaces){
+    if(n_spaces > max_spaces){
+        fprintf(stderr, "%s: %s: Can't handle %i spaces - max %i\n",
+            __FILE__, __func__, n_spaces, max_spaces);
+        n_spaces = max_spaces;
+    }
+    for(int i = 0; i < n_spaces; i++)spaces[i] = ' ';
+    spaces[n_spaces] = '\0';
+}
+
 
 
 /***********
@@ -160,15 +176,34 @@ int rendergraph_init(rendergraph_t *rendergraph, vecspace_t *space){
     return 0;
 }
 
-void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces){
-    char spaces[20+1];
-    if(n_spaces > 20){
-        fprintf(f, "%s: %s: Can't handle %i spaces, sorry!\n",
-            __FILE__, __func__, n_spaces);
-        return;
+void rendergraph_bitmap_dump(rendergraph_bitmap_t *bitmap, FILE *f,
+    int n_spaces
+){
+    char spaces[20];
+    get_spaces(spaces, 20, n_spaces);
+
+    SDL_Surface *surface = bitmap->surface;
+    fprintf(f, "%sbitmap: x=%i y=%i w=%i h=%i surface=%p\n",
+        spaces,
+        bitmap->bbox.x, bitmap->bbox.y, bitmap->bbox.w, bitmap->bbox.h,
+        surface);
+    if(surface != NULL){
+        SDL_LockSurface(surface);
+        for(int y = 0; y < surface->h; y++){
+            fprintf(f, "%s  ", spaces);
+            for(int x = 0; x < surface->w; x++){
+                Uint32 c = *surface_get_pixel_ptr(surface, x, y);
+                fprintf(f, " %08x", c);
+            }
+            fprintf(f, "\n");
+        }
+        SDL_UnlockSurface(surface);
     }
-    for(int i = 0; i < n_spaces; i++)spaces[i] = ' ';
-    spaces[n_spaces] = '\0';
+}
+
+void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces){
+    char spaces[20];
+    get_spaces(spaces, 20, n_spaces);
 
     fprintf(f, "%srendergraph: %p\n", spaces, rendergraph);
     if(rendergraph == NULL)return;
@@ -186,8 +221,11 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces){
     }
 
     fprintf(f, "%s  rendergraph_trf_list:\n", spaces);
-    for(rendergraph_trf_t *rendergraph_trf = rendergraph->rendergraph_trf_list;
-        rendergraph_trf != NULL; rendergraph_trf = rendergraph_trf->next
+    for(
+        rendergraph_trf_t *rendergraph_trf =
+            rendergraph->rendergraph_trf_list;
+        rendergraph_trf != NULL;
+        rendergraph_trf = rendergraph_trf->next
     ){
         rendergraph_t *rendergraph = rendergraph_trf->rendergraph;
         fprintf(f, "%s    rendergraph_trf: %p ", spaces, rendergraph);
@@ -199,23 +237,7 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces){
     fprintf(f, "%s  bitmaps:\n", spaces);
     for(int i = 0; i < rendergraph->n_bitmaps; i++){
         rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[i];
-        SDL_Surface *surface = bitmap->surface;
-        fprintf(f, "%s    bitmap: x=%i y=%i w=%i h=%i bpp=%i surface=%p\n",
-            spaces,
-            bitmap->bbox.x, bitmap->bbox.y, bitmap->bbox.w, bitmap->bbox.h,
-            bitmap->bpp, surface);
-        if(surface != NULL){
-            int bpp = bitmap->bpp / 8; /* bytes, not bits, plz */
-            for(int y = 0; y < surface->h; y++){
-                fprintf(f, "%s      ", spaces);
-                for(int x = 0; x < surface->w; x++){
-                    Uint32 c = *((Uint8 *)surface->pixels
-                        + y*surface->pitch + x*bpp);
-                    fprintf(f, " %08x", c);
-                }
-                fprintf(f, "\n");
-            }
-        }
+        rendergraph_bitmap_dump(bitmap, f, n_spaces+4);
     }
 
     fprintf(f, "%s  boundbox: ", spaces); boundbox_fprintf(f,
@@ -280,8 +302,11 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph, trf_t *trf,
     prismel's boundary. */
     boundary_box_clear(&bbox);
 
-    prismel_trf_t *prismel_trf = rendergraph->prismel_trf_list;
-    while(prismel_trf != NULL){
+    for(
+        prismel_trf_t *prismel_trf = rendergraph->prismel_trf_list;
+        prismel_trf != NULL;
+        prismel_trf = prismel_trf->next
+    ){
         prismel_t *prismel = prismel_trf->prismel;
 
         /* Combine the transformations: trf and prismel_trf->trf */
@@ -296,13 +321,14 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph, trf_t *trf,
         prismel_get_boundary_box(prismel, &bbox2, bitmap_i2);
         boundary_box_shift(&bbox2, shift_x, shift_y);
         boundary_box_union(&bbox, &bbox2);
-
-        /* Iterate */
-        prismel_trf = prismel_trf->next;
     }
 
-    rendergraph_trf_t *rendergraph_trf = rendergraph->rendergraph_trf_list;
-    while(rendergraph_trf != NULL){
+    for(
+        rendergraph_trf_t *rendergraph_trf =
+            rendergraph->rendergraph_trf_list;
+        rendergraph_trf != NULL;
+        rendergraph_trf = rendergraph_trf->next
+    ){
         rendergraph_t *rendergraph2 = rendergraph_trf->rendergraph;
 
         /* Combine the transformations: trf and prismel_trf->trf */
@@ -322,16 +348,13 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph, trf_t *trf,
         boundary_box_from_position_box(&bbox2, &bitmap2->bbox);
         boundary_box_shift(&bbox2, shift_x, shift_y);
         boundary_box_union(&bbox, &bbox2);
-
-        /* Iterate */
-        rendergraph_trf = rendergraph_trf->next;
     }
 
     /* Store "accumulated" bbox on bitmap */
     position_box_from_boundary_box(&bitmap->bbox, &bbox);
 
     /* Bytes per pixel */
-    int bpp = bitmap->bpp = 32;
+    int bpp = 32;
 
     /* Get rid of old bitmap, create new one */
     SDL_FreeSurface(bitmap->surface);

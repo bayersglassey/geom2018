@@ -88,7 +88,6 @@ typedef struct rendergraph_trf {
 } rendergraph_trf_t;
 
 typedef struct rendergraph_bitmap {
-    int bpp;
     position_box_t bbox;
     SDL_Surface *surface;
 } rendergraph_bitmap_t;
@@ -104,6 +103,8 @@ typedef struct rendergraph {
 
 
 int rendergraph_init(rendergraph_t *rendergraph, vecspace_t *space);
+void rendergraph_bitmap_dump(rendergraph_bitmap_t *bitmap, FILE *f,
+    int n_spaces);
 void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces);
 int rendergraph_create_bitmaps(rendergraph_t *rendergraph);
 int rendergraph_push_rendergraph_trf(rendergraph_t *rendergraph);

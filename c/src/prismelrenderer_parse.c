@@ -228,6 +228,7 @@ static int parse_shape_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer, re
             rgraph->prismel_trf_list->prismel = found;
             rgraph->prismel_trf_list->trf.rot = rot;
             rgraph->prismel_trf_list->trf.flip = flip;
+            rgraph->prismel_trf_list->color = color;
             vec_cpy(prend->space->dims, rgraph->prismel_trf_list->trf.add, v);
         }else{
             err = fus_lexer_unexpected(lexer);
