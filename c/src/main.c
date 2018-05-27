@@ -83,7 +83,7 @@ int main(int n_args, char *args[]){
             trf_t trf = {false, rot, {0, 0, 0, 0}};
             int bitmap_i = get_bitmap_i(prend.space, &trf);
             rendergraph_bitmap_t *bitmap = &rgraph->bitmaps[bitmap_i];
-            position_box_t pbox = bitmap->bbox;
+            position_box_t pbox = bitmap->pbox;
             boundary_box_t bbox;
             boundary_box_from_position_box(&bbox, &pbox);
             printf("    ");

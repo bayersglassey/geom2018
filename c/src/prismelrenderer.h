@@ -88,7 +88,7 @@ typedef struct rendergraph_trf {
 } rendergraph_trf_t;
 
 typedef struct rendergraph_bitmap {
-    position_box_t bbox;
+    position_box_t pbox;
     SDL_Surface *surface;
 } rendergraph_bitmap_t;
 

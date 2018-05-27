@@ -185,7 +185,7 @@ void rendergraph_bitmap_dump(rendergraph_bitmap_t *bitmap, FILE *f,
     SDL_Surface *surface = bitmap->surface;
     fprintf(f, "%sbitmap: x=%i y=%i w=%i h=%i surface=%p\n",
         spaces,
-        bitmap->bbox.x, bitmap->bbox.y, bitmap->bbox.w, bitmap->bbox.h,
+        bitmap->pbox.x, bitmap->pbox.y, bitmap->pbox.w, bitmap->pbox.h,
         surface);
     if(surface != NULL){
         SDL_LockSurface(surface);
@@ -282,14 +282,14 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph, trf_t *trf,
     int bitmap_i = rendergraph_get_bitmap_i(rendergraph, trf);
     rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[bitmap_i];
 
-    /* bitmap->bbox should be the union of its sub-bitmap's bboxes.
+    /* bitmap->pbox should be the union of its sub-bitmap's pboxes.
     (I mean the set-theoretic union, like the "OR" of Venn diagrams.
     And by sub-bitmaps I mean the bitmaps of
     rendergraph->rendergraph_trf_list.)
     It's easy to do unions with boundary_box_t, so we use one of those
     as an "accumulator" while iterating through sub-bitmaps.
     We will convert it back to a position_box_t when we store it in
-    bitmap->bbox later. */
+    bitmap->pbox later. */
     boundary_box_t bbox;
 
     /* NOTE: Clearing sets all values to zero, which basically describes
@@ -345,13 +345,13 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph, trf_t *trf,
 
         /* Union sub-bitmap's bbox into our "accumulating" bbox */
         boundary_box_t bbox2;
-        boundary_box_from_position_box(&bbox2, &bitmap2->bbox);
+        boundary_box_from_position_box(&bbox2, &bitmap2->pbox);
         boundary_box_shift(&bbox2, shift_x, shift_y);
         boundary_box_union(&bbox, &bbox2);
     }
 
     /* Store "accumulated" bbox on bitmap */
-    position_box_from_boundary_box(&bitmap->bbox, &bbox);
+    position_box_from_boundary_box(&bitmap->pbox, &bbox);
 
     /* Bytes per pixel */
     int bpp = 32;
@@ -360,7 +360,7 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph, trf_t *trf,
     SDL_FreeSurface(bitmap->surface);
     bitmap->surface = NULL;
     SDL_Surface *surface = SDL_CreateRGBSurface(
-        0, bitmap->bbox.w, bitmap->bbox.h, bpp, 0, 0, 0, 0);
+        0, bitmap->pbox.w, bitmap->pbox.h, bpp, 0, 0, 0, 0);
     if(surface == NULL){
         fprintf(stderr, "SDL_CreateRGBSurface failed: %s\n", SDL_GetError());
         return 2;}
@@ -398,8 +398,8 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph, trf_t *trf,
         prismel_image_t *image = &prismel->images[bitmap_i2];
         prismel_image_line_t *line = image->line_list;
         while(line != NULL){
-            int x = line->x + bitmap->bbox.x + shift_x;
-            int y = line->y + bitmap->bbox.y + shift_y;
+            int x = line->x + bitmap->pbox.x + shift_x;
+            int y = line->y + bitmap->pbox.y + shift_y;
             Uint32 *p = surface_get_pixel_ptr(surface, x, y);
             for(int xx = 0; xx < line->w; xx++){
                 // p[xx] = c;
@@ -432,12 +432,11 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph, trf_t *trf,
         int bitmap_i2 = rendergraph_get_bitmap_i(rendergraph2, &trf2);
         rendergraph_bitmap_t *bitmap2 = &rendergraph2->bitmaps[bitmap_i2];
         SDL_Surface *surface2 = bitmap2->surface;
-        position_box_t *bbox2 = &bitmap2->bbox;
         SDL_Rect dst_rect = {
-            bitmap->bbox.x + shift_x - bbox2->x,
-            bitmap->bbox.y + shift_y - bbox2->y,
-            bbox2->w,
-            bbox2->h
+            bitmap->pbox.x + shift_x - bitmap2->pbox.x,
+            bitmap->pbox.y + shift_y - bitmap2->pbox.y,
+            bitmap2->pbox.w,
+            bitmap2->pbox.h
         };
         if(SDL_BlitSurface(bitmap2->surface, NULL, surface, &dst_rect)){
             fprintf(stderr, "SDL_BlitSurface failed: %s\n", SDL_GetError());
