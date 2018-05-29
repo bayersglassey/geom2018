@@ -48,7 +48,12 @@ prismels:
 
 shapes:
 
-    sixth:
+
+    ##########
+    # DODECA #
+    ##########
+
+    dodeca_sixth:
 
         #   +
         #  +++
@@ -73,12 +78,17 @@ shapes:
     dodeca:
 
         shapes:
-            : sixth (0 0 0 0)  0 f
-            : sixth (0 0 0 0)  2 f
-            : sixth (0 0 0 0)  4 f
-            : sixth (0 0 0 0)  6 f
-            : sixth (0 0 0 0)  8 f
-            : sixth (0 0 0 0) 10 f
+            : dodeca_sixth (0 0 0 0)  0 f
+            : dodeca_sixth (0 0 0 0)  2 f
+            : dodeca_sixth (0 0 0 0)  4 f
+            : dodeca_sixth (0 0 0 0)  6 f
+            : dodeca_sixth (0 0 0 0)  8 f
+            : dodeca_sixth (0 0 0 0) 10 f
+
+
+    ############
+    # CURVY SQ #
+    ############
 
     curvy_sq_eighth:
 
@@ -113,4 +123,56 @@ shapes:
             : curvy_sq_quarter ( 2  2  2  0)  3 f
             : curvy_sq_quarter ( 0  0  4  4)  6 f
             : curvy_sq_quarter (-2 -2  2  4)  9 f
+
+
+    #############
+    # CURVY TRI #
+    #############
+
+    curvy_tri_third:
+
+        prismels:
+            : tri ( 0 0 0 0)  0 f 0
+            : tri ( 0 1 1 0)  0 f 2
+            : sq  ( 0 1 1 0)  2 f 1
+            : tri ( 0 1 1 0)  5 f 2
+            : sq  ( 0 1 1 0)  7 f 1
+            : tri ( 0 1 1 0) 10 f 2
+            : tri (-1 0 2 1) 10 f 2
+
+    curvy_tri:
+
+        #   +
+        #   |
+        #  / \
+        # |   |
+        # +---+-
+        # |   | \
+        # |   |  -+---+---+-
+        # |   | / |   |   | \
+        # +---+-   \ / \ /   -+
+        # |   |     |   |     |
+        #  \ / \   -+---+-   / \
+        #   |   | / |   | \ |   |
+        #   +---+-  |   |  -+---+
+        #   |   | \ |   | /
+        #    \ /   -+---+-
+        #     |     |   |
+        #     +-   / \ /
+        #     | \ |   |
+        #     |  -+---+
+        #     | / |   |
+        #     +-   \ /
+        #     |     |
+        #    / \   -+
+        #   |   | /
+        #   0---+-
+
+        shapes:
+            : curvy_tri_third ( 0  0  0  0)  0 f
+            : curvy_tri_third ( 2  2  2  0)  4 f
+            : curvy_tri_third (-2  0  4  2)  8 f
+
+        prismels:
+            : tri ( 0  0  2  1) 11 f 4
 

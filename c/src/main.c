@@ -16,6 +16,7 @@ int main(int n_args, char *args[]){
         {.r=255, .g= 60, .b= 60},
         {.r= 60, .g=255, .b= 60},
         {.r= 60, .g= 60, .b=255},
+        {.r=255, .g=255, .b=255},
     };
 
     fus_lexer_t lexer;
