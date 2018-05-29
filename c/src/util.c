@@ -36,6 +36,13 @@ size_t strnlen(const char *s, size_t maxlen){
     return len;
 }
 
+char *strdup(const char *s1){
+    char *s2 = malloc(strlen(s1) + 1);
+    if(s2 == NULL)return NULL;
+    strcpy(s2, s1);
+    return s2;
+}
+
 char *strndup(const char *s1, size_t len){
     size_t s_len = strnlen(s1, len);
     char *s2 = malloc(s_len + 1);
