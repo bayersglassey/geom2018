@@ -238,12 +238,16 @@ static int parse_shape_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer, re
     return 0;
 }
 
-static int parse_shape(prismelrenderer_t *prend, fus_lexer_t *lexer){
+static int parse_shape(prismelrenderer_t *prend, fus_lexer_t *lexer,
+    const char *name
+){
     int err;
     rendergraph_t *rgraph = calloc(1, sizeof(rendergraph_t));
     if(rgraph == NULL)return 1;
     err = rendergraph_init(rgraph, prend->space);
     if(err)goto err;
+
+    rgraph->name = strdup(name);
 
     while(1){
         err = fus_lexer_next(lexer);
@@ -299,7 +303,7 @@ static int parse_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer){
 
         err = fus_lexer_expect(lexer, "(");
         if(err)return err;
-        err = parse_shape(prend, lexer);
+        err = parse_shape(prend, lexer, name);
         if(err)return err;
     }
     return 0;

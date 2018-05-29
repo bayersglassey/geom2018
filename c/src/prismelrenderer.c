@@ -207,6 +207,9 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces){
 
     fprintf(f, "%srendergraph: %p\n", spaces, rendergraph);
     if(rendergraph == NULL)return;
+    if(rendergraph->name != NULL){
+        fprintf(f, "%s  name: %s\n", spaces, rendergraph->name);
+    }
     fprintf(f, "%s  space: %p\n", spaces, rendergraph->space);
 
     fprintf(f, "%s  prismel_trf_list:\n", spaces);

@@ -93,6 +93,7 @@ typedef struct rendergraph_bitmap {
 } rendergraph_bitmap_t;
 
 typedef struct rendergraph {
+    char *name;
     vecspace_t *space;
     struct prismel_trf *prismel_trf_list;
     struct rendergraph_trf *rendergraph_trf_list;
