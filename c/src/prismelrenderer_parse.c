@@ -146,7 +146,8 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer, rend
             err = rendergraph_push_rendergraph_trf(rgraph);
             if(err)return err;
 
-            rendergraph_t *found = rendergraph_map_get(prend->rendergraph_map, name);
+            rendergraph_t *found = prismelrenderer_get_rendergraph(
+                prend, name);
             if(found == NULL){
                 fprintf(stderr, "Couldn't find shape: %s\n", name);
                 return 2;
@@ -292,7 +293,7 @@ static int parse_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer){
         err = fus_lexer_get_name(lexer, &name);
         if(err)return err;
 
-        if(rendergraph_map_get(prend->rendergraph_map, name) != NULL){
+        if(prismelrenderer_get_rendergraph(prend, name) != NULL){
             fprintf(stderr, "Shape %s already defined\n", name);
             return 2;
         }

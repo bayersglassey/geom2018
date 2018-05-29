@@ -67,6 +67,8 @@ int prismelrenderer_push_prismel(prismelrenderer_t *renderer);
 prismel_t *prismelrenderer_get_prismel(prismelrenderer_t *renderer,
     char *name);
 int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer);
+struct rendergraph *prismelrenderer_get_rendergraph(prismelrenderer_t *prend,
+    const char *name);
 
 
 

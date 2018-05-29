@@ -69,8 +69,8 @@ int main(int n_args, char *args[]){
 
     if(0){
         const char *name = "dodeca";
-        rendergraph_t *rgraph = rendergraph_map_get(
-            prend.rendergraph_map, name);
+        rendergraph_t *rgraph = prismelrenderer_get_rendergraph(
+            &prend, name);
         if(rgraph == NULL)return 2;
 
         printf("RGRAPH: %s\n", name);

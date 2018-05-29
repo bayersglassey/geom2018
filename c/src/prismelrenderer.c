@@ -158,6 +158,12 @@ prismel_t *prismelrenderer_get_prismel(prismelrenderer_t *renderer,
     return NULL;
 }
 
+rendergraph_t *prismelrenderer_get_rendergraph(prismelrenderer_t *prend,
+    const char *name
+){
+    return rendergraph_map_get(prend->rendergraph_map, name);
+}
+
 
 
 
