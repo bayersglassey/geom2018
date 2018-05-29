@@ -16,7 +16,7 @@
  ***********/
 
 int get_n_bitmaps(vecspace_t *space);
-int get_bitmap_i(vecspace_t *space, trf_t *trf);
+int get_bitmap_i(vecspace_t *space, rot_t rot, flip_t flip);
 
 
 /***********
@@ -105,16 +105,20 @@ typedef struct rendergraph {
 
 int rendergraph_init(rendergraph_t *rendergraph, vecspace_t *space);
 void rendergraph_bitmap_dump(rendergraph_bitmap_t *bitmap, FILE *f,
-    int n_spaces);
+    int i, int n_spaces);
 void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces);
 int rendergraph_create_bitmaps(rendergraph_t *rendergraph);
 int rendergraph_push_rendergraph_trf(rendergraph_t *rendergraph);
 int rendergraph_push_prismel_trf(rendergraph_t *rendergraph);
-int rendergraph_get_bitmap_i(rendergraph_t *rendergraph, trf_t *trf);
-int rendergraph_render_bitmap(rendergraph_t *rendergraph, trf_t *trf,
+int rendergraph_get_bitmap_i(rendergraph_t *rendergraph,
+    rot_t rot, flip_t flip);
+int rendergraph_render_bitmap(rendergraph_t *rendergraph,
+    rot_t rot, flip_t flip,
     SDL_Color pal[]);
 int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
-    rendergraph_bitmap_t **bitmap_ptr, trf_t *trf, SDL_Color pal[]);
+    rendergraph_bitmap_t **bitmap_ptr,
+    rot_t rot, flip_t flip,
+    SDL_Color pal[]);
 
 
 

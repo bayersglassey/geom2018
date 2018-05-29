@@ -17,9 +17,9 @@ int get_n_bitmaps(vecspace_t *space){
     return space->rot_max;
 }
 
-int get_bitmap_i(vecspace_t *space, trf_t *trf){
-    rot_t rot = rot_contain(space->rot_max, trf->rot);
-    return rot_flip(space->rot_max, rot, trf->flip);
+int get_bitmap_i(vecspace_t *space, rot_t rot, flip_t flip){
+    rot = rot_contain(space->rot_max, rot);
+    return rot_flip(space->rot_max, rot, flip);
 }
 
 Uint32 *surface_get_pixel_ptr(SDL_Surface *surface, int x, int y){
@@ -177,14 +177,14 @@ int rendergraph_init(rendergraph_t *rendergraph, vecspace_t *space){
 }
 
 void rendergraph_bitmap_dump(rendergraph_bitmap_t *bitmap, FILE *f,
-    int n_spaces
+    int i, int n_spaces
 ){
     char spaces[20];
     get_spaces(spaces, 20, n_spaces);
 
     SDL_Surface *surface = bitmap->surface;
-    fprintf(f, "%sbitmap: x=%i y=%i w=%i h=%i surface=%p\n",
-        spaces,
+    fprintf(f, "%sbitmap %i: x=%i y=%i w=%i h=%i surface=%p\n",
+        spaces, i,
         bitmap->pbox.x, bitmap->pbox.y, bitmap->pbox.w, bitmap->pbox.h,
         surface);
     if(surface != NULL){
@@ -240,7 +240,7 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces){
     fprintf(f, "%s  bitmaps:\n", spaces);
     for(int i = 0; i < rendergraph->n_bitmaps; i++){
         rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[i];
-        rendergraph_bitmap_dump(bitmap, f, n_spaces+4);
+        rendergraph_bitmap_dump(bitmap, f, i, n_spaces+4);
     }
 
     fprintf(f, "%s  boundbox: ", spaces); boundbox_fprintf(f,
@@ -274,15 +274,18 @@ int rendergraph_push_prismel_trf(rendergraph_t *rendergraph){
     return 0;
 }
 
-int rendergraph_get_bitmap_i(rendergraph_t *rendergraph, trf_t *trf){
-    return get_bitmap_i(rendergraph->space, trf);
+int rendergraph_get_bitmap_i(rendergraph_t *rendergraph,
+    rot_t rot, flip_t flip
+){
+    return get_bitmap_i(rendergraph->space, rot, flip);
 }
 
-int rendergraph_render_bitmap(rendergraph_t *rendergraph, trf_t *trf,
+int rendergraph_render_bitmap(rendergraph_t *rendergraph,
+    rot_t rot, flip_t flip,
     SDL_Color pal[]
 ){
     int err;
-    int bitmap_i = rendergraph_get_bitmap_i(rendergraph, trf);
+    int bitmap_i = rendergraph_get_bitmap_i(rendergraph, rot, flip);
     rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[bitmap_i];
 
     /* bitmap->pbox should be the union of its sub-bitmap's pboxes.
@@ -314,8 +317,10 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph, trf_t *trf,
 
         /* Combine the transformations: trf and prismel_trf->trf */
         trf_t trf2 = prismel_trf->trf;
-        trf_apply(rendergraph->space, &trf2, trf);
-        int bitmap_i2 = get_bitmap_i(rendergraph->space, &trf2);
+        trf_apply(rendergraph->space, &trf2,
+            &(trf_t){flip, rot, {0, 0, 0, 0}});
+        int bitmap_i2 = get_bitmap_i(rendergraph->space,
+            trf2.rot, trf2.flip);
         int shift_x, shift_y;
         rendergraph->space->vec_render(trf2.add, &shift_x, &shift_y);
 
@@ -336,14 +341,15 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph, trf_t *trf,
 
         /* Combine the transformations: trf and prismel_trf->trf */
         trf_t trf2 = rendergraph_trf->trf;
-        trf_apply(rendergraph->space, &trf2, trf);
+        trf_apply(rendergraph->space, &trf2,
+            &(trf_t){flip, rot, {0, 0, 0, 0}});
         int shift_x, shift_y;
         rendergraph->space->vec_render(trf2.add, &shift_x, &shift_y);
 
         /* Get or render sub-bitmap for this rendergraph_trf */
         rendergraph_bitmap_t *bitmap2;
         err = rendergraph_get_or_render_bitmap(rendergraph2,
-            &bitmap2, &trf2, pal);
+            &bitmap2, trf2.rot, trf2.flip, pal);
         if(err)return err;
 
         /* Union sub-bitmap's bbox into our "accumulating" bbox */
@@ -392,8 +398,10 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph, trf_t *trf,
 
         /* Combine the transformations: trf and prismel_trf->trf */
         trf_t trf2 = prismel_trf->trf;
-        trf_apply(rendergraph->space, &trf2, trf);
-        int bitmap_i2 = get_bitmap_i(rendergraph->space, &trf2);
+        trf_apply(rendergraph->space, &trf2,
+            &(trf_t){flip, rot, {0, 0, 0, 0}});
+        int bitmap_i2 = get_bitmap_i(rendergraph->space,
+            trf2.rot, trf2.flip);
         int shift_x, shift_y;
         rendergraph->space->vec_render(trf2.add, &shift_x, &shift_y);
 
@@ -427,14 +435,17 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph, trf_t *trf,
 
         /* Combine the transformations: trf and prismel_trf->trf */
         trf_t trf2 = rendergraph_trf->trf;
-        trf_apply(rendergraph->space, &trf2, trf);
+        trf_apply(rendergraph->space, &trf2,
+            &(trf_t){flip, rot, {0, 0, 0, 0}});
         int shift_x, shift_y;
         rendergraph->space->vec_render(trf2.add, &shift_x, &shift_y);
 
         /* Blit sub-bitmap's surface onto ours */
-        int bitmap_i2 = rendergraph_get_bitmap_i(rendergraph2, &trf2);
+        int bitmap_i2 = rendergraph_get_bitmap_i(rendergraph2,
+            trf2.rot, trf2.flip);
         rendergraph_bitmap_t *bitmap2 = &rendergraph2->bitmaps[bitmap_i2];
         SDL_Surface *surface2 = bitmap2->surface;
+
         SDL_Rect dst_rect = {
             bitmap->pbox.x + shift_x - bitmap2->pbox.x,
             bitmap->pbox.y + shift_y - bitmap2->pbox.y,
@@ -452,14 +463,16 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph, trf_t *trf,
 }
 
 int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
-    rendergraph_bitmap_t **bitmap_ptr, trf_t *trf, SDL_Color pal[]
+    rendergraph_bitmap_t **bitmap_ptr,
+    rot_t rot, flip_t flip,
+    SDL_Color pal[]
 ){
     int err;
-    int bitmap_i = rendergraph_get_bitmap_i(rendergraph, trf);
+    int bitmap_i = rendergraph_get_bitmap_i(rendergraph, rot, flip);
 
     rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[bitmap_i];
     if(bitmap->surface == NULL){
-        err = rendergraph_render_bitmap(rendergraph, trf, pal);
+        err = rendergraph_render_bitmap(rendergraph, rot, flip, pal);
         if(err)return err;
     }
 

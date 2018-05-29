@@ -40,9 +40,8 @@ int main(int n_args, char *args[]){
     while(rgraph_map != NULL){
         rendergraph_t *rgraph = rgraph_map->rgraph;
         for(int rot = 0; rot < prend.space->rot_max; rot++){
-            trf_t trf = {false, rot, {0, 0, 0, 0}};
             err = rendergraph_get_or_render_bitmap(
-                rgraph, NULL, &trf, pal);
+                rgraph, NULL, rot, false, pal);
             if(err)return err;
         }
         rgraph_map = rgraph_map->next;
@@ -58,13 +57,10 @@ int main(int n_args, char *args[]){
 
         printf("  boundary boxes:\n");
         for(int rot = 0; rot < prend.space->rot_max; rot++){
-            trf_t trf = {false, rot, {0, 0, 0, 0}};
-            int bitmap_i = get_bitmap_i(prend.space, &trf);
+            int bitmap_i = get_bitmap_i(prend.space, rot, false);
             boundary_box_t bbox;
             prismel_get_boundary_box(prismel, &bbox, bitmap_i);
-            printf("    ");
-            trf_printf(prend.space->dims, &trf);
-            printf(" (bitmap %2i): ", bitmap_i);
+            printf("    bitmap %2i: ", bitmap_i);
             boundary_box_printf(&bbox);
             printf("\n");
         }
@@ -80,15 +76,12 @@ int main(int n_args, char *args[]){
 
         printf("  boundary boxes:\n");
         for(int rot = 0; rot < prend.space->rot_max; rot++){
-            trf_t trf = {false, rot, {0, 0, 0, 0}};
-            int bitmap_i = get_bitmap_i(prend.space, &trf);
+            int bitmap_i = get_bitmap_i(prend.space, rot, false);
             rendergraph_bitmap_t *bitmap = &rgraph->bitmaps[bitmap_i];
             position_box_t pbox = bitmap->pbox;
             boundary_box_t bbox;
             boundary_box_from_position_box(&bbox, &pbox);
-            printf("    ");
-            trf_printf(prend.space->dims, &trf);
-            printf(" (bitmap %2i): ", bitmap_i);
+            printf("    bitmap %2i: ", bitmap_i);
             boundary_box_printf(&bbox);
             printf("\n");
         }
