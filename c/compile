@@ -5,4 +5,5 @@ gcc -g -std=c99 \
     -D_REENTRANT -lSDL2 \
     src/main.c src/util.c src/lexer.c \
     src/geom.c src/vec4.c src/bounds.c \
-    src/prismelrenderer.c src/prismelrenderer_parse.c
+    src/prismelrenderer.c src/prismelrenderer_parse.c \
+    $@
