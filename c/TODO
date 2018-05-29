@@ -1,13 +1,19 @@
 
-Apr 30, 2018:
--------------
+Apr 30, 2018 - May 28, 2018:
+----------------------------
 
 We need:
-    - function for rendering a rendergraph to one of its bitmaps
-    - function to get or render one of a rendergraph's bitmaps
-    - way to specify, each time one rendergraph refers to another, whether
-        the referee's bitmap should be used, or just its trf_lists.
+    - function for rendering a rendergraph to one of its bitmaps (DONE)
+    - function to get or render one of a rendergraph's bitmaps (DONE)
 
 Test app:
-    - render the dodeca from data/test.fus in middle of screen
+    - load data/test.fus
+    - user can choose rendergraph with PgUp/PdDn
+    - user can rotate/flip ...zoom?..
+
+TODO:
+    - mapping_t object maps prismels to rendergraphs
+    - applying it to a rendergraph generates a new rendergraph
+    - add parser support
+    - add "curvy" transformation to test.fus
 
