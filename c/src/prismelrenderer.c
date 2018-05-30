@@ -494,7 +494,7 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
             Uint32 *p = surface_get_pixel_ptr(surface, x, y);
             for(int xx = 0; xx < line->w; xx++){
                 // p[xx] = c;
-                p[xx] = (color_i+1) * 0x11111111; /* for debugging */
+                p[xx] = (color_i+1) * 0x22222222; /* for debugging */
             }
             line = line->next;
         }

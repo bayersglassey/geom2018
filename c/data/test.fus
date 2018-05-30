@@ -124,6 +124,27 @@ shapes:
             : curvy_sq_quarter ( 0  0  4  4)  6 f
             : curvy_sq_quarter (-2 -2  2  4)  9 f
 
+    curvy_sq_many:
+
+        shapes:
+            : curvy_sq (-2 -2 -6 -4) 0 f
+            : curvy_sq ( 0  0 -4 -4) 0 f
+            : curvy_sq ( 2  2 -2 -4) 0 f
+            : curvy_sq ( 4  4  0 -4) 0 f
+            : curvy_sq ( 6  6  2 -4) 0 f
+
+            : curvy_sq (-4 -4 -4  0) 0 f
+            : curvy_sq (-2 -2 -2  0) 0 f
+            : curvy_sq ( 0  0  0  0) 0 f
+            : curvy_sq ( 2  2  2  0) 0 f
+            : curvy_sq ( 4  4  4  0) 0 f
+
+            : curvy_sq (-6 -6 -2  4) 0 f
+            : curvy_sq (-4 -4  0  4) 0 f
+            : curvy_sq (-2 -2  2  4) 0 f
+            : curvy_sq ( 0  0  4  4) 0 f
+            : curvy_sq ( 2  2  6  4) 0 f
+
 
     #############
     # CURVY TRI #
@@ -174,5 +195,5 @@ shapes:
             : curvy_tri_third (-2  0  4  2)  8 f
 
         prismels:
-            : tri ( 0  0  2  1) 11 f 4
+            : tri ( 0  0  2  1) 11 f 3
 
