@@ -54,7 +54,9 @@ void fus_lexer_dump(fus_lexer_t *lexer, FILE *f){
 
 void fus_lexer_err_info(fus_lexer_t *lexer){
     fprintf(stderr, "Lexer error: @(row=%i, col=%i, pos=%i): ",
-        lexer->row, lexer->col, lexer->pos);
+        lexer->row + 1,
+        lexer->col - lexer->token_len + 1,
+        lexer->pos - lexer->token_len);
 }
 
 static void fus_lexer_start_token(fus_lexer_t *lexer){
@@ -114,10 +116,10 @@ static char fus_lexer_eat(fus_lexer_t *lexer){
     char c = lexer->text[lexer->pos];
     lexer->pos++;
     if(c == '\n'){
-        lexer->col++;
-        lexer->row = 0;
-    }else{
         lexer->row++;
+        lexer->col = 0;
+    }else{
+        lexer->col++;
     }
     return c;
 }
@@ -352,6 +354,40 @@ int fus_lexer_get_name(fus_lexer_t *lexer, char **name){
     return 0;
 }
 
+int fus_lexer_get_str(fus_lexer_t *lexer, char **s){
+    if(lexer->token_type != FUS_LEXER_TOKEN_STR){
+        fus_lexer_err_info(lexer); fprintf(stderr,
+            "Expected str, but got: ");
+        fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
+        return 2;
+    }
+
+    const char *token = lexer->token;
+    int token_len = lexer->token_len;
+
+    /* Length of s is length of token without the surrounding
+    '"' characters */
+    int s_len = token_len - 2;
+
+    char *ss = malloc(s_len + 1);
+    if(ss == NULL)return 1;
+    char *ss0 = ss;
+
+    for(int i = 1; i < token_len - 1; i++){
+        char c = token[i];
+        if(c == '\\'){
+            i++;
+            c = token[i];
+        }
+        *ss = c;
+        ss++;
+    }
+
+    *ss = '\0';
+    *s = ss0;
+    return 0;
+}
+
 int fus_lexer_get_int(fus_lexer_t *lexer, int *i){
     if(lexer->token_type != FUS_LEXER_TOKEN_INT){
         fus_lexer_err_info(lexer); fprintf(stderr,
@@ -379,6 +415,12 @@ int fus_lexer_expect_name(fus_lexer_t *lexer, char **name){
     int err = fus_lexer_next(lexer);
     if(err)return err;
     return fus_lexer_get_name(lexer, name);
+}
+
+int fus_lexer_expect_str(fus_lexer_t *lexer, char **s){
+    int err = fus_lexer_next(lexer);
+    if(err)return err;
+    return fus_lexer_get_str(lexer, s);
 }
 
 int fus_lexer_expect_int(fus_lexer_t *lexer, int *i){
