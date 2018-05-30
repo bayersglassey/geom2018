@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <SDL2/SDL.h>
+
 #include "util.h"
 
 char *load_file(const char *filename){
@@ -50,4 +52,25 @@ char *strndup(const char *s1, size_t len){
     strncpy(s2, s1, len);
     s2[s_len] = '\0';
     return s2;
+}
+
+SDL_Surface *surface_create(int w, int h, int bpp){
+    SDL_Surface *surface = SDL_CreateRGBSurface(
+        0, w, h, bpp, 0, 0, 0, 0);
+    if(surface == NULL){
+        fprintf(stderr, "SDL_CreateRGBSurface failed: %s\n", SDL_GetError());
+        return NULL;}
+    if(SDL_SetSurfaceRLE(surface, 1)){
+        fprintf(stderr, "SDL_SetSurfaceRLE failed: %s\n", SDL_GetError());
+        return NULL;}
+    if(SDL_SetColorKey(surface, SDL_TRUE, 0)){
+        fprintf(stderr, "SDL_SetColorKey failed: %s\n", SDL_GetError());
+        return NULL;}
+    return surface;
+}
+
+Uint32 *surface_get_pixel_ptr(SDL_Surface *surface, int x, int y){
+    return (Uint32 *)(
+        (Uint8 *)surface->pixels + y*surface->pitch + x*(32/8)
+    );
 }

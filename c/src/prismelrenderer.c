@@ -24,12 +24,6 @@ int get_bitmap_i(vecspace_t *space, rot_t rot, flip_t flip){
     return rot_flip(space->rot_max, rot, flip);
 }
 
-Uint32 *surface_get_pixel_ptr(SDL_Surface *surface, int x, int y){
-    return (Uint32 *)(
-        (Uint8 *)surface->pixels + y*surface->pitch + x*(32/8)
-    );
-}
-
 void get_spaces(char *spaces, int max_spaces, int n_spaces){
     if(n_spaces > max_spaces){
         fprintf(stderr, "%s: %s: Can't handle %i spaces - max %i\n",
@@ -448,17 +442,8 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     SDL_DestroyTexture(bitmap->texture);
     bitmap->surface = NULL;
     bitmap->texture = NULL;
-    SDL_Surface *surface = SDL_CreateRGBSurface(
-        0, bitmap->pbox.w, bitmap->pbox.h, bpp, 0, 0, 0, 0);
-    if(surface == NULL){
-        fprintf(stderr, "SDL_CreateRGBSurface failed: %s\n", SDL_GetError());
-        return 2;}
-    if(SDL_SetSurfaceRLE(surface, 1)){
-        fprintf(stderr, "SDL_SetSurfaceRLE failed: %s\n", SDL_GetError());
-        return 2;}
-    if(SDL_SetColorKey(surface, SDL_TRUE, 0)){
-        fprintf(stderr, "SDL_SetColorKey failed: %s\n", SDL_GetError());
-        return 2;}
+    SDL_Surface *surface = surface_create(bitmap->pbox.w, bitmap->pbox.h, bpp);
+    if(surface == NULL)return 2;
 
     /* Fill new bitmap with transparent colour */
     SDL_LockSurface(surface);
