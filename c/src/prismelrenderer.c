@@ -6,7 +6,9 @@
 #include <SDL2/SDL.h>
 
 #include "prismelrenderer.h"
+#include "lexer.h"
 #include "bounds.h"
+#include "util.h"
 
 
 /***********
@@ -162,6 +164,44 @@ rendergraph_t *prismelrenderer_get_rendergraph(prismelrenderer_t *prend,
     const char *name
 ){
     return rendergraph_map_get(prend->rendergraph_map, name);
+}
+
+int prismelrenderer_load(prismelrenderer_t *prend, const char *filename,
+    vecspace_t *space
+){
+    int err;
+    fus_lexer_t lexer;
+
+    char *text = load_file(filename);
+    if(text == NULL)return 1;
+
+    err = fus_lexer_init(&lexer, text);
+    if(err)return err;
+
+    err = prismelrenderer_init(prend, space);
+    if(err)return err;
+
+    err = prismelrenderer_parse(prend, &lexer);
+    if(err)return err;
+
+    return 0;
+}
+
+int prismelrenderer_render_all_bitmaps(prismelrenderer_t *prend,
+    SDL_Color pal[]
+){
+    int err;
+    rendergraph_map_t *rgraph_map = prend->rendergraph_map;
+    while(rgraph_map != NULL){
+        rendergraph_t *rgraph = rgraph_map->rgraph;
+        for(int rot = 0; rot < prend->space->rot_max; rot++){
+            err = rendergraph_get_or_render_bitmap(
+                rgraph, NULL, rot, false, pal);
+            if(err)return err;
+        }
+        rgraph_map = rgraph_map->next;
+    }
+    return 0;
 }
 
 

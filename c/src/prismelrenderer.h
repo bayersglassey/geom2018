@@ -69,6 +69,10 @@ prismel_t *prismelrenderer_get_prismel(prismelrenderer_t *renderer,
 int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer);
 struct rendergraph *prismelrenderer_get_rendergraph(prismelrenderer_t *prend,
     const char *name);
+int prismelrenderer_load(prismelrenderer_t *prend, const char *filename,
+    vecspace_t *space);
+int prismelrenderer_render_all_bitmaps(prismelrenderer_t *prend,
+    SDL_Color pal[]);
 
 
 
