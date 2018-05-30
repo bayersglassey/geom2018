@@ -7,9 +7,9 @@ We need:
     - function to get or render one of a rendergraph's bitmaps (DONE)
 
 Test app:
-    - load data/test.fus
-    - user can choose rendergraph with PgUp/PdDn
-    - user can rotate/flip ...zoom?..
+    - load data/test.fus (DONE)
+    - user can choose rendergraph with PgUp/PdDn (DONE)
+    - user can rotate/flip/zoom (DONE)
 
 TODO:
     - mapping_t object maps prismels to rendergraphs
