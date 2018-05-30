@@ -5,6 +5,7 @@
 
 #include "prismelrenderer.h"
 #include "vec4.h"
+#include "font.h"
 
 
 #define SCW 640
@@ -30,6 +31,7 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
     };
 
     prismelrenderer_t prend;
+    font_t font;
 
     char *filename = "data/test.fus";
     if(n_args >= 2)filename = args[1];
@@ -37,11 +39,17 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
     err = prismelrenderer_load(&prend, filename, &vec4);
     if(err)return err;
 
+    err = font_load(&font, "data/font.fus", renderer);
+    if(err)return err;
+
     int n_rgraphs;
     rendergraph_t **rgraphs;
     err = prismelrenderer_get_rendergraphs(&prend,
         &n_rgraphs, &rgraphs);
     if(err)return err;
+    if(n_rgraphs < 1){
+        fprintf(stderr, "No rendergraphs in %s\n", filename);
+        return 2;}
 
     int cur_rgraph_i = 0;
 
@@ -74,6 +82,20 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
             RET_IF_SDL_ERR(SDL_SetRenderDrawColor(renderer,
                 0, 0, 0, 255));
             RET_IF_SDL_ERR(SDL_RenderClear(renderer));
+
+            /*
+            RET_IF_SDL_ERR(SDL_RenderCopy(renderer, font.texture,
+                NULL, NULL));
+            */
+
+            font_blitmsg(&font, renderer,
+                "Controls:\n"
+                "  up/down - zoom\n"
+                "  left/right - rotate (hold shift for tap mode)\n"
+                "  page up/down - cycle through available rendergraphs\n"
+                "Currently displaying rendergraphs from file: %s\n"
+                "Currently displaying rendergraph %i: %s",
+                filename, cur_rgraph_i, rgraphs[cur_rgraph_i]->name);
             RET_IF_SDL_ERR(SDL_RenderCopy(renderer, bitmap->texture,
                 NULL, &dst_rect));
             SDL_RenderPresent(renderer);
@@ -93,12 +115,12 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                         || event.key.keysym.sym == SDLK_RSHIFT){
                             keydown_shift = true;}
                     if(event.key.keysym.sym == SDLK_PAGEUP){
-                        cur_rgraph_i--;
-                        if(cur_rgraph_i < 0)cur_rgraph_i = n_rgraphs - 1;
-                        refresh = true;}
-                    if(event.key.keysym.sym == SDLK_PAGEDOWN){
                         cur_rgraph_i++;
                         if(cur_rgraph_i >= n_rgraphs)cur_rgraph_i = 0;
+                        refresh = true;}
+                    if(event.key.keysym.sym == SDLK_PAGEDOWN){
+                        cur_rgraph_i--;
+                        if(cur_rgraph_i < 0)cur_rgraph_i = n_rgraphs - 1;
                         refresh = true;}
                     if(event.key.keysym.sym == SDLK_UP){
                         zoom += 1; if(zoom > 10)zoom=10; refresh = true;}

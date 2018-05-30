@@ -178,6 +178,7 @@ int prismelrenderer_load(prismelrenderer_t *prend, const char *filename,
     err = prismelrenderer_parse(prend, &lexer);
     if(err)return err;
 
+    free(text);
     return 0;
 }
 
