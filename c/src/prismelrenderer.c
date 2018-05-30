@@ -204,6 +204,38 @@ int prismelrenderer_render_all_bitmaps(prismelrenderer_t *prend,
     return 0;
 }
 
+int prismelrenderer_get_rendergraphs(prismelrenderer_t *prend,
+    int *n_rgraphs_ptr, rendergraph_t ***rgraphs_ptr
+){
+    int n_rgraphs = 0;
+
+    for(
+        rendergraph_map_t *rgraph_map = prend->rendergraph_map;
+        rgraph_map != NULL;
+        rgraph_map = rgraph_map->next
+    ){
+        n_rgraphs++;
+    }
+
+    rendergraph_t **rgraphs = malloc(sizeof(*rgraphs) * n_rgraphs);
+    if(rgraphs == NULL)return 1;
+
+    int rgraph_i = 0;
+    for(
+        rendergraph_map_t *rgraph_map = prend->rendergraph_map;
+        rgraph_map != NULL;
+        rgraph_map = rgraph_map->next
+    ){
+        rgraphs[rgraph_i] = rgraph_map->rgraph;
+        rgraph_i++;
+    }
+
+    *n_rgraphs_ptr = n_rgraphs;
+    *rgraphs_ptr = rgraphs;
+    return 0;
+}
+
+
 
 
 
