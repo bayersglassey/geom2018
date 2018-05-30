@@ -72,7 +72,7 @@ struct rendergraph *prismelrenderer_get_rendergraph(prismelrenderer_t *prend,
 int prismelrenderer_load(prismelrenderer_t *prend, const char *filename,
     vecspace_t *space);
 int prismelrenderer_render_all_bitmaps(prismelrenderer_t *prend,
-    SDL_Color pal[]);
+    SDL_Color pal[], SDL_Renderer *renderer);
 
 
 
@@ -96,6 +96,7 @@ typedef struct rendergraph_trf {
 typedef struct rendergraph_bitmap {
     position_box_t pbox;
     SDL_Surface *surface;
+    SDL_Texture *texture;
 } rendergraph_bitmap_t;
 
 typedef struct rendergraph {
@@ -120,11 +121,11 @@ int rendergraph_get_bitmap_i(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip);
 int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip,
-    SDL_Color pal[]);
+    SDL_Color pal[], SDL_Renderer *renderer);
 int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
     rendergraph_bitmap_t **bitmap_ptr,
     rot_t rot, flip_t flip,
-    SDL_Color pal[]);
+    SDL_Color pal[], SDL_Renderer *renderer);
 
 
 

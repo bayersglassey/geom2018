@@ -25,7 +25,7 @@ int main(int n_args, char *args[]){
     err = prismelrenderer_load(&prend, filename, &vec4);
     if(err)return err;
 
-    err = prismelrenderer_render_all_bitmaps(&prend, pal);
+    err = prismelrenderer_render_all_bitmaps(&prend, pal, NULL);
     if(err)return err;
 
     prismelrenderer_dump(&prend, stdout);

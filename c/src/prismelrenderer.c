@@ -188,7 +188,7 @@ int prismelrenderer_load(prismelrenderer_t *prend, const char *filename,
 }
 
 int prismelrenderer_render_all_bitmaps(prismelrenderer_t *prend,
-    SDL_Color pal[]
+    SDL_Color pal[], SDL_Renderer *renderer
 ){
     int err;
     rendergraph_map_t *rgraph_map = prend->rendergraph_map;
@@ -196,7 +196,7 @@ int prismelrenderer_render_all_bitmaps(prismelrenderer_t *prend,
         rendergraph_t *rgraph = rgraph_map->rgraph;
         for(int rot = 0; rot < prend->space->rot_max; rot++){
             err = rendergraph_get_or_render_bitmap(
-                rgraph, NULL, rot, false, pal);
+                rgraph, NULL, rot, false, pal, renderer);
             if(err)return err;
         }
         rgraph_map = rgraph_map->next;
@@ -328,7 +328,7 @@ int rendergraph_get_bitmap_i(rendergraph_t *rendergraph,
 
 int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip,
-    SDL_Color pal[]
+    SDL_Color pal[], SDL_Renderer *renderer
 ){
     int err;
     int bitmap_i = rendergraph_get_bitmap_i(rendergraph, rot, flip);
@@ -395,7 +395,7 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
         /* Get or render sub-bitmap for this rendergraph_trf */
         rendergraph_bitmap_t *bitmap2;
         err = rendergraph_get_or_render_bitmap(rendergraph2,
-            &bitmap2, trf2.rot, trf2.flip, pal);
+            &bitmap2, trf2.rot, trf2.flip, pal, renderer);
         if(err)return err;
 
         /* Union sub-bitmap's bbox into our "accumulating" bbox */
@@ -413,7 +413,9 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
 
     /* Get rid of old bitmap, create new one */
     SDL_FreeSurface(bitmap->surface);
+    SDL_DestroyTexture(bitmap->texture);
     bitmap->surface = NULL;
+    bitmap->texture = NULL;
     SDL_Surface *surface = SDL_CreateRGBSurface(
         0, bitmap->pbox.w, bitmap->pbox.h, bpp, 0, 0, 0, 0);
     if(surface == NULL){
@@ -503,22 +505,35 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
             return 2;}
     }
 
+    /* Create texture, if an SDL_Renderer was provided */
+    SDL_Texture *texture = NULL;
+    if(renderer != NULL){
+        texture = SDL_CreateTextureFromSurface(renderer, surface);
+        if(texture == NULL){
+            fprintf(stderr, "SDL_CreateTextureFromSurface failed: %s\n",
+                SDL_GetError());
+            return 2;
+        }
+    }
+
     /* LET'S GO */
     bitmap->surface = surface;
+    bitmap->texture = texture;
     return 0;
 }
 
 int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
     rendergraph_bitmap_t **bitmap_ptr,
     rot_t rot, flip_t flip,
-    SDL_Color pal[]
+    SDL_Color pal[], SDL_Renderer *renderer
 ){
     int err;
     int bitmap_i = rendergraph_get_bitmap_i(rendergraph, rot, flip);
 
     rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[bitmap_i];
     if(bitmap->surface == NULL){
-        err = rendergraph_render_bitmap(rendergraph, rot, flip, pal);
+        err = rendergraph_render_bitmap(rendergraph, rot, flip, pal,
+            renderer);
         if(err)return err;
     }
 
