@@ -41,6 +41,21 @@ void get_spaces(char *spaces, int max_spaces, int n_spaces){
  ***********/
 
 
+void prismel_cleanup(prismel_t *prismel){
+    free(prismel->name);
+
+    for(int i = 0; i < prismel->n_images; i++){
+        prismel_image_t *image = &prismel->images[i];
+        prismel_image_line_t *line = image->line_list;
+        while(line != NULL){
+            prismel_image_line_t *next = line->next;
+            free(line);
+            line = next;
+        }
+    }
+    free(prismel->images);
+}
+
 int prismel_create_images(prismel_t *prismel, vecspace_t *space){
     int n_images = get_n_bitmaps(space);
     prismel_image_t *images = calloc(n_images, sizeof(prismel_image_t));
@@ -93,6 +108,24 @@ int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space){
     renderer->prismel_list = NULL;
     renderer->rendergraph_map = NULL;
     return 0;
+}
+
+void prismelrenderer_cleanup(prismelrenderer_t *renderer){
+    prismel_t *prismel = renderer->prismel_list;
+    while(prismel != NULL){
+        prismel_t *next = prismel->next;
+        prismel_cleanup(prismel);
+        free(prismel);
+        prismel = next;
+    }
+
+    rendergraph_map_t *rendergraph_map = renderer->rendergraph_map;
+    while(rendergraph_map != NULL){
+        rendergraph_map_t *next = rendergraph_map->next;
+        rendergraph_map_cleanup(rendergraph_map);
+        free(rendergraph_map);
+        rendergraph_map = next;
+    }
 }
 
 void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f){
@@ -237,6 +270,37 @@ int prismelrenderer_get_rendergraphs(prismelrenderer_t *prend,
 /***************
  * RENDERGRAPH *
  ***************/
+
+void rendergraph_cleanup(rendergraph_t *rendergraph){
+    free(rendergraph->name);
+
+    prismel_trf_t *prismel_trf = rendergraph->prismel_trf_list;
+    while(prismel_trf != NULL){
+        /* NOTE: prismel_trfs don't own their prismels! */
+        /* prismel_cleanup(prismel_trf->pismel); */
+
+        prismel_trf_t *next = prismel_trf->next;
+        free(prismel_trf);
+        prismel_trf = next;
+    }
+
+    rendergraph_trf_t *rendergraph_trf = rendergraph->rendergraph_trf_list;
+    while(rendergraph_trf != NULL){
+        /* NOTE: rendergraph_trfs don't own their rendergraphs! */
+        /* rendergraph_cleanup(rendergraph_trf->rendergraph); */
+
+        rendergraph_trf_t *next = rendergraph_trf->next;
+        free(rendergraph_trf);
+        rendergraph_trf = next;
+    }
+
+    for(int i = 0; i < rendergraph->n_bitmaps; i++){
+        rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[i];
+        SDL_FreeSurface(bitmap->surface);
+        SDL_DestroyTexture(bitmap->texture);
+    }
+    free(rendergraph->bitmaps);
+}
 
 int rendergraph_init(rendergraph_t *rendergraph, vecspace_t *space){
     int err;
@@ -565,6 +629,12 @@ int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
  * RENDERGRAPH_MAP *
  *******************/
 
+
+void rendergraph_map_cleanup(rendergraph_map_t *map){
+    free(map->name);
+    rendergraph_cleanup(map->rgraph);
+    free(map->rgraph);
+}
 
 int rendergraph_map_push(rendergraph_map_t **map){
     rendergraph_map_t *new_map = calloc(1, sizeof(rendergraph_map_t));

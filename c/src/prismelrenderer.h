@@ -42,6 +42,7 @@ typedef struct prismel {
 } prismel_t;
 
 
+void prismel_cleanup(prismel_t *prismel);
 int prismel_create_images(prismel_t *prismel, vecspace_t *space);
 int prismel_image_push_line(prismel_image_t *image, int x, int y, int w);
 void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box,
@@ -62,6 +63,7 @@ typedef struct prismelrenderer {
 
 
 int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space);
+void prismelrenderer_cleanup(prismelrenderer_t *renderer);
 void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f);
 int prismelrenderer_push_prismel(prismelrenderer_t *renderer);
 prismel_t *prismelrenderer_get_prismel(prismelrenderer_t *renderer,
@@ -112,6 +114,7 @@ typedef struct rendergraph {
 } rendergraph_t;
 
 
+void rendergraph_cleanup(rendergraph_t *rendergraph);
 int rendergraph_init(rendergraph_t *rendergraph, vecspace_t *space);
 void rendergraph_bitmap_dump(rendergraph_bitmap_t *bitmap, FILE *f,
     int i, int n_spaces);
@@ -141,6 +144,7 @@ typedef struct rendergraph_map {
     struct rendergraph_map *next;
 } rendergraph_map_t;
 
+void rendergraph_map_cleanup(rendergraph_map_t *map);
 int rendergraph_map_push(rendergraph_map_t **map);
 rendergraph_t *rendergraph_map_get(rendergraph_map_t *map, const char *name);
 
