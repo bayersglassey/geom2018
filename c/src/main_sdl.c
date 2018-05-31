@@ -12,6 +12,8 @@
 #define SCW 640
 #define SCH 400
 
+/* How many milliseconds we want each frame to last */
+#define DELAY_GOAL 30
 
 #define ERR_INFO() fprintf(stderr, "%s: %i: ", __func__, __LINE__)
 #define RET_IF_SDL_ERR(x) {int e=(x); \
@@ -86,10 +88,18 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
     int keydown_l = 0;
     int keydown_r = 0;
 
+    Uint32 took = 0;
+
     SDL_StartTextInput();
     while(loop){
+        Uint32 tick0 = SDL_GetTicks();
+
         if(refresh){
             refresh = false;
+
+            RET_IF_SDL_ERR(SDL_SetRenderDrawColor(renderer,
+                0, 0, 0, 255));
+            RET_IF_SDL_ERR(SDL_RenderClear(renderer));
 
             rendergraph_bitmap_t *bitmap;
             err = rendergraph_get_or_render_bitmap(
@@ -103,19 +113,12 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                 bitmap->pbox.w*zoom,
                 bitmap->pbox.h*zoom
             };
-
-            RET_IF_SDL_ERR(SDL_SetRenderDrawColor(renderer,
-                0, 0, 0, 255));
-            RET_IF_SDL_ERR(SDL_RenderClear(renderer));
-
-            /*
-            RET_IF_SDL_ERR(SDL_RenderCopy(renderer, font.texture,
-                NULL, NULL));
-            */
-
             RET_IF_SDL_ERR(SDL_RenderCopy(renderer, bitmap->texture,
                 NULL, &dst_rect));
+
             font_blitmsg(&font, renderer, 0, 0,
+                "Frame rendered in: %i ms\n"
+                "  (Aiming for sub-%i ms)\n"
                 "Controls:\n"
                 "  up/down - zoom\n"
                 "  left/right - rotate (hold shift for tap mode)\n"
@@ -123,11 +126,15 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                 "  0 - reset rotation\n"
                 "Currently displaying rendergraphs from file: %s\n"
                 "Currently displaying rendergraph %i / %i: %s",
+                took, DELAY_GOAL,
                 filename, cur_rgraph_i, n_rgraphs,
                 rgraphs[cur_rgraph_i]->name);
+
             console_blit(&console, &font, renderer, 0, 10 * font.char_h);
+
             SDL_RenderPresent(renderer);
         }
+
         while(SDL_PollEvent(&event)){
             switch(event.type){
                 case SDL_KEYDOWN: {
@@ -222,6 +229,10 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
             rot += 1; refresh = true; keydown_l = 1;}
         if(keydown_r >= (keydown_shift? 2: 1)){
             rot -= 1; refresh = true; keydown_r = 1;}
+
+        Uint32 tick1 = SDL_GetTicks();
+        took = tick1 - tick0;
+        if(took < DELAY_GOAL)SDL_Delay(DELAY_GOAL - took);
     }
 
     free(rgraphs);
