@@ -21,6 +21,32 @@
 
 
 
+int load_rendergraphs(prismelrenderer_t *prend, const char *filename, int *n_rgraphs_ptr, rendergraph_t ***rgraphs_ptr, bool reload){
+    int err;
+
+    int n_rgraphs = *n_rgraphs_ptr;
+    rendergraph_t **rgraphs = *rgraphs_ptr;
+
+    if(reload){
+        free(rgraphs);
+        prismelrenderer_cleanup(prend);
+    }
+
+    err = prismelrenderer_load(prend, filename, &vec4);
+    if(err)return err;
+
+    err = prismelrenderer_get_rendergraphs(prend,
+        n_rgraphs_ptr, rgraphs_ptr);
+    if(err)return err;
+    if(*n_rgraphs_ptr < 1){
+        fprintf(stderr, "No rendergraphs in %s\n", filename);
+        return 2;}
+
+    return 0;
+}
+
+
+
 int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
     int err;
 
@@ -35,28 +61,20 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
     font_t font;
     console_t console;
 
-    char *filename = "data/test.fus";
-    if(n_args >= 2)filename = args[1];
-
-    err = prismelrenderer_load(&prend, filename, &vec4);
-    if(err)return err;
-
     err = font_load(&font, "data/font.fus", renderer);
     if(err)return err;
 
     err = console_init(&console, 40, 20, 20000);
     if(err)return err;
 
+    char *filename = "data/test.fus";
+    if(n_args >= 2)filename = args[1];
+
     int n_rgraphs;
     rendergraph_t **rgraphs;
-    err = prismelrenderer_get_rendergraphs(&prend,
-        &n_rgraphs, &rgraphs);
-    if(err)return err;
-    if(n_rgraphs < 1){
-        fprintf(stderr, "No rendergraphs in %s\n", filename);
-        return 2;}
-
     int cur_rgraph_i = 0;
+    err = load_rendergraphs(&prend, filename, &n_rgraphs, &rgraphs, false);
+    if(err)return err;
 
     SDL_Event event;
 
@@ -104,8 +122,9 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                 "  page up/down - cycle through available rendergraphs\n"
                 "  0 - reset rotation\n"
                 "Currently displaying rendergraphs from file: %s\n"
-                "Currently displaying rendergraph %i: %s",
-                filename, cur_rgraph_i, rgraphs[cur_rgraph_i]->name);
+                "Currently displaying rendergraph %i / %i: %s",
+                filename, cur_rgraph_i, n_rgraphs,
+                rgraphs[cur_rgraph_i]->name);
             console_blit(&console, &font, renderer, 0, 10 * font.char_h);
             SDL_RenderPresent(renderer);
         }
@@ -121,11 +140,18 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                         int action = -1;
                         if(!strcmp(console.input, "exit"))action = 0;
                         else if(!strcmp(console.input, "cls"))action = 1;
+                        else if(!strcmp(console.input, "reload"))action = 2;
 
                         console_input_accept(&console); refresh = true;
 
                         if(action == 0)loop = false;
                         else if(action == 1)console_clear(&console);
+                        else if(action == 2){
+                            err = load_rendergraphs(&prend, filename, &n_rgraphs, &rgraphs, true);
+                            if(err)return err;
+
+                            cur_rgraph_i = 0;
+                        }
                     }
                     if(event.key.keysym.sym == SDLK_BACKSPACE){
                         console_input_backspace(&console); refresh = true;}
