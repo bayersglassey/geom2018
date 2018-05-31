@@ -12,6 +12,14 @@
 #include "font.h"
 
 
+
+void font_get_char_coords(font_t *font, char c, int *char_x, int *char_y){
+    int char_index = (unsigned)c;
+    *char_x = char_index % 16;
+    *char_y = char_index / 16;
+}
+
+
 int font_load(font_t *font, const char *filename,
     SDL_Renderer *renderer
 ){
@@ -34,12 +42,6 @@ int font_load(font_t *font, const char *filename,
 
     free(text);
     return 0;
-}
-
-void font_get_char_coords(font_t *font, char c, int *char_x, int *char_y){
-    int char_index = (unsigned)c;
-    *char_x = char_index % 16;
-    *char_y = char_index / 16;
 }
 
 int font_parse(font_t *font, fus_lexer_t *lexer,
@@ -175,25 +177,20 @@ int font_parse(font_t *font, fus_lexer_t *lexer,
     return 0;
 }
 
-typedef struct font_blitter {
-    font_t *font;
-    SDL_Renderer *renderer;
-    int x0;
-    int y0;
-    int x;
-    int y;
-} font_blitter_t;
+void font_blitter_newline(font_blitter_t *blitter){
+    blitter->col = 0;
+    blitter->row++;
+}
 
-void font_blitchar(font_blitter_t *blitter, char c){
-    font_t *font = blitter->font;
+void font_blitter_move_right(font_blitter_t *blitter){
+    blitter->col++;
+}
+
+void font_blitchar(font_t *font, SDL_Renderer *renderer,
+    int x, int y, char c
+){
     int char_w = font->char_w;
     int char_h = font->char_h;
-
-    if(c == '\n'){
-        blitter->x = blitter->x0;
-        blitter->y += char_h;
-        return;
-    }
 
     int char_x, char_y;
     font_get_char_coords(font, toupper(c),
@@ -205,19 +202,34 @@ void font_blitchar(font_blitter_t *blitter, char c){
         char_w, char_h
     };
     SDL_Rect dst_rect = {
-        blitter->x, blitter->y,
+        x, y,
         char_w, char_h
     };
-    SDL_RenderCopy(blitter->renderer, font->texture,
+    SDL_RenderCopy(renderer, font->texture,
         &src_rect, &dst_rect);
-
-    blitter->x += char_w;
 }
 
-void font_blitmsg(font_t *font, SDL_Renderer *renderer, const char *msg, ...){
+void font_blitter_blitchar(font_blitter_t *blitter, char c){
+    font_t *font = blitter->font;
+
+    if(c == '\n'){
+        font_blitter_newline(blitter);
+        return;
+    }
+
+    font_blitchar(font, blitter->renderer,
+        blitter->x0 + blitter->col * font->char_w,
+        blitter->y0 + blitter->row * font->char_h,
+        c);
+    font_blitter_move_right(blitter);
+}
+
+void font_blitmsg(font_t *font, SDL_Renderer *renderer,
+    int x0, int y0, const char *msg, ...
+){
     int char_w = font->char_w;
     int char_h = font->char_h;
-    font_blitter_t blitter = {font, renderer, 0, 0, 0, 0};
+    font_blitter_t blitter = {font, renderer, x0, y0, 0, 0};
 
     va_list args;
     va_start(args, msg);
@@ -231,24 +243,24 @@ void font_blitmsg(font_t *font, SDL_Renderer *renderer, const char *msg, ...){
                 if(c == 'i'){
                     int i = va_arg(args, int);
                     if(i == 0){
-                        font_blitchar(&blitter, '0');
+                        font_blitter_blitchar(&blitter, '0');
                     }else if(i < 0){
                         i = -i;
-                        font_blitchar(&blitter, '-');
+                        font_blitter_blitchar(&blitter, '-');
                     }
                     while(i != 0){
                         char c = '0' + (i % 10);
-                        font_blitchar(&blitter, c);
+                        font_blitter_blitchar(&blitter, c);
                         i /= 10;
                     }
                 }else if(c == 'c'){
                     char c = va_arg(args, int);
-                    font_blitchar(&blitter, c);
+                    font_blitter_blitchar(&blitter, c);
                 }else if(c == 's'){
                     char *s = va_arg(args, char *);
                     char c;
                     while(c = *s, c != '\0'){
-                        font_blitchar(&blitter, c);
+                        font_blitter_blitchar(&blitter, c);
                         s++;
                     }
                 }else{
@@ -261,7 +273,7 @@ void font_blitmsg(font_t *font, SDL_Renderer *renderer, const char *msg, ...){
             }
         }
 
-        font_blitchar(&blitter, c);
+        font_blitter_blitchar(&blitter, c);
         msg++;
     }
 
