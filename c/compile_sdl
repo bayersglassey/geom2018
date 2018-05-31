@@ -1,6 +1,7 @@
 gcc -g -std=c99 -Wall -Werror -Wno-unused \
     -o main \
-    src/main_sdl.c src/util.c src/lexer.c src/font.c \
+    src/main_sdl.c src/util.c src/lexer.c \
+    src/font.c src/console.c \
     src/geom.c src/vec4.c src/bounds.c \
     src/prismelrenderer.c src/prismelrenderer_parse.c \
     `sdl2-config --cflags --libs`

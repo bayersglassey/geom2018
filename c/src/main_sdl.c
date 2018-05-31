@@ -6,6 +6,7 @@
 #include "prismelrenderer.h"
 #include "vec4.h"
 #include "font.h"
+#include "console.h"
 
 
 #define SCW 640
@@ -32,6 +33,7 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
 
     prismelrenderer_t prend;
     font_t font;
+    console_t console;
 
     char *filename = "data/test.fus";
     if(n_args >= 2)filename = args[1];
@@ -40,6 +42,9 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
     if(err)return err;
 
     err = font_load(&font, "data/font.fus", renderer);
+    if(err)return err;
+
+    err = console_init(&console, 40, 20, 200);
     if(err)return err;
 
     int n_rgraphs;
@@ -62,6 +67,8 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
     bool keydown_shift = false;
     int keydown_l = 0;
     int keydown_r = 0;
+
+    SDL_StartTextInput();
     while(loop){
         if(refresh){
             refresh = false;
@@ -88,23 +95,43 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                 NULL, NULL));
             */
 
-            font_blitmsg(&font, renderer,
+            RET_IF_SDL_ERR(SDL_RenderCopy(renderer, bitmap->texture,
+                NULL, &dst_rect));
+            font_blitmsg(&font, renderer, 0, 0,
                 "Controls:\n"
                 "  up/down - zoom\n"
                 "  left/right - rotate (hold shift for tap mode)\n"
                 "  page up/down - cycle through available rendergraphs\n"
+                "  0 - reset rotation\n"
                 "Currently displaying rendergraphs from file: %s\n"
                 "Currently displaying rendergraph %i: %s",
                 filename, cur_rgraph_i, rgraphs[cur_rgraph_i]->name);
-            RET_IF_SDL_ERR(SDL_RenderCopy(renderer, bitmap->texture,
-                NULL, &dst_rect));
+            console_blit(&console, &font, renderer, 0, 10 * font.char_h);
             SDL_RenderPresent(renderer);
         }
         while(SDL_PollEvent(&event)){
             switch(event.type){
-                case SDL_KEYDOWN:
+                case SDL_KEYDOWN: {
                     if(event.key.keysym.sym == SDLK_ESCAPE){
                         loop = false;}
+
+                    if(event.key.keysym.sym == SDLK_RETURN){
+                        printf("GOT CONSOLE INPUT: %s\n", console.input);
+
+                        int action = -1;
+                        if(!strcmp(console.input, "exit"))action = 0;
+                        else if(!strcmp(console.input, "cls"))action = 1;
+
+                        console_input_accept(&console); refresh = true;
+
+                        if(action == 0)loop = false;
+                        else if(action == 1)console_clear(&console);
+                    }
+                    if(event.key.keysym.sym == SDLK_BACKSPACE){
+                        console_input_backspace(&console); refresh = true;}
+                    if(event.key.keysym.sym == SDLK_DELETE){
+                        console_input_delete(&console); refresh = true;}
+
                     if(event.key.keysym.sym == SDLK_0){
                         rot = 0; refresh = true;}
                     if(event.key.keysym.sym == SDLK_LEFT && keydown_l == 0){
@@ -126,8 +153,8 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                         zoom += 1; if(zoom > 10)zoom=10; refresh = true;}
                     if(event.key.keysym.sym == SDLK_DOWN){
                         zoom -= 1; if(zoom <= 0)zoom=1; refresh = true;}
-                    break;
-                case SDL_KEYUP:
+                } break;
+                case SDL_KEYUP: {
                     if(event.key.keysym.sym == SDLK_LEFT){
                         keydown_l = 0;}
                     if(event.key.keysym.sym == SDLK_RIGHT){
@@ -135,7 +162,13 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                     if(event.key.keysym.sym == SDLK_LSHIFT
                         || event.key.keysym.sym == SDLK_RSHIFT){
                             keydown_shift = false;}
-                    break;
+                } break;
+                case SDL_TEXTINPUT: {
+                    for(char *c = event.text.text; *c != '\0'; c++){
+                        console_input_char(&console, *c);
+                    }
+                    refresh = true;
+                } break;
                 case SDL_QUIT: loop = false; break;
                 default: break;
             }
