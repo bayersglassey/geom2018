@@ -44,7 +44,7 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
     err = font_load(&font, "data/font.fus", renderer);
     if(err)return err;
 
-    err = console_init(&console, 40, 20, 200);
+    err = console_init(&console, 40, 20, 20000);
     if(err)return err;
 
     int n_rgraphs;
@@ -131,6 +131,25 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                         console_input_backspace(&console); refresh = true;}
                     if(event.key.keysym.sym == SDLK_DELETE){
                         console_input_delete(&console); refresh = true;}
+                    if(
+                        event.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL)
+                        && event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)
+                    ){
+                        if(event.key.keysym.sym == SDLK_c){
+                            SDL_SetClipboardText(console.input);}
+                        if(event.key.keysym.sym == SDLK_v
+                            && SDL_HasClipboardText()
+                        ){
+                            char *input = SDL_GetClipboardText();
+                            char *c = input;
+                            while(*c != '\0'){
+                                console_input_char(&console, *c);
+                                c++;
+                            }
+                            SDL_free(input);
+                            refresh = true;
+                        }
+                    }
 
                     if(event.key.keysym.sym == SDLK_0){
                         rot = 0; refresh = true;}
