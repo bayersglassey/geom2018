@@ -242,16 +242,31 @@ void font_blitmsg(font_t *font, SDL_Renderer *renderer,
             if(c != '%'){
                 if(c == 'i'){
                     int i = va_arg(args, int);
-                    if(i == 0){
-                        font_blitter_blitchar(&blitter, '0');
-                    }else if(i < 0){
+
+                    /* 2^64 has 20 digits in base 10 */
+                    static const int max_digits = 20;
+                    int digits[max_digits];
+                    int digit_i = 0;
+
+                    /* in case i == 0 */
+                    digits[0] = 0;
+
+                    if(i < 0){
                         i = -i;
                         font_blitter_blitchar(&blitter, '-');
                     }
-                    while(i != 0){
-                        char c = '0' + (i % 10);
-                        font_blitter_blitchar(&blitter, c);
+
+                    while(i > 0 && digit_i < max_digits){
+                        digits[digit_i] = i % 10;
                         i /= 10;
+                        digit_i++;
+                    }
+
+                    if(digit_i > 0)digit_i--;
+                    while(digit_i >= 0){
+                        char c = '0' + digits[digit_i];
+                        font_blitter_blitchar(&blitter, c);
+                        digit_i--;
                     }
                 }else if(c == 'c'){
                     char c = va_arg(args, int);
