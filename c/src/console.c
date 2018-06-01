@@ -154,7 +154,7 @@ void console_input_accept(console_t *console){
 
 
 
-void console_blit(console_t *console, font_t *font, SDL_Renderer *renderer,
+void console_blit(console_t *console, font_t *font, SDL_Surface *render_surface,
     int x0, int y0
 ){
     int char_w = font->char_w;
@@ -168,7 +168,7 @@ void console_blit(console_t *console, font_t *font, SDL_Renderer *renderer,
     for(int row = 0; row < rows; row++){
         int x = x0;
         for(int col = 0; col < cols; col++){
-            font_blitchar(font, renderer, x, y, *text);
+            font_blitchar(font, render_surface, x, y, *text);
             text++;
             x += char_w;
         }

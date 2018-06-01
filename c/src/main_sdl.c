@@ -63,7 +63,11 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
     font_t font;
     console_t console;
 
-    err = font_load(&font, "data/font.fus", renderer);
+    SDL_Surface *render_surface = SDL_CreateRGBSurface(
+        0, SCW, SCH, 32, 0, 0, 0, 0);
+    if(render_surface == NULL)return 2;
+
+    err = font_load(&font, "data/font.fus");
     if(err)return err;
 
     err = console_init(&console, 40, 20, 20000);
@@ -97,9 +101,7 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
         if(refresh){
             refresh = false;
 
-            RET_IF_SDL_ERR(SDL_SetRenderDrawColor(renderer,
-                0, 0, 0, 255));
-            RET_IF_SDL_ERR(SDL_RenderClear(renderer));
+            RET_IF_SDL_ERR(SDL_FillRect(render_surface, NULL, 0));
 
             rendergraph_bitmap_t *bitmap;
             err = rendergraph_get_or_render_bitmap(
@@ -113,10 +115,10 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                 bitmap->pbox.w*zoom,
                 bitmap->pbox.h*zoom
             };
-            RET_IF_SDL_ERR(SDL_RenderCopy(renderer, bitmap->texture,
-                NULL, &dst_rect));
+            RET_IF_SDL_ERR(SDL_BlitSurface(bitmap->surface, NULL,
+                render_surface, &dst_rect));
 
-            font_blitmsg(&font, renderer, 0, 0,
+            font_blitmsg(&font, render_surface, 0, 0,
                 "Frame rendered in: %i ms\n"
                 "  (Aiming for sub-%i ms)\n"
                 "Controls:\n"
@@ -130,9 +132,17 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                 filename, cur_rgraph_i, n_rgraphs,
                 rgraphs[cur_rgraph_i]->name);
 
-            console_blit(&console, &font, renderer, 0, 10 * font.char_h);
+            printf("TOOK: %i\n", took);
 
+            console_blit(&console, &font, render_surface,
+                0, 10 * font.char_h);
+
+            SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
+                renderer, render_surface);
+            if(render_texture == NULL)return 2;
+            SDL_RenderCopy(renderer, render_texture, NULL, NULL);
             SDL_RenderPresent(renderer);
+            SDL_DestroyTexture(render_texture);
         }
 
         while(SDL_PollEvent(&event)){
