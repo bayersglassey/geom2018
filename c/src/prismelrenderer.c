@@ -271,6 +271,16 @@ int prismelrenderer_get_rendergraphs(prismelrenderer_t *prend,
  * RENDERGRAPH *
  ***************/
 
+const char rendergraph_animation_type_once[] = "once";
+const char rendergraph_animation_type_cycle[] = "cycle";
+const char rendergraph_animation_type_oscillate[] = "oscillate";
+const char *rendergraph_animation_types[] = {
+    rendergraph_animation_type_once,
+    rendergraph_animation_type_cycle,
+    rendergraph_animation_type_oscillate,
+    NULL
+};
+
 void rendergraph_cleanup(rendergraph_t *rendergraph){
     free(rendergraph->name);
 
@@ -302,11 +312,17 @@ void rendergraph_cleanup(rendergraph_t *rendergraph){
     free(rendergraph->bitmaps);
 }
 
-int rendergraph_init(rendergraph_t *rendergraph, vecspace_t *space){
+int rendergraph_init(rendergraph_t *rendergraph, vecspace_t *space,
+    const char *animation_type, int n_frames
+){
     int err;
     rendergraph->space = space;
     rendergraph->prismel_trf_list = NULL;
     rendergraph->rendergraph_trf_list = NULL;
+
+    rendergraph->animation_type = animation_type;
+    rendergraph->n_frames = n_frames;
+
     err = rendergraph_create_bitmaps(rendergraph);
     if(err)return err;
     boundbox_init(rendergraph->boundbox, space->dims);
@@ -398,6 +414,9 @@ int rendergraph_push_rendergraph_trf(rendergraph_t *rendergraph){
     rendergraph_trf_t *rendergraph_trf =
         calloc(1, sizeof(rendergraph_trf_t));
     if(rendergraph_trf == NULL)return 1;
+    rendergraph_trf->frame_start = 0;
+    rendergraph_trf->frame_len = -1;
+    rendergraph_trf->frame_i = -1;
     rendergraph_trf->next = rendergraph->rendergraph_trf_list;
     rendergraph->rendergraph_trf_list = rendergraph_trf;
     return 0;
@@ -406,6 +425,8 @@ int rendergraph_push_rendergraph_trf(rendergraph_t *rendergraph){
 int rendergraph_push_prismel_trf(rendergraph_t *rendergraph){
     prismel_trf_t *prismel_trf = calloc(1, sizeof(prismel_trf_t));
     if(prismel_trf == NULL)return 1;
+    prismel_trf->frame_start = 0;
+    prismel_trf->frame_len = -1;
     prismel_trf->next = rendergraph->prismel_trf_list;
     rendergraph->prismel_trf_list = prismel_trf;
     return 0;

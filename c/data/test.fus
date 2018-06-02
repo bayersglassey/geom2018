@@ -54,6 +54,7 @@ shapes:
     ##########
 
     dodeca_sixth:
+        animation: cycle 1
 
         #   +
         #  +++
@@ -76,6 +77,7 @@ shapes:
             : sq  (1 0 0 0)  1 f 2
 
     dodeca:
+        animation: cycle 1
 
         shapes:
             : dodeca_sixth (0 0 0 0)  0 f
@@ -91,6 +93,7 @@ shapes:
     ############
 
     curvy_sq_eighth:
+        animation: cycle 1
 
         # +---+---+-
         # |   |   | \
@@ -111,12 +114,14 @@ shapes:
             : tri (0 0 1 1) 10 f 2
 
     curvy_sq_quarter:
+        animation: cycle 1
 
         shapes:
             : curvy_sq_eighth (0 0 0 0)  0 f
             : curvy_sq_eighth (0 0 2 2)  6 f
 
     curvy_sq:
+        animation: cycle 1
 
         shapes:
             : curvy_sq_quarter ( 0  0  0  0)  0 f
@@ -125,6 +130,7 @@ shapes:
             : curvy_sq_quarter (-2 -2  2  4)  9 f
 
     curvy_sq_many:
+        animation: cycle 1
 
         shapes:
             : curvy_sq (-2 -2 -6 -4) 0 f
@@ -151,6 +157,7 @@ shapes:
     #############
 
     curvy_tri_third:
+        animation: cycle 1
 
         prismels:
             : tri ( 0 0 0 0)  0 f 0
@@ -162,6 +169,7 @@ shapes:
             : tri (-1 0 2 1) 10 f 2
 
     curvy_tri:
+        animation: cycle 1
 
         #   +
         #   |

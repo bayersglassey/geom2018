@@ -88,12 +88,21 @@ typedef struct prismel_trf {
     prismel_t *prismel;
     int color;
     trf_t trf;
+
+    int frame_start;
+    int frame_len;
+
     struct prismel_trf *next;
 } prismel_trf_t;
 
 typedef struct rendergraph_trf {
     struct rendergraph *rendergraph;
     trf_t trf;
+    int frame_i;
+
+    int frame_start;
+    int frame_len;
+
     struct rendergraph_trf *next;
 } rendergraph_trf_t;
 
@@ -108,14 +117,25 @@ typedef struct rendergraph {
     vecspace_t *space;
     struct prismel_trf *prismel_trf_list;
     struct rendergraph_trf *rendergraph_trf_list;
+
+    const char *animation_type;
+    int n_frames;
+
     int n_bitmaps;
     rendergraph_bitmap_t *bitmaps;
     boundbox_t boundbox;
 } rendergraph_t;
 
 
+extern const char rendergraph_animation_type_once[];
+extern const char rendergraph_animation_type_cycle[];
+extern const char rendergraph_animation_type_oscillate[];
+extern const char *rendergraph_animation_types[];
+
+
 void rendergraph_cleanup(rendergraph_t *rendergraph);
-int rendergraph_init(rendergraph_t *rendergraph, vecspace_t *space);
+int rendergraph_init(rendergraph_t *rendergraph, vecspace_t *space,
+    const char *animation_type, int n_frames);
 void rendergraph_bitmap_dump(rendergraph_bitmap_t *bitmap, FILE *f,
     int i, int n_spaces);
 void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces);

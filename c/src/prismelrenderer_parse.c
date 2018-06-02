@@ -245,10 +245,34 @@ static int parse_shape(prismelrenderer_t *prend, fus_lexer_t *lexer,
     int err;
     rendergraph_t *rgraph = calloc(1, sizeof(rendergraph_t));
     if(rgraph == NULL)return 1;
-    err = rendergraph_init(rgraph, prend->space);
-    if(err)goto err;
 
     rgraph->name = strdup(name);
+
+    err = fus_lexer_expect(lexer, "animation");
+    if(err)goto err;
+    err = fus_lexer_expect(lexer, "(");
+    if(err)goto err;
+    {
+        err = fus_lexer_next(lexer);
+        if(err)goto err;
+        const char **animation_type = rendergraph_animation_types;
+        while(*animation_type != NULL){
+            if(fus_lexer_got(lexer, *animation_type))break;
+            animation_type++;
+        }
+        if(*animation_type == NULL)return fus_lexer_unexpected(lexer);
+
+        int n_frames;
+        err = fus_lexer_next(lexer);
+        if(err)goto err;
+        err = fus_lexer_get_int(lexer, &n_frames);
+        if(err)goto err;
+
+        err = rendergraph_init(rgraph, prend->space, *animation_type, n_frames);
+        if(err)goto err;
+    }
+    err = fus_lexer_expect(lexer, ")");
+    if(err)goto err;
 
     while(1){
         err = fus_lexer_next(lexer);
