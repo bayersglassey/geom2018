@@ -20,13 +20,10 @@ void font_get_char_coords(font_t *font, char c, int *char_x, int *char_y){
 }
 
 
-int font_load(font_t *font, const char *filename,
-    SDL_Renderer *renderer
-){
+int font_load(font_t *font, const char *filename){
     font->char_w = 0;
     font->char_h = 0;
     font->surface = NULL;
-    font->texture = NULL;
 
     int err;
     fus_lexer_t lexer;
@@ -37,16 +34,14 @@ int font_load(font_t *font, const char *filename,
     err = fus_lexer_init(&lexer, text);
     if(err)return err;
 
-    err = font_parse(font, &lexer, renderer);
+    err = font_parse(font, &lexer);
     if(err)return err;
 
     free(text);
     return 0;
 }
 
-int font_parse(font_t *font, fus_lexer_t *lexer,
-    SDL_Renderer *renderer
-){
+int font_parse(font_t *font, fus_lexer_t *lexer){
     int err;
 
 
@@ -84,7 +79,7 @@ int font_parse(font_t *font, fus_lexer_t *lexer,
     static const int bpp = 32;
 
     SDL_Surface *surface = surface_create(
-        char_w * n_chars_x, char_h * n_chars_y, bpp);
+        char_w * n_chars_x, char_h * n_chars_y, bpp, true, false);
     if(surface == NULL)return 2;
 
     SDL_LockSurface(surface);
@@ -163,17 +158,9 @@ int font_parse(font_t *font, fus_lexer_t *lexer,
 
     SDL_UnlockSurface(surface);
 
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-    if(texture == NULL){
-        fprintf(stderr, "SDL_CreateTextureFromSurface failed: %s\n",
-            SDL_GetError());
-        return 2;
-    }
-
     font->char_w = char_w;
     font->char_h = char_h;
     font->surface = surface;
-    font->texture = texture;
     return 0;
 }
 
@@ -186,7 +173,7 @@ void font_blitter_move_right(font_blitter_t *blitter){
     blitter->col++;
 }
 
-void font_blitchar(font_t *font, SDL_Renderer *renderer,
+void font_blitchar(font_t *font, SDL_Surface *render_surface,
     int x, int y, char c
 ){
     int char_w = font->char_w;
@@ -205,8 +192,8 @@ void font_blitchar(font_t *font, SDL_Renderer *renderer,
         x, y,
         char_w, char_h
     };
-    SDL_RenderCopy(renderer, font->texture,
-        &src_rect, &dst_rect);
+    SDL_BlitSurface(font->surface, &src_rect,
+        render_surface, &dst_rect);
 }
 
 void font_blitter_blitchar(font_blitter_t *blitter, char c){
@@ -217,19 +204,19 @@ void font_blitter_blitchar(font_blitter_t *blitter, char c){
         return;
     }
 
-    font_blitchar(font, blitter->renderer,
+    font_blitchar(font, blitter->render_surface,
         blitter->x0 + blitter->col * font->char_w,
         blitter->y0 + blitter->row * font->char_h,
         c);
     font_blitter_move_right(blitter);
 }
 
-void font_blitmsg(font_t *font, SDL_Renderer *renderer,
+void font_blitmsg(font_t *font, SDL_Surface *render_surface,
     int x0, int y0, const char *msg, ...
 ){
     int char_w = font->char_w;
     int char_h = font->char_h;
-    font_blitter_t blitter = {font, renderer, x0, y0, 0, 0};
+    font_blitter_t blitter = {font, render_surface, x0, y0, 0, 0};
 
     va_list args;
     va_start(args, msg);
