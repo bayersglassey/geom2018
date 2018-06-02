@@ -336,10 +336,20 @@ int fus_lexer_got(fus_lexer_t *lexer, const char *text){
 
 void fus_lexer_show(fus_lexer_t *lexer, FILE *f){
     if(lexer->token == NULL){
-        fprintf(f, "NULL");
+        fprintf(f, "end of input");
     }else{
         fprintf(f, "\"%.*s\"", lexer->token_len, lexer->token);
     }
+}
+
+int fus_lexer_get(fus_lexer_t *lexer, const char *text){
+    if(!fus_lexer_got(lexer, text)){
+        fus_lexer_err_info(lexer); fprintf(stderr,
+            "Expected \"%s\", but got: ", text);
+        fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
+        return 2;
+    }
+    return 0;
 }
 
 int fus_lexer_get_name(fus_lexer_t *lexer, char **name){
@@ -402,13 +412,7 @@ int fus_lexer_get_int(fus_lexer_t *lexer, int *i){
 int fus_lexer_expect(fus_lexer_t *lexer, const char *text){
     int err = fus_lexer_next(lexer);
     if(err)return err;
-    if(!fus_lexer_got(lexer, text)){
-        fus_lexer_err_info(lexer); fprintf(stderr,
-            "Expected \"%s\", but got: ", text);
-        fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
-        return 2;
-    }
-    return 0;
+    return fus_lexer_get(lexer, text);
 }
 
 int fus_lexer_expect_name(fus_lexer_t *lexer, char **name){
