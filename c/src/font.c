@@ -79,7 +79,7 @@ int font_parse(font_t *font, fus_lexer_t *lexer){
     static const int bpp = 32;
 
     SDL_Surface *surface = surface_create(
-        char_w * n_chars_x, char_h * n_chars_y, bpp);
+        char_w * n_chars_x, char_h * n_chars_y, bpp, true, false);
     if(surface == NULL)return 2;
 
     SDL_LockSurface(surface);

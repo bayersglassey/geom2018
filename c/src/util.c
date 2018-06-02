@@ -1,6 +1,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 
 #include <SDL2/SDL.h>
@@ -54,16 +55,18 @@ char *strndup(const char *s1, size_t len){
     return s2;
 }
 
-SDL_Surface *surface_create(int w, int h, int bpp){
+SDL_Surface *surface_create(int w, int h, int bpp,
+    bool use_rle, bool use_colorkey
+){
     SDL_Surface *surface = SDL_CreateRGBSurface(
         0, w, h, bpp, 0, 0, 0, 0);
     if(surface == NULL){
         fprintf(stderr, "SDL_CreateRGBSurface failed: %s\n", SDL_GetError());
         return NULL;}
-    if(SDL_SetSurfaceRLE(surface, 1)){
+    if(use_rle && SDL_SetSurfaceRLE(surface, 1)){
         fprintf(stderr, "SDL_SetSurfaceRLE failed: %s\n", SDL_GetError());
         return NULL;}
-    if(SDL_SetColorKey(surface, SDL_TRUE, 0)){
+    if(use_colorkey && SDL_SetColorKey(surface, SDL_TRUE, 0)){
         fprintf(stderr, "SDL_SetColorKey failed: %s\n", SDL_GetError());
         return NULL;}
     return surface;

@@ -507,7 +507,8 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     SDL_DestroyTexture(bitmap->texture);
     bitmap->surface = NULL;
     bitmap->texture = NULL;
-    SDL_Surface *surface = surface_create(bitmap->pbox.w, bitmap->pbox.h, bpp);
+    SDL_Surface *surface = surface_create(bitmap->pbox.w, bitmap->pbox.h,
+        bpp, true, true);
     if(surface == NULL)return 2;
 
     /* Fill new bitmap with transparent colour */

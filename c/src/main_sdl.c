@@ -7,6 +7,7 @@
 #include "vec4.h"
 #include "font.h"
 #include "console.h"
+#include "util.h"
 
 
 #define SCW 640
@@ -23,7 +24,9 @@
 
 
 
-int load_rendergraphs(prismelrenderer_t *prend, const char *filename, int *n_rgraphs_ptr, rendergraph_t ***rgraphs_ptr, bool reload){
+int load_rendergraphs(prismelrenderer_t *prend, const char *filename,
+    int *n_rgraphs_ptr, rendergraph_t ***rgraphs_ptr, bool reload
+){
     int err;
 
     int n_rgraphs = *n_rgraphs_ptr;
@@ -63,8 +66,8 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
     font_t font;
     console_t console;
 
-    SDL_Surface *render_surface = SDL_CreateRGBSurface(
-        0, SCW, SCH, 32, 0, 0, 0, 0);
+    SDL_Surface *render_surface = surface_create(SCW, SCH, 32,
+        true, true);
     if(render_surface == NULL)return 2;
 
     err = font_load(&font, "data/font.fus");
@@ -79,7 +82,8 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
     int n_rgraphs;
     rendergraph_t **rgraphs;
     int cur_rgraph_i = 0;
-    err = load_rendergraphs(&prend, filename, &n_rgraphs, &rgraphs, false);
+    err = load_rendergraphs(&prend, filename,
+        &n_rgraphs, &rgraphs, false);
     if(err)return err;
 
     SDL_Event event;
@@ -101,22 +105,12 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
         if(refresh){
             refresh = false;
 
+
+            /******************************************************************
+            * Blit stuff onto render_surface
+            */
+
             RET_IF_SDL_ERR(SDL_FillRect(render_surface, NULL, 0));
-
-            rendergraph_bitmap_t *bitmap;
-            err = rendergraph_get_or_render_bitmap(
-                rgraphs[cur_rgraph_i], &bitmap,
-                rot, false, pal, renderer);
-            if(err)return err;
-
-            SDL_Rect dst_rect = {
-                SCW/2 - bitmap->pbox.x*zoom,
-                SCH/2 - bitmap->pbox.y*zoom,
-                bitmap->pbox.w*zoom,
-                bitmap->pbox.h*zoom
-            };
-            RET_IF_SDL_ERR(SDL_BlitSurface(bitmap->surface, NULL,
-                render_surface, &dst_rect));
 
             font_blitmsg(&font, render_surface, 0, 0,
                 "Frame rendered in: %i ms\n"
@@ -132,17 +126,49 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                 filename, cur_rgraph_i, n_rgraphs,
                 rgraphs[cur_rgraph_i]->name);
 
-            printf("TOOK: %i\n", took);
-
             console_blit(&console, &font, render_surface,
                 0, 10 * font.char_h);
 
+
+            /******************************************************************
+            * Render stuff onto renderer
+            */
+
+            RET_IF_SDL_ERR(SDL_SetRenderDrawColor(renderer,
+                0, 0, 0, 255));
+            RET_IF_SDL_ERR(SDL_RenderClear(renderer));
+
+            rendergraph_bitmap_t *bitmap;
+            err = rendergraph_get_or_render_bitmap(
+                rgraphs[cur_rgraph_i], &bitmap,
+                rot, false, pal, renderer);
+            if(err)return err;
+
+            SDL_Rect dst_rect = {
+                SCW/2 - bitmap->pbox.x*zoom,
+                SCH/2 - bitmap->pbox.y*zoom,
+                bitmap->pbox.w*zoom,
+                bitmap->pbox.h*zoom
+            };
+            RET_IF_SDL_ERR(SDL_RenderCopy(renderer, bitmap->texture,
+                NULL, &dst_rect));
+
             SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
                 renderer, render_surface);
-            if(render_texture == NULL)return 2;
+            if(render_texture == NULL){
+                fprintf(stderr, "SDL_CreateTextureFromSurface failed: %s\n",
+                    SDL_GetError());
+                return 2;}
             SDL_RenderCopy(renderer, render_texture, NULL, NULL);
-            SDL_RenderPresent(renderer);
             SDL_DestroyTexture(render_texture);
+
+
+            /******************************************************************
+            * Present it
+            */
+
+            SDL_RenderPresent(renderer);
+
         }
 
         while(SDL_PollEvent(&event)){
@@ -164,7 +190,8 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                         if(action == 0)loop = false;
                         else if(action == 1)console_clear(&console);
                         else if(action == 2){
-                            err = load_rendergraphs(&prend, filename, &n_rgraphs, &rgraphs, true);
+                            err = load_rendergraphs(&prend, filename,
+                                &n_rgraphs, &rgraphs, true);
                             if(err)return err;
 
                             cur_rgraph_i = 0;
