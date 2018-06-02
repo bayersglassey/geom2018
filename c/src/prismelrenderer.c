@@ -373,7 +373,8 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces){
         fprintf(f, "%s    prismel_trf: %7s ", spaces,
             prismel == NULL? "NULL": prismel->name);
         trf_fprintf(f, rendergraph->space->dims, &prismel_trf->trf);
-            fprintf(f, " %i\n", prismel_trf->color);
+            fprintf(f, " % 2i [% 3i % 3i]\n", prismel_trf->color,
+            prismel_trf->frame_start, prismel_trf->frame_len);
     }
 
     fprintf(f, "%s  rendergraph_trf_list:\n", spaces);
@@ -386,9 +387,12 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces){
         rendergraph_t *rendergraph = rendergraph_trf->rendergraph;
         fprintf(f, "%s    rendergraph_trf: %p ", spaces, rendergraph);
         trf_fprintf(f, rendergraph->space->dims, &rendergraph_trf->trf);
-            fprintf(f, "\n");
+        fprintf(f, " % 3i [% 3i % 3i]\n", rendergraph_trf->frame_i,
+            rendergraph_trf->frame_start, rendergraph_trf->frame_len);
     }
 
+    fprintf(f, "%s  animation_type: %s\n", spaces, rendergraph->animation_type);
+    fprintf(f, "%s  n_frames: %i\n", spaces, rendergraph->n_frames);
     fprintf(f, "%s  n_bitmaps: %i\n", spaces, rendergraph->n_bitmaps);
     fprintf(f, "%s  bitmaps:\n", spaces);
     for(int i = 0; i < rendergraph->n_bitmaps; i++){

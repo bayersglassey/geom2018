@@ -184,6 +184,7 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                         if(!strcmp(console.input, "exit"))action = 0;
                         else if(!strcmp(console.input, "cls"))action = 1;
                         else if(!strcmp(console.input, "reload"))action = 2;
+                        else if(!strcmp(console.input, "dump"))action = 3;
 
                         console_input_accept(&console); refresh = true;
 
@@ -193,8 +194,12 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                             err = load_rendergraphs(&prend, filename,
                                 &n_rgraphs, &rgraphs, true);
                             if(err)return err;
-
                             cur_rgraph_i = 0;
+                        }else if(action == 3){
+                            err = prismelrenderer_render_all_bitmaps(
+                                &prend, pal, NULL);
+                            if(err)return err;
+                            prismelrenderer_dump(&prend, stdout);
                         }
                     }
                     if(event.key.keysym.sym == SDLK_BACKSPACE){

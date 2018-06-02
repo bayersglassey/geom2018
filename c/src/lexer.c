@@ -433,8 +433,10 @@ int fus_lexer_expect_int(fus_lexer_t *lexer, int *i){
     return fus_lexer_get_int(lexer, i);
 }
 
-int fus_lexer_unexpected(fus_lexer_t *lexer){
-    fus_lexer_err_info(lexer); fprintf(stderr, "Unexpected: ");
+int fus_lexer_unexpected(fus_lexer_t *lexer, const char *expected){
+    fus_lexer_err_info(lexer);
+    if(expected == NULL)fprintf(stderr, "Unexpected: ");
+    else fprintf(stderr, "Expected %s, but got: ", expected);
     fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
     return 2;
 }
@@ -455,7 +457,7 @@ int fus_lexer_parse_silent(fus_lexer_t *lexer){
                 break;
             }
         }else if(fus_lexer_done(lexer)){
-            return fus_lexer_unexpected(lexer);
+            return fus_lexer_unexpected(lexer, NULL);
         }else{
             /* eat atoms silently */
         }

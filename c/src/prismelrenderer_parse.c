@@ -59,14 +59,14 @@ static int parse_prismel(prismel_t *prismel, fus_lexer_t *lexer){
                     }else if(fus_lexer_got(lexer, ")")){
                         break;
                     }else{
-                        return fus_lexer_unexpected(lexer);
+                        return fus_lexer_unexpected(lexer, "(...)");
                     }
                 }
             }
             err = fus_lexer_expect(lexer, ")");
             if(err)return err;
         }else{
-            return fus_lexer_unexpected(lexer);
+            return fus_lexer_unexpected(lexer, "images");
         }
     }
     return 0;
@@ -104,7 +104,7 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer, rend
 
             : sixth (0 0 0 0)  0 f
             : sixth (0 0 0 0)  2 f
-            : sixth (0 0 0 0)  4 f
+            : sixth (0 0 0 0)  4 f  0 (0 1)
     */
     int err;
     while(1){
@@ -118,6 +118,9 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer, rend
             vec_t v;
             int rot;
             bool flip;
+            int frame_start = 0;
+            int frame_len = -1;
+            int frame_i = -1;
 
             err = fus_lexer_expect_name(lexer, &name);
             if(err)return err;
@@ -138,9 +141,30 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer, rend
             if(err)return err;
             if(fus_lexer_got(lexer, "t"))flip = true;
             else if(fus_lexer_got(lexer, "f"))flip = false;
-            else return fus_lexer_unexpected(lexer);
+            else return fus_lexer_unexpected(lexer, "t or f");
 
-            err = fus_lexer_expect(lexer, ")");
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            if(!fus_lexer_got(lexer, ")")){
+                err = fus_lexer_get_int(lexer, &frame_i);
+                if(err)return err;
+                err = fus_lexer_next(lexer);
+                if(err)return err;
+                if(!fus_lexer_got(lexer, ")")){
+                    err = fus_lexer_get(lexer, "(");
+                    if(err)return err;
+                    err = fus_lexer_expect_int(lexer, &frame_start);
+                    if(err)return err;
+                    err = fus_lexer_expect_int(lexer, &frame_len);
+                    if(err)return err;
+                    err = fus_lexer_expect(lexer, ")");
+                    if(err)return err;
+                    err = fus_lexer_next(lexer);
+                    if(err)return err;
+                }
+            }
+
+            err = fus_lexer_get(lexer, ")");
             if(err)return err;
 
             err = rendergraph_push_rendergraph_trf(rgraph);
@@ -157,9 +181,12 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer, rend
             rgraph->rendergraph_trf_list->rendergraph = found;
             rgraph->rendergraph_trf_list->trf.rot = rot;
             rgraph->rendergraph_trf_list->trf.flip = flip;
+            rgraph->rendergraph_trf_list->frame_start = frame_start;
+            rgraph->rendergraph_trf_list->frame_len = frame_len;
+            rgraph->rendergraph_trf_list->frame_i = frame_i;
             vec_cpy(prend->space->dims, rgraph->rendergraph_trf_list->trf.add, v);
         }else{
-            err = fus_lexer_unexpected(lexer);
+            err = fus_lexer_unexpected(lexer, "(...)");
             return err;
         }
     }
@@ -172,7 +199,7 @@ static int parse_shape_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer, re
 
             : tri (0 0 0 0)  0 f 0
             : tri (1 0 0 0) 11 f 1
-            : sq  (1 0 0 0)  1 f 2
+            : sq  (1 0 0 0)  1 f 2 (3 1)
     */
     int err;
     while(1){
@@ -188,6 +215,8 @@ static int parse_shape_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer, re
             int rot;
             bool flip;
             int color;
+            int frame_start = 0;
+            int frame_len = -1;
 
             err = fus_lexer_expect_name(lexer, &name);
             if(err)return err;
@@ -208,12 +237,27 @@ static int parse_shape_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer, re
             if(err)return err;
             if(fus_lexer_got(lexer, "t"))flip = true;
             else if(fus_lexer_got(lexer, "f"))flip = false;
-            else return fus_lexer_unexpected(lexer);
+            else return fus_lexer_unexpected(lexer, "t or f");
 
             err = fus_lexer_expect_int(lexer, &color);
             if(err)return err;
 
-            err = fus_lexer_expect(lexer, ")");
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            if(!fus_lexer_got(lexer, ")")){
+                err = fus_lexer_get(lexer, "(");
+                if(err)return err;
+                err = fus_lexer_expect_int(lexer, &frame_start);
+                if(err)return err;
+                err = fus_lexer_expect_int(lexer, &frame_len);
+                if(err)return err;
+                err = fus_lexer_expect(lexer, ")");
+                if(err)return err;
+                err = fus_lexer_next(lexer);
+                if(err)return err;
+            }
+
+            err = fus_lexer_get(lexer, ")");
             if(err)return err;
 
             err = rendergraph_push_prismel_trf(rgraph);
@@ -230,9 +274,11 @@ static int parse_shape_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer, re
             rgraph->prismel_trf_list->trf.rot = rot;
             rgraph->prismel_trf_list->trf.flip = flip;
             rgraph->prismel_trf_list->color = color;
+            rgraph->prismel_trf_list->frame_start = frame_start;
+            rgraph->prismel_trf_list->frame_len = frame_len;
             vec_cpy(prend->space->dims, rgraph->prismel_trf_list->trf.add, v);
         }else{
-            err = fus_lexer_unexpected(lexer);
+            err = fus_lexer_unexpected(lexer, "(...)");
             return err;
         }
     }
@@ -260,7 +306,8 @@ static int parse_shape(prismelrenderer_t *prend, fus_lexer_t *lexer,
             if(fus_lexer_got(lexer, *animation_type))break;
             animation_type++;
         }
-        if(*animation_type == NULL)return fus_lexer_unexpected(lexer);
+        if(*animation_type == NULL)return fus_lexer_unexpected(lexer,
+            "<animation_type>");
 
         int n_frames;
         err = fus_lexer_next(lexer);
@@ -291,7 +338,7 @@ static int parse_shape(prismelrenderer_t *prend, fus_lexer_t *lexer,
             err = parse_shape_prismels(prend, lexer, rgraph);
             if(err)goto err;
         }else{
-            err = fus_lexer_unexpected(lexer);
+            err = fus_lexer_unexpected(lexer, "shapes or prismels");
             goto err;
         }
     }
@@ -354,7 +401,7 @@ int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer){
             err = parse_shapes(prend, lexer);
             if(err)return err;
         }else{
-            return fus_lexer_unexpected(lexer);
+            return fus_lexer_unexpected(lexer, "shapes or prismels");
         }
     }
     return 0;
