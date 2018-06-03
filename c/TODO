@@ -17,3 +17,14 @@ TODO:
     - add parser support
     - add "curvy" transformation to test.fus
 
+
+
+Jun 3, 2018:
+------------
+
+- reload + renderall crashes!
+    run valgrind, maybe it will find something
+- add: rendergraph_get_or_create_texture()
+    that may solve the reload+renderall crash
+    (maybe we're just creating too many textures)
+
