@@ -86,6 +86,31 @@ prismels:
 
 shapes:
 
+    ##########
+    # DOUBLE #
+    ##########
+
+    double_sq:
+        prismels:
+            : sq  (0 0 0 0)  0 f 0
+            : sq  (1 0 0 0)  0 f 0
+            : sq  (0 0 0 1)  0 f 0
+            : sq  (1 0 0 1)  0 f 0
+
+    double_tri:
+        prismels:
+            : tri (0 0 0 0)  0 f 0
+            : tri (1 0 0 0)  0 f 0
+            : tri (0 0 1 0)  0 f 0
+            : tri (1 0 1 0)  6 f 0
+
+    double_dia:
+        prismels:
+            : dia (0 0 0 0)  0 f 0
+            : dia (1 0 0 0)  0 f 0
+            : dia (0 1 0 0)  0 f 0
+            : dia (1 1 0 0)  0 f 0
+
 
     ##########
     # DODECA #
@@ -129,6 +154,11 @@ shapes:
             : dodeca_sixth (0 0 0 0)  6 f  6+
             : dodeca_sixth (0 0 0 0)  8 f  8+
             : dodeca_sixth (0 0 0 0) 10 f 10+
+
+
+    ############
+    # DODECA B #
+    ############
 
     dodeca_B_twelfth:
         animation: oscillate 6
@@ -283,4 +313,34 @@ shapes:
 
         prismels:
             : tri ( 0  0  2  1) 11 f 3
+
+mappers:
+
+    double:
+        unit: 2 0 0 0
+        entries:
+            : sq  -> double_sq
+            : tri -> double_tri
+            : dia -> double_dia
+
+    curvy:
+        unit: 2 2 2 0
+        entries:
+            : sq  -> curvy_sq
+            : tri -> curvy_tri
+
+shapes:
+
+    double_curvy_sq: map: double curvy_sq
+    curvy_curvy_sq: map: curvy curvy_sq
+    curvy_double_sq: map: curvy double_sq
+
+    double_curvy_tri: map: double curvy_tri
+    curvy_curvy_tri: map: curvy curvy_tri
+    curvy_double_tri: map: curvy double_tri
+
+    curvy_double_curvy_sq: map: curvy double_curvy_sq
+    curvy_curvy_curvy_sq: map: curvy curvy_curvy_sq
+
+    curvy_dodeca: map: curvy dodeca
 
