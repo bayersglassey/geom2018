@@ -30,6 +30,7 @@
         return NULL;}}
 
 char *load_file(const char *filename);
+bool streq(const char *s1, const char *s2);
 size_t strnlen(const char *s, size_t maxlen);
 char *strdup(const char *s1);
 char *strndup(const char *s1, size_t len);

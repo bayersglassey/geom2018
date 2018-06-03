@@ -33,6 +33,11 @@ char *load_file(const char *filename){
     return f_buffer;
 }
 
+bool streq(const char *s1, const char *s2){
+    if(s1 == NULL || s2 == NULL)return s1 == s2;
+    return strcmp(s1, s2) == 0;
+}
+
 size_t strnlen(const char *s, size_t maxlen){
     size_t len = 0;
     while(len < maxlen && s[len] != '\0')len++;
