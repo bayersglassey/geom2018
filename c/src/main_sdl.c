@@ -120,11 +120,12 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                 "  0 - reset rotation\n"
                 "Currently displaying rendergraphs from file: %s\n"
                 "Currently displaying rendergraph %i / %i: %s\n"
-                "  rot = %i, zoom = %i, frame_i = %i (%i) / %i",
+                "  rot = %i, zoom = %i, frame_i = %i (%i) / %i (%s)",
                 took, (int)DELAY_GOAL,
                 filename, cur_rgraph_i, n_rgraphs,
                 rgraph->name,
-                rot, zoom, frame_i, animated_frame_i, rgraph->n_frames);
+                rot, zoom, frame_i, animated_frame_i, rgraph->n_frames,
+                rgraph->animation_type);
 
             console_blit(&console, &font, render_surface,
                 0, 10 * font.char_h);
