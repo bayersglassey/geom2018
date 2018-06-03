@@ -343,4 +343,5 @@ shapes:
     curvy_curvy_curvy_sq: map: curvy curvy_curvy_sq
 
     curvy_dodeca: map: curvy dodeca
+    curvy_curvy_dodeca: map: curvy curvy_dodeca
 
