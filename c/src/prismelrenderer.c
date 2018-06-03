@@ -607,7 +607,7 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
         int frame_i2 = rendergraph_trf_get_frame_i(
             rendergraph_trf, frame_i);
         bool visible = rendergraph_trf_get_frame_visible(
-            rendergraph_trf, rendergraph->n_frames, frame_i2);
+            rendergraph_trf, rendergraph->n_frames, frame_i);
         if(!visible)continue;
 
         /* Combine the transformations: trf and prismel_trf->trf */
@@ -704,7 +704,7 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
         int frame_i2 = rendergraph_trf_get_frame_i(
             rendergraph_trf, frame_i);
         bool visible = rendergraph_trf_get_frame_visible(
-            rendergraph_trf, rendergraph->n_frames, frame_i2);
+            rendergraph_trf, rendergraph->n_frames, frame_i);
         if(!visible)continue;
 
         /* Combine the transformations: trf and prismel_trf->trf */
