@@ -267,7 +267,7 @@ void font_blitmsg(font_t *font, SDL_Surface *render_surface,
                     }
                 }else{
                     fprintf(stderr,
-                        "font_blitmsg: Unsupported format string: %%%c", c);
+                        "font_blitmsg: Unsupported format string: %%%c\n", c);
                     goto done;
                 }
                 msg++;

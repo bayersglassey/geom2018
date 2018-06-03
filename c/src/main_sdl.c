@@ -16,12 +16,6 @@
 /* How many milliseconds we want each frame to last */
 #define DELAY_GOAL 30
 
-#define ERR_INFO() fprintf(stderr, "%s: %i: ", __func__, __LINE__)
-#define RET_IF_SDL_ERR(x) {int e=(x); \
-    if(e < 0){ERR_INFO(); \
-    fprintf(stderr, "SDL error: %s\n", SDL_GetError()); \
-    return 2;}}
-
 
 
 int load_rendergraphs(prismelrenderer_t *prend, const char *filename,
@@ -90,6 +84,7 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
 
     int rot = 0;
     int zoom = 4;
+    int frame_i = 0;
     bool loop = true;
     bool refresh = true;
     bool keydown_shift = false;
@@ -102,15 +97,18 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
     while(loop){
         Uint32 tick0 = SDL_GetTicks();
 
+        rendergraph_t *rgraph = rgraphs[cur_rgraph_i];
+        int animated_frame_i = get_animated_frame_i(
+            rgraph->animation_type, rgraph->n_frames, frame_i);
+
         if(refresh){
             refresh = false;
-
 
             /******************************************************************
             * Blit stuff onto render_surface
             */
 
-            RET_IF_SDL_ERR(SDL_FillRect(render_surface, NULL, 0));
+            RET_IF_SDL_NZ(SDL_FillRect(render_surface, NULL, 0));
 
             font_blitmsg(&font, render_surface, 0, 0,
                 "Frame rendered in: %i ms\n"
@@ -121,10 +119,12 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                 "  page up/down - cycle through available rendergraphs\n"
                 "  0 - reset rotation\n"
                 "Currently displaying rendergraphs from file: %s\n"
-                "Currently displaying rendergraph %i / %i: %s",
-                took, DELAY_GOAL,
+                "Currently displaying rendergraph %i / %i: %s\n"
+                "  rot = %i, zoom = %i, frame_i = %i (%i) / %i",
+                took, (int)DELAY_GOAL,
                 filename, cur_rgraph_i, n_rgraphs,
-                rgraphs[cur_rgraph_i]->name);
+                rgraph->name,
+                rot, zoom, frame_i, animated_frame_i, rgraph->n_frames);
 
             console_blit(&console, &font, render_surface,
                 0, 10 * font.char_h);
@@ -134,14 +134,14 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
             * Render stuff onto renderer
             */
 
-            RET_IF_SDL_ERR(SDL_SetRenderDrawColor(renderer,
+            RET_IF_SDL_NZ(SDL_SetRenderDrawColor(renderer,
                 0, 0, 0, 255));
-            RET_IF_SDL_ERR(SDL_RenderClear(renderer));
+            RET_IF_SDL_NZ(SDL_RenderClear(renderer));
 
             rendergraph_bitmap_t *bitmap;
             err = rendergraph_get_or_render_bitmap(
-                rgraphs[cur_rgraph_i], &bitmap,
-                rot, false, pal, renderer);
+                rgraph, &bitmap,
+                rot, false, animated_frame_i, pal, renderer);
             if(err)return err;
 
             SDL_Rect dst_rect = {
@@ -150,15 +150,12 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                 bitmap->pbox.w*zoom,
                 bitmap->pbox.h*zoom
             };
-            RET_IF_SDL_ERR(SDL_RenderCopy(renderer, bitmap->texture,
+            RET_IF_SDL_NZ(SDL_RenderCopy(renderer, bitmap->texture,
                 NULL, &dst_rect));
 
             SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
                 renderer, render_surface);
-            if(render_texture == NULL){
-                fprintf(stderr, "SDL_CreateTextureFromSurface failed: %s\n",
-                    SDL_GetError());
-                return 2;}
+            RET_IF_SDL_NULL(render_surface);
             SDL_RenderCopy(renderer, render_texture, NULL, NULL);
             SDL_DestroyTexture(render_texture);
 
@@ -185,6 +182,8 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                         else if(!strcmp(console.input, "cls"))action = 1;
                         else if(!strcmp(console.input, "reload"))action = 2;
                         else if(!strcmp(console.input, "dump"))action = 3;
+                        else if(!strcmp(console.input, "dumpall"))action = 4;
+                        else if(!strcmp(console.input, "renderall"))action = 5;
 
                         console_input_accept(&console); refresh = true;
 
@@ -196,10 +195,13 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                             if(err)return err;
                             cur_rgraph_i = 0;
                         }else if(action == 3){
+                            rendergraph_dump(rgraph, stdout, 0);
+                        }else if(action == 4){
+                            prismelrenderer_dump(&prend, stdout);
+                        }else if(action == 5){
                             err = prismelrenderer_render_all_bitmaps(
                                 &prend, pal, NULL);
                             if(err)return err;
-                            prismelrenderer_dump(&prend, stdout);
                         }
                     }
                     if(event.key.keysym.sym == SDLK_BACKSPACE){
@@ -242,6 +244,12 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                     if(event.key.keysym.sym == SDLK_PAGEDOWN){
                         cur_rgraph_i--;
                         if(cur_rgraph_i < 0)cur_rgraph_i = n_rgraphs - 1;
+                        refresh = true;}
+                    if(event.key.keysym.sym == SDLK_HOME){
+                        frame_i++;
+                        refresh = true;}
+                    if(event.key.keysym.sym == SDLK_END){
+                        if(frame_i > 0)frame_i--;
                         refresh = true;}
                     if(event.key.keysym.sym == SDLK_UP){
                         zoom += 1; if(zoom > 10)zoom=10; refresh = true;}

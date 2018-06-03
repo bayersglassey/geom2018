@@ -120,7 +120,8 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer, rend
             bool flip;
             int frame_start = 0;
             int frame_len = -1;
-            int frame_i = -1;
+            int frame_i = 0;
+            bool frame_i_additive = true;
 
             err = fus_lexer_expect_name(lexer, &name);
             if(err)return err;
@@ -146,10 +147,16 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer, rend
             err = fus_lexer_next(lexer);
             if(err)return err;
             if(!fus_lexer_got(lexer, ")")){
+                frame_i_additive = false;
                 err = fus_lexer_get_int(lexer, &frame_i);
                 if(err)return err;
                 err = fus_lexer_next(lexer);
                 if(err)return err;
+                if(fus_lexer_got(lexer, "+")){
+                    frame_i_additive = true;
+                    err = fus_lexer_next(lexer);
+                    if(err)return err;
+                }
                 if(!fus_lexer_got(lexer, ")")){
                     err = fus_lexer_get(lexer, "(");
                     if(err)return err;
@@ -184,6 +191,7 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer, rend
             rgraph->rendergraph_trf_list->frame_start = frame_start;
             rgraph->rendergraph_trf_list->frame_len = frame_len;
             rgraph->rendergraph_trf_list->frame_i = frame_i;
+            rgraph->rendergraph_trf_list->frame_i_additive = frame_i_additive;
             vec_cpy(prend->space->dims, rgraph->rendergraph_trf_list->trf.add, v);
         }else{
             err = fus_lexer_unexpected(lexer, "(...)");
@@ -294,37 +302,41 @@ static int parse_shape(prismelrenderer_t *prend, fus_lexer_t *lexer,
 
     rgraph->name = strdup(name);
 
-    err = fus_lexer_expect(lexer, "animation");
+    const char *animation_type = rendergraph_animation_type_cycle;
+    int n_frames = 1;
+
+    err = fus_lexer_next(lexer);
     if(err)goto err;
-    err = fus_lexer_expect(lexer, "(");
-    if(err)goto err;
-    {
+    if(fus_lexer_got(lexer, "animation")){
+        err = fus_lexer_expect(lexer, "(");
+        if(err)goto err;
+
         err = fus_lexer_next(lexer);
         if(err)goto err;
-        const char **animation_type = rendergraph_animation_types;
-        while(*animation_type != NULL){
-            if(fus_lexer_got(lexer, *animation_type))break;
-            animation_type++;
+        const char **animation_type_ptr = rendergraph_animation_types;
+        while(*animation_type_ptr != NULL){
+            if(fus_lexer_got(lexer, *animation_type_ptr))break;
+            animation_type_ptr++;
         }
-        if(*animation_type == NULL)return fus_lexer_unexpected(lexer,
-            "<animation_type>");
+        if(*animation_type_ptr == NULL){
+            return fus_lexer_unexpected(lexer, "<animation_type>");}
+        animation_type = *animation_type_ptr;
 
-        int n_frames;
         err = fus_lexer_next(lexer);
         if(err)goto err;
         err = fus_lexer_get_int(lexer, &n_frames);
         if(err)goto err;
 
-        err = rendergraph_init(rgraph, prend->space, *animation_type, n_frames);
+        err = fus_lexer_expect(lexer, ")");
+        if(err)goto err;
+        err = fus_lexer_next(lexer);
         if(err)goto err;
     }
-    err = fus_lexer_expect(lexer, ")");
+
+    err = rendergraph_init(rgraph, prend->space, animation_type, n_frames);
     if(err)goto err;
 
     while(1){
-        err = fus_lexer_next(lexer);
-        if(err)goto err;
-
         if(fus_lexer_got(lexer, ")")){
             break;
         }else if(fus_lexer_got(lexer, "shapes")){
@@ -341,6 +353,9 @@ static int parse_shape(prismelrenderer_t *prend, fus_lexer_t *lexer,
             err = fus_lexer_unexpected(lexer, "shapes or prismels");
             goto err;
         }
+
+        err = fus_lexer_next(lexer);
+        if(err)goto err;
     }
     prend->rendergraph_map->rgraph = rgraph;
     return 0;

@@ -60,15 +60,11 @@ SDL_Surface *surface_create(int w, int h, int bpp,
 ){
     SDL_Surface *surface = SDL_CreateRGBSurface(
         0, w, h, bpp, 0, 0, 0, 0);
-    if(surface == NULL){
-        fprintf(stderr, "SDL_CreateRGBSurface failed: %s\n", SDL_GetError());
-        return NULL;}
-    if(use_rle && SDL_SetSurfaceRLE(surface, 1)){
-        fprintf(stderr, "SDL_SetSurfaceRLE failed: %s\n", SDL_GetError());
-        return NULL;}
-    if(use_colorkey && SDL_SetColorKey(surface, SDL_TRUE, 0)){
-        fprintf(stderr, "SDL_SetColorKey failed: %s\n", SDL_GetError());
-        return NULL;}
+    RET_NULL_IF_SDL_NULL(surface);
+    RET_NULL_IF_SDL_NZ(use_rle
+        && SDL_SetSurfaceRLE(surface, 1));
+    RET_NULL_IF_SDL_NZ(use_colorkey
+        && SDL_SetColorKey(surface, SDL_TRUE, 0));
     return surface;
 }
 

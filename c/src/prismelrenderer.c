@@ -15,13 +15,52 @@
  * GENERAL *
  ***********/
 
-int get_n_bitmaps(vecspace_t *space){
-    return space->rot_max;
+bool get_animated_frame_visible(int n_frames,
+    int frame_start, int frame_len, int frame_i
+){
+    /* This function answers that age-old question:
+    Is frame_i in the interval [frame_start, frame_start + frame_len)
+    in the space of integers modulo n_frames? */
+
+    if(frame_i >= frame_start && frame_i < frame_start + frame_len){
+        return true;}
+
+    /* Same check, modulo n_frames */
+    frame_i += n_frames;
+    if(frame_i >= frame_start && frame_i < frame_start + frame_len){
+        return true;}
+
+    return false;
 }
 
-int get_bitmap_i(vecspace_t *space, rot_t rot, flip_t flip){
+int get_animated_frame_i(const char *animation_type,
+    int n_frames, int frame_i
+){
+    if(animation_type == rendergraph_animation_type_cycle){
+        frame_i = frame_i % n_frames;
+    }else if(animation_type == rendergraph_animation_type_oscillate){
+        frame_i = frame_i % (n_frames * 2);
+        if(frame_i >= n_frames)frame_i = n_frames - (frame_i - n_frames) - 1;
+    }else{
+        fprintf(stderr, "Unsupported animation_type: %s\n",
+            animation_type);
+        return 0;
+    }
+    return frame_i;
+}
+
+int get_n_bitmaps(vecspace_t *space, int n_frames){
+    return space->rot_max * n_frames;
+}
+
+int get_bitmap_i(vecspace_t *space, rot_t rot, flip_t flip,
+    int n_frames, int frame_i
+){
+    int n_bitmaps = get_n_bitmaps(space, n_frames);
     rot = rot_contain(space->rot_max, rot);
-    return rot_flip(space->rot_max, rot, flip);
+    rot = rot_flip(space->rot_max, rot, flip);
+    int bitmap_i = frame_i * space->rot_max + rot;
+    return bitmap_i;
 }
 
 void get_spaces(char *spaces, int max_spaces, int n_spaces){
@@ -57,7 +96,7 @@ void prismel_cleanup(prismel_t *prismel){
 }
 
 int prismel_create_images(prismel_t *prismel, vecspace_t *space){
-    int n_images = get_n_bitmaps(space);
+    int n_images = get_n_bitmaps(space, 1);
     prismel_image_t *images = calloc(n_images, sizeof(prismel_image_t));
     if(images == NULL)return 1;
     prismel->n_images = n_images;
@@ -222,10 +261,12 @@ int prismelrenderer_render_all_bitmaps(prismelrenderer_t *prend,
     rendergraph_map_t *rgraph_map = prend->rendergraph_map;
     while(rgraph_map != NULL){
         rendergraph_t *rgraph = rgraph_map->rgraph;
-        for(int rot = 0; rot < prend->space->rot_max; rot++){
-            err = rendergraph_get_or_render_bitmap(
-                rgraph, NULL, rot, false, pal, renderer);
-            if(err)return err;
+        for(int frame_i = 0; frame_i < rgraph->n_frames; frame_i++){
+            for(int rot = 0; rot < rgraph->space->rot_max; rot++){
+                err = rendergraph_get_or_render_bitmap(
+                    rgraph, NULL, rot, false, frame_i, pal, renderer);
+                if(err)return err;
+            }
         }
         rgraph_map = rgraph_map->next;
     }
@@ -387,7 +428,8 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces){
         rendergraph_t *rendergraph = rendergraph_trf->rendergraph;
         fprintf(f, "%s    rendergraph_trf: %p ", spaces, rendergraph);
         trf_fprintf(f, rendergraph->space->dims, &rendergraph_trf->trf);
-        fprintf(f, " % 3i [% 3i % 3i]\n", rendergraph_trf->frame_i,
+        fprintf(f, " % 3i%c [% 3i % 3i]\n", rendergraph_trf->frame_i,
+            rendergraph_trf->frame_i_additive? '+': ' ',
             rendergraph_trf->frame_start, rendergraph_trf->frame_len);
     }
 
@@ -405,7 +447,7 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces){
 }
 
 int rendergraph_create_bitmaps(rendergraph_t *rendergraph){
-    int n_bitmaps = get_n_bitmaps(rendergraph->space);
+    int n_bitmaps = get_n_bitmaps(rendergraph->space, rendergraph->n_frames);
     rendergraph_bitmap_t *bitmaps = calloc(n_bitmaps,
         sizeof(rendergraph_bitmap_t));
     if(bitmaps == NULL)return 1;
@@ -420,7 +462,8 @@ int rendergraph_push_rendergraph_trf(rendergraph_t *rendergraph){
     if(rendergraph_trf == NULL)return 1;
     rendergraph_trf->frame_start = 0;
     rendergraph_trf->frame_len = -1;
-    rendergraph_trf->frame_i = -1;
+    rendergraph_trf->frame_i = 0;
+    rendergraph_trf->frame_i_additive = true;
     rendergraph_trf->next = rendergraph->rendergraph_trf_list;
     rendergraph->rendergraph_trf_list = rendergraph_trf;
     return 0;
@@ -437,17 +480,49 @@ int rendergraph_push_prismel_trf(rendergraph_t *rendergraph){
 }
 
 int rendergraph_get_bitmap_i(rendergraph_t *rendergraph,
-    rot_t rot, flip_t flip
+    rot_t rot, flip_t flip, int frame_i
 ){
-    return get_bitmap_i(rendergraph->space, rot, flip);
+    return get_bitmap_i(rendergraph->space, rot, flip,
+        rendergraph->n_frames, frame_i);
+}
+
+bool prismel_trf_get_frame_visible(prismel_trf_t *prismel_trf,
+    int n_frames, int frame_i
+){
+    int frame_start = prismel_trf->frame_start;
+    int frame_len = prismel_trf->frame_len;
+    if(frame_len == -1)return true;
+    return get_animated_frame_visible(
+        n_frames, frame_start, frame_len, frame_i);
+}
+
+bool rendergraph_trf_get_frame_visible(rendergraph_trf_t *rendergraph_trf,
+    int n_frames, int frame_i
+){
+    int frame_start = rendergraph_trf->frame_start;
+    int frame_len = rendergraph_trf->frame_len;
+    if(frame_len == -1)return true;
+    return get_animated_frame_visible(
+        n_frames, frame_start, frame_len, frame_i);
+}
+
+int rendergraph_trf_get_frame_i(rendergraph_trf_t *rendergraph_trf,
+    int parent_frame_i
+){
+    int frame_i = rendergraph_trf->frame_i;
+    rendergraph_t *rgraph = rendergraph_trf->rendergraph;
+    if(rendergraph_trf->frame_i_additive)frame_i += parent_frame_i;
+    return get_animated_frame_i(rgraph->animation_type,
+        rgraph->n_frames, frame_i);
 }
 
 int rendergraph_render_bitmap(rendergraph_t *rendergraph,
-    rot_t rot, flip_t flip,
+    rot_t rot, flip_t flip, int frame_i,
     SDL_Color pal[], SDL_Renderer *renderer
 ){
     int err;
-    int bitmap_i = rendergraph_get_bitmap_i(rendergraph, rot, flip);
+    int bitmap_i = rendergraph_get_bitmap_i(rendergraph, rot, flip,
+        frame_i);
     rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[bitmap_i];
 
     /* bitmap->pbox should be the union of its sub-bitmap's pboxes.
@@ -476,13 +551,16 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
         prismel_trf = prismel_trf->next
     ){
         prismel_t *prismel = prismel_trf->prismel;
+        bool visible = prismel_trf_get_frame_visible(
+            prismel_trf, rendergraph->n_frames, frame_i);
+        if(!visible)continue;
 
         /* Combine the transformations: trf and prismel_trf->trf */
         trf_t trf2 = prismel_trf->trf;
         trf_apply(rendergraph->space, &trf2,
             &(trf_t){flip, rot, {0, 0, 0, 0}});
         int bitmap_i2 = get_bitmap_i(rendergraph->space,
-            trf2.rot, trf2.flip);
+            trf2.rot, trf2.flip, 1, 0);
         int shift_x, shift_y;
         rendergraph->space->vec_render(trf2.add, &shift_x, &shift_y);
 
@@ -500,6 +578,11 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
         rendergraph_trf = rendergraph_trf->next
     ){
         rendergraph_t *rendergraph2 = rendergraph_trf->rendergraph;
+        int frame_i2 = rendergraph_trf_get_frame_i(
+            rendergraph_trf, frame_i);
+        bool visible = rendergraph_trf_get_frame_visible(
+            rendergraph_trf, rendergraph->n_frames, frame_i2);
+        if(!visible)continue;
 
         /* Combine the transformations: trf and prismel_trf->trf */
         trf_t trf2 = rendergraph_trf->trf;
@@ -511,7 +594,7 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
         /* Get or render sub-bitmap for this rendergraph_trf */
         rendergraph_bitmap_t *bitmap2;
         err = rendergraph_get_or_render_bitmap(rendergraph2,
-            &bitmap2, trf2.rot, trf2.flip, pal, renderer);
+            &bitmap2, trf2.rot, trf2.flip, frame_i2, pal, renderer);
         if(err)return err;
 
         /* Union sub-bitmap's bbox into our "accumulating" bbox */
@@ -547,6 +630,10 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
         prismel_trf = prismel_trf->next
     ){
         prismel_t *prismel = prismel_trf->prismel;
+        bool visible = prismel_trf_get_frame_visible(
+            prismel_trf, rendergraph->n_frames, frame_i);
+        if(!visible)continue;
+
         int color_i = prismel_trf->color;
         SDL_Color *color = &pal[color_i];
         Uint32 c = SDL_MapRGB(surface->format,
@@ -557,7 +644,7 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
         trf_apply(rendergraph->space, &trf2,
             &(trf_t){flip, rot, {0, 0, 0, 0}});
         int bitmap_i2 = get_bitmap_i(rendergraph->space,
-            trf2.rot, trf2.flip);
+            trf2.rot, trf2.flip, 1, 0);
         int shift_x, shift_y;
         rendergraph->space->vec_render(trf2.add, &shift_x, &shift_y);
 
@@ -588,6 +675,11 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
         rendergraph_trf = rendergraph_trf->next
     ){
         rendergraph_t *rendergraph2 = rendergraph_trf->rendergraph;
+        int frame_i2 = rendergraph_trf_get_frame_i(
+            rendergraph_trf, frame_i);
+        bool visible = rendergraph_trf_get_frame_visible(
+            rendergraph_trf, rendergraph->n_frames, frame_i2);
+        if(!visible)continue;
 
         /* Combine the transformations: trf and prismel_trf->trf */
         trf_t trf2 = rendergraph_trf->trf;
@@ -598,7 +690,7 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
 
         /* Blit sub-bitmap's surface onto ours */
         int bitmap_i2 = rendergraph_get_bitmap_i(rendergraph2,
-            trf2.rot, trf2.flip);
+            trf2.rot, trf2.flip, frame_i2);
         rendergraph_bitmap_t *bitmap2 = &rendergraph2->bitmaps[bitmap_i2];
         SDL_Surface *surface2 = bitmap2->surface;
 
@@ -608,20 +700,15 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
             bitmap2->pbox.w,
             bitmap2->pbox.h
         };
-        if(SDL_BlitSurface(bitmap2->surface, NULL, surface, &dst_rect)){
-            fprintf(stderr, "SDL_BlitSurface failed: %s\n", SDL_GetError());
-            return 2;}
+        RET_IF_SDL_NZ(SDL_BlitSurface(bitmap2->surface, NULL,
+            surface, &dst_rect));
     }
 
     /* Create texture, if an SDL_Renderer was provided */
     SDL_Texture *texture = NULL;
     if(renderer != NULL){
         texture = SDL_CreateTextureFromSurface(renderer, surface);
-        if(texture == NULL){
-            fprintf(stderr, "SDL_CreateTextureFromSurface failed: %s\n",
-                SDL_GetError());
-            return 2;
-        }
+        RET_IF_SDL_NULL(texture);
     }
 
     /* LET'S GO */
@@ -632,16 +719,16 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
 
 int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
     rendergraph_bitmap_t **bitmap_ptr,
-    rot_t rot, flip_t flip,
+    rot_t rot, flip_t flip, int frame_i,
     SDL_Color pal[], SDL_Renderer *renderer
 ){
     int err;
-    int bitmap_i = rendergraph_get_bitmap_i(rendergraph, rot, flip);
+    int bitmap_i = rendergraph_get_bitmap_i(rendergraph, rot, flip, frame_i);
 
     rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[bitmap_i];
     if(bitmap->surface == NULL){
-        err = rendergraph_render_bitmap(rendergraph, rot, flip, pal,
-            renderer);
+        err = rendergraph_render_bitmap(rendergraph, rot, flip, frame_i,
+            pal, renderer);
         if(err)return err;
     }
 

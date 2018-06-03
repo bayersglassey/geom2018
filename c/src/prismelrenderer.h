@@ -15,8 +15,13 @@
  * GENERAL *
  ***********/
 
-int get_n_bitmaps(vecspace_t *space);
-int get_bitmap_i(vecspace_t *space, rot_t rot, flip_t flip);
+bool get_animated_frame_visible(int n_frames,
+    int frame_start, int frame_len, int frame_i);
+int get_animated_frame_i(const char *animation_type,
+    int n_frames, int frame_i);
+int get_n_bitmaps(vecspace_t *space, int n_frames);
+int get_bitmap_i(vecspace_t *space, rot_t rot, flip_t flip,
+    int n_frames, int frame_i);
 
 
 /***********
@@ -99,6 +104,7 @@ typedef struct rendergraph_trf {
     struct rendergraph *rendergraph;
     trf_t trf;
     int frame_i;
+    bool frame_i_additive;
 
     int frame_start;
     int frame_len;
@@ -143,13 +149,13 @@ int rendergraph_create_bitmaps(rendergraph_t *rendergraph);
 int rendergraph_push_rendergraph_trf(rendergraph_t *rendergraph);
 int rendergraph_push_prismel_trf(rendergraph_t *rendergraph);
 int rendergraph_get_bitmap_i(rendergraph_t *rendergraph,
-    rot_t rot, flip_t flip);
+    rot_t rot, flip_t flip, int frame_i);
 int rendergraph_render_bitmap(rendergraph_t *rendergraph,
-    rot_t rot, flip_t flip,
+    rot_t rot, flip_t flip, int frame_i,
     SDL_Color pal[], SDL_Renderer *renderer);
 int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
     rendergraph_bitmap_t **bitmap_ptr,
-    rot_t rot, flip_t flip,
+    rot_t rot, flip_t flip, int frame_i,
     SDL_Color pal[], SDL_Renderer *renderer);
 
 

@@ -6,6 +6,29 @@
 #include <stdbool.h>
 #include <SDL2/SDL.h>
 
+#define ERR_INFO() fprintf(stderr, "%s:%s:%i: ", \
+    __FILE__, __func__, __LINE__)
+#define RET_IF_SDL_NZ(x) { \
+    if((x) != 0){ \
+        ERR_INFO(); \
+        fprintf(stderr, "SDL error: %s\n", SDL_GetError()); \
+        return 2;}}
+#define RET_IF_SDL_NULL(x) { \
+    if((x) == NULL){ \
+        ERR_INFO(); \
+        fprintf(stderr, "SDL error: %s\n", SDL_GetError()); \
+        return 2;}}
+#define RET_NULL_IF_SDL_NZ(x) { \
+    if((x) != 0){ \
+        ERR_INFO(); \
+        fprintf(stderr, "SDL error: %s\n", SDL_GetError()); \
+        return NULL;}}
+#define RET_NULL_IF_SDL_NULL(x) { \
+    if((x) == NULL){ \
+        ERR_INFO(); \
+        fprintf(stderr, "SDL error: %s\n", SDL_GetError()); \
+        return NULL;}}
+
 char *load_file(const char *filename);
 size_t strnlen(const char *s, size_t maxlen);
 char *strdup(const char *s1);
