@@ -59,25 +59,46 @@ int load_rendergraphs(test_app_t *app, bool reload){
     return 0;
 }
 
-int process_console_input(test_app_t *app){
+int process_console_input(test_app_t *app, fus_lexer_t *lexer){
     int err;
     rendergraph_t *rgraph = app->rgraphs[app->cur_rgraph_i];
-    if(!strcmp(app->console.input, "exit")){
+    if(fus_lexer_got(lexer, "exit")){
         app->loop = false;
-    }else if(!strcmp(app->console.input, "cls")){
+    }else if(fus_lexer_got(lexer, "cls")){
         console_clear(&app->console);
-    }else if(!strcmp(app->console.input, "reload")){
+    }else if(fus_lexer_got(lexer, "reload")){
         err = load_rendergraphs(app, true);
         if(err)return err;
         app->cur_rgraph_i = 0;
-    }else if(!strcmp(app->console.input, "dump")){
+    }else if(fus_lexer_got(lexer, "dump")){
         rendergraph_dump(rgraph, stdout, 0,
             app->prend.dump_bitmap_surfaces);
-    }else if(!strcmp(app->console.input, "dumpall")){
+    }else if(fus_lexer_got(lexer, "dumpall")){
         prismelrenderer_dump(&app->prend, stdout);
-    }else if(!strcmp(app->console.input, "renderall")){
+    }else if(fus_lexer_got(lexer, "renderall")){
         err = prismelrenderer_render_all_bitmaps(
             &app->prend, app->pal, NULL);
+        if(err)return err;
+    }else{
+        fus_lexer_unexpected(lexer, NULL);
+    }
+    return 0;
+}
+
+int process_console_input_all(test_app_t *app){
+    int err;
+
+    fus_lexer_t lexer;
+    err = fus_lexer_init(&lexer, app->console.input);
+    if(err)return err;
+
+    while(1){
+        err = fus_lexer_next(&lexer);
+        if(err)return err;
+
+        if(fus_lexer_done(&lexer))break;
+
+        err = process_console_input(app, &lexer);
         if(err)return err;
     }
     return 0;
@@ -237,7 +258,7 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                         printf("GOT CONSOLE INPUT: %s\n", app.console.input);
                         console_newline(&app.console);
 
-                        err = process_console_input(&app);
+                        err = process_console_input_all(&app);
                         if(err)return err;
 
                         console_input_clear(&app.console);
