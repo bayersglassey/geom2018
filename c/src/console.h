@@ -41,7 +41,6 @@ void console_delete(console_t *console);
 void console_input_char(console_t *console, char c);
 void console_input_backspace(console_t *console);
 void console_input_delete(console_t *console);
-void console_input_accept(console_t *console);
 void console_input_clear(console_t *console);
 
 void console_blit(console_t *console, font_t *font, SDL_Surface *render_surface,

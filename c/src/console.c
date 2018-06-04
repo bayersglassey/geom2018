@@ -15,11 +15,6 @@ void console_clear(console_t *console){
     for(int i = 0; i < text_len; i++)console->text[i] = ' ';
     console->col = 0;
     console->row = 0;
-
-    int input_len = console->input_len;
-    for(int i = 0; i < input_len; i++)console->input[i] = '\0';
-    console->input_i = 0;
-    console->input_len = 0;
 }
 
 int console_init(console_t *console, int cols, int rows, int input_maxlen){
@@ -143,13 +138,11 @@ void console_input_delete(console_t *console){
     console_delete(console);
 }
 
-void console_input_accept(console_t *console){
-    for(int i = 0; i < console->input_len; i++){
-        console->input[i] = '\0';
-    }
+void console_input_clear(console_t *console){
+    int input_len = console->input_len;
+    for(int i = 0; i < input_len; i++)console->input[i] = '\0';
     console->input_i = 0;
     console->input_len = 0;
-    console_newline(console);
 }
 
 

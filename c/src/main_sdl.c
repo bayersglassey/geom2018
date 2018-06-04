@@ -200,34 +200,31 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
 
                     if(event.key.keysym.sym == SDLK_RETURN){
                         printf("GOT CONSOLE INPUT: %s\n", console.input);
+                        console_newline(&console);
 
                         int action = -1;
-                        if(!strcmp(console.input, "exit"))action = 0;
-                        else if(!strcmp(console.input, "cls"))action = 1;
-                        else if(!strcmp(console.input, "reload"))action = 2;
-                        else if(!strcmp(console.input, "dump"))action = 3;
-                        else if(!strcmp(console.input, "dumpall"))action = 4;
-                        else if(!strcmp(console.input, "renderall"))action = 5;
-
-                        console_input_accept(&console); refresh = true;
-
-                        if(action == 0)loop = false;
-                        else if(action == 1)console_clear(&console);
-                        else if(action == 2){
+                        if(!strcmp(console.input, "exit")){
+                            loop = false;
+                        }else if(!strcmp(console.input, "cls")){
+                            console_clear(&console);
+                        }else if(!strcmp(console.input, "reload")){
                             err = load_rendergraphs(&prend, filename,
                                 &n_rgraphs, &rgraphs, true);
                             if(err)return err;
                             cur_rgraph_i = 0;
-                        }else if(action == 3){
+                        }else if(!strcmp(console.input, "dump")){
                             rendergraph_dump(rgraph, stdout, 0,
                                 prend.dump_bitmap_surfaces);
-                        }else if(action == 4){
+                        }else if(!strcmp(console.input, "dumpall")){
                             prismelrenderer_dump(&prend, stdout);
-                        }else if(action == 5){
+                        }else if(!strcmp(console.input, "renderall")){
                             err = prismelrenderer_render_all_bitmaps(
                                 &prend, pal, NULL);
                             if(err)return err;
                         }
+
+                        console_input_clear(&console);
+                        refresh = true;
                     }
                     if(event.key.keysym.sym == SDLK_BACKSPACE){
                         console_input_backspace(&console); refresh = true;}
