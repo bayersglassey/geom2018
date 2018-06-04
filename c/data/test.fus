@@ -86,6 +86,19 @@ prismels:
 
 shapes:
 
+    sq:
+        prismels:
+            : sq  (0 0 0 0)  0 f 0
+
+    tri:
+        prismels:
+            : tri (0 0 0 0)  0 f 0
+
+    dia:
+        prismels:
+            : dia (0 0 0 0)  0 f 0
+
+
     ##########
     # DOUBLE #
     ##########
