@@ -64,6 +64,8 @@ typedef struct prismelrenderer {
     struct prismel *prismel_list;
     struct rendergraph_map *rendergraph_map;
     struct prismelmapper_map *mapper_map;
+
+    bool dump_bitmap_surfaces;
 } prismelrenderer_t;
 
 
@@ -149,8 +151,9 @@ int rendergraph_init(rendergraph_t *rendergraph, char *name,
     vecspace_t *space,
     const char *animation_type, int n_frames);
 void rendergraph_bitmap_dump(rendergraph_bitmap_t *bitmap, FILE *f,
-    int i, int n_spaces);
-void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces);
+    int i, int n_spaces, bool dump_bitmap_surfaces);
+void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces,
+    bool dump_bitmap_surfaces);
 int rendergraph_create_bitmaps(rendergraph_t *rendergraph);
 int rendergraph_push_rendergraph_trf(rendergraph_t *rendergraph);
 int rendergraph_push_prismel_trf(rendergraph_t *rendergraph);
@@ -171,13 +174,12 @@ int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
  *******************/
 
 typedef struct rendergraph_map {
-    char *name;
     rendergraph_t *rgraph;
     struct rendergraph_map *next;
 } rendergraph_map_t;
 
 void rendergraph_map_cleanup(rendergraph_map_t *map);
-int rendergraph_map_push(rendergraph_map_t **map);
+int rendergraph_map_push(rendergraph_map_t **map, rendergraph_t *rgraph);
 rendergraph_t *rendergraph_map_get(rendergraph_map_t *map,
     const char *name);
 
@@ -187,6 +189,12 @@ rendergraph_t *rendergraph_map_get(rendergraph_map_t *map,
 /*****************
  * PRISMELMAPPER *
  *****************/
+
+typedef struct prismelmapper_application {
+    rendergraph_t *mapped_rgraph;
+    rendergraph_t *resulting_rgraph;
+    struct prismelmapper_application *next;
+} prismelmapper_application_t;
 
 typedef struct prismelmapper_entry {
     prismel_t *prismel;
@@ -199,6 +207,7 @@ typedef struct prismelmapper {
     vecspace_t *space;
     vec_t unit;
     prismelmapper_entry_t *entry_list;
+    prismelmapper_application_t *application_list;
 } prismelmapper_t;
 
 
@@ -207,10 +216,14 @@ int prismelmapper_init(prismelmapper_t *mapper, char *name, vecspace_t *space);
 void prismelmapper_dump(prismelmapper_t *mapper, FILE *f, int n_spaces);
 int prismelmapper_push_entry(prismelmapper_t *mapper,
     prismel_t *prismel, rendergraph_t *rendergraph);
-int prismelmapper_apply(prismelmapper_t *mapper,
+int prismelmapper_apply(prismelmapper_t *mapper, prismelrenderer_t *prend,
     rendergraph_t *mapped_rgraph,
     char *name, vecspace_t *space,
     rendergraph_t **rgraph_ptr);
+int prismelmapper_push_application(prismelmapper_t *mapper,
+    rendergraph_t *mapped_rgraph, rendergraph_t *resulting_rgraph);
+rendergraph_t *prismelmapper_get_application(prismelmapper_t *mapper,
+    rendergraph_t *mapped_rgraph);
 
 
 

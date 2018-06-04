@@ -147,6 +147,7 @@ int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space){
     renderer->prismel_list = NULL;
     renderer->rendergraph_map = NULL;
     renderer->mapper_map = NULL;
+    renderer->dump_bitmap_surfaces = false;
     return 0;
 }
 
@@ -205,8 +206,8 @@ void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f){
     for(rendergraph_map_t *map = renderer->rendergraph_map;
         map != NULL; map = map->next
     ){
-        fprintf(f, "    %s:\n", map->name);
-        rendergraph_dump(map->rgraph, f, 6);
+        rendergraph_dump(map->rgraph, f, 4,
+            renderer->dump_bitmap_surfaces);
     }
 
     fprintf(f, "  prismelmapper_map:\n");
@@ -396,7 +397,7 @@ int rendergraph_init(rendergraph_t *rendergraph, char *name,
 }
 
 void rendergraph_bitmap_dump(rendergraph_bitmap_t *bitmap, FILE *f,
-    int i, int n_spaces
+    int i, int n_spaces, bool dump_bitmap_surfaces
 ){
     char spaces[20];
     get_spaces(spaces, 20, n_spaces);
@@ -406,7 +407,7 @@ void rendergraph_bitmap_dump(rendergraph_bitmap_t *bitmap, FILE *f,
         spaces, i,
         bitmap->pbox.x, bitmap->pbox.y, bitmap->pbox.w, bitmap->pbox.h,
         surface);
-    if(surface != NULL){
+    if(dump_bitmap_surfaces && surface != NULL){
         SDL_LockSurface(surface);
         for(int y = 0; y < surface->h; y++){
             fprintf(f, "%s  ", spaces);
@@ -420,7 +421,9 @@ void rendergraph_bitmap_dump(rendergraph_bitmap_t *bitmap, FILE *f,
     }
 }
 
-void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces){
+void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces,
+    bool dump_bitmap_surfaces
+){
     char spaces[20];
     get_spaces(spaces, 20, n_spaces);
 
@@ -459,13 +462,15 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces){
             rendergraph_trf->frame_start, rendergraph_trf->frame_len);
     }
 
-    fprintf(f, "%s  animation_type: %s\n", spaces, rendergraph->animation_type);
+    fprintf(f, "%s  animation_type: %s\n", spaces,
+        rendergraph->animation_type);
     fprintf(f, "%s  n_frames: %i\n", spaces, rendergraph->n_frames);
     fprintf(f, "%s  n_bitmaps: %i\n", spaces, rendergraph->n_bitmaps);
     fprintf(f, "%s  bitmaps:\n", spaces);
     for(int i = 0; i < rendergraph->n_bitmaps; i++){
         rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[i];
-        rendergraph_bitmap_dump(bitmap, f, i, n_spaces+4);
+        rendergraph_bitmap_dump(bitmap, f, i, n_spaces+4,
+            dump_bitmap_surfaces);
     }
 
     fprintf(f, "%s  boundbox: ", spaces); boundbox_fprintf(f,
@@ -770,14 +775,14 @@ int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
 
 
 void rendergraph_map_cleanup(rendergraph_map_t *map){
-    free(map->name);
     rendergraph_cleanup(map->rgraph);
     free(map->rgraph);
 }
 
-int rendergraph_map_push(rendergraph_map_t **map){
+int rendergraph_map_push(rendergraph_map_t **map, rendergraph_t *rgraph){
     rendergraph_map_t *new_map = calloc(1, sizeof(rendergraph_map_t));
     if(new_map == NULL)return 1;
+    new_map->rgraph = rgraph;
     new_map->next = *map;
     *map = new_map;
     return 0;
@@ -787,7 +792,8 @@ rendergraph_t *rendergraph_map_get(rendergraph_map_t *map,
     const char *name
 ){
     while(map != NULL){
-        if(streq(map->name, name))return map->rgraph;
+        if(map->rgraph != NULL && streq(map->rgraph->name, name)){
+            return map->rgraph;}
         map = map->next;
     }
     return NULL;
@@ -808,6 +814,13 @@ void prismelmapper_cleanup(prismelmapper_t *mapper){
         free(entry);
         entry = next;
     }
+
+    prismelmapper_application_t *application = mapper->application_list;
+    while(application != NULL){
+        prismelmapper_application_t *next = application->next;
+        free(application);
+        application = next;
+    }
 }
 
 int prismelmapper_init(prismelmapper_t *mapper, char *name, vecspace_t *space){
@@ -815,6 +828,7 @@ int prismelmapper_init(prismelmapper_t *mapper, char *name, vecspace_t *space){
     mapper->space = space;
     vec_zero(space->dims, mapper->unit);
     mapper->entry_list = NULL;
+    mapper->application_list = NULL;
     return 0;
 }
 
@@ -838,6 +852,17 @@ void prismelmapper_dump(prismelmapper_t *mapper, FILE *f, int n_spaces){
             entry->prismel == NULL? "<NULL>": entry->prismel->name,
             entry->rendergraph == NULL? "<NULL>": entry->rendergraph->name);
     }
+
+    fprintf(f, "%s  applications:\n", spaces);
+    for(prismelmapper_application_t *application = mapper->application_list;
+        application != NULL; application = application->next
+    ){
+        fprintf(f, "%s    %s -> %s\n", spaces,
+            application->mapped_rgraph == NULL? "<NULL>":
+                application->mapped_rgraph->name,
+            application->resulting_rgraph == NULL? "<NULL>":
+                application->resulting_rgraph->name);
+    }
 }
 
 int prismelmapper_push_entry(prismelmapper_t *mapper,
@@ -852,7 +877,7 @@ int prismelmapper_push_entry(prismelmapper_t *mapper,
     return 0;
 }
 
-int prismelmapper_apply(prismelmapper_t *mapper,
+int prismelmapper_apply(prismelmapper_t *mapper, prismelrenderer_t *prend,
     rendergraph_t *mapped_rgraph,
     char *name, vecspace_t *space,
     rendergraph_t **rgraph_ptr
@@ -861,35 +886,23 @@ int prismelmapper_apply(prismelmapper_t *mapper,
 
     rendergraph_t *resulting_rgraph;
 
-    /* TODO: Cache a mapper's applications.
-    So, add a linked list to the mapper, whose entries contain
-    mapped_rgraph and resulting_rgraph.
-    Then add the following code here:
-
-        resulting_rgraph = prismelmapper_get_application(
-            mapper, mapped_rgraph);
-        if(resulting_rgraph != NULL){
-            *rgraph_ptr = resulting_rgraph;
-            return 0;
-        }
-
-        // ...otherwise, generate a new one.
-        // Before returning it, add it to the cache:
-
-        err = prismelmapper_add_application(mapper,
-            mapped_rgraph, resulting_rgraph);
-        if(err)return err;
+    /* Check whether this mapper has already been applied to this
+    mapped_rgraph. If so, return the cached resulting_rgraph. */
+    resulting_rgraph = prismelmapper_get_application(
+        mapper, mapped_rgraph);
+    if(resulting_rgraph != NULL){
         *rgraph_ptr = resulting_rgraph;
         return 0;
+    }
 
-    */
-
+    /* Create a new rendergraph */
     resulting_rgraph = calloc(1, sizeof(rendergraph_t));
     if(resulting_rgraph == NULL)return 1;
     err = rendergraph_init(resulting_rgraph, name, space,
         mapped_rgraph->animation_type, mapped_rgraph->n_frames);
     if(err)return err;
 
+    /* Apply mapper to mapped_rgraph's prismels */
     for(prismel_trf_t *prismel_trf = mapped_rgraph->prismel_trf_list;
         prismel_trf != NULL; prismel_trf = prismel_trf->next
     ){
@@ -925,15 +938,37 @@ int prismelmapper_apply(prismelmapper_t *mapper,
         }
     }
 
-    for(rendergraph_trf_t *rendergraph_trf = mapped_rgraph->rendergraph_trf_list;
-        rendergraph_trf != NULL; rendergraph_trf = rendergraph_trf->next
+    /* Apply mapper to mapped_rgraph's sub-rendergraphs */
+    for(
+        rendergraph_trf_t *rendergraph_trf =
+            mapped_rgraph->rendergraph_trf_list;
+        rendergraph_trf != NULL;
+        rendergraph_trf = rendergraph_trf->next
     ){
         rendergraph_t *rgraph = rendergraph_trf->rendergraph;
+
+        /* Generate a name, e.g. "<curvy dodeca_sixth>" */
+        int mapper_name_len = strlen(mapper->name);
+        int rgraph_name_len = strlen(rgraph->name);
+        int name_len = mapper_name_len + rgraph_name_len + 3;
+        char *name = malloc(sizeof(*name) * (name_len + 1));
+        if(name == NULL)return 1;
+        name[0] = '<';
+        strcpy(name + 1, mapper->name);
+        name[1 + mapper_name_len] = ' ';
+        strcpy(name + 1 + mapper_name_len + 1, rgraph->name);
+        name[name_len - 1] = '>';
+        name[name_len] = '\0';
+
+        /* Recurse! */
         rendergraph_t *new_rgraph;
-        err = prismelmapper_apply(mapper,
-            rgraph, "<auto>", space, &new_rgraph);
+        err = prismelmapper_apply(mapper, prend,
+            rgraph, name, space, &new_rgraph);
         if(err)return err;
 
+        /* Add a rendergraph_trf to resulting_rgraph
+        ...TODO: rendergraph_push_rendergraph_trf should take a bunch
+        of parameters instead of us poking attributes on afterwards */
         err = rendergraph_push_rendergraph_trf(resulting_rgraph);
         if(err)return err;
         rendergraph_trf_t *new_rendergraph_trf =
@@ -952,8 +987,46 @@ int prismelmapper_apply(prismelmapper_t *mapper,
             rendergraph_trf->frame_len;
     }
 
+    /* Cache this resulting_rgraph on the mapper in case it
+    ever gets applied to the same mapped_rgraph again */
+    err = prismelmapper_push_application(mapper,
+        mapped_rgraph, resulting_rgraph);
+    if(err)return err;
+
+    /* Add the resulting_rgraph to the prismelrenderer, makes for
+    easier debugging */
+    err = rendergraph_map_push(&prend->rendergraph_map, resulting_rgraph);
+    if(err)return err;
+
+    /* Success! */
     *rgraph_ptr = resulting_rgraph;
     return 0;
+}
+
+int prismelmapper_push_application(prismelmapper_t *mapper,
+    rendergraph_t *mapped_rgraph, rendergraph_t *resulting_rgraph
+){
+    prismelmapper_application_t *application =
+        calloc(1, sizeof(*application));
+    if(application == NULL)return 1;
+    application->mapped_rgraph = mapped_rgraph;
+    application->resulting_rgraph = resulting_rgraph;
+
+    application->next = mapper->application_list;
+    mapper->application_list = application;
+    return 0;
+}
+
+rendergraph_t *prismelmapper_get_application(prismelmapper_t *mapper,
+    rendergraph_t *mapped_rgraph
+){
+    prismelmapper_application_t *application = mapper->application_list;
+    while(application != NULL){
+        if(application->mapped_rgraph == mapped_rgraph){
+            return application->resulting_rgraph;}
+        application = application->next;
+    }
+    return NULL;
 }
 
 

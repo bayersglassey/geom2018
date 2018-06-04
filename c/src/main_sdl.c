@@ -71,7 +71,25 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
     if(err)return err;
 
     char *filename = "data/test.fus";
-    if(n_args >= 2)filename = args[1];
+    bool dump_bitmap_surfaces = false;
+
+    for(int arg_i = 1; arg_i < n_args; arg_i++){
+        char *arg = args[arg_i];
+        if(!strcmp(arg, "-S")){
+            dump_bitmap_surfaces = true;
+        }else if(!strcmp(arg, "-f")){
+            arg_i++;
+            if(arg_i >= n_args){
+                fprintf(stderr, "Missing filename after -f\n");
+                return 2;
+            }
+            arg = args[arg_i];
+            filename = arg;
+        }else{
+            fprintf(stderr, "Unrecognized option: %s\n", arg);
+            return 2;
+        }
+    }
 
     int n_rgraphs;
     rendergraph_t **rgraphs;
@@ -79,6 +97,7 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
     err = load_rendergraphs(&prend, filename,
         &n_rgraphs, &rgraphs, false);
     if(err)return err;
+    prend.dump_bitmap_surfaces = dump_bitmap_surfaces;
 
     SDL_Event event;
 
@@ -196,7 +215,8 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                             if(err)return err;
                             cur_rgraph_i = 0;
                         }else if(action == 3){
-                            rendergraph_dump(rgraph, stdout, 0);
+                            rendergraph_dump(rgraph, stdout, 0,
+                                prend.dump_bitmap_surfaces);
                         }else if(action == 4){
                             prismelrenderer_dump(&prend, stdout);
                         }else if(action == 5){
