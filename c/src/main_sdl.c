@@ -18,36 +18,76 @@
 
 
 
-int load_rendergraphs(prismelrenderer_t *prend, const char *filename,
-    int *n_rgraphs_ptr, rendergraph_t ***rgraphs_ptr, bool reload
-){
+typedef struct test_app {
+    SDL_Color *pal;
+    prismelrenderer_t prend;
+    font_t font;
+    console_t console;
+    char *filename;
+    int n_rgraphs;
+    rendergraph_t **rgraphs;
+    int cur_rgraph_i;
+
+    int rot;
+    int zoom;
+    int frame_i;
+    bool loop;
+    bool keydown_shift;
+    int keydown_l;
+    int keydown_r;
+} test_app_t;
+
+
+int load_rendergraphs(test_app_t *app, bool reload){
     int err;
 
-    int n_rgraphs = *n_rgraphs_ptr;
-    rendergraph_t **rgraphs = *rgraphs_ptr;
-
     if(reload){
-        free(rgraphs);
-        prismelrenderer_cleanup(prend);
+        free(app->rgraphs);
+        prismelrenderer_cleanup(&app->prend);
     }
 
-    err = prismelrenderer_load(prend, filename, &vec4);
+    err = prismelrenderer_load(&app->prend, app->filename, &vec4);
     if(err)return err;
 
-    err = prismelrenderer_get_rendergraphs(prend,
-        n_rgraphs_ptr, rgraphs_ptr);
+    err = prismelrenderer_get_rendergraphs(&app->prend,
+        &app->n_rgraphs, &app->rgraphs);
     if(err)return err;
-    if(*n_rgraphs_ptr < 1){
-        fprintf(stderr, "No rendergraphs in %s\n", filename);
+    if(app->n_rgraphs < 1){
+        fprintf(stderr, "No rendergraphs in %s\n", app->filename);
         return 2;}
 
     return 0;
 }
 
+int process_console_input(test_app_t *app){
+    int err;
+    rendergraph_t *rgraph = app->rgraphs[app->cur_rgraph_i];
+    if(!strcmp(app->console.input, "exit")){
+        app->loop = false;
+    }else if(!strcmp(app->console.input, "cls")){
+        console_clear(&app->console);
+    }else if(!strcmp(app->console.input, "reload")){
+        err = load_rendergraphs(app, true);
+        if(err)return err;
+        app->cur_rgraph_i = 0;
+    }else if(!strcmp(app->console.input, "dump")){
+        rendergraph_dump(rgraph, stdout, 0,
+            app->prend.dump_bitmap_surfaces);
+    }else if(!strcmp(app->console.input, "dumpall")){
+        prismelrenderer_dump(&app->prend, stdout);
+    }else if(!strcmp(app->console.input, "renderall")){
+        err = prismelrenderer_render_all_bitmaps(
+            &app->prend, app->pal, NULL);
+        if(err)return err;
+    }
+    return 0;
+}
 
 
 int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
     int err;
+
+    test_app_t app;
 
     SDL_Color pal[] = {
         {.r=255, .g= 60, .b= 60},
@@ -55,22 +95,20 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
         {.r= 60, .g= 60, .b=255},
         {.r=255, .g=255, .b=255},
     };
-
-    prismelrenderer_t prend;
-    font_t font;
-    console_t console;
+    app.pal = pal;
 
     SDL_Surface *render_surface = surface_create(SCW, SCH, 32,
         true, true);
     if(render_surface == NULL)return 2;
 
-    err = font_load(&font, "data/font.fus");
+    err = font_load(&app.font, "data/font.fus");
     if(err)return err;
 
-    err = console_init(&console, 40, 20, 20000);
+    err = console_init(&app.console, 40, 20, 20000);
     if(err)return err;
 
-    char *filename = "data/test.fus";
+    app.filename = "data/test.fus";
+
     bool dump_bitmap_surfaces = false;
 
     for(int arg_i = 1; arg_i < n_args; arg_i++){
@@ -84,41 +122,38 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                 return 2;
             }
             arg = args[arg_i];
-            filename = arg;
+            app.filename = arg;
         }else{
             fprintf(stderr, "Unrecognized option: %s\n", arg);
             return 2;
         }
     }
 
-    int n_rgraphs;
-    rendergraph_t **rgraphs;
-    int cur_rgraph_i = 0;
-    err = load_rendergraphs(&prend, filename,
-        &n_rgraphs, &rgraphs, false);
+    app.cur_rgraph_i = 0;
+    err = load_rendergraphs(&app, false);
     if(err)return err;
-    prend.dump_bitmap_surfaces = dump_bitmap_surfaces;
+    app.prend.dump_bitmap_surfaces = dump_bitmap_surfaces;
 
     SDL_Event event;
 
-    int rot = 0;
-    int zoom = 4;
-    int frame_i = 0;
-    bool loop = true;
-    bool refresh = true;
-    bool keydown_shift = false;
-    int keydown_l = 0;
-    int keydown_r = 0;
+    app.rot = 0;
+    app.zoom = 4;
+    app.frame_i = 0;
+    app.loop = true;
+    app.keydown_shift = false;
+    app.keydown_l = 0;
+    app.keydown_r = 0;
 
     Uint32 took = 0;
+    bool refresh = true;
 
     SDL_StartTextInput();
-    while(loop){
+    while(app.loop){
         Uint32 tick0 = SDL_GetTicks();
 
-        rendergraph_t *rgraph = rgraphs[cur_rgraph_i];
+        rendergraph_t *rgraph = app.rgraphs[app.cur_rgraph_i];
         int animated_frame_i = get_animated_frame_i(
-            rgraph->animation_type, rgraph->n_frames, frame_i);
+            rgraph->animation_type, rgraph->n_frames, app.frame_i);
 
         if(refresh){
             refresh = false;
@@ -129,7 +164,7 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
 
             RET_IF_SDL_NZ(SDL_FillRect(render_surface, NULL, 0));
 
-            font_blitmsg(&font, render_surface, 0, 0,
+            font_blitmsg(&app.font, render_surface, 0, 0,
                 "Frame rendered in: %i ms\n"
                 "  (Aiming for sub-%i ms)\n"
                 "Controls:\n"
@@ -141,13 +176,13 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                 "Currently displaying rendergraph %i / %i: %s\n"
                 "  rot = %i, zoom = %i, frame_i = %i (%i) / %i (%s)",
                 took, (int)DELAY_GOAL,
-                filename, cur_rgraph_i, n_rgraphs,
+                app.filename, app.cur_rgraph_i, app.n_rgraphs,
                 rgraph->name,
-                rot, zoom, frame_i, animated_frame_i, rgraph->n_frames,
-                rgraph->animation_type);
+                app.rot, app.zoom, app.frame_i, animated_frame_i,
+                rgraph->n_frames, rgraph->animation_type);
 
-            console_blit(&console, &font, render_surface,
-                0, 10 * font.char_h);
+            console_blit(&app.console, &app.font, render_surface,
+                0, 10 * app.font.char_h);
 
 
             /******************************************************************
@@ -161,14 +196,14 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
             rendergraph_bitmap_t *bitmap;
             err = rendergraph_get_or_render_bitmap(
                 rgraph, &bitmap,
-                rot, false, animated_frame_i, pal, renderer);
+                app.rot, false, animated_frame_i, app.pal, renderer);
             if(err)return err;
 
             SDL_Rect dst_rect = {
-                SCW/2 - bitmap->pbox.x*zoom,
-                SCH/2 - bitmap->pbox.y*zoom,
-                bitmap->pbox.w*zoom,
-                bitmap->pbox.h*zoom
+                SCW / 2 - bitmap->pbox.x * app.zoom,
+                SCH / 2 - bitmap->pbox.y * app.zoom,
+                bitmap->pbox.w * app.zoom,
+                bitmap->pbox.h * app.zoom
             };
             SDL_Texture *bitmap_texture;
             err = rendergraph_bitmap_get_texture(bitmap, renderer,
@@ -196,53 +231,37 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
             switch(event.type){
                 case SDL_KEYDOWN: {
                     if(event.key.keysym.sym == SDLK_ESCAPE){
-                        loop = false;}
+                        app.loop = false;}
 
                     if(event.key.keysym.sym == SDLK_RETURN){
-                        printf("GOT CONSOLE INPUT: %s\n", console.input);
-                        console_newline(&console);
+                        printf("GOT CONSOLE INPUT: %s\n", app.console.input);
+                        console_newline(&app.console);
 
-                        int action = -1;
-                        if(!strcmp(console.input, "exit")){
-                            loop = false;
-                        }else if(!strcmp(console.input, "cls")){
-                            console_clear(&console);
-                        }else if(!strcmp(console.input, "reload")){
-                            err = load_rendergraphs(&prend, filename,
-                                &n_rgraphs, &rgraphs, true);
-                            if(err)return err;
-                            cur_rgraph_i = 0;
-                        }else if(!strcmp(console.input, "dump")){
-                            rendergraph_dump(rgraph, stdout, 0,
-                                prend.dump_bitmap_surfaces);
-                        }else if(!strcmp(console.input, "dumpall")){
-                            prismelrenderer_dump(&prend, stdout);
-                        }else if(!strcmp(console.input, "renderall")){
-                            err = prismelrenderer_render_all_bitmaps(
-                                &prend, pal, NULL);
-                            if(err)return err;
-                        }
+                        err = process_console_input(&app);
+                        if(err)return err;
 
-                        console_input_clear(&console);
+                        console_input_clear(&app.console);
                         refresh = true;
                     }
                     if(event.key.keysym.sym == SDLK_BACKSPACE){
-                        console_input_backspace(&console); refresh = true;}
+                        console_input_backspace(&app.console);
+                        refresh = true;}
                     if(event.key.keysym.sym == SDLK_DELETE){
-                        console_input_delete(&console); refresh = true;}
+                        console_input_delete(&app.console);
+                        refresh = true;}
                     if(
                         event.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL)
                         && event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)
                     ){
                         if(event.key.keysym.sym == SDLK_c){
-                            SDL_SetClipboardText(console.input);}
+                            SDL_SetClipboardText(app.console.input);}
                         if(event.key.keysym.sym == SDLK_v
                             && SDL_HasClipboardText()
                         ){
                             char *input = SDL_GetClipboardText();
                             char *c = input;
                             while(*c != '\0'){
-                                console_input_char(&console, *c);
+                                console_input_char(&app.console, *c);
                                 c++;
                             }
                             SDL_free(input);
@@ -251,63 +270,69 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                     }
 
                     if(event.key.keysym.sym == SDLK_0){
-                        rot = 0; refresh = true;}
-                    if(event.key.keysym.sym == SDLK_LEFT && keydown_l == 0){
-                        keydown_l = 2;}
-                    if(event.key.keysym.sym == SDLK_RIGHT && keydown_r == 0){
-                        keydown_r = 2;}
+                        app.rot = 0; refresh = true;}
+                    if(event.key.keysym.sym == SDLK_LEFT
+                        && app.keydown_l == 0){
+                            app.keydown_l = 2;}
+                    if(event.key.keysym.sym == SDLK_RIGHT
+                        && app.keydown_r == 0){
+                            app.keydown_r = 2;}
                     if(event.key.keysym.sym == SDLK_LSHIFT
                         || event.key.keysym.sym == SDLK_RSHIFT){
-                            keydown_shift = true;}
+                            app.keydown_shift = true;}
                     if(event.key.keysym.sym == SDLK_PAGEUP){
-                        cur_rgraph_i++;
-                        if(cur_rgraph_i >= n_rgraphs)cur_rgraph_i = 0;
+                        app.cur_rgraph_i++;
+                        if(app.cur_rgraph_i >= app.n_rgraphs){
+                            app.cur_rgraph_i = 0;}
                         refresh = true;}
                     if(event.key.keysym.sym == SDLK_PAGEDOWN){
-                        cur_rgraph_i--;
-                        if(cur_rgraph_i < 0)cur_rgraph_i = n_rgraphs - 1;
+                        app.cur_rgraph_i--;
+                        if(app.cur_rgraph_i < 0){
+                            app.cur_rgraph_i = app.n_rgraphs - 1;}
                         refresh = true;}
                     if(event.key.keysym.sym == SDLK_HOME){
-                        frame_i++;
+                        app.frame_i++;
                         refresh = true;}
                     if(event.key.keysym.sym == SDLK_END){
-                        if(frame_i > 0)frame_i--;
+                        if(app.frame_i > 0)app.frame_i--;
                         refresh = true;}
                     if(event.key.keysym.sym == SDLK_UP){
-                        zoom += 1; if(zoom > 10)zoom=10; refresh = true;}
+                        if(app.zoom < 10)app.zoom += 1;
+                        refresh = true;}
                     if(event.key.keysym.sym == SDLK_DOWN){
-                        zoom -= 1; if(zoom <= 0)zoom=1; refresh = true;}
+                        if(app.zoom > 0)app.zoom -= 1;
+                        refresh = true;}
                 } break;
                 case SDL_KEYUP: {
                     if(event.key.keysym.sym == SDLK_LEFT){
-                        keydown_l = 0;}
+                        app.keydown_l = 0;}
                     if(event.key.keysym.sym == SDLK_RIGHT){
-                        keydown_r = 0;}
+                        app.keydown_r = 0;}
                     if(event.key.keysym.sym == SDLK_LSHIFT
                         || event.key.keysym.sym == SDLK_RSHIFT){
-                            keydown_shift = false;}
+                            app.keydown_shift = false;}
                 } break;
                 case SDL_TEXTINPUT: {
                     for(char *c = event.text.text; *c != '\0'; c++){
-                        console_input_char(&console, *c);
+                        console_input_char(&app.console, *c);
                     }
                     refresh = true;
                 } break;
-                case SDL_QUIT: loop = false; break;
+                case SDL_QUIT: app.loop = false; break;
                 default: break;
             }
         }
-        if(keydown_l >= (keydown_shift? 2: 1)){
-            rot += 1; refresh = true; keydown_l = 1;}
-        if(keydown_r >= (keydown_shift? 2: 1)){
-            rot -= 1; refresh = true; keydown_r = 1;}
+        if(app.keydown_l >= (app.keydown_shift? 2: 1)){
+            app.rot += 1; refresh = true; app.keydown_l = 1;}
+        if(app.keydown_r >= (app.keydown_shift? 2: 1)){
+            app.rot -= 1; refresh = true; app.keydown_r = 1;}
 
         Uint32 tick1 = SDL_GetTicks();
         took = tick1 - tick0;
         if(took < DELAY_GOAL)SDL_Delay(DELAY_GOAL - took);
     }
 
-    free(rgraphs);
+    free(app.rgraphs);
     return 0;
 }
 
