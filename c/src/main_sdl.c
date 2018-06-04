@@ -170,7 +170,11 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                 bitmap->pbox.w*zoom,
                 bitmap->pbox.h*zoom
             };
-            RET_IF_SDL_NZ(SDL_RenderCopy(renderer, bitmap->texture,
+            SDL_Texture *bitmap_texture;
+            err = rendergraph_bitmap_get_texture(bitmap, renderer,
+                &bitmap_texture);
+            if(err)return err;
+            RET_IF_SDL_NZ(SDL_RenderCopy(renderer, bitmap_texture,
                 NULL, &dst_rect));
 
             SDL_Texture *render_texture = SDL_CreateTextureFromSurface(

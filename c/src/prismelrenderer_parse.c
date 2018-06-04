@@ -5,6 +5,7 @@
 
 #include "lexer.h"
 #include "util.h"
+#include "llist.h"
 #include "prismelrenderer.h"
 
 
@@ -27,6 +28,9 @@ static int parse_prismel(prismel_t *prismel, fus_lexer_t *lexer){
                 : ( 1 -2  1) ( 0 -1  3) ( 1  0  1)
     */
     int err;
+
+    err = fus_lexer_expect(lexer, "(");
+    if(err)return err;
     while(1){
 
         err = fus_lexer_next(lexer);
@@ -85,20 +89,20 @@ static int parse_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer){
 
         err = fus_lexer_get_name(lexer, &name);
         if(err)return err;
-        err = prismelrenderer_push_prismel(prend);
+
+        prismel_t *prismel;
+        err = prismelrenderer_push_prismel(prend, name, &prismel);
         if(err)return err;
 
-        prend->prismel_list->name = name;
-
-        err = fus_lexer_expect(lexer, "(");
-        if(err)return err;
-        err = parse_prismel(prend->prismel_list, lexer);
+        err = parse_prismel(prismel, lexer);
         if(err)return err;
     }
     return 0;
 }
 
-static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer, rendergraph_t *rgraph){
+static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
+    rendergraph_t *rgraph
+){
     /*
         Example data:
 
@@ -174,25 +178,25 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer, rend
             err = fus_lexer_get(lexer, ")");
             if(err)return err;
 
-            err = rendergraph_push_rendergraph_trf(rgraph);
-            if(err)return err;
-
             rendergraph_t *found = prismelrenderer_get_rendergraph(
                 prend, name);
             if(found == NULL){
                 fprintf(stderr, "Couldn't find shape: %s\n", name);
                 return 2;
             }
-
             free(name);
-            rgraph->rendergraph_trf_list->rendergraph = found;
-            rgraph->rendergraph_trf_list->trf.rot = rot;
-            rgraph->rendergraph_trf_list->trf.flip = flip;
-            rgraph->rendergraph_trf_list->frame_start = frame_start;
-            rgraph->rendergraph_trf_list->frame_len = frame_len;
-            rgraph->rendergraph_trf_list->frame_i = frame_i;
-            rgraph->rendergraph_trf_list->frame_i_additive = frame_i_additive;
-            vec_cpy(prend->space->dims, rgraph->rendergraph_trf_list->trf.add, v);
+
+            rendergraph_trf_t *rendergraph_trf;
+            err = rendergraph_push_rendergraph_trf(rgraph, &rendergraph_trf);
+            if(err)return err;
+            rendergraph_trf->rendergraph = found;
+            rendergraph_trf->trf.rot = rot;
+            rendergraph_trf->trf.flip = flip;
+            rendergraph_trf->frame_start = frame_start;
+            rendergraph_trf->frame_len = frame_len;
+            rendergraph_trf->frame_i = frame_i;
+            rendergraph_trf->frame_i_additive = frame_i_additive;
+            vec_cpy(prend->space->dims, rendergraph_trf->trf.add, v);
         }else{
             err = fus_lexer_unexpected(lexer, "(...)");
             return err;
@@ -201,7 +205,9 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer, rend
     return 0;
 }
 
-static int parse_shape_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer, rendergraph_t *rgraph){
+static int parse_shape_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer,
+    rendergraph_t *rgraph
+){
     /*
         Example data:
 
@@ -268,23 +274,23 @@ static int parse_shape_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer, re
             err = fus_lexer_get(lexer, ")");
             if(err)return err;
 
-            err = rendergraph_push_prismel_trf(rgraph);
-            if(err)return err;
-
             prismel_t *found = prismelrenderer_get_prismel(prend, name);
             if(found == NULL){
                 fprintf(stderr, "Couldn't find prismel: %s\n", name);
                 return 2;
             }
-
             free(name);
-            rgraph->prismel_trf_list->prismel = found;
-            rgraph->prismel_trf_list->trf.rot = rot;
-            rgraph->prismel_trf_list->trf.flip = flip;
-            rgraph->prismel_trf_list->color = color;
-            rgraph->prismel_trf_list->frame_start = frame_start;
-            rgraph->prismel_trf_list->frame_len = frame_len;
-            vec_cpy(prend->space->dims, rgraph->prismel_trf_list->trf.add, v);
+
+            prismel_trf_t *prismel_trf;
+            err = rendergraph_push_prismel_trf(rgraph, &prismel_trf);
+            if(err)return err;
+            prismel_trf->prismel = found;
+            prismel_trf->trf.rot = rot;
+            prismel_trf->trf.flip = flip;
+            prismel_trf->color = color;
+            prismel_trf->frame_start = frame_start;
+            prismel_trf->frame_len = frame_len;
+            vec_cpy(prend->space->dims, prismel_trf->trf.add, v);
         }else{
             err = fus_lexer_unexpected(lexer, "(...)");
             return err;
@@ -369,7 +375,8 @@ static int parse_shape(prismelrenderer_t *prend, fus_lexer_t *lexer,
             animation_type, n_frames);
         if(err)return err;
 
-        err = rendergraph_map_push(&prend->rendergraph_map, rgraph);
+        LLIST_PUSH(rendergraph_map_t, *prend, rendergraph_map, new_map)
+        err = rendergraph_map_init(new_map, rgraph);
         if(err)return err;
     }
 
@@ -431,7 +438,7 @@ static int parse_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer){
 
 
 static int parse_mapper(prismelrenderer_t *prend, fus_lexer_t *lexer,
-    const char *name
+    const char *name, prismelmapper_t **mapper_ptr
 ){
     int err;
     prismelmapper_t *mapper = calloc(1, sizeof(*mapper));
@@ -500,7 +507,7 @@ static int parse_mapper(prismelrenderer_t *prend, fus_lexer_t *lexer,
     err = fus_lexer_expect(lexer, ")");
     if(err)return err;
 
-    prend->mapper_map->mapper = mapper;
+    *mapper_ptr = mapper;
     return 0;
 }
 
@@ -522,11 +529,12 @@ static int parse_mappers(prismelrenderer_t *prend, fus_lexer_t *lexer){
             return 2;
         }
 
-        err = prismelmapper_map_push(&prend->mapper_map);
+        prismelmapper_t *mapper;
+        err = parse_mapper(prend, lexer, name, &mapper);
         if(err)return err;
-        prend->mapper_map->name = name;
 
-        err = parse_mapper(prend, lexer, name);
+        LLIST_PUSH(prismelmapper_map_t, *prend, mapper_map, new_map)
+        err = prismelmapper_map_init(new_map, mapper);
         if(err)return err;
     }
     return 0;
