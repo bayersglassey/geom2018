@@ -1,30 +1,12 @@
 
-Apr 30, 2018 - May 28, 2018:
-----------------------------
-
-We need:
-    - function for rendering a rendergraph to one of its bitmaps (DONE)
-    - function to get or render one of a rendergraph's bitmaps (DONE)
-
-Test app:
-    - load data/test.fus (DONE)
-    - user can choose rendergraph with PgUp/PdDn (DONE)
-    - user can rotate/flip/zoom (DONE)
-
-TODO:
-    - mapping_t object maps prismels to rendergraphs
-    - applying it to a rendergraph generates a new rendergraph
-    - add parser support
-    - add "curvy" transformation to test.fus
-
-
 
 Jun 3, 2018:
 ------------
 
 - reload + renderall crashes!
     run valgrind, maybe it will find something
-- add: rendergraph_get_or_create_texture()
-    that may solve the reload+renderall crash
-    (maybe we're just creating too many textures)
+    ...nope, it's happening in SDL dynamic lib somewhere...
+- fus_lexer: Leaving closing quote off a string literal doesn't seem
+    to cause an issue?..
+    (With the console input of main_sdl.c)
 
