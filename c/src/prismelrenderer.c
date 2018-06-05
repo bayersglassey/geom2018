@@ -150,7 +150,6 @@ int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space){
     LLIST_INIT(*renderer, prismel_list)
     LLIST_INIT(*renderer, rendergraph_map)
     LLIST_INIT(*renderer, mapper_map)
-    renderer->dump_bitmap_surfaces = false;
     return 0;
 }
 
@@ -162,7 +161,9 @@ void prismelrenderer_cleanup(prismelrenderer_t *renderer){
         prismelmapper_map_cleanup)
 }
 
-void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f){
+void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
+    bool dump_bitmap_surfaces
+){
     fprintf(f, "prismelrenderer: %p\n", renderer);
     if(renderer == NULL)return;
     fprintf(f, "  space: %p\n", renderer->space);
@@ -191,8 +192,7 @@ void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f){
     for(rendergraph_map_t *map = renderer->rendergraph_map;
         map != NULL; map = map->next
     ){
-        rendergraph_dump(map->rgraph, f, 4,
-            renderer->dump_bitmap_surfaces);
+        rendergraph_dump(map->rgraph, f, 4, dump_bitmap_surfaces);
     }
 
     fprintf(f, "  prismelmapper_map:\n");

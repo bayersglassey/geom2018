@@ -66,15 +66,14 @@ typedef struct prismelrenderer {
     LLIST_DECL(struct prismel, prismel_list)
     LLIST_DECL(struct rendergraph_map, rendergraph_map)
     LLIST_DECL(struct prismelmapper_map, mapper_map)
-
-    bool dump_bitmap_surfaces;
 } prismelrenderer_t;
 
 
 
 int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space);
 void prismelrenderer_cleanup(prismelrenderer_t *renderer);
-void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f);
+void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
+    bool dump_bitmap_surfaces);
 int prismelrenderer_push_prismel(prismelrenderer_t *renderer, char *name,
     prismel_t **prismel_ptr);
 prismel_t *prismelrenderer_get_prismel(prismelrenderer_t *renderer,
