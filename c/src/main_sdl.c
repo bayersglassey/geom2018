@@ -337,7 +337,7 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                         if(app.zoom < 10)app.zoom += 1;
                         refresh = true;}
                     if(event.key.keysym.sym == SDLK_DOWN){
-                        if(app.zoom > 0)app.zoom -= 1;
+                        if(app.zoom > 1)app.zoom -= 1;
                         refresh = true;}
                 } break;
                 case SDL_KEYUP: {
