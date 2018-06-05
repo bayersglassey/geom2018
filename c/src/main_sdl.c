@@ -59,52 +59,54 @@ int load_rendergraphs(test_app_t *app, bool reload){
     return 0;
 }
 
-int process_console_input_all(test_app_t *app){
+int process_console_input(test_app_t *app){
     int err;
 
     rendergraph_t *rgraph = app->rgraphs[app->cur_rgraph_i];
 
     fus_lexer_t lexer;
     err = fus_lexer_init(&lexer, app->console.input);
-    if(err)return err;
+    if(err)goto lexer_err;
 
     err = fus_lexer_next(&lexer);
-    if(err)return err;
+    if(err)goto lexer_err;
     if(fus_lexer_got(&lexer, "exit")){
         app->loop = false;
     }else if(fus_lexer_got(&lexer, "cls")){
         console_clear(&app->console);
     }else if(fus_lexer_got(&lexer, "reload")){
+        err = fus_lexer_next(&lexer);
+        if(err)goto lexer_err;
+        if(!fus_lexer_done(&lexer)){
+            char *filename;
+            err = fus_lexer_get_str(&lexer, &filename);
+            if(err)goto lexer_err;
+
+            FILE *f = fopen(filename, "r");
+            if(f == NULL){
+                fprintf(stderr, "Could not open file: %s\n", filename);
+                console_write_msg(&app->console, "Could not open file\n");
+                return 0;
+            }else{
+                err = fclose(f);
+                if(err)return err;
+                app->filename = filename;
+            }
+        }
+
         err = load_rendergraphs(app, true);
         if(err)return err;
         app->cur_rgraph_i = 0;
-    }else if(fus_lexer_got(&lexer, "load")){
-        char *filename;
-        err = fus_lexer_expect_str(&lexer, &filename);
-        if(err)return err;
-
-        FILE *f = fopen(filename, "r");
-        if(f == NULL){
-            fprintf(stderr, "Could not open file: %s\n", filename);
-        }else{
-            err = fclose(f);
-            if(err)return err;
-
-            app->filename = filename;
-            err = load_rendergraphs(app, true);
-            if(err)return err;
-            app->cur_rgraph_i = 0;
-        }
     }else if(fus_lexer_got(&lexer, "dump")){
         bool dump_bitmap_surfaces = false;
         err = fus_lexer_next(&lexer);
-        if(err)return err;
+        if(err)goto lexer_err;
         if(fus_lexer_got(&lexer, "S"))dump_bitmap_surfaces = true;
         rendergraph_dump(rgraph, stdout, 0, dump_bitmap_surfaces);
     }else if(fus_lexer_got(&lexer, "dumpall")){
         bool dump_bitmap_surfaces = false;
         err = fus_lexer_next(&lexer);
-        if(err)return err;
+        if(err)goto lexer_err;
         if(fus_lexer_got(&lexer, "S"))dump_bitmap_surfaces = true;
         prismelrenderer_dump(&app->prend, stdout, dump_bitmap_surfaces);
     }else if(fus_lexer_got(&lexer, "renderall")){
@@ -113,7 +115,14 @@ int process_console_input_all(test_app_t *app){
         if(err)return err;
     }else{
         fus_lexer_unexpected(&lexer, NULL);
+        console_write_msg(&app->console, "Sorry, what?\n");
+        return 0;
     }
+
+    console_write_msg(&app->console, "OK\n");
+    return 0;
+lexer_err:
+    console_write_msg(&app->console, "That didn't work\n");
     return 0;
 }
 
@@ -263,10 +272,9 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                         app.loop = false;}
 
                     if(event.key.keysym.sym == SDLK_RETURN){
-                        printf("GOT CONSOLE INPUT: %s\n", app.console.input);
                         console_newline(&app.console);
 
-                        err = process_console_input_all(&app);
+                        err = process_console_input(&app);
                         if(err)return err;
 
                         console_input_clear(&app.console);
