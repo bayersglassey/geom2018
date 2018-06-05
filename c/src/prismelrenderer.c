@@ -612,10 +612,14 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     int bpp = 32;
 
     /* Get rid of old bitmap, create new one */
-    SDL_FreeSurface(bitmap->surface);
-    SDL_DestroyTexture(bitmap->texture);
-    bitmap->surface = NULL;
-    bitmap->texture = NULL;
+    if(bitmap->surface != NULL){
+        SDL_FreeSurface(bitmap->surface);
+        bitmap->surface = NULL;
+    }
+    if(bitmap->texture != NULL){
+        SDL_DestroyTexture(bitmap->texture);
+        bitmap->texture = NULL;
+    }
     SDL_Surface *surface = surface_create(bitmap->pbox.w, bitmap->pbox.h,
         bpp, true, true);
     if(surface == NULL)return 2;
