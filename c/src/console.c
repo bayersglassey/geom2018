@@ -94,6 +94,13 @@ void console_write_char(console_t *console, char c){
     }
 }
 
+void console_write_msg(console_t *console, const char *msg){
+    while(*msg != '\0'){
+        console_write_char(console, *msg);
+        msg++;
+    }
+}
+
 void console_backspace(console_t *console){
     console_move_left(console);
     int text_i = console_get_text_i(console);
