@@ -709,8 +709,16 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
             surface, &dst_rect));
     }
 
+    /* Create texture, if an SDL_Renderer was provided */
+    SDL_Texture *texture = NULL;
+    if(renderer != NULL && bitmap->pbox.w != 0 && bitmap->pbox.h != 0){
+        texture = SDL_CreateTextureFromSurface(renderer, surface);
+        RET_IF_SDL_NULL(texture);
+    }
+
     /* LET'S GO */
     bitmap->surface = surface;
+    bitmap->texture = texture;
     return 0;
 }
 
