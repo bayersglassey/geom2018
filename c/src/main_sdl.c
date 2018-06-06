@@ -10,8 +10,8 @@
 #include "util.h"
 
 
-#define SCW 640
-#define SCH 400
+#define SCW 1024
+#define SCH 768
 
 /* How many milliseconds we want each frame to last */
 #define DELAY_GOAL 30
@@ -23,16 +23,21 @@ typedef struct test_app {
     prismelrenderer_t prend;
     font_t font;
     console_t console;
-    char *filename;
+    const char *filename;
     int n_rgraphs;
     rendergraph_t **rgraphs;
     int cur_rgraph_i;
 
+    int x0;
+    int y0;
     int rot;
     int zoom;
     int frame_i;
     bool loop;
     bool keydown_shift;
+    bool keydown_ctrl;
+    int keydown_u;
+    int keydown_d;
     int keydown_l;
     int keydown_r;
 } test_app_t;
@@ -127,10 +132,13 @@ lexer_err:
 }
 
 
-int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
+int mainloop(SDL_Window *window, SDL_Renderer *renderer,
+    const char *filename
+){
     int err;
 
     test_app_t app;
+    app.filename = filename;
 
     SDL_Color pal[] = {
         {.r=255, .g= 60, .b= 60},
@@ -147,26 +155,8 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
     err = font_load(&app.font, "data/font.fus");
     if(err)return err;
 
-    err = console_init(&app.console, 40, 20, 20000);
+    err = console_init(&app.console, 80, 40, 20000);
     if(err)return err;
-
-    app.filename = "data/test.fus";
-
-    for(int arg_i = 1; arg_i < n_args; arg_i++){
-        char *arg = args[arg_i];
-        if(!strcmp(arg, "-f")){
-            arg_i++;
-            if(arg_i >= n_args){
-                fprintf(stderr, "Missing filename after -f\n");
-                return 2;
-            }
-            arg = args[arg_i];
-            app.filename = arg;
-        }else{
-            fprintf(stderr, "Unrecognized option: %s\n", arg);
-            return 2;
-        }
-    }
 
     app.cur_rgraph_i = 0;
     err = load_rendergraphs(&app, false);
@@ -174,11 +164,16 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
 
     SDL_Event event;
 
+    app.x0 = 0;
+    app.y0 = 0;
     app.rot = 0;
-    app.zoom = 4;
+    app.zoom = 1;
     app.frame_i = 0;
     app.loop = true;
     app.keydown_shift = false;
+    app.keydown_ctrl = false;
+    app.keydown_u = 0;
+    app.keydown_d = 0;
     app.keydown_l = 0;
     app.keydown_r = 0;
 
@@ -206,21 +201,24 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                 "Frame rendered in: %i ms\n"
                 "  (Aiming for sub-%i ms)\n"
                 "Controls:\n"
-                "  up/down - zoom\n"
+                "  up/down - zoom (hold shift for tap mode)\n"
                 "  left/right - rotate (hold shift for tap mode)\n"
+                "  control + up/down/left/right - pan (hold shift...)\n"
                 "  page up/down - cycle through available rendergraphs\n"
                 "  0 - reset rotation\n"
                 "Currently displaying rendergraphs from file: %s\n"
                 "Currently displaying rendergraph %i / %i: %s\n"
-                "  rot = %i, zoom = %i, frame_i = %i (%i) / %i (%s)",
+                "  pan=(%i,%i), rot = %i, zoom = %i,"
+                    " frame_i = %i (%i) / %i (%s)",
                 took, (int)DELAY_GOAL,
                 app.filename, app.cur_rgraph_i, app.n_rgraphs,
                 rgraph->name,
-                app.rot, app.zoom, app.frame_i, animated_frame_i,
+                app.x0, app.y0, app.rot, app.zoom, app.frame_i,
+                animated_frame_i,
                 rgraph->n_frames, rgraph->animation_type);
 
             console_blit(&app.console, &app.font, render_surface,
-                0, 10 * app.font.char_h);
+                0, 12 * app.font.char_h);
 
 
             /******************************************************************
@@ -238,8 +236,8 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
             if(err)return err;
 
             SDL_Rect dst_rect = {
-                SCW / 2 - bitmap->pbox.x * app.zoom,
-                SCH / 2 - bitmap->pbox.y * app.zoom,
+                SCW / 2 + app.x0 - bitmap->pbox.x * app.zoom,
+                SCH / 2 + app.y0 - bitmap->pbox.y * app.zoom,
                 bitmap->pbox.w * app.zoom,
                 bitmap->pbox.h * app.zoom
             };
@@ -307,16 +305,25 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                     }
 
                     if(event.key.keysym.sym == SDLK_0){
-                        app.rot = 0; refresh = true;}
-                    if(event.key.keysym.sym == SDLK_LEFT
-                        && app.keydown_l == 0){
-                            app.keydown_l = 2;}
-                    if(event.key.keysym.sym == SDLK_RIGHT
-                        && app.keydown_r == 0){
-                            app.keydown_r = 2;}
+                        app.x0 = 0; app.y0 = 0; app.rot = 0; app.zoom = 1;
+                        refresh = true;}
+
+                    #define IF_KEYDOWN(SYM, KEY) \
+                        if(event.key.keysym.sym == SDLK_##SYM \
+                            && app.keydown_##KEY == 0){ \
+                                app.keydown_##KEY = 2;}
+                    IF_KEYDOWN(UP, u)
+                    IF_KEYDOWN(DOWN, d)
+                    IF_KEYDOWN(LEFT, l)
+                    IF_KEYDOWN(RIGHT, r)
+
                     if(event.key.keysym.sym == SDLK_LSHIFT
                         || event.key.keysym.sym == SDLK_RSHIFT){
                             app.keydown_shift = true;}
+                    if(event.key.keysym.sym == SDLK_LCTRL
+                        || event.key.keysym.sym == SDLK_RCTRL){
+                            app.keydown_ctrl = true;}
+
                     if(event.key.keysym.sym == SDLK_PAGEUP){
                         app.cur_rgraph_i++;
                         if(app.cur_rgraph_i >= app.n_rgraphs){
@@ -333,21 +340,23 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                     if(event.key.keysym.sym == SDLK_END){
                         if(app.frame_i > 0)app.frame_i--;
                         refresh = true;}
-                    if(event.key.keysym.sym == SDLK_UP){
-                        if(app.zoom < 10)app.zoom += 1;
-                        refresh = true;}
-                    if(event.key.keysym.sym == SDLK_DOWN){
-                        if(app.zoom > 1)app.zoom -= 1;
-                        refresh = true;}
                 } break;
                 case SDL_KEYUP: {
-                    if(event.key.keysym.sym == SDLK_LEFT){
-                        app.keydown_l = 0;}
-                    if(event.key.keysym.sym == SDLK_RIGHT){
-                        app.keydown_r = 0;}
+
+                    #define IF_KEYUP(SYM, KEY) \
+                        if(event.key.keysym.sym == SDLK_##SYM){ \
+                            app.keydown_##KEY = 0;}
+                    IF_KEYUP(UP, u)
+                    IF_KEYUP(DOWN, d)
+                    IF_KEYUP(LEFT, l)
+                    IF_KEYUP(RIGHT, r)
+
                     if(event.key.keysym.sym == SDLK_LSHIFT
                         || event.key.keysym.sym == SDLK_RSHIFT){
                             app.keydown_shift = false;}
+                    if(event.key.keysym.sym == SDLK_LCTRL
+                        || event.key.keysym.sym == SDLK_RCTRL){
+                            app.keydown_ctrl = false;}
                 } break;
                 case SDL_TEXTINPUT: {
                     for(char *c = event.text.text; *c != '\0'; c++){
@@ -359,10 +368,15 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
                 default: break;
             }
         }
-        if(app.keydown_l >= (app.keydown_shift? 2: 1)){
-            app.rot += 1; refresh = true; app.keydown_l = 1;}
-        if(app.keydown_r >= (app.keydown_shift? 2: 1)){
-            app.rot -= 1; refresh = true; app.keydown_r = 1;}
+
+        #define IF_APP_KEY(KEY, BODY) \
+            if(app.keydown_##KEY >= (app.keydown_shift? 2: 1)){ \
+                refresh = true; app.keydown_##KEY = 1; \
+                BODY}
+        IF_APP_KEY(l, if(app.keydown_ctrl){app.x0 -= 6;}else{app.rot += 1;})
+        IF_APP_KEY(r, if(app.keydown_ctrl){app.x0 += 6;}else{app.rot -= 1;})
+        IF_APP_KEY(u, if(app.keydown_ctrl){app.y0 -= 6;}else if(app.zoom < 10){app.zoom += 1;})
+        IF_APP_KEY(d, if(app.keydown_ctrl){app.y0 += 6;}else if(app.zoom > 1){app.zoom -= 1;})
 
         Uint32 tick1 = SDL_GetTicks();
         took = tick1 - tick0;
@@ -375,13 +389,36 @@ int mainloop(SDL_Renderer *renderer, int n_args, char *args[]){
 
 int main(int n_args, char *args[]){
     int e = 0;
+    Uint32 window_flags = SDL_WINDOW_SHOWN;
+    const char *filename = "data/test.fus";
+
+    for(int arg_i = 1; arg_i < n_args; arg_i++){
+        char *arg = args[arg_i];
+        if(!strcmp(arg, "-F")){
+            window_flags |= SDL_WINDOW_FULLSCREEN;
+        }else if(!strcmp(arg, "-FD")){
+            window_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+        }else if(!strcmp(arg, "-f")){
+            arg_i++;
+            if(arg_i >= n_args){
+                fprintf(stderr, "Missing filename after -f\n");
+                return 2;
+            }
+            arg = args[arg_i];
+            filename = arg;
+        }else{
+            fprintf(stderr, "Unrecognized option: %s\n", arg);
+            return 2;
+        }
+    }
+
     if(SDL_Init(SDL_INIT_VIDEO)){
         e = 1;
         fprintf(stderr, "SDL_Init error: %s\n", SDL_GetError());
     }else{
         SDL_Window *window = SDL_CreateWindow("Hello World!",
             SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-            SCW, SCH, SDL_WINDOW_SHOWN);
+            SCW, SCH, window_flags);
 
         if(!window){
             e = 1;
@@ -396,7 +433,7 @@ int main(int n_args, char *args[]){
                 fprintf(stderr, "SDL_CreateRenderer error: %s\n",
                     SDL_GetError());
             }else{
-                e = mainloop(renderer, n_args, args);
+                e = mainloop(window, renderer, filename);
                 SDL_DestroyRenderer(renderer);
             }
             SDL_DestroyWindow(window);
