@@ -344,17 +344,14 @@ mappers:
 
 shapes:
 
-    double_curvy_sq: map: double curvy_sq
-    curvy_curvy_sq: map: curvy curvy_sq
-    curvy_double_sq: map: curvy double_sq
-
-    double_curvy_tri: map: double curvy_tri
-    curvy_curvy_tri: map: curvy curvy_tri
-    curvy_double_tri: map: curvy double_tri
-
-    curvy_double_curvy_sq: map: curvy double_curvy_sq
-    curvy_curvy_curvy_sq: map: curvy curvy_curvy_sq
-
+    double_dodeca: map: double dodeca
     curvy_dodeca: map: curvy dodeca
+
+    double_double_dodeca: map: double double_dodeca
+    double_curvy_dodeca: map: double curvy_dodeca
+    curvy_double_dodeca: map: curvy double_dodeca
     curvy_curvy_dodeca: map: curvy curvy_dodeca
+
+    double_curvy_curvy_dodeca: map: double curvy_curvy_dodeca
+    curvy_double_curvy_dodeca: map: curvy double_curvy_dodeca
 
