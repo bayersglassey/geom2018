@@ -102,6 +102,23 @@ int process_console_input(test_app_t *app){
         err = load_rendergraphs(app, true);
         if(err)return err;
         app->cur_rgraph_i = 0;
+    }else if(fus_lexer_got(&lexer, "save")){
+        char *filename = NULL;
+
+        err = fus_lexer_next(&lexer);
+        if(err)goto lexer_err;
+        if(!fus_lexer_done(&lexer)){
+            err = fus_lexer_get_str(&lexer, &filename);
+            if(err)goto lexer_err;
+        }
+
+        if(filename == NULL){
+            err = prismelrenderer_write(&app->prend, stdout);
+            if(err)return err;
+        }else{
+            err = prismelrenderer_save(&app->prend, filename);
+            if(err)return err;
+        }
     }else if(fus_lexer_got(&lexer, "dump")){
         bool dump_bitmap_surfaces = false;
         err = fus_lexer_next(&lexer);
