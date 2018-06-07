@@ -259,6 +259,104 @@ int prismelrenderer_load(prismelrenderer_t *prend, const char *filename,
     return 0;
 }
 
+int prismelrenderer_save(prismelrenderer_t *prend, const char *filename){
+    int err;
+    FILE *f = fopen(filename, "w");
+    if(f == NULL)return 2;
+    err = prismelrenderer_write(prend, f);
+    if(err)return err;
+    if(fclose(f))return 2;
+    return 0;
+}
+
+int prismelrenderer_write(prismelrenderer_t *prend, FILE *f){
+    int err;
+
+    fprintf(f, "prismels:\n");
+    for(
+        prismel_t *prismel = prend->prismel_list;
+        prismel != NULL;
+        prismel = prismel->next
+    ){
+        fprintf(f, "    %s:\n", prismel->name);
+        fprintf(f, "        images:\n");
+        for(int i = 0; i < prismel->n_images; i++){
+            prismel_image_t *image = &prismel->images[i];
+            fprintf(f, "            :");
+            for(
+                prismel_image_line_t *line = image->line_list;
+                line != NULL;
+                line = line->next
+            ){
+                fprintf(f, " (% 3i % 3i % 3i)",
+                    line->x, line->y, line->w);
+            }
+            fprintf(f, "\n");
+        }
+    }
+
+    fprintf(f, "shapes:\n");
+    for(
+        rendergraph_map_t *rgraph_map = prend->rendergraph_map;
+        rgraph_map != NULL;
+        rgraph_map = rgraph_map->next
+    ){
+        rendergraph_t *rgraph = rgraph_map->rgraph;
+        fprintf(f, "    %s:\n", rgraph->name);
+
+        fprintf(f, "        animation: %s %i\n",
+            rgraph->animation_type, rgraph->n_frames);
+
+        if(rgraph->prismel_trf_list != NULL){
+            fprintf(f, "        prismels:\n");}
+        for(
+            prismel_trf_t *prismel_trf =
+                rgraph->prismel_trf_list;
+            prismel_trf != NULL;
+            prismel_trf = prismel_trf->next
+        ){
+            prismel_t *prismel = prismel_trf->prismel;
+            trf_t *trf = &prismel_trf->trf;
+
+            fprintf(f, "            : %7s (", prismel->name);
+            fprintf(f, "% 3i", trf->add[0]);
+            for(int i = 1; i < prend->space->dims; i++){
+                fprintf(f, " % 3i", trf->add[i]);
+            }
+            fprintf(f, ") %2i %c %2i (%2i %2i)\n", trf->rot, trf->flip? 't': 'f',
+                prismel_trf->color,
+                prismel_trf->frame_start,
+                prismel_trf->frame_len);
+        }
+
+        if(rgraph->rendergraph_trf_list != NULL){
+            fprintf(f, "        shapes:\n");}
+        for(
+            rendergraph_trf_t *rendergraph_trf =
+                rgraph->rendergraph_trf_list;
+            rendergraph_trf != NULL;
+            rendergraph_trf = rendergraph_trf->next
+        ){
+            rendergraph_t *rendergraph = rendergraph_trf->rendergraph;
+            trf_t *trf = &rendergraph_trf->trf;
+
+            fprintf(f, "            : %40s (", rendergraph->name);
+            fprintf(f, "% 3i", trf->add[0]);
+            for(int i = 1; i < prend->space->dims; i++){
+                fprintf(f, " % 3i", trf->add[i]);
+            }
+            fprintf(f, ") %2i %c %2i%c (%2i %2i)\n", trf->rot, trf->flip? 't': 'f',
+                rendergraph_trf->frame_i,
+                rendergraph_trf->frame_i_additive? '+': ' ',
+                rendergraph_trf->frame_start,
+                rendergraph_trf->frame_len);
+        }
+        fprintf(f, "\n");
+    }
+
+    return 0;
+}
+
 int prismelrenderer_render_all_bitmaps(prismelrenderer_t *prend,
     SDL_Color pal[], SDL_Renderer *renderer
 ){
