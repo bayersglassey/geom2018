@@ -87,7 +87,7 @@ static int parse_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer){
 
         if(fus_lexer_got(lexer, ")"))break;
 
-        err = fus_lexer_get_name(lexer, &name);
+        err = fus_lexer_get_str(lexer, &name);
         if(err)return err;
 
         prismel_t *prismel;
@@ -127,7 +127,7 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
             int frame_i = 0;
             bool frame_i_additive = true;
 
-            err = fus_lexer_expect_name(lexer, &name);
+            err = fus_lexer_expect_str(lexer, &name);
             if(err)return err;
 
             err = fus_lexer_expect(lexer, "(");
@@ -232,7 +232,7 @@ static int parse_shape_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer,
             int frame_start = 0;
             int frame_len = -1;
 
-            err = fus_lexer_expect_name(lexer, &name);
+            err = fus_lexer_expect_str(lexer, &name);
             if(err)return err;
 
             err = fus_lexer_expect(lexer, "(");
@@ -315,7 +315,7 @@ static int parse_shape(prismelrenderer_t *prend, fus_lexer_t *lexer,
         if(err)return err;
 
         char *mapper_name;
-        err = fus_lexer_expect_name(lexer, &mapper_name);
+        err = fus_lexer_expect_str(lexer, &mapper_name);
         if(err)return err;
         prismelmapper_t *mapper = prismelrenderer_get_mapper(prend,
             mapper_name);
@@ -325,7 +325,7 @@ static int parse_shape(prismelrenderer_t *prend, fus_lexer_t *lexer,
         free(mapper_name);
 
         char *mapped_rgraph_name;
-        err = fus_lexer_expect_name(lexer, &mapped_rgraph_name);
+        err = fus_lexer_expect_str(lexer, &mapped_rgraph_name);
         if(err)return err;
         rendergraph_t *mapped_rgraph = prismelrenderer_get_rendergraph(prend,
             mapped_rgraph_name);
@@ -418,7 +418,7 @@ static int parse_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer){
             break;
         }
 
-        err = fus_lexer_get_name(lexer, &name);
+        err = fus_lexer_get_str(lexer, &name);
         if(err)return err;
 
         if(prismelrenderer_get_rendergraph(prend, name) != NULL){
@@ -475,7 +475,7 @@ static int parse_mapper(prismelrenderer_t *prend, fus_lexer_t *lexer,
         if(err)return err;
 
         char *prismel_name;
-        err = fus_lexer_expect_name(lexer, &prismel_name);
+        err = fus_lexer_expect_str(lexer, &prismel_name);
         if(err)return err;
         prismel_t *prismel = prismelrenderer_get_prismel(
             prend, prismel_name);
@@ -488,7 +488,7 @@ static int parse_mapper(prismelrenderer_t *prend, fus_lexer_t *lexer,
         if(err)return err;
 
         char *rgraph_name;
-        err = fus_lexer_expect_name(lexer, &rgraph_name);
+        err = fus_lexer_expect_str(lexer, &rgraph_name);
         if(err)return err;
         rendergraph_t *rgraph = prismelrenderer_get_rendergraph(
             prend, rgraph_name);
@@ -521,7 +521,7 @@ static int parse_mappers(prismelrenderer_t *prend, fus_lexer_t *lexer){
 
         if(fus_lexer_got(lexer, ")"))break;
 
-        err = fus_lexer_get_name(lexer, &name);
+        err = fus_lexer_get_str(lexer, &name);
         if(err)return err;
 
         if(prismelrenderer_get_mapper(prend, name) != NULL){

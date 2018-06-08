@@ -10,6 +10,7 @@
 #include "bounds.h"
 #include "util.h"
 #include "llist.h"
+#include "write.h"
 
 
 /***********
@@ -278,7 +279,9 @@ int prismelrenderer_write(prismelrenderer_t *prend, FILE *f){
         prismel != NULL;
         prismel = prismel->next
     ){
-        fprintf(f, "    %s:\n", prismel->name);
+        fprintf(f, "    ");
+        fus_write_str(f, prismel->name);
+        fprintf(f, ":\n");
         fprintf(f, "        images:\n");
         for(int i = 0; i < prismel->n_images; i++){
             prismel_image_t *image = &prismel->images[i];
@@ -302,7 +305,9 @@ int prismelrenderer_write(prismelrenderer_t *prend, FILE *f){
         rgraph_map = rgraph_map->next
     ){
         rendergraph_t *rgraph = rgraph_map->rgraph;
-        fprintf(f, "    %s:\n", rgraph->name);
+        fprintf(f, "    ");
+        fus_write_str(f, rgraph->name);
+        fprintf(f, ":\n");
 
         fprintf(f, "        animation: %s %i\n",
             rgraph->animation_type, rgraph->n_frames);
@@ -318,7 +323,9 @@ int prismelrenderer_write(prismelrenderer_t *prend, FILE *f){
             prismel_t *prismel = prismel_trf->prismel;
             trf_t *trf = &prismel_trf->trf;
 
-            fprintf(f, "            : %7s (", prismel->name);
+            fprintf(f, "            : ");
+            fus_write_str_padded(f, prismel->name, 7);
+            fprintf(f, " (");
             fprintf(f, "% 3i", trf->add[0]);
             for(int i = 1; i < prend->space->dims; i++){
                 fprintf(f, " % 3i", trf->add[i]);
@@ -340,7 +347,9 @@ int prismelrenderer_write(prismelrenderer_t *prend, FILE *f){
             rendergraph_t *rendergraph = rendergraph_trf->rendergraph;
             trf_t *trf = &rendergraph_trf->trf;
 
-            fprintf(f, "            : %40s (", rendergraph->name);
+            fprintf(f, "            : ");
+            fus_write_str_padded(f, rendergraph->name, 40);
+            fprintf(f, " (");
             fprintf(f, "% 3i", trf->add[0]);
             for(int i = 1; i < prend->space->dims; i++){
                 fprintf(f, " % 3i", trf->add[i]);
