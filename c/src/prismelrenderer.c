@@ -330,7 +330,8 @@ int prismelrenderer_write(prismelrenderer_t *prend, FILE *f){
             for(int i = 1; i < prend->space->dims; i++){
                 fprintf(f, " % 3i", trf->add[i]);
             }
-            fprintf(f, ") %2i %c %2i (%2i %2i)\n", trf->rot, trf->flip? 't': 'f',
+            fprintf(f, ") %2i %c %2i (%2i %2i)\n",
+                trf->rot, trf->flip? 't': 'f',
                 prismel_trf->color,
                 prismel_trf->frame_start,
                 prismel_trf->frame_len);
@@ -354,13 +355,45 @@ int prismelrenderer_write(prismelrenderer_t *prend, FILE *f){
             for(int i = 1; i < prend->space->dims; i++){
                 fprintf(f, " % 3i", trf->add[i]);
             }
-            fprintf(f, ") %2i %c %2i%c (%2i %2i)\n", trf->rot, trf->flip? 't': 'f',
+            fprintf(f, ") %2i %c %2i%c (%2i %2i)\n",
+                trf->rot, trf->flip? 't': 'f',
                 rendergraph_trf->frame_i,
                 rendergraph_trf->frame_i_additive? '+': ' ',
                 rendergraph_trf->frame_start,
                 rendergraph_trf->frame_len);
         }
         fprintf(f, "\n");
+    }
+
+    fprintf(f, "mappers:\n");
+    for(
+        prismelmapper_map_t *mapper_map = prend->mapper_map;
+        mapper_map != NULL; mapper_map = mapper_map->next
+    ){
+        prismelmapper_t *mapper = mapper_map->mapper;
+
+        fprintf(f, "    ");
+        fus_write_str(f, mapper->name);
+        fprintf(f, ":\n");
+
+        fprintf(f, "        unit:");
+        for(int i = 0; i < prend->space->dims; i++){
+            fprintf(f, " % 3i", mapper->unit[i]);
+        }
+        fprintf(f, "\n");
+
+        if(mapper->entry_list != NULL){
+            fprintf(f, "        entries:\n");}
+        for(
+            prismelmapper_entry_t *entry = mapper->entry_list;
+            entry != NULL; entry = entry->next
+        ){
+            fprintf(f, "            : ");
+            fus_write_str(f, entry->prismel->name);
+            fprintf(f, " -> ");
+            fus_write_str(f, entry->rendergraph->name);
+            fprintf(f, "\n");
+        }
     }
 
     return 0;
