@@ -17,6 +17,13 @@ void console_clear(console_t *console){
     console->row = 0;
 }
 
+void console_clear_line(console_t *console){
+    int cols = console->cols;
+    char *text = console->text + console->row * cols;
+    for(int i = 0; i < cols; i++)text[i] = ' ';
+    console->col = 0;
+}
+
 int console_init(console_t *console, int cols, int rows, int input_maxlen){
     int text_len = cols * rows;
 
@@ -57,6 +64,7 @@ void console_move_up(console_t *console){
 void console_move_down(console_t *console){
     if(console->row >= console->rows - 1)console->row = 0;
     else console->row++;
+    console_clear_line(console);
 }
 
 void console_move_left(console_t *console){
@@ -162,11 +170,13 @@ void console_blit(console_t *console, font_t *font, SDL_Surface *render_surface,
 
     int cols = console->cols;
     int rows = console->rows;
-    char *text = console->text;
+    char *text = console->text + (console->row + 1) * cols;
+    char *text_end = console->text + cols * rows;
 
     int y = y0;
     for(int row = 0; row < rows; row++){
         int x = x0;
+        if(text >= text_end)text = console->text;
         for(int col = 0; col < cols; col++){
             font_blitchar(font, render_surface, x, y, *text);
             text++;
