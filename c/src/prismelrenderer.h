@@ -88,7 +88,7 @@ int prismelrenderer_load(prismelrenderer_t *prend, const char *filename,
 int prismelrenderer_save(prismelrenderer_t *prend, const char *filename);
 int prismelrenderer_write(prismelrenderer_t *prend, FILE *f);
 int prismelrenderer_render_all_bitmaps(prismelrenderer_t *prend,
-    SDL_Color pal[], SDL_Renderer *renderer);
+    SDL_Palette *pal, SDL_Renderer *renderer);
 int prismelrenderer_get_rendergraphs(prismelrenderer_t *prend,
     int *n_rgraphs, struct rendergraph ***rgraphs);
 
@@ -100,7 +100,7 @@ int prismelrenderer_get_rendergraphs(prismelrenderer_t *prend,
 
 typedef struct prismel_trf {
     prismel_t *prismel;
-    int color;
+    Uint8 color;
     trf_t trf;
 
     int frame_start;
@@ -167,11 +167,11 @@ int rendergraph_get_bitmap_i(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i);
 int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i,
-    SDL_Color pal[], SDL_Renderer *renderer);
+    SDL_Palette *pal, SDL_Renderer *renderer);
 int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
     rendergraph_bitmap_t **bitmap_ptr,
     rot_t rot, flip_t flip, int frame_i,
-    SDL_Color pal[], SDL_Renderer *renderer);
+    SDL_Palette *pal, SDL_Renderer *renderer);
 int rendergraph_bitmap_get_texture(rendergraph_bitmap_t *bitmap,
     SDL_Renderer *renderer, SDL_Texture **texture_ptr);
 

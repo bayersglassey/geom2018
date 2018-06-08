@@ -76,10 +76,9 @@ int font_parse(font_t *font, fus_lexer_t *lexer){
 
     static const int n_chars_x = 16;
     static const int n_chars_y = 16;
-    static const int bpp = 32;
 
-    SDL_Surface *surface = surface_create(
-        char_w * n_chars_x, char_h * n_chars_y, bpp, true, false);
+    SDL_Surface *surface = surface32_create(
+        char_w * n_chars_x, char_h * n_chars_y, true, false);
     if(surface == NULL)return 2;
 
     SDL_LockSurface(surface);
@@ -133,7 +132,7 @@ int font_parse(font_t *font, fus_lexer_t *lexer){
                     line_w, char_w);
                 return 2;}
 
-            Uint32 *p = surface_get_pixel_ptr(surface,
+            Uint32 *p = surface32_get_pixel_ptr(surface,
                 char_x * char_w,
                 char_y * char_h + y);
 

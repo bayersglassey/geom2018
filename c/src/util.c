@@ -60,11 +60,32 @@ char *strndup(const char *s1, size_t len){
     return s2;
 }
 
-SDL_Surface *surface_create(int w, int h, int bpp,
+void palette_printf(SDL_Palette *pal){
+    for(int i = 0; i < pal->ncolors; i++){
+        SDL_Color *c = &pal->colors[i];
+        printf("%i: (%i, %i, %i, %i)\n", i, c->r, c->g, c->b, c->a);
+    }
+}
+
+SDL_Surface *surface8_create(int w, int h,
+    bool use_rle, bool use_colorkey, SDL_Palette *pal
+){
+    SDL_Surface *surface = SDL_CreateRGBSurface(
+        0, w, h, 8, 0, 0, 0, 0);
+    RET_NULL_IF_SDL_NULL(surface);
+    RET_NULL_IF_SDL_NZ(use_rle
+        && SDL_SetSurfaceRLE(surface, 1));
+    RET_NULL_IF_SDL_NZ(use_colorkey
+        && SDL_SetColorKey(surface, SDL_TRUE, 0));
+    RET_NULL_IF_SDL_NZ(SDL_SetSurfacePalette(surface, pal));
+    return surface;
+}
+
+SDL_Surface *surface32_create(int w, int h,
     bool use_rle, bool use_colorkey
 ){
     SDL_Surface *surface = SDL_CreateRGBSurface(
-        0, w, h, bpp, 0, 0, 0, 0);
+        0, w, h, 32, 0, 0, 0, 0);
     RET_NULL_IF_SDL_NULL(surface);
     RET_NULL_IF_SDL_NZ(use_rle
         && SDL_SetSurfaceRLE(surface, 1));
@@ -73,7 +94,11 @@ SDL_Surface *surface_create(int w, int h, int bpp,
     return surface;
 }
 
-Uint32 *surface_get_pixel_ptr(SDL_Surface *surface, int x, int y){
+Uint8 *surface8_get_pixel_ptr(SDL_Surface *surface, int x, int y){
+    return (Uint8 *)surface->pixels + y*surface->pitch + x;
+}
+
+Uint32 *surface32_get_pixel_ptr(SDL_Surface *surface, int x, int y){
     return (Uint32 *)(
         (Uint8 *)surface->pixels + y*surface->pitch + x*(32/8)
     );

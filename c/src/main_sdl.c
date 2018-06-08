@@ -19,7 +19,7 @@
 
 
 typedef struct test_app {
-    SDL_Color *pal;
+    SDL_Palette *pal;
     prismelrenderer_t prend;
     font_t font;
     console_t console;
@@ -157,15 +157,24 @@ int mainloop(SDL_Window *window, SDL_Renderer *renderer,
     test_app_t app;
     app.filename = filename;
 
-    SDL_Color pal[] = {
-        {.r=255, .g= 60, .b= 60},
-        {.r= 60, .g=255, .b= 60},
-        {.r= 60, .g= 60, .b=255},
-        {.r=255, .g=255, .b=255},
-    };
-    app.pal = pal;
+    app.pal = SDL_AllocPalette(256);
+    RET_IF_SDL_NULL(app.pal);
+    RET_IF_SDL_NZ(SDL_SetPaletteColors(
+        app.pal,
+        (SDL_Color []){
+            {.r=  0, .g=  0, .b=  0, .a=  0},
+            {.r=  0, .g=  0, .b=  0, .a=255},
+            {.r=255, .g= 60, .b= 60, .a=255},
+            {.r= 60, .g=255, .b= 60, .a=255},
+            {.r= 60, .g= 60, .b=255, .a=255},
+            {.r=255, .g=255, .b= 60, .a=255},
+            {.r= 60, .g=255, .b=255, .a=255},
+            {.r=255, .g= 60, .b=255, .a=255},
+            {.r=255, .g=255, .b=255, .a=255},
+        },
+        0, 9));
 
-    SDL_Surface *render_surface = surface_create(SCW, SCH, 32,
+    SDL_Surface *render_surface = surface32_create(SCW, SCH,
         true, true);
     if(render_surface == NULL)return 2;
 

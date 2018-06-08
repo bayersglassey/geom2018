@@ -400,7 +400,7 @@ int prismelrenderer_write(prismelrenderer_t *prend, FILE *f){
 }
 
 int prismelrenderer_render_all_bitmaps(prismelrenderer_t *prend,
-    SDL_Color pal[], SDL_Renderer *renderer
+    SDL_Palette *pal, SDL_Renderer *renderer
 ){
     int err;
     rendergraph_map_t *rgraph_map = prend->rendergraph_map;
@@ -521,8 +521,8 @@ void rendergraph_bitmap_dump(rendergraph_bitmap_t *bitmap, FILE *f,
         for(int y = 0; y < surface->h; y++){
             fprintf(f, "%s  ", spaces);
             for(int x = 0; x < surface->w; x++){
-                Uint32 c = *surface_get_pixel_ptr(surface, x, y);
-                fprintf(f, " %08x", c);
+                Uint8 c = *surface8_get_pixel_ptr(surface, x, y);
+                fprintf(f, " %02x", c);
             }
             fprintf(f, "\n");
         }
@@ -659,7 +659,7 @@ int rendergraph_trf_get_frame_i(rendergraph_trf_t *rendergraph_trf,
 
 int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i,
-    SDL_Color pal[], SDL_Renderer *renderer
+    SDL_Palette *pal, SDL_Renderer *renderer
 ){
     int err;
     int bitmap_i = rendergraph_get_bitmap_i(rendergraph, rot, flip,
@@ -748,8 +748,8 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     /* Store "accumulated" bbox on bitmap */
     position_box_from_boundary_box(&bitmap->pbox, &bbox);
 
-    /* Bytes per pixel */
-    int bpp = 32;
+    /* Bits per pixel */
+    int bpp = 8;
 
     /* Get rid of old bitmap, create new one */
     if(bitmap->surface != NULL){
@@ -760,8 +760,8 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
         SDL_DestroyTexture(bitmap->texture);
         bitmap->texture = NULL;
     }
-    SDL_Surface *surface = surface_create(bitmap->pbox.w, bitmap->pbox.h,
-        bpp, true, true);
+    SDL_Surface *surface = surface8_create(bitmap->pbox.w, bitmap->pbox.h,
+        true, true, pal);
     if(surface == NULL)return 2;
 
     /* Fill new bitmap with transparent colour */
@@ -779,10 +779,7 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
             prismel_trf, rendergraph->n_frames, frame_i);
         if(!visible)continue;
 
-        int color_i = prismel_trf->color;
-        SDL_Color *color = &pal[color_i];
-        Uint32 c = SDL_MapRGB(surface->format,
-            color->r, color->g, color->b);
+        Uint8 c = prismel_trf->color;
 
         /* Combine the transformations: trf and prismel_trf->trf */
         trf_t trf2 = prismel_trf->trf;
@@ -799,10 +796,9 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
         while(line != NULL){
             int x = line->x + bitmap->pbox.x + shift_x;
             int y = line->y + bitmap->pbox.y + shift_y;
-            Uint32 *p = surface_get_pixel_ptr(surface, x, y);
+            Uint8 *p = surface8_get_pixel_ptr(surface, x, y);
             for(int xx = 0; xx < line->w; xx++){
-                // p[xx] = c;
-                p[xx] = (color_i+1) * 0x22222222; /* for debugging */
+                p[xx] = c;
             }
             line = line->next;
         }
@@ -865,7 +861,7 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
 int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
     rendergraph_bitmap_t **bitmap_ptr,
     rot_t rot, flip_t flip, int frame_i,
-    SDL_Color pal[], SDL_Renderer *renderer
+    SDL_Palette *pal, SDL_Renderer *renderer
 ){
     int err;
     int bitmap_i = rendergraph_get_bitmap_i(rendergraph, rot, flip, frame_i);

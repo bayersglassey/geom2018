@@ -34,8 +34,12 @@ bool streq(const char *s1, const char *s2);
 size_t strnlen(const char *s, size_t maxlen);
 char *strdup(const char *s1);
 char *strndup(const char *s1, size_t len);
-SDL_Surface *surface_create(int w, int h, int bpp,
+void palette_printf(SDL_Palette *pal);
+SDL_Surface *surface8_create(int w, int h,
+    bool use_rle, bool use_colorkey, SDL_Palette *pal);
+SDL_Surface *surface32_create(int w, int h,
     bool use_rle, bool use_colorkey);
-Uint32 *surface_get_pixel_ptr(SDL_Surface *surface, int x, int y);
+Uint8 *surface8_get_pixel_ptr(SDL_Surface *surface, int x, int y);
+Uint32 *surface32_get_pixel_ptr(SDL_Surface *surface, int x, int y);
 
 #endif
