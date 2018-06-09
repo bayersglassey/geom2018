@@ -9,7 +9,7 @@
 #include "lexer.h"
 #include "bounds.h"
 #include "util.h"
-#include "llist.h"
+#include "array.h"
 #include "write.h"
 
 
@@ -92,7 +92,7 @@ void prismel_cleanup(prismel_t *prismel){
 
     for(int i = 0; i < prismel->n_images; i++){
         prismel_image_t *image = &prismel->images[i];
-        LLIST_FREE(prismel_image_line_t, *image, line_list, (void))
+        ARRAY_FREE(prismel_image_line_t, *image, lines, (void))
     }
     free(prismel->images);
 }
@@ -106,13 +106,13 @@ int prismel_create_images(prismel_t *prismel, vecspace_t *space){
 
     for(int i = 0; i < n_images; i++){
         prismel_image_t *image = &images[i];
-        LLIST_INIT(*image, line_list)
+        ARRAY_INIT(*image, lines)
     }
     return 0;
 }
 
 int prismel_image_push_line(prismel_image_t *image, int x, int y, int w){
-    LLIST_PUSH(prismel_image_line_t, *image, line_list, line)
+    ARRAY_PUSH_NEW(prismel_image_line_t, *image, lines, line)
     line->x = x;
     line->y = y;
     line->w = w;
@@ -127,16 +127,15 @@ void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box,
 
     boundary_box_clear(box);
 
-    prismel_image_line_t *line = image->line_list;
-    while(line != NULL){
+    for(int i = 0; i < image->lines_len; i++){
+        prismel_image_line_t *line = image->lines[i];
+
         boundary_box_t line_box;
         line_box.l = line->x;
         line_box.r = line->x + line->w;
         line_box.t = line->y;
         line_box.b = line->y + line_h;
         boundary_box_union(box, &line_box);
-
-        line = line->next;
     }
 }
 
@@ -148,18 +147,18 @@ void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box,
 
 int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space){
     renderer->space = space;
-    LLIST_INIT(*renderer, prismel_list)
-    LLIST_INIT(*renderer, rendergraph_map)
-    LLIST_INIT(*renderer, mapper_map)
+    ARRAY_INIT(*renderer, prismels)
+    ARRAY_INIT(*renderer, rendergraphs)
+    ARRAY_INIT(*renderer, mappers)
     return 0;
 }
 
 void prismelrenderer_cleanup(prismelrenderer_t *renderer){
-    LLIST_FREE(prismel_t, *renderer, prismel_list, prismel_cleanup)
-    LLIST_FREE(rendergraph_map_t, *renderer, rendergraph_map,
-        rendergraph_map_cleanup)
-    LLIST_FREE(prismelmapper_map_t, *renderer, mapper_map,
-        prismelmapper_map_cleanup)
+    ARRAY_FREE(prismel_t, *renderer, prismels, prismel_cleanup)
+    ARRAY_FREE(rendergraph_t, *renderer, rendergraphs,
+        rendergraph_cleanup)
+    ARRAY_FREE(prismelmapper_t, *renderer, mappers,
+        prismelmapper_cleanup)
 }
 
 void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
@@ -170,9 +169,8 @@ void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
     fprintf(f, "  space: %p\n", renderer->space);
 
     fprintf(f, "  prismels:\n");
-    for(prismel_t *prismel = renderer->prismel_list;
-        prismel != NULL; prismel = prismel->next
-    ){
+    for(int i = 0; i < renderer->prismels_len; i++){
+        prismel_t *prismel = renderer->prismels[i];
         fprintf(f, "    prismel: %p\n", prismel);
         fprintf(f, "      name: %s\n", prismel->name);
         fprintf(f, "      n_images: %i\n", prismel->n_images);
@@ -180,27 +178,24 @@ void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
         for(int i = 0; i < prismel->n_images; i++){
             prismel_image_t *image = &prismel->images[i];
             fprintf(f, "        image: %p", image);
-            for(prismel_image_line_t *line = image->line_list;
-                line != NULL; line = line->next
-            ){
+            for(int i = 0; i < image->lines_len; i++){
+                prismel_image_line_t *line = image->lines[i];
                 fprintf(f, " (% i % i % i)", line->x, line->y, line->w);
             }
             fprintf(f, "\n");
         }
     }
 
-    fprintf(f, "  rendergraph_map:\n");
-    for(rendergraph_map_t *map = renderer->rendergraph_map;
-        map != NULL; map = map->next
-    ){
-        rendergraph_dump(map->rgraph, f, 4, dump_bitmap_surfaces);
+    fprintf(f, "  rendergraphs:\n");
+    for(int i = 0; i < renderer->rendergraphs_len; i++){
+        rendergraph_t *rgraph = renderer->rendergraphs[i];
+        rendergraph_dump(rgraph, f, 4, dump_bitmap_surfaces);
     }
 
-    fprintf(f, "  prismelmapper_map:\n");
-    for(prismelmapper_map_t *map = renderer->mapper_map;
-        map != NULL; map = map->next
-    ){
-        prismelmapper_dump(map->mapper, f, 4);
+    fprintf(f, "  prismelmappers:\n");
+    for(int i = 0; i < renderer->mappers_len; i++){
+        prismelmapper_t *mapper = renderer->mappers[i];
+        prismelmapper_dump(mapper, f, 4);
     }
 }
 
@@ -208,7 +203,7 @@ int prismelrenderer_push_prismel(prismelrenderer_t *renderer, char *name,
     prismel_t **prismel_ptr
 ){
     int err;
-    LLIST_PUSH(prismel_t, *renderer, prismel_list, prismel)
+    ARRAY_PUSH_NEW(prismel_t, *renderer, prismels, prismel)
     err = prismel_init(prismel, name, renderer->space);
     if(err)return err;
     *prismel_ptr = prismel;
@@ -218,10 +213,9 @@ int prismelrenderer_push_prismel(prismelrenderer_t *renderer, char *name,
 prismel_t *prismelrenderer_get_prismel(prismelrenderer_t *renderer,
     char *name
 ){
-    prismel_t *prismel = renderer->prismel_list;
-    while(prismel != NULL){
+    for(int i = 0; i < renderer->prismels_len; i++){
+        prismel_t *prismel = renderer->prismels[i];
         if(strcmp(prismel->name, name) == 0)return prismel;
-        prismel = prismel->next;
     }
     return NULL;
 }
@@ -229,13 +223,21 @@ prismel_t *prismelrenderer_get_prismel(prismelrenderer_t *renderer,
 rendergraph_t *prismelrenderer_get_rendergraph(prismelrenderer_t *prend,
     const char *name
 ){
-    return rendergraph_map_get(prend->rendergraph_map, name);
+    for(int i = 0; i < prend->rendergraphs_len; i++){
+        rendergraph_t *rgraph = prend->rendergraphs[i];
+        if(!strcmp(rgraph->name, name))return rgraph;
+    }
+    return NULL;
 }
 
 prismelmapper_t *prismelrenderer_get_mapper(prismelrenderer_t *prend,
     const char *name
 ){
-    return prismelmapper_map_get(prend->mapper_map, name);
+    for(int i = 0; i < prend->mappers_len; i++){
+        prismelmapper_t *mapper = prend->mappers[i];
+        if(!strcmp(mapper->name, name))return mapper;
+    }
+    return NULL;
 }
 
 int prismelrenderer_load(prismelrenderer_t *prend, const char *filename,
@@ -274,11 +276,8 @@ int prismelrenderer_write(prismelrenderer_t *prend, FILE *f){
     int err;
 
     fprintf(f, "prismels:\n");
-    for(
-        prismel_t *prismel = prend->prismel_list;
-        prismel != NULL;
-        prismel = prismel->next
-    ){
+    for(int i = 0; i < prend->prismels_len; i++){
+        prismel_t *prismel = prend->prismels[i];
         fprintf(f, "    ");
         fus_write_str(f, prismel->name);
         fprintf(f, ":\n");
@@ -286,11 +285,8 @@ int prismelrenderer_write(prismelrenderer_t *prend, FILE *f){
         for(int i = 0; i < prismel->n_images; i++){
             prismel_image_t *image = &prismel->images[i];
             fprintf(f, "            :");
-            for(
-                prismel_image_line_t *line = image->line_list;
-                line != NULL;
-                line = line->next
-            ){
+            for(int i = 0; i < image->lines_len; i++){
+                prismel_image_line_t *line = image->lines[i];
                 fprintf(f, " (% 3i % 3i % 3i)",
                     line->x, line->y, line->w);
             }
@@ -299,12 +295,8 @@ int prismelrenderer_write(prismelrenderer_t *prend, FILE *f){
     }
 
     fprintf(f, "shapes:\n");
-    for(
-        rendergraph_map_t *rgraph_map = prend->rendergraph_map;
-        rgraph_map != NULL;
-        rgraph_map = rgraph_map->next
-    ){
-        rendergraph_t *rgraph = rgraph_map->rgraph;
+    for(int i = 0; i < prend->rendergraphs_len; i++){
+        rendergraph_t *rgraph = prend->rendergraphs[i];
         fprintf(f, "    ");
         fus_write_str(f, rgraph->name);
         fprintf(f, ":\n");
@@ -312,14 +304,11 @@ int prismelrenderer_write(prismelrenderer_t *prend, FILE *f){
         fprintf(f, "        animation: %s %i\n",
             rgraph->animation_type, rgraph->n_frames);
 
-        if(rgraph->prismel_trf_list != NULL){
+        if(rgraph->prismel_trfs != NULL){
             fprintf(f, "        prismels:\n");}
-        for(
+        for(int i = 0; i < rgraph->prismel_trfs_len; i++){
             prismel_trf_t *prismel_trf =
-                rgraph->prismel_trf_list;
-            prismel_trf != NULL;
-            prismel_trf = prismel_trf->next
-        ){
+                rgraph->prismel_trfs[i];
             prismel_t *prismel = prismel_trf->prismel;
             trf_t *trf = &prismel_trf->trf;
 
@@ -337,14 +326,11 @@ int prismelrenderer_write(prismelrenderer_t *prend, FILE *f){
                 prismel_trf->frame_len);
         }
 
-        if(rgraph->rendergraph_trf_list != NULL){
+        if(rgraph->rendergraph_trfs != NULL){
             fprintf(f, "        shapes:\n");}
-        for(
+        for(int i = 0; i < rgraph->rendergraph_trfs_len; i++){
             rendergraph_trf_t *rendergraph_trf =
-                rgraph->rendergraph_trf_list;
-            rendergraph_trf != NULL;
-            rendergraph_trf = rendergraph_trf->next
-        ){
+                rgraph->rendergraph_trfs[i];
             rendergraph_t *rendergraph = rendergraph_trf->rendergraph;
             trf_t *trf = &rendergraph_trf->trf;
 
@@ -366,11 +352,8 @@ int prismelrenderer_write(prismelrenderer_t *prend, FILE *f){
     }
 
     fprintf(f, "mappers:\n");
-    for(
-        prismelmapper_map_t *mapper_map = prend->mapper_map;
-        mapper_map != NULL; mapper_map = mapper_map->next
-    ){
-        prismelmapper_t *mapper = mapper_map->mapper;
+    for(int i = 0; i < prend->mappers_len; i++){
+        prismelmapper_t *mapper = prend->mappers[i];
 
         fprintf(f, "    ");
         fus_write_str(f, mapper->name);
@@ -382,12 +365,10 @@ int prismelrenderer_write(prismelrenderer_t *prend, FILE *f){
         }
         fprintf(f, "\n");
 
-        if(mapper->entry_list != NULL){
+        if(mapper->entries != NULL){
             fprintf(f, "        entries:\n");}
-        for(
-            prismelmapper_entry_t *entry = mapper->entry_list;
-            entry != NULL; entry = entry->next
-        ){
+        for(int i = 0; i < mapper->entries_len; i++){
+            prismelmapper_entry_t *entry = mapper->entries[i];
             fprintf(f, "            : ");
             fus_write_str(f, entry->prismel->name);
             fprintf(f, " -> ");
@@ -403,9 +384,8 @@ int prismelrenderer_render_all_bitmaps(prismelrenderer_t *prend,
     SDL_Palette *pal, SDL_Renderer *renderer
 ){
     int err;
-    rendergraph_map_t *rgraph_map = prend->rendergraph_map;
-    while(rgraph_map != NULL){
-        rendergraph_t *rgraph = rgraph_map->rgraph;
+    for(int i = 0; i < prend->rendergraphs_len; i++){
+        rendergraph_t *rgraph = prend->rendergraphs[i];
         for(int frame_i = 0; frame_i < rgraph->n_frames; frame_i++){
             for(int rot = 0; rot < rgraph->space->rot_max; rot++){
                 err = rendergraph_get_or_render_bitmap(
@@ -413,39 +393,7 @@ int prismelrenderer_render_all_bitmaps(prismelrenderer_t *prend,
                 if(err)return err;
             }
         }
-        rgraph_map = rgraph_map->next;
     }
-    return 0;
-}
-
-int prismelrenderer_get_rendergraphs(prismelrenderer_t *prend,
-    int *n_rgraphs_ptr, rendergraph_t ***rgraphs_ptr
-){
-    int n_rgraphs = 0;
-
-    for(
-        rendergraph_map_t *rgraph_map = prend->rendergraph_map;
-        rgraph_map != NULL;
-        rgraph_map = rgraph_map->next
-    ){
-        n_rgraphs++;
-    }
-
-    rendergraph_t **rgraphs = malloc(sizeof(*rgraphs) * n_rgraphs);
-    if(rgraphs == NULL)return 1;
-
-    int rgraph_i = 0;
-    for(
-        rendergraph_map_t *rgraph_map = prend->rendergraph_map;
-        rgraph_map != NULL;
-        rgraph_map = rgraph_map->next
-    ){
-        rgraphs[rgraph_i] = rgraph_map->rgraph;
-        rgraph_i++;
-    }
-
-    *n_rgraphs_ptr = n_rgraphs;
-    *rgraphs_ptr = rgraphs;
     return 0;
 }
 
@@ -473,9 +421,9 @@ const int rendergraph_n_frames_default = 1;
 void rendergraph_cleanup(rendergraph_t *rendergraph){
     free(rendergraph->name);
 
-    LLIST_FREE(prismel_trf_t, *rendergraph, prismel_trf_list,
+    ARRAY_FREE(prismel_trf_t, *rendergraph, prismel_trfs,
         (void))
-    LLIST_FREE(rendergraph_trf_t, *rendergraph, rendergraph_trf_list,
+    ARRAY_FREE(rendergraph_trf_t, *rendergraph, rendergraph_trfs,
         (void))
 
     for(int i = 0; i < rendergraph->n_bitmaps; i++){
@@ -493,8 +441,8 @@ int rendergraph_init(rendergraph_t *rendergraph, char *name,
     int err;
     rendergraph->name = name;
     rendergraph->space = space;
-    LLIST_INIT(*rendergraph, prismel_trf_list)
-    LLIST_INIT(*rendergraph, rendergraph_trf_list)
+    ARRAY_INIT(*rendergraph, prismel_trfs)
+    ARRAY_INIT(*rendergraph, rendergraph_trfs)
 
     rendergraph->animation_type = animation_type;
     rendergraph->n_frames = n_frames;
@@ -543,10 +491,9 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces,
     }
     fprintf(f, "%s  space: %p\n", spaces, rendergraph->space);
 
-    fprintf(f, "%s  prismel_trf_list:\n", spaces);
-    for(prismel_trf_t *prismel_trf = rendergraph->prismel_trf_list;
-        prismel_trf != NULL; prismel_trf = prismel_trf->next
-    ){
+    fprintf(f, "%s  prismel_trfs:\n", spaces);
+    for(int i = 0; i < rendergraph->prismel_trfs_len; i++){
+        prismel_trf_t *prismel_trf = rendergraph->prismel_trfs[i];
         prismel_t *prismel = prismel_trf->prismel;
         fprintf(f, "%s    prismel_trf: %7s ", spaces,
             prismel == NULL? "<NULL>": prismel->name);
@@ -555,13 +502,10 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces,
             prismel_trf->frame_start, prismel_trf->frame_len);
     }
 
-    fprintf(f, "%s  rendergraph_trf_list:\n", spaces);
-    for(
+    fprintf(f, "%s  rendergraph_trfs:\n", spaces);
+    for(int i = 0; i < rendergraph->rendergraph_trfs_len; i++){
         rendergraph_trf_t *rendergraph_trf =
-            rendergraph->rendergraph_trf_list;
-        rendergraph_trf != NULL;
-        rendergraph_trf = rendergraph_trf->next
-    ){
+            rendergraph->rendergraph_trfs[i];
         rendergraph_t *rendergraph = rendergraph_trf->rendergraph;
         fprintf(f, "%s    rendergraph_trf: %7s ", spaces,
             rendergraph == NULL? "<NULL>": rendergraph->name);
@@ -599,7 +543,7 @@ int rendergraph_create_bitmaps(rendergraph_t *rendergraph){
 int rendergraph_push_rendergraph_trf(rendergraph_t *rendergraph,
     rendergraph_trf_t **rendergraph_trf_ptr
 ){
-    LLIST_PUSH(rendergraph_trf_t, *rendergraph, rendergraph_trf_list,
+    ARRAY_PUSH_NEW(rendergraph_trf_t, *rendergraph, rendergraph_trfs,
         rendergraph_trf)
     rendergraph_trf->frame_start = 0;
     rendergraph_trf->frame_len = -1;
@@ -612,7 +556,7 @@ int rendergraph_push_rendergraph_trf(rendergraph_t *rendergraph,
 int rendergraph_push_prismel_trf(rendergraph_t *rendergraph,
     prismel_trf_t **prismel_trf_ptr
 ){
-    LLIST_PUSH(prismel_trf_t, *rendergraph, prismel_trf_list,
+    ARRAY_PUSH_NEW(prismel_trf_t, *rendergraph, prismel_trfs,
         prismel_trf)
     prismel_trf->frame_start = 0;
     prismel_trf->frame_len = -1;
@@ -669,7 +613,7 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     /* bitmap->pbox should be the union of its sub-bitmap's pboxes.
     (I mean the set-theoretic union, like the "OR" of Venn diagrams.
     And by sub-bitmaps I mean the bitmaps of
-    rendergraph->rendergraph_trf_list.)
+    rendergraph->rendergraph_trfs.)
     It's easy to do unions with boundary_box_t, so we use one of those
     as an "accumulator" while iterating through sub-bitmaps.
     We will convert it back to a position_box_t when we store it in
@@ -686,11 +630,8 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     prismel's boundary. */
     boundary_box_clear(&bbox);
 
-    for(
-        prismel_trf_t *prismel_trf = rendergraph->prismel_trf_list;
-        prismel_trf != NULL;
-        prismel_trf = prismel_trf->next
-    ){
+    for(int i = 0; i < rendergraph->prismel_trfs_len; i++){
+        prismel_trf_t *prismel_trf = rendergraph->prismel_trfs[i];
         prismel_t *prismel = prismel_trf->prismel;
         bool visible = prismel_trf_get_frame_visible(
             prismel_trf, rendergraph->n_frames, frame_i);
@@ -712,12 +653,9 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
         boundary_box_union(&bbox, &bbox2);
     }
 
-    for(
+    for(int i = 0; i < rendergraph->rendergraph_trfs_len; i++){
         rendergraph_trf_t *rendergraph_trf =
-            rendergraph->rendergraph_trf_list;
-        rendergraph_trf != NULL;
-        rendergraph_trf = rendergraph_trf->next
-    ){
+            rendergraph->rendergraph_trfs[i];
         rendergraph_t *rendergraph2 = rendergraph_trf->rendergraph;
         int frame_i2 = rendergraph_trf_get_frame_i(
             rendergraph_trf, frame_i);
@@ -769,11 +707,8 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     SDL_memset(surface->pixels, 0, surface->h * surface->pitch);
 
     /* Render prismels */
-    for(
-        prismel_trf_t *prismel_trf = rendergraph->prismel_trf_list;
-        prismel_trf != NULL;
-        prismel_trf = prismel_trf->next
-    ){
+    for(int i = 0; i < rendergraph->prismel_trfs_len; i++){
+        prismel_trf_t *prismel_trf = rendergraph->prismel_trfs[i];
         prismel_t *prismel = prismel_trf->prismel;
         bool visible = prismel_trf_get_frame_visible(
             prismel_trf, rendergraph->n_frames, frame_i);
@@ -792,15 +727,14 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
 
         /* Draw prismel's image onto SDL surface */
         prismel_image_t *image = &prismel->images[bitmap_i2];
-        prismel_image_line_t *line = image->line_list;
-        while(line != NULL){
+        for(int i = 0; i < image->lines_len; i++){
+            prismel_image_line_t *line = image->lines[i];
             int x = line->x + bitmap->pbox.x + shift_x;
             int y = line->y + bitmap->pbox.y + shift_y;
             Uint8 *p = surface8_get_pixel_ptr(surface, x, y);
             for(int xx = 0; xx < line->w; xx++){
                 p[xx] = c;
             }
-            line = line->next;
         }
 
     }
@@ -809,12 +743,9 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     SDL_UnlockSurface(surface);
 
     /* Render sub-rendergraphs */
-    for(
+    for(int i = 0; i < rendergraph->rendergraph_trfs_len; i++){
         rendergraph_trf_t *rendergraph_trf =
-            rendergraph->rendergraph_trf_list;
-        rendergraph_trf != NULL;
-        rendergraph_trf = rendergraph_trf->next
-    ){
+            rendergraph->rendergraph_trfs[i];
         rendergraph_t *rendergraph2 = rendergraph_trf->rendergraph;
         int frame_i2 = rendergraph_trf_get_frame_i(
             rendergraph_trf, frame_i);
@@ -892,34 +823,6 @@ int rendergraph_bitmap_get_texture(rendergraph_bitmap_t *bitmap,
 
 
 
-/*******************
- * RENDERGRAPH_MAP *
- *******************/
-
-
-void rendergraph_map_cleanup(rendergraph_map_t *map){
-    rendergraph_cleanup(map->rgraph);
-    free(map->rgraph);
-}
-
-int rendergraph_map_init(rendergraph_map_t *map, rendergraph_t *rgraph){
-    map->rgraph = rgraph;
-    return 0;
-}
-
-rendergraph_t *rendergraph_map_get(rendergraph_map_t *map,
-    const char *name
-){
-    while(map != NULL){
-        if(map->rgraph != NULL && streq(map->rgraph->name, name)){
-            return map->rgraph;}
-        map = map->next;
-    }
-    return NULL;
-}
-
-
-
 /*****************
  * PRISMELMAPPER *
  *****************/
@@ -927,9 +830,9 @@ rendergraph_t *rendergraph_map_get(rendergraph_map_t *map,
 void prismelmapper_cleanup(prismelmapper_t *mapper){
     free(mapper->name);
 
-    LLIST_FREE(prismelmapper_entry_t, *mapper, entry_list,
+    ARRAY_FREE(prismelmapper_entry_t, *mapper, entries,
         (void))
-    LLIST_FREE(prismelmapper_application_t, *mapper, application_list,
+    ARRAY_FREE(prismelmapper_application_t, *mapper, applications,
         (void))
 }
 
@@ -937,8 +840,8 @@ int prismelmapper_init(prismelmapper_t *mapper, char *name, vecspace_t *space){
     mapper->name = name;
     mapper->space = space;
     vec_zero(space->dims, mapper->unit);
-    LLIST_INIT(*mapper, entry_list)
-    LLIST_INIT(*mapper, application_list)
+    ARRAY_INIT(*mapper, entries)
+    ARRAY_INIT(*mapper, applications)
     return 0;
 }
 
@@ -955,18 +858,16 @@ void prismelmapper_dump(prismelmapper_t *mapper, FILE *f, int n_spaces){
     fprintf(f, "\n");
 
     fprintf(f, "%s  entries:\n", spaces);
-    for(prismelmapper_entry_t *entry = mapper->entry_list;
-        entry != NULL; entry = entry->next
-    ){
+    for(int i = 0; i < mapper->entries_len; i++){
+        prismelmapper_entry_t *entry = mapper->entries[i];
         fprintf(f, "%s    %s -> %s\n", spaces,
             entry->prismel == NULL? "<NULL>": entry->prismel->name,
             entry->rendergraph == NULL? "<NULL>": entry->rendergraph->name);
     }
 
     fprintf(f, "%s  applications:\n", spaces);
-    for(prismelmapper_application_t *application = mapper->application_list;
-        application != NULL; application = application->next
-    ){
+    for(int i = 0; i < mapper->applications_len; i++){
+        prismelmapper_application_t *application = mapper->applications[i];
         fprintf(f, "%s    %s -> %s\n", spaces,
             application->mapped_rgraph == NULL? "<NULL>":
                 application->mapped_rgraph->name,
@@ -978,7 +879,7 @@ void prismelmapper_dump(prismelmapper_t *mapper, FILE *f, int n_spaces){
 int prismelmapper_push_entry(prismelmapper_t *mapper,
     prismel_t *prismel, rendergraph_t *rendergraph
 ){
-    LLIST_PUSH(prismelmapper_entry_t, *mapper, entry_list, entry)
+    ARRAY_PUSH_NEW(prismelmapper_entry_t, *mapper, entries, entry)
     entry->prismel = prismel;
     entry->rendergraph = rendergraph;
     return 0;
@@ -1010,16 +911,13 @@ int prismelmapper_apply(prismelmapper_t *mapper, prismelrenderer_t *prend,
     if(err)return err;
 
     /* Apply mapper to mapped_rgraph's prismels */
-    for(prismel_trf_t *prismel_trf = mapped_rgraph->prismel_trf_list;
-        prismel_trf != NULL; prismel_trf = prismel_trf->next
-    ){
+    for(int i = 0; i < mapped_rgraph->prismel_trfs_len; i++){
+        prismel_trf_t *prismel_trf = mapped_rgraph->prismel_trfs[i];
         prismel_t *prismel = prismel_trf->prismel;
-        prismelmapper_entry_t *entry;
-        for(
-            entry = mapper->entry_list;
-            entry != NULL;
-            entry = entry->next
-        ){
+
+        bool entry_found = false;
+        for(int i = 0; i < mapper->entries_len; i++){
+            prismelmapper_entry_t *entry = mapper->entries[i];
             if(prismel == entry->prismel){
                 rendergraph_trf_t *new_rendergraph_trf;
                 err = rendergraph_push_rendergraph_trf(resulting_rgraph,
@@ -1034,10 +932,12 @@ int prismelmapper_apply(prismelmapper_t *mapper, prismelrenderer_t *prend,
                 new_rendergraph_trf->frame_len =
                     prismel_trf->frame_len;
 
+                entry_found = true;
                 break;
             }
         }
-        if(entry == NULL){
+
+        if(!entry_found){
             fprintf(stderr,
                 "Prismel %s does not match any mapper entry\n",
                 prismel->name);
@@ -1046,12 +946,9 @@ int prismelmapper_apply(prismelmapper_t *mapper, prismelrenderer_t *prend,
     }
 
     /* Apply mapper to mapped_rgraph's sub-rendergraphs */
-    for(
+    for(int i = 0; i < mapped_rgraph->rendergraph_trfs_len; i++){
         rendergraph_trf_t *rendergraph_trf =
-            mapped_rgraph->rendergraph_trf_list;
-        rendergraph_trf != NULL;
-        rendergraph_trf = rendergraph_trf->next
-    ){
+            mapped_rgraph->rendergraph_trfs[i];
         rendergraph_t *rgraph = rendergraph_trf->rendergraph;
 
         /* Generate a name, e.g. "<curvy dodeca_sixth>" */
@@ -1100,9 +997,8 @@ int prismelmapper_apply(prismelmapper_t *mapper, prismelrenderer_t *prend,
 
     /* Add the resulting_rgraph to the prismelrenderer, makes for
     easier debugging */
-    LLIST_PUSH(rendergraph_map_t, *prend, rendergraph_map, new_map)
-    err = rendergraph_map_init(new_map, resulting_rgraph);
-    if(err)return err;
+    ARRAY_PUSH(rendergraph_t, *prend, rendergraphs,
+        resulting_rgraph)
 
     /* Success! */
     *rgraph_ptr = resulting_rgraph;
@@ -1112,7 +1008,7 @@ int prismelmapper_apply(prismelmapper_t *mapper, prismelrenderer_t *prend,
 int prismelmapper_push_application(prismelmapper_t *mapper,
     rendergraph_t *mapped_rgraph, rendergraph_t *resulting_rgraph
 ){
-    LLIST_PUSH(prismelmapper_application_t, *mapper, application_list,
+    ARRAY_PUSH_NEW(prismelmapper_application_t, *mapper, applications,
         application)
     application->mapped_rgraph = mapped_rgraph;
     application->resulting_rgraph = resulting_rgraph;
@@ -1122,43 +1018,11 @@ int prismelmapper_push_application(prismelmapper_t *mapper,
 rendergraph_t *prismelmapper_get_application(prismelmapper_t *mapper,
     rendergraph_t *mapped_rgraph
 ){
-    prismelmapper_application_t *application = mapper->application_list;
-    while(application != NULL){
+    for(int i = 0; i < mapper->applications_len; i++){
+        prismelmapper_application_t *application = mapper->applications[i];
         if(application->mapped_rgraph == mapped_rgraph){
             return application->resulting_rgraph;}
-        application = application->next;
     }
     return NULL;
 }
-
-
-
-/*********************
- * PRISMELMAPPER_MAP *
- *********************/
-
-
-void prismelmapper_map_cleanup(prismelmapper_map_t *map){
-    prismelmapper_cleanup(map->mapper);
-    free(map->mapper);
-}
-
-int prismelmapper_map_init(prismelmapper_map_t *map,
-    prismelmapper_t *mapper
-){
-    map->mapper = mapper;
-    return 0;
-}
-
-prismelmapper_t *prismelmapper_map_get(prismelmapper_map_t *map,
-    const char *name
-){
-    while(map != NULL){
-        if(map->mapper != NULL && streq(map->mapper->name, name)){
-            return map->mapper;}
-        map = map->next;
-    }
-    return NULL;
-}
-
 

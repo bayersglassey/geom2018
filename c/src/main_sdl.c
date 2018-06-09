@@ -24,8 +24,6 @@ typedef struct test_app {
     font_t font;
     console_t console;
     const char *filename;
-    int n_rgraphs;
-    rendergraph_t **rgraphs;
     int cur_rgraph_i;
 
     int x0;
@@ -47,17 +45,13 @@ int load_rendergraphs(test_app_t *app, bool reload){
     int err;
 
     if(reload){
-        free(app->rgraphs);
         prismelrenderer_cleanup(&app->prend);
     }
 
     err = prismelrenderer_load(&app->prend, app->filename, &vec4);
     if(err)return err;
 
-    err = prismelrenderer_get_rendergraphs(&app->prend,
-        &app->n_rgraphs, &app->rgraphs);
-    if(err)return err;
-    if(app->n_rgraphs < 1){
+    if(app->prend.rendergraphs_len < 1){
         fprintf(stderr, "No rendergraphs in %s\n", app->filename);
         return 2;}
 
@@ -67,7 +61,8 @@ int load_rendergraphs(test_app_t *app, bool reload){
 int process_console_input(test_app_t *app){
     int err;
 
-    rendergraph_t *rgraph = app->rgraphs[app->cur_rgraph_i];
+    rendergraph_t *rgraph =
+        app->prend.rendergraphs[app->cur_rgraph_i];
 
     fus_lexer_t lexer;
     err = fus_lexer_init(&lexer, app->console.input);
@@ -210,7 +205,8 @@ int mainloop(SDL_Window *window, SDL_Renderer *renderer,
     while(app.loop){
         Uint32 tick0 = SDL_GetTicks();
 
-        rendergraph_t *rgraph = app.rgraphs[app.cur_rgraph_i];
+        rendergraph_t *rgraph =
+            app.prend.rendergraphs[app.cur_rgraph_i];
         int animated_frame_i = get_animated_frame_i(
             rgraph->animation_type, rgraph->n_frames, app.frame_i);
 
@@ -237,7 +233,7 @@ int mainloop(SDL_Window *window, SDL_Renderer *renderer,
                 "  pan=(%i,%i), rot = %i, zoom = %i,"
                     " frame_i = %i (%i) / %i (%s)",
                 took, (int)DELAY_GOAL,
-                app.filename, app.cur_rgraph_i, app.n_rgraphs,
+                app.filename, app.cur_rgraph_i, app.prend.rendergraphs_len,
                 rgraph->name,
                 app.x0, app.y0, app.rot, app.zoom, app.frame_i,
                 animated_frame_i,
@@ -352,13 +348,15 @@ int mainloop(SDL_Window *window, SDL_Renderer *renderer,
 
                     if(event.key.keysym.sym == SDLK_PAGEUP){
                         app.cur_rgraph_i++;
-                        if(app.cur_rgraph_i >= app.n_rgraphs){
-                            app.cur_rgraph_i = 0;}
+                        if(app.cur_rgraph_i >=
+                            app.prend.rendergraphs_len){
+                                app.cur_rgraph_i = 0;}
                         refresh = true;}
                     if(event.key.keysym.sym == SDLK_PAGEDOWN){
                         app.cur_rgraph_i--;
                         if(app.cur_rgraph_i < 0){
-                            app.cur_rgraph_i = app.n_rgraphs - 1;}
+                            app.cur_rgraph_i =
+                                app.prend.rendergraphs_len - 1;}
                         refresh = true;}
                     if(event.key.keysym.sym == SDLK_HOME){
                         app.frame_i++;
@@ -409,7 +407,6 @@ int mainloop(SDL_Window *window, SDL_Renderer *renderer,
         if(took < DELAY_GOAL)SDL_Delay(DELAY_GOAL - took);
     }
 
-    free(app.rgraphs);
     return 0;
 }
 

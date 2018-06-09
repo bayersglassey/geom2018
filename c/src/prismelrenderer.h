@@ -9,7 +9,7 @@
 #include "geom.h"
 #include "lexer.h"
 #include "bounds.h"
-#include "llist.h"
+#include "array.h"
 
 
 /***********
@@ -31,11 +31,10 @@ int get_bitmap_i(vecspace_t *space, rot_t rot, flip_t flip,
 
 typedef struct prismel_image_line {
     int x, y, w;
-    struct prismel_image_line *next;
 } prismel_image_line_t;
 
 typedef struct prismel_image {
-    LLIST_DECL(struct prismel_image_line, line_list)
+    ARRAY_DECL(struct prismel_image_line, lines)
 } prismel_image_t;
 
 typedef struct prismel {
@@ -43,8 +42,6 @@ typedef struct prismel {
 
     int n_images;
     struct prismel_image *images;
-
-    struct prismel *next;
 } prismel_t;
 
 
@@ -63,9 +60,9 @@ void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box,
 
 typedef struct prismelrenderer {
     vecspace_t *space;
-    LLIST_DECL(struct prismel, prismel_list)
-    LLIST_DECL(struct rendergraph_map, rendergraph_map)
-    LLIST_DECL(struct prismelmapper_map, mapper_map)
+    ARRAY_DECL(struct prismel, prismels)
+    ARRAY_DECL(struct rendergraph, rendergraphs)
+    ARRAY_DECL(struct prismelmapper, mappers)
 } prismelrenderer_t;
 
 
@@ -89,8 +86,6 @@ int prismelrenderer_save(prismelrenderer_t *prend, const char *filename);
 int prismelrenderer_write(prismelrenderer_t *prend, FILE *f);
 int prismelrenderer_render_all_bitmaps(prismelrenderer_t *prend,
     SDL_Palette *pal, SDL_Renderer *renderer);
-int prismelrenderer_get_rendergraphs(prismelrenderer_t *prend,
-    int *n_rgraphs, struct rendergraph ***rgraphs);
 
 
 
@@ -105,8 +100,6 @@ typedef struct prismel_trf {
 
     int frame_start;
     int frame_len;
-
-    struct prismel_trf *next;
 } prismel_trf_t;
 
 typedef struct rendergraph_trf {
@@ -117,8 +110,6 @@ typedef struct rendergraph_trf {
 
     int frame_start;
     int frame_len;
-
-    struct rendergraph_trf *next;
 } rendergraph_trf_t;
 
 typedef struct rendergraph_bitmap {
@@ -130,8 +121,8 @@ typedef struct rendergraph_bitmap {
 typedef struct rendergraph {
     char *name;
     vecspace_t *space;
-    LLIST_DECL(struct prismel_trf, prismel_trf_list)
-    LLIST_DECL(struct rendergraph_trf, rendergraph_trf_list)
+    ARRAY_DECL(struct prismel_trf, prismel_trfs)
+    ARRAY_DECL(struct rendergraph_trf, rendergraph_trfs)
 
     const char *animation_type;
     int n_frames;
@@ -177,23 +168,6 @@ int rendergraph_bitmap_get_texture(rendergraph_bitmap_t *bitmap,
 
 
 
-/*******************
- * RENDERGRAPH_MAP *
- *******************/
-
-typedef struct rendergraph_map {
-    rendergraph_t *rgraph;
-    struct rendergraph_map *next;
-} rendergraph_map_t;
-
-void rendergraph_map_cleanup(rendergraph_map_t *map);
-int rendergraph_map_init(rendergraph_map_t *map, rendergraph_t *rgraph);
-rendergraph_t *rendergraph_map_get(rendergraph_map_t *map,
-    const char *name);
-
-
-
-
 /*****************
  * PRISMELMAPPER *
  *****************/
@@ -201,21 +175,19 @@ rendergraph_t *rendergraph_map_get(rendergraph_map_t *map,
 typedef struct prismelmapper_application {
     rendergraph_t *mapped_rgraph;
     rendergraph_t *resulting_rgraph;
-    struct prismelmapper_application *next;
 } prismelmapper_application_t;
 
 typedef struct prismelmapper_entry {
     prismel_t *prismel;
     rendergraph_t *rendergraph;
-    struct prismelmapper_entry *next;
 } prismelmapper_entry_t;
 
 typedef struct prismelmapper {
     char *name;
     vecspace_t *space;
     vec_t unit;
-    LLIST_DECL(prismelmapper_entry_t, entry_list)
-    LLIST_DECL(prismelmapper_application_t, application_list)
+    ARRAY_DECL(prismelmapper_entry_t, entries)
+    ARRAY_DECL(prismelmapper_application_t, applications)
 } prismelmapper_t;
 
 
@@ -232,23 +204,6 @@ int prismelmapper_push_application(prismelmapper_t *mapper,
     rendergraph_t *mapped_rgraph, rendergraph_t *resulting_rgraph);
 rendergraph_t *prismelmapper_get_application(prismelmapper_t *mapper,
     rendergraph_t *mapped_rgraph);
-
-
-
-/*********************
- * PRISMELMAPPER_MAP *
- *********************/
-
-typedef struct prismelmapper_map {
-    prismelmapper_t *mapper;
-    struct prismelmapper_map *next;
-} prismelmapper_map_t;
-
-void prismelmapper_map_cleanup(prismelmapper_map_t *map);
-int prismelmapper_map_init(prismelmapper_map_t *map,
-    prismelmapper_t *mapper);
-prismelmapper_t *prismelmapper_map_get(prismelmapper_map_t *map,
-    const char *name);
 
 
 

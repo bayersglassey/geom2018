@@ -1,3 +1,5 @@
+#ifndef _LLIST_H_
+#define _LLIST_H_
 
 #define LLIST_DECL(T, list) \
     T *list; \
@@ -25,3 +27,4 @@
     (parent).list##_last = &(parent).list; \
 }
 
+#endif

@@ -5,7 +5,7 @@
 
 #include "lexer.h"
 #include "util.h"
-#include "llist.h"
+#include "array.h"
 #include "prismelrenderer.h"
 
 
@@ -375,9 +375,7 @@ static int parse_shape(prismelrenderer_t *prend, fus_lexer_t *lexer,
             animation_type, n_frames);
         if(err)return err;
 
-        LLIST_PUSH(rendergraph_map_t, *prend, rendergraph_map, new_map)
-        err = rendergraph_map_init(new_map, rgraph);
-        if(err)return err;
+        ARRAY_PUSH(rendergraph_t, *prend, rendergraphs, rgraph)
     }
 
     while(1){
@@ -533,9 +531,7 @@ static int parse_mappers(prismelrenderer_t *prend, fus_lexer_t *lexer){
         err = parse_mapper(prend, lexer, name, &mapper);
         if(err)return err;
 
-        LLIST_PUSH(prismelmapper_map_t, *prend, mapper_map, new_map)
-        err = prismelmapper_map_init(new_map, mapper);
-        if(err)return err;
+        ARRAY_PUSH(prismelmapper_t, *prend, mappers, mapper)
     }
     return 0;
 }
