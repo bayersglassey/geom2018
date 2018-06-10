@@ -19,6 +19,8 @@
 
 
 typedef struct test_app {
+    SDL_Window *window;
+    SDL_Renderer *renderer;
     SDL_Palette *pal;
     prismelrenderer_t prend;
     font_t font;
@@ -127,8 +129,12 @@ int process_console_input(test_app_t *app){
         if(fus_lexer_got(&lexer, "S"))dump_bitmap_surfaces = true;
         prismelrenderer_dump(&app->prend, stdout, dump_bitmap_surfaces);
     }else if(fus_lexer_got(&lexer, "renderall")){
+        SDL_Renderer *renderer = NULL;
+        err = fus_lexer_next(&lexer);
+        if(err)goto lexer_err;
+        if(fus_lexer_got(&lexer, "R"))renderer = app->renderer;
         err = prismelrenderer_render_all_bitmaps(
-            &app->prend, app->pal, NULL);
+            &app->prend, app->pal, renderer);
         if(err)return err;
     }else{
         fus_lexer_unexpected(&lexer, NULL);
@@ -150,6 +156,8 @@ int mainloop(SDL_Window *window, SDL_Renderer *renderer,
     int err;
 
     test_app_t app;
+    app.window = window;
+    app.renderer = renderer;
     app.filename = filename;
 
     app.pal = SDL_AllocPalette(256);

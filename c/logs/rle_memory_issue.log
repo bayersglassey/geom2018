@@ -1,0 +1,100 @@
+==4118== Invalid read of size 1
+==4118==    at 0x4EAE2F5: uncopy_32 (SDL_RLEaccel.c:1011)
+==4118==    by 0x4EB82D4: UnRLEAlpha (SDL_RLEaccel.c:1511)
+==4118==    by 0x4EB82D4: SDL_UnRLESurface (SDL_RLEaccel.c:1566)
+==4118==    by 0x4EF0991: SDL_MapSurface (SDL_pixels.c:1000)  <-- clears out source surface's map (which is what's breaking)
+==4118==    by 0x4EF511B: SDL_LowerBlit_REAL (SDL_surface.c:583)
+==4118==    by 0x4EF511B: SDL_ConvertSurface_REAL (SDL_surface.c:992)
+==4118==    by 0x4E83468: SDL_CreateTextureFromSurface_REAL (SDL_render.c:646)
+==4118==    by 0x409D59: rendergraph_bitmap_get_texture (prismelrenderer.c:815)
+==4118==    by 0x4024B7: mainloop (main_sdl.c:267)
+==4118==    by 0x402E45: main (main_sdl.c:459)
+==4118==  Address 0x808000 is not stack'd, malloc'd or (recently) free'd
+
+
+
+typedef struct SDL_Surface
+{
+    ...
+    /** info for fast blit mapping to other surfaces */
+    struct SDL_BlitMap *map;    /**< Private */
+    ...
+} SDL_Surface;
+
+
+/*
+ * Un-RLE a surface with pixel alpha
+ * This may not give back exactly the image before RLE-encoding; all
+ * completely transparent pixels will be lost, and color and alpha depth
+ * may have been reduced (when encoding for 16bpp targets).
+ */
+static SDL_bool
+UnRLEAlpha(SDL_Surface * surface)
+{
+    Uint8 *srcbuf;
+    Uint32 *dst;
+    SDL_PixelFormat *sf = surface->format;
+    RLEDestFormat *df = surface->map->data;
+    int (*uncopy_opaque) (Uint32 *, void *, int,
+                          RLEDestFormat *, SDL_PixelFormat *);
+    int (*uncopy_transl) (Uint32 *, void *, int,
+                          RLEDestFormat *, SDL_PixelFormat *);
+    int w = surface->w;
+    int bpp = df->BytesPerPixel;
+
+    /* ... */
+                srcbuf += uncopy_opaque(dst + ofs, srcbuf, run, df, sf); // <--- (SDL_RLEaccel.c:1511)
+    /* ... */
+}
+
+
+
+/* decode 32bpp rgba into 32bpp rgba, keeping alpha (dual purpose) */
+static int
+uncopy_32(Uint32 * dst, void *src, int n,
+          RLEDestFormat * sfmt, SDL_PixelFormat * dfmt)
+{
+    int i;
+    Uint32 *s = src;
+    for (i = 0; i < n; i++) {
+        unsigned r, g, b, a;
+        Uint32 pixel = *s++;
+        RGB_FROM_PIXEL(pixel, sfmt, r, g, b); // <----- (SDL_RLEaccel.c:1011) 
+        a = pixel >> 24;
+        PIXEL_FROM_RGBA(*dst, dfmt, r, g, b, a);
+        dst++;
+    }
+    return n * 4;
+}
+
+
+/* Load pixel of the specified format from a buffer and get its R-G-B values */
+#define RGB_FROM_PIXEL(Pixel, fmt, r, g, b)                             \
+{                                                                       \
+    r = SDL_expand_byte[fmt->Rloss][((Pixel&fmt->Rmask)>>fmt->Rshift)]; \
+    g = SDL_expand_byte[fmt->Gloss][((Pixel&fmt->Gmask)>>fmt->Gshift)]; \
+    b = SDL_expand_byte[fmt->Bloss][((Pixel&fmt->Bmask)>>fmt->Bshift)]; \
+}
+
+
+/* used to save the destination format in the encoding. Designed to be
+   macro-compatible with SDL_PixelFormat but without the unneeded fields */
+typedef struct
+{
+    Uint8 BytesPerPixel;
+    Uint8 padding[3];
+    Uint32 Rmask;
+    Uint32 Gmask;
+    Uint32 Bmask;
+    Uint32 Amask;
+    Uint8 Rloss;
+    Uint8 Gloss;
+    Uint8 Bloss;
+    Uint8 Aloss;
+    Uint8 Rshift;
+    Uint8 Gshift;
+    Uint8 Bshift;
+    Uint8 Ashift;
+} RLEDestFormat;
+
+

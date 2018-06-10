@@ -460,10 +460,10 @@ void rendergraph_bitmap_dump(rendergraph_bitmap_t *bitmap, FILE *f,
     get_spaces(spaces, 20, n_spaces);
 
     SDL_Surface *surface = bitmap->surface;
-    fprintf(f, "%sbitmap %i: x=%i y=%i w=%i h=%i surface=%p\n",
+    fprintf(f, "%sbitmap %i: x=%i y=%i w=%i h=%i surface=%p texture=%p\n",
         spaces, i,
         bitmap->pbox.x, bitmap->pbox.y, bitmap->pbox.w, bitmap->pbox.h,
-        surface);
+        surface, bitmap->texture);
     if(dump_bitmap_surfaces && surface != NULL){
         SDL_LockSurface(surface);
         for(int y = 0; y < surface->h; y++){

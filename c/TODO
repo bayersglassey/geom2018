@@ -10,3 +10,15 @@ Jun 3, 2018:
     to cause an issue?..
     (With the console input of main_sdl.c)
 
+
+Jun 9, 2018:
+------------
+
+- review uses of RLE
+    RLEDestFormat - we keep running into undefined reads of these...
+    Specifically as a result of SDL_CreateTextureFromSurface...
+    Look at SDL source, figure out wtf is going on
+
+    Theory: we can recreate the bug by creating a surface, blitting it onto
+    something else, then creating a texture from it.
+        ...nope, didn't work :|
