@@ -177,6 +177,11 @@ typedef struct prismelmapper_application {
     rendergraph_t *resulting_rgraph;
 } prismelmapper_application_t;
 
+typedef struct prismelmapper_mapplication {
+    struct prismelmapper *mapped_mapper;
+    struct prismelmapper *resulting_mapper;
+} prismelmapper_mapplication_t;
+
 typedef struct prismelmapper_entry {
     prismel_t *prismel;
     rendergraph_t *rendergraph;
@@ -188,6 +193,7 @@ typedef struct prismelmapper {
     vec_t unit;
     ARRAY_DECL(prismelmapper_entry_t, entries)
     ARRAY_DECL(prismelmapper_application_t, applications)
+    ARRAY_DECL(prismelmapper_mapplication_t, mapplications)
 } prismelmapper_t;
 
 
@@ -196,14 +202,24 @@ int prismelmapper_init(prismelmapper_t *mapper, char *name, vecspace_t *space);
 void prismelmapper_dump(prismelmapper_t *mapper, FILE *f, int n_spaces);
 int prismelmapper_push_entry(prismelmapper_t *mapper,
     prismel_t *prismel, rendergraph_t *rendergraph);
-int prismelmapper_apply(prismelmapper_t *mapper, prismelrenderer_t *prend,
+int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
+    prismelrenderer_t *prend,
     rendergraph_t *mapped_rgraph,
     char *name, vecspace_t *space,
     rendergraph_t **rgraph_ptr);
+int prismelmapper_apply_to_mapper(prismelmapper_t *mapper,
+    prismelrenderer_t *prend,
+    prismelmapper_t *mapped_mapper,
+    char *name, vecspace_t *space,
+    prismelmapper_t **mapper_ptr);
 int prismelmapper_push_application(prismelmapper_t *mapper,
     rendergraph_t *mapped_rgraph, rendergraph_t *resulting_rgraph);
+int prismelmapper_push_mapplication(prismelmapper_t *mapper,
+    prismelmapper_t *mapped_mapper, prismelmapper_t *resulting_mapper);
 rendergraph_t *prismelmapper_get_application(prismelmapper_t *mapper,
     rendergraph_t *mapped_rgraph);
+prismelmapper_t *prismelmapper_get_mapplication(prismelmapper_t *mapper,
+    prismelmapper_t *mapped_mapper);
 
 
 

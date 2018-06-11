@@ -17,6 +17,22 @@
  * GENERAL *
  ***********/
 
+char *generate_mapped_name(char *mapper_name, char *mappee_name){
+    /* Generate a name, e.g. "<curvy dodeca_sixth>" */
+    int mapper_name_len = strlen(mapper_name);
+    int mappee_name_len = strlen(mappee_name);
+    int name_len = mapper_name_len + mappee_name_len + 3;
+    char *name = malloc(sizeof(*name) * (name_len + 1));
+    if(name == NULL)return NULL;
+    name[0] = '<';
+    strcpy(name + 1, mapper_name);
+    name[1 + mapper_name_len] = ' ';
+    strcpy(name + 1 + mapper_name_len + 1, mappee_name);
+    name[name_len - 1] = '>';
+    name[name_len] = '\0';
+    return name;
+}
+
 bool get_animated_frame_visible(int n_frames,
     int frame_start, int frame_len, int frame_i
 ){
@@ -834,6 +850,8 @@ void prismelmapper_cleanup(prismelmapper_t *mapper){
         (void))
     ARRAY_FREE(prismelmapper_application_t, *mapper, applications,
         (void))
+    ARRAY_FREE(prismelmapper_mapplication_t, *mapper, mapplications,
+        (void))
 }
 
 int prismelmapper_init(prismelmapper_t *mapper, char *name, vecspace_t *space){
@@ -842,6 +860,7 @@ int prismelmapper_init(prismelmapper_t *mapper, char *name, vecspace_t *space){
     vec_zero(space->dims, mapper->unit);
     ARRAY_INIT(*mapper, entries)
     ARRAY_INIT(*mapper, applications)
+    ARRAY_INIT(*mapper, mapplications)
     return 0;
 }
 
@@ -874,6 +893,16 @@ void prismelmapper_dump(prismelmapper_t *mapper, FILE *f, int n_spaces){
             application->resulting_rgraph == NULL? "<NULL>":
                 application->resulting_rgraph->name);
     }
+
+    fprintf(f, "%s  mapplications:\n", spaces);
+    for(int i = 0; i < mapper->mapplications_len; i++){
+        prismelmapper_mapplication_t *mapplication = mapper->mapplications[i];
+        fprintf(f, "%s    %s -> %s\n", spaces,
+            mapplication->mapped_mapper == NULL? "<NULL>":
+                mapplication->mapped_mapper->name,
+            mapplication->resulting_mapper == NULL? "<NULL>":
+                mapplication->resulting_mapper->name);
+    }
 }
 
 int prismelmapper_push_entry(prismelmapper_t *mapper,
@@ -885,7 +914,8 @@ int prismelmapper_push_entry(prismelmapper_t *mapper,
     return 0;
 }
 
-int prismelmapper_apply(prismelmapper_t *mapper, prismelrenderer_t *prend,
+int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
+    prismelrenderer_t *prend,
     rendergraph_t *mapped_rgraph,
     char *name, vecspace_t *space,
     rendergraph_t **rgraph_ptr
@@ -899,6 +929,7 @@ int prismelmapper_apply(prismelmapper_t *mapper, prismelrenderer_t *prend,
     resulting_rgraph = prismelmapper_get_application(
         mapper, mapped_rgraph);
     if(resulting_rgraph != NULL){
+        free(name);
         *rgraph_ptr = resulting_rgraph;
         return 0;
     }
@@ -952,21 +983,12 @@ int prismelmapper_apply(prismelmapper_t *mapper, prismelrenderer_t *prend,
         rendergraph_t *rgraph = rendergraph_trf->rendergraph;
 
         /* Generate a name, e.g. "<curvy dodeca_sixth>" */
-        int mapper_name_len = strlen(mapper->name);
-        int rgraph_name_len = strlen(rgraph->name);
-        int name_len = mapper_name_len + rgraph_name_len + 3;
-        char *name = malloc(sizeof(*name) * (name_len + 1));
+        char *name = generate_mapped_name(mapper->name, rgraph->name);
         if(name == NULL)return 1;
-        name[0] = '<';
-        strcpy(name + 1, mapper->name);
-        name[1 + mapper_name_len] = ' ';
-        strcpy(name + 1 + mapper_name_len + 1, rgraph->name);
-        name[name_len - 1] = '>';
-        name[name_len] = '\0';
 
         /* Recurse! */
         rendergraph_t *new_rgraph;
-        err = prismelmapper_apply(mapper, prend,
+        err = prismelmapper_apply_to_rendergraph(mapper, prend,
             rgraph, name, space, &new_rgraph);
         if(err)return err;
 
@@ -1005,6 +1027,75 @@ int prismelmapper_apply(prismelmapper_t *mapper, prismelrenderer_t *prend,
     return 0;
 }
 
+int prismelmapper_apply_to_mapper(prismelmapper_t *mapper,
+    prismelrenderer_t *prend,
+    prismelmapper_t *mapped_mapper,
+    char *name, vecspace_t *space,
+    prismelmapper_t **mapper_ptr
+){
+    /* Hey dawg, we applied mapper to mapped_mapper, resulting in
+    resulting_mapper
+    Question: do mapper, mapped_mapper, and resulting_mapper all
+    need to share the same vecspace?.. */
+    int err;
+
+    prismelmapper_t *resulting_mapper;
+
+    /* Check whether this mapper has already been applied to this
+    mapped_mapper. If so, return the cached resulting_mapper. */
+    resulting_mapper = prismelmapper_get_mapplication(
+        mapper, mapped_mapper);
+    if(resulting_mapper != NULL){
+        free(name);
+        *mapper_ptr = resulting_mapper;
+        return 0;
+    }
+
+    /* Create a new prismelmapper */
+    resulting_mapper = calloc(1, sizeof(prismelmapper_t));
+    if(resulting_mapper == NULL)return 1;
+    err = prismelmapper_init(resulting_mapper, name, space);
+    if(err)return err;
+
+    /* Calculate the new mapper's unit */
+    vec_cpy(space->dims, resulting_mapper->unit, mapped_mapper->unit);
+    vec_mul(space, resulting_mapper->unit, mapper->unit);
+
+    /* Copy entries from mapped_mapper to resulting_mapper, applying
+    mapper to each entry */
+    for(int i = 0; i < mapped_mapper->entries_len; i++){
+        prismelmapper_entry_t *entry = mapped_mapper->entries[i];
+
+        char *name = generate_mapped_name(mapper->name,
+            entry->rendergraph->name);
+        if(name == NULL)return 1;
+
+        rendergraph_t *new_rgraph;
+        err = prismelmapper_apply_to_rendergraph(mapper, prend,
+            entry->rendergraph, name, space, &new_rgraph);
+        if(err)return err;
+
+        err = prismelmapper_push_entry(resulting_mapper,
+            entry->prismel, new_rgraph);
+        if(err)return err;
+    }
+
+    /* Cache this resulting_mapper on the mapper in case it
+    ever gets applied to the same mapped_mapper again */
+    err = prismelmapper_push_mapplication(mapper,
+        mapped_mapper, resulting_mapper);
+    if(err)return err;
+
+    /* Add the resulting_mapper to the prismelrenderer, makes for
+    easier debugging */
+    ARRAY_PUSH(prismelmapper_t, *prend, mappers,
+        resulting_mapper)
+
+    /* Success! */
+    *mapper_ptr = resulting_mapper;
+    return 0;
+}
+
 int prismelmapper_push_application(prismelmapper_t *mapper,
     rendergraph_t *mapped_rgraph, rendergraph_t *resulting_rgraph
 ){
@@ -1015,6 +1106,16 @@ int prismelmapper_push_application(prismelmapper_t *mapper,
     return 0;
 }
 
+int prismelmapper_push_mapplication(prismelmapper_t *mapper,
+    prismelmapper_t *mapped_mapper, prismelmapper_t *resulting_mapper
+){
+    ARRAY_PUSH_NEW(prismelmapper_mapplication_t, *mapper, mapplications,
+        mapplication)
+    mapplication->mapped_mapper = mapped_mapper;
+    mapplication->resulting_mapper = resulting_mapper;
+    return 0;
+}
+
 rendergraph_t *prismelmapper_get_application(prismelmapper_t *mapper,
     rendergraph_t *mapped_rgraph
 ){
@@ -1022,6 +1123,17 @@ rendergraph_t *prismelmapper_get_application(prismelmapper_t *mapper,
         prismelmapper_application_t *application = mapper->applications[i];
         if(application->mapped_rgraph == mapped_rgraph){
             return application->resulting_rgraph;}
+    }
+    return NULL;
+}
+
+prismelmapper_t *prismelmapper_get_mapplication(prismelmapper_t *mapper,
+    prismelmapper_t *mapped_mapper
+){
+    for(int i = 0; i < mapper->mapplications_len; i++){
+        prismelmapper_mapplication_t *mapplication = mapper->mapplications[i];
+        if(mapplication->mapped_mapper == mapped_mapper){
+            return mapplication->resulting_mapper;}
     }
     return NULL;
 }
