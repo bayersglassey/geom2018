@@ -1,0 +1,87 @@
+
+stand:
+
+    if:
+        k_forw
+        allcoll:
+            "        +"
+            "       /"
+            " ( )  +"
+    then:
+        move: 1 0 0 0
+        rot: 1
+
+    if:
+        k_forw
+        k_up
+        allnocoll:
+            "       \*/*"
+            "        + -"
+            "       /*\*"
+            " ( )"
+        anynocoll:
+            " ( )  + - +"
+    then:
+        move: 1 0 0 0
+        goto: jump
+
+    if:
+        k_forw
+        allcoll:
+            " ( )  + - +"
+        allnocoll:
+            "       \*/*"
+            "        + -"
+            "       /*\*"
+            " ( )"
+    then:
+        move: 1 0 0 0
+
+    if:
+        k_forw
+        allcoll:
+            " ( )  +"
+            "       \"
+            "        +"
+        allnocoll:
+            "       \*/*"
+            "        + -"
+            "       /*\*/*"
+            " ( )    - + -"
+            "        */*\*"
+    then:
+        move: 1 0 0 0
+        rot: -1
+
+    if:
+        k_back
+    then:
+        turn
+
+jump:
+
+    if:
+        allnocoll:
+            "       \*/*"
+            "        + -"
+            "       /*\*"
+            " ( )"
+        allcoll:
+            " ( )  + - +"
+    then:
+        move: 1 0 0 0
+        goto: stand
+
+    if:
+        allnocoll:
+            "       \*/*"
+            "        + -"
+            "       /*\*"
+            " ( )"
+    then:
+        move: 1 0 0 0
+
+    if:
+    then:
+        die
+
