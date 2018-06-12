@@ -80,10 +80,64 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer){
             if(err)return err;
             err = fus_lexer_expect(lexer, "(");
             if(err)return err;
-            err = fus_lexer_parse_silent(lexer);
-            if(err)return err;
-            err = fus_lexer_get(lexer, ")");
-            if(err)return err;
+            while(1){
+                err = fus_lexer_next(lexer);
+                if(err)return err;
+                if(fus_lexer_got(lexer, ")")){
+                    break;
+                }else if(fus_lexer_got(lexer, "kdown")){
+                    char *name;
+
+                    err = fus_lexer_expect(lexer, "(");
+                    if(err)return err;
+                    err = fus_lexer_expect_name(lexer, &name);
+                    if(err)return err;
+
+                    ARRAY_PUSH_NEW(state_cond_t, *rule, conds, cond)
+                    cond->type = state_cond_type_kdown;
+                    cond->u.key = name[0];
+                    free(name);
+
+                    err = fus_lexer_expect(lexer, ")");
+                    if(err)return err;
+                }else if(fus_lexer_got(lexer, "coll")){
+                    err = fus_lexer_expect(lexer, "(");
+                    if(err)return err;
+
+                    int flags = 0;
+
+                    err = fus_lexer_next(lexer);
+                    if(err)return err;
+                    if(fus_lexer_got(lexer, "all"))flags ^= 1;
+                    else if(fus_lexer_got(lexer, "any"))/* don't do nuthin */;
+                    else return fus_lexer_unexpected(lexer, "all or any");
+
+                    err = fus_lexer_next(lexer);
+                    if(err)return err;
+                    if(fus_lexer_got(lexer, "yes"))flags ^= 2;
+                    else if(fus_lexer_got(lexer, "no"))/* dinnae move a muscle */;
+                    else return fus_lexer_unexpected(lexer, "yes or no");
+
+                    while(1){
+                        err = fus_lexer_next(lexer);
+                        if(err)return err;
+
+                        if(fus_lexer_got(lexer, ")"))break;
+
+                        char *line;
+                        err = fus_lexer_get_str(lexer, &line);
+                        if(err)return err;
+                        /* TODO: parse them lines... */
+                        free(line);
+                    }
+
+                    ARRAY_PUSH_NEW(state_cond_t, *rule, conds, cond)
+                    cond->type = state_cond_type_coll;
+                    cond->u.coll.flags = flags;
+                }else{
+                    return fus_lexer_unexpected(lexer, NULL);
+                }
+            }
 
             err = fus_lexer_expect(lexer, "then");
             if(err)return err;
@@ -103,6 +157,30 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer){
 /*********
  * STATE *
  *********/
+
+
+const char state_cond_type_kdown[] = "kdown";
+const char state_cond_type_coll[] = "coll";
+const char *state_cond_types[] = {
+    state_cond_type_kdown,
+    state_cond_type_coll,
+    NULL
+};
+
+
+const char state_effect_type_move[] = "move";
+const char state_effect_type_rot[] = "rot";
+const char state_effect_type_turn[] = "turn";
+const char state_effect_type_goto[] = "goto";
+const char state_effect_type_die[] = "die";
+const char *state_effect_types[] = {
+    state_effect_type_move,
+    state_effect_type_rot,
+    state_effect_type_turn,
+    state_effect_type_goto,
+    state_effect_type_die,
+    NULL
+};
 
 
 void state_cleanup(state_t *state){
@@ -134,7 +212,11 @@ void state_dump(state_t *state, FILE *f, int n_spaces){
         fprintf(f, "%s    if:\n", spaces);
         for(int i = 0; i < rule->conds_len; i++){
             state_cond_t *cond = rule->conds[i];
-            fprintf(f, "%s      cond: %p\n", spaces, cond);
+            fprintf(f, "%s      %s", spaces, cond->type);
+            if(cond->type == state_cond_type_kdown){
+                fprintf(f, ": %c", cond->u.key);
+            }
+            fprintf(f, "\n");
         }
         fprintf(f, "%s    then:\n", spaces);
         for(int i = 0; i < rule->effects_len; i++){

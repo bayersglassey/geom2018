@@ -37,13 +37,34 @@ typedef struct state_rule {
     ARRAY_DECL(struct state_effect, effects)
 } state_rule_t;
 
+
+
 typedef struct state_cond {
     const char *type;
     union {
-        hexcollmap_t *collmap;
-        char key; /* 'f' 'b' 'u' 'd' ... */
+        struct {
+            int flags;
+                /*
+                    flags & 1: 0 -> any, 1 -> all
+                    flags & 2: 0 -> no,  1 -> yes
+                */
+            hexcollmap_t *collmap;
+        } coll;
+        char key;
+            /*
+                'f' -> forward
+                'b' -> back
+                'u' -> up
+                'd' -> down
+            */
     } u;
 } state_cond_t;
+
+extern const char state_cond_type_kdown[];
+extern const char state_cond_type_coll[];
+extern const char *state_cond_types[];
+
+
 
 typedef struct state_effect {
     const char *type;
@@ -52,6 +73,13 @@ typedef struct state_effect {
         rot_t rot;
     } u;
 } state_effect_t;
+
+extern const char state_effect_type_move[];
+extern const char state_effect_type_rot[];
+extern const char state_effect_type_turn[];
+extern const char state_effect_type_goto[];
+extern const char state_effect_type_die[];
+extern const char *state_effect_types[];
 
 
 
