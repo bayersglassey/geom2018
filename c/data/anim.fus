@@ -2,8 +2,8 @@
 stand:
 
     if:
-        k_forw
-        allcoll:
+        kdown: f
+        coll: all yes
             ;;        +
             ;;       /
             ;; ( )  +
@@ -12,24 +12,24 @@ stand:
         rot: 1
 
     if:
-        k_forw
-        k_up
-        allnocoll:
+        kdown: f
+        kdown: u
+        coll: all no
             ;;       \*/*
             ;;        + -
             ;;       /*\*
             ;; ( )
-        anynocoll:
+        coll: any no
             ;; ( )  + - +
     then:
         move: 1 0 0 0
         goto: jump
 
     if:
-        k_forw
-        allcoll:
+        kdown: f
+        coll: all yes
             ;; ( )  + - +
-        allnocoll:
+        coll: all no
             ;;       \*/*
             ;;        + -
             ;;       /*\*
@@ -38,12 +38,12 @@ stand:
         move: 1 0 0 0
 
     if:
-        k_forw
-        allcoll:
+        kdown: f
+        coll: all yes
             ;; ( )  +
             ;;       \
             ;;        +
-        allnocoll:
+        coll: all no
             ;;       \*/*
             ;;        + -
             ;;       /*\*/*
@@ -54,7 +54,7 @@ stand:
         rot: -1
 
     if:
-        k_back
+        kdown: b
     then:
         move: 1 0 0 0
         turn
@@ -62,19 +62,19 @@ stand:
 jump:
 
     if:
-        allnocoll:
+        coll: all no
             ;;       \*/*
             ;;        + -
             ;;       /*\*
             ;; ( )
-        allcoll:
+        coll: all yes
             ;; ( )  + - +
     then:
         move: 1 0 0 0
         goto: stand
 
     if:
-        allnocoll:
+        coll: all no
             ;;       \*/*
             ;;        + -
             ;;       /*\*
