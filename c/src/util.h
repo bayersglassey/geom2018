@@ -34,6 +34,7 @@ bool streq(const char *s1, const char *s2);
 size_t strnlen(const char *s, size_t maxlen);
 char *strdup(const char *s1);
 char *strndup(const char *s1, size_t len);
+void get_spaces(char *spaces, int max_spaces, int n_spaces);
 void palette_printf(SDL_Palette *pal);
 SDL_Surface *surface8_create(int w, int h,
     bool use_rle, bool use_colorkey, SDL_Palette *pal);

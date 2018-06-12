@@ -81,16 +81,6 @@ int get_bitmap_i(vecspace_t *space, rot_t rot, flip_t flip,
     return bitmap_i;
 }
 
-void get_spaces(char *spaces, int max_spaces, int n_spaces){
-    if(n_spaces > max_spaces){
-        fprintf(stderr, "%s: %s: Can't handle %i spaces - max %i\n",
-            __FILE__, __func__, n_spaces, max_spaces);
-        n_spaces = max_spaces;
-    }
-    for(int i = 0; i < n_spaces; i++)spaces[i] = ' ';
-    spaces[n_spaces] = '\0';
-}
-
 
 
 /***********

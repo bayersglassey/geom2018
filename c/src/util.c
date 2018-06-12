@@ -60,6 +60,16 @@ char *strndup(const char *s1, size_t len){
     return s2;
 }
 
+void get_spaces(char *spaces, int max_spaces, int n_spaces){
+    if(n_spaces > max_spaces){
+        fprintf(stderr, "Can't handle %i spaces - max %i\n",
+            n_spaces, max_spaces);
+        n_spaces = max_spaces;
+    }
+    for(int i = 0; i < n_spaces; i++)spaces[i] = ' ';
+    spaces[n_spaces] = '\0';
+}
+
 void palette_printf(SDL_Palette *pal){
     for(int i = 0; i < pal->ncolors; i++){
         SDL_Color *c = &pal->colors[i];
