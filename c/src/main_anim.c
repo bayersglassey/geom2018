@@ -6,7 +6,15 @@
 
 
 int mainloop(){
+    int err;
+    stateset_t stateset;
     const char *filename = "data/anim.fus";
+
+    err = stateset_load(&stateset, filename);
+    if(err)return err;
+
+    stateset_dump(&stateset, stdout);
+
     return 0;
 }
 

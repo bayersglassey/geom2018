@@ -28,6 +28,10 @@ typedef struct state {
     ARRAY_DECL(struct state_rule, rules)
 } state_t;
 
+typedef struct stateset {
+    ARRAY_DECL(struct state, states)
+} stateset_t;
+
 typedef struct state_rule {
     ARRAY_DECL(struct state_cond, conds)
     ARRAY_DECL(struct state_effect, effects)
@@ -41,7 +45,7 @@ typedef struct state_cond {
     } u;
 } state_cond_t;
 
-typedef struct rule_effect {
+typedef struct state_effect {
     const char *type;
     union {
         vec_t vec;
@@ -50,13 +54,17 @@ typedef struct rule_effect {
 } state_effect_t;
 
 
+
+
+void stateset_cleanup(stateset_t *stateset);
+int stateset_init(stateset_t *stateset);
+void stateset_dump(stateset_t *stateset, FILE *f);
+int stateset_load(stateset_t *stateset, const char *filename);
+int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer);
+
+
 void state_cleanup(state_t *state);
 int state_init(state_t *state, char *name);
-void state_dump(state_t *state, FILE *f);
-int state_parse(fus_lexer_t *lexer, state_t **state_ptr);
-
-void state_rule_cleanup(state_rule_t *rule);
-int state_rule_init(state_rule_t *rule);
-void state_rule_dump(state_rule_t *rule, FILE *f);
+void state_dump(state_t *state, FILE *f, int n_spaces);
 
 #endif
