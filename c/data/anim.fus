@@ -56,6 +56,7 @@ stand:
     if:
         k_back
     then:
+        move: 1 0 0 0
         turn
 
 jump:
