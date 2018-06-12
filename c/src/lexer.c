@@ -241,6 +241,26 @@ err_eof:
     return 2;
 }
 
+static int fus_lexer_parse_blockstr(fus_lexer_t *lexer){
+    fus_lexer_start_token(lexer);
+
+    /* Include leading ";;" */
+    fus_lexer_eat(lexer);
+    fus_lexer_eat(lexer);
+
+    while(lexer->pos < lexer->text_len){
+        char c = lexer->text[lexer->pos];
+        if(c == '\0'){
+            break;
+        }else if(c == '\n'){
+            break;
+        }
+        fus_lexer_eat(lexer);
+    }
+    fus_lexer_end_token(lexer);
+    return 0;
+}
+
 int fus_lexer_next(fus_lexer_t *lexer){
     int err;
     while(1){
@@ -298,6 +318,11 @@ int fus_lexer_next(fus_lexer_t *lexer){
             err = fus_lexer_parse_str(lexer);
             if(err)return err;
             lexer->token_type = FUS_LEXER_TOKEN_STR;
+            break;
+        }else if(c == ';' && fus_lexer_peek(lexer) == ';'){
+            err = fus_lexer_parse_blockstr(lexer);
+            if(err)return err;
+            lexer->token_type = FUS_LEXER_TOKEN_BLOCKSTR;
             break;
         }else{
             fus_lexer_parse_op(lexer);
@@ -365,36 +390,47 @@ int fus_lexer_get_name(fus_lexer_t *lexer, char **name){
 }
 
 int fus_lexer_get_str(fus_lexer_t *lexer, char **s){
-    if(lexer->token_type != FUS_LEXER_TOKEN_STR){
+    if(lexer->token_type == FUS_LEXER_TOKEN_STR){
+        const char *token = lexer->token;
+        int token_len = lexer->token_len;
+
+        /* Length of s is length of token without the surrounding
+        '"' characters */
+        int s_len = token_len - 2;
+
+        char *ss0 = malloc(s_len + 1);
+        if(ss0 == NULL)return 1;
+        char *ss = ss0;
+
+        for(int i = 1; i < token_len - 1; i++){
+            char c = token[i];
+            if(c == '\\'){
+                i++;
+                c = token[i];
+            }
+            *ss = c;
+            ss++;
+        }
+
+        *ss = '\0';
+        *s = ss0;
+    }else if(lexer->token_type == FUS_LEXER_TOKEN_BLOCKSTR){
+        const char *token = lexer->token;
+        int token_len = lexer->token_len;
+
+        /* Length of s is length of token without the leading ";;" */
+        int s_len = token_len - 2;
+
+        char *ss = strndup(token+2, s_len+1);
+        if(ss == NULL)return 1;
+
+        *s = ss;
+    }else{
         fus_lexer_err_info(lexer); fprintf(stderr,
             "Expected str, but got: ");
         fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
         return 2;
     }
-
-    const char *token = lexer->token;
-    int token_len = lexer->token_len;
-
-    /* Length of s is length of token without the surrounding
-    '"' characters */
-    int s_len = token_len - 2;
-
-    char *ss = malloc(s_len + 1);
-    if(ss == NULL)return 1;
-    char *ss0 = ss;
-
-    for(int i = 1; i < token_len - 1; i++){
-        char c = token[i];
-        if(c == '\\'){
-            i++;
-            c = token[i];
-        }
-        *ss = c;
-        ss++;
-    }
-
-    *ss = '\0';
-    *s = ss0;
     return 0;
 }
 

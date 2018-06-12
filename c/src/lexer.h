@@ -40,6 +40,7 @@ typedef struct fus_lexer {
         FUS_LEXER_TOKEN_SYM,
         FUS_LEXER_TOKEN_OP,
         FUS_LEXER_TOKEN_STR,
+        FUS_LEXER_TOKEN_BLOCKSTR,
         FUS_LEXER_TOKEN_OPEN,
         FUS_LEXER_TOKEN_CLOSE,
         FUS_LEXER_TOKEN_TYPES
