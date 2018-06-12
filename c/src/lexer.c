@@ -421,7 +421,7 @@ int fus_lexer_get_str(fus_lexer_t *lexer, char **s){
         /* Length of s is length of token without the leading ";;" */
         int s_len = token_len - 2;
 
-        char *ss = strndup(token+2, s_len+1);
+        char *ss = strndup(token+2, s_len);
         if(ss == NULL)return 1;
 
         *s = ss;
