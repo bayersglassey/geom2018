@@ -330,6 +330,37 @@ int process_console_input(test_app_t *app){
         }else if(dump_what == 3){
             hexcollmapset_dump(&app->collmapset, stdout);
         }
+    }else if(fus_lexer_got(&lexer, "map")){
+        char *mapper_name;
+        char *mapped_rgraph_name;
+        char *resulting_rgraph_name = NULL;
+
+        err = fus_lexer_expect_str(&lexer, &mapper_name);
+        if(err)return err;
+        err = fus_lexer_expect_str(&lexer, &mapped_rgraph_name);
+        if(err)return err;
+        err = fus_lexer_next(&lexer);
+        if(err)return err;
+        if(!fus_lexer_done(&lexer)){
+            err = fus_lexer_get_str(&lexer, &resulting_rgraph_name);
+            if(err)return err;
+        }
+
+        prismelmapper_t *mapper = prismelrenderer_get_mapper(
+            &app->prend, mapper_name);
+        if(mapper == NULL)return 2;
+        rendergraph_t *mapped_rgraph = prismelrenderer_get_rendergraph(
+            &app->prend, mapped_rgraph_name);
+        if(mapper == NULL)return 2;
+
+        free(mapper_name);
+        free(mapped_rgraph_name);
+
+        rendergraph_t *rgraph;
+        err = prismelmapper_apply_to_rendergraph(mapper, &app->prend,
+            mapped_rgraph, resulting_rgraph_name, app->prend.space,
+            &rgraph);
+        if(err)return err;
     }else if(fus_lexer_got(&lexer, "renderall")){
         SDL_Renderer *renderer = NULL;
         err = fus_lexer_next(&lexer);

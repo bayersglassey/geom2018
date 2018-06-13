@@ -919,6 +919,11 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
         return 0;
     }
 
+    /* If no name specified, generate one like "<curvy dodeca_sixth>" */
+    if(name == NULL){
+        name = generate_mapped_name(mapper->name,
+            mapped_rgraph->name);}
+
     /* Create a new rendergraph */
     resulting_rgraph = calloc(1, sizeof(rendergraph_t));
     if(resulting_rgraph == NULL)return 1;
@@ -967,14 +972,10 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
             mapped_rgraph->rendergraph_trfs[i];
         rendergraph_t *rgraph = rendergraph_trf->rendergraph;
 
-        /* Generate a name, e.g. "<curvy dodeca_sixth>" */
-        char *name = generate_mapped_name(mapper->name, rgraph->name);
-        if(name == NULL)return 1;
-
         /* Recurse! */
         rendergraph_t *new_rgraph;
         err = prismelmapper_apply_to_rendergraph(mapper, prend,
-            rgraph, name, space, &new_rgraph);
+            rgraph, NULL, space, &new_rgraph);
         if(err)return err;
 
         /* Add a rendergraph_trf to resulting_rgraph */
