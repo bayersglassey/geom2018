@@ -602,8 +602,15 @@ int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer){
             if(err)return err;
             err = parse_mappers(prend, lexer);
             if(err)return err;
+        }else if(fus_lexer_got(lexer, "import")){
+            char *filename;
+            err = fus_lexer_expect_str(lexer, &filename);
+            if(err)return err;
+            err = prismelrenderer_load(prend, filename);
+            if(err)return err;
+            free(filename);
         }else{
-            return fus_lexer_unexpected(lexer, "shapes or prismels");
+            return fus_lexer_unexpected(lexer, "shapes or prismels or mappers or import");
         }
     }
     return 0;
