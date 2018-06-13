@@ -485,6 +485,8 @@ static int parse_mapper(prismelrenderer_t *prend, fus_lexer_t *lexer,
         err = prismelmapper_init(mapper, strdup(name), prend->space);
         if(err)return err;
 
+        ARRAY_PUSH(prismelmapper_t, *prend, mappers, mapper)
+
         err = fus_lexer_get(lexer, "unit");
         if(err)return err;
         err = fus_lexer_expect(lexer, "(");
@@ -572,8 +574,6 @@ static int parse_mappers(prismelrenderer_t *prend, fus_lexer_t *lexer){
         prismelmapper_t *mapper;
         err = parse_mapper(prend, lexer, name, &mapper);
         if(err)return err;
-
-        ARRAY_PUSH(prismelmapper_t, *prend, mappers, mapper)
     }
     return 0;
 }

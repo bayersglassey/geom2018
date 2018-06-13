@@ -32,10 +32,3 @@ Jun 10, 2018:
     But instead it looks like... well, anyway it looks like the order that the
     mappers are being applied in is the opposite of what we expected; or at any rate,
     the *associativity* of application is the opposite of what we expected.
-
-Jun 13, 2018:
--------------
-
-- prismelrenderer_cleanup: prismelmapper_cleanup: free(mapper->name): Invalid read of size 8
-    ...right, because we need to strdup() our string literals when using them as names
-
