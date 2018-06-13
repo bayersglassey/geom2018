@@ -3,17 +3,19 @@
 #include <stdbool.h>
 
 #include "anim.h"
+#include "util.h"
 
 
 int mainloop(){
     int err;
+
     stateset_t stateset;
     const char *filename = "data/anim.fus";
-
     err = stateset_load(&stateset, filename);
     if(err)return err;
 
     stateset_dump(&stateset, stdout);
+    stateset_cleanup(&stateset);
 
     return 0;
 }

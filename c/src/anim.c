@@ -54,6 +54,13 @@ int stateset_load(stateset_t *stateset, const char *filename){
 
 int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer){
     int err;
+
+    int collmap_lines_len = 0;
+    int collmap_lines_size = 8;
+    char **collmap_lines = calloc(collmap_lines_size,
+        sizeof(*collmap_lines));
+    if(collmap_lines == NULL)return 1;
+
     while(1){
         err = fus_lexer_next(lexer);
         if(err)return err;
@@ -119,21 +126,51 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer){
                     else if(fus_lexer_got(lexer, "no"))/* dinnae move a muscle */;
                     else return fus_lexer_unexpected(lexer, "yes or no");
 
+                    /* read in lines of hexcollmap */
                     while(1){
                         err = fus_lexer_next(lexer);
                         if(err)return err;
 
                         if(fus_lexer_got(lexer, ")"))break;
 
-                        char *line;
-                        err = fus_lexer_get_str(lexer, &line);
+                        /* resize array of lines, if necessary */
+                        if(collmap_lines_len >= collmap_lines_size){
+                            int new_lines_size = collmap_lines_size * 2;
+                            char **new_lines = realloc(collmap_lines,
+                                sizeof(*collmap_lines) * new_lines_size);
+                            if(new_lines == NULL)return 1;
+                            for(int i = collmap_lines_size;
+                                i < new_lines_size; i++){
+                                    new_lines[i] = NULL;}
+                            collmap_lines_size = new_lines_size;
+                            collmap_lines = new_lines;
+                        }
+
+                        /* get new line from lexer */
+                        collmap_lines_len++;
+                        err = fus_lexer_get_str(lexer,
+                            &collmap_lines[collmap_lines_len - 1]);
                         if(err)return err;
-                        /* TODO: parse them lines... */
-                        free(line);
                     }
+
+                    /* parse lines as hexcollmap */
+                    hexcollmap_t *collmap = calloc(1, sizeof(*collmap));
+                    if(collmap == NULL)return 1;
+                    err = hexcollmap_init(collmap, NULL);
+                    if(err)return err;
+                    err = hexcollmap_parse_lines(collmap,
+                        collmap_lines, collmap_lines_len);
+                    if(err)return err;
+
+                    /* clear array of lines */
+                    for(int i = 0; i < collmap_lines_len; i++){
+                        free(collmap_lines[i]);
+                        collmap_lines[i] = NULL;}
+                    collmap_lines_len = 0;
 
                     ARRAY_PUSH_NEW(state_cond_t, *rule, conds, cond)
                     cond->type = state_cond_type_coll;
+                    cond->u.coll.collmap = collmap;
                     cond->u.coll.flags = flags;
                 }else{
                     return fus_lexer_unexpected(lexer, NULL);
@@ -280,13 +317,16 @@ void state_dump(state_t *state, FILE *f, int n_spaces){
             state_cond_t *cond = rule->conds[i];
             fprintf(f, "%s      %s", spaces, cond->type);
             if(cond->type == state_cond_type_kdown){
-                fprintf(f, ": %c", cond->u.key);
+                fprintf(f, ": %c\n", cond->u.key);
             }else if(cond->type == state_cond_type_coll){
-                fprintf(f, ": %s %s",
+                fprintf(f, ": %s %s\n",
                     (cond->u.coll.flags & 1)? "all": "any",
                     (cond->u.coll.flags & 2)? "yes": "no");
+                hexcollmap_dump(cond->u.coll.collmap,
+                    f, n_spaces + 8);
+            }else{
+                fprintf(f, "\n");
             }
-            fprintf(f, "\n");
         }
         fprintf(f, "%s    then:\n", spaces);
         for(int i = 0; i < rule->effects_len; i++){
@@ -296,14 +336,18 @@ void state_dump(state_t *state, FILE *f, int n_spaces){
                 int *vec = effect->u.vec;
                 fprintf(f, ":");
                 for(int i = 0; i < 4; i++)fprintf(f, " %i", vec[i]);
+                fprintf(f, "\n");
             }else if(effect->type == state_effect_type_rot){
-                fprintf(f, ": %i", effect->u.rot);
+                fprintf(f, ": %i\n", effect->u.rot);
             }else if(effect->type == state_effect_type_turn){
+                fprintf(f, "\n");
             }else if(effect->type == state_effect_type_goto){
-                fprintf(f, ": %s", effect->u.goto_name);
+                fprintf(f, ": %s\n", effect->u.goto_name);
             }else if(effect->type == state_effect_type_die){
+                fprintf(f, "\n");
+            }else{
+                fprintf(f, "\n");
             }
-            fprintf(f, "\n");
         }
     }
 }
