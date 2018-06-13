@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "hexcollmap.h"
+#include "lexer.h"
 #include "util.h"
 
 
@@ -71,6 +72,11 @@ static void get_map_coords(int x, int y, char c,
 
 
 
+
+/**************
+ * HEXCOLLMAP *
+ **************/
+
 void hexcollmap_cleanup(hexcollmap_t *collmap){
     free(collmap->name);
     free(collmap->tiles);
@@ -102,6 +108,57 @@ void hexcollmap_dump(hexcollmap_t *collmap, FILE *f, int n_spaces){
         }
         fprintf(f, "\n");
     }
+}
+
+int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer){
+    int err;
+
+    /* set up dynamic array of lines */
+    int collmap_lines_len = 0;
+    int collmap_lines_size = 8;
+    char **collmap_lines = calloc(collmap_lines_size,
+        sizeof(*collmap_lines));
+    if(collmap_lines == NULL)return 1;
+
+    /* read in lines */
+    while(1){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+
+        if(fus_lexer_got(lexer, ")"))break;
+
+        /* resize array of lines, if necessary */
+        if(collmap_lines_len >= collmap_lines_size){
+            int new_lines_size = collmap_lines_size * 2;
+            char **new_lines = realloc(collmap_lines,
+                sizeof(*collmap_lines) * new_lines_size);
+            if(new_lines == NULL)return 1;
+            for(int i = collmap_lines_size;
+                i < new_lines_size; i++){
+                    new_lines[i] = NULL;}
+            collmap_lines_size = new_lines_size;
+            collmap_lines = new_lines;
+        }
+
+        /* get new line from lexer */
+        collmap_lines_len++;
+        err = fus_lexer_get_str(lexer,
+            &collmap_lines[collmap_lines_len - 1]);
+        if(err)return err;
+    }
+
+    /* parse lines */
+    err = hexcollmap_parse_lines(collmap,
+        collmap_lines, collmap_lines_len);
+    if(err)return err;
+
+    /* free lines and dynamic array thereof */
+    for(int i = 0; i < collmap_lines_len; i++){
+        free(collmap_lines[i]);
+        collmap_lines[i] = NULL;}
+    free(collmap_lines);
+
+    return 0;
 }
 
 int hexcollmap_parse_lines(hexcollmap_t *collmap,
@@ -205,6 +262,65 @@ int hexcollmap_parse_lines(hexcollmap_t *collmap,
     collmap->w = map_w;
     collmap->h = map_h;
     collmap->tiles = tiles;
+    return 0;
+}
+
+
+
+/*****************
+ * HEXCOLLMAPSET *
+ *****************/
+
+void hexcollmapset_cleanup(hexcollmapset_t *collmapset){
+    ARRAY_FREE(hexcollmap_t, *collmapset, collmaps, hexcollmap_cleanup)
+}
+
+int hexcollmapset_init(hexcollmapset_t *collmapset){
+    ARRAY_INIT(*collmapset, collmaps)
+    return 0;
+}
+
+void hexcollmapset_dump(hexcollmapset_t *collmapset, FILE *f){
+    fprintf(f, "hexcollmapset: %p\n", collmapset);
+    for(int i = 0; i < collmapset->collmaps_len; i++){
+        hexcollmap_dump(collmapset->collmaps[i], f, 2);
+    }
+}
+
+int hexcollmapset_load(hexcollmapset_t *collmapset, const char *filename){
+    int err;
+    fus_lexer_t lexer;
+
+    char *text = load_file(filename);
+    if(text == NULL)return 1;
+
+    err = fus_lexer_init(&lexer, text, filename);
+    if(err)return err;
+
+    err = hexcollmapset_init(collmapset);
+    if(err)return err;
+
+    while(1){
+        err = fus_lexer_next(&lexer);
+        if(err)return err;
+
+        if(fus_lexer_done(&lexer))break;
+
+        char *name;
+        err = fus_lexer_get_name(&lexer, &name);
+        if(err)return err;
+
+        ARRAY_PUSH_NEW(hexcollmap_t, *collmapset, collmaps, collmap)
+        err = hexcollmap_init(collmap, name);
+        if(err)return err;
+
+        err = fus_lexer_expect(&lexer, "(");
+        if(err)return err;
+        err = hexcollmap_parse(collmap, &lexer);
+        if(err)return err;
+    }
+
+    free(text);
     return 0;
 }
 

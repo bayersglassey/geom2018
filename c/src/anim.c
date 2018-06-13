@@ -39,7 +39,7 @@ int stateset_load(stateset_t *stateset, const char *filename){
     char *text = load_file(filename);
     if(text == NULL)return 1;
 
-    err = fus_lexer_init(&lexer, text);
+    err = fus_lexer_init(&lexer, text, filename);
     if(err)return err;
 
     err = stateset_init(stateset);
@@ -54,12 +54,6 @@ int stateset_load(stateset_t *stateset, const char *filename){
 
 int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer){
     int err;
-
-    int collmap_lines_len = 0;
-    int collmap_lines_size = 8;
-    char **collmap_lines = calloc(collmap_lines_size,
-        sizeof(*collmap_lines));
-    if(collmap_lines == NULL)return 1;
 
     while(1){
         err = fus_lexer_next(lexer);
@@ -126,47 +120,12 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer){
                     else if(fus_lexer_got(lexer, "no"))/* dinnae move a muscle */;
                     else return fus_lexer_unexpected(lexer, "yes or no");
 
-                    /* read in lines of hexcollmap */
-                    while(1){
-                        err = fus_lexer_next(lexer);
-                        if(err)return err;
-
-                        if(fus_lexer_got(lexer, ")"))break;
-
-                        /* resize array of lines, if necessary */
-                        if(collmap_lines_len >= collmap_lines_size){
-                            int new_lines_size = collmap_lines_size * 2;
-                            char **new_lines = realloc(collmap_lines,
-                                sizeof(*collmap_lines) * new_lines_size);
-                            if(new_lines == NULL)return 1;
-                            for(int i = collmap_lines_size;
-                                i < new_lines_size; i++){
-                                    new_lines[i] = NULL;}
-                            collmap_lines_size = new_lines_size;
-                            collmap_lines = new_lines;
-                        }
-
-                        /* get new line from lexer */
-                        collmap_lines_len++;
-                        err = fus_lexer_get_str(lexer,
-                            &collmap_lines[collmap_lines_len - 1]);
-                        if(err)return err;
-                    }
-
-                    /* parse lines as hexcollmap */
                     hexcollmap_t *collmap = calloc(1, sizeof(*collmap));
                     if(collmap == NULL)return 1;
                     err = hexcollmap_init(collmap, NULL);
                     if(err)return err;
-                    err = hexcollmap_parse_lines(collmap,
-                        collmap_lines, collmap_lines_len);
+                    err = hexcollmap_parse(collmap, lexer);
                     if(err)return err;
-
-                    /* clear array of lines */
-                    for(int i = 0; i < collmap_lines_len; i++){
-                        free(collmap_lines[i]);
-                        collmap_lines[i] = NULL;}
-                    collmap_lines_len = 0;
 
                     ARRAY_PUSH_NEW(state_cond_t, *rule, conds, cond)
                     cond->type = state_cond_type_coll;
