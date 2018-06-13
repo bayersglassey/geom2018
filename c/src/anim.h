@@ -21,6 +21,9 @@ typedef struct hexcollmap {
     hexcolltile_t *data;
 } hexcollmap_t;
 
+void hexcollmap_cleanup(hexcollmap_t *collmap);
+int hexcollmap_init(hexcollmap_t *collmap);
+
 
 
 typedef struct state {
@@ -69,6 +72,7 @@ extern const char *state_cond_types[];
 typedef struct state_effect {
     const char *type;
     union {
+        char *goto_name;
         vec_t vec;
         rot_t rot;
     } u;

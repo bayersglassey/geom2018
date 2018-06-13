@@ -10,6 +10,16 @@
 
 
 
+/**************
+ * HEXCOLLMAP *
+ **************/
+
+void hexcollmap_cleanup(hexcollmap_t *collmap){
+    /* heyyo... */
+}
+
+
+
 /************
  * STATESET *
  ************/
@@ -143,10 +153,57 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer){
             if(err)return err;
             err = fus_lexer_expect(lexer, "(");
             if(err)return err;
-            err = fus_lexer_parse_silent(lexer);
-            if(err)return err;
-            err = fus_lexer_get(lexer, ")");
-            if(err)return err;
+            while(1){
+                err = fus_lexer_next(lexer);
+                if(err)return err;
+                if(fus_lexer_got(lexer, ")")){
+                    break;
+                }else if(fus_lexer_got(lexer, "move")){
+                    err = fus_lexer_expect(lexer, "(");
+                    if(err)return err;
+                    ARRAY_PUSH_NEW(state_effect_t, *rule, effects, effect)
+                    effect->type = state_effect_type_move;
+                    for(int i = 0; i < 4; i++){
+                        err = fus_lexer_expect_int(lexer, &effect->u.vec[i]);
+                        if(err)return err;
+                    }
+                    err = fus_lexer_expect(lexer, ")");
+                    if(err)return err;
+                }else if(fus_lexer_got(lexer, "rot")){
+                    err = fus_lexer_expect(lexer, "(");
+                    if(err)return err;
+                    int rot;
+                    err = fus_lexer_expect_int(lexer, &rot);
+                    if(err)return err;
+                    ARRAY_PUSH_NEW(state_effect_t, *rule, effects, effect)
+                    effect->type = state_effect_type_rot;
+                    effect->u.rot = rot_contain(12, rot);
+                    err = fus_lexer_expect(lexer, ")");
+                    if(err)return err;
+                }else if(fus_lexer_got(lexer, "turn")){
+                    ARRAY_PUSH_NEW(state_effect_t, *rule, effects, effect)
+                    effect->type = state_effect_type_turn;
+                }else if(fus_lexer_got(lexer, "goto")){
+                    err = fus_lexer_expect(lexer, "(");
+                    if(err)return err;
+
+                    char *goto_name;
+                    err = fus_lexer_expect_name(lexer, &goto_name);
+                    if(err)return err;
+
+                    ARRAY_PUSH_NEW(state_effect_t, *rule, effects, effect)
+                    effect->type = state_effect_type_goto;
+                    effect->u.goto_name = goto_name;
+
+                    err = fus_lexer_expect(lexer, ")");
+                    if(err)return err;
+                }else if(fus_lexer_got(lexer, "die")){
+                    ARRAY_PUSH_NEW(state_effect_t, *rule, effects, effect)
+                    effect->type = state_effect_type_die;
+                }else{
+                    return fus_lexer_unexpected(lexer, NULL);
+                }
+            }
         }
     }
     return 0;
@@ -188,8 +245,26 @@ void state_cleanup(state_t *state){
 
     for(int i = 0; i < state->rules_len; i++){
         state_rule_t *rule = state->rules[i];
-        ARRAY_FREE(state_cond_t, *rule, conds, (void));
-        ARRAY_FREE(state_effect_t, *rule, effects, (void));
+
+        for(int i = 0; i < rule->conds_len; i++){
+            state_cond_t *cond = rule->conds[i];
+            if(cond->type == state_cond_type_coll){
+                hexcollmap_t *collmap = cond->u.coll.collmap;
+                if(collmap != NULL){
+                    hexcollmap_cleanup(collmap);
+                    free(collmap);
+                }
+            }
+        }
+        free(rule->conds);
+
+        for(int i = 0; i < rule->effects_len; i++){
+            state_effect_t *effect = rule->effects[i];
+            if(effect->type == state_effect_type_goto){
+                free(effect->u.goto_name);
+            }
+        }
+        free(rule->effects);
     }
     free(state->rules);
 }
@@ -215,13 +290,29 @@ void state_dump(state_t *state, FILE *f, int n_spaces){
             fprintf(f, "%s      %s", spaces, cond->type);
             if(cond->type == state_cond_type_kdown){
                 fprintf(f, ": %c", cond->u.key);
+            }else if(cond->type == state_cond_type_coll){
+                fprintf(f, ": %s %s",
+                    (cond->u.coll.flags & 1)? "all": "any",
+                    (cond->u.coll.flags & 2)? "yes": "no");
             }
             fprintf(f, "\n");
         }
         fprintf(f, "%s    then:\n", spaces);
         for(int i = 0; i < rule->effects_len; i++){
             state_effect_t *effect = rule->effects[i];
-            fprintf(f, "%s      effect: %p\n", spaces, effect);
+            fprintf(f, "%s      %s", spaces, effect->type);
+            if(effect->type == state_effect_type_move){
+                int *vec = effect->u.vec;
+                fprintf(f, ":");
+                for(int i = 0; i < 4; i++)fprintf(f, " %i", vec[i]);
+            }else if(effect->type == state_effect_type_rot){
+                fprintf(f, ": %i", effect->u.rot);
+            }else if(effect->type == state_effect_type_turn){
+            }else if(effect->type == state_effect_type_goto){
+                fprintf(f, ": %s", effect->u.goto_name);
+            }else if(effect->type == state_effect_type_die){
+            }
+            fprintf(f, "\n");
         }
     }
 }
