@@ -71,7 +71,9 @@ int test_app_load_rendergraphs(test_app_t *app, bool reload){
         prismelrenderer_cleanup(&app->prend);
     }
 
-    err = prismelrenderer_load(&app->prend, app->prend_filename, &vec4);
+    err = prismelrenderer_init(&app->prend, &vec4);
+    if(err)return err;
+    err = prismelrenderer_load(&app->prend, app->prend_filename);
     if(err)return err;
 
     if(app->prend.rendergraphs_len < 1){

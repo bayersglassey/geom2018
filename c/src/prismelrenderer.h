@@ -80,8 +80,7 @@ struct rendergraph *prismelrenderer_get_rendergraph(prismelrenderer_t *prend,
     const char *name);
 struct prismelmapper *prismelrenderer_get_mapper(prismelrenderer_t *prend,
     const char *name);
-int prismelrenderer_load(prismelrenderer_t *prend, const char *filename,
-    vecspace_t *space);
+int prismelrenderer_load(prismelrenderer_t *prend, const char *filename);
 int prismelrenderer_save(prismelrenderer_t *prend, const char *filename);
 int prismelrenderer_write(prismelrenderer_t *prend, FILE *f);
 int prismelrenderer_render_all_bitmaps(prismelrenderer_t *prend,

@@ -246,9 +246,7 @@ prismelmapper_t *prismelrenderer_get_mapper(prismelrenderer_t *prend,
     return NULL;
 }
 
-int prismelrenderer_load(prismelrenderer_t *prend, const char *filename,
-    vecspace_t *space
-){
+int prismelrenderer_load(prismelrenderer_t *prend, const char *filename){
     int err;
     fus_lexer_t lexer;
 
@@ -256,9 +254,6 @@ int prismelrenderer_load(prismelrenderer_t *prend, const char *filename,
     if(text == NULL)return 1;
 
     err = fus_lexer_init(&lexer, text, filename);
-    if(err)return err;
-
-    err = prismelrenderer_init(prend, space);
     if(err)return err;
 
     err = prismelrenderer_parse(prend, &lexer);

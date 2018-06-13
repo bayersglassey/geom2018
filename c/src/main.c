@@ -22,7 +22,9 @@ int main(int n_args, char *args[]){
     char *filename = "data/test.fus";
     if(n_args >= 2)filename = args[1];
 
-    err = prismelrenderer_load(&prend, filename, &vec4);
+    err = prismelrenderer_init(&prend, &vec4);
+    if(err)return err;
+    err = prismelrenderer_load(&prend, filename);
     if(err)return err;
 
     err = prismelrenderer_render_all_bitmaps(&prend, pal, NULL);
