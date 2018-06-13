@@ -39,6 +39,8 @@ void hexcollmapset_cleanup(hexcollmapset_t *collmapset);
 int hexcollmapset_init(hexcollmapset_t *collmapset);
 void hexcollmapset_dump(hexcollmapset_t *collmapset, FILE *f);
 int hexcollmapset_load(hexcollmapset_t *collmapset, const char *filename);
+hexcollmap_t *hexcollmapset_get_collmap(hexcollmapset_t *collmapset,
+    const char *name);
 
 
 #endif

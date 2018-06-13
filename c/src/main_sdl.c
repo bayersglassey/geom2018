@@ -52,6 +52,7 @@ typedef struct test_app {
 
 
 #include "anim.h"
+#include "hexcollmap.h"
 #include "util.h"
 
 
@@ -107,49 +108,49 @@ int test_app_load_map(test_app_t *app, const char *map_name, bool is_curvy){
         fprintf(stderr, "Couldn't find rgraph: %s\n", face_name);
         return 2;}
 
-    hexcollmapset_t *collmapset = &app->collmapset;
-    for(int i = 0; i < collmapset->collmaps_len; i++){
-        hexcollmap_t *collmap = collmapset->collmaps[i];
-        if(!strcmp(collmap->name, map_name)){
-            ARRAY_PUSH_NEW(rendergraph_t, *prend, rendergraphs, rgraph)
-            err = rendergraph_init(rgraph, strdup(map_name), &vec4,
-                rendergraph_animation_type_default,
-                rendergraph_n_frames_default);
-            if(err)return err;
-            for(int y = 0; y < collmap->h; y++){
-                for(int x = 0; x < collmap->w; x++){
-                    int px = x - collmap->ox;
-                    int py = y - collmap->oy;
+    hexcollmap_t *collmap = hexcollmapset_get_collmap(&app->collmapset,
+        map_name);
+    if(collmap == NULL){
+        fprintf(stderr, "Couldn't find map: %s\n", map_name);
+        return 2;}
 
-                    vec_t v;
-                    vec4_set(v, px + py, 0, -py, 0);
-                    vec_mul(prend->space, v, mul);
+    ARRAY_PUSH_NEW(rendergraph_t, *prend, rendergraphs, rgraph)
+    err = rendergraph_init(rgraph, strdup(map_name), &vec4,
+        rendergraph_animation_type_default,
+        rendergraph_n_frames_default);
+    if(err)return err;
 
-                    hexcollmap_tile_t *tile =
-                        &collmap->tiles[y * collmap->w + x];
+    for(int y = 0; y < collmap->h; y++){
+        for(int x = 0; x < collmap->w; x++){
+            int px = x - collmap->ox;
+            int py = y - collmap->oy;
 
-                    for(int i = 0; i < 1; i++){
-                        if(tile->vert[i]){
-                            err = add_tile_rgraph(rgraph, rgraph_vert,
-                                prend->space, v, i * 2);
-                            if(err)return err;}}
-                    for(int i = 0; i < 3; i++){
-                        if(tile->edge[i]){
-                            err = add_tile_rgraph(rgraph, rgraph_edge,
-                                prend->space, v, i * 2);
-                            if(err)return err;}}
-                    for(int i = 0; i < 2; i++){
-                        if(tile->face[i]){
-                            err = add_tile_rgraph(rgraph, rgraph_face,
-                                prend->space, v, i * 2);
-                            if(err)return err;}}
-                }
-            }
-            return 0;
+            vec_t v;
+            vec4_set(v, px + py, 0, -py, 0);
+            vec_mul(prend->space, v, mul);
+
+            hexcollmap_tile_t *tile =
+                &collmap->tiles[y * collmap->w + x];
+
+            for(int i = 0; i < 1; i++){
+                if(tile->vert[i]){
+                    err = add_tile_rgraph(rgraph, rgraph_vert,
+                        prend->space, v, i * 2);
+                    if(err)return err;}}
+            for(int i = 0; i < 3; i++){
+                if(tile->edge[i]){
+                    err = add_tile_rgraph(rgraph, rgraph_edge,
+                        prend->space, v, i * 2);
+                    if(err)return err;}}
+            for(int i = 0; i < 2; i++){
+                if(tile->face[i]){
+                    err = add_tile_rgraph(rgraph, rgraph_face,
+                        prend->space, v, i * 2);
+                    if(err)return err;}}
         }
     }
-    fprintf(stderr, "Couldn't find map: %s\n", map_name);
-    return 2;
+
+    return 0;
 }
 
 int test_app_load_rendergraphs(test_app_t *app, bool reload){

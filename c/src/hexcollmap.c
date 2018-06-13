@@ -324,3 +324,13 @@ int hexcollmapset_load(hexcollmapset_t *collmapset, const char *filename){
     return 0;
 }
 
+hexcollmap_t *hexcollmapset_get_collmap(hexcollmapset_t *collmapset,
+    const char *name
+){
+    for(int i = 0; i < collmapset->collmaps_len; i++){
+        hexcollmap_t *collmap = collmapset->collmaps[i];
+        if(!strcmp(collmap->name, name))return collmap;
+    }
+    return NULL;
+}
+
