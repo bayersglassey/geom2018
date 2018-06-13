@@ -64,6 +64,97 @@ void test_app_cleanup(test_app_t *app){
     hexcollmapset_cleanup(&app->collmapset);
 }
 
+int add_tile_rgraph(rendergraph_t *rgraph, rendergraph_t *rgraph2,
+    vecspace_t *space, vec_t add, rot_t rot
+){
+    int err;
+    rendergraph_trf_t *rendergraph_trf;
+    err = rendergraph_push_rendergraph_trf(rgraph, &rendergraph_trf);
+    if(err)return err;
+    rendergraph_trf->rendergraph = rgraph2;
+    rendergraph_trf->trf.rot = rot;
+    vec_cpy(space->dims, rendergraph_trf->trf.add, add);
+    return 0;
+}
+
+int test_app_load_map(test_app_t *app, const char *map_name, bool is_curvy){
+    int err;
+
+    prismelrenderer_t *prend = &app->prend;
+
+    vec_t mul_curvy;
+    vec4_set(mul_curvy, 2, 2, 2, 0);
+
+    vec_t mul;
+    vec4_set(mul, 3, 2, 0, -1);
+    if(is_curvy)vec_mul(prend->space, mul, mul_curvy);
+
+    const char *vert_name = is_curvy? "curvy_map_vert": "map_vert";
+    rendergraph_t *rgraph_vert = prismelrenderer_get_rendergraph(
+        prend, vert_name);
+    if(rgraph_vert == NULL){
+        fprintf(stderr, "Couldn't find rgraph: %s\n", vert_name);
+        return 2;}
+
+    const char *edge_name = is_curvy? "curvy_map_edge": "map_edge";
+    rendergraph_t *rgraph_edge = prismelrenderer_get_rendergraph(
+        prend, edge_name);
+    if(rgraph_edge == NULL){
+        fprintf(stderr, "Couldn't find rgraph: %s\n", edge_name);
+        return 2;}
+
+    const char *face_name = is_curvy? "curvy_map_face": "map_face";
+    rendergraph_t *rgraph_face = prismelrenderer_get_rendergraph(
+        prend, face_name);
+    if(rgraph_face == NULL){
+        fprintf(stderr, "Couldn't find rgraph: %s\n", face_name);
+        return 2;}
+
+    hexcollmapset_t *collmapset = &app->collmapset;
+    for(int i = 0; i < collmapset->collmaps_len; i++){
+        hexcollmap_t *collmap = collmapset->collmaps[i];
+        if(!strcmp(collmap->name, map_name)){
+            ARRAY_PUSH_NEW(rendergraph_t, *prend, rendergraphs, rgraph)
+            err = rendergraph_init(rgraph, strdup(map_name), &vec4,
+                rendergraph_animation_type_default,
+                rendergraph_n_frames_default);
+            if(err)return err;
+            for(int y = 0; y < collmap->h; y++){
+                for(int x = 0; x < collmap->w; x++){
+                    int px = x - collmap->ox;
+                    int py = y - collmap->oy;
+
+                    vec_t v;
+                    vec4_set(v, px + py, 0, -py, 0);
+                    vec_mul(prend->space, v, mul);
+
+                    hexcollmap_tile_t *tile =
+                        &collmap->tiles[y * collmap->w + x];
+
+                    for(int i = 0; i < 1; i++){
+                        if(tile->vert[i]){
+                            err = add_tile_rgraph(rgraph, rgraph_vert,
+                                prend->space, v, i * 2);
+                            if(err)return err;}}
+                    for(int i = 0; i < 3; i++){
+                        if(tile->edge[i]){
+                            err = add_tile_rgraph(rgraph, rgraph_edge,
+                                prend->space, v, i * 2);
+                            if(err)return err;}}
+                    for(int i = 0; i < 2; i++){
+                        if(tile->face[i]){
+                            err = add_tile_rgraph(rgraph, rgraph_face,
+                                prend->space, v, i * 2);
+                            if(err)return err;}}
+                }
+            }
+            return 0;
+        }
+    }
+    fprintf(stderr, "Couldn't find map: %s\n", map_name);
+    return 2;
+}
+
 int test_app_load_rendergraphs(test_app_t *app, bool reload){
     int err;
 
@@ -202,6 +293,18 @@ int process_console_input(test_app_t *app){
             err = prismelrenderer_save(&app->prend, filename);
             if(err)return err;
         }
+    }else if(fus_lexer_got(&lexer, "loadmap")){
+        bool is_curvy = false;
+        char *map_name;
+        err = fus_lexer_expect_str(&lexer, &map_name);
+        if(err)goto lexer_err;
+        err = fus_lexer_next(&lexer);
+        if(err)goto lexer_err;
+        if(fus_lexer_got(&lexer, "curvy"))is_curvy = true;
+
+        err = test_app_load_map(app, map_name, is_curvy);
+        if(err)return err;
+        free(map_name);
     }else if(fus_lexer_got(&lexer, "dump")){
         bool dump_bitmap_surfaces = false;
         int dump_what = 0; /* rgraph, prend, states, maps */
@@ -218,7 +321,7 @@ int process_console_input(test_app_t *app){
                 dump_bitmap_surfaces = true;}
             else {
                 console_write_msg(&app->console, "Dumper says: idunno\n");
-                break;}
+                dump_what = -1; break;}
         }
         if(dump_what == 0){
             rendergraph_dump(rgraph, stdout, 0, dump_bitmap_surfaces);
@@ -464,10 +567,10 @@ int mainloop(SDL_Window *window, SDL_Renderer *renderer,
             if(app.keydown_##KEY >= (app.keydown_shift? 2: 1)){ \
                 refresh = true; app.keydown_##KEY = 1; \
                 BODY}
-        IF_APP_KEY(l, if(app.keydown_ctrl){app.x0 -= 6;}else{app.rot += 1;})
-        IF_APP_KEY(r, if(app.keydown_ctrl){app.x0 += 6;}else{app.rot -= 1;})
-        IF_APP_KEY(u, if(app.keydown_ctrl){app.y0 -= 6;}else if(app.zoom < 10){app.zoom += 1;})
-        IF_APP_KEY(d, if(app.keydown_ctrl){app.y0 += 6;}else if(app.zoom > 1){app.zoom -= 1;})
+        IF_APP_KEY(l, if(app.keydown_ctrl){app.x0 += 6;}else{app.rot += 1;})
+        IF_APP_KEY(r, if(app.keydown_ctrl){app.x0 -= 6;}else{app.rot -= 1;})
+        IF_APP_KEY(u, if(app.keydown_ctrl){app.y0 += 6;}else if(app.zoom < 10){app.zoom += 1;})
+        IF_APP_KEY(d, if(app.keydown_ctrl){app.y0 -= 6;}else if(app.zoom > 1){app.zoom -= 1;})
 
         Uint32 tick1 = SDL_GetTicks();
         took = tick1 - tick0;
