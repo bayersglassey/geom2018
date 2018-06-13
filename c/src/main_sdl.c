@@ -75,33 +75,29 @@ int add_tile_rgraph(rendergraph_t *rgraph, rendergraph_t *rgraph2,
     return 0;
 }
 
-int test_app_load_map(test_app_t *app, const char *map_name, bool is_curvy){
+int test_app_load_map(test_app_t *app, const char *map_name){
     int err;
 
     prismelrenderer_t *prend = &app->prend;
 
-    vec_t mul_curvy;
-    vec4_set(mul_curvy, 2, 2, 2, 0);
-
     vec_t mul;
     vec4_set(mul, 3, 2, 0, -1);
-    if(is_curvy)vec_mul(prend->space, mul, mul_curvy);
 
-    const char *vert_name = is_curvy? "curvy_map_vert": "map_vert";
+    const char *vert_name = "map_vert";
     rendergraph_t *rgraph_vert = prismelrenderer_get_rendergraph(
         prend, vert_name);
     if(rgraph_vert == NULL){
         fprintf(stderr, "Couldn't find rgraph: %s\n", vert_name);
         return 2;}
 
-    const char *edge_name = is_curvy? "curvy_map_edge": "map_edge";
+    const char *edge_name = "map_edge";
     rendergraph_t *rgraph_edge = prismelrenderer_get_rendergraph(
         prend, edge_name);
     if(rgraph_edge == NULL){
         fprintf(stderr, "Couldn't find rgraph: %s\n", edge_name);
         return 2;}
 
-    const char *face_name = is_curvy? "curvy_map_face": "map_face";
+    const char *face_name = "map_face";
     rendergraph_t *rgraph_face = prismelrenderer_get_rendergraph(
         prend, face_name);
     if(rgraph_face == NULL){
@@ -292,15 +288,10 @@ int process_console_input(test_app_t *app){
             if(err)return err;
         }
     }else if(fus_lexer_got(&lexer, "loadmap")){
-        bool is_curvy = false;
         char *map_name;
         err = fus_lexer_expect_str(&lexer, &map_name);
         if(err)goto lexer_err;
-        err = fus_lexer_next(&lexer);
-        if(err)goto lexer_err;
-        if(fus_lexer_got(&lexer, "curvy"))is_curvy = true;
-
-        err = test_app_load_map(app, map_name, is_curvy);
+        err = test_app_load_map(app, map_name);
         if(err)return err;
         free(map_name);
     }else if(fus_lexer_got(&lexer, "dump")){
@@ -348,10 +339,15 @@ int process_console_input(test_app_t *app){
 
         prismelmapper_t *mapper = prismelrenderer_get_mapper(
             &app->prend, mapper_name);
-        if(mapper == NULL)return 2;
+        if(mapper == NULL){
+            fprintf(stderr, "Couldn't find map: %s\n", mapper_name);
+            return 2;}
         rendergraph_t *mapped_rgraph = prismelrenderer_get_rendergraph(
             &app->prend, mapped_rgraph_name);
-        if(mapper == NULL)return 2;
+        if(mapper == NULL){
+            fprintf(stderr, "Couldn't find shape: %s\n",
+                mapped_rgraph_name);
+            return 2;}
 
         free(mapper_name);
         free(mapped_rgraph_name);

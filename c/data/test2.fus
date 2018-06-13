@@ -44,12 +44,3 @@ shapes:
             : "map_face_third" (1 1 1 0)  4 f
             : "map_face_third" (1 1 1 0)  8 f
 
-shapes:
-    "double_map_vert": map: "double" "map_vert"
-    "double_map_edge": map: "double" "map_edge"
-    "double_map_face": map: "double" "map_face"
-
-    "curvy_map_vert": map: "curvy" "map_vert"
-    "curvy_map_edge": map: "curvy" "map_edge"
-    "curvy_map_face": map: "curvy" "map_face"
-
