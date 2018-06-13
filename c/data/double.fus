@@ -1,0 +1,36 @@
+
+shapes:
+
+    ##########
+    # DOUBLE #
+    ##########
+
+    "double_sq":
+        prismels:
+            : "sq"  (0 0 0 0)  0 f 2
+            : "sq"  (1 0 0 0)  0 f 2
+            : "sq"  (0 0 0 1)  0 f 2
+            : "sq"  (1 0 0 1)  0 f 2
+
+    "double_tri":
+        prismels:
+            : "tri" (0 0 0 0)  0 f 2
+            : "tri" (1 0 0 0)  0 f 2
+            : "tri" (0 0 1 0)  0 f 2
+            : "tri" (1 0 1 0)  6 f 2
+
+    "double_dia":
+        prismels:
+            : "dia" (0 0 0 0)  0 f 2
+            : "dia" (1 0 0 0)  0 f 2
+            : "dia" (0 1 0 0)  0 f 2
+            : "dia" (1 1 0 0)  0 f 2
+
+mappers:
+
+    "double":
+        unit: 2 0 0 0
+        entries:
+            : "sq"  -> "double_sq"
+            : "tri" -> "double_tri"
+            : "dia" -> "double_dia"

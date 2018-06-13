@@ -1,0 +1,173 @@
+
+shapes:
+
+    ############
+    # CURVY SQ #
+    ############
+
+    "curvy_sq_eighth":
+
+        # +---+---+-
+        # |   |   | \
+        #  \ / \ /   -+
+        #   |   |     |
+        #   +---+-   /
+        #   |   | \ |
+        #   |   |  -+
+        #   |   | /
+        #   0---+-
+
+        prismels:
+            : "sq"  (0 0 0 0)  0 f 2
+            : "tri" (1 0 0 0)  1 f 3
+            : "sq"  (1 0 0 1) 11 f 2
+            : "tri" (0 0 1 1)  6 f 4
+            : "tri" (0 0 1 1)  8 f 4
+            : "tri" (0 0 1 1) 10 f 4
+
+    "curvy_sq_quarter":
+
+        shapes:
+            : "curvy_sq_eighth" (0 0 0 0)  0 f
+            : "curvy_sq_eighth" (0 0 2 2)  6 f
+
+    "curvy_sq":
+
+        shapes:
+            : "curvy_sq_quarter" ( 0  0  0  0)  0 f
+            : "curvy_sq_quarter" ( 2  2  2  0)  3 f
+            : "curvy_sq_quarter" ( 0  0  4  4)  6 f
+            : "curvy_sq_quarter" (-2 -2  2  4)  9 f
+
+    "curvy_sq_many":
+
+        shapes:
+            : "curvy_sq" (-2 -2 -6 -4) 0 f
+            : "curvy_sq" ( 0  0 -4 -4) 0 f
+            : "curvy_sq" ( 2  2 -2 -4) 0 f
+            : "curvy_sq" ( 4  4  0 -4) 0 f
+            : "curvy_sq" ( 6  6  2 -4) 0 f
+
+            : "curvy_sq" (-4 -4 -4  0) 0 f
+            : "curvy_sq" (-2 -2 -2  0) 0 f
+            : "curvy_sq" ( 0  0  0  0) 0 f
+            : "curvy_sq" ( 2  2  2  0) 0 f
+            : "curvy_sq" ( 4  4  4  0) 0 f
+
+            : "curvy_sq" (-6 -6 -2  4) 0 f
+            : "curvy_sq" (-4 -4  0  4) 0 f
+            : "curvy_sq" (-2 -2  2  4) 0 f
+            : "curvy_sq" ( 0  0  4  4) 0 f
+            : "curvy_sq" ( 2  2  6  4) 0 f
+
+
+    #############
+    # CURVY TRI #
+    #############
+
+    "curvy_tri_third":
+
+        prismels:
+            : "tri" ( 0 0 0 0)  0 f 2
+            : "tri" ( 0 1 1 0)  0 f 4
+            : "sq"  ( 0 1 1 0)  2 f 3
+            : "tri" ( 0 1 1 0)  5 f 4
+            : "sq"  ( 0 1 1 0)  7 f 3
+            : "tri" ( 0 1 1 0) 10 f 4
+            : "tri" (-1 0 2 1) 10 f 4
+
+    "curvy_tri":
+
+        #   +
+        #   |
+        #  / \
+        # |   |
+        # +---+-
+        # |   | \
+        # |   |  -+---+---+-
+        # |   | / |   |   | \
+        # +---+-   \ / \ /   -+
+        # |   |     |   |     |
+        #  \ / \   -+---+-   / \
+        #   |   | / |   | \ |   |
+        #   +---+-  |   |  -+---+
+        #   |   | \ |   | /
+        #    \ /   -+---+-
+        #     |     |   |
+        #     +-   / \ /
+        #     | \ |   |
+        #     |  -+---+
+        #     | / |   |
+        #     +-   \ /
+        #     |     |
+        #    / \   -+
+        #   |   | /
+        #   0---+-
+
+        shapes:
+            : "curvy_tri_third" ( 0  0  0  0)  0 f
+            : "curvy_tri_third" ( 2  2  2  0)  4 f
+            : "curvy_tri_third" (-2  0  4  2)  8 f
+
+        prismels:
+            : "tri" ( 0  0  2  1) 11 f 5
+
+
+    #############
+    # CURVY DIA #
+    #############
+
+    "curvy_dia_half":
+
+        #            -X
+        #           /
+        #         +---+-
+        #         |   | \
+        #        / \ /|  -+-
+        #       |   | | / | \
+        #       +---+ +-  |  -+---+
+        #       |   | | \ | /   /
+        #       |   |/|  -+---X-
+        #       |   | | /
+        #       +---+ +-
+        #       |   | |
+        #       |   |/
+        #       |   |
+        #       +---+
+        #       |   |
+        #      / \ /
+        #     |   |
+        #    -+---+
+        #   /   /
+        # 0---+-
+
+        prismels:
+            : "dia" ( 0  0  0  0)  0 f 2
+            : "tri" ( 1  1  0  0)  2 f 3
+            : "tri" ( 1  1  0  0)  4 f 4
+            : "sq"  ( 0  1  1  0)  0 f 3
+            : "sq"  ( 0  1  1  1)  0 f 4
+            : "tri" ( 1  1  1  2)  2 f 3
+            : "tri" ( 1  1  1  2)  4 f 3
+            : "dia" ( 1  1  1  0)  2 f 3
+            : "dia" ( 1  1  1  1)  2 f 4
+            : "dia" ( 1  2  2  0)  0 f 2
+            : "tri" ( 1  2  2  0)  1 f 3
+            : "tri" ( 1  2  2  0)  3 f 4
+            : "tri" ( 1  2  2  0)  5 f 5
+            : "tri" ( 1  2  2  1)  5 f 6
+
+    "curvy_dia":
+
+        shapes:
+            : "curvy_dia_half" ( 0  0  0  0)  0 f
+            : "curvy_dia_half" ( 2  4  4  2)  6 f
+
+mappers:
+
+    "curvy":
+        unit: 2 2 2 0
+        entries:
+            : "sq"  -> "curvy_sq"
+            : "tri" -> "curvy_tri"
+            : "dia" -> "curvy_dia"
