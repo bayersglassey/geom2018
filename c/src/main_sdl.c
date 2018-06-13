@@ -8,6 +8,7 @@
 #include "font.h"
 #include "console.h"
 #include "util.h"
+#include "anim.h"
 
 
 #define SCW 1024
@@ -21,12 +22,19 @@
 typedef struct test_app {
     SDL_Window *window;
     SDL_Renderer *renderer;
+
+    const char *prend_filename;
+    const char *stateset_filename;
+    const char *collmapset_filename;
+
     SDL_Palette *pal;
     prismelrenderer_t prend;
     font_t font;
     console_t console;
-    const char *filename;
     int cur_rgraph_i;
+
+    stateset_t stateset;
+    hexcollmapset_t collmapset;
 
     int x0;
     int y0;
@@ -43,22 +51,98 @@ typedef struct test_app {
 } test_app_t;
 
 
-int load_rendergraphs(test_app_t *app, bool reload){
+#include "anim.h"
+#include "util.h"
+
+
+void test_app_cleanup(test_app_t *app){
+    fprintf(stderr, "Cleaning up -> FAKED\n");
+    return;
+
+    prismelrenderer_cleanup(&app->prend);
+    stateset_cleanup(&app->stateset);
+    hexcollmapset_cleanup(&app->collmapset);
+}
+
+int test_app_load_rendergraphs(test_app_t *app, bool reload){
     int err;
 
     if(reload){
         prismelrenderer_cleanup(&app->prend);
     }
 
-    err = prismelrenderer_load(&app->prend, app->filename, &vec4);
+    err = prismelrenderer_load(&app->prend, app->prend_filename, &vec4);
     if(err)return err;
 
     if(app->prend.rendergraphs_len < 1){
-        fprintf(stderr, "No rendergraphs in %s\n", app->filename);
+        fprintf(stderr, "No rendergraphs in %s\n", app->prend_filename);
         return 2;}
 
     return 0;
 }
+
+int test_app_init(test_app_t *app, SDL_Window *window,
+    SDL_Renderer *renderer, const char *prend_filename
+){
+    int err;
+
+    app->window = window;
+    app->renderer = renderer;
+    app->prend_filename = prend_filename;
+
+    app->pal = SDL_AllocPalette(256);
+    RET_IF_SDL_NULL(app->pal);
+    RET_IF_SDL_NZ(SDL_SetPaletteColors(
+        app->pal,
+        (SDL_Color []){
+            {.r=  0, .g=  0, .b=  0, .a=  0},
+            {.r=  0, .g=  0, .b=  0, .a=255},
+            {.r=255, .g= 60, .b= 60, .a=255},
+            {.r= 60, .g=255, .b= 60, .a=255},
+            {.r= 60, .g= 60, .b=255, .a=255},
+            {.r=255, .g=255, .b= 60, .a=255},
+            {.r= 60, .g=255, .b=255, .a=255},
+            {.r=255, .g= 60, .b=255, .a=255},
+            {.r=255, .g=255, .b=255, .a=255},
+        },
+        0, 9));
+
+    app->stateset_filename = "data/anim.fus";
+    err = stateset_load(&app->stateset,
+        app->stateset_filename);
+    if(err)return err;
+
+    app->collmapset_filename = "data/map.fus";
+    err = hexcollmapset_load(&app->collmapset,
+        app->collmapset_filename);
+    if(err)return err;
+
+    err = font_load(&app->font, "data/font.fus");
+    if(err)return err;
+
+    err = console_init(&app->console, 80, 40, 20000);
+    if(err)return err;
+
+    app->cur_rgraph_i = 0;
+    err = test_app_load_rendergraphs(app, false);
+    if(err)return err;
+
+    app->x0 = 0;
+    app->y0 = 0;
+    app->rot = 0;
+    app->zoom = 1;
+    app->frame_i = 0;
+    app->loop = true;
+    app->keydown_shift = false;
+    app->keydown_ctrl = false;
+    app->keydown_u = 0;
+    app->keydown_d = 0;
+    app->keydown_l = 0;
+    app->keydown_r = 0;
+
+    return 0;
+}
+
 
 int process_console_input(test_app_t *app){
     int err;
@@ -92,11 +176,11 @@ int process_console_input(test_app_t *app){
             }else{
                 err = fclose(f);
                 if(err)return err;
-                app->filename = filename;
+                app->prend_filename = filename;
             }
         }
 
-        err = load_rendergraphs(app, true);
+        err = test_app_load_rendergraphs(app, true);
         if(err)return err;
         app->cur_rgraph_i = 0;
     }else if(fus_lexer_got(&lexer, "save")){
@@ -118,16 +202,31 @@ int process_console_input(test_app_t *app){
         }
     }else if(fus_lexer_got(&lexer, "dump")){
         bool dump_bitmap_surfaces = false;
-        err = fus_lexer_next(&lexer);
-        if(err)goto lexer_err;
-        if(fus_lexer_got(&lexer, "S"))dump_bitmap_surfaces = true;
-        rendergraph_dump(rgraph, stdout, 0, dump_bitmap_surfaces);
-    }else if(fus_lexer_got(&lexer, "dumpall")){
-        bool dump_bitmap_surfaces = false;
-        err = fus_lexer_next(&lexer);
-        if(err)goto lexer_err;
-        if(fus_lexer_got(&lexer, "S"))dump_bitmap_surfaces = true;
-        prismelrenderer_dump(&app->prend, stdout, dump_bitmap_surfaces);
+        int dump_what = 0; /* rgraph, prend, states, maps */
+        while(1){
+            err = fus_lexer_next(&lexer);
+            if(err)goto lexer_err;
+
+            if(fus_lexer_done(&lexer))break;
+            else if(fus_lexer_got(&lexer, "rgraph"))dump_what = 0;
+            else if(fus_lexer_got(&lexer, "prend"))dump_what = 1;
+            else if(fus_lexer_got(&lexer, "states"))dump_what = 2;
+            else if(fus_lexer_got(&lexer, "maps"))dump_what = 3;
+            else if(fus_lexer_got(&lexer, "surfaces")){
+                dump_bitmap_surfaces = true;}
+            else {
+                console_write_msg(&app->console, "Dumper says: idunno\n");
+                break;}
+        }
+        if(dump_what == 0){
+            rendergraph_dump(rgraph, stdout, 0, dump_bitmap_surfaces);
+        }else if(dump_what == 1){
+            prismelrenderer_dump(&app->prend, stdout, dump_bitmap_surfaces);
+        }else if(dump_what == 2){
+            stateset_dump(&app->stateset, stdout);
+        }else if(dump_what == 3){
+            hexcollmapset_dump(&app->collmapset, stdout);
+        }
     }else if(fus_lexer_got(&lexer, "renderall")){
         SDL_Renderer *renderer = NULL;
         err = fus_lexer_next(&lexer);
@@ -156,55 +255,13 @@ int mainloop(SDL_Window *window, SDL_Renderer *renderer,
     int err;
 
     test_app_t app;
-    app.window = window;
-    app.renderer = renderer;
-    app.filename = filename;
-
-    app.pal = SDL_AllocPalette(256);
-    RET_IF_SDL_NULL(app.pal);
-    RET_IF_SDL_NZ(SDL_SetPaletteColors(
-        app.pal,
-        (SDL_Color []){
-            {.r=  0, .g=  0, .b=  0, .a=  0},
-            {.r=  0, .g=  0, .b=  0, .a=255},
-            {.r=255, .g= 60, .b= 60, .a=255},
-            {.r= 60, .g=255, .b= 60, .a=255},
-            {.r= 60, .g= 60, .b=255, .a=255},
-            {.r=255, .g=255, .b= 60, .a=255},
-            {.r= 60, .g=255, .b=255, .a=255},
-            {.r=255, .g= 60, .b=255, .a=255},
-            {.r=255, .g=255, .b=255, .a=255},
-        },
-        0, 9));
+    err = test_app_init(&app, window, renderer, filename);
 
     SDL_Surface *render_surface = surface32_create(SCW, SCH,
         true, true);
     if(render_surface == NULL)return 2;
 
-    err = font_load(&app.font, "data/font.fus");
-    if(err)return err;
-
-    err = console_init(&app.console, 80, 40, 20000);
-    if(err)return err;
-
-    app.cur_rgraph_i = 0;
-    err = load_rendergraphs(&app, false);
-    if(err)return err;
-
     SDL_Event event;
-
-    app.x0 = 0;
-    app.y0 = 0;
-    app.rot = 0;
-    app.zoom = 1;
-    app.frame_i = 0;
-    app.loop = true;
-    app.keydown_shift = false;
-    app.keydown_ctrl = false;
-    app.keydown_u = 0;
-    app.keydown_d = 0;
-    app.keydown_l = 0;
-    app.keydown_r = 0;
 
     Uint32 took = 0;
     bool refresh = true;
@@ -241,8 +298,8 @@ int mainloop(SDL_Window *window, SDL_Renderer *renderer,
                 "  pan=(%i,%i), rot = %i, zoom = %i,"
                     " frame_i = %i (%i) / %i (%s)",
                 took, (int)DELAY_GOAL,
-                app.filename, app.cur_rgraph_i, app.prend.rendergraphs_len,
-                rgraph->name,
+                app.prend_filename, app.cur_rgraph_i,
+                app.prend.rendergraphs_len, rgraph->name,
                 app.x0, app.y0, app.rot, app.zoom, app.frame_i,
                 animated_frame_i,
                 rgraph->n_frames, rgraph->animation_type);
@@ -414,6 +471,9 @@ int mainloop(SDL_Window *window, SDL_Renderer *renderer,
         took = tick1 - tick0;
         if(took < DELAY_GOAL)SDL_Delay(DELAY_GOAL - took);
     }
+
+    fprintf(stderr, "Cleaning up...\n");
+    test_app_cleanup(&app);
 
     return 0;
 }
