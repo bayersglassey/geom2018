@@ -6,17 +6,8 @@
 
 #include "anim.h"
 #include "array.h"
+#include "hexcollmap.h"
 #include "util.h"
-
-
-
-/**************
- * HEXCOLLMAP *
- **************/
-
-void hexcollmap_cleanup(hexcollmap_t *collmap){
-    /* heyyo... */
-}
 
 
 
