@@ -8,6 +8,9 @@
 #include "hexcollmap.h"
 #include "lexer.h"
 #include "util.h"
+#include "geom.h"
+#include "vec4.h"
+#include "prismelrenderer.h"
 
 
 /* What a tile looks like in the hexcollmap text format: */
@@ -264,6 +267,68 @@ int hexcollmap_parse_lines(hexcollmap_t *collmap,
     collmap->tiles = tiles;
     return 0;
 }
+
+int add_tile_rgraph(rendergraph_t *rgraph, rendergraph_t *rgraph2,
+    vecspace_t *space, vec_t add, rot_t rot
+){
+    int err;
+    rendergraph_trf_t *rendergraph_trf;
+    err = rendergraph_push_rendergraph_trf(rgraph, &rendergraph_trf);
+    if(err)return err;
+    rendergraph_trf->rendergraph = rgraph2;
+    rendergraph_trf->trf.rot = rot;
+    vec_cpy(space->dims, rendergraph_trf->trf.add, add);
+    return 0;
+}
+
+int hexcollmap_create_rgraph(hexcollmap_t *collmap,
+    prismelrenderer_t *prend,
+    rendergraph_t *rgraph_vert,
+    rendergraph_t *rgraph_edge,
+    rendergraph_t *rgraph_face,
+    vecspace_t *space, vec_t mul
+){
+    int err;
+
+    ARRAY_PUSH_NEW(rendergraph_t, *prend, rendergraphs, rgraph)
+    err = rendergraph_init(rgraph, strdup(collmap->name), space,
+        rendergraph_animation_type_default,
+        rendergraph_n_frames_default);
+    if(err)return err;
+
+    for(int y = 0; y < collmap->h; y++){
+        for(int x = 0; x < collmap->w; x++){
+            int px = x - collmap->ox;
+            int py = y - collmap->oy;
+
+            vec_t v;
+            vec4_set(v, px + py, 0, -py, 0);
+            vec_mul(prend->space, v, mul);
+
+            hexcollmap_tile_t *tile =
+                &collmap->tiles[y * collmap->w + x];
+
+            for(int i = 0; i < 1; i++){
+                if(tile->vert[i]){
+                    err = add_tile_rgraph(rgraph, rgraph_vert,
+                        prend->space, v, i * 2);
+                    if(err)return err;}}
+            for(int i = 0; i < 3; i++){
+                if(tile->edge[i]){
+                    err = add_tile_rgraph(rgraph, rgraph_edge,
+                        prend->space, v, i * 2);
+                    if(err)return err;}}
+            for(int i = 0; i < 2; i++){
+                if(tile->face[i]){
+                    err = add_tile_rgraph(rgraph, rgraph_face,
+                        prend->space, v, i * 2);
+                    if(err)return err;}}
+        }
+    }
+
+    return 0;
+}
+
 
 
 

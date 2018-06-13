@@ -9,6 +9,7 @@
 #include "console.h"
 #include "util.h"
 #include "anim.h"
+#include "hexcollmap.h"
 
 
 #define SCW 1024
@@ -51,9 +52,6 @@ typedef struct test_app {
 } test_app_t;
 
 
-#include "anim.h"
-#include "hexcollmap.h"
-#include "util.h"
 
 
 void test_app_cleanup(test_app_t *app){
@@ -62,23 +60,8 @@ void test_app_cleanup(test_app_t *app){
     hexcollmapset_cleanup(&app->collmapset);
 }
 
-int add_tile_rgraph(rendergraph_t *rgraph, rendergraph_t *rgraph2,
-    vecspace_t *space, vec_t add, rot_t rot
-){
+int test_app_load_map(prismelrenderer_t *prend, hexcollmap_t *collmap){
     int err;
-    rendergraph_trf_t *rendergraph_trf;
-    err = rendergraph_push_rendergraph_trf(rgraph, &rendergraph_trf);
-    if(err)return err;
-    rendergraph_trf->rendergraph = rgraph2;
-    rendergraph_trf->trf.rot = rot;
-    vec_cpy(space->dims, rendergraph_trf->trf.add, add);
-    return 0;
-}
-
-int test_app_load_map(test_app_t *app, const char *map_name){
-    int err;
-
-    prismelrenderer_t *prend = &app->prend;
 
     vec_t mul;
     vec4_set(mul, 3, 2, 0, -1);
@@ -104,47 +87,9 @@ int test_app_load_map(test_app_t *app, const char *map_name){
         fprintf(stderr, "Couldn't find rgraph: %s\n", face_name);
         return 2;}
 
-    hexcollmap_t *collmap = hexcollmapset_get_collmap(&app->collmapset,
-        map_name);
-    if(collmap == NULL){
-        fprintf(stderr, "Couldn't find map: %s\n", map_name);
-        return 2;}
-
-    ARRAY_PUSH_NEW(rendergraph_t, *prend, rendergraphs, rgraph)
-    err = rendergraph_init(rgraph, strdup(map_name), &vec4,
-        rendergraph_animation_type_default,
-        rendergraph_n_frames_default);
+    err = hexcollmap_create_rgraph(collmap, prend,
+        rgraph_vert, rgraph_edge, rgraph_face, &vec4, mul);
     if(err)return err;
-
-    for(int y = 0; y < collmap->h; y++){
-        for(int x = 0; x < collmap->w; x++){
-            int px = x - collmap->ox;
-            int py = y - collmap->oy;
-
-            vec_t v;
-            vec4_set(v, px + py, 0, -py, 0);
-            vec_mul(prend->space, v, mul);
-
-            hexcollmap_tile_t *tile =
-                &collmap->tiles[y * collmap->w + x];
-
-            for(int i = 0; i < 1; i++){
-                if(tile->vert[i]){
-                    err = add_tile_rgraph(rgraph, rgraph_vert,
-                        prend->space, v, i * 2);
-                    if(err)return err;}}
-            for(int i = 0; i < 3; i++){
-                if(tile->edge[i]){
-                    err = add_tile_rgraph(rgraph, rgraph_edge,
-                        prend->space, v, i * 2);
-                    if(err)return err;}}
-            for(int i = 0; i < 2; i++){
-                if(tile->face[i]){
-                    err = add_tile_rgraph(rgraph, rgraph_face,
-                        prend->space, v, i * 2);
-                    if(err)return err;}}
-        }
-    }
 
     return 0;
 }
@@ -291,7 +236,12 @@ int process_console_input(test_app_t *app){
         char *map_name;
         err = fus_lexer_expect_str(&lexer, &map_name);
         if(err)goto lexer_err;
-        err = test_app_load_map(app, map_name);
+        hexcollmap_t *collmap = hexcollmapset_get_collmap(
+            &app->collmapset, map_name);
+        if(collmap == NULL){
+            fprintf(stderr, "Couldn't find map: %s\n", map_name);
+            free(map_name); return 2;}
+        err = test_app_load_map(&app->prend, collmap);
         if(err)return err;
         free(map_name);
     }else if(fus_lexer_got(&lexer, "dump")){

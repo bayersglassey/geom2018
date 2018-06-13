@@ -5,6 +5,7 @@
 
 #include "array.h"
 #include "lexer.h"
+#include "prismelrenderer.h"
 
 
 typedef struct hexcollmap_tile {
@@ -33,6 +34,12 @@ void hexcollmap_dump(hexcollmap_t *collmap, FILE *f, int n_spaces);
 int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer);
 int hexcollmap_parse_lines(hexcollmap_t *collmap,
     char **lines, int lines_len);
+int hexcollmap_create_rgraph(hexcollmap_t *collmap,
+    prismelrenderer_t *prend,
+    rendergraph_t *rgraph_vert,
+    rendergraph_t *rgraph_edge,
+    rendergraph_t *rgraph_face,
+    vecspace_t *space, vec_t mul);
 
 
 void hexcollmapset_cleanup(hexcollmapset_t *collmapset);
