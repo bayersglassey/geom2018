@@ -255,7 +255,7 @@ int prismelrenderer_load(prismelrenderer_t *prend, const char *filename,
     char *text = load_file(filename);
     if(text == NULL)return 1;
 
-    err = fus_lexer_init(&lexer, text);
+    err = fus_lexer_init(&lexer, text, filename);
     if(err)return err;
 
     err = prismelrenderer_init(prend, space);

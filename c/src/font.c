@@ -31,7 +31,7 @@ int font_load(font_t *font, const char *filename){
     char *text = load_file(filename);
     if(text == NULL)return 1;
 
-    err = fus_lexer_init(&lexer, text);
+    err = fus_lexer_init(&lexer, text, filename);
     if(err)return err;
 
     err = font_parse(font, &lexer);

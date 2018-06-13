@@ -67,7 +67,7 @@ int process_console_input(test_app_t *app){
         app->prend.rendergraphs[app->cur_rgraph_i];
 
     fus_lexer_t lexer;
-    err = fus_lexer_init(&lexer, app->console.input);
+    err = fus_lexer_init(&lexer, app->console.input, "<console input>");
     if(err)goto lexer_err;
 
     err = fus_lexer_next(&lexer);

@@ -9,13 +9,16 @@ const int INITIAL_INDENTS_SIZE = 32;
 
 static int fus_lexer_get_indent(fus_lexer_t *lexer);
 
-int fus_lexer_init(fus_lexer_t *lexer, const char *text){
+int fus_lexer_init(fus_lexer_t *lexer, const char *text,
+    const char *filename
+){
     lexer->debug = false;
 
     int indents_size = INITIAL_INDENTS_SIZE;
     int *indents = calloc(indents_size, sizeof(indents));
     if(indents == NULL)return 1;
 
+    lexer->filename = filename;
     lexer->text = text;
     lexer->text_len = strlen(text);
     lexer->token = NULL;
@@ -53,10 +56,10 @@ void fus_lexer_dump(fus_lexer_t *lexer, FILE *f){
 }
 
 void fus_lexer_err_info(fus_lexer_t *lexer){
-    fprintf(stderr, "Lexer error: @(row=%i, col=%i, pos=%i): ",
+    fprintf(stderr, "Lexer error: %s: row %i: col %i: ",
+        lexer->filename,
         lexer->row + 1,
-        lexer->col - lexer->token_len + 1,
-        lexer->pos - lexer->token_len);
+        lexer->col - lexer->token_len + 1);
 }
 
 static void fus_lexer_start_token(fus_lexer_t *lexer){
