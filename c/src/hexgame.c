@@ -8,12 +8,31 @@
 #include "anim.h"
 #include "hexcollmap.h"
 #include "prismelrenderer.h"
+#include "array.h"
 
+
+
+/**********
+ * PLAYER *
+ **********/
+
+void player_cleanup(player_t *player){
+}
+
+int player_init(player_t *player){
+    return 0;
+}
+
+
+/***********
+ * HEXGAME *
+ ***********/
 
 
 void hexgame_cleanup(hexgame_t *game){
     /* Leave cleanup of game->stateset, game->map_collmap, game->map_rgraph
     to caller */
+    ARRAY_FREE(player_t, *game, players, player_cleanup)
 }
 
 int hexgame_init(hexgame_t *game, stateset_t *stateset,
@@ -22,6 +41,7 @@ int hexgame_init(hexgame_t *game, stateset_t *stateset,
     game->stateset = stateset;
     game->map_collmap = map_collmap;
     game->map_rgraph = map_rgraph;
+    ARRAY_INIT(*game, players)
     return 0;
 }
 
