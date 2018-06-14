@@ -286,7 +286,7 @@ int hexcollmap_create_rgraph(hexcollmap_t *collmap,
     rendergraph_t *rgraph_vert,
     rendergraph_t *rgraph_edge,
     rendergraph_t *rgraph_face,
-    vecspace_t *space, vec_t mul
+    vecspace_t *space, vec_t mul, rendergraph_t **rgraph_ptr
 ){
     int err;
 
@@ -326,6 +326,7 @@ int hexcollmap_create_rgraph(hexcollmap_t *collmap,
         }
     }
 
+    *rgraph_ptr = rgraph;
     return 0;
 }
 

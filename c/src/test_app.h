@@ -13,6 +13,7 @@
 #include "util.h"
 #include "anim.h"
 #include "hexcollmap.h"
+#include "hexgame.h"
 
 
 typedef struct test_app {
@@ -34,6 +35,7 @@ typedef struct test_app {
 
     stateset_t stateset;
     hexcollmapset_t collmapset;
+    hexgame_t hexgame;
 
     int x0;
     int y0;
@@ -53,7 +55,7 @@ typedef struct test_app {
 
 
 void test_app_cleanup(test_app_t *app);
-int test_app_load_map(prismelrenderer_t *prend, hexcollmap_t *collmap);
+int test_app_load_map(test_app_t *app, hexcollmap_t *collmap);
 int test_app_load_rendergraphs(test_app_t *app, bool reload);
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename);

@@ -11,6 +11,7 @@
 #include "util.h"
 #include "anim.h"
 #include "hexcollmap.h"
+#include "hexgame.h"
 
 
 
@@ -19,10 +20,13 @@ void test_app_cleanup(test_app_t *app){
     prismelrenderer_cleanup(&app->prend);
     stateset_cleanup(&app->stateset);
     hexcollmapset_cleanup(&app->collmapset);
+    hexgame_cleanup(&app->hexgame);
 }
 
-int test_app_load_map(prismelrenderer_t *prend, hexcollmap_t *collmap){
+int test_app_load_map(test_app_t *app, hexcollmap_t *collmap){
     int err;
+
+    prismelrenderer_t *prend = &app->prend;
 
     vec_t mul;
     vec4_set(mul, 3, 2, 0, -1);
@@ -48,8 +52,15 @@ int test_app_load_map(prismelrenderer_t *prend, hexcollmap_t *collmap){
         fprintf(stderr, "Couldn't find rgraph: %s\n", face_name);
         return 2;}
 
+    rendergraph_t *rgraph_map;
     err = hexcollmap_create_rgraph(collmap, prend,
-        rgraph_vert, rgraph_edge, rgraph_face, &vec4, mul);
+        rgraph_vert, rgraph_edge, rgraph_face, &vec4, mul,
+        &rgraph_map);
+    if(err)return err;
+
+    hexgame_cleanup(&app->hexgame);
+    err = hexgame_init(&app->hexgame, &app->stateset,
+        collmap, rgraph_map);
     if(err)return err;
 
     return 0;
@@ -61,6 +72,10 @@ int test_app_load_rendergraphs(test_app_t *app, bool reload){
     if(reload){
         prismelrenderer_cleanup(&app->prend);
     }
+
+    hexgame_cleanup(&app->hexgame);
+    err = hexgame_init(&app->hexgame, &app->stateset, NULL, NULL);
+    if(err)return err;
 
     err = prismelrenderer_init(&app->prend, &vec4);
     if(err)return err;
@@ -114,6 +129,9 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         app->collmapset_filename);
     if(err)return err;
 
+    err = hexgame_init(&app->hexgame, &app->stateset, NULL, NULL);
+    if(err)return err;
+
     err = font_load(&app->font, "data/font.fus");
     if(err)return err;
 
@@ -157,6 +175,14 @@ int test_app_process_console_input(test_app_t *app){
         app->loop = false;
     }else if(fus_lexer_got(&lexer, "cls")){
         console_clear(&app->console);
+    }else if(fus_lexer_got(&lexer, "run")){
+        if(!hexgame_ready(&app->hexgame)){
+            console_write_msg(&app->console, "Game's not ready, eh\n");
+            return 0;
+        }else{
+            err = hexgame_mainloop(&app->hexgame);
+            if(err)return err;
+        }
     }else if(fus_lexer_got(&lexer, "reload")){
         err = fus_lexer_next(&lexer);
         if(err)goto lexer_err;
@@ -206,7 +232,7 @@ int test_app_process_console_input(test_app_t *app){
         if(collmap == NULL){
             fprintf(stderr, "Couldn't find map: %s\n", map_name);
             free(map_name); return 2;}
-        err = test_app_load_map(&app->prend, collmap);
+        err = test_app_load_map(app, collmap);
         if(err)return err;
         free(map_name);
     }else if(fus_lexer_got(&lexer, "dump")){
