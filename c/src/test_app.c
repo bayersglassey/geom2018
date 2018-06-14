@@ -60,8 +60,7 @@ int test_app_load_map(test_app_t *app, hexcollmap_t *collmap){
     if(err)return err;
 
     hexgame_cleanup(&app->hexgame);
-    err = hexgame_init(&app->hexgame, &app->stateset,
-        collmap, rgraph_map);
+    err = test_app_hexgame_init(app, collmap, rgraph_map);
     if(err)return err;
 
     return 0;
@@ -75,7 +74,7 @@ int test_app_load_rendergraphs(test_app_t *app, bool reload){
     }
 
     hexgame_cleanup(&app->hexgame);
-    err = hexgame_init(&app->hexgame, &app->stateset, NULL, NULL);
+    err = test_app_hexgame_init(app, NULL, NULL);
     if(err)return err;
 
     err = prismelrenderer_init(&app->prend, &vec4);
@@ -88,6 +87,22 @@ int test_app_load_rendergraphs(test_app_t *app, bool reload){
         return 2;}
 
     return 0;
+}
+
+int test_app_hexgame_init(test_app_t *app, hexcollmap_t *collmap,
+    rendergraph_t *rgraph_map
+){
+    app->hexgame_running = false;
+    return hexgame_init(&app->hexgame, &app->stateset, collmap, rgraph_map);
+}
+
+static void test_app_init_input(test_app_t *app){
+    app->keydown_shift = false;
+    app->keydown_ctrl = false;
+    app->keydown_u = 0;
+    app->keydown_d = 0;
+    app->keydown_l = 0;
+    app->keydown_r = 0;
 }
 
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
@@ -130,7 +145,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         app->collmapset_filename);
     if(err)return err;
 
-    err = hexgame_init(&app->hexgame, &app->stateset, NULL, NULL);
+    err = test_app_hexgame_init(app, NULL, NULL);
     if(err)return err;
 
     err = font_load(&app->font, "data/font.fus");
@@ -149,13 +164,8 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->zoom = 1;
     app->frame_i = 0;
     app->loop = true;
-    app->keydown_shift = false;
-    app->keydown_ctrl = false;
-    app->keydown_u = 0;
-    app->keydown_d = 0;
-    app->keydown_l = 0;
-    app->keydown_r = 0;
 
+    test_app_init_input(app);
     return 0;
 }
 
@@ -181,8 +191,11 @@ int test_app_process_console_input(test_app_t *app){
             console_write_msg(&app->console, "Game's not ready, eh\n");
             return 0;
         }else{
-            err = hexgame_mainloop(&app->hexgame);
-            if(err)return err;
+            app->hexgame_running = true;
+            test_app_init_input(app);
+            console_write_msg(&app->console, "Game started\n");
+            SDL_StopTextInput();
+            return 0;
         }
     }else if(fus_lexer_got(&lexer, "reload")){
         err = fus_lexer_next(&lexer);
@@ -328,10 +341,7 @@ int test_app_mainloop(test_app_t *app){
         true, true);
     if(render_surface == NULL)return 2;
 
-    SDL_Event event;
-
     Uint32 took = 0;
-    bool refresh = true;
 
     SDL_StartTextInput();
     while(app->loop){
@@ -342,8 +352,10 @@ int test_app_mainloop(test_app_t *app){
         int animated_frame_i = get_animated_frame_i(
             rgraph->animation_type, rgraph->n_frames, app->frame_i);
 
-        if(refresh){
-            refresh = false;
+        if(app->hexgame_running){
+            err = hexgame_render(&app->hexgame, app->renderer);
+            if(err)return err;
+        }else{
 
             /******************************************************************
             * Blit stuff onto render_surface
@@ -352,6 +364,7 @@ int test_app_mainloop(test_app_t *app){
             RET_IF_SDL_NZ(SDL_FillRect(render_surface, NULL, 0));
 
             font_blitmsg(&app->font, render_surface, 0, 0,
+                "Game running? %c\n"
                 "Frame rendered in: %i ms\n"
                 "  (Aiming for sub-%i ms)\n"
                 "Controls:\n"
@@ -364,7 +377,7 @@ int test_app_mainloop(test_app_t *app){
                 "Currently displaying rendergraph %i / %i: %s\n"
                 "  pan=(%i,%i), rot = %i, zoom = %i,"
                     " frame_i = %i (%i) / %i (%s)",
-                took, app->delay_goal,
+                app->hexgame_running? 'y': 'n', took, app->delay_goal,
                 app->prend_filename, app->cur_rgraph_i,
                 app->prend.rendergraphs_len, rgraph->name,
                 app->x0, app->y0, app->rot, app->zoom, app->frame_i,
@@ -386,7 +399,8 @@ int test_app_mainloop(test_app_t *app){
             rendergraph_bitmap_t *bitmap;
             err = rendergraph_get_or_render_bitmap(
                 rgraph, &bitmap,
-                app->rot, false, animated_frame_i, app->pal, app->renderer);
+                app->rot, false, animated_frame_i, app->pal,
+                app->renderer);
             if(err)return err;
 
             SDL_Rect dst_rect = {
@@ -417,12 +431,29 @@ int test_app_mainloop(test_app_t *app){
 
         }
 
+        SDL_Event event;
         while(SDL_PollEvent(&event)){
+            if(event.type == SDL_QUIT){
+                app->loop = false; break;}
+
+            if(event.type == SDL_KEYDOWN
+                && event.key.keysym.sym == SDLK_ESCAPE){
+                    if(app->hexgame_running){
+                        app->hexgame_running = false;
+                        console_write_msg(&app->console, "Game stopped\n");
+                        SDL_StartTextInput();
+                    }else{
+                        console_write_msg(&app->console,
+                            "Game already stopped - try \"exit\"\n");}
+                    continue;}
+
+            if(app->hexgame_running){
+                err = hexgame_process_event(&app->hexgame, &event);
+                if(err)return err;
+                continue;}
+
             switch(event.type){
                 case SDL_KEYDOWN: {
-                    if(event.key.keysym.sym == SDLK_ESCAPE){
-                        app->loop = false;}
-
                     if(event.key.keysym.sym == SDLK_RETURN){
                         console_newline(&app->console);
 
@@ -430,14 +461,11 @@ int test_app_mainloop(test_app_t *app){
                         if(err)return err;
 
                         console_input_clear(&app->console);
-                        refresh = true;
                     }
                     if(event.key.keysym.sym == SDLK_BACKSPACE){
-                        console_input_backspace(&app->console);
-                        refresh = true;}
+                        console_input_backspace(&app->console);}
                     if(event.key.keysym.sym == SDLK_DELETE){
-                        console_input_delete(&app->console);
-                        refresh = true;}
+                        console_input_delete(&app->console);}
                     if(
                         event.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL)
                         && event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)
@@ -454,13 +482,12 @@ int test_app_mainloop(test_app_t *app){
                                 c++;
                             }
                             SDL_free(input);
-                            refresh = true;
                         }
                     }
 
                     if(event.key.keysym.sym == SDLK_0){
-                        app->x0 = 0; app->y0 = 0; app->rot = 0; app->zoom = 1;
-                        refresh = true;}
+                        app->x0 = 0; app->y0 = 0;
+                        app->rot = 0; app->zoom = 1;}
 
                     #define IF_KEYDOWN(SYM, KEY) \
                         if(event.key.keysym.sym == SDLK_##SYM \
@@ -470,6 +497,7 @@ int test_app_mainloop(test_app_t *app){
                     IF_KEYDOWN(DOWN, d)
                     IF_KEYDOWN(LEFT, l)
                     IF_KEYDOWN(RIGHT, r)
+                    #undef IF_KEYDOWN
 
                     if(event.key.keysym.sym == SDLK_LSHIFT
                         || event.key.keysym.sym == SDLK_RSHIFT){
@@ -482,20 +510,16 @@ int test_app_mainloop(test_app_t *app){
                         app->cur_rgraph_i++;
                         if(app->cur_rgraph_i >=
                             app->prend.rendergraphs_len){
-                                app->cur_rgraph_i = 0;}
-                        refresh = true;}
+                                app->cur_rgraph_i = 0;}}
                     if(event.key.keysym.sym == SDLK_PAGEDOWN){
                         app->cur_rgraph_i--;
                         if(app->cur_rgraph_i < 0){
                             app->cur_rgraph_i =
-                                app->prend.rendergraphs_len - 1;}
-                        refresh = true;}
+                                app->prend.rendergraphs_len - 1;}}
                     if(event.key.keysym.sym == SDLK_HOME){
-                        app->frame_i++;
-                        refresh = true;}
+                        app->frame_i++;}
                     if(event.key.keysym.sym == SDLK_END){
-                        if(app->frame_i > 0)app->frame_i--;
-                        refresh = true;}
+                        if(app->frame_i > 0)app->frame_i--;}
                 } break;
                 case SDL_KEYUP: {
 
@@ -506,6 +530,7 @@ int test_app_mainloop(test_app_t *app){
                     IF_KEYUP(DOWN, d)
                     IF_KEYUP(LEFT, l)
                     IF_KEYUP(RIGHT, r)
+                    #undef IF_KEYUP
 
                     if(event.key.keysym.sym == SDLK_LSHIFT
                         || event.key.keysym.sym == SDLK_RSHIFT){
@@ -518,26 +543,26 @@ int test_app_mainloop(test_app_t *app){
                     for(char *c = event.text.text; *c != '\0'; c++){
                         console_input_char(&app->console, *c);
                     }
-                    refresh = true;
                 } break;
-                case SDL_QUIT: app->loop = false; break;
                 default: break;
             }
         }
 
         #define IF_APP_KEY(KEY, BODY) \
             if(app->keydown_##KEY >= (app->keydown_shift? 2: 1)){ \
-                refresh = true; app->keydown_##KEY = 1; \
+                app->keydown_##KEY = 1; \
                 BODY}
         IF_APP_KEY(l, if(app->keydown_ctrl){app->x0 += 6;}else{app->rot += 1;})
         IF_APP_KEY(r, if(app->keydown_ctrl){app->x0 -= 6;}else{app->rot -= 1;})
         IF_APP_KEY(u, if(app->keydown_ctrl){app->y0 += 6;}else if(app->zoom < 10){app->zoom += 1;})
         IF_APP_KEY(d, if(app->keydown_ctrl){app->y0 -= 6;}else if(app->zoom > 1){app->zoom -= 1;})
+        #undef IF_APP_KEY
 
         Uint32 tick1 = SDL_GetTicks();
         took = tick1 - tick0;
         if(took < app->delay_goal)SDL_Delay(app->delay_goal - took);
     }
+    SDL_StopTextInput();
 
     return 0;
 }

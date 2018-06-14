@@ -50,7 +50,9 @@ void hexgame_cleanup(hexgame_t *game);
 int hexgame_init(hexgame_t *game, stateset_t *stateset,
     hexcollmap_t *map_collmap, rendergraph_t *map_rgraph);
 bool hexgame_ready(hexgame_t *game);
-int hexgame_mainloop(hexgame_t *game);
+int hexgame_process_event(hexgame_t *game, SDL_Event *event);
+int hexgame_step(hexgame_t *game);
+int hexgame_render(hexgame_t *game, SDL_Renderer *renderer);
 
 
 #endif

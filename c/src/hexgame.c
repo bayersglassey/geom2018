@@ -9,6 +9,7 @@
 #include "hexcollmap.h"
 #include "prismelrenderer.h"
 #include "array.h"
+#include "util.h"
 
 
 
@@ -50,10 +51,20 @@ bool hexgame_ready(hexgame_t *game){
     return game->stateset && game->map_collmap && game->map_rgraph;
 }
 
-int hexgame_mainloop(hexgame_t *game){
-    if(!hexgame_ready(game)){
-        fprintf(stderr, "Game not ready, refusing to start\n");
-        return 0;}
+int hexgame_process_event(hexgame_t *game, SDL_Event *event){
+    return 0;
+}
+
+int hexgame_step(hexgame_t *game){
+    return 0;
+}
+
+int hexgame_render(hexgame_t *game, SDL_Renderer *renderer){
+    RET_IF_SDL_NZ(SDL_SetRenderDrawColor(renderer,
+        30, 50, 80, 255));
+    RET_IF_SDL_NZ(SDL_RenderClear(renderer));
+
+    SDL_RenderPresent(renderer);
     return 0;
 }
 
