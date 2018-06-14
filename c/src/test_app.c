@@ -17,6 +17,7 @@
 
 
 void test_app_cleanup(test_app_t *app){
+    SDL_FreePalette(app->pal);
     prismelrenderer_cleanup(&app->prend);
     stateset_cleanup(&app->stateset);
     hexcollmapset_cleanup(&app->collmapset);
