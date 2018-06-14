@@ -52,7 +52,9 @@ int hexgame_init(hexgame_t *game, stateset_t *stateset,
 bool hexgame_ready(hexgame_t *game);
 int hexgame_process_event(hexgame_t *game, SDL_Event *event);
 int hexgame_step(hexgame_t *game);
-int hexgame_render(hexgame_t *game, SDL_Renderer *renderer);
+
+struct test_app; /* TODO: Get rid of this dependency */
+int hexgame_render(hexgame_t *game, struct test_app *app);
 
 
 #endif
