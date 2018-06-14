@@ -38,18 +38,24 @@ void hexgame_cleanup(hexgame_t *game){
 }
 
 int hexgame_init(hexgame_t *game, stateset_t *stateset,
-    hexcollmap_t *map_collmap, rendergraph_t *map_rgraph
+    hexcollmap_t *map_collmap, rendergraph_t *map_rgraph,
+    rendergraph_t *player_rgraph
 ){
     game->stateset = stateset;
     game->map_collmap = map_collmap;
     game->map_rgraph = map_rgraph;
+    game->player_rgraph = player_rgraph;
     ARRAY_INIT(*game, players)
     return 0;
 }
 
 bool hexgame_ready(hexgame_t *game){
     /* If we got any NULLs, game should refuse to start */
-    return game->stateset && game->map_collmap && game->map_rgraph;
+    return
+        game->stateset &&
+        game->map_collmap &&
+        game->map_rgraph &&
+        game->player_rgraph;
 }
 
 int hexgame_process_event(hexgame_t *game, SDL_Event *event){

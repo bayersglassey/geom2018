@@ -59,7 +59,7 @@ void test_app_cleanup(test_app_t *app);
 int test_app_load_map(test_app_t *app, hexcollmap_t *collmap);
 int test_app_load_rendergraphs(test_app_t *app, bool reload);
 int test_app_hexgame_init(test_app_t *app, hexcollmap_t *collmap,
-    rendergraph_t *rgraph_map);
+    rendergraph_t *rgraph_map, rendergraph_t *rgraph_player);
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename);
 int test_app_process_console_input(test_app_t *app);

@@ -32,35 +32,25 @@ int test_app_load_map(test_app_t *app, hexcollmap_t *collmap){
     vec_t mul;
     vec4_set(mul, 3, 2, 0, -1);
 
-    const char *vert_name = "map_vert";
-    rendergraph_t *rgraph_vert = prismelrenderer_get_rendergraph(
-        prend, vert_name);
-    if(rgraph_vert == NULL){
-        fprintf(stderr, "Couldn't find rgraph: %s\n", vert_name);
-        return 2;}
-
-    const char *edge_name = "map_edge";
-    rendergraph_t *rgraph_edge = prismelrenderer_get_rendergraph(
-        prend, edge_name);
-    if(rgraph_edge == NULL){
-        fprintf(stderr, "Couldn't find rgraph: %s\n", edge_name);
-        return 2;}
-
-    const char *face_name = "map_face";
-    rendergraph_t *rgraph_face = prismelrenderer_get_rendergraph(
-        prend, face_name);
-    if(rgraph_face == NULL){
-        fprintf(stderr, "Couldn't find rgraph: %s\n", face_name);
-        return 2;}
+    #define GET_RGRAPH(new_rgraph, rgraph_name) \
+        rendergraph_t *new_rgraph = prismelrenderer_get_rendergraph( \
+            prend, rgraph_name); \
+        if(new_rgraph == NULL){ \
+            fprintf(stderr, "Couldn't find rgraph: %s\n", rgraph_name); \
+            return 2;}
+    GET_RGRAPH(rgraph_vert, "map_vert")
+    GET_RGRAPH(rgraph_edge, "map_edge")
+    GET_RGRAPH(rgraph_face, "map_face")
+    GET_RGRAPH(rgraph_player, "player")
+    #undef GET_RGRAPH
 
     rendergraph_t *rgraph_map;
     err = hexcollmap_create_rgraph(collmap, prend,
-        rgraph_vert, rgraph_edge, rgraph_face, &vec4, mul,
-        &rgraph_map);
+        rgraph_vert, rgraph_edge, rgraph_face, &vec4, mul, &rgraph_map);
     if(err)return err;
 
     hexgame_cleanup(&app->hexgame);
-    err = test_app_hexgame_init(app, collmap, rgraph_map);
+    err = test_app_hexgame_init(app, collmap, rgraph_map, rgraph_player);
     if(err)return err;
 
     return 0;
@@ -74,7 +64,7 @@ int test_app_load_rendergraphs(test_app_t *app, bool reload){
     }
 
     hexgame_cleanup(&app->hexgame);
-    err = test_app_hexgame_init(app, NULL, NULL);
+    err = test_app_hexgame_init(app, NULL, NULL, NULL);
     if(err)return err;
 
     err = prismelrenderer_init(&app->prend, &vec4);
@@ -90,10 +80,11 @@ int test_app_load_rendergraphs(test_app_t *app, bool reload){
 }
 
 int test_app_hexgame_init(test_app_t *app, hexcollmap_t *collmap,
-    rendergraph_t *rgraph_map
+    rendergraph_t *rgraph_map, rendergraph_t *rgraph_player
 ){
     app->hexgame_running = false;
-    return hexgame_init(&app->hexgame, &app->stateset, collmap, rgraph_map);
+    return hexgame_init(&app->hexgame, &app->stateset, collmap,
+        rgraph_map, rgraph_player);
 }
 
 static void test_app_init_input(test_app_t *app){
@@ -145,7 +136,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         app->collmapset_filename);
     if(err)return err;
 
-    err = test_app_hexgame_init(app, NULL, NULL);
+    err = test_app_hexgame_init(app, NULL, NULL, NULL);
     if(err)return err;
 
     err = font_load(&app->font, "data/font.fus");
