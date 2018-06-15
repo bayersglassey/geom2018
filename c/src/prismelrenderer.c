@@ -33,6 +33,51 @@ char *generate_mapped_name(char *mapper_name, char *mappee_name){
     return name;
 }
 
+int strlen_of_int(int i){
+    /* Basically log(i), except that strlen of "0" is 1, and strlen of a
+    negative number includes a space for the '-' */
+    if(i == 0)return 1;
+    if(i < 0)return strlen_of_int(-i) + 1;
+    int len = 0;
+    while(i != 0){
+        len++;
+        i /= 10;
+    }
+    return len;
+}
+
+void strncpy_of_int(char *s, int i, int i_len){
+    /* i_len should be strlen_of_int(i) */
+    if(i == 0){
+        *s = '0';
+        return;}
+    if(i < 0){
+        *s = '-';
+        strncpy_of_int(s+1, -i, i_len-1);
+        return;}
+    while(i_len > 0){
+        s[i_len - 1] = '0' + i % 10;
+        i /= 10;
+        i_len--;
+    }
+}
+
+char *generate_indexed_name(char *base_name, int i){
+    /* Generate a name, e.g. "<shape 6>" */
+    int base_name_len = strlen(base_name);
+    int i_len = strlen_of_int(i);
+    int name_len = base_name_len + i_len + 3;
+    char *name = malloc(sizeof(*name) * (name_len + 1));
+    if(name == NULL)return NULL;
+    name[0] = '<';
+    strcpy(name + 1, base_name);
+    name[1 + base_name_len] = ' ';
+    strncpy_of_int(name + 1 + base_name_len + 1, i, i_len);
+    name[name_len - 1] = '>';
+    name[name_len] = '\0';
+    return name;
+}
+
 bool get_animated_frame_visible(int n_frames,
     int frame_start, int frame_len, int frame_i
 ){
@@ -210,6 +255,8 @@ int prismelrenderer_push_prismel(prismelrenderer_t *renderer, char *name,
 ){
     int err;
     ARRAY_PUSH_NEW(prismel_t, *renderer, prismels, prismel)
+    if(!name){name = generate_indexed_name("prismel",
+        renderer->prismels_len - 1);}
     err = prismel_init(prismel, name, renderer->space);
     if(err)return err;
     *prismel_ptr = prismel;
@@ -927,6 +974,8 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
     /* Create a new rendergraph */
     resulting_rgraph = calloc(1, sizeof(rendergraph_t));
     if(resulting_rgraph == NULL)return 1;
+    if(!name){name = generate_indexed_name("shape",
+        prend->rendergraphs_len);}
     err = rendergraph_init(resulting_rgraph, name, space,
         mapped_rgraph->animation_type, mapped_rgraph->n_frames);
     if(err)return err;
@@ -1040,6 +1089,8 @@ int prismelmapper_apply_to_mapper(prismelmapper_t *mapper,
     /* Create a new prismelmapper */
     resulting_mapper = calloc(1, sizeof(prismelmapper_t));
     if(resulting_mapper == NULL)return 1;
+    if(!name){name = generate_indexed_name("mapper",
+        prend->mappers_len);}
     err = prismelmapper_init(resulting_mapper, name, space);
     if(err)return err;
 

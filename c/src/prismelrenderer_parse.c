@@ -359,7 +359,7 @@ static int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
         if(err)return err;
 
         err = prismelmapper_apply_to_rendergraph(mapper, prend, mapped_rgraph,
-            strdup(name), prend->space, &rgraph);
+            name, prend->space, &rgraph);
         if(err)return err;
 
         err = fus_lexer_next(lexer);
@@ -398,7 +398,9 @@ static int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
 
     rgraph = calloc(1, sizeof(rendergraph_t));
     if(rgraph == NULL)return 1;
-    err = rendergraph_init(rgraph, strdup(name), prend->space,
+    if(!name){name = generate_indexed_name("shape",
+        prend->rendergraphs_len);}
+    err = rendergraph_init(rgraph, name, prend->space,
         animation_type, n_frames);
     if(err)return err;
 
@@ -506,7 +508,7 @@ static int fus_lexer_get_mapper(fus_lexer_t *lexer,
         if(err)return err;
 
         err = prismelmapper_apply_to_mapper(mapper2, prend, mapper1,
-            strdup(name), prend->space, &mapper);
+            name, prend->space, &mapper);
         if(err)return err;
 
         err = fus_lexer_next(lexer);
@@ -519,7 +521,9 @@ static int fus_lexer_get_mapper(fus_lexer_t *lexer,
 
     mapper = calloc(1, sizeof(*mapper));
     if(mapper == NULL)return 1;
-    err = prismelmapper_init(mapper, strdup(name), prend->space);
+    if(!name){name = generate_indexed_name("mapper",
+        prend->mappers_len);}
+    err = prismelmapper_init(mapper, name, prend->space);
     if(err)return err;
 
     ARRAY_PUSH(prismelmapper_t, *prend, mappers, mapper)

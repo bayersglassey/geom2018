@@ -16,6 +16,8 @@
  * GENERAL *
  ***********/
 
+char *generate_mapped_name(char *mapper_name, char *mappee_name);
+char *generate_indexed_name(char *base_name, int i);
 bool get_animated_frame_visible(int n_frames,
     int frame_start, int frame_len, int frame_i);
 int get_animated_frame_i(const char *animation_type,
