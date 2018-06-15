@@ -221,5 +221,16 @@ prismelmapper_t *prismelmapper_get_mapplication(prismelmapper_t *mapper,
     prismelmapper_t *mapped_mapper);
 
 
+/*************
+ * FUS_LEXER *
+ *************/
+
+static int fus_lexer_get_prismel(fus_lexer_t *lexer,
+    prismelrenderer_t *prend, char *name, prismel_t **prismel_ptr);
+static int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
+    prismelrenderer_t *prend, char *name, rendergraph_t **rgraph_ptr);
+static int fus_lexer_get_mapper(fus_lexer_t *lexer,
+    prismelrenderer_t *prend, char *name, prismelmapper_t **mapper_ptr);
+
 
 #endif
