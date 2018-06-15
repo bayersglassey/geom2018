@@ -39,4 +39,7 @@ Jun 14, 2018:
 - prismelrenderer_parse.c:
     fus_lexer_get_{prismel,rendergraph,mapper} shouldn't take a "name" param?
     Maybe reintroduce the *_map objects?
+    No: introduce "variable" objects.
+    They don't own their shape/prismel/mapper, and the latter don't have names.
+    ^... YES THIS
 
