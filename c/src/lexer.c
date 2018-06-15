@@ -352,7 +352,7 @@ bool fus_lexer_done(fus_lexer_t *lexer){
     return lexer->token == NULL;
 }
 
-int fus_lexer_got(fus_lexer_t *lexer, const char *text){
+bool fus_lexer_got(fus_lexer_t *lexer, const char *text){
     if(lexer->token == NULL || text == NULL){
         return lexer->token == text;
     }
@@ -360,6 +360,20 @@ int fus_lexer_got(fus_lexer_t *lexer, const char *text){
         lexer->token_len == strlen(text) &&
         strncmp(lexer->token, text, lexer->token_len) == 0
     ;
+}
+
+bool fus_lexer_got_name(fus_lexer_t *lexer){
+    return lexer->token_type == FUS_LEXER_TOKEN_SYM;
+}
+
+bool fus_lexer_got_str(fus_lexer_t *lexer){
+    return
+        lexer->token_type == FUS_LEXER_TOKEN_STR ||
+        lexer->token_type == FUS_LEXER_TOKEN_BLOCKSTR;
+}
+
+bool fus_lexer_got_int(fus_lexer_t *lexer){
+    return lexer->token_type == FUS_LEXER_TOKEN_INT;
 }
 
 void fus_lexer_show(fus_lexer_t *lexer, FILE *f){
@@ -381,7 +395,7 @@ int fus_lexer_get(fus_lexer_t *lexer, const char *text){
 }
 
 int fus_lexer_get_name(fus_lexer_t *lexer, char **name){
-    if(lexer->token_type != FUS_LEXER_TOKEN_SYM){
+    if(!fus_lexer_got_name(lexer)){
         fus_lexer_err_info(lexer); fprintf(stderr,
             "Expected name, but got: ");
         fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
@@ -438,7 +452,7 @@ int fus_lexer_get_str(fus_lexer_t *lexer, char **s){
 }
 
 int fus_lexer_get_int(fus_lexer_t *lexer, int *i){
-    if(lexer->token_type != FUS_LEXER_TOKEN_INT){
+    if(!fus_lexer_got_int(lexer)){
         fus_lexer_err_info(lexer); fprintf(stderr,
             "Expected int, but got: ");
         fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
