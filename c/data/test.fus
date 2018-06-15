@@ -6,40 +6,40 @@ import "data/dodecas.fus"
 
 mappers:
 
-    "double_double": map: "double" "double"
-    "double_curvy": map: "double" "curvy"
-    "curvy_double": map: "curvy" "double"
-    "curvy_curvy": map: "curvy" "curvy"
+    "double_double": map ("double") ("double")
+    "double_curvy": map ("double") ("curvy")
+    "curvy_double": map ("curvy") ("double")
+    "curvy_curvy": map ("curvy") ("curvy")
 
-    "double_curvy_curvy": map: "double" "curvy_curvy"
-    "curvy_double_curvy": map: "curvy" "double_curvy"
+    "double_curvy_curvy": map ("double") ("curvy_curvy")
+    "curvy_double_curvy": map ("curvy") ("double_curvy")
 
-    "double_double_curvy_curvy": map: "double" "double_curvy_curvy"
-    "double_curvy_double_curvy": map: "double" "curvy_double_curvy"
+    "double_double_curvy_curvy": map ("double") ("double_curvy_curvy")
+    "double_curvy_double_curvy": map ("double") ("curvy_double_curvy")
 
 shapes:
 
-    "double_dodeca": map: "double" "dodeca"
-    "curvy_dodeca": map: "curvy" "dodeca"
-    "double_dodeca_B": map: "double" "dodeca_B"
-    "curvy_dodeca_B": map: "curvy" "dodeca_B"
+    "double_dodeca": map ("double") ("dodeca")
+    "curvy_dodeca": map ("curvy") ("dodeca")
+    "double_dodeca_B": map ("double") ("dodeca_B")
+    "curvy_dodeca_B": map ("curvy") ("dodeca_B")
 
-    "double_double_dodeca": map: "double" "double_dodeca"
-    "double_curvy_dodeca": map: "double" "curvy_dodeca"
-    "curvy_double_dodeca": map: "curvy" "double_dodeca"
-    "curvy_curvy_dodeca": map: "curvy" "curvy_dodeca"
+    "double_double_dodeca": map ("double") ("double_dodeca")
+    "double_curvy_dodeca": map ("double") ("curvy_dodeca")
+    "curvy_double_dodeca": map ("curvy") ("double_dodeca")
+    "curvy_curvy_dodeca": map ("curvy") ("curvy_dodeca")
 
-    "double_double_dodeca_B": map: "double_double" "dodeca_B"
-    "double_curvy_dodeca_B": map: "double_curvy" "dodeca_B"
-    "curvy_double_dodeca_B": map: "curvy_double" "double_dodeca_B"
-    "curvy_curvy_dodeca_B": map: "curvy_curvy" "dodeca_B"
+    "double_double_dodeca_B": map ("double_double") ("dodeca_B")
+    "double_curvy_dodeca_B": map ("double_curvy") ("dodeca_B")
+    "curvy_double_dodeca_B": map ("curvy_double") ("double_dodeca_B")
+    "curvy_curvy_dodeca_B": map ("curvy_curvy") ("dodeca_B")
 
-    "double_curvy_curvy_dodeca": map: "double_curvy_curvy" "dodeca"
-    "curvy_double_curvy_dodeca": map: "curvy_double_curvy" "dodeca"
+    "double_curvy_curvy_dodeca": map ("double_curvy_curvy") ("dodeca")
+    "curvy_double_curvy_dodeca": map ("curvy_double_curvy") ("dodeca")
 
-    "double_curvy_curvy_dodeca_B": map: "double_curvy_curvy" "dodeca_B"
-    "curvy_double_curvy_dodeca_B": map: "curvy_double_curvy" "dodeca_B"
+    "double_curvy_curvy_dodeca_B": map ("double_curvy_curvy") ("dodeca_B")
+    "curvy_double_curvy_dodeca_B": map ("curvy_double_curvy") ("dodeca_B")
 
-    "double_double_curvy_curvy_dodeca_B": map: "double_double_curvy_curvy" "dodeca_B"
-    "double_curvy_double_curvy_dodeca_B": map: "double_curvy_double_curvy" "dodeca_B"
+    "double_double_curvy_curvy_dodeca_B": map ("double_double_curvy_curvy") ("dodeca_B")
+    "double_curvy_double_curvy_dodeca_B": map ("double_curvy_double_curvy") ("dodeca_B")
 

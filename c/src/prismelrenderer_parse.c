@@ -9,6 +9,14 @@
 #include "prismelrenderer.h"
 
 
+static int fus_lexer_expect_prismel(fus_lexer_t *lexer,
+    prismelrenderer_t *prend, char *name, prismel_t **prismel_ptr
+){
+    int err = fus_lexer_next(lexer);
+    if(err)return err;
+    return fus_lexer_get_prismel(lexer, prend, name, prismel_ptr);
+}
+
 static int fus_lexer_get_prismel(fus_lexer_t *lexer,
     prismelrenderer_t *prend, char *name, prismel_t **prismel_ptr
 ){
@@ -304,50 +312,65 @@ static int parse_shape_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer,
     return 0;
 }
 
+
+static int fus_lexer_expect_rendergraph(fus_lexer_t *lexer,
+    prismelrenderer_t *prend, char *name, rendergraph_t **rgraph_ptr
+){
+    int err = fus_lexer_next(lexer);
+    if(err)return err;
+    return fus_lexer_get_rendergraph(lexer, prend, name, rgraph_ptr);
+}
+
 static int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
     prismelrenderer_t *prend, char *name, rendergraph_t **rgraph_ptr
 ){
     int err;
     rendergraph_t *rgraph = NULL;
 
-    const char *animation_type = rendergraph_animation_type_cycle;
-    int n_frames = 1;
-
+    err = fus_lexer_get(lexer, "(");
+    if(err)return err;
     err = fus_lexer_next(lexer);
     if(err)return err;
-    if(fus_lexer_got(lexer, "map")){
-        err = fus_lexer_expect(lexer, "(");
-        if(err)return err;
 
-        char *mapper_name;
-        err = fus_lexer_expect_str(lexer, &mapper_name);
+    if(fus_lexer_got_str(lexer)){
+        char *name;
+        err = fus_lexer_get_str(lexer, &name);
         if(err)return err;
-        prismelmapper_t *mapper = prismelrenderer_get_mapper(prend,
-            mapper_name);
-        if(mapper == NULL){
-            fprintf(stderr, "Couldn't find mapper: %s\n", mapper_name);
-            free(mapper_name); return 2;}
-        free(mapper_name);
+        rgraph = prismelrenderer_get_rendergraph(prend, name);
+        if(rgraph == NULL){
+            fprintf(stderr, "Couldn't find shape: %s\n", name);
+            free(name); return 2;}
+        free(name);
 
-        char *mapped_rgraph_name;
-        err = fus_lexer_expect_str(lexer, &mapped_rgraph_name);
-        if(err)return err;
-        rendergraph_t *mapped_rgraph = prismelrenderer_get_rendergraph(prend,
-            mapped_rgraph_name);
-        if(mapped_rgraph == NULL){
-            fprintf(stderr, "Couldn't find shape: %s\n", mapped_rgraph_name);
-            free(mapped_rgraph_name); return 2;}
-        free(mapped_rgraph_name);
-
-        err = fus_lexer_expect(lexer, ")");
-        if(err)return err;
         err = fus_lexer_next(lexer);
+        if(err)return err;
+        goto ok;
+    }
+
+    if(fus_lexer_got(lexer, "map")){
+        prismelmapper_t *mapper;
+        err = fus_lexer_expect_mapper(lexer, prend, NULL,
+            &mapper);
+        if(err)return err;
+
+        rendergraph_t *mapped_rgraph;
+        err = fus_lexer_expect_rendergraph(lexer, prend, NULL,
+            &mapped_rgraph);
         if(err)return err;
 
         err = prismelmapper_apply_to_rendergraph(mapper, prend, mapped_rgraph,
             strdup(name), prend->space, &rgraph);
         if(err)return err;
-    }else if(fus_lexer_got(lexer, "animation")){
+
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        goto ok;
+    }
+
+    const char *animation_type = rendergraph_animation_type_cycle;
+    int n_frames = 1;
+
+    if(fus_lexer_got(lexer, "animation")){
         err = fus_lexer_expect(lexer, "(");
         if(err)return err;
 
@@ -373,15 +396,13 @@ static int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
         if(err)return err;
     }
 
-    if(rgraph == NULL){
-        rgraph = calloc(1, sizeof(rendergraph_t));
-        if(rgraph == NULL)return 1;
-        err = rendergraph_init(rgraph, strdup(name), prend->space,
-            animation_type, n_frames);
-        if(err)return err;
+    rgraph = calloc(1, sizeof(rendergraph_t));
+    if(rgraph == NULL)return 1;
+    err = rendergraph_init(rgraph, strdup(name), prend->space,
+        animation_type, n_frames);
+    if(err)return err;
 
-        ARRAY_PUSH(rendergraph_t, *prend, rendergraphs, rgraph)
-    }
+    ARRAY_PUSH(rendergraph_t, *prend, rendergraphs, rgraph)
 
     while(1){
         if(fus_lexer_got(lexer, ")")){
@@ -404,6 +425,10 @@ static int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
         err = fus_lexer_next(lexer);
         if(err)return err;
     }
+
+ok:
+    err = fus_lexer_get(lexer, ")");
+    if(err)return err;
 
     *rgraph_ptr = rgraph;
     return 0;
@@ -429,16 +454,21 @@ static int parse_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer){
             return 2;
         }
 
-        err = fus_lexer_expect(lexer, "(");
-        if(err)return err;
-
         rendergraph_t *rgraph;
-        err = fus_lexer_get_rendergraph(lexer, prend, name, &rgraph);
+        err = fus_lexer_expect_rendergraph(lexer, prend, name, &rgraph);
         if(err)return err;
     }
     return 0;
 }
 
+
+static int fus_lexer_expect_mapper(fus_lexer_t *lexer,
+    prismelrenderer_t *prend, char *name, prismelmapper_t **mapper_ptr
+){
+    int err = fus_lexer_next(lexer);
+    if(err)return err;
+    return fus_lexer_get_mapper(lexer, prend, name, mapper_ptr);
+}
 
 static int fus_lexer_get_mapper(fus_lexer_t *lexer,
     prismelrenderer_t *prend, char *name, prismelmapper_t **mapper_ptr
@@ -446,65 +476,64 @@ static int fus_lexer_get_mapper(fus_lexer_t *lexer,
     int err;
     prismelmapper_t *mapper = NULL;
 
-    err = fus_lexer_expect(lexer, "(");
+    err = fus_lexer_get(lexer, "(");
     if(err)return err;
-
     err = fus_lexer_next(lexer);
     if(err)return err;
-    if(fus_lexer_got(lexer, "map")){
-        err = fus_lexer_expect(lexer, "(");
-        if(err)return err;
 
-        char *mapper1_name;
-        err = fus_lexer_expect_str(lexer, &mapper1_name);
+    if(fus_lexer_got_str(lexer)){
+        char *name;
+        err = fus_lexer_get_str(lexer, &name);
         if(err)return err;
-        prismelmapper_t *mapper1 = prismelrenderer_get_mapper(prend,
-            mapper1_name);
-        if(mapper1 == NULL){
-            fprintf(stderr, "Couldn't find mapper: %s\n", mapper1_name);
-            free(mapper1_name); return 2;}
-        free(mapper1_name);
+        mapper = prismelrenderer_get_mapper(prend, name);
+        if(mapper == NULL){
+            fprintf(stderr, "Couldn't find mapper: %s\n", name);
+            free(name); return 2;}
+        free(name);
 
-        char *mapper2_name;
-        err = fus_lexer_expect_str(lexer, &mapper2_name);
-        if(err)return err;
-        prismelmapper_t *mapper2 = prismelrenderer_get_mapper(prend,
-            mapper2_name);
-        if(mapper2 == NULL){
-            fprintf(stderr, "Couldn't find mapper: %s\n", mapper2_name);
-            free(mapper2_name); return 2;}
-        free(mapper2_name);
-
-        err = fus_lexer_expect(lexer, ")");
-        if(err)return err;
         err = fus_lexer_next(lexer);
+        if(err)return err;
+        goto ok;
+    }
+
+    if(fus_lexer_got(lexer, "map")){
+        prismelmapper_t *mapper1;
+        err = fus_lexer_expect_mapper(lexer, prend, NULL, &mapper1);
+        if(err)return err;
+
+        prismelmapper_t *mapper2;
+        err = fus_lexer_expect_mapper(lexer, prend, NULL, &mapper2);
         if(err)return err;
 
         err = prismelmapper_apply_to_mapper(mapper2, prend, mapper1,
             strdup(name), prend->space, &mapper);
         if(err)return err;
-    }else{
 
-        mapper = calloc(1, sizeof(*mapper));
-        if(mapper == NULL)return 1;
-        err = prismelmapper_init(mapper, strdup(name), prend->space);
-        if(err)return err;
-
-        ARRAY_PUSH(prismelmapper_t, *prend, mappers, mapper)
-
-        err = fus_lexer_get(lexer, "unit");
-        if(err)return err;
-        err = fus_lexer_expect(lexer, "(");
-        if(err)return err;
-        for(int i = 0; i < prend->space->dims; i++){
-            err = fus_lexer_expect_int(lexer, &mapper->unit[i]);
-            if(err)return err;
-        }
-        err = fus_lexer_expect(lexer, ")");
-        if(err)return err;
         err = fus_lexer_next(lexer);
         if(err)return err;
+        goto ok;
     }
+
+    err = fus_lexer_get(lexer, "unit");
+    if(err)return err;
+
+    mapper = calloc(1, sizeof(*mapper));
+    if(mapper == NULL)return 1;
+    err = prismelmapper_init(mapper, strdup(name), prend->space);
+    if(err)return err;
+
+    ARRAY_PUSH(prismelmapper_t, *prend, mappers, mapper)
+
+    err = fus_lexer_expect(lexer, "(");
+    if(err)return err;
+    for(int i = 0; i < prend->space->dims; i++){
+        err = fus_lexer_expect_int(lexer, &mapper->unit[i]);
+        if(err)return err;
+    }
+    err = fus_lexer_expect(lexer, ")");
+    if(err)return err;
+    err = fus_lexer_next(lexer);
+    if(err)return err;
 
     if(fus_lexer_got(lexer, "entries")){
         err = fus_lexer_expect(lexer, "(");
@@ -551,6 +580,7 @@ static int fus_lexer_get_mapper(fus_lexer_t *lexer,
         if(err)return err;
     }
 
+ok:
     err = fus_lexer_get(lexer, ")");
     if(err)return err;
 
@@ -577,7 +607,7 @@ static int parse_mappers(prismelrenderer_t *prend, fus_lexer_t *lexer){
         }
 
         prismelmapper_t *mapper;
-        err = fus_lexer_get_mapper(lexer, prend, name, &mapper);
+        err = fus_lexer_expect_mapper(lexer, prend, name, &mapper);
         if(err)return err;
     }
     return 0;
