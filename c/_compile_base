@@ -2,7 +2,7 @@ MAIN_C="$1"
 shift
 gcc -g -std=c99 -Wall -Werror -Wno-unused \
     -o main $MAIN_C \
-    src/anim.c src/hexmap.c src/hexcollmap.c \
+    src/anim.c src/hexmap.c \
     src/util.c src/lexer.c src/write.c \
     src/geom.c src/vec4.c src/bounds.c \
     src/test_app.c src/hexgame.c \

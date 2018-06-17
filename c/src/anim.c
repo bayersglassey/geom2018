@@ -6,7 +6,7 @@
 
 #include "anim.h"
 #include "array.h"
-#include "hexcollmap.h"
+#include "hexmap.h"
 #include "util.h"
 
 
@@ -122,7 +122,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer){
 
                     hexcollmap_t *collmap = calloc(1, sizeof(*collmap));
                     if(collmap == NULL)return 1;
-                    err = hexcollmap_init(collmap, NULL);
+                    err = hexcollmap_init(collmap);
                     if(err)return err;
                     err = hexcollmap_parse(collmap, lexer);
                     if(err)return err;

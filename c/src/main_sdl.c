@@ -17,7 +17,9 @@
 int main(int n_args, char *args[]){
     int e = 0;
     Uint32 window_flags = SDL_WINDOW_SHOWN;
-    const char *filename = "data/test.fus";
+    const char *prend_filename = "data/test.fus";
+    const char *stateset_filename = "data/anim.fus";
+    const char *hexmap_filename = "data/map1.fus";
 
     for(int arg_i = 1; arg_i < n_args; arg_i++){
         char *arg = args[arg_i];
@@ -28,11 +30,24 @@ int main(int n_args, char *args[]){
         }else if(!strcmp(arg, "-f")){
             arg_i++;
             if(arg_i >= n_args){
-                fprintf(stderr, "Missing filename after -f\n");
-                return 2;
-            }
+                fprintf(stderr, "Missing filename after %s\n", arg);
+                return 2;}
             arg = args[arg_i];
-            filename = arg;
+            prend_filename = arg;
+        }else if(!strcmp(arg, "--anim")){
+            arg_i++;
+            if(arg_i >= n_args){
+                fprintf(stderr, "Missing filename after %s\n", arg);
+                return 2;}
+            arg = args[arg_i];
+            stateset_filename = arg;
+        }else if(!strcmp(arg, "--map")){
+            arg_i++;
+            if(arg_i >= n_args){
+                fprintf(stderr, "Missing filename after %s\n", arg);
+                return 2;}
+            arg = args[arg_i];
+            hexmap_filename = arg;
         }else{
             fprintf(stderr, "Unrecognized option: %s\n", arg);
             return 2;
@@ -62,7 +77,8 @@ int main(int n_args, char *args[]){
             }else{
                 test_app_t app;
                 if(test_app_init(&app, SCW, SCH, DELAY_GOAL,
-                    window, renderer, filename)
+                    window, renderer, prend_filename, stateset_filename,
+                    hexmap_filename)
                 ){
                     e = 1;
                     fprintf(stderr, "Couldn't init test app\n");

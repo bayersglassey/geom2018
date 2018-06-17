@@ -10,7 +10,7 @@
 #include "console.h"
 #include "util.h"
 #include "anim.h"
-#include "hexcollmap.h"
+#include "hexmap.h"
 #include "hexgame.h"
 
 
@@ -20,71 +20,8 @@ void test_app_cleanup(test_app_t *app){
     SDL_FreePalette(app->pal);
     prismelrenderer_cleanup(&app->prend);
     stateset_cleanup(&app->stateset);
-    hexcollmapset_cleanup(&app->collmapset);
+    hexmap_cleanup(&app->hexmap);
     hexgame_cleanup(&app->hexgame);
-}
-
-int test_app_load_map(test_app_t *app, hexcollmap_t *collmap){
-    int err;
-
-    prismelrenderer_t *prend = &app->prend;
-
-    vec_t mul;
-    vec4_set(mul, 3, 2, 0, -1);
-
-    #define GET_RGRAPH(new_rgraph, rgraph_name) \
-        rendergraph_t *new_rgraph = prismelrenderer_get_rendergraph( \
-            prend, rgraph_name); \
-        if(new_rgraph == NULL){ \
-            fprintf(stderr, "Couldn't find rgraph: %s\n", rgraph_name); \
-            return 2;}
-    GET_RGRAPH(rgraph_vert, "map_vert")
-    GET_RGRAPH(rgraph_edge, "map_edge")
-    GET_RGRAPH(rgraph_face, "map_face")
-    GET_RGRAPH(rgraph_player, "player")
-    #undef GET_RGRAPH
-
-    rendergraph_t *rgraph_map;
-    err = hexcollmap_create_rgraph(collmap, prend,
-        rgraph_vert, rgraph_edge, rgraph_face, &vec4, mul, &rgraph_map);
-    if(err)return err;
-
-    hexgame_cleanup(&app->hexgame);
-    err = test_app_hexgame_init(app, collmap, rgraph_map, rgraph_player);
-    if(err)return err;
-
-    return 0;
-}
-
-int test_app_load_rendergraphs(test_app_t *app, bool reload){
-    int err;
-
-    if(reload){
-        prismelrenderer_cleanup(&app->prend);
-    }
-
-    hexgame_cleanup(&app->hexgame);
-    err = test_app_hexgame_init(app, NULL, NULL, NULL);
-    if(err)return err;
-
-    err = prismelrenderer_init(&app->prend, &vec4);
-    if(err)return err;
-    err = prismelrenderer_load(&app->prend, app->prend_filename);
-    if(err)return err;
-
-    if(app->prend.rendergraphs_len < 1){
-        fprintf(stderr, "No rendergraphs in %s\n", app->prend_filename);
-        return 2;}
-
-    return 0;
-}
-
-int test_app_hexgame_init(test_app_t *app, hexcollmap_t *collmap,
-    rendergraph_t *rgraph_map, rendergraph_t *rgraph_player
-){
-    app->hexgame_running = false;
-    return hexgame_init(&app->hexgame, &app->stateset, collmap,
-        rgraph_map, rgraph_player);
 }
 
 static void test_app_init_input(test_app_t *app){
@@ -97,7 +34,8 @@ static void test_app_init_input(test_app_t *app){
 }
 
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
-    SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename
+    SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
+    const char *stateset_filename, const char *hexmap_filename
 ){
     int err;
 
@@ -108,6 +46,8 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->window = window;
     app->renderer = renderer;
     app->prend_filename = prend_filename;
+    app->stateset_filename = stateset_filename;
+    app->hexmap_filename = hexmap_filename;
 
     app->pal = SDL_AllocPalette(256);
     RET_IF_SDL_NULL(app->pal);
@@ -126,35 +66,39 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         },
         0, 9));
 
-    app->stateset_filename = "data/anim.fus";
-    err = stateset_load(&app->stateset,
-        app->stateset_filename);
-    if(err)return err;
-
-    app->collmapset_filename = "data/map.fus";
-    err = hexcollmapset_load(&app->collmapset,
-        app->collmapset_filename);
-    if(err)return err;
-
-    err = test_app_hexgame_init(app, NULL, NULL, NULL);
-    if(err)return err;
-
     err = font_load(&app->font, "data/font.fus");
     if(err)return err;
 
     err = console_init(&app->console, 80, 40, 20000);
     if(err)return err;
 
-    app->cur_rgraph_i = 0;
-    err = test_app_load_rendergraphs(app, false);
+    err = prismelrenderer_init(&app->prend, &vec4);
+    if(err)return err;
+    err = prismelrenderer_load(&app->prend, app->prend_filename);
+    if(err)return err;
+    if(app->prend.rendergraphs_len < 1){
+        fprintf(stderr, "No rendergraphs in %s\n", app->prend_filename);
+        return 2;}
+
+    err = stateset_init(&app->stateset);
+    if(err)return err;
+    err = stateset_load(&app->stateset, app->stateset_filename);
     if(err)return err;
 
+    err = hexmap_load(&app->hexmap, &app->prend, app->hexmap_filename);
+    if(err)return err;
+
+    err = hexgame_init(&app->hexgame, &app->stateset, &app->hexmap);
+    if(err)return err;
+
+    app->cur_rgraph_i = 0;
     app->x0 = 0;
     app->y0 = 0;
     app->rot = 0;
     app->zoom = 1;
     app->frame_i = 0;
     app->loop = true;
+    app->hexgame_running = false;
 
     test_app_init_input(app);
     return 0;
@@ -188,29 +132,6 @@ int test_app_process_console_input(test_app_t *app){
             SDL_StopTextInput();
             return 0;
         }
-    }else if(fus_lexer_got(&lexer, "reload")){
-        err = fus_lexer_next(&lexer);
-        if(err)goto lexer_err;
-        if(!fus_lexer_done(&lexer)){
-            char *filename;
-            err = fus_lexer_get_str(&lexer, &filename);
-            if(err)goto lexer_err;
-
-            FILE *f = fopen(filename, "r");
-            if(f == NULL){
-                fprintf(stderr, "Could not open file: %s\n", filename);
-                console_write_msg(&app->console, "Could not open file\n");
-                return 0;
-            }else{
-                err = fclose(f);
-                if(err)return err;
-                app->prend_filename = filename;
-            }
-        }
-
-        err = test_app_load_rendergraphs(app, true);
-        if(err)return err;
-        app->cur_rgraph_i = 0;
     }else if(fus_lexer_got(&lexer, "save")){
         char *filename = NULL;
 
@@ -228,21 +149,9 @@ int test_app_process_console_input(test_app_t *app){
             err = prismelrenderer_save(&app->prend, filename);
             if(err)return err;
         }
-    }else if(fus_lexer_got(&lexer, "loadmap")){
-        char *map_name;
-        err = fus_lexer_expect_str(&lexer, &map_name);
-        if(err)goto lexer_err;
-        hexcollmap_t *collmap = hexcollmapset_get_collmap(
-            &app->collmapset, map_name);
-        if(collmap == NULL){
-            fprintf(stderr, "Couldn't find map: %s\n", map_name);
-            free(map_name); return 2;}
-        err = test_app_load_map(app, collmap);
-        if(err)return err;
-        free(map_name);
     }else if(fus_lexer_got(&lexer, "dump")){
         bool dump_bitmap_surfaces = false;
-        int dump_what = 0; /* rgraph, prend, states, maps */
+        int dump_what = 0; /* rgraph, prend */
         while(1){
             err = fus_lexer_next(&lexer);
             if(err)goto lexer_err;
@@ -250,9 +159,9 @@ int test_app_process_console_input(test_app_t *app){
             if(fus_lexer_done(&lexer))break;
             else if(fus_lexer_got(&lexer, "rgraph"))dump_what = 0;
             else if(fus_lexer_got(&lexer, "prend"))dump_what = 1;
-            else if(fus_lexer_got(&lexer, "states"))dump_what = 2;
-            else if(fus_lexer_got(&lexer, "maps"))dump_what = 3;
             else if(fus_lexer_got(&lexer, "surfaces")){
+                /* WARNING: doing this with "prend" after "renderall" causes
+                my laptop to hang... */
                 dump_bitmap_surfaces = true;}
             else {
                 console_write_msg(&app->console, "Dumper says: idunno\n");
@@ -262,10 +171,6 @@ int test_app_process_console_input(test_app_t *app){
             rendergraph_dump(rgraph, stdout, 0, dump_bitmap_surfaces);
         }else if(dump_what == 1){
             prismelrenderer_dump(&app->prend, stdout, dump_bitmap_surfaces);
-        }else if(dump_what == 2){
-            stateset_dump(&app->stateset, stdout);
-        }else if(dump_what == 3){
-            hexcollmapset_dump(&app->collmapset, stdout);
         }
     }else if(fus_lexer_got(&lexer, "map")){
         char *mapper_name;
@@ -286,11 +191,11 @@ int test_app_process_console_input(test_app_t *app){
         prismelmapper_t *mapper = prismelrenderer_get_mapper(
             &app->prend, mapper_name);
         if(mapper == NULL){
-            fprintf(stderr, "Couldn't find map: %s\n", mapper_name);
+            fprintf(stderr, "Couldn't find mapper: %s\n", mapper_name);
             return 2;}
         rendergraph_t *mapped_rgraph = prismelrenderer_get_rendergraph(
             &app->prend, mapped_rgraph_name);
-        if(mapper == NULL){
+        if(mapped_rgraph == NULL){
             fprintf(stderr, "Couldn't find shape: %s\n",
                 mapped_rgraph_name);
             return 2;}
@@ -307,7 +212,11 @@ int test_app_process_console_input(test_app_t *app){
         SDL_Renderer *renderer = NULL;
         err = fus_lexer_next(&lexer);
         if(err)goto lexer_err;
+
+        /* WARNING: as of June 16 2018, the following causes my laptop
+        to hang... */
         if(fus_lexer_got(&lexer, "R"))renderer = app->renderer;
+
         err = prismelrenderer_render_all_bitmaps(
             &app->prend, app->pal, renderer);
         if(err)return err;

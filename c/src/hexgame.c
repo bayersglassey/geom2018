@@ -6,7 +6,7 @@
 
 #include "hexgame.h"
 #include "anim.h"
-#include "hexcollmap.h"
+#include "hexmap.h"
 #include "prismelrenderer.h"
 #include "array.h"
 #include "util.h"
@@ -21,7 +21,20 @@
 void player_cleanup(player_t *player){
 }
 
-int player_init(player_t *player){
+int player_init(player_t *player, rendergraph_t *rgraph, int keymap){
+    player->rgraph = rgraph;
+    for(int i = 0; i < PLAYER_KEYS; i++)player->key_code[i] = 0;
+    if(keymap == 0){
+        player->key_code[PLAYER_KEY_U] = SDLK_UP;
+        player->key_code[PLAYER_KEY_D] = SDLK_DOWN;
+        player->key_code[PLAYER_KEY_L] = SDLK_LEFT;
+        player->key_code[PLAYER_KEY_R] = SDLK_RIGHT;
+    }else if(keymap == 1){
+        player->key_code[PLAYER_KEY_U] = SDLK_w;
+        player->key_code[PLAYER_KEY_D] = SDLK_s;
+        player->key_code[PLAYER_KEY_L] = SDLK_a;
+        player->key_code[PLAYER_KEY_R] = SDLK_d;
+    }
     return 0;
 }
 
@@ -32,33 +45,32 @@ int player_init(player_t *player){
 
 
 void hexgame_cleanup(hexgame_t *game){
-    /* Leave cleanup of game->stateset, game->map_collmap, game->map_rgraph
-    to caller */
     ARRAY_FREE(player_t, *game, players, player_cleanup)
 }
 
-int hexgame_init(hexgame_t *game, stateset_t *stateset,
-    hexcollmap_t *map_collmap, rendergraph_t *map_rgraph,
-    rendergraph_t *player_rgraph
-){
+int hexgame_init(hexgame_t *game, stateset_t *stateset, hexmap_t *map){
     game->stateset = stateset;
-    game->map_collmap = map_collmap;
-    game->map_rgraph = map_rgraph;
-    game->player_rgraph = player_rgraph;
+    game->map = map;
     ARRAY_INIT(*game, players)
     return 0;
 }
 
 bool hexgame_ready(hexgame_t *game){
-    /* If we got any NULLs, game should refuse to start */
-    return
-        game->stateset &&
-        game->map_collmap &&
-        game->map_rgraph &&
-        game->player_rgraph;
+    return game->stateset && game->map;
 }
 
 int hexgame_process_event(hexgame_t *game, SDL_Event *event){
+    switch(event->type){
+        case SDL_KEYDOWN: {
+            for(int i = 0; i < game->players_len; i++){
+                player_t *player = game->players[i];
+                for(int i = 0; i < PLAYER_KEYS; i++){
+                    if(event->key.keysym.sym == player->key_code[i]){
+                        player->key_wentdown[i] = true;
+                        player->key_isdown[i] = true;}}}
+        } break;
+        default: break;
+    }
     return 0;
 }
 
@@ -73,7 +85,7 @@ int hexgame_render(hexgame_t *game, test_app_t *app){
         30, 50, 80, 255));
     RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
 
-    rendergraph_t *rgraph = game->map_rgraph;
+    rendergraph_t *rgraph = game->map->rgraph_map;
     int animated_frame_i = get_animated_frame_i(
         rgraph->animation_type, rgraph->n_frames, app->frame_i);
 

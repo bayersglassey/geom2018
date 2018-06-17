@@ -12,7 +12,7 @@
 #include "console.h"
 #include "util.h"
 #include "anim.h"
-#include "hexcollmap.h"
+#include "hexmap.h"
 #include "hexgame.h"
 
 
@@ -25,7 +25,7 @@ typedef struct test_app {
 
     const char *prend_filename;
     const char *stateset_filename;
-    const char *collmapset_filename;
+    const char *hexmap_filename;
 
     SDL_Palette *pal;
     prismelrenderer_t prend;
@@ -34,7 +34,7 @@ typedef struct test_app {
     int cur_rgraph_i;
 
     stateset_t stateset;
-    hexcollmapset_t collmapset;
+    hexmap_t hexmap;
     hexgame_t hexgame;
     bool hexgame_running;
 
@@ -56,12 +56,10 @@ typedef struct test_app {
 
 
 void test_app_cleanup(test_app_t *app);
-int test_app_load_map(test_app_t *app, hexcollmap_t *collmap);
-int test_app_load_rendergraphs(test_app_t *app, bool reload);
-int test_app_hexgame_init(test_app_t *app, hexcollmap_t *collmap,
-    rendergraph_t *rgraph_map, rendergraph_t *rgraph_player);
+int test_app_load_rendergraphs(test_app_t *app);
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
-    SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename);
+    SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
+    const char *stateset_filename, const char *hexmap_filename);
 int test_app_process_console_input(test_app_t *app);
 int test_app_mainloop(test_app_t *app);
 

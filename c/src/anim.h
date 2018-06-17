@@ -6,7 +6,7 @@
 #include "array.h"
 #include "geom.h"
 #include "lexer.h"
-#include "hexcollmap.h"
+#include "hexmap.h"
 
 
 
