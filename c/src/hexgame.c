@@ -38,6 +38,15 @@ int player_init(player_t *player, rendergraph_t *rgraph, int keymap){
     return 0;
 }
 
+int player_step(player_t *player){
+
+    /* start of new frame, no keys have gone down yet. */
+    for(int i = 0; i < PLAYER_KEYS; i++){
+        player->key_wentdown[i] = false;}
+
+    return 0;
+}
+
 
 /***********
  * HEXGAME *
@@ -52,29 +61,35 @@ int hexgame_init(hexgame_t *game, stateset_t *stateset, hexmap_t *map){
     game->stateset = stateset;
     game->map = map;
     ARRAY_INIT(*game, players)
+
+    ARRAY_PUSH_NEW(player_t, *game, players, player0)
+    player_init(player0, map->rgraph_player, 0);
+
+    ARRAY_PUSH_NEW(player_t, *game, players, player1)
+    player_init(player1, map->rgraph_player, 1);
+
     return 0;
 }
 
-bool hexgame_ready(hexgame_t *game){
-    return game->stateset && game->map;
-}
-
 int hexgame_process_event(hexgame_t *game, SDL_Event *event){
-    switch(event->type){
-        case SDL_KEYDOWN: {
-            for(int i = 0; i < game->players_len; i++){
-                player_t *player = game->players[i];
-                for(int i = 0; i < PLAYER_KEYS; i++){
-                    if(event->key.keysym.sym == player->key_code[i]){
-                        player->key_wentdown[i] = true;
-                        player->key_isdown[i] = true;}}}
-        } break;
-        default: break;
+    if(event->type == SDL_KEYDOWN && !event->key.repeat){
+        for(int i = 0; i < game->players_len; i++){
+            player_t *player = game->players[i];
+            for(int i = 0; i < PLAYER_KEYS; i++){
+                if(event->key.keysym.sym == player->key_code[i]){
+                    player->key_wentdown[i] = true;
+                    player->key_isdown[i] = true;}}}
     }
     return 0;
 }
 
 int hexgame_step(hexgame_t *game){
+    int err;
+    for(int i = 0; i < game->players_len; i++){
+        player_t *player = game->players[i];
+        err = player_step(player);
+        if(err)return err;
+    }
     return 0;
 }
 
@@ -89,23 +104,25 @@ int hexgame_render(hexgame_t *game, test_app_t *app){
     int animated_frame_i = get_animated_frame_i(
         rgraph->animation_type, rgraph->n_frames, app->frame_i);
 
-    rendergraph_bitmap_t *bitmap;
-    err = rendergraph_get_or_render_bitmap(rgraph, &bitmap,
-        app->rot, false, animated_frame_i, app->pal, app->renderer);
+    err = test_app_blit_rgraph(app, rgraph, 0, false, animated_frame_i);
     if(err)return err;
 
-    SDL_Rect dst_rect = {
-        app->scw / 2 + app->x0 - bitmap->pbox.x * app->zoom,
-        app->sch / 2 + app->y0 - bitmap->pbox.y * app->zoom,
-        bitmap->pbox.w * app->zoom,
-        bitmap->pbox.h * app->zoom
-    };
-    SDL_Texture *bitmap_texture;
-    err = rendergraph_bitmap_get_texture(bitmap, app->renderer,
-        &bitmap_texture);
-    if(err)return err;
-    RET_IF_SDL_NZ(SDL_RenderCopy(app->renderer, bitmap_texture,
-        NULL, &dst_rect));
+    for(int i = 0; i < game->players_len; i++){
+        player_t *player = game->players[i];
+
+        /* TODO: render player properly... */
+
+        rendergraph_t *rgraph = player->rgraph;
+        rot_t rot = player->rot + app->rot;
+        flip_t flip = false;
+        int frame_i = 0;
+
+        /* TODO: player->turn affects rot + flip.
+        Add player_get_rot, player_get_flip?.. */
+
+        err = test_app_blit_rgraph(app, rgraph, rot, flip, frame_i);
+        if(err)return err;
+    }
 
     SDL_RenderPresent(app->renderer);
     return 0;
