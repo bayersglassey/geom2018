@@ -61,6 +61,8 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
     const char *stateset_filename, const char *hexmap_filename);
 int test_app_process_console_input(test_app_t *app);
+int test_app_blit_rgraph(test_app_t *app, rendergraph_t *rgraph,
+    rot_t rot, flip_t flip, int frame_i);
 int test_app_mainloop(test_app_t *app);
 
 

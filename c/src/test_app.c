@@ -122,16 +122,11 @@ int test_app_process_console_input(test_app_t *app){
     }else if(fus_lexer_got(&lexer, "cls")){
         console_clear(&app->console);
     }else if(fus_lexer_got(&lexer, "run")){
-        if(!hexgame_ready(&app->hexgame)){
-            console_write_msg(&app->console, "Game's not ready, eh\n");
-            return 0;
-        }else{
-            app->hexgame_running = true;
-            test_app_init_input(app);
-            console_write_msg(&app->console, "Game started\n");
-            SDL_StopTextInput();
-            return 0;
-        }
+        app->hexgame_running = true;
+        test_app_init_input(app);
+        console_write_msg(&app->console, "Game started\n");
+        SDL_StopTextInput();
+        return 0;
     }else if(fus_lexer_got(&lexer, "save")){
         char *filename = NULL;
 
@@ -233,6 +228,34 @@ lexer_err:
     return 0;
 }
 
+int test_app_blit_rgraph(test_app_t *app, rendergraph_t *rgraph,
+    rot_t rot, flip_t flip, int frame_i
+){
+    int err;
+
+    rendergraph_bitmap_t *bitmap;
+    err = rendergraph_get_or_render_bitmap(rgraph, &bitmap,
+        app->rot, false, frame_i, app->pal, app->renderer);
+    if(err)return err;
+
+    int x0 = app->scw / 2 + app->x0;
+    int y0 = app->sch / 2 + app->y0;
+    SDL_Rect dst_rect = {
+        x0 - bitmap->pbox.x * app->zoom,
+        y0 - bitmap->pbox.y * app->zoom,
+        bitmap->pbox.w * app->zoom,
+        bitmap->pbox.h * app->zoom
+    };
+    SDL_Texture *bitmap_texture;
+    err = rendergraph_bitmap_get_texture(bitmap, app->renderer,
+        &bitmap_texture);
+    if(err)return err;
+    RET_IF_SDL_NZ(SDL_RenderCopy(app->renderer, bitmap_texture,
+        NULL, &dst_rect));
+
+    return 0;
+}
+
 
 int test_app_mainloop(test_app_t *app){
     int err;
@@ -296,25 +319,9 @@ int test_app_mainloop(test_app_t *app){
                 0, 0, 0, 255));
             RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
 
-            rendergraph_bitmap_t *bitmap;
-            err = rendergraph_get_or_render_bitmap(
-                rgraph, &bitmap,
-                app->rot, false, animated_frame_i, app->pal,
-                app->renderer);
+            err = test_app_blit_rgraph(app, rgraph, 0, false,
+                animated_frame_i);
             if(err)return err;
-
-            SDL_Rect dst_rect = {
-                app->scw / 2 + app->x0 - bitmap->pbox.x * app->zoom,
-                app->sch / 2 + app->y0 - bitmap->pbox.y * app->zoom,
-                bitmap->pbox.w * app->zoom,
-                bitmap->pbox.h * app->zoom
-            };
-            SDL_Texture *bitmap_texture;
-            err = rendergraph_bitmap_get_texture(bitmap, app->renderer,
-                &bitmap_texture);
-            if(err)return err;
-            RET_IF_SDL_NZ(SDL_RenderCopy(app->renderer, bitmap_texture,
-                NULL, &dst_rect));
 
             SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
                 app->renderer, render_surface);
