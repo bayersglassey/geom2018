@@ -32,10 +32,18 @@ typedef struct player {
     SDL_Keycode key_code[PLAYER_KEYS];
     bool key_wentdown[PLAYER_KEYS];
     bool key_isdown[PLAYER_KEYS];
+
+    state_t *state;
+    int cooldown;
+    bool dead;
 } player_t;
 
 void player_cleanup(player_t *player);
-int player_init(player_t *player, rendergraph_t *rgraph, int keymap);
+int player_init(player_t *player, rendergraph_t *rgraph,
+    state_t *state, int keymap);
+
+struct hexgame;
+int player_step(player_t *player, struct hexgame *game);
 
 
 

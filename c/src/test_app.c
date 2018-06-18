@@ -283,6 +283,8 @@ int test_app_mainloop(test_app_t *app){
             rgraph->animation_type, rgraph->n_frames, app->frame_i);
 
         if(app->hexgame_running){
+            err = hexgame_step(&app->hexgame);
+            if(err)return err;
             err = hexgame_render(&app->hexgame, app);
             if(err)return err;
         }else{
