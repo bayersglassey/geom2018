@@ -7,6 +7,7 @@
 #include "hexgame.h"
 #include "anim.h"
 #include "hexmap.h"
+#include "hexspace.h"
 #include "prismelrenderer.h"
 #include "array.h"
 #include "util.h"
@@ -64,9 +65,15 @@ int hexgame_init(hexgame_t *game, stateset_t *stateset, hexmap_t *map){
 
     ARRAY_PUSH_NEW(player_t, *game, players, player0)
     player_init(player0, map->rgraph_player, 0);
+    player0->pos[0] = 4;
+    player0->pos[1] = 1;
+    player0->rot = 0;
 
     ARRAY_PUSH_NEW(player_t, *game, players, player1)
     player_init(player1, map->rgraph_player, 1);
+    player1->pos[0] = 0;
+    player1->pos[1] = -2;
+    player1->rot = 3;
 
     return 0;
 }
@@ -101,10 +108,8 @@ int hexgame_render(hexgame_t *game, test_app_t *app){
     RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
 
     rendergraph_t *rgraph = game->map->rgraph_map;
-    int animated_frame_i = get_animated_frame_i(
-        rgraph->animation_type, rgraph->n_frames, app->frame_i);
-
-    err = test_app_blit_rgraph(app, rgraph, 0, false, animated_frame_i);
+    err = test_app_blit_rgraph(app, game->map->rgraph_map,
+        (vec_t){0}, 0, false, app->frame_i);
     if(err)return err;
 
     for(int i = 0; i < game->players_len; i++){
@@ -113,14 +118,17 @@ int hexgame_render(hexgame_t *game, test_app_t *app){
         /* TODO: render player properly... */
 
         rendergraph_t *rgraph = player->rgraph;
-        rot_t rot = player->rot + app->rot;
+        vec_t pos;
+        vec4_vec_from_hexspace(pos, player->pos);
+        vec_mul(rgraph->space, pos, game->map->unit);
+        rot_t rot = vec4_rot_from_hexspace(player->rot);
         flip_t flip = false;
         int frame_i = 0;
 
         /* TODO: player->turn affects rot + flip.
         Add player_get_rot, player_get_flip?.. */
 
-        err = test_app_blit_rgraph(app, rgraph, rot, flip, frame_i);
+        err = test_app_blit_rgraph(app, rgraph, pos, rot, flip, frame_i);
         if(err)return err;
     }
 
