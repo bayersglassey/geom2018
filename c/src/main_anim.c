@@ -4,6 +4,7 @@
 
 #include "anim.h"
 #include "util.h"
+#include "hexspace.h"
 
 
 int mainloop(){
@@ -11,7 +12,7 @@ int mainloop(){
 
     stateset_t stateset;
     const char *stateset_filename = "data/anim.fus";
-    err = stateset_load(&stateset, stateset_filename);
+    err = stateset_load(&stateset, stateset_filename, &hexspace);
     if(err)return err;
 
     stateset_dump(&stateset, stdout);

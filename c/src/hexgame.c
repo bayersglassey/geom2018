@@ -109,6 +109,8 @@ static int player_apply_rule(player_t *player, hexgame_t *game,
                 return 2;
             }
             player->state = state;
+        }else if(effect->type == state_effect_type_delay){
+            player->cooldown = effect->u.delay;
         }else if(effect->type == state_effect_type_die){
             player->dead = true;
         }else{

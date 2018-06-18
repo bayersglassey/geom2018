@@ -32,7 +32,9 @@ void stateset_dump(stateset_t *stateset, FILE *f){
     }
 }
 
-int stateset_load(stateset_t *stateset, const char *filename){
+int stateset_load(stateset_t *stateset, const char *filename,
+    vecspace_t *space
+){
     int err;
     fus_lexer_t lexer;
 
@@ -45,14 +47,16 @@ int stateset_load(stateset_t *stateset, const char *filename){
     err = stateset_init(stateset);
     if(err)return err;
 
-    err = stateset_parse(stateset, &lexer);
+    err = stateset_parse(stateset, &lexer, space);
     if(err)return err;
 
     free(text);
     return 0;
 }
 
-int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer){
+int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
+    vecspace_t *space
+){
     int err;
 
     while(1){
@@ -150,7 +154,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer){
                     if(err)return err;
                     ARRAY_PUSH_NEW(state_effect_t, *rule, effects, effect)
                     effect->type = state_effect_type_move;
-                    for(int i = 0; i < 4; i++){
+                    for(int i = 0; i < space->dims; i++){
                         err = fus_lexer_expect_int(lexer, &effect->u.vec[i]);
                         if(err)return err;
                     }
@@ -164,7 +168,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer){
                     if(err)return err;
                     ARRAY_PUSH_NEW(state_effect_t, *rule, effects, effect)
                     effect->type = state_effect_type_rot;
-                    effect->u.rot = rot_contain(12, rot);
+                    effect->u.rot = rot_contain(space->rot_max, rot);
                     err = fus_lexer_expect(lexer, ")");
                     if(err)return err;
                 }else if(fus_lexer_got(lexer, "turn")){
@@ -181,6 +185,20 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer){
                     ARRAY_PUSH_NEW(state_effect_t, *rule, effects, effect)
                     effect->type = state_effect_type_goto;
                     effect->u.goto_name = goto_name;
+
+                    err = fus_lexer_expect(lexer, ")");
+                    if(err)return err;
+                }else if(fus_lexer_got(lexer, "delay")){
+                    err = fus_lexer_expect(lexer, "(");
+                    if(err)return err;
+
+                    int delay;
+                    err = fus_lexer_expect_int(lexer, &delay);
+                    if(err)return err;
+
+                    ARRAY_PUSH_NEW(state_effect_t, *rule, effects, effect)
+                    effect->type = state_effect_type_delay;
+                    effect->u.delay = delay;
 
                     err = fus_lexer_expect(lexer, ")");
                     if(err)return err;
@@ -224,12 +242,14 @@ const char state_effect_type_move[] = "move";
 const char state_effect_type_rot[] = "rot";
 const char state_effect_type_turn[] = "turn";
 const char state_effect_type_goto[] = "goto";
+const char state_effect_type_delay[] = "delay";
 const char state_effect_type_die[] = "die";
 const char *state_effect_types[] = {
     state_effect_type_move,
     state_effect_type_rot,
     state_effect_type_turn,
     state_effect_type_goto,
+    state_effect_type_delay,
     state_effect_type_die,
     NULL
 };

@@ -56,6 +56,7 @@ extern const char *state_cond_types[];
 typedef struct state_effect {
     const char *type;
     union {
+        int delay;
         char *goto_name;
         vec_t vec;
         rot_t rot;
@@ -66,6 +67,7 @@ extern const char state_effect_type_move[];
 extern const char state_effect_type_rot[];
 extern const char state_effect_type_turn[];
 extern const char state_effect_type_goto[];
+extern const char state_effect_type_delay[];
 extern const char state_effect_type_die[];
 extern const char *state_effect_types[];
 
@@ -75,8 +77,10 @@ extern const char *state_effect_types[];
 void stateset_cleanup(stateset_t *stateset);
 int stateset_init(stateset_t *stateset);
 void stateset_dump(stateset_t *stateset, FILE *f);
-int stateset_load(stateset_t *stateset, const char *filename);
-int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer);
+int stateset_load(stateset_t *stateset, const char *filename,
+    vecspace_t *space);
+int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
+    vecspace_t *space);
 state_t *stateset_get_state(stateset_t *stateset, const char *name);
 
 
