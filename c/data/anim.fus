@@ -8,11 +8,13 @@ test:
     if:
         kdown: b
     then:
-        move: -1 0
+        move: 1 0
+        turn
         delay: 3
     if:
         kdown: u
     then:
+        move: 1 0
         rot: 1
         delay: 3
     if:

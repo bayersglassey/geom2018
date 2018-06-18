@@ -41,6 +41,7 @@ typedef struct player {
 void player_cleanup(player_t *player);
 int player_init(player_t *player, rendergraph_t *rgraph,
     state_t *state, int keymap);
+rot_t player_get_rot(player_t *player, const vecspace_t *space);
 
 struct hexgame;
 int player_step(player_t *player, struct hexgame *game);

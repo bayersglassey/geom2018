@@ -44,6 +44,14 @@ int player_init(player_t *player, rendergraph_t *rgraph,
     return 0;
 }
 
+rot_t player_get_rot(player_t *player, const vecspace_t *space){
+    rot_t rot = player->rot;
+    if(player->turn){
+        rot = rot_contain(space->rot_max,
+            space->rot_max/2 - rot);}
+    return rot;
+}
+
 static int player_match_rule(player_t *player, hexgame_t *game,
     state_rule_t *rule, bool *rule_matched_ptr
 ){
@@ -96,14 +104,17 @@ static int player_apply_rule(player_t *player, hexgame_t *game,
         if(effect->type == state_effect_type_move){
             vec_t vec;
             vec_cpy(space->dims, vec, effect->u.vec);
-            rot_t rot = player->rot;
+            rot_t rot = player_get_rot(player, space);
+            space->vec_flip(vec, player->turn);
             space->vec_rot(vec, rot);
             vec_add(space->dims, player->pos, vec);
         }else if(effect->type == state_effect_type_rot){
+            rot_t effect_rot = effect->u.rot;
             player->rot = rot_rot(space->rot_max,
-                player->rot, effect->u.rot);
+                player->rot, effect_rot);
         }else if(effect->type == state_effect_type_turn){
             player->turn = !player->turn;
+            player->rot = rot_flip(space->rot_max, player->rot, true);
         }else if(effect->type == state_effect_type_goto){
             state_t *state = stateset_get_state(game->stateset,
                 effect->u.goto_name);
@@ -230,21 +241,22 @@ int hexgame_render(hexgame_t *game, test_app_t *app){
         (vec_t){0}, app->rot, false, app->frame_i);
     if(err)return err;
 
+    vecspace_t *space = &hexspace;
+
     for(int i = 0; i < game->players_len; i++){
         player_t *player = game->players[i];
 
         if(player->dead)continue;
 
         rendergraph_t *rgraph = player->rgraph;
+
         vec_t pos;
         vec4_vec_from_hexspace(pos, player->pos);
         vec_mul(rgraph->space, pos, game->map->unit);
-        rot_t rot = vec4_rot_from_hexspace(player->rot);
-        flip_t flip = false;
+        rot_t player_rot = player_get_rot(player, space);
+        rot_t rot = vec4_rot_from_hexspace(player_rot);
+        flip_t flip = player->turn;
         int frame_i = 0;
-
-        /* TODO: player->turn affects rot + flip.
-        Add player_get_rot, player_get_flip?.. */
 
         err = test_app_blit_rgraph(app, rgraph, pos, rot, flip, frame_i);
         if(err)return err;
