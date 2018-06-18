@@ -90,13 +90,17 @@ static int player_match_rule(player_t *player, hexgame_t *game,
 static int player_apply_rule(player_t *player, hexgame_t *game,
     state_rule_t *rule
 ){
+    const static vecspace_t *space = &hexspace;
     for(int i = 0; i < rule->effects_len; i++){
         state_effect_t *effect = rule->effects[i];
         if(effect->type == state_effect_type_move){
-            vec_add(hexspace.dims,
-                player->pos, effect->u.vec);
+            vec_t vec;
+            vec_cpy(space->dims, vec, effect->u.vec);
+            rot_t rot = player->rot;
+            space->vec_rot(vec, rot);
+            vec_add(space->dims, player->pos, vec);
         }else if(effect->type == state_effect_type_rot){
-            player->rot = rot_rot(hexspace.rot_max,
+            player->rot = rot_rot(space->rot_max,
                 player->rot, effect->u.rot);
         }else if(effect->type == state_effect_type_turn){
             player->turn = !player->turn;

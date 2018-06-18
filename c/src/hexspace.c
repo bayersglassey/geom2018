@@ -42,7 +42,7 @@ void hexspace_rot(vec_t v, rot_t r){
         /* RY = -X */
         int x = v[0] - v[1];
         int y = v[0];
-        v[0] = -x;
+        v[0] = x;
         v[1] = y;
     }
 }
@@ -54,7 +54,7 @@ void hexspace_flip(vec_t v, flip_t flip){
         int x = v[0] - v[1];
         int y = -v[1];
         v[0] = x;
-        v[1] = -y;
+        v[1] = y;
     }
 }
 
