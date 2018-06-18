@@ -77,6 +77,7 @@ int stateset_init(stateset_t *stateset);
 void stateset_dump(stateset_t *stateset, FILE *f);
 int stateset_load(stateset_t *stateset, const char *filename);
 int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer);
+state_t *stateset_get_state(stateset_t *stateset, const char *name);
 
 
 void state_cleanup(state_t *state);

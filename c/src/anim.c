@@ -196,6 +196,14 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer){
     return 0;
 }
 
+state_t *stateset_get_state(stateset_t *stateset, const char *name){
+    for(int i = 0; i < stateset->states_len; i++){
+        state_t *state = stateset->states[i];
+        if(!strcmp(state->name, name))return state;
+    }
+    return NULL;
+}
+
 
 
 /*********
