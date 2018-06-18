@@ -1,4 +1,26 @@
 
+test:
+    if:
+        kdown: f
+    then:
+        move: 1 0
+        delay: 3
+    if:
+        kdown: b
+    then:
+        move: -1 0
+        delay: 3
+    if:
+        kdown: u
+    then:
+        rot: 1
+        delay: 3
+    if:
+        kdown: d
+    then:
+        rot: -1
+        delay: 3
+
 stand:
 
     if:
@@ -8,8 +30,9 @@ stand:
             ;;       /
             ;; ( )  +
     then:
-        move: 1 0 0 0
+        move: 1 0
         rot: 1
+        delay: 3
 
     if:
         kdown: f
@@ -22,8 +45,9 @@ stand:
         coll: any no
             ;; ( )  + - +
     then:
-        move: 1 0 0 0
+        move: 1 0
         goto: jump
+        delay: 3
 
     if:
         kdown: f
@@ -35,7 +59,8 @@ stand:
             ;;       /*\*
             ;; ( )
     then:
-        move: 1 0 0 0
+        move: 1 0
+        delay: 3
 
     if:
         kdown: f
@@ -50,14 +75,16 @@ stand:
             ;; ( )    - + -
             ;;        */*\*
     then:
-        move: 1 0 0 0
+        move: 1 0
         rot: -1
+        delay: 3
 
     if:
         kdown: b
     then:
-        move: 1 0 0 0
+        move: 1 0
         turn
+        delay: 3
 
 jump:
 
@@ -70,8 +97,9 @@ jump:
         coll: all yes
             ;; ( )  + - +
     then:
-        move: 1 0 0 0
+        move: 1 0
         goto: stand
+        delay: 3
 
     if:
         coll: all no
@@ -80,7 +108,8 @@ jump:
             ;;       /*\*
             ;; ( )
     then:
-        move: 1 0 0 0
+        move: 1 0
+        delay: 3
 
     if:
     then:
