@@ -9,12 +9,102 @@
 #include "prismelrenderer.h"
 
 
+
+/***********
+ * PRISMEL *
+ ***********/
+
 static int fus_lexer_expect_prismel(fus_lexer_t *lexer,
     prismelrenderer_t *prend, char *name, prismel_t **prismel_ptr
 ){
     int err = fus_lexer_next(lexer);
     if(err)return err;
     return fus_lexer_get_prismel(lexer, prend, name, prismel_ptr);
+}
+
+static int parse_prismel_image(prismel_t *prismel, fus_lexer_t *lexer,
+    int image_i
+){
+    int err;
+    prismel_image_t *image = &prismel->images[image_i];
+    err = fus_lexer_expect(lexer, "(");
+    if(err)return err;
+
+    err = fus_lexer_next(lexer);
+    if(err)return err;
+
+    if(fus_lexer_got_int(lexer)){
+        /* For example:
+            6 +( 4  0) */
+
+        int i;
+        err = fus_lexer_get_int(lexer, &i);
+        if(err)return err;
+        if(i < 0 || i >= image_i){
+            fus_lexer_err_info(lexer);
+            fprintf(stderr, "Prismel image reference out "
+                "of bounds: %i not in 0..%i\n",
+                i, image_i - 1);
+            return 2;
+        }
+        prismel_image_t *other_image = &prismel->images[i];
+
+        int add_x = 0, add_y = 0;
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        if(fus_lexer_got(lexer, "+")){
+            err = fus_lexer_expect(lexer, "(");
+            if(err)return err;
+
+            err = fus_lexer_expect_int(lexer, &add_x);
+            if(err)return err;
+            err = fus_lexer_expect_int(lexer, &add_y);
+            if(err)return err;
+
+            err = fus_lexer_expect(lexer, ")");
+            if(err)return err;
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+        }
+
+        err = fus_lexer_get(lexer, ")");
+        if(err)return err;
+
+        for(int i = 0; i < other_image->lines_len; i++){
+            prismel_image_line_t *other_line =
+                other_image->lines[i];
+            err = prismel_image_push_line(image,
+                other_line->x + add_x, other_line->y + add_y,
+                other_line->w);
+            if(err)return err;
+        }
+    }else{
+        /* For example:
+            ( 1 -2  1) ( 0 -1  3) ( 1  0  1) */
+        while(1){
+            if(fus_lexer_got(lexer, "(")){
+                int x, y, w;
+                err = fus_lexer_expect_int(lexer, &x);
+                if(err)return err;
+                err = fus_lexer_expect_int(lexer, &y);
+                if(err)return err;
+                err = fus_lexer_expect_int(lexer, &w);
+                if(err)return err;
+                err = fus_lexer_expect(lexer, ")");
+                if(err)return err;
+                err = prismel_image_push_line(image, x, y, w);
+                if(err)return err;
+                err = fus_lexer_next(lexer);
+                if(err)return err;
+            }else if(fus_lexer_got(lexer, ")")){
+                break;
+            }else{
+                return fus_lexer_unexpected(lexer, "(...)");
+            }
+        }
+    }
+
+    return 0;
 }
 
 static int fus_lexer_get_prismel(fus_lexer_t *lexer,
@@ -36,6 +126,18 @@ static int fus_lexer_get_prismel(fus_lexer_t *lexer,
                 : ( 0  0  2) ( 0  1  2)
                 : ( 1 -1  1) ( 0  0  3) ( 1  1  1)
                 : ( 1 -2  1) ( 0 -1  3) ( 1  0  1)
+                :  6 +( 4  0)
+                :  7 +( 4 -2)
+                :  8 +( 2 -4)
+                :  9 +( 0 -4)
+                : 10 +(-2 -4)
+                : 11 +(-4 -2)
+                :  0 +(-4  0)
+                :  1 +(-4  2)
+                :  2 +(-2  4)
+                :  3 +( 0  4)
+                :  4 +( 2  4)
+                :  5 +( 4  2)
     */
     int err;
 
@@ -56,30 +158,8 @@ static int fus_lexer_get_prismel(fus_lexer_t *lexer,
             err = fus_lexer_expect(lexer, "(");
             if(err)return err;
             for(int i = 0; i < prismel->n_images; i++){
-                prismel_image_t *image = &prismel->images[i];
-                err = fus_lexer_expect(lexer, "(");
+                err = parse_prismel_image(prismel, lexer, i);
                 if(err)return err;
-                while(1){
-                    err = fus_lexer_next(lexer);
-                    if(err)return err;
-                    if(fus_lexer_got(lexer, "(")){
-                        int x, y, w;
-                        err = fus_lexer_expect_int(lexer, &x);
-                        if(err)return err;
-                        err = fus_lexer_expect_int(lexer, &y);
-                        if(err)return err;
-                        err = fus_lexer_expect_int(lexer, &w);
-                        if(err)return err;
-                        err = fus_lexer_expect(lexer, ")");
-                        if(err)return err;
-                        err = prismel_image_push_line(image, x, y, w);
-                        if(err)return err;
-                    }else if(fus_lexer_got(lexer, ")")){
-                        break;
-                    }else{
-                        return fus_lexer_unexpected(lexer, "(...)");
-                    }
-                }
             }
             err = fus_lexer_expect(lexer, ")");
             if(err)return err;
@@ -112,6 +192,13 @@ static int parse_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer){
     }
     return 0;
 }
+
+
+
+
+/*********
+ * SHAPE *
+ *********/
 
 static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
     rendergraph_t *rgraph
@@ -464,6 +551,11 @@ static int parse_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer){
 }
 
 
+
+/**********
+ * MAPPER *
+ **********/
+
 static int fus_lexer_expect_mapper(fus_lexer_t *lexer,
     prismelrenderer_t *prend, char *name, prismelmapper_t **mapper_ptr
 ){
@@ -616,6 +708,13 @@ static int parse_mappers(prismelrenderer_t *prend, fus_lexer_t *lexer){
     }
     return 0;
 }
+
+
+
+
+/*******************
+ * PRISMELRENDERER *
+ *******************/
 
 int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer){
     while(1){

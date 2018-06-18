@@ -96,6 +96,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->x0 = 0;
     app->y0 = 0;
     app->rot = 0;
+    app->flip = false;
     app->zoom = 1;
     app->frame_i = 0;
     app->loop = true;
@@ -239,8 +240,11 @@ int test_app_blit_rgraph(test_app_t *app, rendergraph_t *rgraph,
 
     rendergraph_bitmap_t *bitmap;
     err = rendergraph_get_or_render_bitmap(rgraph, &bitmap,
-        rot, false, animated_frame_i, app->pal, app->renderer);
+        rot, flip, animated_frame_i, app->pal, app->renderer);
     if(err)return err;
+
+    /* Can't create a texture with either dimension 0, so exit early */
+    if(bitmap->surface->w == 0 || bitmap->surface->h == 0)return 0;
 
     int x0 = app->scw / 2 + app->x0;
     int y0 = app->sch / 2 + app->y0;
@@ -308,13 +312,13 @@ int test_app_mainloop(test_app_t *app){
                 "  0 - reset rotation\n"
                 "Currently displaying rendergraphs from file: %s\n"
                 "Currently displaying rendergraph %i / %i: %s\n"
-                "  pan=(%i,%i), rot = %i, zoom = %i,"
+                "  pan=(%i,%i), rot = %i, flip = %c, zoom = %i,"
                     " frame_i = %i (%i) / %i (%s)",
                 app->hexgame_running? 'y': 'n', took, app->delay_goal,
                 app->prend_filename, app->cur_rgraph_i,
                 app->prend.rendergraphs_len, rgraph->name,
-                app->x0, app->y0, app->rot, app->zoom, app->frame_i,
-                animated_frame_i,
+                app->x0, app->y0, app->rot, app->flip? 'y': 'n', app->zoom,
+                app->frame_i, animated_frame_i,
                 rgraph->n_frames, rgraph->animation_type);
 
             console_blit(&app->console, &app->font, render_surface,
@@ -329,8 +333,8 @@ int test_app_mainloop(test_app_t *app){
                 0, 0, 0, 255));
             RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
 
-            err = test_app_blit_rgraph(app, rgraph, (vec_t){0}, 0, false,
-                app->frame_i);
+            err = test_app_blit_rgraph(app, rgraph, (vec_t){0}, app->rot,
+                app->flip, app->frame_i);
             if(err)return err;
 
             SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
@@ -404,7 +408,10 @@ int test_app_mainloop(test_app_t *app){
 
                     if(event.key.keysym.sym == SDLK_0){
                         app->x0 = 0; app->y0 = 0;
-                        app->rot = 0; app->zoom = 1;}
+                        app->rot = 0; app->flip = false; app->zoom = 1;}
+
+                    if(event.key.keysym.sym == SDLK_SPACE){
+                        app->flip = !app->flip;}
 
                     #define IF_KEYDOWN(SYM, KEY) \
                         if(event.key.keysym.sym == SDLK_##SYM \

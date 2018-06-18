@@ -113,7 +113,8 @@ int get_animated_frame_i(const char *animation_type,
 }
 
 int get_n_bitmaps(vecspace_t *space, int n_frames){
-    return space->rot_max * n_frames;
+    /* The "* 2" is for flip (true or false) */
+    return n_frames * 2 * space->rot_max;
 }
 
 int get_bitmap_i(vecspace_t *space, rot_t rot, flip_t flip,
@@ -122,7 +123,7 @@ int get_bitmap_i(vecspace_t *space, rot_t rot, flip_t flip,
     int n_bitmaps = get_n_bitmaps(space, n_frames);
     rot = rot_contain(space->rot_max, rot);
     rot = rot_flip(space->rot_max, rot, flip);
-    int bitmap_i = frame_i * space->rot_max + rot;
+    int bitmap_i = (frame_i * 2 + (flip? 1: 0)) * space->rot_max + rot;
     return bitmap_i;
 }
 

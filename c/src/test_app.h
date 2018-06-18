@@ -41,6 +41,7 @@ typedef struct test_app {
     int x0;
     int y0;
     int rot;
+    int flip;
     int zoom;
     int frame_i;
     bool loop;

@@ -227,7 +227,7 @@ int hexgame_render(hexgame_t *game, test_app_t *app){
 
     rendergraph_t *rgraph = game->map->rgraph_map;
     err = test_app_blit_rgraph(app, game->map->rgraph_map,
-        (vec_t){0}, 0, false, app->frame_i);
+        (vec_t){0}, app->rot, false, app->frame_i);
     if(err)return err;
 
     for(int i = 0; i < game->players_len; i++){
