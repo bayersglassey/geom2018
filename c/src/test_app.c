@@ -229,20 +229,27 @@ lexer_err:
 }
 
 int test_app_blit_rgraph(test_app_t *app, rendergraph_t *rgraph,
-    rot_t rot, flip_t flip, int frame_i
+    vec_t pos, rot_t rot, flip_t flip, int frame_i
 ){
     int err;
 
+    int animated_frame_i = get_animated_frame_i(
+        rgraph->animation_type, rgraph->n_frames, frame_i);
+
     rendergraph_bitmap_t *bitmap;
     err = rendergraph_get_or_render_bitmap(rgraph, &bitmap,
-        app->rot, false, frame_i, app->pal, app->renderer);
+        rot, false, animated_frame_i, app->pal, app->renderer);
     if(err)return err;
 
     int x0 = app->scw / 2 + app->x0;
     int y0 = app->sch / 2 + app->y0;
+
+    int x, y;
+    rgraph->space->vec_render(pos, &x, &y);
+
     SDL_Rect dst_rect = {
-        x0 - bitmap->pbox.x * app->zoom,
-        y0 - bitmap->pbox.y * app->zoom,
+        x0 + (x - bitmap->pbox.x) * app->zoom,
+        y0 + (y - bitmap->pbox.y) * app->zoom,
         bitmap->pbox.w * app->zoom,
         bitmap->pbox.h * app->zoom
     };
@@ -319,8 +326,8 @@ int test_app_mainloop(test_app_t *app){
                 0, 0, 0, 255));
             RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
 
-            err = test_app_blit_rgraph(app, rgraph, 0, false,
-                animated_frame_i);
+            err = test_app_blit_rgraph(app, rgraph, (vec_t){0}, 0, false,
+                app->frame_i);
             if(err)return err;
 
             SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
