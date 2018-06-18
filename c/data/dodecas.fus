@@ -6,7 +6,6 @@ shapes:
     ##########
 
     "dodeca_sixth":
-        animation: oscillate 6
 
         #   +
         #  +++
@@ -27,22 +26,41 @@ shapes:
             : "tri" (0 0 0 0)  0 f 2
             : "tri" (1 0 0 0) 11 f 3
             : "sq"  (1 0 0 0)  1 f 4
+
+    "dodeca":
+        shapes:
+            : "dodeca_sixth" (0 0 0 0)  0 f
+            : "dodeca_sixth" (0 0 0 0)  2 f
+            : "dodeca_sixth" (0 0 0 0)  4 f
+            : "dodeca_sixth" (0 0 0 0)  6 f
+            : "dodeca_sixth" (0 0 0 0)  8 f
+            : "dodeca_sixth" (0 0 0 0) 10 f
+
+
+    ###############
+    # DODECA ANIM #
+    ###############
+
+    "dodeca_anim_sixth":
+        animation: oscillate 6
+        shapes:
+            : "dodeca_sixth" (0 0 0 0) 0 f
+        prismels:
             : "tri" (1 1 0 0)  2 f 5 (1 1)
             : "sq"  (1 1 0 0)  1 f 5 (2 4)
             : "tri" (1 2 0 0)  2 f 4 (3 1)
             : "sq"  (1 2 0 0)  1 f 4 (4 2)
             : "tri" (1 3 0 0)  2 f 3 (5 1)
 
-    "dodeca":
+    "dodeca_anim":
         animation: cycle 12
-
         shapes:
-            : "dodeca_sixth" (0 0 0 0)  0 f  0+
-            : "dodeca_sixth" (0 0 0 0)  2 f  2+
-            : "dodeca_sixth" (0 0 0 0)  4 f  4+
-            : "dodeca_sixth" (0 0 0 0)  6 f  6+
-            : "dodeca_sixth" (0 0 0 0)  8 f  8+
-            : "dodeca_sixth" (0 0 0 0) 10 f 10+
+            : "dodeca_anim_sixth" (0 0 0 0)  0 f  0+
+            : "dodeca_anim_sixth" (0 0 0 0)  2 f  2+
+            : "dodeca_anim_sixth" (0 0 0 0)  4 f  4+
+            : "dodeca_anim_sixth" (0 0 0 0)  6 f  6+
+            : "dodeca_anim_sixth" (0 0 0 0)  8 f  8+
+            : "dodeca_anim_sixth" (0 0 0 0) 10 f 10+
 
 
     ############

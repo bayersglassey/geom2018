@@ -41,35 +41,5 @@ shapes:
             : "map_face_third" (1 1 1 0)  4 f
             : "map_face_third" (1 1 1 0)  8 f
 
-    ##########
-    # PLAYER #
-    ##########
-
-    # ...god, no. this is awful
-
-    "player_leg":
-        prismels:
-            : "tri" ( 0 0 0 0)  0 f 4
-            : "tri" ( 0 0 0 0)  2 f 4
-            : "sq"  (-1 0 1 0)  0 f 5
-            : "tri" (-1 0 1 1)  0 f 6
-
-    "player_head":
-        prismels:
-            : "tri" ( 0 0 0 0)  0 f 4
-            : "tri" ( 0 0 0 0)  2 f 4
-            : "sq"  (-1 0 1 0)  0 f 4
-            : "tri" (-1 0 1 1)  0 f 5
-
-            : "tri" ( 0 0 1 1)  9 f 6
-
-    "player":
-        prismels:
-            : "tri" ( 0 1 1 0)  2 f 5
-            : "tri" ( 2 1 1 0)  2 f 5
-        shapes:
-            : "player_head" (1 1 1 0)  0 f
-            : "player_leg"  (1 1 1 0)  4 f
-            : "player_leg"  (1 1 1 0)  8 f
 
 

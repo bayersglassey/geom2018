@@ -1,0 +1,39 @@
+
+shapes:
+
+    ##########
+    # PLAYER #
+    ##########
+
+    #      -+       +-
+    #     / |       | \
+    #   +-  |       |  -+
+    #   | \ |       | / |
+    #  /   -+       +-   \
+    # |     |       |     |
+    # +-   /         \   -+
+    # | \ |           | / |
+    # |  -+  -+---+-  +-  |
+    # | /   /       \   \ |
+    # 0---+-         -+---+
+
+    "player_leg":
+        prismels:
+            : "tri" ( 0 0 0 0)  1 f 6
+            : "sq"  ( 0 1 0 0)  2 f 6
+            : "tri" ( 0 1 1 0)  3 f 7
+
+    "player_head":
+        shapes:
+            : "dodeca" (0 0 0 0) 0 f
+        prismels:
+            : "sq"  (1 1 0 -1) 0 f 4
+            : "tri" (2 1 0 -1) 1 f 3
+
+    "player":
+        shapes:
+            : "player_head" (0 1 3  1)  0 f
+            : "player_leg"  (0 0 0  0)  0 f
+            : "player_leg"  (3 2 0 -1)  2 f
+
+
