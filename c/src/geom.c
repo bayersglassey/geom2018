@@ -111,19 +111,19 @@ void vec_nmul(int dims, vec_t v, int n){
 }
 
 
-void vec_apply(vecspace_t *space, vec_t v, trf_t *t){
+void vec_apply(const vecspace_t *space, vec_t v, trf_t *t){
     space->vec_flip(v, t->flip);
     space->vec_rot(v, t->rot);
     vec_add(space->dims, v, t->add);
 }
 
-void vec_apply_inv(vecspace_t *space, vec_t v, trf_t *t){
+void vec_apply_inv(const vecspace_t *space, vec_t v, trf_t *t){
     vec_sub(space->dims, v, t->add);
     space->vec_rot(v, rot_inv(space->rot_max, t->rot));
     space->vec_flip(v, t->flip);
 }
 
-void vec_mul(vecspace_t *space, vec_t v, vec_t w){
+void vec_mul(const vecspace_t *space, vec_t v, vec_t w){
     int dims = space->dims;
 
     vec_t v0;
@@ -169,14 +169,14 @@ void trf_printf(int dims, trf_t *trf){
     trf_fprintf(stdout, dims, trf);
 }
 
-bool trf_eq(vecspace_t *space, trf_t *t, trf_t *s){
+bool trf_eq(const vecspace_t *space, trf_t *t, trf_t *s){
     return
         !!t->flip == !!s->flip &&
         rot_eq(space->rot_max, t->rot, s->rot) &&
         vec_eq(space->dims, t->add, s->add);
 }
 
-void trf_inv(vecspace_t *space, trf_t *t){
+void trf_inv(const vecspace_t *space, trf_t *t){
     flip_t f = t->flip;
     rot_t r = rot_inv(space->rot_max, t->rot);
     space->vec_rot(t->add, r);
@@ -186,7 +186,7 @@ void trf_inv(vecspace_t *space, trf_t *t){
     t->rot = rot_flip(space->rot_max, f, r);
 }
 
-void trf_apply(vecspace_t *space, trf_t *t, trf_t *s){
+void trf_apply(const vecspace_t *space, trf_t *t, trf_t *s){
     if(s->flip){
         t->flip = flip_inv(t->flip);
         t->rot = rot_inv(space->rot_max, t->rot);
@@ -197,7 +197,7 @@ void trf_apply(vecspace_t *space, trf_t *t, trf_t *s){
     vec_add(space->dims, t->add, s->add);
 }
 
-void trf_apply_inv(vecspace_t *space, trf_t *t, trf_t *s){
+void trf_apply_inv(const vecspace_t *space, trf_t *t, trf_t *s){
     vec_sub(space->dims, t->add, s->add);
     rot_t r = rot_inv(space->rot_max, s->rot);
     space->vec_rot(t->add, r);

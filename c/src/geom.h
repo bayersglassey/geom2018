@@ -55,9 +55,9 @@ void vec_sub(int dims, vec_t v, vec_t w);
 void vec_addn(int dims, vec_t v, vec_t w, int n);
 bool vec_eq(int dims, vec_t v, vec_t w);
 void vec_nmul(int dims, vec_t v, int n);
-void vec_apply(vecspace_t *space, vec_t v, trf_t *t);
-void vec_apply_inv(vecspace_t *space, vec_t v, trf_t *t);
-void vec_mul(vecspace_t *space, vec_t v, vec_t w);
+void vec_apply(const vecspace_t *space, vec_t v, trf_t *t);
+void vec_apply_inv(const vecspace_t *space, vec_t v, trf_t *t);
+void vec_mul(const vecspace_t *space, vec_t v, vec_t w);
 
 void boundbox_init(boundbox_t box, int dims);
 void boundbox_fprintf(FILE *f, int dims, boundbox_t box);
@@ -65,9 +65,9 @@ void boundbox_printf(int dims, boundbox_t box);
 
 void trf_fprintf(FILE *f, int dims, trf_t *trf);
 void trf_printf(int dims, trf_t *trf);
-bool trf_eq(vecspace_t *space, trf_t *t, trf_t *s);
-void trf_inv(vecspace_t *space, trf_t *t);
-void trf_apply(vecspace_t *space, trf_t *t, trf_t *s);
-void trf_apply_inv(vecspace_t *space, trf_t *t, trf_t *s);
+bool trf_eq(const vecspace_t *space, trf_t *t, trf_t *s);
+void trf_inv(const vecspace_t *space, trf_t *t);
+void trf_apply(const vecspace_t *space, trf_t *t, trf_t *s);
+void trf_apply_inv(const vecspace_t *space, trf_t *t, trf_t *s);
 
 #endif
