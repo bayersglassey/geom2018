@@ -19,7 +19,7 @@ int main(int n_args, char *args[]){
     Uint32 window_flags = SDL_WINDOW_SHOWN;
     const char *prend_filename = "data/test.fus";
     const char *stateset_filename = "data/anim.fus";
-    const char *hexmap_filename = "data/map1.fus";
+    const char *hexmap_filename = "data/map2.fus";
 
     for(int arg_i = 1; arg_i < n_args; arg_i++){
         char *arg = args[arg_i];
