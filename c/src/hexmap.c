@@ -10,7 +10,11 @@
 #include "util.h"
 #include "geom.h"
 #include "vec4.h"
+#include "hexspace.h"
 #include "prismelrenderer.h"
+
+
+#define DEBUG_COLLIDE false
 
 
 
@@ -264,6 +268,121 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer){
     free(collmap_lines);
 
     return 0;
+}
+
+void hexcollmap_normalize_vert(trf_t *index){
+    index->rot = 0;
+}
+
+void hexcollmap_normalize_edge(trf_t *index){
+    if(index->rot == 3){
+        index->rot = 0; index->add[0]--;
+    }else if(index->rot == 4){
+        index->rot = 1; index->add[0]--; index->add[1]++;
+    }else if(index->rot == 5){
+        index->rot = 2; index->add[1]++;
+    }
+}
+
+void hexcollmap_normalize_face(trf_t *index){
+    if(index->rot == 2){
+        index->rot = 0; index->add[0]--;
+    }else if(index->rot == 3){
+        index->rot = 1; index->add[0]--; index->add[1]++;
+    }else if(index->rot == 4){
+        index->rot = 0; index->add[0]--; index->add[1]++;
+    }else if(index->rot == 5){
+        index->rot = 1; index->add[1]++;
+    }
+}
+
+bool hexcollmap_collide(hexcollmap_t *map1, hexcollmap_t *map2,
+    trf_t *trf, bool all
+){
+    int ox1 = map1->ox;
+    int oy1 = map1->oy;
+    int w1 = map1->w;
+    int h1 = map1->h;
+    int ox2 = map2->ox;
+    int oy2 = map2->oy;
+    int w2 = map2->w;
+    int h2 = map2->h;
+    const static vecspace_t *space = &hexspace;
+    if(DEBUG_COLLIDE)printf("COLLIDE: "
+        "map1=%p[%i,%i,%i,%i] map2=%p[%i,%i,%i,%i] all=%c\n",
+        map1, ox1, oy1, w1, h1, map2, ox2, oy2, w2, h2, all? 'y': 'n');
+    if(DEBUG_COLLIDE)printf("  trf = (%i %i) %i %c\n",
+        trf->add[0], trf->add[1],
+        trf->rot, trf->flip? 'y': 'n');
+
+    /* NOTE: for tile coords (ox, oy, x, y, w, h),
+    Y is reversed (down is positive, up is negative) */
+
+    for(int y2 = 0; y2 < h2; y2++){
+        for(int x2 = 0; x2 < w2; x2++){
+            hexcollmap_tile_t *tile2 = &map2->tiles[y2 * w2 + x2];
+            if(DEBUG_COLLIDE)printf("    (%i, %i):\n", x2, y2);
+            #define COLLIDE(PART, ROT) \
+                for(int r2 = 0; r2 < ROT; r2++){ \
+                    if(!tile2->PART[r2])continue; \
+                    if(DEBUG_COLLIDE){ \
+                        printf("      %s %i:\n", #PART, r2);} \
+                    \
+                    trf_t index; \
+                    hexspace_set(index.add, x2 - ox2, y2 - oy2); \
+                    index.rot = r2; \
+                    index.flip = false; \
+                    if(DEBUG_COLLIDE){ \
+                        printf("        index = (%i %i) %i %c\n", \
+                            index.add[0], index.add[1], \
+                            index.rot, index.flip? 'y': 'n');} \
+                    \
+                    /* And now, because we were fools and defined */ \
+                    /* the tile coords such that their Y is flipped */ \
+                    /* compared to vecspaces, we need to flip that Y */ \
+                    /* before calling trf_apply and then flip it back */ \
+                    /* again: */ \
+                    index.add[1] = -index.add[1]; \
+                    trf_apply(space, &index, trf); \
+                    index.add[1] = -index.add[1]; \
+                    \
+                    if(DEBUG_COLLIDE){ \
+                        printf("        index = (%i %i) %i %c\n", \
+                            index.add[0], index.add[1], \
+                            index.rot, index.flip? 'y': 'n');} \
+                    hexcollmap_normalize_##PART(&index); \
+                    if(DEBUG_COLLIDE){ \
+                        printf("        index = (%i %i) %i %c\n", \
+                            index.add[0], index.add[1], \
+                            index.rot, index.flip? 'y': 'n');} \
+                    \
+                    int x1 = ox1 + index.add[0]; \
+                    int y1 = oy1 + index.add[1]; \
+                    int r1 = index.rot; \
+                    if(DEBUG_COLLIDE)printf("        x1 = %i\n", x1); \
+                    if(DEBUG_COLLIDE)printf("        y1 = %i\n", y1); \
+                    if(DEBUG_COLLIDE)printf("        r1 = %i\n", r1); \
+                    if(x1 < 0 || x1 >= w1 || y1 < 0 || y1 >= h1){ \
+                        goto nocoll_##PART;} \
+                    \
+                    hexcollmap_tile_t *tile1 = \
+                        &map1->tiles[y1 * w1 + x1]; \
+                    bool collide = tile1->PART[r1]; \
+                    if(collide){ \
+                        if(!all)return true; \
+                        continue; \
+                    } \
+                nocoll_##PART: \
+                    if(all)return false; \
+                }
+            COLLIDE(vert, 1)
+            COLLIDE(edge, 3)
+            COLLIDE(face, 2)
+            #undef COLLIDE
+        }
+    }
+    if(all)return true;
+    else return false;
 }
 
 

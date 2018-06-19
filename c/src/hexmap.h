@@ -40,6 +40,8 @@ void hexcollmap_cleanup(hexcollmap_t *collmap);
 int hexcollmap_init(hexcollmap_t *collmap);
 void hexcollmap_dump(hexcollmap_t *collmap, FILE *f, int n_spaces);
 int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer);
+bool hexcollmap_collide(hexcollmap_t *map1, hexcollmap_t *map2,
+    trf_t *trf, bool all);
 
 
 void hexmap_cleanup(hexmap_t *map);
