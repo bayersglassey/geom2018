@@ -272,9 +272,11 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer){
 
 void hexcollmap_normalize_vert(trf_t *index){
     index->rot = 0;
+    index->flip = false;
 }
 
 void hexcollmap_normalize_edge(trf_t *index){
+    index->flip = false;
     if(index->rot == 3){
         index->rot = 0; index->add[0]--;
     }else if(index->rot == 4){
@@ -285,6 +287,10 @@ void hexcollmap_normalize_edge(trf_t *index){
 }
 
 void hexcollmap_normalize_face(trf_t *index){
+    if(index->flip){
+        index->flip = false;
+        index->rot = rot_contain(6, index->rot - 1);
+    }
     if(index->rot == 2){
         index->rot = 0; index->add[0]--;
     }else if(index->rot == 3){
@@ -369,6 +375,7 @@ bool hexcollmap_collide(hexcollmap_t *map1, hexcollmap_t *map2,
                         &map1->tiles[y1 * w1 + x1]; \
                     bool collide = tile1->PART[r1]; \
                     if(collide){ \
+                        if(DEBUG_COLLIDE)printf("        HIT\n"); \
                         if(!all)return true; \
                         continue; \
                     } \
