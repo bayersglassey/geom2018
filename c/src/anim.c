@@ -91,17 +91,38 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                 if(err)return err;
                 if(fus_lexer_got(lexer, ")")){
                     break;
-                }else if(fus_lexer_got(lexer, "kdown")){
-                    char *name;
-
+                }else if(fus_lexer_got(lexer, "key")){
                     err = fus_lexer_expect(lexer, "(");
                     if(err)return err;
+                    err = fus_lexer_next(lexer);
+                    if(err)return err;
+
+                    int kstate;
+                    if(fus_lexer_got(lexer, "isdown")){
+                        kstate = 0;
+                    }else if(fus_lexer_got(lexer, "wasdown")){
+                        kstate = 1;
+                    }else if(fus_lexer_got(lexer, "wentdown")){
+                        kstate = 2;
+                    }else{
+                        return fus_lexer_unexpected(lexer,
+                            "isdown or wasdown or wentdown");
+                    }
+
+                    char *name;
                     err = fus_lexer_expect_name(lexer, &name);
                     if(err)return err;
 
+                    char c = name[0];
+                    if(!strchr("fbud", c)){
+                        return fus_lexer_unexpected(lexer,
+                            "f or b or u or d");
+                    }
+
                     ARRAY_PUSH_NEW(state_cond_t, *rule, conds, cond)
-                    cond->type = state_cond_type_kdown;
-                    cond->u.key = name[0];
+                    cond->type = state_cond_type_key;
+                    cond->u.key.kstate = kstate;
+                    cond->u.key.c = c;
                     free(name);
 
                     err = fus_lexer_expect(lexer, ")");
@@ -240,10 +261,10 @@ state_t *stateset_get_state(stateset_t *stateset, const char *name){
  *********/
 
 
-const char state_cond_type_kdown[] = "kdown";
+const char state_cond_type_key[] = "key";
 const char state_cond_type_coll[] = "coll";
 const char *state_cond_types[] = {
-    state_cond_type_kdown,
+    state_cond_type_key,
     state_cond_type_coll,
     NULL
 };
@@ -318,8 +339,14 @@ void state_dump(state_t *state, FILE *f, int n_spaces){
         for(int i = 0; i < rule->conds_len; i++){
             state_cond_t *cond = rule->conds[i];
             fprintf(f, "%s      %s", spaces, cond->type);
-            if(cond->type == state_cond_type_kdown){
-                fprintf(f, ": %c\n", cond->u.key);
+            if(cond->type == state_cond_type_key){
+                int kstate = cond->u.key.kstate;
+                const char *kstate_msg =
+                    kstate == 0? "isdown":
+                    kstate == 1? "wasdown":
+                    kstate == 2? "wentdown":
+                    "<unknown>";
+                fprintf(f, ": %s %c\n", kstate_msg, cond->u.key.c);
             }else if(cond->type == state_cond_type_coll){
                 fprintf(f, ": %s %s\n",
                     (cond->u.coll.flags & 1)? "all": "any",

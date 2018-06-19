@@ -6,27 +6,27 @@ test:
         goto: stand
 
     if:
-        kdown: f
+        key: isdown f
     then:
         move: 1 0
         delay: 3
 
     if:
-        kdown: b
+        key: isdown b
     then:
         move: 1 0
         turn
         delay: 3
 
     if:
-        kdown: u
+        key: wasdown u
     then:
         move: 1 0
         rot: 1
         delay: 3
 
     if:
-        kdown: d
+        key: wasdown d
     then:
         rot: -1
         move: -1 0
@@ -35,7 +35,7 @@ test:
 stand:
 
     if:
-        kdown: f
+        key: isdown f
         coll: all yes
             ;;        +
             ;;       /
@@ -46,8 +46,8 @@ stand:
         delay: 3
 
     if:
-        kdown: u
-        kdown: f
+        key: wasdown u
+        key: isdown f
         coll: any no
             ;; ( )  + - +
         coll: all no
@@ -61,7 +61,7 @@ stand:
         delay: 3
 
     if:
-        kdown: f
+        key: isdown f
         coll: all yes
             ;; ( )  + - +
         coll: all no
@@ -74,7 +74,7 @@ stand:
         delay: 3
 
     if:
-        kdown: f
+        key: isdown f
         coll: all yes
             ;; ( )  +
             ;;       \
@@ -91,7 +91,7 @@ stand:
         delay: 3
 
     if:
-        kdown: f
+        key: isdown f
         coll: any no
             ;; ( )  + - +
         coll: all no
@@ -105,7 +105,7 @@ stand:
         delay: 3
 
     if:
-        kdown: b
+        key: isdown b
     then:
         move: 1 0
         turn

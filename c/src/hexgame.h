@@ -30,8 +30,9 @@ typedef struct player {
     rot_t rot;
     bool turn;
     SDL_Keycode key_code[PLAYER_KEYS];
-    bool key_wentdown[PLAYER_KEYS];
     bool key_isdown[PLAYER_KEYS];
+    bool key_wasdown[PLAYER_KEYS];
+    bool key_wentdown[PLAYER_KEYS];
 
     state_t *state;
     int cooldown;

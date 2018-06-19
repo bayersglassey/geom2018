@@ -63,28 +63,30 @@ static int player_match_rule(player_t *player, hexgame_t *game,
     for(int i = 0; i < rule->conds_len; i++){
         state_cond_t *cond = rule->conds[i];
         if(DEBUG_RULES)printf("  if: %s\n", cond->type);
-        if(cond->type == state_cond_type_kdown){
-            switch(cond->u.key){
-                case 'u':
-                    rule_matched =
-                        player->key_isdown[PLAYER_KEY_U];
-                    break;
-                case 'd':
-                    rule_matched =
-                        player->key_isdown[PLAYER_KEY_D];
-                    break;
-                case 'f':
-                    rule_matched =
-                        player->key_isdown[player->turn?
-                            PLAYER_KEY_L: PLAYER_KEY_R];
-                    break;
-                case 'b':
-                    rule_matched =
-                        player->key_isdown[player->turn?
-                            PLAYER_KEY_R: PLAYER_KEY_L];
-                    break;
-                default: break;
-            }
+        if(cond->type == state_cond_type_key){
+
+            int kstate_i = cond->u.key.kstate;
+            bool *kstate =
+                kstate_i == 0? player->key_isdown:
+                kstate_i == 1? player->key_wasdown:
+                kstate_i == 2? player->key_wentdown:
+                NULL;
+            if(kstate == NULL){
+                fprintf(stderr, "kstate out of range: %i", kstate_i);
+                return 2;}
+
+            char c = cond->u.key.c;
+            int key_i =
+                c == 'u'? PLAYER_KEY_U:
+                c == 'd'? PLAYER_KEY_D:
+                c == 'f'? (player->turn? PLAYER_KEY_L: PLAYER_KEY_R):
+                c == 'b'? (player->turn? PLAYER_KEY_R: PLAYER_KEY_L):
+                -1;
+            if(key_i == -1){
+                fprintf(stderr, "Unrecognized key char: %c", c);
+                return 2;}
+
+            rule_matched = kstate[key_i];
         }else if(cond->type == state_cond_type_coll){
             trf_t trf;
             vec_cpy(space->dims, trf.add, player->pos);
@@ -185,6 +187,7 @@ int player_step(player_t *player, hexgame_t *game){
 
         /* start of new frame, no keys have gone down yet. */
         for(int i = 0; i < PLAYER_KEYS; i++){
+            player->key_wasdown[i] = player->key_isdown[i];
             player->key_wentdown[i] = false;}
     }
     return 0;
@@ -232,8 +235,9 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
                 player_t *player = game->players[i];
                 for(int i = 0; i < PLAYER_KEYS; i++){
                     if(event->key.keysym.sym == player->key_code[i]){
-                        player->key_wentdown[i] = true;
-                        player->key_isdown[i] = true;}}}}
+                        player->key_isdown[i] = true;
+                        player->key_wasdown[i] = true;
+                        player->key_wentdown[i] = true;}}}}
     }else if(event->type == SDL_KEYUP){
         if(!event->key.repeat){ /* ??? */
             for(int i = 0; i < game->players_len; i++){

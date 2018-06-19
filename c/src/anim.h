@@ -37,17 +37,25 @@ typedef struct state_cond {
                 */
             hexcollmap_t *collmap;
         } coll;
-        char key;
-            /*
-                'f' -> forward
-                'b' -> back
-                'u' -> up
-                'd' -> down
-            */
+        struct {
+            int kstate;
+                /*
+                    0 -> isdown
+                    1 -> wasdown
+                    2 -> wentdown
+                */
+            char c;
+                /*
+                    'f' -> forward
+                    'b' -> back
+                    'u' -> up
+                    'd' -> down
+                */
+        } key;
     } u;
 } state_cond_t;
 
-extern const char state_cond_type_kdown[];
+extern const char state_cond_type_key[];
 extern const char state_cond_type_coll[];
 extern const char *state_cond_types[];
 
