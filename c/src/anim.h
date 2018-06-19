@@ -56,6 +56,7 @@ extern const char *state_cond_types[];
 typedef struct state_effect {
     const char *type;
     union {
+        char *msg;
         int delay;
         char *goto_name;
         vec_t vec;
@@ -63,6 +64,7 @@ typedef struct state_effect {
     } u;
 } state_effect_t;
 
+extern const char state_effect_type_print[];
 extern const char state_effect_type_move[];
 extern const char state_effect_type_rot[];
 extern const char state_effect_type_turn[];

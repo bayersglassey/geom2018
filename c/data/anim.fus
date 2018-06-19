@@ -1,25 +1,42 @@
 
 test:
+
+    if:
+        kdown: f
+        coll: any yes
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        print: "Bonk!"
+        move: 1 0
+        delay: 6
+
     if:
         kdown: f
     then:
         move: 1 0
         delay: 3
+
     if:
         kdown: b
     then:
         move: 1 0
         turn
         delay: 3
+
     if:
         kdown: u
     then:
-        move: 1 0
+        #move: 1 0
         rot: 1
         delay: 3
+
     if:
         kdown: d
     then:
+        #move: 1 0
         rot: -1
         delay: 3
 

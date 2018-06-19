@@ -149,6 +149,17 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                 if(err)return err;
                 if(fus_lexer_got(lexer, ")")){
                     break;
+                }else if(fus_lexer_got(lexer, "print")){
+                    err = fus_lexer_expect(lexer, "(");
+                    if(err)return err;
+                    char *msg;
+                    err = fus_lexer_expect_str(lexer, &msg);
+                    if(err)return err;
+                    ARRAY_PUSH_NEW(state_effect_t, *rule, effects, effect)
+                    effect->type = state_effect_type_print;
+                    effect->u.msg = msg;
+                    err = fus_lexer_expect(lexer, ")");
+                    if(err)return err;
                 }else if(fus_lexer_got(lexer, "move")){
                     err = fus_lexer_expect(lexer, "(");
                     if(err)return err;
@@ -238,6 +249,7 @@ const char *state_cond_types[] = {
 };
 
 
+const char state_effect_type_print[] = "print";
 const char state_effect_type_move[] = "move";
 const char state_effect_type_rot[] = "rot";
 const char state_effect_type_turn[] = "turn";
@@ -245,6 +257,7 @@ const char state_effect_type_goto[] = "goto";
 const char state_effect_type_delay[] = "delay";
 const char state_effect_type_die[] = "die";
 const char *state_effect_types[] = {
+    state_effect_type_print,
     state_effect_type_move,
     state_effect_type_rot,
     state_effect_type_turn,
@@ -275,7 +288,9 @@ void state_cleanup(state_t *state){
 
         for(int i = 0; i < rule->effects_len; i++){
             state_effect_t *effect = rule->effects[i];
-            if(effect->type == state_effect_type_goto){
+            if(effect->type == state_effect_type_print){
+                free(effect->u.msg);
+            }else if(effect->type == state_effect_type_goto){
                 free(effect->u.goto_name);
             }
         }
@@ -319,7 +334,9 @@ void state_dump(state_t *state, FILE *f, int n_spaces){
         for(int i = 0; i < rule->effects_len; i++){
             state_effect_t *effect = rule->effects[i];
             fprintf(f, "%s      %s", spaces, effect->type);
-            if(effect->type == state_effect_type_move){
+            if(effect->type == state_effect_type_print){
+                fprintf(f, ": %s\n", effect->u.msg);
+            }else if(effect->type == state_effect_type_move){
                 int *vec = effect->u.vec;
                 fprintf(f, ":");
                 for(int i = 0; i < 4; i++)fprintf(f, " %i", vec[i]);
