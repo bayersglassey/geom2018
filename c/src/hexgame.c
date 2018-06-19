@@ -209,15 +209,9 @@ int hexgame_init(hexgame_t *game, stateset_t *stateset, hexmap_t *map){
 
     ARRAY_PUSH_NEW(player_t, *game, players, player0)
     player_init(player0, map->rgraph_player, default_state, 0);
-    player0->pos[0] = 4;
-    player0->pos[1] = 1;
-    player0->rot = 0;
 
     ARRAY_PUSH_NEW(player_t, *game, players, player1)
     player_init(player1, map->rgraph_player, default_state, 1);
-    player1->pos[0] = 0;
-    player1->pos[1] = -2;
-    player1->rot = 3;
 
     return 0;
 }
