@@ -509,12 +509,45 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
     fus_lexer_t *lexer
 ){
     int err;
+    static const vecspace_t *space = &hexspace;
+
+    err = fus_lexer_next(lexer);
+    if(err)return err;
+
+    if(fus_lexer_got(lexer, "map")){
+        prismelmapper_t *mapper;
+        err = fus_lexer_expect_mapper(lexer, prend, NULL, &mapper);
+        if(err)return err;
+
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+
+        err = hexmap_parse(map, prend, name, lexer);
+        if(err)return err;
+
+        vec_mul(prend->space, map->unit, mapper->unit);
+
+        #define MAP_RGRAPH(PART) { \
+            err = prismelmapper_apply_to_rendergraph( \
+                mapper, prend, map->rgraph_##PART, \
+                NULL, prend->space, &map->rgraph_##PART); \
+            if(err)return err; \
+        }
+        MAP_RGRAPH(face)
+        MAP_RGRAPH(edge)
+        MAP_RGRAPH(vert)
+        MAP_RGRAPH(map)
+        MAP_RGRAPH(player)
+        #undef MAP_RGRAPH
+
+        return 0;
+    }
 
 
     /* parse unit */
 
     vec_t unit;
-    err = fus_lexer_expect(lexer, "unit");
+    err = fus_lexer_get(lexer, "unit");
     if(err)return err;
     err = fus_lexer_expect(lexer, "(");
     if(err)return err;
