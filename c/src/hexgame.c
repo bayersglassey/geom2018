@@ -14,6 +14,8 @@
 #include "test_app.h"
 
 
+#define DEBUG_RULES false
+
 
 /**********
  * PLAYER *
@@ -55,10 +57,12 @@ rot_t player_get_rot(player_t *player, const vecspace_t *space){
 static int player_match_rule(player_t *player, hexgame_t *game,
     state_rule_t *rule, bool *rule_matched_ptr
 ){
-    bool rule_matched = false;
+    const static vecspace_t *space = &hexspace;
 
+    bool rule_matched = true;
     for(int i = 0; i < rule->conds_len; i++){
         state_cond_t *cond = rule->conds[i];
+        if(DEBUG_RULES)printf("  if: %s\n", cond->type);
         if(cond->type == state_cond_type_kdown){
             switch(cond->u.key){
                 case 'u':
@@ -82,14 +86,27 @@ static int player_match_rule(player_t *player, hexgame_t *game,
                 default: break;
             }
         }else if(cond->type == state_cond_type_coll){
-            /* TODO!!!... */
+            trf_t trf;
+            vec_cpy(space->dims, trf.add, player->pos);
+            trf.rot = player_get_rot(player, space);
+            trf.flip = player->turn;
+
+            int flags = cond->u.coll.flags;
+            bool all = flags & 1;
+            bool yes = flags & 2;
+
+            bool collide = hexcollmap_collide(&game->map->collmap,
+                cond->u.coll.collmap, &trf, yes? all: !all);
+            rule_matched = yes? collide: !collide;
         }else{
             fprintf(stderr, "Unrecognized state rule condition: %s\n",
                 cond->type);
             return 2;
         }
-        if(rule_matched)break;
+        if(!rule_matched)break;
     }
+
+    if(DEBUG_RULES && !rule_matched)printf("    NO MATCH\n");
 
     *rule_matched_ptr = rule_matched;
     return 0;
@@ -101,7 +118,10 @@ static int player_apply_rule(player_t *player, hexgame_t *game,
     const static vecspace_t *space = &hexspace;
     for(int i = 0; i < rule->effects_len; i++){
         state_effect_t *effect = rule->effects[i];
-        if(effect->type == state_effect_type_move){
+        if(DEBUG_RULES)printf("  then: %s\n", effect->type);
+        if(effect->type == state_effect_type_print){
+            printf("player %p says: %s\n", player, effect->u.msg);
+        }else if(effect->type == state_effect_type_move){
             vec_t vec;
             vec_cpy(space->dims, vec, effect->u.vec);
             rot_t rot = player_get_rot(player, space);
@@ -150,6 +170,8 @@ int player_step(player_t *player, hexgame_t *game){
         for(int i = 0; i < state->rules_len; i++){
             state_rule_t *rule = state->rules[i];
 
+            if(DEBUG_RULES)printf("player %p rule %i:\n", player, i);
+
             bool rule_matched;
             err = player_match_rule(player, game, rule, &rule_matched);
             if(err)return err;
@@ -157,6 +179,7 @@ int player_step(player_t *player, hexgame_t *game){
             if(rule_matched){
                 err = player_apply_rule(player, game, rule);
                 if(err)return err;
+                break;
             }
         }
 
@@ -199,9 +222,18 @@ int hexgame_init(hexgame_t *game, stateset_t *stateset, hexmap_t *map){
     return 0;
 }
 
+int hexgame_reset_player(hexgame_t *game, player_t *player, int keymap){
+    player_cleanup(player);
+    memset(player, 0, sizeof(*player));
+    state_t *default_state = game->stateset->states[0];
+    return player_init(player, game->map->rgraph_player, default_state, keymap);
+}
+
 int hexgame_process_event(hexgame_t *game, SDL_Event *event){
     if(event->type == SDL_KEYDOWN){
         if(!event->key.repeat){
+            if(event->key.keysym.sym == SDLK_q){
+                hexgame_reset_player(game, game->players[0], 0);}
             for(int i = 0; i < game->players_len; i++){
                 player_t *player = game->players[i];
                 for(int i = 0; i < PLAYER_KEYS; i++){
