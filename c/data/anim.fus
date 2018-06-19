@@ -48,13 +48,13 @@ stand:
     if:
         kdown: u
         kdown: f
+        coll: any no
+            ;; ( )  + - +
         coll: all no
             ;;       \*/*
             ;;        + -
             ;;       /*\*
             ;; ( )
-        coll: any no
-            ;; ( )  + - +
     then:
         move: 1 0
         goto: jump
@@ -88,6 +88,20 @@ stand:
     then:
         move: 1 0
         rot: -1
+        delay: 3
+
+    if:
+        kdown: f
+        coll: any no
+            ;; ( )  + - +
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        move: 1 0
+        goto: jump
         delay: 3
 
     if:
