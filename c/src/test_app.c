@@ -232,12 +232,20 @@ lexer_err:
 }
 
 int test_app_blit_rgraph(test_app_t *app, rendergraph_t *rgraph,
-    vec_t pos, rot_t rot, flip_t flip, int frame_i
+    vec_t pos, rot_t rot, flip_t flip, int frame_i, prismelmapper_t *mapper
 ){
     int err;
 
     int animated_frame_i = get_animated_frame_i(
         rgraph->animation_type, rgraph->n_frames, frame_i);
+
+    if(mapper != NULL){
+        err = prismelmapper_apply_to_rendergraph(mapper, &app->prend, rgraph,
+            NULL, rgraph->space, &rgraph);
+        if(err)return err;
+
+        vec_mul(mapper->space, pos, mapper->unit);
+    }
 
     rendergraph_bitmap_t *bitmap;
     err = rendergraph_get_or_render_bitmap(rgraph, &bitmap,
@@ -335,7 +343,7 @@ int test_app_mainloop(test_app_t *app){
             RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
 
             err = test_app_blit_rgraph(app, rgraph, (vec_t){0}, app->rot,
-                app->flip, app->frame_i);
+                app->flip, app->frame_i, NULL);
             if(err)return err;
 
             SDL_Texture *render_texture = SDL_CreateTextureFromSurface(

@@ -27,6 +27,7 @@ typedef struct hexmap {
     char *name;
     hexcollmap_t collmap;
     prismelrenderer_t *prend;
+    prismelmapper_t *mapper;
     vec_t unit;
     rendergraph_t *rgraph_vert;
     rendergraph_t *rgraph_edge;
@@ -46,6 +47,7 @@ bool hexcollmap_collide(hexcollmap_t *map1, hexcollmap_t *map2,
 void hexmap_cleanup(hexmap_t *map);
 int hexmap_init(hexmap_t *map, char *name,
     prismelrenderer_t *prend,
+    prismelmapper_t *mapper,
     vec_t unit,
     rendergraph_t *rgraph_vert,
     rendergraph_t *rgraph_edge,

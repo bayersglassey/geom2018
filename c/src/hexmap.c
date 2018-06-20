@@ -405,6 +405,7 @@ void hexmap_cleanup(hexmap_t *map){
 
 int hexmap_init(hexmap_t *map, char *name,
     prismelrenderer_t *prend,
+    prismelmapper_t *mapper,
     vec_t unit,
     rendergraph_t *rgraph_vert,
     rendergraph_t *rgraph_edge,
@@ -412,6 +413,7 @@ int hexmap_init(hexmap_t *map, char *name,
 ){
     map->name = name;
     map->prend = prend;
+    map->mapper = mapper;
     vec_cpy(prend->space->dims, map->unit, unit);
 
     /* map->collmap: ...we do nothing with this...
@@ -508,36 +510,23 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
 ){
     int err;
     static const vecspace_t *space = &hexspace;
+    prismelmapper_t *mapper = NULL;
 
     err = fus_lexer_next(lexer);
     if(err)return err;
 
+
+    /* (maybe) get mapper */
+
     if(fus_lexer_got(lexer, "map")){
-        prismelmapper_t *mapper;
+        err = fus_lexer_expect(lexer, "(");
+        if(err)return err;
         err = fus_lexer_expect_mapper(lexer, prend, NULL, &mapper);
         if(err)return err;
-
+        err = fus_lexer_expect(lexer, ")");
+        if(err)return err;
         err = fus_lexer_next(lexer);
         if(err)return err;
-
-        err = hexmap_parse(map, prend, name, lexer);
-        if(err)return err;
-
-        vec_mul(prend->space, map->unit, mapper->unit);
-
-        #define MAP_RGRAPH(PART) { \
-            err = prismelmapper_apply_to_rendergraph( \
-                mapper, prend, map->rgraph_##PART, \
-                NULL, prend->space, &map->rgraph_##PART); \
-            if(err)return err; \
-        }
-        MAP_RGRAPH(face)
-        MAP_RGRAPH(edge)
-        MAP_RGRAPH(vert)
-        MAP_RGRAPH(map)
-        #undef MAP_RGRAPH
-
-        return 0;
     }
 
 
@@ -589,7 +578,7 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
 
 
     /* home stretch! init the map */
-    err = hexmap_init(map, name, prend, unit,
+    err = hexmap_init(map, name, prend, mapper, unit,
         rgraph_vert, rgraph_edge, rgraph_face);
     if(err)return err;
 

@@ -269,7 +269,7 @@ int hexgame_render(hexgame_t *game, test_app_t *app){
 
     rendergraph_t *rgraph = game->map->rgraph_map;
     err = test_app_blit_rgraph(app, game->map->rgraph_map,
-        (vec_t){0}, app->rot, false, app->frame_i);
+        (vec_t){0}, app->rot, false, app->frame_i, game->map->mapper);
     if(err)return err;
 
     vecspace_t *space = &hexspace;
@@ -289,7 +289,8 @@ int hexgame_render(hexgame_t *game, test_app_t *app){
         flip_t flip = player->turn;
         int frame_i = player->frame_i;
 
-        err = test_app_blit_rgraph(app, rgraph, pos, rot, flip, frame_i);
+        err = test_app_blit_rgraph(app, rgraph, pos, rot, flip, frame_i,
+            game->map->mapper);
         if(err)return err;
     }
 
