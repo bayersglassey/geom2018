@@ -204,18 +204,19 @@ void hexgame_cleanup(hexgame_t *game){
     ARRAY_FREE(player_t, *game, players, player_cleanup)
 }
 
-int hexgame_init(hexgame_t *game, stateset_t *stateset, hexmap_t *map){
+int hexgame_init(hexgame_t *game, stateset_t *stateset, hexmap_t *map,
+    int n_players
+){
     game->stateset = stateset;
     game->map = map;
     ARRAY_INIT(*game, players)
 
     state_t *default_state = stateset->states[0];
 
-    ARRAY_PUSH_NEW(player_t, *game, players, player0)
-    player_init(player0, default_state, 0);
-
-    ARRAY_PUSH_NEW(player_t, *game, players, player1)
-    player_init(player1, default_state, 1);
+    for(int i = 0; i < n_players; i++){
+        ARRAY_PUSH_NEW(player_t, *game, players, player)
+        player_init(player, default_state, i);
+    }
 
     return 0;
 }
@@ -230,8 +231,12 @@ int hexgame_reset_player(hexgame_t *game, player_t *player, int keymap){
 int hexgame_process_event(hexgame_t *game, SDL_Event *event){
     if(event->type == SDL_KEYDOWN){
         if(!event->key.repeat){
-            if(event->key.keysym.sym == SDLK_q){
-                hexgame_reset_player(game, game->players[0], 0);}
+            if(event->key.keysym.sym == SDLK_1
+                && game->players_len >= 1){
+                    hexgame_reset_player(game, game->players[0], 0);}
+            if(event->key.keysym.sym == SDLK_2
+                && game->players_len >= 2){
+                    hexgame_reset_player(game, game->players[1], 1);}
             for(int i = 0; i < game->players_len; i++){
                 player_t *player = game->players[i];
                 for(int i = 0; i < PLAYER_KEYS; i++){

@@ -90,7 +90,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     err = hexmap_load(&app->hexmap, &app->prend, app->hexmap_filename);
     if(err)return err;
 
-    err = hexgame_init(&app->hexgame, &app->stateset, &app->hexmap);
+    err = hexgame_init(&app->hexgame, &app->stateset, &app->hexmap, 1);
     if(err)return err;
 
     app->cur_rgraph_i = 0;
@@ -130,6 +130,11 @@ int test_app_process_console_input(test_app_t *app){
         console_write_msg(&app->console, "Game started\n");
         SDL_StopTextInput();
         return 0;
+    }else if(fus_lexer_got(&lexer, "add_player")){
+        state_t *default_state = app->hexgame.stateset->states[0];
+        int player_i = app->hexgame.players_len;
+        ARRAY_PUSH_NEW(player_t, app->hexgame, players, player)
+        player_init(player, default_state, player_i);
     }else if(fus_lexer_got(&lexer, "save")){
         char *filename = NULL;
 

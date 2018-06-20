@@ -60,7 +60,8 @@ typedef struct hexgame {
 
 
 void hexgame_cleanup(hexgame_t *game);
-int hexgame_init(hexgame_t *game, stateset_t *stateset, hexmap_t *map);
+int hexgame_init(hexgame_t *game, stateset_t *stateset, hexmap_t *map,
+    int n_players);
 int hexgame_process_event(hexgame_t *game, SDL_Event *event);
 int hexgame_step(hexgame_t *game);
 
