@@ -116,6 +116,13 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     err = fus_lexer_next(lexer);
                     if(err)return err;
 
+                    bool yes = true;
+                    if(fus_lexer_got(lexer, "not")){
+                        yes = false;
+                        err = fus_lexer_next(lexer);
+                        if(err)return err;
+                    }
+
                     int kstate;
                     if(fus_lexer_got(lexer, "isdown")){
                         kstate = 0;
@@ -142,6 +149,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     cond->type = state_cond_type_key;
                     cond->u.key.kstate = kstate;
                     cond->u.key.c = c;
+                    cond->u.key.yes = yes;
                     free(name);
 
                     err = fus_lexer_expect(lexer, ")");
@@ -366,7 +374,8 @@ void state_dump(state_t *state, FILE *f, int n_spaces){
                     kstate == 1? "wasdown":
                     kstate == 2? "wentdown":
                     "<unknown>";
-                fprintf(f, ": %s %c\n", kstate_msg, cond->u.key.c);
+                fprintf(f, ": %s%s %c\n", cond->u.key.yes? "": "not",
+                    kstate_msg, cond->u.key.c);
             }else if(cond->type == state_cond_type_coll){
                 fprintf(f, ": %s %s\n",
                     (cond->u.coll.flags & 1)? "all": "any",

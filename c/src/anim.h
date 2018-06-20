@@ -40,6 +40,7 @@ typedef struct state_cond {
             hexcollmap_t *collmap;
         } coll;
         struct {
+            bool yes;
             int kstate;
                 /*
                     0 -> isdown

@@ -85,6 +85,7 @@ static int player_match_rule(player_t *player, hexgame_t *game,
                 return 2;}
 
             rule_matched = kstate[key_i];
+            if(!cond->u.key.yes)rule_matched = !rule_matched;
         }else if(cond->type == state_cond_type_coll){
             trf_t trf;
             vec_cpy(space->dims, trf.add, player->pos);
