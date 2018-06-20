@@ -46,6 +46,7 @@ stand:
         move: 1 0
         rot: 1
         delay: 3
+        goto: step
 
     if:
         key: wasdown u
@@ -73,6 +74,7 @@ stand:
     then:
         move: 1 0
         delay: 3
+        goto: step
 
     if:
         key: isdown f
@@ -90,6 +92,7 @@ stand:
         move: 1 0
         rot: -1
         delay: 3
+        goto: step
 
     if:
         key: isdown f
@@ -109,6 +112,7 @@ stand:
     then:
         move: 1 0
         turn
+        goto: step
         delay: 3
 
 jump:
@@ -146,11 +150,18 @@ jump:
             ;; ( )
     then:
         move: 1 0
+        goto: jump
         delay: 3
 
     if:
     then:
         goto: dead
+
+step:
+    rgraph: "player_step"
+    if:
+    then:
+        goto: stand
 
 dead:
     rgraph: "player_dead"

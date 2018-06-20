@@ -36,11 +36,27 @@ shapes:
             : "player_leg"  ( 0  1  1  1)  0 f
             : "player_leg"  ( 2  1  1  1)  6 t
 
-    "player_jump":
+    "player_step":
+        animation: cycle 4
+        shapes:
+            : "player_head" (-1  0  3  1)  0 f  0 (0 1)
+            : "player_head" ( 0  0  3  1)  0 f  0 (1 1)
+            : "player_head" ( 0  1  3  1)  0 f  0 (2 1)
+            : "player_head" ( 0  1  3  1)  0 f  0 (3 1)
+            : "player_leg"  (-1  1  1  1)  0 f
+            : "player_leg"  ( 2  1  1  1)  6 t
+
+    "_player_jump":
         shapes:
             : "player_head" ( 0  1  3  1)  0 f
             : "player_leg"  ( 0  1  1  1) 10 f
             : "player_leg"  ( 2  1  1  1)  7 t
+
+    "player_jump":
+        animation: cycle 4
+        shapes:
+            : "_player_jump" (-1 0 0  0) 0 f  0 (0 2)
+            : "_player_jump" ( 0 0 0  0) 0 f  0 (2 2)
 
     "player_dead":
         animation: oscillate 3
