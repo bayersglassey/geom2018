@@ -408,8 +408,7 @@ int hexmap_init(hexmap_t *map, char *name,
     vec_t unit,
     rendergraph_t *rgraph_vert,
     rendergraph_t *rgraph_edge,
-    rendergraph_t *rgraph_face,
-    rendergraph_t *rgraph_player
+    rendergraph_t *rgraph_face
 ){
     map->name = name;
     map->prend = prend;
@@ -421,7 +420,6 @@ int hexmap_init(hexmap_t *map, char *name,
     map->rgraph_vert = rgraph_vert;
     map->rgraph_edge = rgraph_edge;
     map->rgraph_face = rgraph_face;
-    map->rgraph_player = rgraph_player;
     map->rgraph_map = NULL;
     return 0;
 }
@@ -537,7 +535,6 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
         MAP_RGRAPH(edge)
         MAP_RGRAPH(vert)
         MAP_RGRAPH(map)
-        MAP_RGRAPH(player)
         #undef MAP_RGRAPH
 
         return 0;
@@ -564,7 +561,6 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
     rendergraph_t *rgraph_vert;
     rendergraph_t *rgraph_edge;
     rendergraph_t *rgraph_face;
-    rendergraph_t *rgraph_player;
 
     #define GET_RGRAPH(TYPE) { \
         err = fus_lexer_expect(lexer, #TYPE); \
@@ -589,13 +585,12 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
     GET_RGRAPH(vert)
     GET_RGRAPH(edge)
     GET_RGRAPH(face)
-    GET_RGRAPH(player)
     #undef GET_RGRAPH
 
 
     /* home stretch! init the map */
     err = hexmap_init(map, name, prend, unit,
-        rgraph_vert, rgraph_edge, rgraph_face, rgraph_player);
+        rgraph_vert, rgraph_edge, rgraph_face);
     if(err)return err;
 
     /* parse collmap */

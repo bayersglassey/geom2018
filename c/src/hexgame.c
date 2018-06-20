@@ -24,10 +24,7 @@
 void player_cleanup(player_t *player){
 }
 
-int player_init(player_t *player, rendergraph_t *rgraph,
-    state_t *state, int keymap
-){
-    player->rgraph = rgraph;
+int player_init(player_t *player, state_t *state, int keymap){
     for(int i = 0; i < PLAYER_KEYS; i++)player->key_code[i] = 0;
     if(keymap == 0){
         player->key_code[PLAYER_KEY_U] = SDLK_UP;
@@ -41,6 +38,7 @@ int player_init(player_t *player, rendergraph_t *rgraph,
         player->key_code[PLAYER_KEY_R] = SDLK_d;
     }
     player->state = state;
+    player->frame_i = 0;
     player->cooldown = 0;
     player->dead = false;
     return 0;
@@ -146,6 +144,7 @@ static int player_apply_rule(player_t *player, hexgame_t *game,
                 return 2;
             }
             player->state = state;
+            player->frame_i = 0;
         }else if(effect->type == state_effect_type_delay){
             player->cooldown = effect->u.delay;
         }else if(effect->type == state_effect_type_die){
@@ -163,6 +162,8 @@ int player_step(player_t *player, hexgame_t *game){
     int err;
 
     if(player->dead)return 0;
+
+    player->frame_i++;
 
     if(player->cooldown > 0){
         player->cooldown--;
@@ -211,10 +212,10 @@ int hexgame_init(hexgame_t *game, stateset_t *stateset, hexmap_t *map){
     state_t *default_state = stateset->states[0];
 
     ARRAY_PUSH_NEW(player_t, *game, players, player0)
-    player_init(player0, map->rgraph_player, default_state, 0);
+    player_init(player0, default_state, 0);
 
     ARRAY_PUSH_NEW(player_t, *game, players, player1)
-    player_init(player1, map->rgraph_player, default_state, 1);
+    player_init(player1, default_state, 1);
 
     return 0;
 }
@@ -223,7 +224,7 @@ int hexgame_reset_player(hexgame_t *game, player_t *player, int keymap){
     player_cleanup(player);
     memset(player, 0, sizeof(*player));
     state_t *default_state = game->stateset->states[0];
-    return player_init(player, game->map->rgraph_player, default_state, keymap);
+    return player_init(player, default_state, keymap);
 }
 
 int hexgame_process_event(hexgame_t *game, SDL_Event *event){
@@ -278,7 +279,7 @@ int hexgame_render(hexgame_t *game, test_app_t *app){
 
         if(player->dead)continue;
 
-        rendergraph_t *rgraph = player->rgraph;
+        rendergraph_t *rgraph = player->state->rgraph;
 
         vec_t pos;
         vec4_vec_from_hexspace(pos, player->pos);
@@ -286,7 +287,7 @@ int hexgame_render(hexgame_t *game, test_app_t *app){
         rot_t player_rot = player_get_rot(player, space);
         rot_t rot = vec4_rot_from_hexspace(player_rot);
         flip_t flip = player->turn;
-        int frame_i = 0;
+        int frame_i = player->frame_i;
 
         err = test_app_blit_rgraph(app, rgraph, pos, rot, flip, frame_i);
         if(err)return err;

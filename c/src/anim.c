@@ -8,6 +8,7 @@
 #include "array.h"
 #include "hexmap.h"
 #include "util.h"
+#include "prismelrenderer.h"
 
 
 
@@ -33,7 +34,7 @@ void stateset_dump(stateset_t *stateset, FILE *f){
 }
 
 int stateset_load(stateset_t *stateset, const char *filename,
-    vecspace_t *space
+    prismelrenderer_t *prend, vecspace_t *space
 ){
     int err;
     fus_lexer_t lexer;
@@ -47,7 +48,7 @@ int stateset_load(stateset_t *stateset, const char *filename,
     err = stateset_init(stateset);
     if(err)return err;
 
-    err = stateset_parse(stateset, &lexer, space);
+    err = stateset_parse(stateset, &lexer, prend, space);
     if(err)return err;
 
     free(text);
@@ -55,7 +56,7 @@ int stateset_load(stateset_t *stateset, const char *filename,
 }
 
 int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
-    vecspace_t *space
+    prismelrenderer_t *prend, vecspace_t *space
 ){
     int err;
 
@@ -68,12 +69,30 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
         char *name;
         err = fus_lexer_get_name(lexer, &name);
         if(err)return err;
-        ARRAY_PUSH_NEW(state_t, *stateset, states, state)
-        err = state_init(state, name);
-        if(err)return err;
 
         err = fus_lexer_expect(lexer, "(");
         if(err)return err;
+
+        char *rgraph_name;
+        err = fus_lexer_expect(lexer, "rgraph");
+        if(err)return err;
+        err = fus_lexer_expect(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_expect_str(lexer, &rgraph_name);
+        if(err)return err;
+        err = fus_lexer_expect(lexer, ")");
+        if(err)return err;
+        rendergraph_t *rgraph = prismelrenderer_get_rendergraph(
+            prend, rgraph_name);
+        if(rgraph == NULL){
+            fprintf(stderr, "Couldn't find shape: %s\n", rgraph_name);
+            free(rgraph_name); return 2;}
+        free(rgraph_name);
+
+        ARRAY_PUSH_NEW(state_t, *stateset, states, state)
+        err = state_init(state, name, rgraph);
+        if(err)return err;
+
         while(1){
             err = fus_lexer_next(lexer);
             if(err)return err;
@@ -320,8 +339,9 @@ void state_cleanup(state_t *state){
     free(state->rules);
 }
 
-int state_init(state_t *state, char *name){
+int state_init(state_t *state, char *name, rendergraph_t *rgraph){
     state->name = name;
+    state->rgraph = rgraph;
     ARRAY_INIT(*state, rules)
     return 0;
 }

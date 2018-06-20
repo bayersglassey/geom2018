@@ -32,7 +32,6 @@ typedef struct hexmap {
     rendergraph_t *rgraph_edge;
     rendergraph_t *rgraph_face;
     rendergraph_t *rgraph_map;
-    rendergraph_t *rgraph_player;
 } hexmap_t;
 
 
@@ -50,8 +49,7 @@ int hexmap_init(hexmap_t *map, char *name,
     vec_t unit,
     rendergraph_t *rgraph_vert,
     rendergraph_t *rgraph_edge,
-    rendergraph_t *rgraph_face,
-    rendergraph_t *rgraph_player);
+    rendergraph_t *rgraph_face);
 int hexmap_create_rgraph(hexmap_t *map, rendergraph_t **rgraph_ptr);
 int hexmap_load(hexmap_t *map, prismelrenderer_t *prend,
     const char *filename);

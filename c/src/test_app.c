@@ -83,7 +83,8 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 
     err = stateset_init(&app->stateset);
     if(err)return err;
-    err = stateset_load(&app->stateset, app->stateset_filename, &hexspace);
+    err = stateset_load(&app->stateset, app->stateset_filename,
+        &app->prend, &hexspace);
     if(err)return err;
 
     err = hexmap_load(&app->hexmap, &app->prend, app->hexmap_filename);

@@ -7,11 +7,13 @@
 #include "geom.h"
 #include "lexer.h"
 #include "hexmap.h"
+#include "prismelrenderer.h"
 
 
 
 typedef struct state {
     char *name;
+    rendergraph_t *rgraph;
     ARRAY_DECL(struct state_rule, rules)
 } state_t;
 
@@ -88,14 +90,14 @@ void stateset_cleanup(stateset_t *stateset);
 int stateset_init(stateset_t *stateset);
 void stateset_dump(stateset_t *stateset, FILE *f);
 int stateset_load(stateset_t *stateset, const char *filename,
-    vecspace_t *space);
+    prismelrenderer_t *prend, vecspace_t *space);
 int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
-    vecspace_t *space);
+    prismelrenderer_t *prend, vecspace_t *space);
 state_t *stateset_get_state(stateset_t *stateset, const char *name);
 
 
 void state_cleanup(state_t *state);
-int state_init(state_t *state, char *name);
+int state_init(state_t *state, char *name, rendergraph_t *rgraph);
 void state_dump(state_t *state, FILE *f, int n_spaces);
 
 #endif

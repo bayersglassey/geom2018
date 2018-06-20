@@ -25,7 +25,6 @@
 #define PLAYER_KEYS   4
 
 typedef struct player {
-    rendergraph_t *rgraph;
     vec_t pos;
     rot_t rot;
     bool turn;
@@ -35,13 +34,13 @@ typedef struct player {
     bool key_wentdown[PLAYER_KEYS];
 
     state_t *state;
+    int frame_i;
     int cooldown;
     bool dead;
 } player_t;
 
 void player_cleanup(player_t *player);
-int player_init(player_t *player, rendergraph_t *rgraph,
-    state_t *state, int keymap);
+int player_init(player_t *player, state_t *state, int keymap);
 rot_t player_get_rot(player_t *player, const vecspace_t *space);
 
 struct hexgame;

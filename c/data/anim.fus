@@ -1,5 +1,6 @@
 
 test:
+    rgraph: "player_stand"
 
     if:
     then:
@@ -33,6 +34,7 @@ test:
         delay: 3
 
 stand:
+    rgraph: "player_stand"
 
     if:
         key: isdown f
@@ -58,7 +60,6 @@ stand:
     then:
         move: 1 0
         goto: jump
-        delay: 3
 
     if:
         key: isdown f
@@ -102,7 +103,6 @@ stand:
     then:
         move: 1 0
         goto: jump
-        delay: 3
 
     if:
         key: isdown b
@@ -112,6 +112,7 @@ stand:
         delay: 3
 
 jump:
+    rgraph: "player_jump"
 
     if:
         coll: all yes
@@ -149,5 +150,7 @@ jump:
 
     if:
     then:
-        die
+        goto: dead
 
+dead:
+    rgraph: "player_dead"
