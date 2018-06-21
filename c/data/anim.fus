@@ -69,8 +69,18 @@ stand:
 
     if:
         key: isdown f
-        coll: any no
-            ;; ( )  + - +
+        coll: all yes
+            ;;        +
+            ;;
+            ;; ( )
+    then:
+        move: 1 0
+        rot: 1
+        delay: 2
+        goto: jump
+
+    if:
+        key: isdown f
         coll: all no
             ;;       \*/*
             ;;        + -
@@ -86,8 +96,8 @@ stand:
     then:
         move: 1 0
         turn
-        goto: step
         delay: 2
+        goto: step
 
 jump:
     rgraph: "player_jump"
@@ -100,8 +110,19 @@ jump:
     then:
         move: 1 0
         rot: 1
-        goto: stand
         delay: 2
+        goto: stand
+
+    if:
+        coll: all yes
+            ;;        +
+            ;;
+            ;; ( )
+    then:
+        move: 1 0
+        rot: 1
+        delay: 2
+        goto: jump
 
     if:
         coll: all no
@@ -113,8 +134,8 @@ jump:
             ;; ( )  + - +
     then:
         move: 1 0
-        goto: stand
         delay: 2
+        goto: stand
 
     if:
         coll: all no
@@ -124,8 +145,8 @@ jump:
             ;; ( )
     then:
         move: 1 0
-        goto: jump
         delay: 2
+        goto: jump
 
     if:
     then:
