@@ -65,16 +65,15 @@ shapes:
             : "player_leg"  ( 2  1  1  1)  6 t
 
     "player_crawl_step":
-        animation: cycle 5
+        animation: cycle 3
         shapes:
-            : "player_head" (-1  0  2  1)  2 f  0 (0 2)
-            : "player_head" ( 0  0  2  1)  1 f  0 (2 1)
-            : "player_head" ( 0  1  2  0)  0 f  0 (3 1)
-            : "player_head" ( 0  1  2  0)  0 f  0 (4 1)
+            : "player_head" (-1  0  2  1)  1 f  0 (0 1)
+            : "player_head" ( 0  0  2  1)  1 f  0 (1 1)
+            : "player_head" ( 0  1  2  0)  1 f  0 (2 1)
             : "player_leg"  (-1  1  1  1)  0 f
-            : "player_leg"  ( 1  1  1  2)  7 t  0 (0 2)
-            : "player_leg"  ( 2  1  1  2)  7 t  0 (3 1)
-            : "player_leg"  ( 2  1  1  2)  6 t  0 (4 1)
+            : "player_leg"  ( 2  1  1  2)  7 t  0 (0 1)
+            : "player_leg"  ( 3  1  1  2)  6 t  0 (1 1)
+            : "player_leg"  ( 3  1  1  1)  6 t  0 (2 1)
 
     "player_dead":
         animation: oscillate 3

@@ -5,7 +5,7 @@ stand:
     if:
         key: isdown d
     then:
-        delay: 4
+        delay: 2
         goto: crawl
 
     if:
@@ -111,13 +111,13 @@ jump:
         move: 1 0
         rot: 1
         delay: 2
-        goto: stand
+        goto: step
 
     if:
         coll: all yes
             ;;        +
             ;;
-            ;; ( )
+            ;; ( )  +
     then:
         move: 1 0
         rot: 1
@@ -135,7 +135,7 @@ jump:
     then:
         move: 1 0
         delay: 2
-        goto: stand
+        goto: step
 
     if:
         coll: all no
@@ -174,6 +174,9 @@ crawl:
 
     if:
         key: isdown f
+        coll: all no
+            ;;     \
+            ;; ( )
         coll: all yes
             ;;        +
             ;;       /
@@ -181,7 +184,7 @@ crawl:
     then:
         move: 1 0
         rot: 1
-        delay: 4
+        delay: 2
         goto: crawl_step
 
     if:
@@ -189,11 +192,11 @@ crawl:
         coll: all yes
             ;; ( )  + - +
         coll: all no
-            ;;   . .*/*
+            ;;   . \*/*
             ;; (.). .
     then:
         move: 1 0
-        delay: 4
+        delay: 2
         goto: crawl_step
 
     if:
@@ -203,13 +206,13 @@ crawl:
             ;;       \
             ;;        +
         coll: all no
-            ;;   . .*/*
+            ;;   . \*/*
             ;; (.). . -
             ;;        *
     then:
         move: 1 0
         rot: -1
-        delay: 4
+        delay: 2
         goto: crawl_step
 
     if:
@@ -218,7 +221,7 @@ crawl:
         move: 1 0
         turn
         goto: crawl_step
-        delay: 4
+        delay: 2
 
 crawl_step:
     rgraph: "player_crawl_step"
