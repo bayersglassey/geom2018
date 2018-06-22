@@ -86,6 +86,8 @@ static int player_match_rule(player_t *player, hexgame_t *game,
             int key_i =
                 c == 'u'? PLAYER_KEY_U:
                 c == 'd'? PLAYER_KEY_D:
+                c == 'l'? PLAYER_KEY_L:
+                c == 'r'? PLAYER_KEY_R:
                 c == 'f'? (player->turn? PLAYER_KEY_L: PLAYER_KEY_R):
                 c == 'b'? (player->turn? PLAYER_KEY_R: PLAYER_KEY_L):
                 -1;

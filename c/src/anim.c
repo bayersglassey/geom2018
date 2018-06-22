@@ -142,9 +142,9 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     if(err)return err;
 
                     char c = name[0];
-                    if(!strchr("fbud", c)){
+                    if(!strchr("udlrfb", c)){
                         return fus_lexer_unexpected(lexer,
-                            "f or b or u or d");
+                            "u or d or l or r or f or b");
                     }
 
                     ARRAY_PUSH_NEW(state_cond_t, *rule, conds, cond)
