@@ -112,6 +112,9 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                 if(err)return err;
                 if(fus_lexer_got(lexer, ")")){
                     break;
+                }else if(fus_lexer_got(lexer, "false")){
+                    ARRAY_PUSH_NEW(state_cond_t, *rule, conds, cond)
+                    cond->type = state_cond_type_false;
                 }else if(fus_lexer_got(lexer, "key")){
                     err = fus_lexer_expect(lexer, "(");
                     if(err)return err;
@@ -287,9 +290,11 @@ state_t *stateset_get_state(stateset_t *stateset, const char *name){
  *********/
 
 
+const char state_cond_type_false[] = "false";
 const char state_cond_type_key[] = "key";
 const char state_cond_type_coll[] = "coll";
 const char *state_cond_types[] = {
+    state_cond_type_false,
     state_cond_type_key,
     state_cond_type_coll,
     NULL

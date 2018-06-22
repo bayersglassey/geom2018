@@ -70,7 +70,9 @@ static int player_match_rule(player_t *player, hexgame_t *game,
     for(int i = 0; i < rule->conds_len; i++){
         state_cond_t *cond = rule->conds[i];
         if(DEBUG_RULES)printf("  if: %s\n", cond->type);
-        if(cond->type == state_cond_type_key){
+        if(cond->type == state_cond_type_false){
+            rule_matched = false;
+        }else if(cond->type == state_cond_type_key){
 
             int kstate_i = cond->u.key.kstate;
             bool *kstate =

@@ -59,6 +59,7 @@ typedef struct state_cond {
     } u;
 } state_cond_t;
 
+extern const char state_cond_type_false[];
 extern const char state_cond_type_key[];
 extern const char state_cond_type_coll[];
 extern const char *state_cond_types[];
