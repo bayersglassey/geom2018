@@ -1,0 +1,38 @@
+
+shapes:
+
+    #########
+    # FLIER #
+    #########
+
+    "flier_born_sixth":
+        prismels:
+            : "tri" (0 0 0 0) 0 f 4
+            : "tri" (1 0 0 0) 2 f 5
+
+    "flier_born":
+        shapes:
+            : "flier_born_sixth" (0 0 0 0)  0 f
+            : "flier_born_sixth" (0 0 0 0)  2 f
+            : "flier_born_sixth" (0 0 0 0)  4 f
+            : "flier_born_sixth" (0 0 0 0)  6 f
+            : "flier_born_sixth" (0 0 0 0)  8 f
+            : "flier_born_sixth" (0 0 0 0) 10 f
+
+    "flier_head":
+        shapes:
+            : "dodeca" (0 0 0 0) 0 f
+        prismels:
+            : "sq"  (1 1 0 -1) 0 f 4
+            : "tri" (2 1 0 -1) 1 f 3
+
+    "flier":
+        shapes:
+            : "flier_head" (0 0 0 0) 0 f
+
+    "flier_fly":
+        animation: cycle 3
+        shapes:
+            : "flier_head" (-2 0 0 0) 0 f  0 (0 1)
+            : "flier_head" (-1 0 0 0) 0 f  0 (1 1)
+            : "flier_head" ( 0 0 0 0) 0 f  0 (2 1)
