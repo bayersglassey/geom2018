@@ -1,0 +1,64 @@
+
+stand:
+    rgraph: "roller"
+
+    if:
+        key: isdown u
+        key: isdown f
+        coll: all yes
+            ;; ( )  +
+    then:
+        move: 1 0
+        turn
+        delay: 1
+
+    if:
+        key: isdown f
+        coll: all no
+            ;; ( )-
+    then:
+        rot: -1
+        delay: 1
+
+    if:
+        key: isdown f
+        coll: all yes
+            ;; ( )  +
+    then:
+        move: 1 0
+        turn
+        delay: 1
+
+    if:
+        key: isdown u
+        key: isdown b
+        coll: all yes
+            ;;    +
+            ;;
+            ;; ( )
+    then:
+        move: 1 1
+        rot: 2
+        turn
+        delay: 1
+
+    if:
+        key: isdown b
+        coll: all no
+            ;;   /
+            ;; ( )
+    then:
+        rot: 1
+        delay: 1
+
+    if:
+        key: isdown b
+        coll: all yes
+            ;;    +
+            ;;
+            ;; ( )
+    then:
+        move: 1 1
+        rot: 2
+        turn
+        delay: 1

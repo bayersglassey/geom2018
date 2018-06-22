@@ -4,6 +4,11 @@ import "data/double.fus"
 import "data/curvy.fus"
 import "data/dodecas.fus"
 
+import "data/tiles.fus"
+import "data/player.fus"
+import "data/roller.fus"
+
+
 mappers:
 
     "double_double": map ("double") ("double")
@@ -42,6 +47,3 @@ shapes:
 
     "double_double_curvy_curvy_dodeca_B": map ("double_double_curvy_curvy") ("dodeca_B")
     "double_curvy_double_curvy_dodeca_B": map ("double_curvy_double_curvy") ("dodeca_B")
-
-import "data/tiles.fus"
-import "data/player.fus"
