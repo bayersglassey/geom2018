@@ -3,7 +3,22 @@ stand:
     rgraph: "roller"
 
     if:
-        key: isdown u
+        key: wentdown u
+        coll: all yes
+            ;;    .   +
+            ;;
+            ;; ( )  .
+        coll: all no
+            ;;    .
+            ;;     \*
+            ;; ( )  .
+    then:
+        move: 2 1
+        rot: 3
+        delay: 1
+
+    if:
+        key: not isdown d
         key: isdown f
         coll: all yes
             ;; ( )  +
@@ -30,7 +45,7 @@ stand:
         delay: 1
 
     if:
-        key: isdown u
+        key: not isdown d
         key: isdown b
         coll: all yes
             ;;    +
