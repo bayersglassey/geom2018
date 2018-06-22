@@ -3,7 +3,7 @@ stand:
     rgraph: "roller"
 
     if:
-        key: wentdown u
+        key: wasdown u
         coll: all yes
             ;;    .   +
             ;;
@@ -15,10 +15,12 @@ stand:
     then:
         move: 2 1
         rot: 3
+        goto: grab
         delay: 1
 
     if:
         key: not isdown d
+        key: not isdown b
         key: isdown f
         coll: all yes
             ;; ( )  +
@@ -28,6 +30,7 @@ stand:
         delay: 1
 
     if:
+        key: not isdown b
         key: isdown f
         coll: all no
             ;; ( )-
@@ -36,6 +39,7 @@ stand:
         delay: 1
 
     if:
+        key: not isdown b
         key: isdown f
         coll: all yes
             ;; ( )  +
@@ -46,6 +50,7 @@ stand:
 
     if:
         key: not isdown d
+        key: not isdown f
         key: isdown b
         coll: all yes
             ;;    +
@@ -58,6 +63,7 @@ stand:
         delay: 1
 
     if:
+        key: not isdown f
         key: isdown b
         coll: all no
             ;;   /
@@ -67,6 +73,7 @@ stand:
         delay: 1
 
     if:
+        key: not isdown f
         key: isdown b
         coll: all yes
             ;;    +
@@ -76,4 +83,13 @@ stand:
         move: 1 1
         rot: 2
         turn
+        delay: 1
+
+grab:
+    rgraph: "roller_grab"
+
+    if:
+        key: not isdown u
+    then:
+        goto: stand
         delay: 1

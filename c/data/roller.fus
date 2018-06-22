@@ -5,7 +5,7 @@ shapes:
     # ROLLER #
     ##########
 
-    "roller_body_third":
+    "_roller_body_third":
 
         prismels:
 
@@ -25,20 +25,24 @@ shapes:
             #         \ |
             #          -+
 
-            : "tri" ( 0 0 0 0)  0 f 3
-            : "tri" ( 0 0 0 0)  2 f 3
+            : "tri" ( 0 0 0 0)  0 f 4
+            : "tri" ( 0 0 0 0)  2 f 4
             : "sq"  (-1 0 1 0)  0 f 2
-            : "tri" (-1 0 1 1)  0 f 4
+            : "tri" (-1 0 1 1)  0 f 3
 
             : "tri" ( 0 0 1 0)  1 f 5
             : "sq"  ( 1 0 0 0)  1 f 4
             : "tri" ( 1 0 0 0) 11 f 5
 
+    "_roller_body":
+        shapes:
+            : "_roller_body_third" (0 0 0 0)  0 f
+            : "_roller_body_third" (0 0 0 0)  4 f
+            : "_roller_body_third" (0 0 0 0)  8 f
+
     "roller_body":
         shapes:
-            : "roller_body_third" (0 0 0 0)  0 f
-            : "roller_body_third" (0 0 0 0)  4 f
-            : "roller_body_third" (0 0 0 0)  8 f
+            : "_roller_body" (1 1 1 0) 0 f
 
     "roller_foot":
         prismels:
@@ -49,6 +53,12 @@ shapes:
 
     "roller":
         shapes:
-            : "roller_body" (1 1 1 0) 0 f
+            : "roller_body" (0 0 0 0) 0 f
             : "roller_foot" (0 0 0 0) 0 f
+
+    "roller_grab":
+        shapes:
+            : "roller_body" (0 0 0  0) 0 f
+            : "roller_body" (3 2 0 -1) 2 f
+            : "roller_foot" (0 0 0  0) 0 f
 
