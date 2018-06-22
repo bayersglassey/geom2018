@@ -33,14 +33,15 @@ typedef struct player {
     bool key_wasdown[PLAYER_KEYS];
     bool key_wentdown[PLAYER_KEYS];
 
+    stateset_t stateset;
     state_t *state;
     int frame_i;
     int cooldown;
-    bool dead;
 } player_t;
 
 void player_cleanup(player_t *player);
-int player_init(player_t *player, state_t *state, int keymap);
+int player_init(player_t *player, prismelrenderer_t *prend,
+    char *stateset_filename, int keymap);
 rot_t player_get_rot(player_t *player, const vecspace_t *space);
 
 struct hexgame;
@@ -53,15 +54,13 @@ int player_step(player_t *player, struct hexgame *game);
  ***********/
 
 typedef struct hexgame {
-    stateset_t *stateset;
     hexmap_t *map;
     ARRAY_DECL(player_t, players)
 } hexgame_t;
 
 
 void hexgame_cleanup(hexgame_t *game);
-int hexgame_init(hexgame_t *game, stateset_t *stateset, hexmap_t *map,
-    int n_players);
+int hexgame_init(hexgame_t *game, hexmap_t *map);
 int hexgame_process_event(hexgame_t *game, SDL_Event *event);
 int hexgame_step(hexgame_t *game);
 

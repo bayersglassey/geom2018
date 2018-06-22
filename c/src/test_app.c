@@ -5,6 +5,7 @@
 
 #include "test_app.h"
 #include "prismelrenderer.h"
+#include "array.h"
 #include "vec4.h"
 #include "font.h"
 #include "console.h"
@@ -20,7 +21,6 @@
 void test_app_cleanup(test_app_t *app){
     SDL_FreePalette(app->pal);
     prismelrenderer_cleanup(&app->prend);
-    stateset_cleanup(&app->stateset);
     hexmap_cleanup(&app->hexmap);
     hexgame_cleanup(&app->hexgame);
 }
@@ -81,17 +81,17 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         fprintf(stderr, "No rendergraphs in %s\n", app->prend_filename);
         return 2;}
 
-    err = stateset_init(&app->stateset);
-    if(err)return err;
-    err = stateset_load(&app->stateset, app->stateset_filename,
-        &app->prend, &hexspace);
-    if(err)return err;
-
     err = hexmap_load(&app->hexmap, &app->prend, app->hexmap_filename);
     if(err)return err;
 
-    err = hexgame_init(&app->hexgame, &app->stateset, &app->hexmap, 1);
+    err = hexgame_init(&app->hexgame, &app->hexmap);
     if(err)return err;
+
+    {
+        char *stateset_filename = strdup(app->stateset_filename);
+        ARRAY_PUSH_NEW(player_t, app->hexgame, players, player)
+        player_init(player, &app->prend, strdup(stateset_filename), 0);
+    }
 
     app->cur_rgraph_i = 0;
     app->x0 = 0;
@@ -130,11 +130,24 @@ int test_app_process_console_input(test_app_t *app){
         console_write_msg(&app->console, "Game started\n");
         SDL_StopTextInput();
         return 0;
+    }else if(fus_lexer_got(&lexer, "rem_players")){
+        ARRAY_FREE(player_t, app->hexgame, players, player_cleanup)
     }else if(fus_lexer_got(&lexer, "add_player")){
-        state_t *default_state = app->hexgame.stateset->states[0];
+        char *stateset_filename;
+
+        err = fus_lexer_next(&lexer);
+        if(err)goto lexer_err;
+        if(!fus_lexer_done(&lexer)){
+            err = fus_lexer_get_str(&lexer, &stateset_filename);
+            if(err)goto lexer_err;
+        }else{
+            stateset_filename = strdup(app->stateset_filename);
+        }
+
         int player_i = app->hexgame.players_len;
         ARRAY_PUSH_NEW(player_t, app->hexgame, players, player)
-        player_init(player, default_state, player_i);
+        err = player_init(player, &app->prend, stateset_filename, player_i);
+        if(err)return err;
     }else if(fus_lexer_got(&lexer, "save")){
         char *filename = NULL;
 

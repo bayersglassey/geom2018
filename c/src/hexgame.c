@@ -22,9 +22,14 @@
  **********/
 
 void player_cleanup(player_t *player){
+    stateset_cleanup(&player->stateset);
 }
 
-int player_init(player_t *player, state_t *state, int keymap){
+int player_init(player_t *player, prismelrenderer_t *prend,
+    char *stateset_filename, int keymap
+){
+    int err;
+
     for(int i = 0; i < PLAYER_KEYS; i++)player->key_code[i] = 0;
     if(keymap == 0){
         player->key_code[PLAYER_KEY_U] = SDLK_UP;
@@ -37,10 +42,14 @@ int player_init(player_t *player, state_t *state, int keymap){
         player->key_code[PLAYER_KEY_L] = SDLK_a;
         player->key_code[PLAYER_KEY_R] = SDLK_d;
     }
-    player->state = state;
+
+    err = stateset_load(&player->stateset, stateset_filename,
+        prend, &hexspace);
+    if(err)return err;
+
+    player->state = player->stateset.states[0];
     player->frame_i = 0;
     player->cooldown = 0;
-    player->dead = false;
     return 0;
 }
 
@@ -137,7 +146,7 @@ static int player_apply_rule(player_t *player, hexgame_t *game,
             player->turn = !player->turn;
             player->rot = rot_flip(space->rot_max, player->rot, true);
         }else if(effect->type == state_effect_type_goto){
-            state_t *state = stateset_get_state(game->stateset,
+            state_t *state = stateset_get_state(&player->stateset,
                 effect->u.goto_name);
             if(state == NULL){
                 fprintf(stderr, "Unrecognized player state: %s\n",
@@ -148,8 +157,6 @@ static int player_apply_rule(player_t *player, hexgame_t *game,
             player->frame_i = 0;
         }else if(effect->type == state_effect_type_delay){
             player->cooldown = effect->u.delay;
-        }else if(effect->type == state_effect_type_die){
-            player->dead = true;
         }else{
             fprintf(stderr, "Unrecognized state rule effect: %s\n",
                 effect->type);
@@ -161,8 +168,6 @@ static int player_apply_rule(player_t *player, hexgame_t *game,
 
 int player_step(player_t *player, hexgame_t *game){
     int err;
-
-    if(player->dead)return 0;
 
     player->frame_i++;
 
@@ -205,28 +210,20 @@ void hexgame_cleanup(hexgame_t *game){
     ARRAY_FREE(player_t, *game, players, player_cleanup)
 }
 
-int hexgame_init(hexgame_t *game, stateset_t *stateset, hexmap_t *map,
-    int n_players
-){
-    game->stateset = stateset;
+int hexgame_init(hexgame_t *game, hexmap_t *map){
     game->map = map;
     ARRAY_INIT(*game, players)
-
-    state_t *default_state = stateset->states[0];
-
-    for(int i = 0; i < n_players; i++){
-        ARRAY_PUSH_NEW(player_t, *game, players, player)
-        player_init(player, default_state, i);
-    }
-
     return 0;
 }
 
-int hexgame_reset_player(hexgame_t *game, player_t *player, int keymap){
-    player_cleanup(player);
-    memset(player, 0, sizeof(*player));
-    state_t *default_state = game->stateset->states[0];
-    return player_init(player, default_state, keymap);
+int hexgame_reset_player(hexgame_t *game, player_t *player){
+    vec_zero(game->map->collmap.space->dims, player->pos);
+    player->rot = 0;
+    player->turn = false;
+    player->state = player->stateset.states[0];
+    player->frame_i = 0;
+    player->cooldown = 0;
+    return 0;
 }
 
 int hexgame_process_event(hexgame_t *game, SDL_Event *event){
@@ -234,10 +231,10 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
         if(!event->key.repeat){
             if(event->key.keysym.sym == SDLK_1
                 && game->players_len >= 1){
-                    hexgame_reset_player(game, game->players[0], 0);}
+                    hexgame_reset_player(game, game->players[0]);}
             if(event->key.keysym.sym == SDLK_2
                 && game->players_len >= 2){
-                    hexgame_reset_player(game, game->players[1], 1);}
+                    hexgame_reset_player(game, game->players[1]);}
             for(int i = 0; i < game->players_len; i++){
                 player_t *player = game->players[i];
                 for(int i = 0; i < PLAYER_KEYS; i++){
@@ -282,8 +279,6 @@ int hexgame_render(hexgame_t *game, test_app_t *app){
 
     for(int i = 0; i < game->players_len; i++){
         player_t *player = game->players[i];
-
-        if(player->dead)continue;
 
         rendergraph_t *rgraph = player->state->rgraph;
 

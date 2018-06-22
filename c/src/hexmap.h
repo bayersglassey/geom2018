@@ -20,6 +20,7 @@ typedef struct hexcollmap {
     int h;
     int ox;
     int oy;
+    vecspace_t *space;
     hexcollmap_tile_t *tiles;
 } hexcollmap_t;
 
@@ -37,7 +38,7 @@ typedef struct hexmap {
 
 
 void hexcollmap_cleanup(hexcollmap_t *collmap);
-int hexcollmap_init(hexcollmap_t *collmap);
+int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space);
 void hexcollmap_dump(hexcollmap_t *collmap, FILE *f, int n_spaces);
 int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer);
 bool hexcollmap_collide(hexcollmap_t *map1, hexcollmap_t *map2,
@@ -45,7 +46,7 @@ bool hexcollmap_collide(hexcollmap_t *map1, hexcollmap_t *map2,
 
 
 void hexmap_cleanup(hexmap_t *map);
-int hexmap_init(hexmap_t *map, char *name,
+int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
     prismelrenderer_t *prend,
     prismelmapper_t *mapper,
     vec_t unit,

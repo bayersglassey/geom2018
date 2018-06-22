@@ -52,7 +52,9 @@ void hexcollmap_cleanup(hexcollmap_t *collmap){
     free(collmap->tiles);
 }
 
-int hexcollmap_init(hexcollmap_t *collmap){
+int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space){
+    memset(collmap, 0, sizeof(*collmap));
+    collmap->space = space;
     return 0;
 }
 
@@ -313,7 +315,7 @@ bool hexcollmap_collide(hexcollmap_t *map1, hexcollmap_t *map2,
     int oy2 = map2->oy;
     int w2 = map2->w;
     int h2 = map2->h;
-    const static vecspace_t *space = &hexspace;
+    vecspace_t *space = map1->space;
     if(DEBUG_COLLIDE)printf("COLLIDE: "
         "map1=%p[%i,%i,%i,%i] map2=%p[%i,%i,%i,%i] all=%c\n",
         map1, ox1, oy1, w1, h1, map2, ox2, oy2, w2, h2, all? 'y': 'n');
@@ -403,7 +405,7 @@ void hexmap_cleanup(hexmap_t *map){
     free(map->name);
 }
 
-int hexmap_init(hexmap_t *map, char *name,
+int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
     prismelrenderer_t *prend,
     prismelmapper_t *mapper,
     vec_t unit,
@@ -411,13 +413,15 @@ int hexmap_init(hexmap_t *map, char *name,
     rendergraph_t *rgraph_edge,
     rendergraph_t *rgraph_face
 ){
+    int err;
+
     map->name = name;
     map->prend = prend;
     map->mapper = mapper;
     vec_cpy(prend->space->dims, map->unit, unit);
 
-    /* map->collmap: ...we do nothing with this...
-    caller should load one ASAP */
+    err = hexcollmap_init(&map->collmap, space);
+    if(err)return err;
 
     map->rgraph_vert = rgraph_vert;
     map->rgraph_edge = rgraph_edge;
@@ -509,7 +513,7 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
     fus_lexer_t *lexer
 ){
     int err;
-    static const vecspace_t *space = &hexspace;
+    vecspace_t *space = &hexspace;
     prismelmapper_t *mapper = NULL;
 
     err = fus_lexer_next(lexer);
@@ -578,7 +582,7 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
 
 
     /* home stretch! init the map */
-    err = hexmap_init(map, name, prend, mapper, unit,
+    err = hexmap_init(map, name, space, prend, mapper, unit,
         rgraph_vert, rgraph_edge, rgraph_face);
     if(err)return err;
 

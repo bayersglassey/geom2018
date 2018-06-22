@@ -12,7 +12,7 @@ int mainloop(){
 
     stateset_t stateset;
     const char *stateset_filename = "data/anim.fus";
-    err = stateset_load(&stateset, stateset_filename, &hexspace);
+    err = stateset_load(&stateset, strdup(stateset_filename), &hexspace);
     if(err)return err;
 
     stateset_dump(&stateset, stdout);

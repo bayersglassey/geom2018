@@ -18,6 +18,7 @@ typedef struct state {
 } state_t;
 
 typedef struct stateset {
+    char *filename;
     ARRAY_DECL(struct state, states)
 } stateset_t;
 
@@ -81,16 +82,15 @@ extern const char state_effect_type_rot[];
 extern const char state_effect_type_turn[];
 extern const char state_effect_type_goto[];
 extern const char state_effect_type_delay[];
-extern const char state_effect_type_die[];
 extern const char *state_effect_types[];
 
 
 
 
 void stateset_cleanup(stateset_t *stateset);
-int stateset_init(stateset_t *stateset);
+int stateset_init(stateset_t *stateset, char *filename);
 void stateset_dump(stateset_t *stateset, FILE *f);
-int stateset_load(stateset_t *stateset, const char *filename,
+int stateset_load(stateset_t *stateset, char *filename,
     prismelrenderer_t *prend, vecspace_t *space);
 int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
     prismelrenderer_t *prend, vecspace_t *space);

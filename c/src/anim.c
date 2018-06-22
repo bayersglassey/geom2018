@@ -17,10 +17,12 @@
  ************/
 
 void stateset_cleanup(stateset_t *stateset){
+    free(stateset->filename);
     ARRAY_FREE(state_t, *stateset, states, state_cleanup)
 }
 
-int stateset_init(stateset_t *stateset){
+int stateset_init(stateset_t *stateset, char *filename){
+    stateset->filename = filename;
     ARRAY_INIT(*stateset, states)
     return 0;
 }
@@ -33,7 +35,7 @@ void stateset_dump(stateset_t *stateset, FILE *f){
     }
 }
 
-int stateset_load(stateset_t *stateset, const char *filename,
+int stateset_load(stateset_t *stateset, char *filename,
     prismelrenderer_t *prend, vecspace_t *space
 ){
     int err;
@@ -45,7 +47,7 @@ int stateset_load(stateset_t *stateset, const char *filename,
     err = fus_lexer_init(&lexer, text, filename);
     if(err)return err;
 
-    err = stateset_init(stateset);
+    err = stateset_init(stateset, filename);
     if(err)return err;
 
     err = stateset_parse(stateset, &lexer, prend, space);
@@ -174,7 +176,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
 
                     hexcollmap_t *collmap = calloc(1, sizeof(*collmap));
                     if(collmap == NULL)return 1;
-                    err = hexcollmap_init(collmap);
+                    err = hexcollmap_init(collmap, space);
                     if(err)return err;
                     err = hexcollmap_parse(collmap, lexer);
                     if(err)return err;
@@ -261,9 +263,6 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
 
                     err = fus_lexer_expect(lexer, ")");
                     if(err)return err;
-                }else if(fus_lexer_got(lexer, "die")){
-                    ARRAY_PUSH_NEW(state_effect_t, *rule, effects, effect)
-                    effect->type = state_effect_type_die;
                 }else{
                     return fus_lexer_unexpected(lexer, NULL);
                 }
@@ -303,7 +302,6 @@ const char state_effect_type_rot[] = "rot";
 const char state_effect_type_turn[] = "turn";
 const char state_effect_type_goto[] = "goto";
 const char state_effect_type_delay[] = "delay";
-const char state_effect_type_die[] = "die";
 const char *state_effect_types[] = {
     state_effect_type_print,
     state_effect_type_move,
@@ -311,7 +309,6 @@ const char *state_effect_types[] = {
     state_effect_type_turn,
     state_effect_type_goto,
     state_effect_type_delay,
-    state_effect_type_die,
     NULL
 };
 
@@ -403,8 +400,6 @@ void state_dump(state_t *state, FILE *f, int n_spaces){
                 fprintf(f, "\n");
             }else if(effect->type == state_effect_type_goto){
                 fprintf(f, ": %s\n", effect->u.goto_name);
-            }else if(effect->type == state_effect_type_die){
-                fprintf(f, "\n");
             }else{
                 fprintf(f, "\n");
             }
