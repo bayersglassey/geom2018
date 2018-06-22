@@ -11,7 +11,7 @@ int mainloop(){
     int err;
 
     stateset_t stateset;
-    const char *stateset_filename = "data/anim.fus";
+    const char *stateset_filename = "anim/player.fus";
     err = stateset_load(&stateset, strdup(stateset_filename), &hexspace);
     if(err)return err;
 
