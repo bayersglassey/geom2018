@@ -1,0 +1,80 @@
+
+stand:
+    rgraph: "roller2"
+
+    #    + - +
+    #   /   /
+    # (+)- +
+
+    if:
+        key: isdown f
+        key: not isdown b
+        coll: all yes
+            ;; ( )  +
+    then:
+        move: 1 0
+        rot: 1
+        goto: stand_flipped
+        delay: 1
+
+    if:
+        key: isdown f
+        key: not isdown b
+        coll: all no
+            ;;       /*
+            ;; ( )- + -
+            ;;    */*\*
+    then:
+        rot: -1
+        delay: 1
+
+    if:
+        key: isdown b
+        key: not isdown f
+    then:
+        turn
+        rot: 2
+        delay: 1
+
+
+stand_flipped:
+    rgraph: "roller2_flipped"
+
+    # + - +
+    #  \   \
+    #  (+)- +
+
+    if:
+        key: isdown d
+    then:
+        goto: crawl
+        delay: 1
+
+    if:
+        key: isdown f
+        key: not isdown b
+        coll: all yes
+            ;; ( )  +
+    then:
+        move: 1 0
+        rot: 2
+        goto: stand
+        delay: 1
+
+    if:
+        key: isdown f
+        key: not isdown b
+        coll: all no
+            ;; ( )-
+            ;;    *
+    then:
+        rot: -1
+        delay: 1
+
+    if:
+        key: isdown b
+        key: not isdown f
+    then:
+        turn
+        rot: 1
+        delay: 1
