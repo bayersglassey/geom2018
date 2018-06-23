@@ -304,21 +304,21 @@ void hexcollmap_normalize_face(trf_t *index){
     }
 }
 
-bool hexcollmap_collide(hexcollmap_t *map1, hexcollmap_t *map2,
+bool hexcollmap_collide(hexcollmap_t *collmap1, hexcollmap_t *collmap2,
     trf_t *trf, bool all
 ){
-    int ox1 = map1->ox;
-    int oy1 = map1->oy;
-    int w1 = map1->w;
-    int h1 = map1->h;
-    int ox2 = map2->ox;
-    int oy2 = map2->oy;
-    int w2 = map2->w;
-    int h2 = map2->h;
-    vecspace_t *space = map1->space;
+    int ox1 = collmap1->ox;
+    int oy1 = collmap1->oy;
+    int w1 = collmap1->w;
+    int h1 = collmap1->h;
+    int ox2 = collmap2->ox;
+    int oy2 = collmap2->oy;
+    int w2 = collmap2->w;
+    int h2 = collmap2->h;
+    vecspace_t *space = collmap1->space;
     if(DEBUG_COLLIDE)printf("COLLIDE: "
-        "map1=%p[%i,%i,%i,%i] map2=%p[%i,%i,%i,%i] all=%c\n",
-        map1, ox1, oy1, w1, h1, map2, ox2, oy2, w2, h2, all? 'y': 'n');
+        "collmap1=%p[%i,%i,%i,%i] collmap2=%p[%i,%i,%i,%i] all=%c\n",
+        collmap1, ox1, oy1, w1, h1, collmap2, ox2, oy2, w2, h2, all? 'y': 'n');
     if(DEBUG_COLLIDE)printf("  trf = (%i %i) %i %c\n",
         trf->add[0], trf->add[1],
         trf->rot, trf->flip? 'y': 'n');
@@ -328,7 +328,8 @@ bool hexcollmap_collide(hexcollmap_t *map1, hexcollmap_t *map2,
 
     for(int y2 = 0; y2 < h2; y2++){
         for(int x2 = 0; x2 < w2; x2++){
-            hexcollmap_tile_t *tile2 = &map2->tiles[y2 * w2 + x2];
+            hexcollmap_tile_t *tile2 = &collmap2->tiles[y2 * w2 + x2];
+
             if(DEBUG_COLLIDE)printf("    (%i, %i):\n", x2, y2);
             #define COLLIDE(PART, ROT) \
                 for(int r2 = 0; r2 < ROT; r2++){ \
@@ -374,7 +375,7 @@ bool hexcollmap_collide(hexcollmap_t *map1, hexcollmap_t *map2,
                         goto nocoll_##PART;} \
                     \
                     hexcollmap_tile_t *tile1 = \
-                        &map1->tiles[y1 * w1 + x1]; \
+                        &collmap1->tiles[y1 * w1 + x1]; \
                     bool collide = tile1->PART[r1]; \
                     if(collide){ \
                         if(DEBUG_COLLIDE)printf("        HIT\n"); \
@@ -403,6 +404,7 @@ bool hexcollmap_collide(hexcollmap_t *map1, hexcollmap_t *map2,
 
 void hexmap_cleanup(hexmap_t *map){
     free(map->name);
+    ARRAY_FREE(hexmap_submap_t, *map, submaps, hexmap_submap_cleanup)
 }
 
 int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
@@ -416,77 +418,16 @@ int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
     int err;
 
     map->name = name;
+    map->space = space;
     map->prend = prend;
     map->mapper = mapper;
     vec_cpy(prend->space->dims, map->unit, unit);
 
-    err = hexcollmap_init(&map->collmap, space);
-    if(err)return err;
+    ARRAY_INIT(*map, submaps)
 
     map->rgraph_vert = rgraph_vert;
     map->rgraph_edge = rgraph_edge;
     map->rgraph_face = rgraph_face;
-    map->rgraph_map = NULL;
-    return 0;
-}
-
-static int add_tile_rgraph(rendergraph_t *rgraph, rendergraph_t *rgraph2,
-    vecspace_t *space, vec_t add, rot_t rot
-){
-    int err;
-    rendergraph_trf_t *rendergraph_trf;
-    err = rendergraph_push_rendergraph_trf(rgraph, &rendergraph_trf);
-    if(err)return err;
-    rendergraph_trf->rendergraph = rgraph2;
-    rendergraph_trf->trf.rot = rot;
-    vec_cpy(space->dims, rendergraph_trf->trf.add, add);
-    return 0;
-}
-
-int hexmap_create_rgraph(hexmap_t *map, rendergraph_t **rgraph_ptr){
-    int err;
-
-    prismelrenderer_t *prend = map->prend;
-    vecspace_t *space = prend->space;
-    hexcollmap_t *collmap = &map->collmap;
-
-    ARRAY_PUSH_NEW(rendergraph_t, *prend, rendergraphs, rgraph)
-    err = rendergraph_init(rgraph, strdup(map->name), space,
-        rendergraph_animation_type_default,
-        rendergraph_n_frames_default);
-    if(err)return err;
-
-    for(int y = 0; y < collmap->h; y++){
-        for(int x = 0; x < collmap->w; x++){
-            int px = x - collmap->ox;
-            int py = y - collmap->oy;
-
-            vec_t v;
-            vec4_set(v, px + py, 0, -py, 0);
-            vec_mul(space, v, map->unit);
-
-            hexcollmap_tile_t *tile =
-                &collmap->tiles[y * collmap->w + x];
-
-            for(int i = 0; i < 1; i++){
-                if(tile->vert[i]){
-                    err = add_tile_rgraph(rgraph, map->rgraph_vert,
-                        space, v, i * 2);
-                    if(err)return err;}}
-            for(int i = 0; i < 3; i++){
-                if(tile->edge[i]){
-                    err = add_tile_rgraph(rgraph, map->rgraph_edge,
-                        space, v, i * 2);
-                    if(err)return err;}}
-            for(int i = 0; i < 2; i++){
-                if(tile->face[i]){
-                    err = add_tile_rgraph(rgraph, map->rgraph_face,
-                        space, v, i * 2);
-                    if(err)return err;}}
-        }
-    }
-
-    *rgraph_ptr = rgraph;
     return 0;
 }
 
@@ -514,6 +455,11 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
 ){
     int err;
     vecspace_t *space = &hexspace;
+        /* hexmap's space is always hexspace. we will pass it
+        to hexmap_init below, instead of just settings it here,
+        which would probably make more sense.
+        But ultimately we should really just move the call to
+        hexmap_init out of hexmap_parse into hexmap_load. SO DO THAT */
     prismelmapper_t *mapper = NULL;
 
     err = fus_lexer_next(lexer);
@@ -586,21 +532,188 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
         rgraph_vert, rgraph_edge, rgraph_face);
     if(err)return err;
 
+    /* parse submaps */
+    err = fus_lexer_expect(lexer, "submaps");
+    if(err)return err;
+    err = fus_lexer_expect(lexer, "(");
+    if(err)return err;
+    while(1){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+
+        if(fus_lexer_got(lexer, ")"))break;
+
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        {
+            char *submap_filename;
+            err = fus_lexer_expect_str(lexer, &submap_filename);
+            if(err)return err;
+
+            vec_t pos;
+            err = fus_lexer_expect(lexer, "(");
+            if(err)return err;
+            for(int i = 0; i < space->dims; i++){
+                err = fus_lexer_expect_int(lexer, &pos[i]);
+                if(err)return err;
+            }
+            err = fus_lexer_expect(lexer, ")");
+            if(err)return err;
+
+            ARRAY_PUSH_NEW(hexmap_submap_t, *map, submaps, submap)
+            err = hexmap_submap_load(map, submap, submap_filename, pos);
+            if(err)return err;
+        }
+        err = fus_lexer_expect(lexer, ")");
+        if(err)return err;
+    }
+
+    /* pheeew */
+    return 0;
+}
+
+bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
+    trf_t *trf, bool all
+){
+    bool collide = all? true: false;
+    for(int i = 0; i < map->submaps_len; i++){
+        hexmap_submap_t *submap = map->submaps[i];
+        hexcollmap_t *collmap1 = &submap->collmap;
+
+        trf_t subtrf = *trf;
+        vec_sub(map->space->dims, subtrf.add, submap->pos);
+
+        collide = hexcollmap_collide(collmap1, collmap2, &subtrf, all);
+        if(all && !collide)break;
+        if(!all && collide)break;
+    }
+    return collide;
+}
+
+
+
+
+void hexmap_submap_cleanup(hexmap_submap_t *submap){
+    free(submap->filename);
+    hexcollmap_cleanup(&submap->collmap);
+}
+
+int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
+    char *filename, vec_t pos
+){
+    int err;
+
+    submap->filename = filename;
+    vec_cpy(MAX_VEC_DIMS, submap->pos, pos);
+
+    err = hexcollmap_init(&submap->collmap, map->space);
+    if(err)return err;
+
+    submap->rgraph_map = NULL;
+
+    return 0;
+}
+
+int hexmap_submap_load(hexmap_t *map, hexmap_submap_t *submap,
+    const char *filename, vec_t pos
+){
+    int err;
+    fus_lexer_t lexer;
+
+    char *text = load_file(filename);
+    if(text == NULL)return 1;
+
+    err = fus_lexer_init(&lexer, text, filename);
+    if(err)return err;
+
+    err = hexmap_submap_init(map, submap, strdup(filename), pos);
+    if(err)return err;
+    err = hexmap_submap_parse(map, submap, &lexer);
+    if(err)return err;
+
+    free(text);
+    return 0;
+}
+
+int hexmap_submap_parse(hexmap_t *map, hexmap_submap_t *submap,
+    fus_lexer_t *lexer
+){
+    int err;
+
     /* parse collmap */
     err = fus_lexer_expect(lexer, "collmap");
     if(err)return err;
     err = fus_lexer_expect(lexer, "(");
     if(err)return err;
-    err = hexcollmap_parse(&map->collmap, lexer);
+    err = hexcollmap_parse(&submap->collmap, lexer);
     if(err)return err;
     err = fus_lexer_get(lexer, ")");
     if(err)return err;
 
     /* render rgraph_map */
-    err = hexmap_create_rgraph(map, &map->rgraph_map);
+    err = hexmap_submap_create_rgraph(map, submap);
     if(err)return err;
 
-    /* pheeew */
+    return 0;
+}
+
+static int add_tile_rgraph(rendergraph_t *rgraph, rendergraph_t *rgraph2,
+    vecspace_t *space, vec_t add, rot_t rot
+){
+    int err;
+    rendergraph_trf_t *rendergraph_trf;
+    err = rendergraph_push_rendergraph_trf(rgraph, &rendergraph_trf);
+    if(err)return err;
+    rendergraph_trf->rendergraph = rgraph2;
+    rendergraph_trf->trf.rot = rot;
+    vec_cpy(space->dims, rendergraph_trf->trf.add, add);
+    return 0;
+}
+
+int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap){
+    int err;
+
+    prismelrenderer_t *prend = map->prend;
+    vecspace_t *space = prend->space;
+    hexcollmap_t *collmap = &submap->collmap;
+
+    ARRAY_PUSH_NEW(rendergraph_t, *prend, rendergraphs, rgraph)
+    err = rendergraph_init(rgraph, strdup(map->name), space,
+        rendergraph_animation_type_default,
+        rendergraph_n_frames_default);
+    if(err)return err;
+
+    for(int y = 0; y < collmap->h; y++){
+        for(int x = 0; x < collmap->w; x++){
+            int px = x - collmap->ox;
+            int py = y - collmap->oy;
+
+            vec_t v;
+            vec4_set(v, px + py, 0, -py, 0);
+            vec_mul(space, v, map->unit);
+
+            hexcollmap_tile_t *tile =
+                &collmap->tiles[y * collmap->w + x];
+
+            for(int i = 0; i < 1; i++){
+                if(tile->vert[i]){
+                    err = add_tile_rgraph(rgraph, map->rgraph_vert,
+                        space, v, i * 2);
+                    if(err)return err;}}
+            for(int i = 0; i < 3; i++){
+                if(tile->edge[i]){
+                    err = add_tile_rgraph(rgraph, map->rgraph_edge,
+                        space, v, i * 2);
+                    if(err)return err;}}
+            for(int i = 0; i < 2; i++){
+                if(tile->face[i]){
+                    err = add_tile_rgraph(rgraph, map->rgraph_face,
+                        space, v, i * 2);
+                    if(err)return err;}}
+        }
+    }
+
+    submap->rgraph_map = rgraph;
     return 0;
 }
 

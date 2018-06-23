@@ -109,7 +109,7 @@ static int player_match_rule(player_t *player, hexgame_t *game,
             bool all = flags & 1;
             bool yes = flags & 2;
 
-            bool collide = hexcollmap_collide(&game->map->collmap,
+            bool collide = hexmap_collide(game->map,
                 cond->u.coll.collmap, &trf, yes? all: !all);
             rule_matched = yes? collide: !collide;
         }else{
@@ -221,7 +221,7 @@ int hexgame_init(hexgame_t *game, hexmap_t *map){
 }
 
 int hexgame_reset_player(hexgame_t *game, player_t *player){
-    vec_zero(game->map->collmap.space->dims, player->pos);
+    vec_zero(game->map->space->dims, player->pos);
     player->rot = 0;
     player->turn = false;
     player->state = player->stateset.states[0];
@@ -274,28 +274,36 @@ int hexgame_render(hexgame_t *game, test_app_t *app){
         30, 50, 80, 255));
     RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
 
-    rendergraph_t *rgraph = game->map->rgraph_map;
-    err = test_app_blit_rgraph(app, game->map->rgraph_map,
-        (vec_t){0}, app->rot, false, app->frame_i, game->map->mapper);
-    if(err)return err;
+    hexmap_t *map = game->map;
+    for(int i = 0; i < map->submaps_len; i++){
+        hexmap_submap_t *submap = map->submaps[i];
+        rendergraph_t *rgraph = submap->rgraph_map;
+
+        vec_t pos;
+        vec4_vec_from_hexspace(pos, submap->pos);
+        vec_mul(rgraph->space, pos, game->map->unit);
+
+        err = test_app_blit_rgraph(app, rgraph, pos, app->rot, false,
+            app->frame_i, game->map->mapper);
+        if(err)return err;
+    }
 
     vecspace_t *space = &hexspace;
 
     for(int i = 0; i < game->players_len; i++){
         player_t *player = game->players[i];
-
         rendergraph_t *rgraph = player->state->rgraph;
 
         vec_t pos;
         vec4_vec_from_hexspace(pos, player->pos);
-        vec_mul(rgraph->space, pos, game->map->unit);
+        vec_mul(rgraph->space, pos, map->unit);
         rot_t player_rot = player_get_rot(player, space);
         rot_t rot = vec4_rot_from_hexspace(player_rot);
         flip_t flip = player->turn;
         int frame_i = player->frame_i;
 
         err = test_app_blit_rgraph(app, rgraph, pos, rot, flip, frame_i,
-            game->map->mapper);
+            map->mapper);
         if(err)return err;
     }
 

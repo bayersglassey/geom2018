@@ -1,9 +1,4 @@
 
-unit: 3 2 0 -1
-vert: "map_vert"
-edge: "map_edge"
-face: "map_face"
-
 collmap:
     ;;                     + - +
     ;;                    /     \
