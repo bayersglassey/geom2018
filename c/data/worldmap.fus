@@ -6,7 +6,7 @@ edge: "map_edge"
 face: "map_face"
 
 submaps:
-    #: "data/map2.fus" (1 10)
+    : "data/map2.fus" (1 10)
     : "data/map3.fus" (0 0)
     : "data/map1.fus" (-1 -10)
 

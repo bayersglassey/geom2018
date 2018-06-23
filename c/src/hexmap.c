@@ -302,78 +302,29 @@ void hexcollmap_normalize_face(trf_t *index){
     }
 }
 
-hexcollmap_tile_t *hexcollmap_get_tile(hexcollmap_t *collmap, trf_t index){
-    int x = collmap->ox + index.add[0];
-    int y = collmap->oy + index.add[1];
+hexcollmap_tile_t *hexcollmap_get_tile(hexcollmap_t *collmap, trf_t *index){
+    int x = collmap->ox + index->add[0];
+    int y = collmap->oy + index->add[1];
     if(x < 0 || x >= collmap->w || y < 0 || y >= collmap->h)return NULL;
     return &collmap->tiles[y * collmap->w + x];
 }
 
-bool hexcollmap_get_vert(hexcollmap_t *collmap, trf_t index){
+bool hexcollmap_get_vert(hexcollmap_t *collmap, trf_t *index){
     hexcollmap_tile_t *tile = hexcollmap_get_tile(collmap, index);
     if(tile == NULL)return false;
-    return tile->vert[index.rot];
+    return tile->vert[index->rot];
 }
 
-bool hexcollmap_get_edge(hexcollmap_t *collmap, trf_t index){
+bool hexcollmap_get_edge(hexcollmap_t *collmap, trf_t *index){
     hexcollmap_tile_t *tile = hexcollmap_get_tile(collmap, index);
     if(tile == NULL)return false;
-    return tile->edge[index.rot];
+    return tile->edge[index->rot];
 }
 
-bool hexcollmap_get_face(hexcollmap_t *collmap, trf_t index){
+bool hexcollmap_get_face(hexcollmap_t *collmap, trf_t *index){
     hexcollmap_tile_t *tile = hexcollmap_get_tile(collmap, index);
     if(tile == NULL)return false;
-    return tile->face[index.rot];
-}
-
-bool hexcollmap_collide(hexcollmap_t *collmap1, hexcollmap_t *collmap2,
-    trf_t *trf, bool all
-){
-    int ox2 = collmap2->ox;
-    int oy2 = collmap2->oy;
-    int w2 = collmap2->w;
-    int h2 = collmap2->h;
-
-    vecspace_t *space = collmap2->space;
-
-    /* NOTE: for tile coords (ox, oy, x, y, w, h),
-    Y is reversed (down is positive, up is negative) */
-
-    for(int y2 = 0; y2 < h2; y2++){
-        for(int x2 = 0; x2 < w2; x2++){
-            hexcollmap_tile_t *tile2 = &collmap2->tiles[y2 * w2 + x2];
-
-            #define COLLIDE(PART, ROT) \
-                for(int r2 = 0; r2 < ROT; r2++){ \
-                    if(!tile2->PART[r2])continue; \
-                    trf_t index; \
-                    hexspace_set(index.add, x2 - ox2, y2 - oy2); \
-                    index.rot = r2; \
-                    index.flip = false; \
-                    \
-                    /* And now, because we were fools and defined */ \
-                    /* the tile coords such that their Y is flipped */ \
-                    /* compared to vecspaces, we need to flip that Y */ \
-                    /* before calling trf_apply and then flip it back */ \
-                    /* again: */ \
-                    index.add[1] = -index.add[1]; \
-                    trf_apply(space, &index, trf); \
-                    index.add[1] = -index.add[1]; \
-                    hexcollmap_normalize_##PART(&index); \
-                    \
-                    bool collide = hexcollmap_get_##PART(collmap1, index); \
-                    if(all && !collide)return false; \
-                    if(!all && collide)return true; \
-                }
-            COLLIDE(vert, 1)
-            COLLIDE(edge, 3)
-            COLLIDE(face, 2)
-            #undef COLLIDE
-        }
-    }
-    if(all)return true;
-    else return false;
+    return tile->face[index->rot];
 }
 
 
@@ -556,19 +507,66 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
 bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf, bool all
 ){
-    bool collide = all? true: false;
-    for(int i = 0; i < map->submaps_len; i++){
-        hexmap_submap_t *submap = map->submaps[i];
-        hexcollmap_t *collmap1 = &submap->collmap;
+    int ox2 = collmap2->ox;
+    int oy2 = collmap2->oy;
+    int w2 = collmap2->w;
+    int h2 = collmap2->h;
 
-        trf_t subtrf = *trf;
-        vec_sub(map->space->dims, subtrf.add, submap->pos);
+    vecspace_t *space = map->space;
 
-        collide = hexcollmap_collide(collmap1, collmap2, &subtrf, all);
-        if(all && !collide)break;
-        if(!all && collide)break;
+    /* NOTE: for tile coords (ox, oy, x, y, w, h),
+    Y is reversed (down is positive, up is negative) */
+
+    for(int y2 = 0; y2 < h2; y2++){
+        for(int x2 = 0; x2 < w2; x2++){
+            hexcollmap_tile_t *tile2 = &collmap2->tiles[y2 * w2 + x2];
+
+            #define COLLIDE(PART, ROT) \
+                for(int r2 = 0; r2 < ROT; r2++){ \
+                    if(!tile2->PART[r2])continue; \
+                    trf_t index; \
+                    hexspace_set(index.add, x2 - ox2, y2 - oy2); \
+                    index.rot = r2; \
+                    index.flip = false; \
+                    \
+                    /* And now, because we were fools and defined */ \
+                    /* the tile coords such that their Y is flipped */ \
+                    /* compared to vecspaces, we need to flip that Y */ \
+                    /* before calling trf_apply and then flip it back */ \
+                    /* again: */ \
+                    index.add[1] = -index.add[1]; \
+                    trf_apply(space, &index, trf); \
+                    index.add[1] = -index.add[1]; \
+                    hexcollmap_normalize_##PART(&index); \
+                    \
+                    bool collide = false; \
+                    for(int i = 0; i < map->submaps_len; i++){ \
+                        hexmap_submap_t *submap = map->submaps[i]; \
+                        hexcollmap_t *collmap1 = &submap->collmap; \
+                        \
+                        trf_t subindex; \
+                        hexspace_set(subindex.add, \
+                            index.add[0] - submap->pos[0], \
+                            index.add[1] + submap->pos[1]); \
+                        subindex.rot = index.rot; \
+                        subindex.flip = index.flip; \
+                        \
+                        bool subcollide = hexcollmap_get_##PART(collmap1, \
+                            &subindex); \
+                        if(subcollide){ \
+                            collide = true; break;} \
+                    } \
+                    if(all && !collide)return false; \
+                    if(!all && collide)return true; \
+                }
+            COLLIDE(vert, 1)
+            COLLIDE(edge, 3)
+            COLLIDE(face, 2)
+            #undef COLLIDE
+        }
     }
-    return collide;
+    if(all)return true;
+    else return false;
 }
 
 
