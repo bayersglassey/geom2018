@@ -34,6 +34,7 @@ stand:
         key: isdown f
         coll: all no
             ;; ( )-
+            ;;    *
     then:
         rot: -1
         delay: 1
@@ -66,7 +67,7 @@ stand:
         key: not isdown f
         key: isdown b
         coll: all no
-            ;;   /
+            ;;  */
             ;; ( )
     then:
         rot: 1
