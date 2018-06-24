@@ -459,12 +459,54 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
     #undef GET_RGRAPH
 
 
-    /* home stretch! init the map */
+    /* init the map */
     err = hexmap_init(map, name, space, prend, mapper, unit,
         rgraph_vert, rgraph_edge, rgraph_face);
     if(err)return err;
 
-    /* parse submaps */
+    /* parse areas & submaps */
+    err = fus_lexer_expect(lexer, "areas");
+    if(err)return err;
+    err = fus_lexer_expect(lexer, "(");
+    if(err)return err;
+    while(1){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        if(fus_lexer_got(lexer, ")"))break;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = hexmap_parse_area(map, lexer);
+        if(err)return err;
+        err = fus_lexer_expect(lexer, ")");
+        if(err)return err;
+    }
+
+    /* pheeew */
+    return 0;
+}
+
+int hexmap_parse_area(hexmap_t *map, fus_lexer_t *lexer){
+    int err;
+    vecspace_t *space = map->space;
+
+    vec_t camera_pos;
+    err = fus_lexer_expect(lexer, "camera");
+    if(err)return err;
+    err = fus_lexer_expect(lexer, "(");
+    if(err)return err;
+    {
+        err = fus_lexer_expect(lexer, "(");
+        if(err)return err;
+        for(int i = 0; i < space->dims; i++){
+            err = fus_lexer_expect_int(lexer, &camera_pos[i]);
+            if(err)return err;
+        }
+        err = fus_lexer_expect(lexer, ")");
+        if(err)return err;
+    }
+    err = fus_lexer_expect(lexer, ")");
+    if(err)return err;
+
     err = fus_lexer_expect(lexer, "submaps");
     if(err)return err;
     err = fus_lexer_expect(lexer, "(");
@@ -517,12 +559,12 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
             }
 
             ARRAY_PUSH_NEW(hexmap_submap_t, *map, submaps, submap)
-            err = hexmap_submap_load(map, submap, submap_filename, pos);
+            err = hexmap_submap_load(map, submap, submap_filename, pos,
+                camera_pos);
             if(err)return err;
         }
     }
 
-    /* pheeew */
     return 0;
 }
 
@@ -600,12 +642,13 @@ void hexmap_submap_cleanup(hexmap_submap_t *submap){
 }
 
 int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
-    char *filename, vec_t pos
+    char *filename, vec_t pos, vec_t camera_pos
 ){
     int err;
 
     submap->filename = filename;
     vec_cpy(MAX_VEC_DIMS, submap->pos, pos);
+    vec_cpy(MAX_VEC_DIMS, submap->camera_pos, camera_pos);
 
     err = hexcollmap_init(&submap->collmap, map->space);
     if(err)return err;
@@ -616,7 +659,7 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
 }
 
 int hexmap_submap_load(hexmap_t *map, hexmap_submap_t *submap,
-    const char *filename, vec_t pos
+    const char *filename, vec_t pos, vec_t camera_pos
 ){
     int err;
     fus_lexer_t lexer;
@@ -627,7 +670,8 @@ int hexmap_submap_load(hexmap_t *map, hexmap_submap_t *submap,
     err = fus_lexer_init(&lexer, text, filename);
     if(err)return err;
 
-    err = hexmap_submap_init(map, submap, strdup(filename), pos);
+    err = hexmap_submap_init(map, submap, strdup(filename), pos,
+        camera_pos);
     if(err)return err;
     err = hexmap_submap_parse(map, submap, &lexer);
     if(err)return err;

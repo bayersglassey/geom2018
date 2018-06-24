@@ -64,4 +64,5 @@ worldmap.fus:
     Need to group submaps into "areas" (or whatever it'll be called)
     which share a camera position.
 
+add fus_lexer_get_vec, which gets "(x y) * n + (x y) * n + ..."
 

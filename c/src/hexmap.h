@@ -26,6 +26,7 @@ typedef struct hexcollmap {
 
 typedef struct hexmap_submap {
     vec_t pos;
+    vec_t camera_pos;
     char *filename;
     hexcollmap_t collmap;
     rendergraph_t *rgraph_map;
@@ -71,15 +72,16 @@ int hexmap_load(hexmap_t *map, prismelrenderer_t *prend,
     const char *filename);
 int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
     fus_lexer_t *lexer);
+int hexmap_parse_area(hexmap_t *map, fus_lexer_t *lexer);
 bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf, bool all);
 
 
 void hexmap_submap_cleanup(hexmap_submap_t *submap);
 int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
-    char *filename, vec_t pos);
+    char *filename, vec_t pos, vec_t camera_pos);
 int hexmap_submap_load(hexmap_t *map, hexmap_submap_t *submap,
-    const char *filename, vec_t pos);
+    const char *filename, vec_t pos, vec_t camera_pos);
 int hexmap_submap_parse(hexmap_t *map, hexmap_submap_t *submap,
     fus_lexer_t *lexer);
 int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap);
