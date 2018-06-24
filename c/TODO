@@ -51,5 +51,17 @@ W: [ 2  4  0 -2]
 V*W: [ 10  16  0 -1]  <--- wrong?? is our vec_mul incorrect?
 
 
+Jun 23, 2018:
+-------------
+
+hexmap_submap_t: if these don't share collmaps, just modify collmaps'
+    ox, oy instead of messing around with submap's pos?..
+
+COLLMAP INDICES NEED TO USE SAME Y COORDS AS TRF_T
+    (currently they are vertically flipped and it ruins everything)
+
+worldmap.fus:
+    Need to group submaps into "areas" (or whatever it'll be called)
+    which share a camera position.
 
 
