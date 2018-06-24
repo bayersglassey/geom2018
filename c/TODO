@@ -43,13 +43,6 @@ Jun 14, 2018:
     They don't own their shape/prismel/mapper, and the latter don't have names.
     ^... YES THIS
 
-Jun 19, 2018:
--------------
-
-V: [ 3  2  0 -1]
-W: [ 2  4  0 -2]
-V*W: [ 10  16  0 -1]  <--- wrong?? is our vec_mul incorrect?
-
 
 Jun 23, 2018:
 -------------
