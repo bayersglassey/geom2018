@@ -1,5 +1,5 @@
 
-#map: ("curvy")
+#map: ("double")
 unit: 3 2 0 -1
 vert: "map_vert"
 edge: "map_edge"
@@ -7,14 +7,21 @@ face: "map_face"
 
 areas:
     :
-        camera: (0 0)
+        camera: eval: (16 12) + (0 8)
+        submaps:
+            : "data/map2x.fus" eval: (15 12)
+            : "data/map3x.fus" eval: (15 12) + (1 10)
+    :
+        camera: (0 4)
         submaps:
             : "data/map2.fus" (1 10)
             : "data/map3.fus" (0 0)
     :
-        camera: (-1 -10)
+        camera: eval: (-1 -10) + (4 0)
         submaps:
             : "data/map1.fus" eval: (-1 -10) + (8 2) *  0 + (-1 3) *  0
             : "data/map1.fus" eval: (-1 -10) + (8 2) *  1 + (-1 3) *  0
             : "data/map1.fus" eval: (-1 -10) + (8 2) *  1 + (-1 3) * -1
+            : "data/map1grid.fus" eval: (-1 -10) + (8 2) *  0 + (-1 3) * -2
+            : "data/map1x.fus" eval: (-1 -10) + (8 2) *  0 + (-1 3) * -4
 
