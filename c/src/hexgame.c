@@ -216,6 +216,7 @@ void hexgame_cleanup(hexgame_t *game){
 
 int hexgame_init(hexgame_t *game, hexmap_t *map){
     game->map = map;
+    vec_zero(map->space->dims, game->camera_pos);
     ARRAY_INIT(*game, players)
     return 0;
 }
@@ -259,11 +260,38 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
 
 int hexgame_step(hexgame_t *game){
     int err;
+
+    /* Figure out camera position */
+    if(game->players_len >= 1){
+        player_t *player = game->players[0];
+        hexmap_t *map = game->map;
+        vecspace_t *space = map->space;
+
+        bool collide = false;
+        for(int i = 0; i < map->submaps_len; i++){
+            hexmap_submap_t *submap = map->submaps[i];
+            hexcollmap_t *collmap = &submap->collmap;
+
+            trf_t index = {0};
+            hexspace_set(index.add,
+                 player->pos[0] - submap->pos[0],
+                -player->pos[1] + submap->pos[1]);
+
+            collide = hexcollmap_get_vert(collmap, &index);
+            if(collide){
+                vec_cpy(space->dims, game->camera_pos, submap->pos);
+                break;
+            }
+        }
+    }
+
+    /* Do 1 gameplay step for each player */
     for(int i = 0; i < game->players_len; i++){
         player_t *player = game->players[i];
         err = player_step(player, game);
         if(err)return err;
     }
+
     return 0;
 }
 
@@ -275,12 +303,17 @@ int hexgame_render(hexgame_t *game, test_app_t *app){
     RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
 
     hexmap_t *map = game->map;
+
+    vec_t camera_renderpos;
+    vec4_vec_from_hexspace(camera_renderpos, game->camera_pos);
+
     for(int i = 0; i < map->submaps_len; i++){
         hexmap_submap_t *submap = map->submaps[i];
         rendergraph_t *rgraph = submap->rgraph_map;
 
         vec_t pos;
         vec4_vec_from_hexspace(pos, submap->pos);
+        vec_sub(rgraph->space->dims, pos, camera_renderpos);
         vec_mul(rgraph->space, pos, game->map->unit);
 
         err = test_app_blit_rgraph(app, rgraph, pos, app->rot, false,
@@ -296,7 +329,9 @@ int hexgame_render(hexgame_t *game, test_app_t *app){
 
         vec_t pos;
         vec4_vec_from_hexspace(pos, player->pos);
+        vec_sub(rgraph->space->dims, pos, camera_renderpos);
         vec_mul(rgraph->space, pos, map->unit);
+
         rot_t player_rot = player_get_rot(player, space);
         rot_t rot = vec4_rot_from_hexspace(player_rot);
         flip_t flip = player->turn;

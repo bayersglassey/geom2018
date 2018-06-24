@@ -49,6 +49,14 @@ void hexcollmap_cleanup(hexcollmap_t *collmap);
 int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space);
 void hexcollmap_dump(hexcollmap_t *collmap, FILE *f, int n_spaces);
 int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer);
+void hexcollmap_normalize_vert(trf_t *index);
+void hexcollmap_normalize_edge(trf_t *index);
+void hexcollmap_normalize_face(trf_t *index);
+hexcollmap_tile_t *hexcollmap_get_tile(hexcollmap_t *collmap, trf_t *index);
+bool hexcollmap_get_vert(hexcollmap_t *collmap, trf_t *index);
+bool hexcollmap_get_edge(hexcollmap_t *collmap, trf_t *index);
+bool hexcollmap_get_face(hexcollmap_t *collmap, trf_t *index);
+
 
 
 void hexmap_cleanup(hexmap_t *map);
