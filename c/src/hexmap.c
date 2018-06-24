@@ -495,13 +495,7 @@ int hexmap_parse_area(hexmap_t *map, fus_lexer_t *lexer){
     err = fus_lexer_expect(lexer, "(");
     if(err)return err;
     {
-        err = fus_lexer_expect(lexer, "(");
-        if(err)return err;
-        for(int i = 0; i < space->dims; i++){
-            err = fus_lexer_expect_int(lexer, &camera_pos[i]);
-            if(err)return err;
-        }
-        err = fus_lexer_expect(lexer, ")");
+        err = fus_lexer_expect_vec(lexer, space, camera_pos);
         if(err)return err;
     }
     err = fus_lexer_expect(lexer, ")");
@@ -525,44 +519,16 @@ int hexmap_parse_area(hexmap_t *map, fus_lexer_t *lexer){
             if(err)return err;
 
             vec_t pos;
-            vec_zero(space->dims, pos);
-
-            while(1){
-                vec_t add;
-                err = fus_lexer_expect(lexer, "(");
-                if(err)return err;
-                for(int i = 0; i < space->dims; i++){
-                    err = fus_lexer_expect_int(lexer, &add[i]);
-                    if(err)return err;
-                }
-                err = fus_lexer_expect(lexer, ")");
-                if(err)return err;
-                err = fus_lexer_next(lexer);
-                if(err)return err;
-
-                if(fus_lexer_got(lexer, "*")){
-                    int n;
-                    err = fus_lexer_expect_int(lexer, &n);
-                    if(err)return err;
-                    err = fus_lexer_next(lexer);
-                    if(err)return err;
-
-                    vec_nmul(space->dims, add, n);
-                }
-
-                vec_add(space->dims, pos, add);
-
-                if(fus_lexer_got(lexer, ")"))break;
-
-                err = fus_lexer_get(lexer, "+");
-                if(err)return err;
-            }
+            err = fus_lexer_expect_vec(lexer, space, pos);
+            if(err)return err;
 
             ARRAY_PUSH_NEW(hexmap_submap_t, *map, submaps, submap)
             err = hexmap_submap_load(map, submap, submap_filename, pos,
                 camera_pos);
             if(err)return err;
         }
+        err = fus_lexer_expect(lexer, ")");
+        if(err)return err;
     }
 
     return 0;
