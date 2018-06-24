@@ -1,4 +1,7 @@
 
+# A version of the player for whom crawling actions have higher
+# priority than jumping.
+
 stand:
     rgraph: "player_stand"
 
