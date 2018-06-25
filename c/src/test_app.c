@@ -34,6 +34,78 @@ static void test_app_init_input(test_app_t *app){
     app->keydown_r = 0;
 }
 
+static int parse_sdl_palette(fus_lexer_t *lexer, SDL_Palette *pal){
+    int err;
+
+    SDL_Color colors[256] = {0};
+    int color_i = 1; /* First one was the transparent color */
+
+    err = fus_lexer_expect(lexer, "colors");
+    if(err)return err;
+    err = fus_lexer_expect(lexer, "(");
+    if(err)return err;
+
+    while(1){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+
+        if(fus_lexer_got(lexer, ")"))break;
+
+        if(fus_lexer_got_int(lexer)){
+            err = fus_lexer_get_int(lexer, &color_i);
+            if(err)return err;
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+        }
+
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        {
+            SDL_Color *c = &colors[color_i];
+            color_i++;
+
+            int r, g, b;
+            err = fus_lexer_expect_int(lexer, &r);
+            if(err)return err;
+            err = fus_lexer_expect_int(lexer, &g);
+            if(err)return err;
+            err = fus_lexer_expect_int(lexer, &b);
+            if(err)return err;
+
+            c->r = r;
+            c->g = g;
+            c->b = b;
+            c->a = 255;
+        }
+        err = fus_lexer_expect(lexer, ")");
+        if(err)return err;
+    }
+
+    RET_IF_SDL_NZ(SDL_SetPaletteColors(pal, colors, 0, 256));
+
+    return 0;
+}
+
+static int load_sdl_palette(const char *filename, SDL_Palette **pal_ptr){
+    int err;
+    fus_lexer_t lexer;
+
+    char *text = load_file(filename);
+    if(text == NULL)return 1;
+
+    *pal_ptr = SDL_AllocPalette(256);
+    RET_IF_SDL_NULL(*pal_ptr);
+
+    err = fus_lexer_init(&lexer, text, filename);
+    if(err)return err;
+
+    err = parse_sdl_palette(&lexer, *pal_ptr);
+    if(err)return err;
+
+    free(text);
+    return 0;
+}
+
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
     const char *stateset_filename, const char *hexmap_filename
@@ -50,22 +122,8 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->stateset_filename = stateset_filename;
     app->hexmap_filename = hexmap_filename;
 
-    app->pal = SDL_AllocPalette(256);
-    RET_IF_SDL_NULL(app->pal);
-    RET_IF_SDL_NZ(SDL_SetPaletteColors(
-        app->pal,
-        (SDL_Color []){
-            {.r=  0, .g=  0, .b=  0, .a=  0},
-            {.r=  0, .g=  0, .b=  0, .a=255},
-            {.r=255, .g= 60, .b= 60, .a=255},
-            {.r= 60, .g=255, .b= 60, .a=255},
-            {.r= 60, .g= 60, .b=255, .a=255},
-            {.r=255, .g=255, .b= 60, .a=255},
-            {.r= 60, .g=255, .b=255, .a=255},
-            {.r=255, .g= 60, .b=255, .a=255},
-            {.r=255, .g=255, .b=255, .a=255},
-        },
-        0, 9));
+    err = load_sdl_palette("data/pal1.fus", &app->pal);
+    if(err)return err;
 
     err = font_load(&app->font, "data/font.fus");
     if(err)return err;

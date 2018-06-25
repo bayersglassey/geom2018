@@ -299,8 +299,9 @@ int hexgame_step(hexgame_t *game){
 int hexgame_render(hexgame_t *game, test_app_t *app){
     int err;
 
+    SDL_Color *bgcolor = &app->pal->colors[255];
     RET_IF_SDL_NZ(SDL_SetRenderDrawColor(app->renderer,
-        30, 50, 80, 255));
+        bgcolor->r, bgcolor->g, bgcolor->b, 255));
     RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
 
     hexmap_t *map = game->map;
