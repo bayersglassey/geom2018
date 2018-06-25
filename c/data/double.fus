@@ -26,6 +26,41 @@ shapes:
             : "dia" (0 1 0 0)  0 f 2
             : "dia" (1 1 0 0)  0 f 2
 
+
+    ##########
+    # TRIPLE #
+    ##########
+
+    "triple_sq":
+        shapes:
+            : "double_sq" (0 0 0 0) 0 f
+        prismels:
+            : "sq"  (2 0 0 0)  0 f 2
+            : "sq"  (2 0 0 1)  0 f 2
+            : "sq"  (2 0 0 2)  0 f 2
+            : "sq"  (1 0 0 2)  0 f 2
+            : "sq"  (0 0 0 2)  0 f 2
+
+    "triple_tri":
+        shapes:
+            : "double_tri" (0 0 0 0) 0 f
+        prismels:
+            : "tri" (2 0 0 0)  0 f 2
+            : "tri" (1 0 1 0)  0 f 2
+            : "tri" (0 0 2 0)  0 f 2
+            : "tri" (2 0 1 0)  6 f 2
+            : "tri" (1 0 2 0)  6 f 2
+
+    "triple_dia":
+        shapes:
+            : "double_dia" (0 0 0 0) 0 f
+        prismels:
+            : "dia" (2 0 0 0)  0 f 2
+            : "dia" (2 0 1 0)  0 f 2
+            : "dia" (2 0 2 0)  0 f 2
+            : "dia" (1 0 2 0)  0 f 2
+            : "dia" (0 0 2 0)  0 f 2
+
 mappers:
 
     "double":
@@ -34,3 +69,10 @@ mappers:
             : "sq"  -> "double_sq"
             : "tri" -> "double_tri"
             : "dia" -> "double_dia"
+
+    "triple":
+        unit: 3 0 0 0
+        entries:
+            : "sq"  -> "triple_sq"
+            : "tri" -> "triple_tri"
+            : "dia" -> "triple_dia"
