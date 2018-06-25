@@ -27,6 +27,19 @@ int get_bitmap_i(vecspace_t *space, rot_t rot, flip_t flip,
     int n_frames, int frame_i);
 
 
+/******************
+ * PALETTE MAPPER *
+ ******************/
+
+typedef struct palettemapper {
+    char *name;
+    Uint8 table[256];
+} palettemapper_t;
+
+int palettemapper_init(palettemapper_t *palmapper, char *name);
+void palettemapper_cleanup(palettemapper_t *palmapper);
+
+
 /***********
  * PRISMEL *
  ***********/
@@ -62,6 +75,7 @@ void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box,
 
 typedef struct prismelrenderer {
     vecspace_t *space;
+    ARRAY_DECL(struct palettemapper, palmappers)
     ARRAY_DECL(struct prismel, prismels)
     ARRAY_DECL(struct rendergraph, rendergraphs)
     ARRAY_DECL(struct prismelmapper, mappers)
@@ -75,13 +89,15 @@ void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
     bool dump_bitmap_surfaces);
 int prismelrenderer_push_prismel(prismelrenderer_t *renderer, char *name,
     prismel_t **prismel_ptr);
-prismel_t *prismelrenderer_get_prismel(prismelrenderer_t *renderer,
-    char *name);
-int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer);
+palettemapper_t *prismelrenderer_get_palmapper(prismelrenderer_t *prend,
+    const char *name);
+prismel_t *prismelrenderer_get_prismel(prismelrenderer_t *prend,
+    const char *name);
 struct rendergraph *prismelrenderer_get_rendergraph(prismelrenderer_t *prend,
     const char *name);
 struct prismelmapper *prismelrenderer_get_mapper(prismelrenderer_t *prend,
     const char *name);
+int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer);
 int prismelrenderer_load(prismelrenderer_t *prend, const char *filename);
 int prismelrenderer_save(prismelrenderer_t *prend, const char *filename);
 int prismelrenderer_write(prismelrenderer_t *prend, FILE *f);
@@ -108,6 +124,8 @@ typedef struct rendergraph_trf {
     trf_t trf;
     int frame_i;
     bool frame_i_additive;
+
+    palettemapper_t *palmapper;
 
     int frame_start;
     int frame_len;
@@ -226,6 +244,11 @@ prismelmapper_t *prismelmapper_get_mapplication(prismelmapper_t *mapper,
 /*************
  * FUS_LEXER *
  *************/
+
+int fus_lexer_expect_palettemapper(fus_lexer_t *lexer,
+    prismelrenderer_t *prend, char *name, palettemapper_t **palmapper_ptr);
+int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
+    prismelrenderer_t *prend, char *name, palettemapper_t **palmapper_ptr);
 
 int fus_lexer_expect_prismel(fus_lexer_t *lexer,
     prismelrenderer_t *prend, char *name, prismel_t **prismel_ptr);

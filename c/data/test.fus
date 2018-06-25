@@ -1,4 +1,6 @@
 
+import "data/palmappers.fus"
+
 import "data/prismels.fus"
 import "data/double.fus"
 import "data/curvy.fus"

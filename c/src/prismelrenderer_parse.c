@@ -10,6 +10,86 @@
 
 
 
+/******************
+ * PALETTE MAPPER *
+ ******************/
+
+static int parse_palmappers(prismelrenderer_t *prend, fus_lexer_t *lexer){
+    int err;
+    while(1){
+        char *name;
+
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+
+        if(fus_lexer_got(lexer, ")"))break;
+
+        err = fus_lexer_get_str(lexer, &name);
+        if(err)return err;
+
+        palettemapper_t *palmapper;
+        err = fus_lexer_expect_palettemapper(lexer, prend, name, &palmapper);
+        if(err)return err;
+    }
+    return 0;
+}
+
+int fus_lexer_expect_palettemapper(fus_lexer_t *lexer,
+    prismelrenderer_t *prend, char *name, palettemapper_t **palmapper_ptr
+){
+    int err = fus_lexer_next(lexer);
+    if(err)return err;
+    return fus_lexer_get_palettemapper(lexer, prend, name, palmapper_ptr);
+}
+
+int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
+    prismelrenderer_t *prend, char *name, palettemapper_t **palmapper_ptr
+){
+    int err;
+
+    ARRAY_PUSH_NEW(palettemapper_t, *prend, palmappers, palmapper)
+    err = palettemapper_init(palmapper, strdup(name));
+    if(err)return err;
+
+    Uint8 *table = palmapper->table;
+    int color_i;
+
+    err = fus_lexer_get(lexer, "(");
+    if(err)return err;
+
+    while(1){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+
+        if(fus_lexer_got(lexer, ")"))break;
+
+        if(fus_lexer_got_int(lexer)){
+            err = fus_lexer_get_int(lexer, &color_i);
+            if(err)return err;
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+        }
+
+        int color;
+
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_expect_int(lexer, &color);
+        if(err)return err;
+        err = fus_lexer_expect(lexer, ")");
+        if(err)return err;
+
+        if(color < 0 || color >= 256){
+            return fus_lexer_unexpected(lexer, "int within 0..255");}
+
+        table[color_i] = color;
+    }
+
+    *palmapper_ptr = palmapper;
+    return 0;
+}
+
+
 /***********
  * PRISMEL *
  ***********/
@@ -209,6 +289,7 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
             : sixth (0 0 0 0)  0 f
             : sixth (0 0 0 0)  2 f
             : sixth (0 0 0 0)  4 f  0 (0 1)
+            : sixth (0 0 0 0)  6 f "red"  0 (0 1)
     */
     int err;
     while(1){
@@ -219,6 +300,8 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
             break;
         }else if(fus_lexer_got(lexer, "(")){
             char *name;
+            char *palmapper_name = NULL;
+            palettemapper_t *palmapper = NULL;
             vec_t v;
             int rot;
             bool flip;
@@ -227,9 +310,11 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
             int frame_i = 0;
             bool frame_i_additive = true;
 
+            /* name */
             err = fus_lexer_expect_str(lexer, &name);
             if(err)return err;
 
+            /* trf.add */
             err = fus_lexer_expect(lexer, "(");
             if(err)return err;
             for(int i = 0; i < prend->space->dims; i++){
@@ -239,9 +324,11 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
             err = fus_lexer_expect(lexer, ")");
             if(err)return err;
 
+            /* trf.rot */
             err = fus_lexer_expect_int(lexer, &rot);
             if(err)return err;
 
+            /* trf.flip */
             err = fus_lexer_next(lexer);
             if(err)return err;
             if(fus_lexer_got(lexer, "t"))flip = true;
@@ -250,6 +337,16 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
 
             err = fus_lexer_next(lexer);
             if(err)return err;
+
+            /* palmapper */
+            if(fus_lexer_got_str(lexer)){
+                err = fus_lexer_expect_str(lexer, &palmapper_name);
+                if(err)return err;
+                err = fus_lexer_next(lexer);
+                if(err)return err;
+            }
+
+            /* animation */
             if(!fus_lexer_got(lexer, ")")){
                 frame_i_additive = false;
                 err = fus_lexer_get_int(lexer, &frame_i);
@@ -278,18 +375,27 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
             err = fus_lexer_get(lexer, ")");
             if(err)return err;
 
+            if(palmapper_name != NULL){
+                palmapper = prismelrenderer_get_palmapper(
+                    prend, palmapper_name);
+                if(palmapper == NULL){
+                    fprintf(stderr, "Couldn't find palette mapper: %s\n",
+                        palmapper_name);
+                    free(palmapper_name); return 2;}
+            }
+
             rendergraph_t *found = prismelrenderer_get_rendergraph(
                 prend, name);
             if(found == NULL){
                 fprintf(stderr, "Couldn't find shape: %s\n", name);
-                return 2;
-            }
+                free(name); return 2;}
             free(name);
 
             rendergraph_trf_t *rendergraph_trf;
             err = rendergraph_push_rendergraph_trf(rgraph, &rendergraph_trf);
             if(err)return err;
             rendergraph_trf->rendergraph = found;
+            rendergraph_trf->palmapper = palmapper;
             rendergraph_trf->trf.rot = rot;
             rendergraph_trf->trf.flip = flip;
             rendergraph_trf->frame_start = frame_start;
@@ -725,6 +831,11 @@ int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer){
 
         if(fus_lexer_done(lexer)){
             break;
+        }else if(fus_lexer_got(lexer, "palmappers")){
+            err = fus_lexer_expect(lexer, "(");
+            if(err)return err;
+            err = parse_palmappers(prend, lexer);
+            if(err)return err;
         }else if(fus_lexer_got(lexer, "prismels")){
             err = fus_lexer_expect(lexer, "(");
             if(err)return err;
@@ -749,7 +860,7 @@ int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer){
             free(filename);
         }else{
             return fus_lexer_unexpected(lexer,
-                "prismels or shapes or mappers or import");
+                "palmappers or prismels or shapes or mappers or import");
         }
     }
     return 0;

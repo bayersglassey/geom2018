@@ -130,6 +130,22 @@ int get_bitmap_i(vecspace_t *space, rot_t rot, flip_t flip,
 
 
 
+/******************
+ * PALETTE MAPPER *
+ ******************/
+
+int palettemapper_init(palettemapper_t *palmapper, char *name){
+    if(name == NULL)name = strdup("<palette mapper>");
+    palmapper->name = name;
+    for(int i = 0; i < 256; i++)palmapper->table[i] = i;
+    return 0;
+}
+
+void palettemapper_cleanup(palettemapper_t *palmapper){
+    free(palmapper->name);
+}
+
+
 /***********
  * PRISMEL *
  ***********/
@@ -200,6 +216,7 @@ void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box,
 
 int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space){
     renderer->space = space;
+    ARRAY_INIT(*renderer, palmappers)
     ARRAY_INIT(*renderer, prismels)
     ARRAY_INIT(*renderer, rendergraphs)
     ARRAY_INIT(*renderer, mappers)
@@ -207,6 +224,8 @@ int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space){
 }
 
 void prismelrenderer_cleanup(prismelrenderer_t *renderer){
+    ARRAY_FREE(palettemapper_t, *renderer, palmappers,
+        palettemapper_cleanup)
     ARRAY_FREE(prismel_t, *renderer, prismels, prismel_cleanup)
     ARRAY_FREE(rendergraph_t, *renderer, rendergraphs,
         rendergraph_cleanup)
@@ -220,6 +239,14 @@ void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
     fprintf(f, "prismelrenderer: %p\n", renderer);
     if(renderer == NULL)return;
     fprintf(f, "  space: %p\n", renderer->space);
+
+    fprintf(f, "  palmappers:\n");
+    for(int i = 0; i < renderer->palmappers_len; i++){
+        palettemapper_t *palmapper = renderer->palmappers[i];
+        fprintf(f, "    palmapper: %p\n", palmapper);
+        fprintf(f, "      name: %s\n", palmapper->name);
+        fprintf(f, "      table: ...\n");
+    }
 
     fprintf(f, "  prismels:\n");
     for(int i = 0; i < renderer->prismels_len; i++){
@@ -265,11 +292,21 @@ int prismelrenderer_push_prismel(prismelrenderer_t *renderer, char *name,
     return 0;
 }
 
-prismel_t *prismelrenderer_get_prismel(prismelrenderer_t *renderer,
-    char *name
+palettemapper_t *prismelrenderer_get_palmapper(prismelrenderer_t *prend,
+    const char *name
 ){
-    for(int i = 0; i < renderer->prismels_len; i++){
-        prismel_t *prismel = renderer->prismels[i];
+    for(int i = 0; i < prend->palmappers_len; i++){
+        palettemapper_t *palmapper = prend->palmappers[i];
+        if(strcmp(palmapper->name, name) == 0)return palmapper;
+    }
+    return NULL;
+}
+
+prismel_t *prismelrenderer_get_prismel(prismelrenderer_t *prend,
+    const char *name
+){
+    for(int i = 0; i < prend->prismels_len; i++){
+        prismel_t *prismel = prend->prismels[i];
         if(strcmp(prismel->name, name) == 0)return prismel;
     }
     return NULL;
@@ -324,6 +361,17 @@ int prismelrenderer_save(prismelrenderer_t *prend, const char *filename){
 
 int prismelrenderer_write(prismelrenderer_t *prend, FILE *f){
     int err;
+
+    fprintf(f, "palmappers:\n");
+    for(int i = 0; i < prend->palmappers_len; i++){
+        palettemapper_t *palmapper = prend->palmappers[i];
+        fprintf(f, "    ");
+        fus_write_str(f, palmapper->name);
+        fprintf(f, ":\n");
+        for(int i = 0; i < 256; i++){
+            fprintf(f, "        : %i\n", palmapper->table[i]);
+        }
+    }
 
     fprintf(f, "prismels:\n");
     for(int i = 0; i < prend->prismels_len; i++){
@@ -823,8 +871,9 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
             bitmap2->pbox.h
         };
 
+        palettemapper_t *palmapper = rendergraph_trf->palmapper;
         RET_IF_SDL_NZ(SDL_PaletteMappedBlit(bitmap2->surface, NULL,
-            surface, &dst_rect, NULL));
+            surface, &dst_rect, palmapper? palmapper->table: NULL));
     }
 
     /* Create texture, if an SDL_Renderer was provided */
