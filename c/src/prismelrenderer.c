@@ -9,6 +9,7 @@
 #include "lexer.h"
 #include "bounds.h"
 #include "util.h"
+#include "sdl_util.c"
 #include "array.h"
 #include "write.h"
 
@@ -821,8 +822,9 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
             bitmap2->pbox.w,
             bitmap2->pbox.h
         };
-        RET_IF_SDL_NZ(SDL_BlitSurface(bitmap2->surface, NULL,
-            surface, &dst_rect));
+
+        RET_IF_SDL_NZ(SDL_PaletteMappedBlit(bitmap2->surface, NULL,
+            surface, &dst_rect, NULL));
     }
 
     /* Create texture, if an SDL_Renderer was provided */
