@@ -134,10 +134,14 @@ int get_bitmap_i(vecspace_t *space, rot_t rot, flip_t flip,
  * PALETTE MAPPER *
  ******************/
 
-int palettemapper_init(palettemapper_t *palmapper, char *name){
+int palettemapper_init(palettemapper_t *palmapper, char *name, int color){
     if(name == NULL)name = strdup("<palette mapper>");
     palmapper->name = name;
-    for(int i = 0; i < 256; i++)palmapper->table[i] = i;
+    if(color < 0){
+        for(int i = 0; i < 256; i++)palmapper->table[i] = i;
+    }else{
+        for(int i = 0; i < 256; i++)palmapper->table[i] = color;
+    }
     return 0;
 }
 
@@ -1054,6 +1058,20 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
                 new_rendergraph_trf->frame_len =
                     prismel_trf->frame_len;
 
+                /* get or create palmapper for solid color */
+                int color = prismel_trf->color;
+                char *palmapper_name = generate_indexed_name("solid", color);
+                palettemapper_t *palmapper = prismelrenderer_get_palmapper(
+                    prend, palmapper_name);
+                if(palmapper == NULL){
+                    ARRAY_PUSH_NEW(palettemapper_t, *prend, palmappers, _palmapper)
+                    palmapper = _palmapper;
+                    err = palettemapper_init(palmapper, palmapper_name, color);
+                    if(err)return err;
+                }
+
+                new_rendergraph_trf->palmapper = palmapper;
+
                 entry_found = true;
                 break;
             }
@@ -1061,8 +1079,8 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
 
         if(!entry_found){
             fprintf(stderr,
-                "Prismel %s does not match any mapper entry\n",
-                prismel->name);
+                "Prismel %s does not match any entry of mapper %s\n",
+                prismel->name, mapper->name);
             err = 2; return err;
         }
     }

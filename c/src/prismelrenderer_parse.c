@@ -48,7 +48,7 @@ int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
     int err;
 
     ARRAY_PUSH_NEW(palettemapper_t, *prend, palmappers, palmapper)
-    err = palettemapper_init(palmapper, strdup(name));
+    err = palettemapper_init(palmapper, strdup(name), -1);
     if(err)return err;
 
     Uint8 *table = palmapper->table;

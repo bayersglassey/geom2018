@@ -36,7 +36,7 @@ typedef struct palettemapper {
     Uint8 table[256];
 } palettemapper_t;
 
-int palettemapper_init(palettemapper_t *palmapper, char *name);
+int palettemapper_init(palettemapper_t *palmapper, char *name, int color);
 void palettemapper_cleanup(palettemapper_t *palmapper);
 
 
