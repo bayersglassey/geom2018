@@ -52,7 +52,7 @@ int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
     if(err)return err;
 
     Uint8 *table = palmapper->table;
-    int color_i;
+    int color_i = 0;
 
     err = fus_lexer_get(lexer, "(");
     if(err)return err;
@@ -70,19 +70,28 @@ int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
             if(err)return err;
         }
 
-        int color;
-
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
-        err = fus_lexer_expect_int(lexer, &color);
-        if(err)return err;
-        err = fus_lexer_expect(lexer, ")");
-        if(err)return err;
+        {
+            int color = color_i;
 
-        if(color < 0 || color >= 256){
-            return fus_lexer_unexpected(lexer, "int within 0..255");}
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            if(!fus_lexer_got(lexer, ")")){
+                err = fus_lexer_get_int_fancy(lexer, &color);
+                if(err)return err;
+                if(color < 0 || color >= 256){
+                    return fus_lexer_unexpected(lexer,
+                        "int within 0..255");}
+                err = fus_lexer_next(lexer);
+                if(err)return err;
+            }
 
-        table[color_i] = color;
+            table[color_i] = color;
+            color_i++;
+        }
+        err = fus_lexer_get(lexer, ")");
+        if(err)return err;
     }
 
     *palmapper_ptr = palmapper;
@@ -340,7 +349,7 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
 
             /* palmapper */
             if(fus_lexer_got_str(lexer)){
-                err = fus_lexer_expect_str(lexer, &palmapper_name);
+                err = fus_lexer_get_str(lexer, &palmapper_name);
                 if(err)return err;
                 err = fus_lexer_next(lexer);
                 if(err)return err;
@@ -459,7 +468,7 @@ static int parse_shape_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer,
             else if(fus_lexer_got(lexer, "f"))flip = false;
             else return fus_lexer_unexpected(lexer, "t or f");
 
-            err = fus_lexer_expect_int(lexer, &color);
+            err = fus_lexer_expect_int_fancy(lexer, &color);
             if(err)return err;
 
             err = fus_lexer_next(lexer);

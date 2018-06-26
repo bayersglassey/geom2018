@@ -137,10 +137,11 @@ int get_bitmap_i(vecspace_t *space, rot_t rot, flip_t flip,
 int palettemapper_init(palettemapper_t *palmapper, char *name, int color){
     if(name == NULL)name = strdup("<palette mapper>");
     palmapper->name = name;
+    palmapper->table[0] = 0; /* 0 is the transparent color */
     if(color < 0){
-        for(int i = 0; i < 256; i++)palmapper->table[i] = i;
+        for(int i = 1; i < 256; i++)palmapper->table[i] = i;
     }else{
-        for(int i = 0; i < 256; i++)palmapper->table[i] = color;
+        for(int i = 1; i < 256; i++)palmapper->table[i] = color;
     }
     return 0;
 }
