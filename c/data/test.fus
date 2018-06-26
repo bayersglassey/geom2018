@@ -12,7 +12,19 @@ import "data/roller.fus"
 import "data/flier.fus"
 
 
+shapes:
+    "red_curvy_sq": shapes: : "curvy_sq" (0 0 0 0) 0 f "red"
+    "red_curvy_tri": shapes: : "curvy_tri" (0 0 0 0) 0 f "red"
+    "red_curvy_dia": shapes: : "curvy_dia" (0 0 0 0) 0 f "red"
+
 mappers:
+
+    "red_curvy":
+        unit: 2 4 0 -2
+        entries:
+            : "sq" -> "red_curvy_sq"
+            : "tri" -> "red_curvy_tri"
+            : "dia" -> "red_curvy_dia"
 
     "double_double": map ("double") ("double")
     "double_curvy": map ("double") ("curvy")
@@ -51,7 +63,4 @@ shapes:
     "double_double_curvy_curvy_dodeca_B": map ("double_double_curvy_curvy") ("dodeca_B")
     "double_curvy_double_curvy_dodeca_B": map ("double_curvy_double_curvy") ("dodeca_B")
 
-    "double_curvy_dodeca_anim_red":
-        animation: cycle 12
-        shapes:
-            : "double_curvy_dodeca_anim" (0 0 0 0) 0 f "red"
+    "red_curvy_dodeca_anim": map ("red_curvy") ("dodeca_anim")

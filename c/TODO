@@ -23,17 +23,6 @@ Jun 9, 2018:
     something else, then creating a texture from it.
         ...nope, didn't work :|
 
-Jun 10, 2018:
--------------
-
-- double_double_curvy_curvy_dodeca_B:
-    I think we expected this to look like double_curvy_curvy_dodeca_B,
-    but with "larger prismels" (that is, "double" applied to "curvy_curvy_dodeca_B").
-    But instead it looks like... well, anyway it looks like the order that the
-    mappers are being applied in is the opposite of what we expected; or at any rate,
-    the *associativity* of application is the opposite of what we expected.
-
-    update Jun 25: Yeah yeah! You can really see it now that we have palettemappers
 
 Jun 14, 2018:
 -------------
@@ -55,3 +44,30 @@ hexmap_submap_t: if these don't share collmaps, just modify collmaps'
 COLLMAP INDICES NEED TO USE SAME Y COORDS AS TRF_T
     (currently they are vertically flipped and it ruins everything)
 
+
+Jun 25, 2018:
+-------------
+
+### prismelmappers whose rgraphs have n_frames > 1 ###
+
+It seems obvious that the resulting n_frames should be the product of mapper & mappee shapes.
+...we could make it an attribute of prismelmapper: how to treat animation.
+    Options:
+        - mapper's animation happens once per frame of mappee's animation
+        - mappee's animation happens once per frame of mapper's animation
+        - mapper + mappee animate simultaneously  <-- this is the default, cos its easiest?..
+...ah, but "mapper" is not a rendergraph, it's a mapper.
+We could define mapper's n_frames as the LCD of its rendergraphs' n_frames.
+
+
+- double_double_curvy_curvy_dodeca_B:
+    I think we expected this to look like double_curvy_curvy_dodeca_B,
+    but with "larger prismels" (that is, "double" applied to "curvy_curvy_dodeca_B").
+    But instead it looks like... well, anyway it looks like the order that the
+    mappers are being applied in is the opposite of what we expected; or at any rate,
+    the *associativity* of application is the opposite of what we expected.
+
+    LOOKS GOOD:
+        "curvy_curvy_dodeca_B": map ("curvy") ("curvy_dodeca_B")
+    LOOKS BORING:
+        "curvy_curvy_dodeca_B": map ("curvy_curvy") ("dodeca_B")
