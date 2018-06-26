@@ -1,20 +1,22 @@
 
 palmappers:
     "red":
-        : 1
-        : 1
-        : 1
-        : 1
-        : 1
-        : 1
-        : 1
-        : 1
+        : # transparent color
 
-        : 1
-        : 1
-        : 1
-        : 1
-        : 1
-        : 1
-        : 1
-        : 1
+        : eval: 1 + 4
+        : eval: 1 + 4
+        : eval: 1 + 4
+        : eval: 1 + 4
+        : eval: 1 + 4
+        : eval: 1 + 4
+        : eval: 1 + 4
+        : eval: 1 + 4
+
+        : eval: 1 + 12
+        : eval: 1 + 12
+        : eval: 1 + 12
+        : eval: 1 + 12
+        : eval: 1 + 12
+        : eval: 1 + 12
+        : eval: 1 + 12
+        : eval: 1 + 12

@@ -50,3 +50,8 @@ shapes:
 
     "double_double_curvy_curvy_dodeca_B": map ("double_double_curvy_curvy") ("dodeca_B")
     "double_curvy_double_curvy_dodeca_B": map ("double_curvy_double_curvy") ("dodeca_B")
+
+    "double_curvy_dodeca_anim_red":
+        animation: cycle 12
+        shapes:
+            : "double_curvy_dodeca_anim" (0 0 0 0) 0 f "red"

@@ -1,5 +1,5 @@
 
-#map: ("double")
+map: ("double")
 unit: 3 2 0 -1
 vert: "map_vert"
 edge: "map_edge"

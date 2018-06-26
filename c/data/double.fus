@@ -56,10 +56,10 @@ shapes:
             : "double_dia" (0 0 0 0) 0 f
         prismels:
             : "dia" (2 0 0 0)  0 f 2
-            : "dia" (2 0 1 0)  0 f 2
-            : "dia" (2 0 2 0)  0 f 2
-            : "dia" (1 0 2 0)  0 f 2
-            : "dia" (0 0 2 0)  0 f 2
+            : "dia" (2 1 0 0)  0 f 2
+            : "dia" (2 2 0 0)  0 f 2
+            : "dia" (1 2 0 0)  0 f 2
+            : "dia" (0 2 0 0)  0 f 2
 
 mappers:
 
