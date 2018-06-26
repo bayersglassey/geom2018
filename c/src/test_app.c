@@ -294,6 +294,23 @@ int test_app_process_console_input(test_app_t *app){
         err = prismelrenderer_render_all_bitmaps(
             &app->prend, app->pal, renderer);
         if(err)return err;
+    }else if(fus_lexer_got(&lexer, "get_shape")){
+        char *name;
+        err = fus_lexer_expect_str(&lexer, &name);
+        if(err)return err;
+        bool found = false;
+        for(int i = 0; i < app->prend.rendergraphs_len; i++){
+            rendergraph_t *rgraph = app->prend.rendergraphs[i];
+            if(!strcmp(rgraph->name, name)){
+                app->cur_rgraph_i = i;
+                found = true;
+                break;
+            }
+        }
+        if(!found){
+            fprintf(stderr, "Couldn't find shape: %s\n", name);
+            return 2;}
+        return 0;
     }else{
         fus_lexer_unexpected(&lexer, NULL);
         console_write_msg(&app->console, "Sorry, what?\n");
