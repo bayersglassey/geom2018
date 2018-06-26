@@ -77,10 +77,12 @@ int fus_lexer_get(fus_lexer_t *lexer, const char *text);
 int fus_lexer_get_name(fus_lexer_t *lexer, char **name);
 int fus_lexer_get_str(fus_lexer_t *lexer, char **s);
 int fus_lexer_get_int(fus_lexer_t *lexer, int *i);
+int fus_lexer_get_int_fancy(fus_lexer_t *lexer, int *i_ptr);
 int fus_lexer_expect(fus_lexer_t *lexer, const char *text);
 int fus_lexer_expect_name(fus_lexer_t *lexer, char **name);
 int fus_lexer_expect_str(fus_lexer_t *lexer, char **s);
 int fus_lexer_expect_int(fus_lexer_t *lexer, int *i);
+int fus_lexer_expect_int_fancy(fus_lexer_t *lexer, int *i);
 int fus_lexer_unexpected(fus_lexer_t *lexer, const char *expected);
 int fus_lexer_parse_silent(fus_lexer_t *lexer);
 

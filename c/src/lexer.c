@@ -462,6 +462,49 @@ int fus_lexer_get_int(fus_lexer_t *lexer, int *i){
     return 0;
 }
 
+int fus_lexer_get_int_fancy(fus_lexer_t *lexer, int *i_ptr){
+    int err;
+    if(fus_lexer_got_int(lexer)){
+        err = fus_lexer_get_int(lexer, i_ptr);
+        if(err)goto err;
+    }else{
+        int i = 0;
+        err = fus_lexer_get(lexer, "eval");
+        if(err)goto err;
+        err = fus_lexer_expect(lexer, "(");
+        if(err)goto err;
+        while(1){
+            err = fus_lexer_next(lexer);
+            if(err)goto err;
+
+            if(fus_lexer_got(lexer, ")"))break;
+
+            bool neg = false;
+            if(fus_lexer_got(lexer, "+")){
+                neg = false;
+                err = fus_lexer_next(lexer);
+                if(err)goto err;
+            }else if(fus_lexer_got(lexer, "-")){
+                neg = true;
+                err = fus_lexer_next(lexer);
+                if(err)goto err;
+            }
+
+            int add;
+            err = fus_lexer_get_int(lexer, &add);
+            if(err)goto err;
+
+            i += neg? -add: add;
+        }
+        *i_ptr = i;
+    }
+    return 0;
+err:
+    fus_lexer_err_info(lexer);
+    fprintf(stderr, "(...while parsing fancy int)\n");
+    return err;
+}
+
 int fus_lexer_expect(fus_lexer_t *lexer, const char *text){
     int err = fus_lexer_next(lexer);
     if(err)return err;
@@ -484,6 +527,12 @@ int fus_lexer_expect_int(fus_lexer_t *lexer, int *i){
     int err = fus_lexer_next(lexer);
     if(err)return err;
     return fus_lexer_get_int(lexer, i);
+}
+
+int fus_lexer_expect_int_fancy(fus_lexer_t *lexer, int *i){
+    int err = fus_lexer_next(lexer);
+    if(err)return err;
+    return fus_lexer_get_int_fancy(lexer, i);
 }
 
 int fus_lexer_unexpected(fus_lexer_t *lexer, const char *expected){
