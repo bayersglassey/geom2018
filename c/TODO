@@ -60,13 +60,10 @@ It seems obvious that the resulting n_frames should be the product of mapper & m
 We could define mapper's n_frames as the LCD of its rendergraphs' n_frames.
 
 
-- double_double_curvy_curvy_dodeca_B:
-    I think we expected this to look like double_curvy_curvy_dodeca_B,
-    but with "larger prismels" (that is, "double" applied to "curvy_curvy_dodeca_B").
-    But instead it looks like... well, anyway it looks like the order that the
-    mappers are being applied in is the opposite of what we expected; or at any rate,
-    the *associativity* of application is the opposite of what we expected.
+Jun 26, 2018:
+-------------
 
+Applying mapper to mapper doesn't do palmappers correctly
     LOOKS GOOD:
         "curvy_curvy_dodeca_B": map ("curvy") ("curvy_dodeca_B")
     LOOKS BORING:

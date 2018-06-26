@@ -726,7 +726,7 @@ int fus_lexer_get_mapper(fus_lexer_t *lexer,
         err = fus_lexer_expect_mapper(lexer, prend, NULL, &mapper2);
         if(err)return err;
 
-        err = prismelmapper_apply_to_mapper(mapper2, prend, mapper1,
+        err = prismelmapper_apply_to_mapper(mapper1, prend, mapper2,
             name, prend->space, &mapper);
         if(err)return err;
 
