@@ -250,7 +250,14 @@ void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
         palettemapper_t *palmapper = renderer->palmappers[i];
         fprintf(f, "    palmapper: %p\n", palmapper);
         fprintf(f, "      name: %s\n", palmapper->name);
-        fprintf(f, "      table: ...\n");
+        fprintf(f, "      table:\n");
+        for(int i = 0; i < 16; i++){
+            fprintf(f, "        ");
+            for(int j = 0; j < 16; j++){
+                fprintf(f, "%2X ", palmapper->table[i * 16 + j]);
+            }
+            fprintf(f, "\n");
+        }
     }
 
     fprintf(f, "  prismels:\n");
@@ -613,6 +620,8 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces,
         fprintf(f, "%s    rendergraph_trf: %7s ", spaces,
             rendergraph == NULL? "<NULL>": rendergraph->name);
         trf_fprintf(f, rendergraph->space->dims, &rendergraph_trf->trf);
+        if(rendergraph_trf->palmapper != NULL){
+            fprintf(f, " %s", rendergraph_trf->palmapper->name);}
         fprintf(f, " % 3i%c [% 3i % 3i]\n", rendergraph_trf->frame_i,
             rendergraph_trf->frame_i_additive? '+': ' ',
             rendergraph_trf->frame_start, rendergraph_trf->frame_len);
