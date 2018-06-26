@@ -5,35 +5,6 @@ shapes:
     # ROLLER #
     ##########
 
-    "_roller_body_third":
-
-        prismels:
-
-            #   +
-            #   |
-            #  / \
-            # |   |
-            # +---+-
-            # |   | \
-            # |   |  -+
-            # |   | / |
-            # +---+-   \
-            # |   |     |
-            #  \ / \   -+
-            #   |   | / |
-            #   0 - +-  |
-            #         \ |
-            #          -+
-
-            : "tri" ( 0 0 0 0)  0 f 4
-            : "tri" ( 0 0 0 0)  2 f 4
-            : "sq"  (-1 0 1 0)  0 f 2
-            : "tri" (-1 0 1 1)  0 f 3
-
-            : "tri" ( 0 0 1 0)  1 f 5
-            : "sq"  ( 1 0 0 0)  1 f 4
-            : "tri" ( 1 0 0 0) 11 f 5
-
     "_roller_body_hollow_third":
 
         prismels:
@@ -54,12 +25,19 @@ shapes:
             #         \ |
             #          -+
 
-            : "sq"  (-1 0 1 0)  0 f 2
-            : "tri" (-1 0 1 1)  0 f 3
+            : "sq"  (-1 0 1 0)  0 f eval: 1 + 8 + 1
+            : "tri" (-1 0 1 1)  0 f eval: 1 + 1
 
-            : "tri" ( 0 0 1 0)  1 f 5
-            : "sq"  ( 1 0 0 0)  1 f 4
-            : "tri" ( 1 0 0 0) 11 f 5
+            : "tri" ( 0 0 1 0)  1 f eval: 1 + 1
+            : "sq"  ( 1 0 0 0)  1 f eval: 1 + 8 + 1
+            : "tri" ( 1 0 0 0) 11 f eval: 1 + 1
+
+    "_roller_body_third":
+        shapes:
+            : "_roller_body_hollow_third" (0 0 0 0) 0 f
+        prismels:
+            : "tri" ( 0 0 0 0)  0 f eval: 1 + 8 + 3
+            : "tri" ( 0 0 0 0)  2 f eval: 1 + 8 + 3
 
     "_roller_body":
         shapes:
@@ -83,10 +61,10 @@ shapes:
 
     "roller_foot":
         prismels:
-            : "sq" (0 0 0 0)  0 f 3
-            : "sq" (0 0 0 0)  3 f 3
-            : "sq" (0 0 0 0)  6 f 3
-            : "sq" (0 0 0 0)  9 f 3
+            : "sq" (0 0 0 0)  0 f eval: 1 + 8 + 3
+            : "sq" (0 0 0 0)  3 f eval: 1 + 8 + 3
+            : "sq" (0 0 0 0)  6 f eval: 1 + 8 + 3
+            : "sq" (0 0 0 0)  9 f eval: 1 + 8 + 3
 
     "roller":
         shapes:
