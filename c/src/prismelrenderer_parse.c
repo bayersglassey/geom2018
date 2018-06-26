@@ -63,17 +63,27 @@ int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
 
         if(fus_lexer_got(lexer, ")"))break;
 
+        int n_colors = 1;
+
         if(fus_lexer_got_int(lexer)){
             err = fus_lexer_get_int(lexer, &color_i);
             if(err)return err;
             err = fus_lexer_next(lexer);
             if(err)return err;
+            if(fus_lexer_got(lexer, "..")){
+                int color_i2;
+                err = fus_lexer_expect_int(lexer, &color_i2);
+                if(err)return err;
+                err = fus_lexer_next(lexer);
+                if(err)return err;
+                n_colors = color_i2 - color_i + 1;
+            }
         }
 
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
         {
-            int color = color_i;
+            int color = -1;
 
             err = fus_lexer_next(lexer);
             if(err)return err;
@@ -87,8 +97,10 @@ int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
                 if(err)return err;
             }
 
-            table[color_i] = color;
-            color_i++;
+            for(int i = 0; i < n_colors; i++){
+                table[color_i] = color < 0? color_i: color;
+                color_i++;
+            }
         }
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
