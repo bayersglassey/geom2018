@@ -70,16 +70,19 @@ int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
             if(err)return err;
             /* NOTE: get_int_range is special, leaves parser looking at
             next unparsed token... */
+        }else if(color_i >= 256){
+            fus_lexer_err_info(lexer);
+            fprintf(stderr, "Color index went out of bounds\n");
+            return 2;
         }
 
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
         {
-            int color = -1;
-
             err = fus_lexer_next(lexer);
             if(err)return err;
             if(!fus_lexer_got(lexer, ")")){
+                int color;
                 err = fus_lexer_get_int_fancy(lexer, &color);
                 if(err)return err;
                 if(color < 0 || color >= 256){
@@ -87,11 +90,15 @@ int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
                         "int within 0..255");}
                 err = fus_lexer_next(lexer);
                 if(err)return err;
-            }
-
-            for(int i = 0; i < n_colors; i++){
-                table[color_i] = color < 0? color_i: color;
-                color_i++;
+                for(int i = 0; i < n_colors; i++){
+                    table[color_i] = color;
+                    color_i++;
+                }
+            }else{
+                for(int i = 0; i < n_colors; i++){
+                    table[color_i] = color_i;
+                    color_i++;
+                }
             }
         }
         err = fus_lexer_get(lexer, ")");
@@ -727,6 +734,13 @@ int fus_lexer_get_mapper(fus_lexer_t *lexer,
         goto ok;
     }
 
+    bool solid = false;
+    if(fus_lexer_got(lexer, "solid")){
+        solid = true;
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+    }
+
     err = fus_lexer_get(lexer, "unit");
     if(err)return err;
 
@@ -734,7 +748,7 @@ int fus_lexer_get_mapper(fus_lexer_t *lexer,
     if(mapper == NULL)return 1;
     if(!name){name = generate_indexed_name("mapper",
         prend->mappers_len);}
-    err = prismelmapper_init(mapper, name, prend->space);
+    err = prismelmapper_init(mapper, name, prend->space, solid);
     if(err)return err;
 
     ARRAY_PUSH(prismelmapper_t, *prend, mappers, mapper)

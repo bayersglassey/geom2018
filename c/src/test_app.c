@@ -224,7 +224,7 @@ int test_app_process_console_input(test_app_t *app){
             if(err)return err;
         }
     }else if(fus_lexer_got(&lexer, "dump")){
-        bool dump_bitmap_surfaces = false;
+        int dump_bitmaps = 1;
         int dump_what = 0; /* rgraph, prend */
         while(1){
             err = fus_lexer_next(&lexer);
@@ -233,18 +233,19 @@ int test_app_process_console_input(test_app_t *app){
             if(fus_lexer_done(&lexer))break;
             else if(fus_lexer_got(&lexer, "rgraph"))dump_what = 0;
             else if(fus_lexer_got(&lexer, "prend"))dump_what = 1;
+            else if(fus_lexer_got(&lexer, "nobitmaps"))dump_bitmaps = 0;
             else if(fus_lexer_got(&lexer, "surfaces")){
                 /* WARNING: doing this with "prend" after "renderall" causes
                 my laptop to hang... */
-                dump_bitmap_surfaces = true;}
+                dump_bitmaps = 2;}
             else {
                 console_write_msg(&app->console, "Dumper says: idunno\n");
                 dump_what = -1; break;}
         }
         if(dump_what == 0){
-            rendergraph_dump(rgraph, stdout, 0, dump_bitmap_surfaces);
+            rendergraph_dump(rgraph, stdout, 0, dump_bitmaps);
         }else if(dump_what == 1){
-            prismelrenderer_dump(&app->prend, stdout, dump_bitmap_surfaces);
+            prismelrenderer_dump(&app->prend, stdout, dump_bitmaps);
         }
     }else if(fus_lexer_got(&lexer, "map")){
         char *mapper_name;

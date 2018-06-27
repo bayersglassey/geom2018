@@ -29,6 +29,8 @@
         fprintf(stderr, "SDL error: %s\n", SDL_GetError()); \
         return NULL;}}
 
+#define MAX_SPACES 256
+
 char *load_file(const char *filename);
 bool streq(const char *s1, const char *s2);
 size_t strnlen(const char *s, size_t maxlen);

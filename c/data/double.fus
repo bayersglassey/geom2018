@@ -64,6 +64,7 @@ shapes:
 mappers:
 
     "double":
+        solid
         unit: 2 0 0 0
         entries:
             : "sq"  -> "double_sq"
@@ -71,6 +72,7 @@ mappers:
             : "dia" -> "double_dia"
 
     "triple":
+        solid
         unit: 3 0 0 0
         entries:
             : "sq"  -> "triple_sq"

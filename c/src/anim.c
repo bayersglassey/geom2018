@@ -357,8 +357,8 @@ int state_init(state_t *state, char *name, rendergraph_t *rgraph){
 }
 
 void state_dump(state_t *state, FILE *f, int n_spaces){
-    char spaces[20];
-    get_spaces(spaces, 20, n_spaces);
+    char spaces[MAX_SPACES];
+    get_spaces(spaces, MAX_SPACES, n_spaces);
 
     fprintf(f, "%sstate: %p\n", spaces, state);
     if(state == NULL)return;

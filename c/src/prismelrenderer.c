@@ -239,7 +239,7 @@ void prismelrenderer_cleanup(prismelrenderer_t *renderer){
 }
 
 void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
-    bool dump_bitmap_surfaces
+    int dump_bitmaps
 ){
     fprintf(f, "prismelrenderer: %p\n", renderer);
     if(renderer == NULL)return;
@@ -281,7 +281,7 @@ void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
     fprintf(f, "  rendergraphs:\n");
     for(int i = 0; i < renderer->rendergraphs_len; i++){
         rendergraph_t *rgraph = renderer->rendergraphs[i];
-        rendergraph_dump(rgraph, f, 4, dump_bitmap_surfaces);
+        rendergraph_dump(rgraph, f, 4, dump_bitmaps);
     }
 
     fprintf(f, "  prismelmappers:\n");
@@ -315,7 +315,7 @@ palettemapper_t *prismelrenderer_get_palmapper(prismelrenderer_t *prend,
 }
 
 int prismelrenderer_get_solid_palettemapper(prismelrenderer_t *prend,
-    int color
+    int color, palettemapper_t **palmapper_ptr
 ){
     int err;
     char *name = generate_indexed_name("solid", color);
@@ -329,6 +329,7 @@ int prismelrenderer_get_solid_palettemapper(prismelrenderer_t *prend,
     }else{
         free(name);
     }
+    *palmapper_ptr = palmapper;
     return 0;
 }
 
@@ -487,6 +488,10 @@ int prismelrenderer_write(prismelrenderer_t *prend, FILE *f){
         fus_write_str(f, mapper->name);
         fprintf(f, ":\n");
 
+        if(mapper->solid){
+            fprintf(f, "        solid\n");
+        }
+
         fprintf(f, "        unit:");
         for(int i = 0; i < prend->space->dims; i++){
             fprintf(f, " % 3i", mapper->unit[i]);
@@ -582,17 +587,17 @@ int rendergraph_init(rendergraph_t *rendergraph, char *name,
 }
 
 void rendergraph_bitmap_dump(rendergraph_bitmap_t *bitmap, FILE *f,
-    int i, int n_spaces, bool dump_bitmap_surfaces
+    int i, int n_spaces, bool dump_surface
 ){
-    char spaces[20];
-    get_spaces(spaces, 20, n_spaces);
+    char spaces[MAX_SPACES];
+    get_spaces(spaces, MAX_SPACES, n_spaces);
 
     SDL_Surface *surface = bitmap->surface;
     fprintf(f, "%sbitmap %i: x=%i y=%i w=%i h=%i surface=%p texture=%p\n",
         spaces, i,
         bitmap->pbox.x, bitmap->pbox.y, bitmap->pbox.w, bitmap->pbox.h,
         surface, bitmap->texture);
-    if(dump_bitmap_surfaces && surface != NULL){
+    if(dump_surface && surface != NULL){
         SDL_LockSurface(surface);
         for(int y = 0; y < surface->h; y++){
             fprintf(f, "%s  ", spaces);
@@ -607,10 +612,10 @@ void rendergraph_bitmap_dump(rendergraph_bitmap_t *bitmap, FILE *f,
 }
 
 void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces,
-    bool dump_bitmap_surfaces
+    int dump_bitmaps
 ){
-    char spaces[20];
-    get_spaces(spaces, 20, n_spaces);
+    char spaces[MAX_SPACES];
+    get_spaces(spaces, MAX_SPACES, n_spaces);
 
     fprintf(f, "%srendergraph: %p\n", spaces, rendergraph);
     if(rendergraph == NULL)return;
@@ -649,12 +654,12 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces,
         rendergraph->animation_type);
     fprintf(f, "%s  n_frames: %i\n", spaces, rendergraph->n_frames);
     fprintf(f, "%s  n_bitmaps: %i\n", spaces, rendergraph->n_bitmaps);
-    fprintf(f, "%s  bitmaps:\n", spaces);
-    for(int i = 0; i < rendergraph->n_bitmaps; i++){
-        rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[i];
-        rendergraph_bitmap_dump(bitmap, f, i, n_spaces+4,
-            dump_bitmap_surfaces);
-    }
+    if(dump_bitmaps > 0){
+        fprintf(f, "%s  bitmaps:\n", spaces);
+        for(int i = 0; i < rendergraph->n_bitmaps; i++){
+            rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[i];
+            rendergraph_bitmap_dump(bitmap, f, i, n_spaces+4,
+                dump_bitmaps > 1);}}
 
     fprintf(f, "%s  boundbox: ", spaces); boundbox_fprintf(f,
         rendergraph->space->dims, rendergraph->boundbox); fprintf(f, "\n");
@@ -970,8 +975,11 @@ void prismelmapper_cleanup(prismelmapper_t *mapper){
         (void))
 }
 
-int prismelmapper_init(prismelmapper_t *mapper, char *name, vecspace_t *space){
+int prismelmapper_init(prismelmapper_t *mapper, char *name,
+    vecspace_t *space, bool solid
+){
     mapper->name = name;
+    mapper->solid = solid;
     mapper->space = space;
     vec_zero(space->dims, mapper->unit);
     ARRAY_INIT(*mapper, entries)
@@ -981,13 +989,14 @@ int prismelmapper_init(prismelmapper_t *mapper, char *name, vecspace_t *space){
 }
 
 void prismelmapper_dump(prismelmapper_t *mapper, FILE *f, int n_spaces){
-    char spaces[20];
-    get_spaces(spaces, 20, n_spaces);
+    char spaces[MAX_SPACES];
+    get_spaces(spaces, MAX_SPACES, n_spaces);
 
     fprintf(f, "%sprismelmapper: %p\n", spaces, mapper);
     if(mapper == NULL)return;
     fprintf(f, "%s  name: %s\n", spaces, mapper->name);
     fprintf(f, "%s  space: %p\n", spaces, mapper->space);
+    fprintf(f, "%s  solid: %c\n", spaces, mapper->solid? 'y': 'n');
     fprintf(f, "%s  unit: ", spaces);
     vec_fprintf(f, mapper->space->dims, mapper->unit);
     fprintf(f, "\n");
@@ -1085,6 +1094,14 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
                     prismel_trf->frame_start;
                 new_rendergraph_trf->frame_len =
                     prismel_trf->frame_len;
+
+                if(mapper->solid){
+                    err = prismelrenderer_get_solid_palettemapper(
+                        prend, prismel_trf->color,
+                        &new_rendergraph_trf->palmapper);
+                    if(err)return err;
+                }
+
                 entry_found = true;
                 break;
             }
@@ -1119,6 +1136,10 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
         new_rendergraph_trf->trf = rendergraph_trf->trf;
         vec_mul(mapper->space, new_rendergraph_trf->trf.add,
             mapper->unit);
+        if(mapper->solid){
+            /* TODO: think about this and make sure it's correct */
+            new_rendergraph_trf->palmapper =
+                rendergraph_trf->palmapper;}
         new_rendergraph_trf->frame_i =
             rendergraph_trf->frame_i;
         new_rendergraph_trf->frame_i_additive =
@@ -1174,7 +1195,7 @@ int prismelmapper_apply_to_mapper(prismelmapper_t *mapper,
     if(resulting_mapper == NULL)return 1;
     if(!name){name = generate_indexed_name("mapper",
         prend->mappers_len);}
-    err = prismelmapper_init(resulting_mapper, name, space);
+    err = prismelmapper_init(resulting_mapper, name, space, false);
     if(err)return err;
 
     /* Calculate the new mapper's unit */
