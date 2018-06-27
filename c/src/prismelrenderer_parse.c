@@ -65,19 +65,11 @@ int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
 
         int n_colors = 1;
 
-        if(fus_lexer_got_int(lexer)){
-            err = fus_lexer_get_int(lexer, &color_i);
+        if(!fus_lexer_got(lexer, "(")){
+            err = fus_lexer_get_int_range(lexer, 256, &color_i, &n_colors);
             if(err)return err;
-            err = fus_lexer_next(lexer);
-            if(err)return err;
-            if(fus_lexer_got(lexer, "..")){
-                int color_i2;
-                err = fus_lexer_expect_int(lexer, &color_i2);
-                if(err)return err;
-                err = fus_lexer_next(lexer);
-                if(err)return err;
-                n_colors = color_i2 - color_i + 1;
-            }
+            /* NOTE: get_int_range is special, leaves parser looking at
+            next unparsed token... */
         }
 
         err = fus_lexer_get(lexer, "(");

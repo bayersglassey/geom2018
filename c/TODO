@@ -59,3 +59,6 @@ It seems obvious that the resulting n_frames should be the product of mapper & m
 ...ah, but "mapper" is not a rendergraph, it's a mapper.
 We could define mapper's n_frames as the LCD of its rendergraphs' n_frames.
 
+
+Standardize all fus_lexer stuff to leave lexer looking at NEXT UNPARSED TOKEN.
+

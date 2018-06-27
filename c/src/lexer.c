@@ -505,6 +505,54 @@ err:
     return err;
 }
 
+int fus_lexer_get_int_range(fus_lexer_t *lexer, int maxlen,
+    int *i_ptr, int *len_ptr
+){
+    int err;
+
+    /* NOTE: Leaves parser looking at next unparsed token, which is
+    how parsing *should* be, but currently everything else leaves parser
+    looking at last parsed token.
+    TODO: All parsing stuff should work like this function. */
+
+    int i = 0;
+    int len = 1;
+
+    if(fus_lexer_got(lexer, "*")){
+        len = maxlen;
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+    }else{
+        err = fus_lexer_get_int(lexer, &i);
+        if(err)return err;
+        if(i < 0 || i > maxlen){
+            fus_lexer_err_info(lexer);
+            fprintf(stderr,
+                "Expected int within 0..%i, got: %.*s\n",
+                maxlen, lexer->token_len, lexer->token);
+            return 2;}
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+
+        if(fus_lexer_got(lexer, ",")){
+            err = fus_lexer_expect_int(lexer, &len);
+            if(err)return err;
+            if(len < 0 || i + len > maxlen){
+                fus_lexer_err_info(lexer);
+                fprintf(stderr,
+                    "Expected int within 0..%i, got: %.*s\n",
+                    maxlen-i, lexer->token_len, lexer->token);
+                return 2;}
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+        }
+    }
+
+    *i_ptr = i;
+    *len_ptr = len;
+    return 0;
+}
+
 int fus_lexer_expect(fus_lexer_t *lexer, const char *text){
     int err = fus_lexer_next(lexer);
     if(err)return err;
@@ -533,6 +581,14 @@ int fus_lexer_expect_int_fancy(fus_lexer_t *lexer, int *i){
     int err = fus_lexer_next(lexer);
     if(err)return err;
     return fus_lexer_get_int_fancy(lexer, i);
+}
+
+int fus_lexer_expect_int_range(fus_lexer_t *lexer, int maxlen,
+    int *i_ptr, int *len_ptr
+){
+    int err = fus_lexer_next(lexer);
+    if(err)return err;
+    return fus_lexer_get_int_range(lexer, maxlen, i_ptr, len_ptr);
 }
 
 int fus_lexer_unexpected(fus_lexer_t *lexer, const char *expected){
