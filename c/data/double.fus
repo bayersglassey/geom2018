@@ -7,24 +7,24 @@ shapes:
 
     "double_sq":
         prismels:
-            : "sq"  (0 0 0 0)  0 f 2
-            : "sq"  (1 0 0 0)  0 f 2
-            : "sq"  (0 0 0 1)  0 f 2
-            : "sq"  (1 0 0 1)  0 f 2
+            : "sq"  (0 0 0 0)  0 f eval: 1 + 1
+            : "sq"  (1 0 0 0)  0 f eval: 1 + 1
+            : "sq"  (0 0 0 1)  0 f eval: 1 + 1
+            : "sq"  (1 0 0 1)  0 f eval: 1 + 1
 
     "double_tri":
         prismels:
-            : "tri" (0 0 0 0)  0 f 2
-            : "tri" (1 0 0 0)  0 f 2
-            : "tri" (0 0 1 0)  0 f 2
-            : "tri" (1 0 1 0)  6 f 2
+            : "tri" (0 0 0 0)  0 f eval: 1 + 1
+            : "tri" (1 0 0 0)  0 f eval: 1 + 1
+            : "tri" (0 0 1 0)  0 f eval: 1 + 1
+            : "tri" (1 0 1 0)  6 f eval: 1 + 1
 
     "double_dia":
         prismels:
-            : "dia" (0 0 0 0)  0 f 2
-            : "dia" (1 0 0 0)  0 f 2
-            : "dia" (0 1 0 0)  0 f 2
-            : "dia" (1 1 0 0)  0 f 2
+            : "dia" (0 0 0 0)  0 f eval: 1 + 1
+            : "dia" (1 0 0 0)  0 f eval: 1 + 1
+            : "dia" (0 1 0 0)  0 f eval: 1 + 1
+            : "dia" (1 1 0 0)  0 f eval: 1 + 1
 
 
     ##########
@@ -35,31 +35,31 @@ shapes:
         shapes:
             : "double_sq" (0 0 0 0) 0 f
         prismels:
-            : "sq"  (2 0 0 0)  0 f 2
-            : "sq"  (2 0 0 1)  0 f 2
-            : "sq"  (2 0 0 2)  0 f 2
-            : "sq"  (1 0 0 2)  0 f 2
-            : "sq"  (0 0 0 2)  0 f 2
+            : "sq"  (2 0 0 0)  0 f eval: 1 + 1
+            : "sq"  (2 0 0 1)  0 f eval: 1 + 1
+            : "sq"  (2 0 0 2)  0 f eval: 1 + 1
+            : "sq"  (1 0 0 2)  0 f eval: 1 + 1
+            : "sq"  (0 0 0 2)  0 f eval: 1 + 1
 
     "triple_tri":
         shapes:
             : "double_tri" (0 0 0 0) 0 f
         prismels:
-            : "tri" (2 0 0 0)  0 f 2
-            : "tri" (1 0 1 0)  0 f 2
-            : "tri" (0 0 2 0)  0 f 2
-            : "tri" (2 0 1 0)  6 f 2
-            : "tri" (1 0 2 0)  6 f 2
+            : "tri" (2 0 0 0)  0 f eval: 1 + 1
+            : "tri" (1 0 1 0)  0 f eval: 1 + 1
+            : "tri" (0 0 2 0)  0 f eval: 1 + 1
+            : "tri" (2 0 1 0)  6 f eval: 1 + 1
+            : "tri" (1 0 2 0)  6 f eval: 1 + 1
 
     "triple_dia":
         shapes:
             : "double_dia" (0 0 0 0) 0 f
         prismels:
-            : "dia" (2 0 0 0)  0 f 2
-            : "dia" (2 1 0 0)  0 f 2
-            : "dia" (2 2 0 0)  0 f 2
-            : "dia" (1 2 0 0)  0 f 2
-            : "dia" (0 2 0 0)  0 f 2
+            : "dia" (2 0 0 0)  0 f eval: 1 + 1
+            : "dia" (2 1 0 0)  0 f eval: 1 + 1
+            : "dia" (2 2 0 0)  0 f eval: 1 + 1
+            : "dia" (1 2 0 0)  0 f eval: 1 + 1
+            : "dia" (0 2 0 0)  0 f eval: 1 + 1
 
 mappers:
 

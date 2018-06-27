@@ -62,3 +62,22 @@ We could define mapper's n_frames as the LCD of its rendergraphs' n_frames.
 
 Standardize all fus_lexer stuff to leave lexer looking at NEXT UNPARSED TOKEN.
 
+
+Jun 27, 2018:
+-------------
+
+mapper l.blu_double: we're expecting to see light-coloured prismels turned to
+    white, others turned to light blue.
+    But everything is turned to light blue.
+    Is that because our double_sq, double_tri are defined with dark blue?
+    (performs an experiment) ...YES.
+    Well, ok but why?..
+    -> because of that recursive step: mappers end up seeing how things
+        are composed, it's up to us to make sure they *behave* as if they
+        only see the colors in their sub-shapes' rendered bitmaps.
+    -> ok, so what's the fix?
+        ...idunno, but take a look at that thing in prismelrenderer.c which
+        says:
+            /* TODO: think about this and make sure it's correct */
+        ...it's probably not correct, eh.
+

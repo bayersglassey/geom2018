@@ -4,6 +4,12 @@ shapes:
     "red_curvy_sq": shapes: : "curvy_sq" (0 0 0 0) 0 f "red"
     "red_curvy_tri": shapes: : "curvy_tri" (0 0 0 0) 0 f "red"
     "red_curvy_dia": shapes: : "curvy_dia" (0 0 0 0) 0 f "red"
+    "red_double_sq": shapes: : "double_sq" (0 0 0 0) 0 f "red"
+    "red_double_tri": shapes: : "double_tri" (0 0 0 0) 0 f "red"
+    "red_double_dia": shapes: : "double_dia" (0 0 0 0) 0 f "red"
+    "l.blu_double_sq": shapes: : "double_sq" (0 0 0 0) 0 f "l.blu"
+    "l.blu_double_tri": shapes: : "double_tri" (0 0 0 0) 0 f "l.blu"
+    "l.blu_double_dia": shapes: : "double_dia" (0 0 0 0) 0 f "l.blu"
 
 mappers:
 
@@ -13,6 +19,20 @@ mappers:
             : "sq" -> "red_curvy_sq"
             : "tri" -> "red_curvy_tri"
             : "dia" -> "red_curvy_dia"
+
+    "red_double":
+        unit: 2 0 0 0
+        entries:
+            : "sq" -> "red_double_sq"
+            : "tri" -> "red_double_tri"
+            : "dia" -> "red_double_dia"
+
+    "l.blu_double":
+        unit: 2 0 0 0
+        entries:
+            : "sq" -> "l.blu_double_sq"
+            : "tri" -> "l.blu_double_tri"
+            : "dia" -> "l.blu_double_dia"
 
     "double_double": map ("double") ("double")
     "double_curvy": map ("double") ("curvy")
