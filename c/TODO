@@ -59,12 +59,3 @@ It seems obvious that the resulting n_frames should be the product of mapper & m
 ...ah, but "mapper" is not a rendergraph, it's a mapper.
 We could define mapper's n_frames as the LCD of its rendergraphs' n_frames.
 
-
-Jun 26, 2018:
--------------
-
-Applying mapper to mapper doesn't do palmappers correctly
-    LOOKS GOOD:
-        "curvy_curvy_dodeca_B": map ("curvy") ("curvy_dodeca_B")
-    LOOKS BORING:
-        "curvy_curvy_dodeca_B": map ("curvy_curvy") ("dodeca_B")

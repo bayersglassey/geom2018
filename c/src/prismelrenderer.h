@@ -91,6 +91,8 @@ int prismelrenderer_push_prismel(prismelrenderer_t *renderer, char *name,
     prismel_t **prismel_ptr);
 palettemapper_t *prismelrenderer_get_palmapper(prismelrenderer_t *prend,
     const char *name);
+int prismelrenderer_get_solid_palettemapper(prismelrenderer_t *prend,
+    int color);
 prismel_t *prismelrenderer_get_prismel(prismelrenderer_t *prend,
     const char *name);
 struct rendergraph *prismelrenderer_get_rendergraph(prismelrenderer_t *prend,

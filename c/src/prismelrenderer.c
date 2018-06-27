@@ -314,6 +314,24 @@ palettemapper_t *prismelrenderer_get_palmapper(prismelrenderer_t *prend,
     return NULL;
 }
 
+int prismelrenderer_get_solid_palettemapper(prismelrenderer_t *prend,
+    int color
+){
+    int err;
+    char *name = generate_indexed_name("solid", color);
+    palettemapper_t *palmapper = prismelrenderer_get_palmapper(
+        prend, name);
+    if(palmapper == NULL){
+        ARRAY_PUSH_NEW(palettemapper_t, *prend, palmappers, _palmapper)
+        palmapper = _palmapper;
+        err = palettemapper_init(palmapper, name, color);
+        if(err)return err;
+    }else{
+        free(name);
+    }
+    return 0;
+}
+
 prismel_t *prismelrenderer_get_prismel(prismelrenderer_t *prend,
     const char *name
 ){
@@ -1067,21 +1085,6 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
                     prismel_trf->frame_start;
                 new_rendergraph_trf->frame_len =
                     prismel_trf->frame_len;
-
-                /* get or create palmapper for solid color */
-                int color = prismel_trf->color;
-                char *palmapper_name = generate_indexed_name("solid", color);
-                palettemapper_t *palmapper = prismelrenderer_get_palmapper(
-                    prend, palmapper_name);
-                if(palmapper == NULL){
-                    ARRAY_PUSH_NEW(palettemapper_t, *prend, palmappers, _palmapper)
-                    palmapper = _palmapper;
-                    err = palettemapper_init(palmapper, palmapper_name, color);
-                    if(err)return err;
-                }
-
-                new_rendergraph_trf->palmapper = palmapper;
-
                 entry_found = true;
                 break;
             }
