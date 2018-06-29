@@ -662,6 +662,7 @@ int rendergraph_push_rendergraph_trf(rendergraph_t *rendergraph,
     rendergraph_trf->frame_len = -1;
     rendergraph_trf->frame_i = 0;
     rendergraph_trf->frame_i_additive = true;
+    rendergraph_trf->palmapper_n_applications = 1;
     *rendergraph_trf_ptr = rendergraph_trf;
     return 0;
 }
@@ -887,8 +888,15 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
         };
 
         palettemapper_t *palmapper = rendergraph_trf->palmapper;
+        Uint8 table[256];
+        if(palmapper){
+            for(int i = 0; i < 256; i++)table[i] = i;
+            for(int i = 0; i < rendergraph_trf->palmapper_n_applications; i++){
+                for(int i = 0; i < 256; i++)table[i] = palmapper->table[table[i]];
+            }
+        }
         RET_IF_SDL_NZ(SDL_PaletteMappedBlit(bitmap2->surface, NULL,
-            surface, &dst_rect, palmapper? palmapper->table: NULL));
+            surface, &dst_rect, palmapper? table: NULL));
     }
 
     /* Create texture, if an SDL_Renderer was provided */

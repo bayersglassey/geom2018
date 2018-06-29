@@ -116,6 +116,7 @@ typedef struct rendergraph_trf {
     bool frame_i_additive;
 
     struct palettemapper *palmapper;
+    int palmapper_n_applications;
 
     int frame_start;
     int frame_len;
