@@ -7,7 +7,7 @@ And a bit of a game demo, a kind of puzzly arcadey look at the triangular grid.
 
 ## How to compile & run
 
-``cd c && ./compile_sdl && ./main`` should do the trick.
+``cd c && ./compile_sdl && ./main`` should do the trick (if you have gcc).
 
 Once it's running, it shows the debug controls on the screen.
 It's a kind of console, into which entering ``run`` should run you the game demo.
