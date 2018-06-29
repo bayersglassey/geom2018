@@ -17,21 +17,21 @@ Not very user-friendly yet, is it? Don't worry, we're getting there.
 ## Screenshots
 
 ### A little pattern:
-!(/img/screen4.png)
+![](/img/screen4.png)
 
 ### A big animated pattern:
-!(/img/screen3.png)
+![](/img/screen3.png)
 
 ### A bug results in a neat pattern:
-!(/img/screen1.png)
+![](/img/screen1.png)
 
 ### Game demo:
-!(/img/screen2.png)
+![](/img/screen2.png)
 
 ### I fly off the screen to my (presumably) death:
-!(/img/screen6.png)
+![](/img/screen6.png)
 
 ### Game demo passed through some kind of geometry-expanding transformation:
-!(/img/screen5.png)
+![](/img/screen5.png)
 
 
