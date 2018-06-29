@@ -173,7 +173,7 @@ int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i,
     SDL_Palette *pal, SDL_Renderer *renderer);
 int rendergraph_bitmap_get_texture(rendergraph_bitmap_t *bitmap,
-    SDL_Renderer *renderer, SDL_Texture **texture_ptr);
+    SDL_Renderer *renderer, bool force_create, SDL_Texture **texture_ptr);
 
 
 

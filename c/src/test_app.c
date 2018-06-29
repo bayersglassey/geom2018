@@ -16,6 +16,8 @@
 #include "hexspace.h"
 
 
+#define CYCLE_PALETTE false
+
 
 
 void test_app_cleanup(test_app_t *app){
@@ -363,7 +365,7 @@ int test_app_blit_rgraph(test_app_t *app, rendergraph_t *rgraph,
     };
     SDL_Texture *bitmap_texture;
     err = rendergraph_bitmap_get_texture(bitmap, app->renderer,
-        &bitmap_texture);
+        CYCLE_PALETTE, &bitmap_texture);
     if(err)return err;
     RET_IF_SDL_NZ(SDL_RenderCopy(app->renderer, bitmap_texture,
         NULL, &dst_rect));
@@ -389,6 +391,17 @@ int test_app_mainloop(test_app_t *app){
             app->prend.rendergraphs[app->cur_rgraph_i];
         int animated_frame_i = get_animated_frame_i(
             rgraph->animation_type, rgraph->n_frames, app->frame_i);
+
+        if(CYCLE_PALETTE){
+            /* Cycle palette */
+            SDL_Color colors[16];
+            for(int i = 0; i < 16; i++){
+                colors[i] = app->pal->colors[1 + (i + 1) % 16];
+            }
+            if(SDL_SetPaletteColors(app->pal, colors, 1, 16)){
+                printf("SDL_SetPaletteColors error: %s\n", SDL_GetError());
+            }
+        }
 
         if(app->hexgame_running){
             err = hexgame_step(&app->hexgame);
