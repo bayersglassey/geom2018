@@ -77,3 +77,15 @@ shapes:
         animation: cycle 12
         shapes:
             : "double_curvy_dodeca_anim" (0 0 0 0)  0 f "l.blu"
+
+    "palmap_grid":
+        shapes:
+            : "curvy_sq" eval((2 4 0 -2) * 0 + (-2 0 4 2) * 0) 0 f "cycle0"
+            : "curvy_sq" eval((2 4 0 -2) * 0 + (-2 0 4 2) * 1) 0 f "cycle1"
+            : "curvy_sq" eval((2 4 0 -2) * 0 + (-2 0 4 2) * 2) 0 f "cycle2"
+            : "curvy_sq" eval((2 4 0 -2) * 1 + (-2 0 4 2) * 0) 0 f "cycle1"
+            : "curvy_sq" eval((2 4 0 -2) * 1 + (-2 0 4 2) * 1) 0 f "cycle2"
+            : "curvy_sq" eval((2 4 0 -2) * 1 + (-2 0 4 2) * 2) 0 f "cycle0"
+            : "curvy_sq" eval((2 4 0 -2) * 2 + (-2 0 4 2) * 0) 0 f "cycle2"
+            : "curvy_sq" eval((2 4 0 -2) * 2 + (-2 0 4 2) * 1) 0 f "cycle0"
+            : "curvy_sq" eval((2 4 0 -2) * 2 + (-2 0 4 2) * 2) 0 f "cycle1"

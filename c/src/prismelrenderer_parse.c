@@ -47,20 +47,57 @@ int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
 ){
     int err;
 
-    ARRAY_PUSH_NEW(palettemapper_t, *prend, palmappers, palmapper)
+    palettemapper_t *palmapper = NULL;
+
+    err = fus_lexer_get(lexer, "(");
+    if(err)return err;
+    err = fus_lexer_next(lexer);
+    if(err)return err;
+
+    if(fus_lexer_got_str(lexer)){
+        char *name;
+        err = fus_lexer_get_str(lexer, &name);
+        if(err)return err;
+        palmapper = prismelrenderer_get_palmapper(prend, name);
+        if(palmapper == NULL){
+            fprintf(stderr, "Couldn't find palette mapper: %s\n", name);
+            free(name); return 2;}
+        free(name);
+
+        err = fus_lexer_expect(lexer, ")");
+        if(err)return err;
+        goto ok;
+    }
+
+    if(fus_lexer_got(lexer, "map")){
+        palettemapper_t *palmapper1;
+        err = fus_lexer_expect_palettemapper(lexer, prend, NULL,
+            &palmapper1);
+        if(err)return err;
+
+        palettemapper_t *palmapper2;
+        err = fus_lexer_expect_palettemapper(lexer, prend, NULL,
+            &palmapper2);
+        if(err)return err;
+
+        err = palettemapper_apply_to_palettemapper(palmapper1, prend,
+            palmapper2, name, &palmapper);
+        if(err)return err;
+
+        err = fus_lexer_expect(lexer, ")");
+        if(err)return err;
+        goto ok;
+    }
+
+    ARRAY_PUSH_NEW(palettemapper_t, *prend, palmappers, _palmapper)
+    palmapper = _palmapper;
     err = palettemapper_init(palmapper, strdup(name), -1);
     if(err)return err;
 
     Uint8 *table = palmapper->table;
     int color_i = 0;
 
-    err = fus_lexer_get(lexer, "(");
-    if(err)return err;
-
     while(1){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-
         if(fus_lexer_got(lexer, ")"))break;
 
         int n_colors = 1;
@@ -103,8 +140,12 @@ int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
         }
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
+
+        err = fus_lexer_next(lexer);
+        if(err)return err;
     }
 
+ok:
     *palmapper_ptr = palmapper;
     return 0;
 }
@@ -335,13 +376,7 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
             if(err)return err;
 
             /* trf.add */
-            err = fus_lexer_expect(lexer, "(");
-            if(err)return err;
-            for(int i = 0; i < prend->space->dims; i++){
-                err = fus_lexer_expect_int(lexer, &v[i]);
-                if(err)return err;
-            }
-            err = fus_lexer_expect(lexer, ")");
+            err = fus_lexer_expect_vec(lexer, prend->space, v);
             if(err)return err;
 
             /* trf.rot */
@@ -461,13 +496,7 @@ static int parse_shape_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer,
             err = fus_lexer_expect_str(lexer, &name);
             if(err)return err;
 
-            err = fus_lexer_expect(lexer, "(");
-            if(err)return err;
-            for(int i = 0; i < prend->space->dims; i++){
-                err = fus_lexer_expect_int(lexer, &v[i]);
-                if(err)return err;
-            }
-            err = fus_lexer_expect(lexer, ")");
+            err = fus_lexer_expect_vec(lexer, prend->space, v);
             if(err)return err;
 
             err = fus_lexer_expect_int(lexer, &rot);
@@ -572,7 +601,7 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
         if(err)return err;
 
         err = prismelmapper_apply_to_rendergraph(mapper, prend, mapped_rgraph,
-            name, prend->space, &rgraph);
+            name, prend->space, NULL, &rgraph);
         if(err)return err;
 
         err = fus_lexer_next(lexer);
@@ -753,13 +782,7 @@ int fus_lexer_get_mapper(fus_lexer_t *lexer,
 
     ARRAY_PUSH(prismelmapper_t, *prend, mappers, mapper)
 
-    err = fus_lexer_expect(lexer, "(");
-    if(err)return err;
-    for(int i = 0; i < prend->space->dims; i++){
-        err = fus_lexer_expect_int(lexer, &mapper->unit[i]);
-        if(err)return err;
-    }
-    err = fus_lexer_expect(lexer, ")");
+    err = fus_lexer_expect_vec(lexer, prend->space, mapper->unit);
     if(err)return err;
     err = fus_lexer_next(lexer);
     if(err)return err;

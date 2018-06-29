@@ -129,28 +129,6 @@ int get_bitmap_i(vecspace_t *space, rot_t rot, flip_t flip,
 }
 
 
-
-/******************
- * PALETTE MAPPER *
- ******************/
-
-int palettemapper_init(palettemapper_t *palmapper, char *name, int color){
-    if(name == NULL)name = strdup("<palette mapper>");
-    palmapper->name = name;
-    palmapper->table[0] = 0; /* 0 is the transparent color */
-    if(color < 0){
-        for(int i = 1; i < 256; i++)palmapper->table[i] = i;
-    }else{
-        for(int i = 1; i < 256; i++)palmapper->table[i] = color;
-    }
-    return 0;
-}
-
-void palettemapper_cleanup(palettemapper_t *palmapper){
-    free(palmapper->name);
-}
-
-
 /***********
  * PRISMEL *
  ***********/
@@ -1042,7 +1020,7 @@ int prismelmapper_push_entry(prismelmapper_t *mapper,
 int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
     prismelrenderer_t *prend,
     rendergraph_t *mapped_rgraph,
-    char *name, vecspace_t *space,
+    char *name, vecspace_t *space, Uint8 *table,
     rendergraph_t **rgraph_ptr
 ){
     int err;
@@ -1096,8 +1074,10 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
                     prismel_trf->frame_len;
 
                 if(mapper->solid){
+                    Uint8 color = prismel_trf->color;
+                    if(table != NULL)color = table[color];
                     err = prismelrenderer_get_solid_palettemapper(
-                        prend, prismel_trf->color,
+                        prend, color,
                         &new_rendergraph_trf->palmapper);
                     if(err)return err;
                 }
@@ -1124,7 +1104,7 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
         /* Recurse! */
         rendergraph_t *new_rgraph;
         err = prismelmapper_apply_to_rendergraph(mapper, prend,
-            rgraph, NULL, space, &new_rgraph);
+            rgraph, NULL, space, table, &new_rgraph);
         if(err)return err;
 
         /* Add a rendergraph_trf to resulting_rgraph */
@@ -1213,7 +1193,7 @@ int prismelmapper_apply_to_mapper(prismelmapper_t *mapper,
 
         rendergraph_t *new_rgraph;
         err = prismelmapper_apply_to_rendergraph(mapper, prend,
-            entry->rendergraph, name, space, &new_rgraph);
+            entry->rendergraph, name, space, NULL, &new_rgraph);
         if(err)return err;
 
         err = prismelmapper_push_entry(resulting_mapper,
@@ -1275,6 +1255,101 @@ prismelmapper_t *prismelmapper_get_mapplication(prismelmapper_t *mapper,
         prismelmapper_mapplication_t *mapplication = mapper->mapplications[i];
         if(mapplication->mapped_mapper == mapped_mapper){
             return mapplication->resulting_mapper;}
+    }
+    return NULL;
+}
+
+
+
+/******************
+ * PALETTE MAPPER *
+ ******************/
+
+int palettemapper_init(palettemapper_t *palmapper, char *name, int color){
+    if(name == NULL)name = strdup("<palette mapper>");
+    palmapper->name = name;
+    palmapper->table[0] = 0; /* 0 is the transparent color */
+    if(color < 0){
+        for(int i = 1; i < 256; i++)palmapper->table[i] = i;
+    }else{
+        for(int i = 1; i < 256; i++)palmapper->table[i] = color;
+    }
+    ARRAY_INIT(*palmapper, pmapplications)
+    return 0;
+}
+
+void palettemapper_cleanup(palettemapper_t *palmapper){
+    free(palmapper->name);
+    ARRAY_FREE(palettemapper_pmapplication_t, *palmapper,
+        pmapplications, (void))
+}
+
+int palettemapper_apply_to_palettemapper(palettemapper_t *palmapper,
+    prismelrenderer_t *prend, palettemapper_t *mapped_palmapper,
+    char *name, palettemapper_t **palmapper_ptr
+){
+    int err;
+
+    palettemapper_t *resulting_palmapper;
+
+    /* Check whether this palmapper has already been applied to this
+    mapped_palmapper. If so, return the cached resulting_palmapper. */
+    resulting_palmapper = palettemapper_get_pmapplication(
+        palmapper, mapped_palmapper);
+    if(resulting_palmapper != NULL){
+        free(name);
+        *palmapper_ptr = resulting_palmapper;
+        return 0;
+    }
+
+    /* Create a new palettemapper */
+    resulting_palmapper = calloc(1, sizeof(palettemapper_t));
+    if(resulting_palmapper == NULL)return 1;
+    if(!name){name = generate_indexed_name("palmapper",
+        prend->palmappers_len);}
+    err = palettemapper_init(resulting_palmapper, name, -1);
+    if(err)return err;
+
+    /* Apply tables to each other... that's why we're here, really */
+    for(int i = 0; i < 256; i++){
+        resulting_palmapper->table[i] = palmapper->table
+            [mapped_palmapper->table[i]];
+    }
+
+    /* Cache this resulting_palmapper on the palmapper in case it
+    ever gets applied to the same mapped_palmapper again */
+    err = palettemapper_push_pmapplication(palmapper,
+        mapped_palmapper, resulting_palmapper);
+    if(err)return err;
+
+    /* Add the resulting_palmapper to the prismelrenderer, makes for
+    easier debugging */
+    ARRAY_PUSH(palettemapper_t, *prend, palmappers,
+        resulting_palmapper)
+
+    /* Success! */
+    *palmapper_ptr = resulting_palmapper;
+    return 0;
+}
+
+int palettemapper_push_pmapplication(palettemapper_t *mapper,
+    palettemapper_t *mapped_mapper, palettemapper_t *resulting_mapper
+){
+    ARRAY_PUSH_NEW(palettemapper_pmapplication_t, *mapper, pmapplications,
+        pmapplication)
+    pmapplication->mapped_mapper = mapped_mapper;
+    pmapplication->resulting_mapper = resulting_mapper;
+    return 0;
+}
+
+palettemapper_t *palettemapper_get_pmapplication(palettemapper_t *mapper,
+    palettemapper_t *mapped_mapper
+){
+    for(int i = 0; i < mapper->pmapplications_len; i++){
+        palettemapper_pmapplication_t *pmapplication =
+            mapper->pmapplications[i];
+        if(pmapplication->mapped_mapper == mapped_mapper){
+            return pmapplication->resulting_mapper;}
     }
     return NULL;
 }

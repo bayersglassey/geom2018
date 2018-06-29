@@ -281,7 +281,7 @@ int test_app_process_console_input(test_app_t *app){
         rendergraph_t *rgraph;
         err = prismelmapper_apply_to_rendergraph(mapper, &app->prend,
             mapped_rgraph, resulting_rgraph_name, app->prend.space,
-            &rgraph);
+            NULL, &rgraph);
         if(err)return err;
     }else if(fus_lexer_got(&lexer, "renderall")){
         SDL_Renderer *renderer = NULL;
@@ -335,7 +335,7 @@ int test_app_blit_rgraph(test_app_t *app, rendergraph_t *rgraph,
 
     if(mapper != NULL){
         err = prismelmapper_apply_to_rendergraph(mapper, &app->prend, rgraph,
-            NULL, rgraph->space, &rgraph);
+            NULL, rgraph->space, NULL, &rgraph);
         if(err)return err;
 
         vec_mul(mapper->space, pos, mapper->unit);

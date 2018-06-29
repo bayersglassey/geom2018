@@ -27,19 +27,6 @@ int get_bitmap_i(vecspace_t *space, rot_t rot, flip_t flip,
     int n_frames, int frame_i);
 
 
-/******************
- * PALETTE MAPPER *
- ******************/
-
-typedef struct palettemapper {
-    char *name;
-    Uint8 table[256];
-} palettemapper_t;
-
-int palettemapper_init(palettemapper_t *palmapper, char *name, int color);
-void palettemapper_cleanup(palettemapper_t *palmapper);
-
-
 /***********
  * PRISMEL *
  ***********/
@@ -89,16 +76,17 @@ void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
     int dump_bitmaps);
 int prismelrenderer_push_prismel(prismelrenderer_t *renderer, char *name,
     prismel_t **prismel_ptr);
-palettemapper_t *prismelrenderer_get_palmapper(prismelrenderer_t *prend,
-    const char *name);
-int prismelrenderer_get_solid_palettemapper(prismelrenderer_t *prend,
-    int color, palettemapper_t **palmapper_ptr);
-prismel_t *prismelrenderer_get_prismel(prismelrenderer_t *prend,
+struct prismel *prismelrenderer_get_prismel(prismelrenderer_t *prend,
     const char *name);
 struct rendergraph *prismelrenderer_get_rendergraph(prismelrenderer_t *prend,
     const char *name);
 struct prismelmapper *prismelrenderer_get_mapper(prismelrenderer_t *prend,
     const char *name);
+struct palettemapper *prismelrenderer_get_palmapper(prismelrenderer_t *prend,
+    const char *name);
+struct palettemapper;
+int prismelrenderer_get_solid_palettemapper(prismelrenderer_t *prend,
+    int color, struct palettemapper **palmapper_ptr);
 int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer);
 int prismelrenderer_load(prismelrenderer_t *prend, const char *filename);
 int prismelrenderer_save(prismelrenderer_t *prend, const char *filename);
@@ -127,7 +115,7 @@ typedef struct rendergraph_trf {
     int frame_i;
     bool frame_i_additive;
 
-    palettemapper_t *palmapper;
+    struct palettemapper *palmapper;
 
     int frame_start;
     int frame_len;
@@ -228,7 +216,7 @@ int prismelmapper_push_entry(prismelmapper_t *mapper,
 int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
     prismelrenderer_t *prend,
     rendergraph_t *mapped_rgraph,
-    char *name, vecspace_t *space,
+    char *name, vecspace_t *space, Uint8 *table,
     rendergraph_t **rgraph_ptr);
 int prismelmapper_apply_to_mapper(prismelmapper_t *mapper,
     prismelrenderer_t *prend,
@@ -243,6 +231,32 @@ rendergraph_t *prismelmapper_get_application(prismelmapper_t *mapper,
     rendergraph_t *mapped_rgraph);
 prismelmapper_t *prismelmapper_get_mapplication(prismelmapper_t *mapper,
     prismelmapper_t *mapped_mapper);
+
+
+/******************
+ * PALETTE MAPPER *
+ ******************/
+
+typedef struct palettemapper {
+    char *name;
+    Uint8 table[256];
+    ARRAY_DECL(struct palettemapper_pmapplication, pmapplications)
+} palettemapper_t;
+
+typedef struct palettemapper_pmapplication {
+    struct palettemapper *mapped_mapper;
+    struct palettemapper *resulting_mapper;
+} palettemapper_pmapplication_t;
+
+int palettemapper_init(palettemapper_t *palmapper, char *name, int color);
+void palettemapper_cleanup(palettemapper_t *palmapper);
+int palettemapper_apply_to_palettemapper(palettemapper_t *palmapper,
+    prismelrenderer_t *prend, palettemapper_t *mapped_palmapper,
+    char *name, palettemapper_t **palmapper_ptr);
+int palettemapper_push_pmapplication(palettemapper_t *mapper,
+    palettemapper_t *mapped_mapper, palettemapper_t *resulting_mapper);
+palettemapper_t *palettemapper_get_pmapplication(palettemapper_t *mapper,
+    palettemapper_t *mapped_mapper);
 
 
 /*************
