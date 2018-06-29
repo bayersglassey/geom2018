@@ -28,7 +28,7 @@ Not very user-friendly yet, is it? Don't worry, we're getting there.
 ### Game demo:
 ![](/img/screen2.png)
 
-### I fly off the screen to (presumably) my death:
+### I jump upside-down off the left side of the screen to (presumably) my death:
 ![](/img/screen6.png)
 
 ### Game demo passed through some kind of geometry-expanding transformation:
