@@ -9,10 +9,14 @@
 #include "prismelrenderer.h"
 
 
+typedef struct hexcollmap_elem {
+    int tile_i;
+} hexcollmap_elem_t;
+
 typedef struct hexcollmap_tile {
-    bool vert[1];
-    bool edge[3];
-    bool face[2];
+    hexcollmap_elem_t vert[1];
+    hexcollmap_elem_t edge[3];
+    hexcollmap_elem_t face[2];
 } hexcollmap_tile_t;
 
 typedef struct hexcollmap {
@@ -54,9 +58,10 @@ void hexcollmap_normalize_vert(trf_t *index);
 void hexcollmap_normalize_edge(trf_t *index);
 void hexcollmap_normalize_face(trf_t *index);
 hexcollmap_tile_t *hexcollmap_get_tile(hexcollmap_t *collmap, trf_t *index);
-bool hexcollmap_get_vert(hexcollmap_t *collmap, trf_t *index);
-bool hexcollmap_get_edge(hexcollmap_t *collmap, trf_t *index);
-bool hexcollmap_get_face(hexcollmap_t *collmap, trf_t *index);
+hexcollmap_elem_t *hexcollmap_get_vert(hexcollmap_t *collmap, trf_t *index);
+hexcollmap_elem_t *hexcollmap_get_edge(hexcollmap_t *collmap, trf_t *index);
+hexcollmap_elem_t *hexcollmap_get_face(hexcollmap_t *collmap, trf_t *index);
+bool hexcollmap_elem_is_solid(hexcollmap_elem_t *elem);
 
 
 

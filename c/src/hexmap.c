@@ -68,10 +68,16 @@ void hexcollmap_dump(hexcollmap_t *collmap, FILE *f, int n_spaces){
         fprintf(f, "%s    ", spaces);
         for(int x = 0; x < collmap->w; x++){
             hexcollmap_tile_t *tile = &collmap->tiles[y * collmap->w + x];
-            fprintf(f, "[%i][%i%i%i][%i%i] ",
-                tile->vert[0],
-                tile->edge[0], tile->edge[1], tile->edge[2],
-                tile->face[0], tile->face[1]);
+            fprintf(f, "[");
+                for(int i = 0; i < 1; i++){
+                    fprintf(f, "%i", tile->vert[i].tile_i);}
+            fprintf(f, "][");
+                for(int i = 0; i < 3; i++){
+                    fprintf(f, "%i", tile->edge[i].tile_i);}
+            fprintf(f, "][");
+                for(int i = 0; i < 2; i++){
+                    fprintf(f, "%i", tile->face[i].tile_i);}
+            fprintf(f, "] ");
         }
         fprintf(f, "\n");
     }
@@ -179,8 +185,16 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
     /* Intermission: Allocate map data */
     int map_w = map_r - map_l + 1;
     int map_h = map_b - map_t + 1;
-    hexcollmap_tile_t *tiles = calloc(map_w * map_h, sizeof(*tiles));
+    int map_size = map_w * map_h;
+    hexcollmap_tile_t *tiles = calloc(map_size, sizeof(*tiles));
     if(tiles == NULL)return 1;
+
+    /* Intermission: Initialize tile elements */
+    for(int i = 0; i < map_size; i++){
+        for(int j = 0; j < 1; j++)tiles[i].vert[j].tile_i = -1;
+        for(int j = 0; j < 3; j++)tiles[i].edge[j].tile_i = -1;
+        for(int j = 0; j < 2; j++)tiles[i].face[j].tile_i = -1;
+    }
 
     /* Iteration 3: The meat of it all */
     for(int y = 0; y < lines_len; y++){
@@ -195,16 +209,19 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                 mx -= map_l;
                 my -= map_t;
                 hexcollmap_tile_t *tile = &tiles[my * map_w + mx];
+
+                int tile_i = 0; /* TODO: get this from somewhere. */
+
                 if(c == '+'){
-                    tile->vert[0] = true;
+                    tile->vert[0].tile_i = tile_i;
                 }else if(c == '-'){
-                    tile->edge[0] = true;
+                    tile->edge[0].tile_i = tile_i;
                 }else if(c == '/'){
-                    tile->edge[1] = true;
+                    tile->edge[1].tile_i = tile_i;
                 }else if(c == '\\'){
-                    tile->edge[2] = true;
+                    tile->edge[2].tile_i = tile_i;
                 }else if(c == '*'){
-                    tile->face[is_face1? 1: 0] = true;
+                    tile->face[is_face1? 1: 0].tile_i = tile_i;
                 }
             }
         }
@@ -309,22 +326,26 @@ hexcollmap_tile_t *hexcollmap_get_tile(hexcollmap_t *collmap, trf_t *index){
     return &collmap->tiles[y * collmap->w + x];
 }
 
-bool hexcollmap_get_vert(hexcollmap_t *collmap, trf_t *index){
+hexcollmap_elem_t *hexcollmap_get_vert(hexcollmap_t *collmap, trf_t *index){
     hexcollmap_tile_t *tile = hexcollmap_get_tile(collmap, index);
-    if(tile == NULL)return false;
-    return tile->vert[index->rot];
+    if(tile == NULL)return NULL;
+    return &tile->vert[index->rot];
 }
 
-bool hexcollmap_get_edge(hexcollmap_t *collmap, trf_t *index){
+hexcollmap_elem_t *hexcollmap_get_edge(hexcollmap_t *collmap, trf_t *index){
     hexcollmap_tile_t *tile = hexcollmap_get_tile(collmap, index);
-    if(tile == NULL)return false;
-    return tile->edge[index->rot];
+    if(tile == NULL)return NULL;
+    return &tile->edge[index->rot];
 }
 
-bool hexcollmap_get_face(hexcollmap_t *collmap, trf_t *index){
+hexcollmap_elem_t *hexcollmap_get_face(hexcollmap_t *collmap, trf_t *index){
     hexcollmap_tile_t *tile = hexcollmap_get_tile(collmap, index);
-    if(tile == NULL)return false;
-    return tile->face[index->rot];
+    if(tile == NULL)return NULL;
+    return &tile->face[index->rot];
+}
+
+bool hexcollmap_elem_is_solid(hexcollmap_elem_t *elem){
+    return elem != NULL && elem->tile_i >= 0;
 }
 
 
@@ -553,7 +574,8 @@ bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
 
             #define COLLIDE(PART, ROT) \
                 for(int r2 = 0; r2 < ROT; r2++){ \
-                    if(!tile2->PART[r2])continue; \
+                    if(!hexcollmap_elem_is_solid( \
+                        &tile2->PART[r2]))continue; \
                     trf_t index; \
                     hexspace_set(index.add, x2 - ox2, y2 - oy2); \
                     index.rot = r2; \
@@ -581,9 +603,9 @@ bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
                         subindex.rot = index.rot; \
                         subindex.flip = index.flip; \
                         \
-                        bool subcollide = hexcollmap_get_##PART(collmap1, \
-                            &subindex); \
-                        if(subcollide){ \
+                        hexcollmap_elem_t *PART = \
+                            hexcollmap_get_##PART(collmap1, &subindex); \
+                        if(hexcollmap_elem_is_solid(PART)){ \
                             collide = true; break;} \
                     } \
                     if(all && !collide)return false; \
@@ -707,17 +729,20 @@ int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap){
                 &collmap->tiles[y * collmap->w + x];
 
             for(int i = 0; i < 1; i++){
-                if(tile->vert[i]){
+                hexcollmap_elem_t *elem = &tile->vert[i];
+                if(hexcollmap_elem_is_solid(elem)){
                     err = add_tile_rgraph(rgraph, map->rgraph_vert,
                         space, v, i * 2);
                     if(err)return err;}}
             for(int i = 0; i < 3; i++){
-                if(tile->edge[i]){
+                hexcollmap_elem_t *elem = &tile->edge[i];
+                if(hexcollmap_elem_is_solid(elem)){
                     err = add_tile_rgraph(rgraph, map->rgraph_edge,
                         space, v, i * 2);
                     if(err)return err;}}
             for(int i = 0; i < 2; i++){
-                if(tile->face[i]){
+                hexcollmap_elem_t *elem = &tile->face[i];
+                if(hexcollmap_elem_is_solid(elem)){
                     err = add_tile_rgraph(rgraph, map->rgraph_face,
                         space, v, i * 2);
                     if(err)return err;}}

@@ -277,8 +277,9 @@ int hexgame_step(hexgame_t *game){
                  player->pos[0] - submap->pos[0],
                 -player->pos[1] + submap->pos[1]);
 
-            collide = hexcollmap_get_vert(collmap, &index);
-            if(collide){
+            hexcollmap_elem_t *vert =
+                hexcollmap_get_vert(collmap, &index);
+            if(hexcollmap_elem_is_solid(vert)){
                 vec_cpy(space->dims, game->camera_pos,
                     submap->camera_pos);
                 break;
