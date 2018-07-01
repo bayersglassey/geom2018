@@ -107,4 +107,7 @@ WHAT'S NEEDED FOR A PROPER DEMO:
         character select, multiplayer, etc.)
 
 
-
+hexcollmap parser should tell you if you've got off-by-one issues, like:
+    ;;   +
+    ;;  / \
+    ;;  + - +   <--- WRONG
