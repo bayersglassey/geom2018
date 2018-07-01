@@ -159,7 +159,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->zoom = 1;
     app->frame_i = 0;
     app->loop = true;
-    app->hexgame_running = false;
+    app->hexgame_running = true;
 
     test_app_init_input(app);
     return 0;
@@ -183,10 +183,7 @@ int test_app_process_console_input(test_app_t *app){
     }else if(fus_lexer_got(&lexer, "cls")){
         console_clear(&app->console);
     }else if(fus_lexer_got(&lexer, "run")){
-        app->hexgame_running = true;
-        test_app_init_input(app);
-        console_write_msg(&app->console, "Game started\n");
-        SDL_StopTextInput();
+        console_write_msg(&app->console, "Try F5\n");
         return 0;
     }else if(fus_lexer_got(&lexer, "rem_players")){
         ARRAY_FREE(player_t, app->hexgame, players, player_cleanup)
@@ -424,16 +421,23 @@ int test_app_mainloop(test_app_t *app){
             if(event.type == SDL_QUIT){
                 app->loop = false; break;}
 
-            if(event.type == SDL_KEYDOWN
-                && event.key.keysym.sym == SDLK_ESCAPE){
+            if(event.type == SDL_KEYDOWN){
+                if(event.key.keysym.sym == SDLK_ESCAPE){
+                    app->loop = false; break;}
+                if(event.key.keysym.sym == SDLK_F5){
                     if(app->hexgame_running){
                         app->hexgame_running = false;
                         console_write_msg(&app->console, "Game stopped\n");
                         SDL_StartTextInput();
                     }else{
-                        console_write_msg(&app->console,
-                            "Game already stopped - try \"exit\"\n");}
-                    continue;}
+                        app->hexgame_running = true;
+                        test_app_init_input(app);
+                        console_write_msg(&app->console, "Game started\n");
+                        SDL_StopTextInput();
+                    }
+                    continue;
+                }
+            }
 
             if(app->hexgame_running){
                 err = hexgame_process_event(&app->hexgame, &event);

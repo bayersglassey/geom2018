@@ -9,8 +9,8 @@ And a bit of a game demo, a kind of puzzly arcadey look at the triangular grid.
 
 ``cd c && ./compile_sdl && ./main`` should do the trick (if you have gcc).
 
-Once it's running, it shows the debug controls on the screen.
-It's a kind of console, into which entering ``run`` should run you the game demo.
+Once game is running, use arrow keys to move.
+F5 enters/exits debug console.
 
 Not very user-friendly yet, is it? Don't worry, we're getting there.
 
