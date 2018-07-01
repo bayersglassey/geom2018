@@ -64,9 +64,8 @@ void hexgame_cleanup(hexgame_t *game);
 int hexgame_init(hexgame_t *game, hexmap_t *map);
 int hexgame_process_event(hexgame_t *game, SDL_Event *event);
 int hexgame_step(hexgame_t *game);
-
-struct test_app; /* TODO: Get rid of this dependency */
-int hexgame_render(hexgame_t *game, struct test_app *app);
+int hexgame_render(hexgame_t *game, SDL_Renderer *renderer,
+    SDL_Palette *pal, int x0, int y0, int zoom);
 
 
 #endif

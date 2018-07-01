@@ -16,8 +16,6 @@
 #include "hexspace.h"
 
 
-#define CYCLE_PALETTE false
-
 
 
 void test_app_cleanup(test_app_t *app){
@@ -327,52 +325,6 @@ lexer_err:
     return 0;
 }
 
-int test_app_blit_rgraph(test_app_t *app, rendergraph_t *rgraph,
-    vec_t pos, rot_t rot, flip_t flip, int frame_i, prismelmapper_t *mapper
-){
-    int err;
-
-    int animated_frame_i = get_animated_frame_i(
-        rgraph->animation_type, rgraph->n_frames, frame_i);
-
-    if(mapper != NULL){
-        err = prismelmapper_apply_to_rendergraph(mapper, &app->prend, rgraph,
-            NULL, rgraph->space, NULL, &rgraph);
-        if(err)return err;
-
-        vec_mul(mapper->space, pos, mapper->unit);
-    }
-
-    rendergraph_bitmap_t *bitmap;
-    err = rendergraph_get_or_render_bitmap(rgraph, &bitmap,
-        rot, flip, animated_frame_i, app->pal, app->renderer);
-    if(err)return err;
-
-    /* Can't create a texture with either dimension 0, so exit early */
-    if(bitmap->surface->w == 0 || bitmap->surface->h == 0)return 0;
-
-    int x0 = app->scw / 2 + app->x0;
-    int y0 = app->sch / 2 + app->y0;
-
-    int x, y;
-    rgraph->space->vec_render(pos, &x, &y);
-
-    SDL_Rect dst_rect = {
-        x0 + (x - bitmap->pbox.x) * app->zoom,
-        y0 + (y - bitmap->pbox.y) * app->zoom,
-        bitmap->pbox.w * app->zoom,
-        bitmap->pbox.h * app->zoom
-    };
-    SDL_Texture *bitmap_texture;
-    err = rendergraph_bitmap_get_texture(bitmap, app->renderer,
-        CYCLE_PALETTE, &bitmap_texture);
-    if(err)return err;
-    RET_IF_SDL_NZ(SDL_RenderCopy(app->renderer, bitmap_texture,
-        NULL, &dst_rect));
-
-    return 0;
-}
-
 
 int test_app_mainloop(test_app_t *app){
     int err;
@@ -392,22 +344,18 @@ int test_app_mainloop(test_app_t *app){
         int animated_frame_i = get_animated_frame_i(
             rgraph->animation_type, rgraph->n_frames, app->frame_i);
 
-        if(CYCLE_PALETTE){
-            /* Cycle palette */
-            SDL_Color colors[16];
-            for(int i = 0; i < 16; i++){
-                colors[i] = app->pal->colors[1 + (i + 1) % 16];
-            }
-            if(SDL_SetPaletteColors(app->pal, colors, 1, 16)){
-                printf("SDL_SetPaletteColors error: %s\n", SDL_GetError());
-            }
-        }
-
         if(app->hexgame_running){
             err = hexgame_step(&app->hexgame);
             if(err)return err;
-            err = hexgame_render(&app->hexgame, app);
+
+            SDL_Color *bgcolor = &app->pal->colors[255];
+            RET_IF_SDL_NZ(SDL_SetRenderDrawColor(app->renderer,
+                bgcolor->r, bgcolor->g, bgcolor->b, 255));
+            RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
+            err = hexgame_render(&app->hexgame, app->renderer, app->pal,
+                app->scw/2 + app->x0, app->sch/2 + app->y0, app->zoom);
             if(err)return err;
+            SDL_RenderPresent(app->renderer);
         }else{
 
             /******************************************************************
@@ -449,8 +397,11 @@ int test_app_mainloop(test_app_t *app){
                 0, 0, 0, 255));
             RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
 
-            err = test_app_blit_rgraph(app, rgraph, (vec_t){0}, app->rot,
-                app->flip, app->frame_i, NULL);
+            int x0 = app->scw / 2 + app->x0;
+            int y0 = app->sch / 2 + app->y0;
+            err = rendergraph_render(rgraph, app->renderer, app->pal,
+                &app->prend, x0, y0, app->zoom,
+                (vec_t){0}, app->rot, app->flip, app->frame_i, NULL);
             if(err)return err;
 
             SDL_Texture *render_texture = SDL_CreateTextureFromSurface(

@@ -11,7 +11,6 @@
 #include "prismelrenderer.h"
 #include "array.h"
 #include "util.h"
-#include "test_app.h"
 
 
 #define DEBUG_RULES false
@@ -297,13 +296,10 @@ int hexgame_step(hexgame_t *game){
     return 0;
 }
 
-int hexgame_render(hexgame_t *game, test_app_t *app){
+int hexgame_render(hexgame_t *game, SDL_Renderer *renderer,
+    SDL_Palette *pal, int x0, int y0, int zoom
+){
     int err;
-
-    SDL_Color *bgcolor = &app->pal->colors[255];
-    RET_IF_SDL_NZ(SDL_SetRenderDrawColor(app->renderer,
-        bgcolor->r, bgcolor->g, bgcolor->b, 255));
-    RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
 
     hexmap_t *map = game->map;
 
@@ -319,8 +315,13 @@ int hexgame_render(hexgame_t *game, test_app_t *app){
         vec_sub(rgraph->space->dims, pos, camera_renderpos);
         vec_mul(rgraph->space, pos, game->map->unit);
 
-        err = test_app_blit_rgraph(app, rgraph, pos, app->rot, false,
-            app->frame_i, game->map->mapper);
+        rot_t rot = 0;
+        flip_t flip = false;
+        int frame_i = 0;
+
+        err = rendergraph_render(rgraph, renderer, pal, game->map->prend,
+            x0, y0, zoom,
+            pos, rot, flip, frame_i, map->mapper);
         if(err)return err;
     }
 
@@ -340,12 +341,12 @@ int hexgame_render(hexgame_t *game, test_app_t *app){
         flip_t flip = player->turn;
         int frame_i = player->frame_i;
 
-        err = test_app_blit_rgraph(app, rgraph, pos, rot, flip, frame_i,
-            map->mapper);
+        err = rendergraph_render(rgraph, renderer, pal, game->map->prend,
+            x0, y0, zoom,
+            pos, rot, flip, frame_i, map->mapper);
         if(err)return err;
     }
 
-    SDL_RenderPresent(app->renderer);
     return 0;
 }
 

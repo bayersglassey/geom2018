@@ -948,6 +948,53 @@ int rendergraph_bitmap_get_texture(rendergraph_bitmap_t *bitmap,
     return 0;
 }
 
+int rendergraph_render(rendergraph_t *rgraph, SDL_Renderer *renderer,
+    SDL_Palette *pal, prismelrenderer_t *prend,
+    int x0, int y0, int zoom,
+    vec_t pos, rot_t rot, flip_t flip, int frame_i,
+    prismelmapper_t *mapper
+){
+    int err;
+
+    int animated_frame_i = get_animated_frame_i(
+        rgraph->animation_type, rgraph->n_frames, frame_i);
+
+    if(mapper != NULL){
+        err = prismelmapper_apply_to_rendergraph(mapper, prend, rgraph,
+            NULL, rgraph->space, NULL, &rgraph);
+        if(err)return err;
+
+        vec_mul(mapper->space, pos, mapper->unit);
+    }
+
+    rendergraph_bitmap_t *bitmap;
+    err = rendergraph_get_or_render_bitmap(rgraph, &bitmap,
+        rot, flip, animated_frame_i, pal, renderer);
+    if(err)return err;
+
+    /* Can't create a texture with either dimension 0, so exit early */
+    if(bitmap->surface->w == 0 || bitmap->surface->h == 0)return 0;
+
+    int x, y;
+    rgraph->space->vec_render(pos, &x, &y);
+
+    SDL_Rect dst_rect = {
+        x0 + (x - bitmap->pbox.x) * zoom,
+        y0 + (y - bitmap->pbox.y) * zoom,
+        bitmap->pbox.w * zoom,
+        bitmap->pbox.h * zoom
+    };
+    SDL_Texture *bitmap_texture;
+    err = rendergraph_bitmap_get_texture(bitmap, renderer,
+        false, &bitmap_texture);
+    if(err)return err;
+    RET_IF_SDL_NZ(SDL_RenderCopy(renderer, bitmap_texture,
+        NULL, &dst_rect));
+
+    return 0;
+}
+
+
 
 
 /*****************

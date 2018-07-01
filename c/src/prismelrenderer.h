@@ -129,6 +129,7 @@ typedef struct rendergraph_bitmap {
 } rendergraph_bitmap_t;
 
 typedef struct rendergraph {
+    prismelrenderer_t *prend;
     char *name;
     vecspace_t *space;
     ARRAY_DECL(struct prismel_trf, prismel_trfs)
@@ -175,6 +176,12 @@ int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
     SDL_Palette *pal, SDL_Renderer *renderer);
 int rendergraph_bitmap_get_texture(rendergraph_bitmap_t *bitmap,
     SDL_Renderer *renderer, bool force_create, SDL_Texture **texture_ptr);
+struct prismelmapper;
+int rendergraph_render(rendergraph_t *rgraph, SDL_Renderer *renderer,
+    SDL_Palette *pal, prismelrenderer_t *prend,
+    int x0, int y0, int zoom,
+    vec_t pos, rot_t rot, flip_t flip, int frame_i,
+    struct prismelmapper *mapper);
 
 
 
