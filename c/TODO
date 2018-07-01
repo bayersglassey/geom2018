@@ -81,3 +81,18 @@ mapper l.blu_double: we're expecting to see light-coloured prismels turned to
             /* TODO: think about this and make sure it's correct */
         ...it's probably not correct, eh.
 
+        UPDATE: It's not correct. I did abstract algebra at it until
+        its incorrectness was proven. T__T
+
+
+Jun 30, 2018:
+-------------
+
+Add hexmap_tileset_t, move rgraph_{verts,edges,faces} from hexmap_t onto it.
+Tilemaps are another named thing on prismelrenderer.
+Then each map.fus can say at the top:
+
+    tileset: "data/tileset1.fus"
+
+...or whatever.
+
