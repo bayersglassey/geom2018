@@ -7,10 +7,11 @@ And a bit of a game demo, a kind of puzzly arcadey look at the triangular grid.
 
 ## How to compile & run
 
-``cd c && ./compile_sdl && ./main`` should do the trick (if you have gcc).
+``cd c && ./compile_demo && ./main`` should do the trick (if you have gcc).
+You'll need the [SDL2](https://www.libsdl.org/) development libraries for your OS.
 
-Once game is running, use arrow keys to move.
-F5 enters/exits debug console.
+Once the game is running, use the arrow keys to move.
+F5 enters/exits the debug console.
 
 Not very user-friendly yet, is it? Don't worry, we're getting there.
 
