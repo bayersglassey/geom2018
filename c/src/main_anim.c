@@ -19,7 +19,7 @@ int mainloop(){
     stateset_cleanup(&stateset);
 
     hexcollmapset_t hexcollmapset;
-    const char *hexcollmapset_filename = "data/map.fus";
+    const char *hexcollmapset_filename = "data/maps/test/map.fus";
     err = hexcollmapset_load(&hexcollmapset, hexcollmapset_filename);
     if(err)return err;
 
