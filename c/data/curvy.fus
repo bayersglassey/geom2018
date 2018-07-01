@@ -134,3 +134,11 @@ mappers:
             : "sq"  -> "curvy_sq"
             : "tri" -> "curvy_tri"
             : "dia" -> "curvy_dia"
+
+    "solid_curvy":
+        solid
+        unit: 2 4 0 -2
+        entries:
+            : "sq"  -> "curvy_sq"
+            : "tri" -> "curvy_tri"
+            : "dia" -> "curvy_dia"

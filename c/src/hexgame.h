@@ -55,6 +55,7 @@ int player_step(player_t *player, struct hexgame *game);
 
 typedef struct hexgame {
     hexmap_t *map;
+    hexmap_submap_t *cur_submap;
     vec_t camera_pos;
     ARRAY_DECL(player_t, players)
 } hexgame_t;

@@ -100,8 +100,8 @@ Then each map.fus can say at the top:
 WHAT'S NEEDED FOR A PROPER DEMO:
 
     - Better map.
-    - More customizability for areas (mapper, rgraph_verts/edges/faces,
-        maybe stateset).
+        - Tilesets.
+        - Background/foreground maps.
     - Better camera scrolling.
     - Title screen. (Maybe allow setting controls, save/load game,
         character select, multiplayer, etc.)

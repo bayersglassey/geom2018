@@ -260,11 +260,12 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
 int hexgame_step(hexgame_t *game){
     int err;
 
-    /* Figure out camera position */
+    hexmap_t *map = game->map;
+    vecspace_t *space = map->space;
+
+    /* Figure out current submap */
     if(game->players_len >= 1){
         player_t *player = game->players[0];
-        hexmap_t *map = game->map;
-        vecspace_t *space = map->space;
 
         bool collide = false;
         for(int i = 0; i < map->submaps_len; i++){
@@ -279,11 +280,16 @@ int hexgame_step(hexgame_t *game){
             hexcollmap_elem_t *vert =
                 hexcollmap_get_vert(collmap, &index);
             if(hexcollmap_elem_is_solid(vert)){
-                vec_cpy(space->dims, game->camera_pos,
-                    submap->camera_pos);
+                game->cur_submap = submap;
                 break;
             }
         }
+    }
+
+    /* Set camera */
+    if(game->cur_submap != NULL){
+        vec_cpy(space->dims, game->camera_pos,
+            game->cur_submap->camera_pos);
     }
 
     /* Do 1 gameplay step for each player */
@@ -306,6 +312,13 @@ int hexgame_render(hexgame_t *game, SDL_Renderer *renderer,
     vec_t camera_renderpos;
     vec4_vec_from_hexspace(camera_renderpos, game->camera_pos);
 
+    prismelmapper_t *mapper = NULL;
+
+    hexmap_submap_t *submap = game->cur_submap;
+    if(submap != NULL){
+        mapper = submap->mapper;
+    }
+
     for(int i = 0; i < map->submaps_len; i++){
         hexmap_submap_t *submap = map->submaps[i];
         rendergraph_t *rgraph = submap->rgraph_map;
@@ -321,7 +334,7 @@ int hexgame_render(hexgame_t *game, SDL_Renderer *renderer,
 
         err = rendergraph_render(rgraph, renderer, pal, game->map->prend,
             x0, y0, zoom,
-            pos, rot, flip, frame_i, map->mapper);
+            pos, rot, flip, frame_i, mapper);
         if(err)return err;
     }
 
@@ -343,7 +356,7 @@ int hexgame_render(hexgame_t *game, SDL_Renderer *renderer,
 
         err = rendergraph_render(rgraph, renderer, pal, game->map->prend,
             x0, y0, zoom,
-            pos, rot, flip, frame_i, map->mapper);
+            pos, rot, flip, frame_i, mapper);
         if(err)return err;
     }
 

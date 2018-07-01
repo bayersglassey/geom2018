@@ -440,7 +440,6 @@ void hexmap_cleanup(hexmap_t *map){
 
 int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
     prismelrenderer_t *prend,
-    prismelmapper_t *mapper,
     vec_t unit
 ){
     int err;
@@ -448,7 +447,6 @@ int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
     map->name = name;
     map->space = space;
     map->prend = prend;
-    map->mapper = mapper;
     vec_cpy(prend->space->dims, map->unit, unit);
 
     ARRAY_INIT(*map, submaps)
@@ -488,24 +486,9 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
         which would probably make more sense.
         But ultimately we should really just move the call to
         hexmap_init out of hexmap_parse into hexmap_load. SO DO THAT */
-    prismelmapper_t *mapper = NULL;
 
     err = fus_lexer_next(lexer);
     if(err)return err;
-
-
-    /* (maybe) get mapper */
-
-    if(fus_lexer_got(lexer, "map")){
-        err = fus_lexer_expect(lexer, "(");
-        if(err)return err;
-        err = fus_lexer_expect_mapper(lexer, prend, NULL, &mapper);
-        if(err)return err;
-        err = fus_lexer_expect(lexer, ")");
-        if(err)return err;
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-    }
 
 
     /* parse unit */
@@ -524,7 +507,7 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
 
 
     /* init the map */
-    err = hexmap_init(map, name, space, prend, mapper, unit);
+    err = hexmap_init(map, name, space, prend, unit);
     if(err)return err;
 
 
@@ -611,7 +594,22 @@ int hexmap_parse_area(hexmap_t *map, fus_lexer_t *lexer){
     err = fus_lexer_expect(lexer, ")");
     if(err)return err;
 
-    err = fus_lexer_expect(lexer, "submaps");
+    err = fus_lexer_next(lexer);
+    if(err)return err;
+
+    prismelmapper_t *mapper = NULL;
+    if(fus_lexer_got(lexer, "mapper")){
+        err = fus_lexer_expect(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_expect_mapper(lexer, map->prend, NULL, &mapper);
+        if(err)return err;
+        err = fus_lexer_expect(lexer, ")");
+        if(err)return err;
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+    }
+
+    err = fus_lexer_get(lexer, "submaps");
     if(err)return err;
     err = fus_lexer_expect(lexer, "(");
     if(err)return err;
@@ -634,7 +632,7 @@ int hexmap_parse_area(hexmap_t *map, fus_lexer_t *lexer){
 
             ARRAY_PUSH_NEW(hexmap_submap_t, *map, submaps, submap)
             err = hexmap_submap_load(map, submap, submap_filename, pos,
-                camera_pos);
+                camera_pos, mapper);
             if(err)return err;
         }
         err = fus_lexer_expect(lexer, ")");
@@ -743,7 +741,7 @@ void hexmap_submap_cleanup(hexmap_submap_t *submap){
 }
 
 int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
-    char *filename, vec_t pos, vec_t camera_pos
+    char *filename, vec_t pos, vec_t camera_pos, prismelmapper_t *mapper
 ){
     int err;
 
@@ -755,12 +753,14 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
     if(err)return err;
 
     submap->rgraph_map = NULL;
+    submap->mapper = mapper;
 
     return 0;
 }
 
 int hexmap_submap_load(hexmap_t *map, hexmap_submap_t *submap,
-    const char *filename, vec_t pos, vec_t camera_pos
+    const char *filename, vec_t pos, vec_t camera_pos,
+    prismelmapper_t *mapper
 ){
     int err;
     fus_lexer_t lexer;
@@ -772,7 +772,7 @@ int hexmap_submap_load(hexmap_t *map, hexmap_submap_t *submap,
     if(err)return err;
 
     err = hexmap_submap_init(map, submap, strdup(filename), pos,
-        camera_pos);
+        camera_pos, mapper);
     if(err)return err;
     err = hexmap_submap_parse(map, submap, &lexer);
     if(err)return err;
