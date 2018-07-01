@@ -1,9 +1,7 @@
 set -e
 
 ./compile
-./compile_anim
 ./compile_demo
-./compile_sdl
 ./compile_sdltest
 ./compile_vec4
 
