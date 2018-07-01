@@ -96,3 +96,15 @@ Then each map.fus can say at the top:
 
 ...or whatever.
 
+
+WHAT'S NEEDED FOR A PROPER DEMO:
+
+    - Better map.
+    - More customizability for areas (mapper, rgraph_verts/edges/faces,
+        maybe stateset).
+    - Better camera scrolling.
+    - Title screen. (Maybe allow setting controls, save/load game,
+        character select, multiplayer, etc.)
+
+
+
