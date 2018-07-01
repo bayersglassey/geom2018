@@ -1,9 +1,16 @@
 
 map: ("double")
 unit: 3 2 0 -1
-vert: "map_vert"
-edge: "map_edge"
-face: "map_face"
+verts:
+    "0": "map_vert0"
+    "1": "map_vert1"
+edges:
+    "0": "map_edge0"
+    "1": "map_edge1"
+    "2": "map_edge2"
+faces:
+    "0": "map_face0"
+    "1": "map_face1"
 
 areas:
     :

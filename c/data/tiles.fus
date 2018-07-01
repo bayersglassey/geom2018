@@ -5,7 +5,7 @@ shapes:
     # VERTEX #
     ##########
 
-    "map_vert":
+    "map_vert0":
         prismels:
             : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 4
             : "tri" (0 0 0 0)  2 f eval: 1 + 8 + 4
@@ -14,32 +14,63 @@ shapes:
             : "tri" (0 0 0 0)  8 f eval: 1 + 8 + 4
             : "tri" (0 0 0 0) 10 f eval: 1 + 8 + 4
 
+    "map_vert1":
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 1
+            : "tri" (0 0 0 0)  2 f eval: 1 + 8 + 2
+            : "tri" (0 0 0 0)  4 f eval: 1 + 8 + 3
+            : "tri" (0 0 0 0)  6 f eval: 1 + 8 + 4
+            : "tri" (0 0 0 0)  8 f eval: 1 + 8 + 5
+            : "tri" (0 0 0 0) 10 f eval: 1 + 8 + 6
+
     ########
     # EDGE #
     ########
 
-    "map_edge":
+    "map_edge0":
         prismels:
             : "tri" (1 0 0  0) 11 f eval: 1 + 8 + 6
             : "sq"  (1 1 0 -1)  0 f eval: 1 + 8 + 1
             : "tri" (2 2 0 -1)  5 f eval: 1 + 8 + 6
 
+    "map_edge1":
+        prismels:
+            : "tri" (1 0 0  0) 11 f eval: 1 + 8 + 4
+            : "sq"  (1 1 0 -1)  0 f eval: 1 + 8 + 6
+            : "tri" (2 2 0 -1)  5 f eval: 1 + 8 + 4
+
+    "map_edge2":
+        prismels:
+            : "dia" (1 0 0  0)  0 f eval: 1 + 8 + 3
+            : "dia" (1 0 0  0) 11 f eval: 1 + 8 + 3
+            : "tri" (2 0 0  0) 11 f eval: 1 + 8 + 1
+            : "tri" (2 2 0 -1)  5 f eval: 1 + 8 + 3
+
     ########
     # FACE #
     ########
 
-    "map_face_third":
+    "map_face0_third":
         prismels:
             : "tri" ( 0 0 0 0)  0 f eval: 1 + 1
             : "tri" ( 0 0 0 0)  2 f eval: 1 + 1
             : "sq"  (-1 0 1 0)  0 f eval: 1 + 8 + 1
             #: "tri" (-1 0 1 1)  0 f eval: 1 + 8 + 3
 
-    "map_face":
+    "map_face0":
         shapes:
-            : "map_face_third" (1 1 1 0)  0 f
-            : "map_face_third" (1 1 1 0)  4 f
-            : "map_face_third" (1 1 1 0)  8 f
+            : "map_face0_third" (1 1 1 0)  0 f
+            : "map_face0_third" (1 1 1 0)  4 f
+            : "map_face0_third" (1 1 1 0)  8 f
 
+    "map_face1_third":
+        prismels:
+            : "tri" ( 0 0 0 0)  0 f eval: 1 + 8 + 4
+            : "tri" ( 0 0 0 0)  2 f eval: 1 + 8 + 4
+            : "sq"  (-1 0 1 0)  0 f eval: 1 + 4
 
-
+    "map_face1":
+        shapes:
+            : "map_face1_third" (1 1 1 0)  0 f
+            : "map_face1_third" (1 1 1 0)  4 f
+            : "map_face1_third" (1 1 1 0)  8 f

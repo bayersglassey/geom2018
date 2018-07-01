@@ -10,7 +10,15 @@
 
 
 typedef struct hexcollmap_elem {
-    int tile_i;
+    char tile_c;
+        /* Symbol representing the graphical tile (so, probably
+        rendergraph) to use for this element.
+        E.g. '0' might be the default, '1' a special version,
+        'r', 'g', 'b' for red, green, blue versions...
+        Should always be a printable character (in the sense of
+        the standard library's isprint function), for debugging
+        purposes.
+        With that in mind, the default (no tile) value is ' '. */
 } hexcollmap_elem_t;
 
 typedef struct hexcollmap_tile {
@@ -36,17 +44,24 @@ typedef struct hexmap_submap {
     rendergraph_t *rgraph_map;
 } hexmap_submap_t;
 
+typedef struct hexmap_rgraph_elem {
+    char tile_c;
+        /* see hexcollmap_elem->tile_c */
+    rendergraph_t *rgraph;
+} hexmap_rgraph_elem_t;
+
 typedef struct hexmap {
     char *name;
     vecspace_t *space;
     prismelrenderer_t *prend;
     prismelmapper_t *mapper;
     vec_t unit;
-    rendergraph_t *rgraph_vert;
-    rendergraph_t *rgraph_edge;
-    rendergraph_t *rgraph_face;
 
-    ARRAY_DECL(struct hexmap_submap, submaps)
+    ARRAY_DECL(hexmap_rgraph_elem_t, rgraph_verts)
+    ARRAY_DECL(hexmap_rgraph_elem_t, rgraph_edges)
+    ARRAY_DECL(hexmap_rgraph_elem_t, rgraph_faces)
+
+    ARRAY_DECL(hexmap_submap_t, submaps)
 } hexmap_t;
 
 
@@ -69,10 +84,7 @@ void hexmap_cleanup(hexmap_t *map);
 int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
     prismelrenderer_t *prend,
     prismelmapper_t *mapper,
-    vec_t unit,
-    rendergraph_t *rgraph_vert,
-    rendergraph_t *rgraph_edge,
-    rendergraph_t *rgraph_face);
+    vec_t unit);
 int hexmap_load(hexmap_t *map, prismelrenderer_t *prend,
     const char *filename);
 int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
@@ -80,6 +92,9 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
 int hexmap_parse_area(hexmap_t *map, fus_lexer_t *lexer);
 bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf, bool all);
+rendergraph_t *hexmap_get_rgraph_vert(hexmap_t *map, char tile_c);
+rendergraph_t *hexmap_get_rgraph_edge(hexmap_t *map, char tile_c);
+rendergraph_t *hexmap_get_rgraph_face(hexmap_t *map, char tile_c);
 
 
 void hexmap_submap_cleanup(hexmap_submap_t *submap);

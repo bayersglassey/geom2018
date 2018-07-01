@@ -70,13 +70,13 @@ void hexcollmap_dump(hexcollmap_t *collmap, FILE *f, int n_spaces){
             hexcollmap_tile_t *tile = &collmap->tiles[y * collmap->w + x];
             fprintf(f, "[");
                 for(int i = 0; i < 1; i++){
-                    fprintf(f, "%i", tile->vert[i].tile_i);}
+                    fprintf(f, "%c", tile->vert[i].tile_c);}
             fprintf(f, "][");
                 for(int i = 0; i < 3; i++){
-                    fprintf(f, "%i", tile->edge[i].tile_i);}
+                    fprintf(f, "%c", tile->edge[i].tile_c);}
             fprintf(f, "][");
                 for(int i = 0; i < 2; i++){
-                    fprintf(f, "%i", tile->face[i].tile_i);}
+                    fprintf(f, "%c", tile->face[i].tile_c);}
             fprintf(f, "] ");
         }
         fprintf(f, "\n");
@@ -150,8 +150,11 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                 ox = x + 1;
                 oy = y;
                 x += 2;
-            }else if(strchr(" .+/-\\*", c) != NULL){
+            }else if(strchr(" .+/-\\*%", c) != NULL){
                 /* these are all fine */
+            }else if(c == '['){
+                /* next line plz */
+                break;
             }else{
                 fprintf(stderr, "Line %i, char %i: unexpected character."
                     " Line: %s\n", y, x, line);
@@ -191,15 +194,24 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
 
     /* Intermission: Initialize tile elements */
     for(int i = 0; i < map_size; i++){
-        for(int j = 0; j < 1; j++)tiles[i].vert[j].tile_i = -1;
-        for(int j = 0; j < 3; j++)tiles[i].edge[j].tile_i = -1;
-        for(int j = 0; j < 2; j++)tiles[i].face[j].tile_i = -1;
+        for(int j = 0; j < 1; j++)tiles[i].vert[j].tile_c = ' ';
+        for(int j = 0; j < 3; j++)tiles[i].edge[j].tile_c = ' ';
+        for(int j = 0; j < 2; j++)tiles[i].face[j].tile_c = ' ';
     }
 
     /* Iteration 3: The meat of it all */
     for(int y = 0; y < lines_len; y++){
         char *line = lines[y];
         int line_len = strlen(line);
+
+        char *tilebucket = NULL;
+        bool tilebucket_active = false;
+            /* A "tile bucket" is a group of characters at the end
+            of the line, surrounded by square brackets, e.g. [1aq].
+            While parsing a line, the '%' character indicates that we
+            should find the next tile bucket; then, as we encounter
+            '-' '/' '\' '+' '*' characters, we will use */
+
         for(int x = 0; x < line_len; x++){
             char c = line[x];
             if(strchr("+/-\\*", c) != NULL){
@@ -210,19 +222,77 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                 my -= map_t;
                 hexcollmap_tile_t *tile = &tiles[my * map_w + mx];
 
-                int tile_i = 0; /* TODO: get this from somewhere. */
+                char tile_c = '0';
+                    /* The default tile_c is '0'. We could make that
+                    more explicit, maybe as a param to this function,
+                    attribute of hexmap or submaps, etc?.. */
+
+                if(tilebucket_active){
+                    /* Get next non-' ' character in current tile bucket. */
+                    char c;
+                    while(c = *tilebucket, c == ' ')tilebucket++;
+                    if(c == ']'){
+                        tilebucket_active = false;
+                    }else if(!isprint(c)){
+                        fprintf(stderr,
+                            "Hexcollmap line %i, char %i: char %li: ",
+                            y+1, x+1, tilebucket-line+1);
+                        if(c == '\0'){
+                            fprintf(stderr, "Hit end of line\n");}
+                        else{fprintf(stderr,
+                            "Hit unprintable character: %x\n", c);}
+                        return 2;
+                    }else{
+                        tile_c = c;
+                        tilebucket++;
+                    }
+                }
 
                 if(c == '+'){
-                    tile->vert[0].tile_i = tile_i;
+                    tile->vert[0].tile_c = tile_c;
                 }else if(c == '-'){
-                    tile->edge[0].tile_i = tile_i;
+                    tile->edge[0].tile_c = tile_c;
                 }else if(c == '/'){
-                    tile->edge[1].tile_i = tile_i;
+                    tile->edge[1].tile_c = tile_c;
                 }else if(c == '\\'){
-                    tile->edge[2].tile_i = tile_i;
+                    tile->edge[2].tile_c = tile_c;
                 }else if(c == '*'){
-                    tile->face[is_face1? 1: 0].tile_i = tile_i;
+                    tile->face[is_face1? 1: 0].tile_c = tile_c;
                 }
+            }else if(c == '%'){
+                /* Activate next tile bucket. */
+
+                char c;
+                if(tilebucket == NULL){
+                    tilebucket = &line[x+1];
+                    while(c = *tilebucket, c != '\0' && c != '[')tilebucket++;
+                    if(c != '['){
+                        fprintf(stderr,
+                            "Hexcollmap line %i, char %i: ", y+1, x+1);
+                        fprintf(stderr, "Didn't find '[' in line\n");
+                        return 2;}
+                    tilebucket++;
+                }else{
+                    while(c = *tilebucket, c == ' ')tilebucket++;
+                    if(c != ']'){
+                        fprintf(stderr,
+                            "Hexcollmap line %i, char %i: char %li: ",
+                            y+1, x+1, tilebucket-line+1);
+                        fprintf(stderr, "Expected ']', got '%c'\n", c);
+                        return 2;}
+                    tilebucket++;
+                    while(c = *tilebucket, c == ' ')tilebucket++;
+                    if(c != '['){
+                        fprintf(stderr,
+                            "Hexcollmap line %i, char %i: char %li: ",
+                            y+1, x+1, tilebucket-line+1);
+                        fprintf(stderr, "Expected '[', got '%c'\n", c);
+                        return 2;}
+                    tilebucket++;
+                }
+                tilebucket_active = true;
+            }else if(c == '['){
+                break;
             }
         }
     }
@@ -276,7 +346,10 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer){
     /* parse lines */
     err = hexcollmap_parse_lines(collmap,
         collmap_lines, collmap_lines_len);
-    if(err)return err;
+    if(err){
+        fus_lexer_err_info(lexer);
+        fprintf(stderr, "Couldn't parse hexcollmap lines\n");
+        return err;}
 
     /* free lines and dynamic array thereof */
     for(int i = 0; i < collmap_lines_len; i++){
@@ -345,7 +418,7 @@ hexcollmap_elem_t *hexcollmap_get_face(hexcollmap_t *collmap, trf_t *index){
 }
 
 bool hexcollmap_elem_is_solid(hexcollmap_elem_t *elem){
-    return elem != NULL && elem->tile_i >= 0;
+    return elem != NULL && elem->tile_c != ' ';
 }
 
 
@@ -357,16 +430,18 @@ bool hexcollmap_elem_is_solid(hexcollmap_elem_t *elem){
 
 void hexmap_cleanup(hexmap_t *map){
     free(map->name);
+
     ARRAY_FREE(hexmap_submap_t, *map, submaps, hexmap_submap_cleanup)
+
+    ARRAY_FREE(hexmap_rgraph_elem_t, *map, rgraph_verts, (void))
+    ARRAY_FREE(hexmap_rgraph_elem_t, *map, rgraph_edges, (void))
+    ARRAY_FREE(hexmap_rgraph_elem_t, *map, rgraph_faces, (void))
 }
 
 int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
     prismelrenderer_t *prend,
     prismelmapper_t *mapper,
-    vec_t unit,
-    rendergraph_t *rgraph_vert,
-    rendergraph_t *rgraph_edge,
-    rendergraph_t *rgraph_face
+    vec_t unit
 ){
     int err;
 
@@ -378,9 +453,9 @@ int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
 
     ARRAY_INIT(*map, submaps)
 
-    map->rgraph_vert = rgraph_vert;
-    map->rgraph_edge = rgraph_edge;
-    map->rgraph_face = rgraph_face;
+    ARRAY_INIT(*map, rgraph_verts)
+    ARRAY_INIT(*map, rgraph_edges)
+    ARRAY_INIT(*map, rgraph_faces)
     return 0;
 }
 
@@ -448,42 +523,56 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
     if(err)return err;
 
 
-    /* parse vert, edge, face, player */
+    /* init the map */
+    err = hexmap_init(map, name, space, prend, mapper, unit);
+    if(err)return err;
 
-    rendergraph_t *rgraph_vert;
-    rendergraph_t *rgraph_edge;
-    rendergraph_t *rgraph_face;
 
+    /* parse vert, edge, face, rgraphs */
     #define GET_RGRAPH(TYPE) { \
-        err = fus_lexer_expect(lexer, #TYPE); \
+        err = fus_lexer_expect(lexer, #TYPE"s"); \
         if(err)return err; \
         err = fus_lexer_expect(lexer, "("); \
         if(err)return err; \
-        \
-        char *name; \
-        err = fus_lexer_expect_str(lexer, &name); \
-        if(err)return err; \
-        rgraph_##TYPE = prismelrenderer_get_rendergraph( \
-            prend, name); \
-        if(rgraph_##TYPE == NULL){ \
-            fus_lexer_err_info(lexer); \
-            fprintf(stderr, "Couldn't find shape: %s\n", name); \
-            free(name); return 2;} \
-        free(name); \
-        \
-        err = fus_lexer_expect(lexer, ")"); \
-        if(err)return err; \
+        while(1){ \
+            err = fus_lexer_next(lexer); \
+            if(err)return err; \
+            if(fus_lexer_got(lexer, ")"))break; \
+            \
+            char *name; \
+            err = fus_lexer_get_str(lexer, &name); \
+            if(err)return err; \
+            if(strlen(name) != 1){ \
+                fprintf(stderr, "Expected single character, got: %s\n", \
+                    name); \
+                free(name); return 2;} \
+            char tile_c = name[0]; \
+            free(name); \
+            \
+            err = fus_lexer_expect(lexer, "("); \
+            if(err)return err; \
+            err = fus_lexer_expect_str(lexer, &name); \
+            if(err)return err; \
+            rendergraph_t *rgraph = \
+                prismelrenderer_get_rendergraph(prend, name); \
+            if(rgraph == NULL){ \
+                fus_lexer_err_info(lexer); \
+                fprintf(stderr, "Couldn't find shape: %s\n", name); \
+                free(name); return 2;} \
+            free(name); \
+            ARRAY_PUSH_NEW(hexmap_rgraph_elem_t, *map, rgraph_##TYPE##s, \
+                rgraph_##TYPE) \
+            rgraph_##TYPE->tile_c = tile_c; \
+            rgraph_##TYPE->rgraph = rgraph; \
+            err = fus_lexer_expect(lexer, ")"); \
+            if(err)return err; \
+        } \
     }
     GET_RGRAPH(vert)
     GET_RGRAPH(edge)
     GET_RGRAPH(face)
     #undef GET_RGRAPH
 
-
-    /* init the map */
-    err = hexmap_init(map, name, space, prend, mapper, unit,
-        rgraph_vert, rgraph_edge, rgraph_face);
-    if(err)return err;
 
     /* parse areas & submaps */
     err = fus_lexer_expect(lexer, "areas");
@@ -621,6 +710,30 @@ bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
     else return false;
 }
 
+rendergraph_t *hexmap_get_rgraph_vert(hexmap_t *map, char tile_c){
+    for(int i = 0; i < map->rgraph_verts_len; i++){
+        hexmap_rgraph_elem_t *elem = map->rgraph_verts[i];
+        if(elem->tile_c == tile_c)return elem->rgraph;
+    }
+    return NULL;
+}
+
+rendergraph_t *hexmap_get_rgraph_edge(hexmap_t *map, char tile_c){
+    for(int i = 0; i < map->rgraph_edges_len; i++){
+        hexmap_rgraph_elem_t *elem = map->rgraph_edges[i];
+        if(elem->tile_c == tile_c)return elem->rgraph;
+    }
+    return NULL;
+}
+
+rendergraph_t *hexmap_get_rgraph_face(hexmap_t *map, char tile_c){
+    for(int i = 0; i < map->rgraph_faces_len; i++){
+        hexmap_rgraph_elem_t *elem = map->rgraph_faces[i];
+        if(elem->tile_c == tile_c)return elem->rgraph;
+    }
+    return NULL;
+}
+
 
 
 
@@ -731,19 +844,22 @@ int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap){
             for(int i = 0; i < 1; i++){
                 hexcollmap_elem_t *elem = &tile->vert[i];
                 if(hexcollmap_elem_is_solid(elem)){
-                    err = add_tile_rgraph(rgraph, map->rgraph_vert,
+                    err = add_tile_rgraph(rgraph,
+                        hexmap_get_rgraph_vert(map, elem->tile_c),
                         space, v, i * 2);
                     if(err)return err;}}
             for(int i = 0; i < 3; i++){
                 hexcollmap_elem_t *elem = &tile->edge[i];
                 if(hexcollmap_elem_is_solid(elem)){
-                    err = add_tile_rgraph(rgraph, map->rgraph_edge,
+                    err = add_tile_rgraph(rgraph,
+                        hexmap_get_rgraph_edge(map, elem->tile_c),
                         space, v, i * 2);
                     if(err)return err;}}
             for(int i = 0; i < 2; i++){
                 hexcollmap_elem_t *elem = &tile->face[i];
                 if(hexcollmap_elem_is_solid(elem)){
-                    err = add_tile_rgraph(rgraph, map->rgraph_face,
+                    err = add_tile_rgraph(rgraph,
+                        hexmap_get_rgraph_face(map, elem->tile_c),
                         space, v, i * 2);
                     if(err)return err;}}
         }
