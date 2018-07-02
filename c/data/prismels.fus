@@ -1,6 +1,18 @@
 
 prismels:
 
+    "vert":
+        # a vertex (invisible dot)
+        images:
+            () () () () () () () () () () () ()
+            () () () () () () () () () () () ()
+
+    "edge":
+        # an edge (invisible line)
+        images:
+            () () () () () () () () () () () ()
+            () () () () () () () () () () () ()
+
     "sq":
 
         # +---+
@@ -121,6 +133,17 @@ prismels:
             :  0
 
 shapes:
+
+    "empty":
+        prismels:
+
+    "vert":
+        prismels:
+            : "vert"  (0 0 0 0)  0 f 2
+
+    "edge":
+        prismels:
+            : "edge"  (0 0 0 0)  0 f 2
 
     "sq":
         prismels:

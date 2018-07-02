@@ -74,3 +74,14 @@ shapes:
             : "map_face1_third" (1 1 1 0)  0 f
             : "map_face1_third" (1 1 1 0)  4 f
             : "map_face1_third" (1 1 1 0)  8 f
+
+mappers:
+    "test_map":
+        solid
+        unit: 3 2 0 -1
+        entries:
+            : "vert" -> "map_vert0"
+            : "edge" -> "map_edge0"
+            : "sq"   -> "empty"
+            : "tri"  -> "map_face0"
+            : "dia"  -> "empty"

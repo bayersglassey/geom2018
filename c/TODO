@@ -101,8 +101,38 @@ WHAT'S NEEDED FOR A PROPER DEMO:
 
     - Better map.
         - Tilesets.
+        - Palettes.
         - Background/foreground maps.
     - Better camera scrolling.
+    - Get rid of hexmap "unit": unit starts as (1 0 0 0) and only
+        mappers change it.
+        Then add a way in the map.fus files to specify mapper cache
+        entries, and that's how tilesets with different units can
+        co-exist within same worldmap?..
+        Not that simple. There are no "vert", "edge" prismels.
+        ...although we could add them, I suppose.
+        Things get a little annoying, since we have to start adding
+        single-"tri" versions of every tile, and each mapper needs
+        to have solid mappings for prismels tri, vert, edge.
+        I guess the fus syntax would be:
+
+            shapes:
+                "tile1":
+                    prismels:
+                        # default, one-"tri" version:
+                        : "tri" (0 0 0 0) 0 f  2
+                        # ...or even have no prismels at all?..
+                        # But having one-"tri" versions is maybe nice
+                        # for e.g. a minimap
+                    mappings:
+                        "curvy":
+                            # We're now defining the shape which
+                            # will be used for map ("curvy") ("tile1")
+                            prismels:
+                                # etc
+                        "double":
+                            # ...
+
     - Title screen. (Maybe allow setting controls, save/load game,
         character select, multiplayer, etc.)
 
