@@ -745,6 +745,13 @@ int fus_lexer_get_mapper(fus_lexer_t *lexer,
         goto ok;
     }
 
+    bool solid = false;
+    if(fus_lexer_got(lexer, "solid")){
+        solid = true;
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+    }
+
     if(fus_lexer_got(lexer, "map")){
         prismelmapper_t *mapper1;
         err = fus_lexer_expect_mapper(lexer, prend, NULL, &mapper1);
@@ -758,16 +765,14 @@ int fus_lexer_get_mapper(fus_lexer_t *lexer,
             name, prend->space, &mapper);
         if(err)return err;
 
+        /* umm kind of hack. But so is our whole mapper->name thing,
+        really we want an array of mapper_entries on prend, where the
+        entries have names instead of the mappers they point to. */
+        if(solid)mapper->solid = true;
+
         err = fus_lexer_next(lexer);
         if(err)return err;
         goto ok;
-    }
-
-    bool solid = false;
-    if(fus_lexer_got(lexer, "solid")){
-        solid = true;
-        err = fus_lexer_next(lexer);
-        if(err)return err;
     }
 
     err = fus_lexer_get(lexer, "unit");

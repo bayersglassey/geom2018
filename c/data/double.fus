@@ -78,3 +78,5 @@ mappers:
             : "sq"  -> "triple_sq"
             : "tri" -> "triple_tri"
             : "dia" -> "triple_dia"
+
+    "quadruple": solid map ("double") ("double")
