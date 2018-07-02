@@ -66,9 +66,9 @@ stand:
 
     if:
         key: isdown f
-        coll: all yes
+        coll: any yes
             ;;        +
-            ;;
+            ;;       /
             ;; ( )
     then:
         move: 1 0
@@ -112,9 +112,11 @@ jump:
 
     if:
         coll: all yes
-            ;;        +
-            ;;
             ;; ( )  +
+        coll: any yes
+            ;;        +
+            ;;       /
+            ;; ( )
     then:
         move: 1 0
         rot: 1
