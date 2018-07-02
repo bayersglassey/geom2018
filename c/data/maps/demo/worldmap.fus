@@ -1,0 +1,29 @@
+
+unit: 3 2 0 -1
+verts:
+    "0": "map_vert0"
+    "1": "map_vert1"
+edges:
+    "0": "map_edge0"
+    "1": "map_edge1"
+    "2": "map_edge2"
+faces:
+    "0": "map_face0"
+    "1": "map_face1"
+
+areas:
+    :
+        camera: eval: (5 4)
+        mapper: ("quadruple")
+        submaps:
+            : "data/maps/demo/start.fus"  (0 0)
+    :
+        camera: eval: (5 4) + (7 11)
+        mapper: ("quadruple")
+        submaps:
+            : "data/maps/demo/start2.fus" eval: (7 11)
+    :
+        camera: eval: (5 4) + (7 11) + (2 6)
+        mapper: ("triple")
+        submaps:
+            : "data/maps/demo/start3.fus" eval: (7 11) + (2 15)
