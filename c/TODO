@@ -112,8 +112,9 @@ WHAT'S NEEDED FOR A PROPER DEMO:
         Not that simple. There are no "vert", "edge" prismels.
         ...although we could add them, I suppose.
         Things get a little annoying, since we have to start adding
-        single-"tri" versions of every tile, and each mapper needs
-        to have solid mappings for prismels tri, vert, edge.
+        single-"tri" versions of every tile (and player state??),
+        and each mapper needs to have solid mappings for prismels
+        tri, vert, edge.
         I guess the fus syntax would be:
 
             shapes:
@@ -135,9 +136,19 @@ WHAT'S NEEDED FOR A PROPER DEMO:
 
     - Title screen. (Maybe allow setting controls, save/load game,
         character select, multiplayer, etc.)
+    - Detect player "death", auto respawn them somewhere useful.
+        - Bring back "die" state effect?..
+        - Can we abuse player->cooldown and have the "jump" state
+            trigger death after some amount of time?
 
 
 hexcollmap parser should tell you if you've got off-by-one issues, like:
     ;;   +
     ;;  / \
     ;;  + - +   <--- WRONG
+
+
+Instead of "import" in .fus files, we should maybe add "require", or anyway
+    imports should be idempotent.
+So all you do is specify worldmap, and it loads rgraphs as required.
+
