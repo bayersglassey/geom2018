@@ -25,6 +25,7 @@
 #define PLAYER_KEYS   4
 
 typedef struct player {
+    vec_t respawn_pos;
     vec_t pos;
     rot_t rot;
     bool turn;
@@ -41,7 +42,7 @@ typedef struct player {
 
 void player_cleanup(player_t *player);
 int player_init(player_t *player, prismelrenderer_t *prend,
-    char *stateset_filename, int keymap);
+    char *stateset_filename, int keymap, vec_t respawn_pos);
 rot_t player_get_rot(player_t *player, const vecspace_t *space);
 
 struct hexgame;

@@ -25,7 +25,7 @@ void player_cleanup(player_t *player){
 }
 
 int player_init(player_t *player, prismelrenderer_t *prend,
-    char *stateset_filename, int keymap
+    char *stateset_filename, int keymap, vec_t respawn_pos
 ){
     int err;
 
@@ -49,6 +49,8 @@ int player_init(player_t *player, prismelrenderer_t *prend,
     player->state = player->stateset.states[0];
     player->frame_i = 0;
     player->cooldown = 0;
+    vec_cpy(hexspace.dims, player->respawn_pos, respawn_pos);
+    vec_cpy(hexspace.dims, player->pos, respawn_pos);
     return 0;
 }
 
@@ -221,7 +223,7 @@ int hexgame_init(hexgame_t *game, hexmap_t *map){
 }
 
 int hexgame_reset_player(hexgame_t *game, player_t *player){
-    vec_zero(game->map->space->dims, player->pos);
+    vec_cpy(game->map->space->dims, player->pos, player->respawn_pos);
     player->rot = 0;
     player->turn = false;
     player->state = player->stateset.states[0];
