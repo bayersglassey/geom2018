@@ -1,7 +1,8 @@
 
 unit: 3 2 0 -1
-#spawn: eval: (7 11) + (15 -2)
 spawn: (0 0)
+#spawn: eval: (7 11) + (15 -2)
+#spawn: eval: (7 11) + (22 9)
 verts:
     "0": "map_vert0"
     "1": "map_vert1"
@@ -30,7 +31,12 @@ areas:
         submaps:
             : "data/maps/demo/start3.fus" eval: (7 11) + (2 15)
     :
-        camera: eval: (7 11) + (15 -2) + (3 0)
+        camera: eval: (7 11) + (15 -2) + (3 1)
         mapper: ("solid_curvy")
         submaps:
             : "data/maps/demo/pebbles.fus" eval: (7 11) + (15 -2)
+    :
+        camera: eval: (7 11) + (22 9) + (4 0)
+        mapper: ("solid_curvy")
+        submaps:
+            : "data/maps/demo/pebbles2.fus" eval: (7 11) + (22 9)
