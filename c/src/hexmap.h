@@ -56,6 +56,7 @@ typedef struct hexmap {
     vecspace_t *space;
     prismelrenderer_t *prend;
     vec_t unit;
+    vec_t spawn;
 
     ARRAY_DECL(hexmap_rgraph_elem_t, rgraph_verts)
     ARRAY_DECL(hexmap_rgraph_elem_t, rgraph_edges)

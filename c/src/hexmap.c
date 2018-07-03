@@ -448,6 +448,7 @@ int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
     map->space = space;
     map->prend = prend;
     vec_cpy(prend->space->dims, map->unit, unit);
+    vec_zero(space->dims, map->spawn);
 
     ARRAY_INIT(*map, submaps)
 
@@ -492,7 +493,6 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
 
 
     /* parse unit */
-
     vec_t unit;
     err = fus_lexer_get(lexer, "unit");
     if(err)return err;
@@ -505,9 +505,18 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
     err = fus_lexer_expect(lexer, ")");
     if(err)return err;
 
-
     /* init the map */
     err = hexmap_init(map, name, space, prend, unit);
+    if(err)return err;
+
+    /* parse spawn point */
+    err = fus_lexer_expect(lexer, "spawn");
+    if(err)return err;
+    err = fus_lexer_expect(lexer, "(");
+    if(err)return err;
+    err = fus_lexer_expect_vec(lexer, space, map->spawn);
+    if(err)return err;
+    err = fus_lexer_expect(lexer, ")");
     if(err)return err;
 
 
