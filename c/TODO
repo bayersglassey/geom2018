@@ -104,6 +104,7 @@ WHAT'S NEEDED FOR A PROPER DEMO:
         - Palettes.
         - Background/foreground maps.
     - Better camera scrolling.
+    - Music + SFX. Almost anything will do for now.
     - Get rid of hexmap "unit": unit starts as (1 0 0 0) and only
         mappers change it.
         Then add a way in the map.fus files to specify mapper cache
