@@ -29,8 +29,8 @@ Not very user-friendly yet, is it? Don't worry, we're getting there.
 ### Game demo:
 ![](/img/screen2.png)
 
-### I jump upside-down off the left side of the screen to (presumably) my death:
-![](/img/screen6.png)
+### A puzzle:
+![](/img/demo1.png)
 
 ### Game demo passed through some kind of geometry-expanding transformation:
 ![](/img/screen5.png)
