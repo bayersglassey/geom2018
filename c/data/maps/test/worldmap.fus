@@ -1,5 +1,6 @@
 
 unit: 3 2 0 -1
+spawn: (0 0)
 verts:
     "0": "map_vert0"
     "1": "map_vert1"
