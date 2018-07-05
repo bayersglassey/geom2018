@@ -35,4 +35,7 @@ Not very user-friendly yet, is it? Don't worry, we're getting there.
 ### Game demo passed through some kind of geometry-expanding transformation:
 ![](/img/screen5.png)
 
+### A demo map, zoomed out:
+![](/img/demo2.png)
+
 
