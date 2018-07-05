@@ -586,8 +586,8 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
     #undef GET_RGRAPH
 
 
-    /* parse areas & submaps */
-    err = fus_lexer_expect(lexer, "areas");
+    /* parse submaps */
+    err = fus_lexer_expect(lexer, "submaps");
     if(err)return err;
     err = fus_lexer_expect(lexer, "(");
     if(err)return err;
@@ -597,9 +597,9 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
         if(fus_lexer_got(lexer, ")"))break;
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
-        err = hexmap_parse_area(map, lexer);
+        err = hexmap_parse_submap(map, lexer, (vec_t){0}, (vec_t){0}, NULL);
         if(err)return err;
-        err = fus_lexer_expect(lexer, ")");
+        err = fus_lexer_get(lexer, ")");
         if(err)return err;
     }
 
@@ -607,26 +607,56 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
     return 0;
 }
 
-int hexmap_parse_area(hexmap_t *map, fus_lexer_t *lexer){
+int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
+    vec_t parent_pos, vec_t parent_camera_pos,
+    prismelmapper_t *parent_mapper
+){
     int err;
     vecspace_t *space = map->space;
-
-    vec_t camera_pos;
-    err = fus_lexer_expect(lexer, "camera");
-    if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
-    if(err)return err;
-    {
-        err = fus_lexer_expect_vec(lexer, space, camera_pos);
-        if(err)return err;
-    }
-    err = fus_lexer_expect(lexer, ")");
-    if(err)return err;
 
     err = fus_lexer_next(lexer);
     if(err)return err;
 
-    prismelmapper_t *mapper = NULL;
+    char *submap_filename = NULL;
+    if(fus_lexer_got(lexer, "file")){
+        err = fus_lexer_expect(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_expect_str(lexer, &submap_filename);
+        if(err)return err;
+        err = fus_lexer_expect(lexer, ")");
+        if(err)return err;
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+    }
+
+    vec_t pos = {0};
+    if(fus_lexer_got(lexer, "pos")){
+        err = fus_lexer_expect(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_expect_vec(lexer, space, pos);
+        if(err)return err;
+        err = fus_lexer_expect(lexer, ")");
+        if(err)return err;
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+    }
+    vec_add(space->dims, pos, parent_pos);
+
+    vec_t camera_pos;
+    vec_cpy(space->dims, camera_pos, parent_camera_pos);
+    if(fus_lexer_got(lexer, "camera")){
+        err = fus_lexer_expect(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_expect_vec(lexer, space, camera_pos);
+        if(err)return err;
+        err = fus_lexer_expect(lexer, ")");
+        if(err)return err;
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        vec_add(space->dims, camera_pos, pos);
+    }
+
+    prismelmapper_t *mapper = parent_mapper;
     if(fus_lexer_got(lexer, "mapper")){
         err = fus_lexer_expect(lexer, "(");
         if(err)return err;
@@ -638,33 +668,28 @@ int hexmap_parse_area(hexmap_t *map, fus_lexer_t *lexer){
         if(err)return err;
     }
 
-    err = fus_lexer_get(lexer, "submaps");
-    if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
-    if(err)return err;
-    while(1){
-        err = fus_lexer_next(lexer);
+    if(submap_filename != NULL){
+        ARRAY_PUSH_NEW(hexmap_submap_t, *map, submaps, submap)
+        err = hexmap_submap_load(map, submap, submap_filename, pos,
+            camera_pos, mapper);
         if(err)return err;
+    }
 
-        if(fus_lexer_got(lexer, ")"))break;
-
-        err = fus_lexer_get(lexer, "(");
+    if(fus_lexer_got(lexer, "submaps")){
+        err = fus_lexer_expect(lexer, "(");
         if(err)return err;
-        {
-            char *submap_filename;
-            err = fus_lexer_expect_str(lexer, &submap_filename);
+        while(1){
+            err = fus_lexer_next(lexer);
             if(err)return err;
-
-            vec_t pos;
-            err = fus_lexer_expect_vec(lexer, space, pos);
+            if(fus_lexer_got(lexer, ")"))break;
+            err = fus_lexer_get(lexer, "(");
             if(err)return err;
-
-            ARRAY_PUSH_NEW(hexmap_submap_t, *map, submaps, submap)
-            err = hexmap_submap_load(map, submap, submap_filename, pos,
-                camera_pos, mapper);
+            err = hexmap_parse_submap(map, lexer, pos, camera_pos, mapper);
+            if(err)return err;
+            err = fus_lexer_get(lexer, ")");
             if(err)return err;
         }
-        err = fus_lexer_expect(lexer, ")");
+        err = fus_lexer_next(lexer);
         if(err)return err;
     }
 

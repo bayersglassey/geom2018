@@ -15,29 +15,30 @@ faces:
     "1": "map_face1"
     "S": "map_savepoint"
 
-areas:
+submaps:
     :
+        file: "data/maps/demo/start.fus"
+        pos: (0 0)
+        camera: eval: (5 4)
+        mapper: ("quadruple")
+    :
+        file: "data/maps/demo/start2.fus"
+        pos: eval: (7 11)
         camera: eval: (5 4)
         mapper: ("quadruple")
         submaps:
-            : "data/maps/demo/start.fus"  (0 0)
-    :
-        camera: eval: (5 4) + (7 11)
-        mapper: ("quadruple")
-        submaps:
-            : "data/maps/demo/start2.fus" eval: (7 11)
-    :
-        camera: eval: (5 4) + (7 11) + (2 6)
-        mapper: ("triple")
-        submaps:
-            : "data/maps/demo/start3.fus" eval: (7 11) + (2 15)
-    :
-        camera: eval: (7 11) + (15 -2) + (3 1)
-        mapper: ("solid_curvy")
-        submaps:
-            : "data/maps/demo/pebbles.fus" eval: (7 11) + (15 -2)
-    :
-        camera: eval: (7 11) + (22 9) + (4 0)
-        mapper: ("solid_curvy")
-        submaps:
-            : "data/maps/demo/pebbles2.fus" eval: (7 11) + (22 9)
+            :
+                file: "data/maps/demo/start3.fus"
+                pos: eval: (2 15)
+                camera: eval: (5 -5)
+                mapper: ("triple")
+            :
+                file: "data/maps/demo/pebbles.fus"
+                pos: eval: (15 -2)
+                camera: eval: (3 1)
+                mapper: ("solid_curvy")
+            :
+                file: "data/maps/demo/pebbles2.fus"
+                pos: eval: (22 9)
+                camera: eval: (4 0)
+                mapper: ("solid_curvy")

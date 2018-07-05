@@ -90,7 +90,9 @@ int hexmap_load(hexmap_t *map, prismelrenderer_t *prend,
     const char *filename);
 int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
     fus_lexer_t *lexer);
-int hexmap_parse_area(hexmap_t *map, fus_lexer_t *lexer);
+int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
+    vec_t parent_pos, vec_t parent_camera_pos,
+    prismelmapper_t *parent_mapper);
 bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf, bool all);
 rendergraph_t *hexmap_get_rgraph_vert(hexmap_t *map, char tile_c);
