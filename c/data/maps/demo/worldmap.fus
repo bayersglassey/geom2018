@@ -1,8 +1,6 @@
 
 unit: 3 2 0 -1
 spawn: (0 0)
-#spawn: eval: (7 11) + (15 -2)
-#spawn: eval: (7 11) + (22 9)
 verts:
     "0": "map_vert0"
     "1": "map_vert1"
@@ -19,26 +17,34 @@ submaps:
     :
         file: "data/maps/demo/start.fus"
         pos: (0 0)
-        camera: eval: (5 4)
+        camera: (5 4)
         mapper: ("quadruple")
     :
         file: "data/maps/demo/start2.fus"
-        pos: eval: (7 11)
-        camera: eval: (5 4)
+        pos: (7 11)
+        camera: (5 4)
         mapper: ("quadruple")
         submaps:
             :
                 file: "data/maps/demo/start3.fus"
-                pos: eval: (2 15)
-                camera: eval: (5 -5)
+                pos: (2 15)
+                camera: (5 -5)
                 mapper: ("triple")
             :
                 file: "data/maps/demo/pebbles.fus"
-                pos: eval: (15 -2)
-                camera: eval: (3 1)
+                pos: (15 -2)
+                camera: (3 1)
                 mapper: ("solid_curvy")
             :
                 file: "data/maps/demo/pebbles2.fus"
-                pos: eval: (22 9)
-                camera: eval: (4 0)
+                pos: (22 9)
+                camera: (4 0)
                 mapper: ("solid_curvy")
+                submaps:
+                    :
+                        file: "data/maps/demo/tunnels.fus"
+                        pos: (13 1)
+                        camera: (6 -5)
+                        mapper: ("triple")
+
+
