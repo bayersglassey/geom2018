@@ -11,7 +11,10 @@ And a bit of a game demo, a kind of puzzly arcadey look at the triangular grid.
 You'll need the [SDL2](https://www.libsdl.org/) development libraries for your OS.
 
 Once the game is running, use the arrow keys to move.
-F5 enters/exits the debug console.
+F5 enters/exits the debug console. Escape key quits.
+
+If you die or get stuck, press '1' to respawn at the last save point you touched.
+(Save points are the glowing rotating green things.)
 
 Not very user-friendly yet, is it? Don't worry, we're getting there.
 
