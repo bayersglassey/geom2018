@@ -221,6 +221,7 @@ void hexgame_cleanup(hexgame_t *game){
 
 int hexgame_init(hexgame_t *game, hexmap_t *map){
     game->frame_i = 0;
+    game->zoomout = false;
     game->map = map;
     vec_zero(map->space->dims, game->camera_pos);
     ARRAY_INIT(*game, players)
@@ -239,6 +240,8 @@ int hexgame_reset_player(hexgame_t *game, player_t *player){
 
 int hexgame_process_event(hexgame_t *game, SDL_Event *event){
     if(event->type == SDL_KEYDOWN){
+        if(event->key.keysym.sym == SDLK_F6){
+            game->zoomout = true;}
         if(!event->key.repeat){
             if(event->key.keysym.sym == SDLK_1
                 && game->players_len >= 1){
@@ -254,6 +257,8 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
                         player->key_wasdown[i] = true;
                         player->key_wentdown[i] = true;}}}}
     }else if(event->type == SDL_KEYUP){
+        if(event->key.keysym.sym == SDLK_F6){
+            game->zoomout = false;}
         if(!event->key.repeat){ /* ??? */
             for(int i = 0; i < game->players_len; i++){
                 player_t *player = game->players[i];
@@ -333,7 +338,7 @@ int hexgame_render(hexgame_t *game, SDL_Renderer *renderer,
 
     hexmap_submap_t *submap = game->cur_submap;
     if(submap != NULL){
-        mapper = submap->mapper;
+        if(!game->zoomout)mapper = submap->mapper;
     }
 
     for(int i = 0; i < map->submaps_len; i++){
