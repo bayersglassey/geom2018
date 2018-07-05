@@ -57,6 +57,7 @@ int player_step(player_t *player, struct hexgame *game);
 typedef struct hexgame {
     int frame_i;
     bool zoomout;
+    bool follow;
     char *respawn_filename;
     hexmap_t *map;
     hexmap_submap_t *cur_submap;

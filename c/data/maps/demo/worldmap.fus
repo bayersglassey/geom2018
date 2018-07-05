@@ -44,6 +44,7 @@ submaps:
                     :
                         file: "data/maps/demo/tunnels.fus"
                         pos: (13 1)
+                        #camera: follow
                         camera: (6 -5)
                         mapper: ("triple")
 

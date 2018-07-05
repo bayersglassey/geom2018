@@ -222,6 +222,7 @@ void hexgame_cleanup(hexgame_t *game){
 int hexgame_init(hexgame_t *game, hexmap_t *map, char *respawn_filename){
     game->frame_i = 0;
     game->zoomout = false;
+    game->follow = false;
     game->map = map;
     game->respawn_filename = respawn_filename;
     vec_zero(map->space->dims, game->camera_pos);
@@ -244,6 +245,8 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
     if(event->type == SDL_KEYDOWN){
         if(event->key.keysym.sym == SDLK_F6){
             game->zoomout = true;}
+        if(event->key.keysym.sym == SDLK_F7){
+            game->follow = true;}
         if(!event->key.repeat){
             bool shift = event->key.keysym.mod & KMOD_SHIFT;
             if(event->key.keysym.sym == SDLK_1
@@ -262,6 +265,8 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
     }else if(event->type == SDL_KEYUP){
         if(event->key.keysym.sym == SDLK_F6){
             game->zoomout = false;}
+        if(event->key.keysym.sym == SDLK_F7){
+            game->follow = false;}
         if(!event->key.repeat){ /* ??? */
             for(int i = 0; i < game->players_len; i++){
                 player_t *player = game->players[i];
@@ -322,9 +327,18 @@ int hexgame_step(hexgame_t *game){
     }
 
     /* Set camera */
-    if(game->cur_submap != NULL){
+    int camera_type = -1;
+    if(game->follow)camera_type = 1;
+    else if(game->cur_submap != NULL){
+        camera_type = game->cur_submap->camera_type;}
+    if(camera_type == 0){
         vec_cpy(space->dims, game->camera_pos,
             game->cur_submap->camera_pos);
+    }else if(camera_type == 1){
+        if(game->players_len >= 1){
+            vec_cpy(space->dims, game->camera_pos,
+                game->players[0]->pos);
+        }
     }
 
     /* Do 1 gameplay step for each player */
