@@ -219,17 +219,19 @@ void hexgame_cleanup(hexgame_t *game){
     ARRAY_FREE(player_t, *game, players, player_cleanup)
 }
 
-int hexgame_init(hexgame_t *game, hexmap_t *map){
+int hexgame_init(hexgame_t *game, hexmap_t *map, char *respawn_filename){
     game->frame_i = 0;
     game->zoomout = false;
     game->map = map;
+    game->respawn_filename = respawn_filename;
     vec_zero(map->space->dims, game->camera_pos);
     ARRAY_INIT(*game, players)
     return 0;
 }
 
-int hexgame_reset_player(hexgame_t *game, player_t *player){
-    vec_cpy(game->map->space->dims, player->pos, player->respawn_pos);
+int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard){
+    vec_cpy(game->map->space->dims, player->pos,
+        hard? game->map->spawn: player->respawn_pos);
     player->rot = 0;
     player->turn = false;
     player->state = player->stateset.states[0];
@@ -243,12 +245,13 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
         if(event->key.keysym.sym == SDLK_F6){
             game->zoomout = true;}
         if(!event->key.repeat){
+            bool shift = event->key.keysym.mod & KMOD_SHIFT;
             if(event->key.keysym.sym == SDLK_1
                 && game->players_len >= 1){
-                    hexgame_reset_player(game, game->players[0]);}
+                    hexgame_reset_player(game, game->players[0], shift);}
             if(event->key.keysym.sym == SDLK_2
                 && game->players_len >= 2){
-                    hexgame_reset_player(game, game->players[1]);}
+                    hexgame_reset_player(game, game->players[1], shift);}
             for(int i = 0; i < game->players_len; i++){
                 player_t *player = game->players[i];
                 for(int i = 0; i < PLAYER_KEYS; i++){
@@ -296,7 +299,17 @@ int hexgame_step(hexgame_t *game){
             hexcollmap_elem_t *face =
                 hexcollmap_get_face(collmap, &index);
             if(face != NULL && face->tile_c == 'S'){
-                vec_cpy(space->dims, player->respawn_pos, player->pos);
+                if(!vec_eq(space->dims, player->respawn_pos, player->pos)){
+                    vec_cpy(space->dims, player->respawn_pos, player->pos);
+                    if(game->respawn_filename != NULL){
+                        FILE *f = fopen(game->respawn_filename, "w");
+                        if(f != NULL){
+                            fprintf(f, "%i %i\n",
+                                player->pos[0], player->pos[1]);
+                            fclose(f);
+                        }
+                    }
+                }
             }
 
             hexcollmap_elem_t *vert =

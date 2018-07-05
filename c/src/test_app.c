@@ -142,14 +142,29 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     err = hexmap_load(&app->hexmap, &app->prend, app->hexmap_filename);
     if(err)return err;
 
-    err = hexgame_init(&app->hexgame, &app->hexmap);
+    err = hexgame_init(&app->hexgame, &app->hexmap, "respawn.txt");
     if(err)return err;
 
     {
+        vec_t spawn;
+        vec_cpy(app->hexgame.map->space->dims,
+            spawn, app->hexgame.map->spawn);
+
+        FILE *f = fopen("respawn.txt", "r");
+        if(f != NULL){
+            int x, y;
+            int n = fscanf(f, "%i %i\n", &x, &y);
+            if(n == 2){
+                spawn[0] = x;
+                spawn[1] = y;
+            }
+            fclose(f);
+        }
+
         char *stateset_filename = strdup(app->stateset_filename);
         ARRAY_PUSH_NEW(player_t, app->hexgame, players, player)
         player_init(player, &app->prend, strdup(stateset_filename), 0,
-            app->hexgame.map->spawn);
+            spawn);
     }
 
     app->cur_rgraph_i = 0;

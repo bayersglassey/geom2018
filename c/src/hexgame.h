@@ -57,6 +57,7 @@ int player_step(player_t *player, struct hexgame *game);
 typedef struct hexgame {
     int frame_i;
     bool zoomout;
+    char *respawn_filename;
     hexmap_t *map;
     hexmap_submap_t *cur_submap;
     vec_t camera_pos;
@@ -65,7 +66,7 @@ typedef struct hexgame {
 
 
 void hexgame_cleanup(hexgame_t *game);
-int hexgame_init(hexgame_t *game, hexmap_t *map);
+int hexgame_init(hexgame_t *game, hexmap_t *map, char *respawn_filename);
 int hexgame_process_event(hexgame_t *game, SDL_Event *event);
 int hexgame_step(hexgame_t *game);
 int hexgame_render(hexgame_t *game, SDL_Renderer *renderer,
