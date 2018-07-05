@@ -226,6 +226,7 @@ int hexgame_init(hexgame_t *game, hexmap_t *map, char *respawn_filename){
     game->map = map;
     game->respawn_filename = respawn_filename;
     vec_zero(map->space->dims, game->camera_pos);
+    game->camera_rot = 0;
     ARRAY_INIT(*game, players)
     return 0;
 }
@@ -334,10 +335,13 @@ int hexgame_step(hexgame_t *game){
     if(camera_type == 0){
         vec_cpy(space->dims, game->camera_pos,
             game->cur_submap->camera_pos);
+        game->camera_rot = 0;
     }else if(camera_type == 1){
         if(game->players_len >= 1){
+            player_t *player = game->players[0];
             vec_cpy(space->dims, game->camera_pos,
-                game->players[0]->pos);
+                player->pos);
+            game->camera_rot = player->rot;
         }
     }
 
@@ -355,6 +359,8 @@ int hexgame_render(hexgame_t *game, SDL_Renderer *renderer,
     SDL_Palette *pal, int x0, int y0, int zoom
 ){
     int err;
+
+    vecspace_t *space = &hexspace;
 
     hexmap_t *map = game->map;
 
@@ -377,7 +383,9 @@ int hexgame_render(hexgame_t *game, SDL_Renderer *renderer,
         vec_sub(rgraph->space->dims, pos, camera_renderpos);
         vec_mul(rgraph->space, pos, game->map->unit);
 
-        rot_t rot = 0;
+        rot_t rot = vec4_rot_from_hexspace(0);
+        //rot_t rot = vec4_rot_from_hexspace(
+        //    rot_inv(space->rot_max, game->camera_rot));
         flip_t flip = false;
         int frame_i = game->frame_i;
 
@@ -386,8 +394,6 @@ int hexgame_render(hexgame_t *game, SDL_Renderer *renderer,
             pos, rot, flip, frame_i, mapper);
         if(err)return err;
     }
-
-    vecspace_t *space = &hexspace;
 
     for(int i = 0; i < game->players_len; i++){
         player_t *player = game->players[i];
@@ -400,6 +406,9 @@ int hexgame_render(hexgame_t *game, SDL_Renderer *renderer,
 
         rot_t player_rot = player_get_rot(player, space);
         rot_t rot = vec4_rot_from_hexspace(player_rot);
+        //rot_t rot = vec4_rot_from_hexspace(
+        //    rot_contain(space->rot_max,
+        //        player_rot + rot_inv(space->rot_max, game->camera_rot)));
         flip_t flip = player->turn;
         int frame_i = player->frame_i;
 
