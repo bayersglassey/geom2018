@@ -287,6 +287,13 @@ int hexgame_step(hexgame_t *game){
                  player->pos[0] - submap->pos[0],
                 -player->pos[1] + submap->pos[1]);
 
+            /* savepoints are currently this HACK */
+            hexcollmap_elem_t *face =
+                hexcollmap_get_face(collmap, &index);
+            if(face != NULL && face->tile_c == 'S'){
+                vec_cpy(space->dims, player->respawn_pos, player->pos);
+            }
+
             hexcollmap_elem_t *vert =
                 hexcollmap_get_vert(collmap, &index);
             if(hexcollmap_elem_is_solid(vert)){
