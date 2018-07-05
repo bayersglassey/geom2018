@@ -75,6 +75,28 @@ shapes:
             : "map_face1_third" (1 1 1 0)  4 f
             : "map_face1_third" (1 1 1 0)  8 f
 
+    "map_savepoint_third":
+        animation: cycle 9
+        prismels:
+            : "tri" ( 0 0 0 0)  0 f eval(1 + 8 + 7) (0 3)
+            : "tri" ( 0 0 0 0)  2 f eval(1 + 8 + 7) (0 3)
+            : "sq"  (-1 0 1 0)  0 f eval(1 + 8 + 7) (0 3)
+
+            : "tri" ( 0 0 0 0)  0 f eval(1 + 8 + 2) (3 1)
+            : "tri" ( 0 0 0 0)  2 f eval(1 + 8 + 2) (3 1)
+            : "sq"  (-1 0 1 0)  0 f eval(1 + 8 + 2) (3 1)
+
+            : "tri" ( 0 0 0 0)  0 f eval(1 + 0 + 2) (4 1)
+            : "tri" ( 0 0 0 0)  2 f eval(1 + 0 + 2) (4 1)
+            : "sq"  (-1 0 1 0)  0 f eval(1 + 0 + 2) (4 1)
+
+    "map_savepoint":
+        animation: cycle 9
+        shapes:
+            : "map_savepoint_third" (1 1 1 0)  0 f  0+
+            : "map_savepoint_third" (1 1 1 0)  4 f  3+
+            : "map_savepoint_third" (1 1 1 0)  8 f  6+
+
 mappers:
     "test_map":
         solid

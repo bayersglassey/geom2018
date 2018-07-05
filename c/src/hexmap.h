@@ -77,6 +77,7 @@ hexcollmap_tile_t *hexcollmap_get_tile(hexcollmap_t *collmap, trf_t *index);
 hexcollmap_elem_t *hexcollmap_get_vert(hexcollmap_t *collmap, trf_t *index);
 hexcollmap_elem_t *hexcollmap_get_edge(hexcollmap_t *collmap, trf_t *index);
 hexcollmap_elem_t *hexcollmap_get_face(hexcollmap_t *collmap, trf_t *index);
+bool hexcollmap_elem_is_visible(hexcollmap_elem_t *elem);
 bool hexcollmap_elem_is_solid(hexcollmap_elem_t *elem);
 
 

@@ -11,6 +11,7 @@ edges:
 faces:
     "0": "map_face0"
     "1": "map_face1"
+    "S": "map_savepoint"
 
 areas:
     :

@@ -150,7 +150,7 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                 ox = x + 1;
                 oy = y;
                 x += 2;
-            }else if(strchr(" .+/-\\*%", c) != NULL){
+            }else if(strchr(" .+/-\\*S%", c) != NULL){
                 /* these are all fine */
             }else if(c == '['){
                 /* next line plz */
@@ -173,8 +173,12 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
         int line_len = strlen(line);
         for(int x = 0; x < line_len; x++){
             char c = line[x];
-            if(strchr("+/-\\*", c) != NULL){
+            if(strchr("+/-\\*S", c) != NULL){
                 int mx, my; bool is_face1;
+
+                /* savepoint is just a face */
+                if(c == 'S')c = '*';
+
                 get_map_coords(x-ox, y-oy, c,
                     &mx, &my, &is_face1);
                 map_t = _min(map_t, my);
@@ -214,18 +218,26 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
 
         for(int x = 0; x < line_len; x++){
             char c = line[x];
-            if(strchr("+/-\\*", c) != NULL){
+            if(strchr("+/-\\*S", c) != NULL){
                 int mx, my; bool is_face1;
+
+                bool is_savepoint = c == 'S';
+                if(is_savepoint)c = '*';
+
                 get_map_coords(x-ox, y-oy, c,
                     &mx, &my, &is_face1);
                 mx -= map_l;
                 my -= map_t;
                 hexcollmap_tile_t *tile = &tiles[my * map_w + mx];
 
-                char tile_c = '0';
+                char tile_c = is_savepoint? 'S': '0';
                     /* The default tile_c is '0'. We could make that
                     more explicit, maybe as a param to this function,
                     attribute of hexmap or submaps, etc?.. */
+                    /* NOTE: The way we've implemented this, 'S' can be
+                    overwritten by '%'. Maybe that's weird? Maybe if
+                    is_savepoint then we should skip the check for
+                    tilebucket_active entirely? */
 
                 if(tilebucket_active){
                     /* Get next non-' ' character in current tile bucket. */
@@ -417,8 +429,16 @@ hexcollmap_elem_t *hexcollmap_get_face(hexcollmap_t *collmap, trf_t *index){
     return &tile->face[index->rot];
 }
 
+bool hexcollmap_elem_is_visible(hexcollmap_elem_t *elem){
+    if(elem == NULL)return false;
+    char tile_c = elem->tile_c;
+    return tile_c != ' ';
+}
+
 bool hexcollmap_elem_is_solid(hexcollmap_elem_t *elem){
-    return elem != NULL && elem->tile_c != ' ';
+    if(elem == NULL)return false;
+    char tile_c = elem->tile_c;
+    return tile_c != ' ' && tile_c != 'S';
 }
 
 
@@ -832,10 +852,21 @@ int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap){
     vecspace_t *space = prend->space;
     hexcollmap_t *collmap = &submap->collmap;
 
+    /* BIG OL' HACK: If any "tile" rgraphs are animated, we need the
+    map's rgraph to be animated also.
+    The most correct way to do this is I guess to compute the LCD of
+    the tile rgraphs' n_frames, and set the map's rgraph's n_frames
+    to that.
+    But for now we use 36, because it has "many" divisors.
+    That's a lot of bitmaps to cache for the map's rgraph, though...
+    if we're going to allow complicated map animations, maybe we
+    should disable bitmap caching for it (somehow). */
+    int n_frames = 36;
+
     ARRAY_PUSH_NEW(rendergraph_t, *prend, rendergraphs, rgraph)
     err = rendergraph_init(rgraph, strdup(map->name), space,
         rendergraph_animation_type_default,
-        rendergraph_n_frames_default);
+        n_frames);
     if(err)return err;
 
     for(int y = 0; y < collmap->h; y++){
@@ -852,21 +883,21 @@ int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap){
 
             for(int i = 0; i < 1; i++){
                 hexcollmap_elem_t *elem = &tile->vert[i];
-                if(hexcollmap_elem_is_solid(elem)){
+                if(hexcollmap_elem_is_visible(elem)){
                     err = add_tile_rgraph(rgraph,
                         hexmap_get_rgraph_vert(map, elem->tile_c),
                         space, v, i * 2);
                     if(err)return err;}}
             for(int i = 0; i < 3; i++){
                 hexcollmap_elem_t *elem = &tile->edge[i];
-                if(hexcollmap_elem_is_solid(elem)){
+                if(hexcollmap_elem_is_visible(elem)){
                     err = add_tile_rgraph(rgraph,
                         hexmap_get_rgraph_edge(map, elem->tile_c),
                         space, v, i * 2);
                     if(err)return err;}}
             for(int i = 0; i < 2; i++){
                 hexcollmap_elem_t *elem = &tile->face[i];
-                if(hexcollmap_elem_is_solid(elem)){
+                if(hexcollmap_elem_is_visible(elem)){
                     err = add_tile_rgraph(rgraph,
                         hexmap_get_rgraph_face(map, elem->tile_c),
                         space, v, i * 2);

@@ -15,6 +15,9 @@
 
 #define DEBUG_RULES false
 
+#define MAX_FRAME_I 554400
+    /* Largest highly composite number smaller than 2^16 */
+
 
 /**********
  * PLAYER *
@@ -175,6 +178,7 @@ int player_step(player_t *player, hexgame_t *game){
     int err;
 
     player->frame_i++;
+    if(player->frame_i == MAX_FRAME_I)player->frame_i = 0;
 
     if(player->cooldown > 0){
         player->cooldown--;
@@ -216,6 +220,7 @@ void hexgame_cleanup(hexgame_t *game){
 }
 
 int hexgame_init(hexgame_t *game, hexmap_t *map){
+    game->frame_i = 0;
     game->map = map;
     vec_zero(map->space->dims, game->camera_pos);
     ARRAY_INIT(*game, players)
@@ -261,6 +266,9 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
 
 int hexgame_step(hexgame_t *game){
     int err;
+
+    game->frame_i++;
+    if(game->frame_i == MAX_FRAME_I)game->frame_i = 0;
 
     hexmap_t *map = game->map;
     vecspace_t *space = map->space;
@@ -332,7 +340,7 @@ int hexgame_render(hexgame_t *game, SDL_Renderer *renderer,
 
         rot_t rot = 0;
         flip_t flip = false;
-        int frame_i = 0;
+        int frame_i = game->frame_i;
 
         err = rendergraph_render(rgraph, renderer, pal, game->map->prend,
             x0, y0, zoom,
