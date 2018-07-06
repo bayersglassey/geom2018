@@ -61,6 +61,7 @@ void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box,
  *******************/
 
 typedef struct prismelrenderer {
+    int n_textures;
     vecspace_t *space;
     ARRAY_DECL(struct palettemapper, palmappers)
     ARRAY_DECL(struct prismel, prismels)
@@ -154,7 +155,7 @@ extern const int rendergraph_n_frames_default;
 
 void rendergraph_cleanup(rendergraph_t *rendergraph);
 int rendergraph_init(rendergraph_t *rendergraph, char *name,
-    vecspace_t *space,
+    prismelrenderer_t *prend,
     const char *animation_type, int n_frames);
 void rendergraph_bitmap_dump(rendergraph_bitmap_t *bitmap, FILE *f,
     int i, int n_spaces, bool dump_surface);
@@ -174,7 +175,8 @@ int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
     rendergraph_bitmap_t **bitmap_ptr,
     rot_t rot, flip_t flip, int frame_i,
     SDL_Palette *pal, SDL_Renderer *renderer);
-int rendergraph_bitmap_get_texture(rendergraph_bitmap_t *bitmap,
+int rendergraph_bitmap_get_texture(rendergraph_t *rgraph,
+    rendergraph_bitmap_t *bitmap,
     SDL_Renderer *renderer, bool force_create, SDL_Texture **texture_ptr);
 struct prismelmapper;
 int rendergraph_render(rendergraph_t *rgraph,

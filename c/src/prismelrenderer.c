@@ -198,6 +198,7 @@ void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box,
  *******************/
 
 int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space){
+    renderer->n_textures = 0;
     renderer->space = space;
     ARRAY_INIT(*renderer, palmappers)
     ARRAY_INIT(*renderer, prismels)
@@ -540,17 +541,23 @@ void rendergraph_cleanup(rendergraph_t *rendergraph){
     for(int i = 0; i < rendergraph->n_bitmaps; i++){
         rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[i];
         SDL_FreeSurface(bitmap->surface);
-        SDL_DestroyTexture(bitmap->texture);
+        if(bitmap->texture){
+            SDL_DestroyTexture(bitmap->texture);
+            rendergraph->prend->n_textures--;
+        }
     }
     free(rendergraph->bitmaps);
 }
 
 int rendergraph_init(rendergraph_t *rendergraph, char *name,
-    vecspace_t *space,
+    prismelrenderer_t *prend,
     const char *animation_type, int n_frames
 ){
     int err;
+    vecspace_t *space = prend->space;
+
     rendergraph->name = name;
+    rendergraph->prend = prend;
     rendergraph->space = space;
     ARRAY_INIT(*rendergraph, prismel_trfs)
     ARRAY_INIT(*rendergraph, rendergraph_trfs)
@@ -810,10 +817,11 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     }
     if(bitmap->texture != NULL){
         SDL_DestroyTexture(bitmap->texture);
+        rendergraph->prend->n_textures--;
         bitmap->texture = NULL;
     }
     SDL_Surface *surface = surface8_create(bitmap->pbox.w, bitmap->pbox.h,
-        true, true, pal);
+        false, true, pal);
     if(surface == NULL)return 2;
 
     /* Fill new bitmap with transparent colour */
@@ -904,6 +912,7 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     if(renderer != NULL && bitmap->pbox.w != 0 && bitmap->pbox.h != 0){
         texture = SDL_CreateTextureFromSurface(renderer, surface);
         RET_IF_SDL_NULL(texture);
+        rendergraph->prend->n_textures++;
     }
 
     /* LET'S GO */
@@ -931,11 +940,13 @@ int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
     return 0;
 }
 
-int rendergraph_bitmap_get_texture(rendergraph_bitmap_t *bitmap,
+int rendergraph_bitmap_get_texture(rendergraph_t *rgraph,
+    rendergraph_bitmap_t *bitmap,
     SDL_Renderer *renderer, bool force_create, SDL_Texture **texture_ptr
 ){
     if(force_create && bitmap->texture){
         SDL_DestroyTexture(bitmap->texture);
+        rgraph->prend->n_textures--;
         bitmap->texture = NULL;
     }
     if(bitmap->texture == NULL){
@@ -943,6 +954,7 @@ int rendergraph_bitmap_get_texture(rendergraph_bitmap_t *bitmap,
             bitmap->surface);
         RET_IF_SDL_NULL(texture);
         bitmap->texture = texture;
+        rgraph->prend->n_textures++;
     }
     *texture_ptr = bitmap->texture;
     return 0;
@@ -986,15 +998,16 @@ int rendergraph_render(rendergraph_t *rgraph,
         bitmap->pbox.h * zoom
     };
 
-    if(renderer != NULL){
+    if(surface != NULL){
+        RET_IF_SDL_NZ(SDL_BlitScaled(bitmap->surface, NULL,
+            surface, &dst_rect));
+    }else if(renderer != NULL){
         SDL_Texture *bitmap_texture;
-        err = rendergraph_bitmap_get_texture(bitmap, renderer,
+        err = rendergraph_bitmap_get_texture(rgraph, bitmap, renderer,
             false, &bitmap_texture);
         if(err)return err;
         RET_IF_SDL_NZ(SDL_RenderCopy(renderer, bitmap_texture,
             NULL, &dst_rect));
-    }else if(surface != NULL){
-        /* TODO: Blit directly to surface, give the GPU a break eh */
     }
 
     return 0;
@@ -1112,7 +1125,7 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
     if(resulting_rgraph == NULL)return 1;
     if(!name){name = generate_indexed_name("shape",
         prend->rendergraphs_len);}
-    err = rendergraph_init(resulting_rgraph, name, space,
+    err = rendergraph_init(resulting_rgraph, name, prend,
         mapped_rgraph->animation_type, mapped_rgraph->n_frames);
     if(err)return err;
 

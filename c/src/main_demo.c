@@ -20,6 +20,7 @@ int main(int n_args, char *args[]){
     const char *prend_filename = "data/test.fus";
     const char *stateset_filename = "anim/player.fus";
     const char *hexmap_filename = "data/maps/demo/worldmap.fus";
+    bool use_textures = false;
 
     for(int arg_i = 1; arg_i < n_args; arg_i++){
         char *arg = args[arg_i];
@@ -48,6 +49,8 @@ int main(int n_args, char *args[]){
                 return 2;}
             arg = args[arg_i];
             hexmap_filename = arg;
+        }else if(!strcmp(arg, "--use_textures")){
+            use_textures = true;
         }else{
             fprintf(stderr, "Unrecognized option: %s\n", arg);
             return 2;
@@ -78,7 +81,7 @@ int main(int n_args, char *args[]){
                 test_app_t app;
                 if(test_app_init(&app, SCW, SCH, DELAY_GOAL,
                     window, renderer, prend_filename, stateset_filename,
-                    hexmap_filename)
+                    hexmap_filename, use_textures)
                 ){
                     e = 1;
                     fprintf(stderr, "Couldn't init test app\n");

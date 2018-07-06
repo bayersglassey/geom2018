@@ -108,7 +108,8 @@ static int load_sdl_palette(const char *filename, SDL_Palette **pal_ptr){
 
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
-    const char *stateset_filename, const char *hexmap_filename
+    const char *stateset_filename, const char *hexmap_filename,
+    bool use_textures
 ){
     int err;
 
@@ -118,13 +119,19 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 
     app->window = window;
     app->renderer = renderer;
-    app->surface = NULL;
     app->prend_filename = prend_filename;
     app->stateset_filename = stateset_filename;
     app->hexmap_filename = hexmap_filename;
 
     err = load_sdl_palette("data/pal1.fus", &app->pal);
     if(err)return err;
+
+    if(use_textures){
+        app->surface = NULL;
+    }else{
+        app->surface = surface8_create(scw, sch, false, false, app->pal);
+        if(app->surface == NULL)return 1;
+    }
 
     err = font_load(&app->font, "data/font.fus");
     if(err)return err;
@@ -345,7 +352,7 @@ int test_app_mainloop(test_app_t *app){
     int err;
 
     SDL_Surface *render_surface = surface32_create(app->scw, app->sch,
-        true, true);
+        false, true);
     if(render_surface == NULL)return 2;
 
     Uint32 took = 0;
@@ -363,27 +370,65 @@ int test_app_mainloop(test_app_t *app){
             err = hexgame_step(&app->hexgame);
             if(err)return err;
 
-            SDL_Color *bgcolor = &app->pal->colors[255];
-            RET_IF_SDL_NZ(SDL_SetRenderDrawColor(app->renderer,
-                bgcolor->r, bgcolor->g, bgcolor->b, 255));
-            RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
+            if(app->surface != NULL){
+                RET_IF_SDL_NZ(SDL_FillRect(app->surface, NULL, 255));
+            }else{
+                SDL_Color *bgcolor = &app->pal->colors[255];
+                RET_IF_SDL_NZ(SDL_SetRenderDrawColor(app->renderer,
+                    bgcolor->r, bgcolor->g, bgcolor->b, 255));
+                RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
+            }
+
             err = hexgame_render(&app->hexgame, app->renderer, app->surface,
                 app->pal, app->scw/2 + app->x0, app->sch/2 + app->y0,
                 app->zoom);
             if(err)return err;
+
+            if(app->surface != NULL){
+                SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
+                    app->renderer, app->surface);
+                RET_IF_SDL_NULL(render_texture);
+                SDL_RenderCopy(app->renderer, render_texture, NULL, NULL);
+                SDL_DestroyTexture(render_texture);
+            }
+
             SDL_RenderPresent(app->renderer);
         }else{
 
             /******************************************************************
-            * Blit stuff onto render_surface
+            * Clear screen
             */
 
             RET_IF_SDL_NZ(SDL_FillRect(render_surface, NULL, 0));
+
+            if(app->surface != NULL){
+                RET_IF_SDL_NZ(SDL_FillRect(app->surface, NULL, 0));
+            }else{
+                RET_IF_SDL_NZ(SDL_SetRenderDrawColor(app->renderer,
+                    0, 0, 0, 255));
+                RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
+            }
+
+            /******************************************************************
+            * Render rgraph
+            */
+
+            int x0 = app->scw / 2 + app->x0;
+            int y0 = app->sch / 2 + app->y0;
+            err = rendergraph_render(rgraph, app->renderer, app->surface,
+                app->pal, &app->prend, x0, y0, app->zoom,
+                (vec_t){0}, app->rot, app->flip, app->frame_i, NULL);
+            if(err)return err;
+
+            /******************************************************************
+            * Render text
+            */
 
             font_blitmsg(&app->font, render_surface, 0, 0,
                 "Game running? %c\n"
                 "Frame rendered in: %i ms\n"
                 "  (Aiming for sub-%i ms)\n"
+                "# Textures in use: %i\n"
                 "Controls:\n"
                 "  up/down - zoom (hold shift for tap mode)\n"
                 "  left/right - rotate (hold shift for tap mode)\n"
@@ -395,6 +440,7 @@ int test_app_mainloop(test_app_t *app){
                 "  pan=(%i,%i), rot = %i, flip = %c, zoom = %i,"
                     " frame_i = %i (%i) / %i (%s)",
                 app->hexgame_running? 'y': 'n', took, app->delay_goal,
+                app->prend.n_textures,
                 app->prend_filename, app->cur_rgraph_i,
                 app->prend.rendergraphs_len, rgraph->name,
                 app->x0, app->y0, app->rot, app->flip? 'y': 'n', app->zoom,
@@ -404,32 +450,25 @@ int test_app_mainloop(test_app_t *app){
             console_blit(&app->console, &app->font, render_surface,
                 0, 12 * app->font.char_h);
 
-
             /******************************************************************
-            * Render stuff onto renderer
+            * Draw to renderer and present it
             */
 
-            RET_IF_SDL_NZ(SDL_SetRenderDrawColor(app->renderer,
-                0, 0, 0, 255));
-            RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
+            if(app->surface != NULL){
+                SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
+                    app->renderer, app->surface);
+                RET_IF_SDL_NULL(render_texture);
+                SDL_RenderCopy(app->renderer, render_texture, NULL, NULL);
+                SDL_DestroyTexture(render_texture);
+            }
 
-            int x0 = app->scw / 2 + app->x0;
-            int y0 = app->sch / 2 + app->y0;
-            err = rendergraph_render(rgraph, app->renderer, app->surface,
-                app->pal, &app->prend, x0, y0, app->zoom,
-                (vec_t){0}, app->rot, app->flip, app->frame_i, NULL);
-            if(err)return err;
-
-            SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
-                app->renderer, render_surface);
-            RET_IF_SDL_NULL(render_surface);
-            SDL_RenderCopy(app->renderer, render_texture, NULL, NULL);
-            SDL_DestroyTexture(render_texture);
-
-
-            /******************************************************************
-            * Present it
-            */
+            {
+                SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
+                    app->renderer, render_surface);
+                RET_IF_SDL_NULL(render_texture);
+                SDL_RenderCopy(app->renderer, render_texture, NULL, NULL);
+                SDL_DestroyTexture(render_texture);
+            }
 
             SDL_RenderPresent(app->renderer);
 

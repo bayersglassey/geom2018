@@ -84,17 +84,16 @@ SDL_Surface *surface8_create(int w, int h,
         0, w, h, 8, 0, 0, 0, 0);
     RET_NULL_IF_SDL_NULL(surface);
 
-    /* NOTE: Temporarily turning RLE off here, because it causes
-    corruption of surface->map->data or something later on when we
-    try to SDL_CreateTextureFromSurface */
+    if(use_rle){
+        RET_NULL_IF_SDL_NZ(use_rle
+            && SDL_SetSurfaceRLE(surface, 1));}
 
-    //RET_NULL_IF_SDL_NZ(use_rle
-    //    && SDL_SetSurfaceRLE(surface, 1));
-    RET_NULL_IF_SDL_NZ(use_colorkey
-        && SDL_SetColorKey(surface, SDL_TRUE, 0));
-    //RET_NULL_IF_SDL_NZ(use_colorkey
-    //    && SDL_SetColorKey(surface, SDL_TRUE,
-    //        use_rle? SDL_RLEACCEL: 0));
+    if(use_colorkey){
+        RET_NULL_IF_SDL_NZ(SDL_SetColorKey(surface, SDL_TRUE, 0));}
+    //if(use_colorkey){
+    //    RET_NULL_IF_SDL_NZ(SDL_SetColorKey(surface, SDL_TRUE,
+    //        use_rle? SDL_RLEACCEL: 0));}
+
     RET_NULL_IF_SDL_NZ(SDL_SetSurfacePalette(surface, pal));
     return surface;
 }
@@ -105,10 +104,10 @@ SDL_Surface *surface32_create(int w, int h,
     SDL_Surface *surface = SDL_CreateRGBSurface(
         0, w, h, 32, 0, 0, 0, 0);
     RET_NULL_IF_SDL_NULL(surface);
-    RET_NULL_IF_SDL_NZ(use_rle
-        && SDL_SetSurfaceRLE(surface, 1));
-    RET_NULL_IF_SDL_NZ(use_colorkey
-        && SDL_SetColorKey(surface, SDL_TRUE, 0));
+    if(use_rle){
+        RET_NULL_IF_SDL_NZ(SDL_SetSurfaceRLE(surface, 1));}
+    if(use_colorkey){
+        RET_NULL_IF_SDL_NZ(SDL_SetColorKey(surface, SDL_TRUE, 0));}
     return surface;
 }
 
