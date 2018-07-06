@@ -309,13 +309,8 @@ int test_app_process_console_input(test_app_t *app){
         SDL_Renderer *renderer = NULL;
         err = fus_lexer_next(&lexer);
         if(err)goto lexer_err;
-
-        /* WARNING: as of June 16 2018, the following causes my laptop
-        to hang... */
-        if(fus_lexer_got(&lexer, "R"))renderer = app->renderer;
-
         err = prismelrenderer_render_all_bitmaps(
-            &app->prend, app->pal, renderer);
+            &app->prend, app->pal);
         if(err)return err;
     }else if(fus_lexer_got(&lexer, "get_shape")){
         char *name;

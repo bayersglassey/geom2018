@@ -93,7 +93,7 @@ int prismelrenderer_load(prismelrenderer_t *prend, const char *filename);
 int prismelrenderer_save(prismelrenderer_t *prend, const char *filename);
 int prismelrenderer_write(prismelrenderer_t *prend, FILE *f);
 int prismelrenderer_render_all_bitmaps(prismelrenderer_t *prend,
-    SDL_Palette *pal, SDL_Renderer *renderer);
+    SDL_Palette *pal);
 
 
 
@@ -170,11 +170,11 @@ int rendergraph_get_bitmap_i(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i);
 int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i,
-    SDL_Palette *pal, SDL_Renderer *renderer);
+    SDL_Palette *pal);
 int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
     rendergraph_bitmap_t **bitmap_ptr,
     rot_t rot, flip_t flip, int frame_i,
-    SDL_Palette *pal, SDL_Renderer *renderer);
+    SDL_Palette *pal);
 int rendergraph_bitmap_get_texture(rendergraph_t *rgraph,
     rendergraph_bitmap_t *bitmap,
     SDL_Renderer *renderer, bool force_create, SDL_Texture **texture_ptr);

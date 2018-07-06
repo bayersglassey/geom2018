@@ -55,7 +55,6 @@ submaps:
 
 
     :
-        #skip
         pos: (40 60)
         camera: (0 0)
         submaps:
