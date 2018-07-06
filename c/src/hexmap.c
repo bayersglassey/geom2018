@@ -618,6 +618,12 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
     err = fus_lexer_next(lexer);
     if(err)return err;
 
+    if(fus_lexer_got(lexer, "skip")){
+        err = fus_lexer_parse_silent(lexer);
+        if(err)return err;
+        return 0;
+    }
+
     char *submap_filename = NULL;
     if(fus_lexer_got(lexer, "file")){
         err = fus_lexer_expect(lexer, "(");
