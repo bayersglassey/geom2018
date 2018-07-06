@@ -948,7 +948,8 @@ int rendergraph_bitmap_get_texture(rendergraph_bitmap_t *bitmap,
     return 0;
 }
 
-int rendergraph_render(rendergraph_t *rgraph, SDL_Renderer *renderer,
+int rendergraph_render(rendergraph_t *rgraph,
+    SDL_Renderer *renderer, SDL_Surface *surface,
     SDL_Palette *pal, prismelrenderer_t *prend,
     int x0, int y0, int zoom,
     vec_t pos, rot_t rot, flip_t flip, int frame_i,
@@ -984,12 +985,17 @@ int rendergraph_render(rendergraph_t *rgraph, SDL_Renderer *renderer,
         bitmap->pbox.w * zoom,
         bitmap->pbox.h * zoom
     };
-    SDL_Texture *bitmap_texture;
-    err = rendergraph_bitmap_get_texture(bitmap, renderer,
-        false, &bitmap_texture);
-    if(err)return err;
-    RET_IF_SDL_NZ(SDL_RenderCopy(renderer, bitmap_texture,
-        NULL, &dst_rect));
+
+    if(renderer != NULL){
+        SDL_Texture *bitmap_texture;
+        err = rendergraph_bitmap_get_texture(bitmap, renderer,
+            false, &bitmap_texture);
+        if(err)return err;
+        RET_IF_SDL_NZ(SDL_RenderCopy(renderer, bitmap_texture,
+            NULL, &dst_rect));
+    }else if(surface != NULL){
+        /* TODO: Blit directly to surface, give the GPU a break eh */
+    }
 
     return 0;
 }

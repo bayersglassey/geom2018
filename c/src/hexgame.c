@@ -355,7 +355,8 @@ int hexgame_step(hexgame_t *game){
     return 0;
 }
 
-int hexgame_render(hexgame_t *game, SDL_Renderer *renderer,
+int hexgame_render(hexgame_t *game,
+    SDL_Renderer *renderer, SDL_Surface *surface,
     SDL_Palette *pal, int x0, int y0, int zoom
 ){
     int err;
@@ -389,7 +390,8 @@ int hexgame_render(hexgame_t *game, SDL_Renderer *renderer,
         flip_t flip = false;
         int frame_i = game->frame_i;
 
-        err = rendergraph_render(rgraph, renderer, pal, game->map->prend,
+        err = rendergraph_render(rgraph, renderer, surface,
+            pal, game->map->prend,
             x0, y0, zoom,
             pos, rot, flip, frame_i, mapper);
         if(err)return err;
@@ -412,7 +414,8 @@ int hexgame_render(hexgame_t *game, SDL_Renderer *renderer,
         flip_t flip = player->turn;
         int frame_i = player->frame_i;
 
-        err = rendergraph_render(rgraph, renderer, pal, game->map->prend,
+        err = rendergraph_render(rgraph, renderer, surface,
+            pal, game->map->prend,
             x0, y0, zoom,
             pos, rot, flip, frame_i, mapper);
         if(err)return err;

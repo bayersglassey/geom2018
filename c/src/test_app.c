@@ -118,6 +118,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 
     app->window = window;
     app->renderer = renderer;
+    app->surface = NULL;
     app->prend_filename = prend_filename;
     app->stateset_filename = stateset_filename;
     app->hexmap_filename = hexmap_filename;
@@ -366,8 +367,9 @@ int test_app_mainloop(test_app_t *app){
             RET_IF_SDL_NZ(SDL_SetRenderDrawColor(app->renderer,
                 bgcolor->r, bgcolor->g, bgcolor->b, 255));
             RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
-            err = hexgame_render(&app->hexgame, app->renderer, app->pal,
-                app->scw/2 + app->x0, app->sch/2 + app->y0, app->zoom);
+            err = hexgame_render(&app->hexgame, app->renderer, app->surface,
+                app->pal, app->scw/2 + app->x0, app->sch/2 + app->y0,
+                app->zoom);
             if(err)return err;
             SDL_RenderPresent(app->renderer);
         }else{
@@ -413,8 +415,8 @@ int test_app_mainloop(test_app_t *app){
 
             int x0 = app->scw / 2 + app->x0;
             int y0 = app->sch / 2 + app->y0;
-            err = rendergraph_render(rgraph, app->renderer, app->pal,
-                &app->prend, x0, y0, app->zoom,
+            err = rendergraph_render(rgraph, app->renderer, app->surface,
+                app->pal, &app->prend, x0, y0, app->zoom,
                 (vec_t){0}, app->rot, app->flip, app->frame_i, NULL);
             if(err)return err;
 

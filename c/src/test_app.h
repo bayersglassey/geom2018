@@ -22,6 +22,7 @@ typedef struct test_app {
 
     SDL_Window *window;
     SDL_Renderer *renderer;
+    SDL_Surface *surface;
 
     const char *prend_filename;
     const char *stateset_filename;

@@ -177,7 +177,8 @@ int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
 int rendergraph_bitmap_get_texture(rendergraph_bitmap_t *bitmap,
     SDL_Renderer *renderer, bool force_create, SDL_Texture **texture_ptr);
 struct prismelmapper;
-int rendergraph_render(rendergraph_t *rgraph, SDL_Renderer *renderer,
+int rendergraph_render(rendergraph_t *rgraph,
+    SDL_Renderer *renderer, SDL_Surface *surface,
     SDL_Palette *pal, prismelrenderer_t *prend,
     int x0, int y0, int zoom,
     vec_t pos, rot_t rot, flip_t flip, int frame_i,
