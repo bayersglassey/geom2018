@@ -227,6 +227,7 @@ int hexgame_init(hexgame_t *game, hexmap_t *map, char *respawn_filename){
     game->respawn_filename = respawn_filename;
     vec_zero(map->space->dims, game->camera_pos);
     game->camera_rot = 0;
+    game->cur_submap = NULL;
     ARRAY_INIT(*game, players)
     return 0;
 }
