@@ -36,6 +36,23 @@ submaps:
                         pos: (19 6)
                         camera: (5 5)
                         mapper: ("quadruple")
+                    :
+                        file: "data/maps/demo/vines.fus"
+                        pos: (-4 2)
+                        camera: (-5 5)
+                        mapper: ("triple")
+                        submaps:
+                            :
+                                file: "data/maps/demo/vines2.fus"
+                                pos: (-26 -5)
+                                camera: (-5 5)
+                                mapper: ("quadruple")
+                                submaps:
+                                    :
+                                        file: "data/maps/demo/vines3.fus"
+                                        pos: (-20 -5)
+                                        camera: (-5 5)
+                                        mapper: ("quadruple")
             :
                 file: "data/maps/demo/pebbles.fus"
                 pos: (15 -2)
