@@ -153,3 +153,13 @@ Instead of "import" in .fus files, we should maybe add "require", or anyway
     imports should be idempotent.
 So all you do is specify worldmap, and it loads rgraphs as required.
 
+
+July 9, 2018:
+-------------
+
+Recordings:
+    - NEED TO STORE INITIAL PLAYER KEY STATES IN RECORDING HEADER!
+    - Do a check and increment an integer, such that recordings don't
+        just overwrite the same filename.
+        So they would go: rec1.fus, rec2.fus, rec3.fus, etc...
+
