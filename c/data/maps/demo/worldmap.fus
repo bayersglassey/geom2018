@@ -22,6 +22,8 @@ submaps:
         camera: (5 4)
         mapper: ("quadruple")
         palette: "data/pals/start.fus"
+        recordings:
+            : "data/maps/demo/recs/start_1.fus"
     :
         file: "data/maps/demo/start2.fus"
         pos: (7 11)

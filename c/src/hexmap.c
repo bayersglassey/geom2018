@@ -456,6 +456,8 @@ void hexmap_cleanup(hexmap_t *map){
     ARRAY_FREE(hexmap_rgraph_elem_t, *map, rgraph_verts, (void))
     ARRAY_FREE(hexmap_rgraph_elem_t, *map, rgraph_edges, (void))
     ARRAY_FREE(hexmap_rgraph_elem_t, *map, rgraph_faces, (void))
+
+    ARRAY_FREE(char, *map, recording_filenames, (void))
 }
 
 int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
@@ -475,6 +477,8 @@ int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
     ARRAY_INIT(*map, rgraph_verts)
     ARRAY_INIT(*map, rgraph_edges)
     ARRAY_INIT(*map, rgraph_faces)
+
+    ARRAY_INIT(*map, recording_filenames)
     return 0;
 }
 
@@ -710,6 +714,28 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
         ARRAY_PUSH_NEW(hexmap_submap_t, *map, submaps, submap)
         err = hexmap_submap_load(map, submap, submap_filename, pos,
             camera_type, camera_pos, mapper, palette_filename);
+        if(err)return err;
+    }
+
+    if(fus_lexer_got(lexer, "recordings")){
+        err = fus_lexer_expect(lexer, "(");
+        if(err)return err;
+        while(1){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            if(fus_lexer_got(lexer, ")"))break;
+
+            char *recording_filename;
+            err = fus_lexer_get(lexer, "(");
+            if(err)return err;
+            err = fus_lexer_expect_str(lexer, &recording_filename);
+            if(err)return err;
+            err = fus_lexer_expect(lexer, ")");
+            if(err)return err;
+            ARRAY_PUSH(char, *map, recording_filenames,
+                recording_filename)
+        }
+        err = fus_lexer_next(lexer);
         if(err)return err;
     }
 

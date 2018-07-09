@@ -108,6 +108,13 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         if(err)return err;
     }
 
+    for(int i = 0; i < app->hexmap.recording_filenames_len; i++){
+        char *recording_filename = app->hexmap.recording_filenames[i];
+        err = hexgame_load_player_recording(&app->hexgame,
+            recording_filename, -1);
+        if(err)return err;
+    }
+
     app->cur_rgraph_i = 0;
     app->x0 = 0;
     app->y0 = 0;

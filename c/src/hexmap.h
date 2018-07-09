@@ -69,6 +69,8 @@ typedef struct hexmap {
     ARRAY_DECL(hexmap_rgraph_elem_t, rgraph_faces)
 
     ARRAY_DECL(hexmap_submap_t, submaps)
+
+    ARRAY_DECL(char, recording_filenames)
 } hexmap_t;
 
 
