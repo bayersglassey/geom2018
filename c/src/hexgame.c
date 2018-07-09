@@ -15,6 +15,7 @@
 
 
 #define DEBUG_RULES false
+#define DEBUG_RECORDINGS false
 
 #define MAX_FRAME_I 554400
     /* Largest highly composite number smaller than 2^16 */
@@ -24,7 +25,7 @@
  * PLAYER *
  **********/
 
-static void player_cleanup_recording(player_t *player){
+static void player_reset_recording(player_t *player){
     free(player->recording);
     free(player->recording_name);
     if(player->recording_file != NULL)fclose(player->recording_file);
@@ -40,7 +41,7 @@ static void player_cleanup_recording(player_t *player){
 
 void player_cleanup(player_t *player){
     stateset_cleanup(&player->stateset);
-    player_cleanup_recording(player);
+    player_reset_recording(player);
 }
 
 int player_init(player_t *player, prismelrenderer_t *prend,
@@ -91,6 +92,7 @@ static int player_maybe_record_wait(player_t *player){
     if(wait == 0)goto ok;
 
     fprintf(player->recording_file, " w%i", wait);
+    if(DEBUG_RECORDINGS)printf("w%i\n", wait);
 
     /*
     char buffer[4];
@@ -120,6 +122,7 @@ void player_keydown(player_t *player, int key_i){
 
         char c = player_get_key_c(player, key_i, true);
         fprintf(player->recording_file, "+%c", c);
+        if(DEBUG_RECORDINGS)printf("+%c\n", c);
 
         /*
         char buffer[3];
@@ -142,6 +145,7 @@ void player_keyup(player_t *player, int key_i){
 
         char c = player_get_key_c(player, key_i, true);
         fprintf(player->recording_file, "-%c", c);
+        if(DEBUG_RECORDINGS)printf("-%c\n", c);
 
         /*
         char buffer[3];
@@ -314,6 +318,20 @@ int player_step(player_t *player, hexmap_t *map){
         player->recording_wait++;
     }
 
+    if(rec_action != 0 && DEBUG_RECORDINGS){
+        printf("KEYS: ");
+        #define DEBUG_PRINT_KEYS(keys) { \
+            printf("["); \
+            for(int i = 0; i < PLAYER_KEYS; i++)printf("%i", keys[i]); \
+            printf("]"); \
+        }
+        DEBUG_PRINT_KEYS(player->key_isdown)
+        DEBUG_PRINT_KEYS(player->key_wasdown)
+        DEBUG_PRINT_KEYS(player->key_wentdown)
+        #undef DEBUG_PRINT_KEYS
+        printf("\n");
+    }
+
     player->frame_i++;
     if(player->frame_i == MAX_FRAME_I)player->frame_i = 0;
 
@@ -347,7 +365,7 @@ int player_step(player_t *player, hexmap_t *map){
 }
 
 int player_play_recording(player_t *player, char *data, char *filename){
-    player_cleanup_recording(player);
+    player_reset_recording(player);
     player->recording_action = 1; /* play */
     player->recording = data;
     player->recording_name = filename;
@@ -355,14 +373,14 @@ int player_play_recording(player_t *player, char *data, char *filename){
 }
 
 int player_start_recording(player_t *player, char *name){
-    player_cleanup_recording(player);
+    player_reset_recording(player);
 
     FILE *f = fopen(name, "w");
     if(f == NULL){
         perror("Couldn't start recording");
         return 2;}
 
-    player_cleanup_recording(player);
+    player_reset_recording(player);
     player->recording_action = 2; /* record */
     player->recording_name = name;
     player->recording_file = f;
@@ -394,7 +412,7 @@ int player_stop_recording(player_t *player){
 
     fprintf(f, "\"\n");
 
-    player_cleanup_recording(player);
+    player_reset_recording(player);
 
     return 0;
 }
@@ -404,7 +422,11 @@ int player_record(player_t *player, const char *data){
 
     int data_len = strlen(data);
     int required_size = player->recording_i + data_len + 1;
-    printf("RECORD: data=%s, len=%i, req=%i\n", data, data_len, required_size);
+
+    if(DEBUG_RECORDINGS){
+        printf("RECORD: data=%s, len=%i, req=%i\n",
+            data, data_len, required_size);}
+
     if(required_size >= player->recording_size){
         int new_size = required_size + 200;
         char *new_recording = realloc(player->recording,
@@ -413,17 +435,22 @@ int player_record(player_t *player, const char *data){
         new_recording[new_size - 1] = '\0';
         player->recording = new_recording;
         player->recording_size = new_size;
-        printf("  REALLOC: new_size=%i\n", new_size);
+        if(DEBUG_RECORDINGS)printf("  REALLOC: new_size=%i\n", new_size);
     }
     strcpy(player->recording + player->recording_i, data);
     player->recording_i += data_len;
-    printf("  OK! i=%i, data=%s\n", player->recording_i, player->recording);
+
+    if(DEBUG_RECORDINGS){
+        printf("  OK! i=%i, data=%s\n",
+            player->recording_i, player->recording);}
+
     return 0;
 }
 
 int player_recording_step(player_t *player){
     if(player->recording_wait > 0){
-        player->recording_wait--; return 0;}
+        player->recording_wait--;
+        if(player->recording_wait > 0)return 0;}
 
     char *rec = player->recording;
     int i = player->recording_i;
@@ -435,12 +462,14 @@ int player_recording_step(player_t *player){
         c = rec[i];
         if(c == '+' || c == '-'){
             bool keydown = c == '+';
-            c = rec[i+1]; i += 2;
-            int key_i = player_get_key_i(player, c);
+            char key_c = rec[i+1]; i += 2;
+            if(DEBUG_RECORDINGS)printf("%c%c\n", c, key_c);
+            int key_i = player_get_key_i(player, key_c);
             if(keydown)player_keydown(player, key_i);
             else player_keyup(player, key_i);
         }else if(c == 'w'){
             i++; int wait = atoi(rec + i);
+            if(DEBUG_RECORDINGS)printf("w%i\n", wait);
             while(isdigit(rec[i]))i++;
             player->recording_wait = wait;
             break;
@@ -452,7 +481,12 @@ int player_recording_step(player_t *player){
         }
     }
 
-    player->recording_i = i;
+    if(rec[i] == '\0'){
+        player_reset_recording(player);
+    }else{
+        player->recording_i = i;
+    }
+
     return 0;
 }
 
