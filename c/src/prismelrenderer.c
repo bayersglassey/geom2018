@@ -139,6 +139,7 @@ int palette_init(palette_t *pal, char *name){
         palette_entry_t *entry = &pal->entries[i];
         entry->frame_i = 0;
         entry->n_frames = 1;
+        entry->frame_offset = 0;
         ARRAY_INIT(*entry, keyframes)
     }
     return 0;
@@ -156,7 +157,7 @@ int palette_reset(palette_t *pal){
     for(int i = 0; i < 256; i++){
         int entry_i = i;
         palette_entry_t *entry = &pal->entries[i];
-        entry->frame_i = 0;
+        entry->frame_i = entry->frame_offset;
     }
     return 0;
 }
@@ -266,9 +267,19 @@ static int palette_parse(palette_t *pal, fus_lexer_t *lexer){
         if(fus_lexer_got(lexer, "animate")){
             err = fus_lexer_expect(lexer, "(");
             if(err)return err;
-            while(1){
+
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+
+            if(fus_lexer_got(lexer, "+")){
+                err = fus_lexer_expect_int_fancy(lexer,
+                    &entry->frame_offset);
+                if(err)return err;
                 err = fus_lexer_next(lexer);
                 if(err)return err;
+            }
+
+            while(1){
                 if(fus_lexer_got(lexer, ")"))break;
 
                 err = fus_lexer_get(lexer, "(");
@@ -297,7 +308,10 @@ static int palette_parse(palette_t *pal, fus_lexer_t *lexer){
 
                 err = fus_lexer_expect(lexer, ")");
                 if(err)return err;
+                err = fus_lexer_next(lexer);
+                if(err)return err;
             }
+
             if(entry->keyframes_len == 0){
                 fus_lexer_err_info(lexer);
                 fprintf(stderr, "Palette entry %i has no keyframes.\n",
@@ -318,6 +332,14 @@ static int palette_parse(palette_t *pal, fus_lexer_t *lexer){
         for(int i = 0; i < entry->keyframes_len; i++){
             n_frames += entry->keyframes[i]->n_frames;}
         entry->n_frames = n_frames;
+
+        if(entry->frame_offset >= entry->n_frames){
+            fus_lexer_err_info(lexer);
+            fprintf(stderr, "Palette entry %i: "
+                "frame_offset >= n_frames: %i >= %i\n",
+                entry_i, entry->frame_offset, entry->n_frames);
+            return 2;}
+
         entry_i++;
     }
 
@@ -338,6 +360,9 @@ int palette_load(palette_t *pal, const char *filename){
     if(err)return err;
 
     err = palette_parse(pal, &lexer);
+    if(err)return err;
+
+    err = palette_reset(pal);
     if(err)return err;
 
     free(text);

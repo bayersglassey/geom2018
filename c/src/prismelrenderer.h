@@ -39,6 +39,7 @@ typedef struct palette_entry_keyframe {
 typedef struct palette_entry {
     int frame_i;
     int n_frames;
+    int frame_offset;
     ARRAY_DECL(palette_entry_keyframe_t, keyframes)
 } palette_entry_t;
 

@@ -21,11 +21,13 @@ submaps:
         pos: (0 0)
         camera: (5 4)
         mapper: ("quadruple")
+        palette: "data/pals/start.fus"
     :
         file: "data/maps/demo/start2.fus"
         pos: (7 11)
         camera: (5 4)
         mapper: ("quadruple")
+        palette: "data/pals/start.fus"
         submaps:
             :
                 file: "data/maps/demo/start3.fus"
@@ -43,6 +45,7 @@ submaps:
                         pos: (-4 2)
                         camera: (-5 5)
                         mapper: ("triple")
+                        palette: "data/pals/vines.fus"
                         submaps:
                             :
                                 file: "data/maps/demo/vines2.fus"
@@ -72,6 +75,7 @@ submaps:
                         #camera: follow
                         camera: (6 -5)
                         mapper: ("triple")
+                        palette: "data/pals/tunnels.fus"
                     :
                         file: "data/maps/demo/tunnels2.fus"
                         pos: eval: (13 1) + (18 8)

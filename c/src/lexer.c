@@ -473,10 +473,9 @@ int fus_lexer_get_int_fancy(fus_lexer_t *lexer, int *i_ptr){
         if(err)goto err;
         err = fus_lexer_expect(lexer, "(");
         if(err)goto err;
+        err = fus_lexer_next(lexer);
+        if(err)goto err;
         while(1){
-            err = fus_lexer_next(lexer);
-            if(err)goto err;
-
             if(fus_lexer_got(lexer, ")"))break;
 
             bool neg = false;
@@ -493,6 +492,18 @@ int fus_lexer_get_int_fancy(fus_lexer_t *lexer, int *i_ptr){
             int add;
             err = fus_lexer_get_int(lexer, &add);
             if(err)goto err;
+
+            err = fus_lexer_next(lexer);
+            if(err)goto err;
+
+            if(fus_lexer_got(lexer, "*")){
+                int mul;
+                err = fus_lexer_expect_int(lexer, &mul);
+                if(err)goto err;
+                err = fus_lexer_next(lexer);
+                if(err)goto err;
+                add *= mul;
+            }
 
             i += neg? -add: add;
         }
