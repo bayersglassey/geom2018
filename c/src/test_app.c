@@ -102,10 +102,10 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
             fclose(f);
         }
 
-        char *stateset_filename = strdup(app->stateset_filename);
         ARRAY_PUSH_NEW(player_t, app->hexgame, players, player)
-        player_init(player, &app->prend, strdup(stateset_filename), 0,
-            spawn);
+        err = player_init(player, &app->prend,
+            strdup(app->stateset_filename), NULL, 0, spawn);
+        if(err)return err;
     }
 
     app->cur_rgraph_i = 0;
@@ -158,8 +158,8 @@ int test_app_process_console_input(test_app_t *app){
 
         int player_i = app->hexgame.players_len;
         ARRAY_PUSH_NEW(player_t, app->hexgame, players, player)
-        err = player_init(player, &app->prend, stateset_filename, player_i,
-            app->hexgame.map->spawn);
+        err = player_init(player, &app->prend, stateset_filename, NULL,
+            player_i, app->hexgame.map->spawn);
         if(err)return err;
     }else if(fus_lexer_got(&lexer, "save")){
         char *filename = NULL;
