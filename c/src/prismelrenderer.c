@@ -130,6 +130,222 @@ int get_bitmap_i(vecspace_t *space, rot_t rot, flip_t flip,
 
 
 /***********
+ * PALETTE *
+ ***********/
+
+int palette_init(palette_t *pal, char *name){
+    pal->name = name;
+    for(int i = 0; i < 256; i++){
+        palette_entry_t *entry = &pal->entries[i];
+        entry->frame_i = 0;
+        entry->n_frames = 1;
+        ARRAY_INIT(*entry, keyframes)
+    }
+    return 0;
+}
+
+void palette_cleanup(palette_t *pal){
+    free(pal->name);
+    for(int i = 0; i < 256; i++){
+        palette_entry_t *entry = &pal->entries[i];
+        ARRAY_FREE(palette_entry_keyframe_t, *entry, keyframes, (void))
+    }
+}
+
+int palette_reset(palette_t *pal){
+    for(int i = 0; i < 256; i++){
+        int entry_i = i;
+        palette_entry_t *entry = &pal->entries[i];
+        entry->frame_i = 0;
+    }
+    return 0;
+}
+
+int palette_step(palette_t *pal){
+    for(int i = 0; i < 256; i++){
+        int entry_i = i;
+        palette_entry_t *entry = &pal->entries[i];
+        entry->frame_i++;
+        if(entry->frame_i >= entry->n_frames)entry->frame_i = 0;
+    }
+    return 0;
+}
+
+int palette_update_sdl_palette(palette_t *pal, SDL_Palette *sdl_pal){
+    SDL_Color colors[256];
+    for(int i = 0; i < 256; i++){
+        int entry_i = i;
+        palette_entry_t *entry = &pal->entries[i];
+        SDL_Color *c = &colors[i];
+
+        if(entry->keyframes_len == 0){
+            c->r = c->g = c->b = 0;
+            continue;}
+
+        int frame_i = entry->frame_i;
+        palette_entry_keyframe_t *keyframe = NULL;
+        palette_entry_keyframe_t *next_keyframe = NULL;
+
+        for(int i = 0; i < entry->keyframes_len; i++){
+            keyframe = entry->keyframes[i];
+            if(frame_i < keyframe->n_frames){
+                int j = (i + 1) % entry->keyframes_len;
+                next_keyframe = entry->keyframes[j];
+                break;
+            }else{
+                frame_i -= keyframe->n_frames;}
+        }
+
+        if(next_keyframe == NULL){
+            fprintf(stderr, "Palette %s: entry %i: "
+                "frame %i out of bounds\n",
+                pal->name, entry_i, entry->frame_i);
+            return 2;}
+
+        c->r = linear_interpolation(keyframe->color.r,
+            next_keyframe->color.r, frame_i, keyframe->n_frames);
+        c->g = linear_interpolation(keyframe->color.g,
+            next_keyframe->color.g, frame_i, keyframe->n_frames);
+        c->b = linear_interpolation(keyframe->color.b,
+            next_keyframe->color.b, frame_i, keyframe->n_frames);
+    }
+
+    RET_IF_SDL_NZ(SDL_SetPaletteColors(sdl_pal, colors, 0, 256));
+    return 0;
+}
+
+static int palette_parse_color(fus_lexer_t *lexer, SDL_Color *color){
+    int err;
+
+    int r, g, b;
+    err = fus_lexer_get_int(lexer, &r);
+    if(err)return err;
+    err = fus_lexer_expect_int(lexer, &g);
+    if(err)return err;
+    err = fus_lexer_expect_int(lexer, &b);
+    if(err)return err;
+
+    color->r = r;
+    color->g = g;
+    color->b = b;
+    color->a = 255;
+
+    return 0;
+}
+
+static int palette_parse(palette_t *pal, fus_lexer_t *lexer){
+    int err;
+
+    int entry_i = 1; /* First one was the transparent color */
+
+    err = fus_lexer_expect(lexer, "colors");
+    if(err)return err;
+    err = fus_lexer_expect(lexer, "(");
+    if(err)return err;
+
+    while(1){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+
+        if(fus_lexer_got(lexer, ")"))break;
+
+        if(fus_lexer_got_int(lexer)){
+            err = fus_lexer_get_int(lexer, &entry_i);
+            if(err)return err;
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+        }
+
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+
+        palette_entry_t *entry = &pal->entries[entry_i];
+
+        if(fus_lexer_got(lexer, "animate")){
+            err = fus_lexer_expect(lexer, "(");
+            if(err)return err;
+            while(1){
+                err = fus_lexer_next(lexer);
+                if(err)return err;
+                if(fus_lexer_got(lexer, ")"))break;
+
+                err = fus_lexer_get(lexer, "(");
+                if(err)return err;
+
+                ARRAY_PUSH_NEW(palette_entry_keyframe_t, *entry,
+                    keyframes, keyframe)
+                err = fus_lexer_expect(lexer, "(");
+                if(err)return err;
+                err = fus_lexer_next(lexer);
+                if(err)return err;
+                err = palette_parse_color(lexer, &keyframe->color);
+                if(err)return err;
+                err = fus_lexer_expect(lexer, ")");
+                if(err)return err;
+
+                err = fus_lexer_expect_int(lexer, &keyframe->n_frames);
+                if(err)return err;
+                if(keyframe->n_frames <= 0){
+                    fus_lexer_err_info(lexer);
+                    fprintf(stderr, "Palette entry %i: keyframe %i: "
+                        "n_frames <= 0: %i\n",
+                        entry_i, entry->keyframes_len-1,
+                        keyframe->n_frames);
+                    return 2;}
+
+                err = fus_lexer_expect(lexer, ")");
+                if(err)return err;
+            }
+            if(entry->keyframes_len == 0){
+                fus_lexer_err_info(lexer);
+                fprintf(stderr, "Palette entry %i has no keyframes.\n",
+                    entry_i);
+                return 2;}
+        }else{
+            ARRAY_PUSH_NEW(palette_entry_keyframe_t, *entry,
+                keyframes, keyframe)
+            keyframe->n_frames = 1;
+            err = palette_parse_color(lexer, &keyframe->color);
+            if(err)return err;
+        }
+
+        err = fus_lexer_expect(lexer, ")");
+        if(err)return err;
+
+        int n_frames = 0;
+        for(int i = 0; i < entry->keyframes_len; i++){
+            n_frames += entry->keyframes[i]->n_frames;}
+        entry->n_frames = n_frames;
+        entry_i++;
+    }
+
+    return 0;
+}
+
+int palette_load(palette_t *pal, const char *filename){
+    int err;
+    fus_lexer_t lexer;
+
+    char *text = load_file(filename);
+    if(text == NULL)return 1;
+
+    err = fus_lexer_init(&lexer, text, filename);
+    if(err)return err;
+
+    err = palette_init(pal, strdup(filename));
+    if(err)return err;
+
+    err = palette_parse(pal, &lexer);
+    if(err)return err;
+
+    free(text);
+    return 0;
+}
+
+
+/***********
  * PRISMEL *
  ***********/
 

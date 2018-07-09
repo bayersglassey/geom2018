@@ -8,6 +8,11 @@
 
 #include "util.h"
 
+int linear_interpolation(int x0, int x1, int t, int t_max){
+    int diff = x1 - x0;
+    return x0 + diff * t / t_max;
+}
+
 char *load_file(const char *filename){
     FILE *f = fopen(filename, "r");
     long f_size;

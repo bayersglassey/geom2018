@@ -28,7 +28,8 @@ typedef struct test_app {
     const char *stateset_filename;
     const char *hexmap_filename;
 
-    SDL_Palette *pal;
+    palette_t palette;
+    SDL_Palette *sdl_palette;
     prismelrenderer_t prend;
     font_t font;
     console_t console;

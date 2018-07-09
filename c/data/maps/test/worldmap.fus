@@ -13,6 +13,8 @@ faces:
     "1": "map_face1"
     "S": "map_savepoint"
 
+default_palette: "data/pal1.fus"
+
 submaps:
     :
         file: "data/maps/test/map3.fus"

@@ -322,10 +322,22 @@ int hexgame_step(hexgame_t *game){
             hexcollmap_elem_t *vert =
                 hexcollmap_get_vert(collmap, &index);
             if(hexcollmap_elem_is_solid(vert)){
+                if(submap != game->cur_submap){
+                    /* TODO: Smoothly transition between
+                    old & new palettes */
+                    err = palette_reset(&submap->palette);
+                    if(err)return err;
+                }
                 game->cur_submap = submap;
                 break;
             }
         }
+    }
+
+    /* Animate palette */
+    if(game->cur_submap != NULL){
+        err = palette_step(&game->cur_submap->palette);
+        if(err)return err;
     }
 
     /* Set camera */
@@ -361,6 +373,11 @@ int hexgame_render(hexgame_t *game,
     SDL_Palette *pal, int x0, int y0, int zoom
 ){
     int err;
+
+    if(game->cur_submap != NULL){
+        err = palette_update_sdl_palette(&game->cur_submap->palette, pal);
+        if(err)return err;
+    }
 
     vecspace_t *space = &hexspace;
 

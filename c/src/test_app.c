@@ -19,7 +19,8 @@
 
 
 void test_app_cleanup(test_app_t *app){
-    SDL_FreePalette(app->pal);
+    palette_cleanup(&app->palette);
+    SDL_FreePalette(app->sdl_palette);
     prismelrenderer_cleanup(&app->prend);
     hexmap_cleanup(&app->hexmap);
     hexgame_cleanup(&app->hexgame);
@@ -32,78 +33,6 @@ static void test_app_init_input(test_app_t *app){
     app->keydown_d = 0;
     app->keydown_l = 0;
     app->keydown_r = 0;
-}
-
-static int parse_sdl_palette(fus_lexer_t *lexer, SDL_Palette *pal){
-    int err;
-
-    SDL_Color colors[256] = {0};
-    int color_i = 1; /* First one was the transparent color */
-
-    err = fus_lexer_expect(lexer, "colors");
-    if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
-    if(err)return err;
-
-    while(1){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-
-        if(fus_lexer_got(lexer, ")"))break;
-
-        if(fus_lexer_got_int(lexer)){
-            err = fus_lexer_get_int(lexer, &color_i);
-            if(err)return err;
-            err = fus_lexer_next(lexer);
-            if(err)return err;
-        }
-
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
-        {
-            SDL_Color *c = &colors[color_i];
-            color_i++;
-
-            int r, g, b;
-            err = fus_lexer_expect_int(lexer, &r);
-            if(err)return err;
-            err = fus_lexer_expect_int(lexer, &g);
-            if(err)return err;
-            err = fus_lexer_expect_int(lexer, &b);
-            if(err)return err;
-
-            c->r = r;
-            c->g = g;
-            c->b = b;
-            c->a = 255;
-        }
-        err = fus_lexer_expect(lexer, ")");
-        if(err)return err;
-    }
-
-    RET_IF_SDL_NZ(SDL_SetPaletteColors(pal, colors, 0, 256));
-
-    return 0;
-}
-
-static int load_sdl_palette(const char *filename, SDL_Palette **pal_ptr){
-    int err;
-    fus_lexer_t lexer;
-
-    char *text = load_file(filename);
-    if(text == NULL)return 1;
-
-    *pal_ptr = SDL_AllocPalette(256);
-    RET_IF_SDL_NULL(*pal_ptr);
-
-    err = fus_lexer_init(&lexer, text, filename);
-    if(err)return err;
-
-    err = parse_sdl_palette(&lexer, *pal_ptr);
-    if(err)return err;
-
-    free(text);
-    return 0;
 }
 
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
@@ -123,13 +52,17 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->stateset_filename = stateset_filename;
     app->hexmap_filename = hexmap_filename;
 
-    err = load_sdl_palette("data/pal1.fus", &app->pal);
+    app->sdl_palette = SDL_AllocPalette(256);
+    RET_IF_SDL_NULL(app->sdl_palette);
+
+    err = palette_load(&app->palette, "data/pal1.fus");
     if(err)return err;
 
     if(use_textures){
         app->surface = NULL;
     }else{
-        app->surface = surface8_create(scw, sch, false, false, app->pal);
+        app->surface = surface8_create(scw, sch, false, false,
+            app->sdl_palette);
         if(app->surface == NULL)return 1;
     }
 
@@ -310,7 +243,7 @@ int test_app_process_console_input(test_app_t *app){
         err = fus_lexer_next(&lexer);
         if(err)goto lexer_err;
         err = prismelrenderer_render_all_bitmaps(
-            &app->prend, app->pal);
+            &app->prend, app->sdl_palette);
         if(err)return err;
     }else if(fus_lexer_got(&lexer, "get_shape")){
         char *name;
@@ -361,6 +294,11 @@ int test_app_mainloop(test_app_t *app){
         int animated_frame_i = get_animated_frame_i(
             rgraph->animation_type, rgraph->n_frames, app->frame_i);
 
+        err = palette_update_sdl_palette(&app->palette, app->sdl_palette);
+        if(err)return err;
+        err = palette_step(&app->palette);
+        if(err)return err;
+
         if(app->hexgame_running){
             err = hexgame_step(&app->hexgame);
             if(err)return err;
@@ -368,14 +306,14 @@ int test_app_mainloop(test_app_t *app){
             if(app->surface != NULL){
                 RET_IF_SDL_NZ(SDL_FillRect(app->surface, NULL, 255));
             }else{
-                SDL_Color *bgcolor = &app->pal->colors[255];
+                SDL_Color *bgcolor = &app->sdl_palette->colors[255];
                 RET_IF_SDL_NZ(SDL_SetRenderDrawColor(app->renderer,
                     bgcolor->r, bgcolor->g, bgcolor->b, 255));
                 RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
             }
 
             err = hexgame_render(&app->hexgame, app->renderer, app->surface,
-                app->pal, app->scw/2 + app->x0, app->sch/2 + app->y0,
+                app->sdl_palette, app->scw/2 + app->x0, app->sch/2 + app->y0,
                 app->zoom);
             if(err)return err;
 
@@ -411,7 +349,7 @@ int test_app_mainloop(test_app_t *app){
             int x0 = app->scw / 2 + app->x0;
             int y0 = app->sch / 2 + app->y0;
             err = rendergraph_render(rgraph, app->renderer, app->surface,
-                app->pal, &app->prend, x0, y0, app->zoom,
+                app->sdl_palette, &app->prend, x0, y0, app->zoom,
                 (vec_t){0}, app->rot, app->flip, app->frame_i, NULL);
             if(err)return err;
 

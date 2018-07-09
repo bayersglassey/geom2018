@@ -48,6 +48,7 @@ typedef struct hexmap_submap {
     hexcollmap_t collmap;
     rendergraph_t *rgraph_map;
     prismelmapper_t *mapper;
+    palette_t palette;
 } hexmap_submap_t;
 
 typedef struct hexmap_rgraph_elem {
@@ -97,7 +98,7 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
     fus_lexer_t *lexer);
 int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
     vec_t parent_pos, vec_t parent_camera_pos, int parent_camera_type,
-    prismelmapper_t *parent_mapper);
+    prismelmapper_t *parent_mapper, char *palette_filename);
 bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf, bool all);
 rendergraph_t *hexmap_get_rgraph_vert(hexmap_t *map, char tile_c);
@@ -108,10 +109,10 @@ rendergraph_t *hexmap_get_rgraph_face(hexmap_t *map, char tile_c);
 void hexmap_submap_cleanup(hexmap_submap_t *submap);
 int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
     char *filename, vec_t pos, int camera_type, vec_t camera_pos,
-    prismelmapper_t *mapper);
+    prismelmapper_t *mapper, char *palette_filename);
 int hexmap_submap_load(hexmap_t *map, hexmap_submap_t *submap,
     const char *filename, vec_t pos, int camera_type, vec_t camera_pos,
-    prismelmapper_t *mapper);
+    prismelmapper_t *mapper, char *palette_filename);
 int hexmap_submap_parse(hexmap_t *map, hexmap_submap_t *submap,
     fus_lexer_t *lexer);
 int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap);

@@ -28,6 +28,34 @@ int get_bitmap_i(vecspace_t *space, rot_t rot, flip_t flip,
 
 
 /***********
+ * PALETTE *
+ ***********/
+
+typedef struct palette_entry_keyframe {
+    SDL_Color color;
+    int n_frames;
+} palette_entry_keyframe_t;
+
+typedef struct palette_entry {
+    int frame_i;
+    int n_frames;
+    ARRAY_DECL(palette_entry_keyframe_t, keyframes)
+} palette_entry_t;
+
+typedef struct palette {
+    char *name;
+    palette_entry_t entries[256];
+} palette_t;
+
+int palette_init(palette_t *pal, char *name);
+void palette_cleanup(palette_t *pal);
+int palette_reset(palette_t *pal);
+int palette_step(palette_t *pal);
+int palette_update_sdl_palette(palette_t *pal, SDL_Palette *sdl_pal);
+int palette_load(palette_t *pal, const char *filename);
+
+
+/***********
  * PRISMEL *
  ***********/
 
