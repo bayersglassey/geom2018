@@ -5,8 +5,8 @@ stand:
     if:
         key: isdown d
     then:
-        delay: 2
         goto: crawl
+        delay: 2
 
     if:
         key: isdown f
@@ -17,8 +17,8 @@ stand:
     then:
         move: 1 0
         rot: 1
-        delay: 2
         goto: step
+        delay: 2
 
     if:
         key: wasdown u
@@ -29,8 +29,8 @@ stand:
             ;; ( )
     then:
         move: 1 0
-        delay: 2
         goto: jump
+        delay: 2
 
     if:
         key: isdown f
@@ -43,8 +43,8 @@ stand:
             ;; ( )
     then:
         move: 1 0
-        delay: 2
         goto: step
+        delay: 2
 
     if:
         key: isdown f
@@ -61,8 +61,8 @@ stand:
     then:
         move: 1 0
         rot: -1
-        delay: 2
         goto: step
+        delay: 2
 
     if:
         key: isdown f
@@ -73,8 +73,8 @@ stand:
     then:
         move: 1 0
         rot: 1
-        delay: 2
         goto: jump
+        delay: 2
 
     if:
         key: isdown f
@@ -85,16 +85,16 @@ stand:
             ;; ( )
     then:
         move: 1 0
-        delay: 2
         goto: jump
+        delay: 2
 
     if:
         key: isdown b
     then:
         move: 1 0
         turn
-        delay: 2
         goto: step
+        delay: 2
 
 jump:
     rgraph: "player_jump"
@@ -107,8 +107,8 @@ jump:
     then:
         move: 1 0
         rot: 1
-        delay: 2
         goto: step
+        delay: 2
 
     if:
         coll: all yes
@@ -120,8 +120,8 @@ jump:
     then:
         move: 1 0
         rot: 1
-        delay: 2
         goto: jump
+        delay: 2
 
     if:
         key: not isdown u
@@ -134,8 +134,8 @@ jump:
             ;; ( )  + - +
     then:
         move: 1 0
-        delay: 2
         goto: step
+        delay: 2
 
     if:
         coll: all no
@@ -145,8 +145,8 @@ jump:
             ;; ( )
     then:
         move: 1 0
-        delay: 2
         goto: jump
+        delay: 2
 
     if:
     then:
@@ -169,8 +169,8 @@ crawl:
             ;;  */ \*
             ;; ( )
     then:
-        delay: 3
         goto: stand
+        delay: 3
 
     if:
         key: isdown f
@@ -184,8 +184,8 @@ crawl:
     then:
         move: 1 0
         rot: 1
-        delay: 2
         goto: crawl_step
+        delay: 2
 
     if:
         key: isdown f
@@ -196,8 +196,8 @@ crawl:
             ;; (.). .
     then:
         move: 1 0
-        delay: 2
         goto: crawl_step
+        delay: 2
 
     if:
         key: isdown f
@@ -212,8 +212,8 @@ crawl:
     then:
         move: 1 0
         rot: -1
-        delay: 2
         goto: crawl_step
+        delay: 2
 
     if:
         key: isdown b

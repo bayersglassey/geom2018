@@ -78,6 +78,7 @@ int player_init(player_t *player, hexmap_t *map,
     vec_t respawn_pos);
 int player_init_stateset(player_t *player, const char *stateset_filename,
     const char *state_name, hexmap_t *map);
+int player_set_state(player_t *player, const char *state_name);
 void player_keydown(player_t *player, int key_i);
 void player_keyup(player_t *player, int key_i);
 int player_get_key_i(player_t *player, char c);
@@ -91,6 +92,7 @@ int player_render(player_t *player,
     hexmap_t *map, vec_t camera_renderpos, prismelmapper_t *mapper);
 
 int player_play_recording(player_t *player);
+int player_restart_recording(player_t *player);
 int player_start_recording(player_t *player, char *name);
 int player_stop_recording(player_t *player);
 int player_record(player_t *player, const char *data);

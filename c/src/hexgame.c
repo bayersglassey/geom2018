@@ -191,6 +191,14 @@ static const char *get_next_recording_filename(){
  * PLAYER *
  **********/
 
+static void player_reset_input(player_t *player){
+    for(int i = 0; i < PLAYER_KEYS; i++){
+        player->key_isdown[i] = false;
+        player->key_wasdown[i] = false;
+        player->key_wentdown[i] = false;
+    }
+}
+
 void player_cleanup(player_t *player){
     stateset_cleanup(&player->stateset);
     player_recording_cleanup(&player->recording);
@@ -222,11 +230,9 @@ int player_init(player_t *player, hexmap_t *map,
     }else{
         /* We really really expect you to call player_init_stateset
         right away! */
-        player->state = NULL;
+        player_set_state(player, NULL);
     }
 
-    player->frame_i = 0;
-    player->cooldown = 0;
     vec_cpy(map->space->dims, player->respawn_pos, respawn_pos);
     vec_cpy(map->space->dims, player->pos, respawn_pos);
 
@@ -243,17 +249,28 @@ int player_init_stateset(player_t *player, const char *stateset_filename,
     if(err)return err;
 
     if(state_name != NULL){
-        player->state = stateset_get_state(&player->stateset,
-            state_name);
-        if(player->state == NULL){
-            fprintf(stderr, "Couldn't init player stateset: "
-                "couldn't find state %s in stateset %s\n",
-                stateset_filename, state_name);
-            return 2;}
+        err = player_set_state(player, state_name);
+        if(err)return err;
     }else{
         player->state = player->stateset.states[0];
     }
 
+    return 0;
+}
+
+int player_set_state(player_t *player, const char *state_name){
+    if(state_name == NULL){
+        player->state = NULL;
+    }else{
+        player->state = stateset_get_state(&player->stateset, state_name);
+        if(player->state == NULL){
+            fprintf(stderr, "Couldn't init player stateset: "
+                "couldn't find state %s in stateset %s\n",
+                player->stateset.filename, state_name);
+            return 2;}
+    }
+    player->frame_i = 0;
+    player->cooldown = 0;
     return 0;
 }
 
@@ -440,6 +457,7 @@ static int player_match_rule(player_t *player, hexmap_t *map,
 static int player_apply_rule(player_t *player, hexmap_t *map,
     state_rule_t *rule
 ){
+    int err;
     vecspace_t *space = map->space;
     for(int i = 0; i < rule->effects_len; i++){
         state_effect_t *effect = rule->effects[i];
@@ -461,15 +479,8 @@ static int player_apply_rule(player_t *player, hexmap_t *map,
             player->turn = !player->turn;
             player->rot = rot_flip(space->rot_max, player->rot, true);
         }else if(effect->type == state_effect_type_goto){
-            state_t *state = stateset_get_state(&player->stateset,
-                effect->u.goto_name);
-            if(state == NULL){
-                fprintf(stderr, "Unrecognized player state: %s\n",
-                    effect->u.goto_name);
-                return 2;
-            }
-            player->state = state;
-            player->frame_i = 0;
+            err = player_set_state(player, effect->u.goto_name);
+            if(err)return err;
         }else if(effect->type == state_effect_type_delay){
             player->cooldown = effect->u.delay;
         }else{
@@ -589,18 +600,30 @@ int player_render(player_t *player,
 
 int player_play_recording(player_t *player){
     int err;
-
     player_recording_t *rec = &player->recording;
 
     err = player_init_stateset(player, rec->stateset_name, rec->state_name,
         rec->map);
     if(err)return err;
 
+    player->recording.action = 1; /* play */
+    return player_restart_recording(player);
+}
+
+int player_restart_recording(player_t *player){
+    int err;
+    player_recording_t *rec = &player->recording;
+
+    rec->i = 0;
+    rec->wait = 0;
+
+    player_reset_input(player);
+    player_set_state(player, rec->state_name);
+
     vec_cpy(MAX_VEC_DIMS, player->pos, rec->pos0);
     player->rot = rec->rot0;
     player->turn = rec->turn0;
 
-    player->recording.action = 1; /* play */
     return 0;
 }
 
@@ -678,6 +701,8 @@ int player_record(player_t *player, const char *data){
 }
 
 int player_recording_step(player_t *player){
+    int err;
+
     if(player->recording.wait > 0){
         player->recording.wait--;
         if(player->recording.wait > 0)return 0;}
@@ -686,7 +711,9 @@ int player_recording_step(player_t *player){
     int i = player->recording.i;
     char c;
 
-    while(rec[i] != '\0'){
+    bool loop = true;
+
+    while(1){
         while(rec[i] == ' ')i++;
 
         c = rec[i];
@@ -703,6 +730,15 @@ int player_recording_step(player_t *player){
             while(isdigit(rec[i]))i++;
             player->recording.wait = wait;
             break;
+        }else if(c == '\0'){
+            if(loop){
+                /* loop! */
+                err = player_restart_recording(player);
+                if(err)return err;
+                i = 0;
+            }else{
+                break;
+            }
         }else{
             fprintf(stderr, "Unrecognized action: %c\n", c);
             fprintf(stderr, "  ...in position %i of recording: %s\n",
@@ -711,10 +747,10 @@ int player_recording_step(player_t *player){
         }
     }
 
-    if(rec[i] == '\0'){
+    player->recording.i = i;
+
+    if(!loop && rec[i] == '\0'){
         player_recording_reset(&player->recording);
-    }else{
-        player->recording.i = i;
     }
 
     return 0;
@@ -752,11 +788,7 @@ int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard){
     player->frame_i = 0;
     player->cooldown = 0;
 
-    for(int i = 0; i < PLAYER_KEYS; i++){
-        player->key_isdown[i] = false;
-        player->key_wasdown[i] = false;
-        player->key_wentdown[i] = false;
-    }
+    player_reset_input(player);
 
     return 0;
 }
