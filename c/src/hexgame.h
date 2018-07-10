@@ -35,6 +35,7 @@ typedef struct player_recording {
     int wait;
     char *name;
     FILE *file;
+    int offset;
 } player_recording_t;
 
 void player_recording_cleanup(player_recording_t *rec);
@@ -92,7 +93,7 @@ int player_render(player_t *player,
     hexmap_t *map, vec_t camera_renderpos, prismelmapper_t *mapper);
 
 int player_play_recording(player_t *player);
-int player_restart_recording(player_t *player);
+int player_restart_recording(player_t *player, bool hard);
 int player_start_recording(player_t *player, char *name);
 int player_stop_recording(player_t *player);
 int player_record(player_t *player, const char *data);

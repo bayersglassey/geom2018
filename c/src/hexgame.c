@@ -51,6 +51,7 @@ void player_recording_reset(player_recording_t *rec){
     rec->wait = 0;
     rec->name = NULL;
     rec->file = NULL;
+    rec->offset = 0;
 }
 
 void player_recording_init(player_recording_t *rec, hexmap_t *map){
@@ -116,7 +117,21 @@ static int player_recording_parse(player_recording_t *rec,
     err = fus_lexer_expect(lexer, ")");
     if(err)return err;
 
-    err = fus_lexer_expect(lexer, "data");
+    err = fus_lexer_next(lexer);
+    if(err)return err;
+
+    if(fus_lexer_got(lexer, "offset")){
+        err = fus_lexer_expect(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_expect_int(lexer, &rec->offset);
+        if(err)return err;
+        err = fus_lexer_expect(lexer, ")");
+        if(err)return err;
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+    }
+
+    err = fus_lexer_get(lexer, "data");
     if(err)return err;
     err = fus_lexer_expect(lexer, "(");
     if(err)return err;
@@ -607,10 +622,10 @@ int player_play_recording(player_t *player){
     if(err)return err;
 
     player->recording.action = 1; /* play */
-    return player_restart_recording(player);
+    return player_restart_recording(player, false);
 }
 
-int player_restart_recording(player_t *player){
+int player_restart_recording(player_t *player, bool hard){
     int err;
     player_recording_t *rec = &player->recording;
 
@@ -623,6 +638,12 @@ int player_restart_recording(player_t *player){
     vec_cpy(MAX_VEC_DIMS, player->pos, rec->pos0);
     player->rot = rec->rot0;
     player->turn = rec->turn0;
+
+    if(!hard){
+        for(int i = 0; i < rec->offset; i++){
+            player_step(player, rec->map);
+        }
+    }
 
     return 0;
 }
@@ -733,7 +754,7 @@ int player_recording_step(player_t *player){
         }else if(c == '\0'){
             if(loop){
                 /* loop! */
-                err = player_restart_recording(player);
+                err = player_restart_recording(player, true);
                 if(err)return err;
                 i = 0;
             }else{

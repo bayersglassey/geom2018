@@ -76,6 +76,11 @@ submaps:
                         camera: (6 -5)
                         mapper: ("triple")
                         palette: "data/pals/tunnels.fus"
+                        recordings:
+                            : "data/maps/demo/recs/tunnels_000.fus"
+                            : "data/maps/demo/recs/tunnels_000b.fus"
+                            : "data/maps/demo/recs/tunnels_001.fus"
+                            : "data/maps/demo/recs/tunnels_002.fus"
                     :
                         file: "data/maps/demo/tunnels2.fus"
                         pos: eval: (13 1) + (18 8)
