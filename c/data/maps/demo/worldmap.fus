@@ -88,6 +88,15 @@ submaps:
     :
         pos: (40 60)
         camera: (0 0)
+        recordings:
+            : "data/maps/demo/recs/test_000.fus"
+            : "data/maps/demo/recs/test_001.fus"
+            : "data/maps/demo/recs/test_002.fus"
+            : "data/maps/demo/recs/test_003.fus"
+            : "data/maps/demo/recs/test_004.fus"
+            : "data/maps/demo/recs/test_005.fus"
+            : "data/maps/demo/recs/test_006.fus"
+            : "data/maps/demo/recs/test_007.fus"
         submaps:
             :
                 file: "data/maps/test/map3.fus"

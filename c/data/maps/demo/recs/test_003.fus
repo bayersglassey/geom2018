@@ -1,0 +1,6 @@
+anim: "anim/player.fus"
+state: "stand"
+pos: ( 55 72)
+rot: 0
+turn: no
+data: " w13+r w43-r w4+d w6+l w20-l w7-d w4+l w7-l w2+d w4+r w12-r w10-d w1+r w19-r w13+r w3-r w4+d w4+l w17-l w10-d w2+l w38-l w21+r w2-r w12+r w7-r w2+l w7-l w1+u w4-u w7+l w6-l w10+l w44-l w1+d w25-d w1+r w20-r w1+d w3+l w24-l w8-d w10+l w4-l w11+r w3-r w25+r w4-r w4+r w11-r"
