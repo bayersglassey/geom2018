@@ -22,55 +22,30 @@
 
 
 
-static const char *get_record_filename(int n){
-    /* NOT REENTRANT, FORGIVE MEEE :( */
-    static char record_filename[200] = "data/rec000.fus";
-    static const int zeros_pos = 8;
-    static const int n_zeros = 3;
-    for(int i = 0; i < n_zeros; i++){
-        int rem = n % 10;
-        n = n / 10;
-        record_filename[zeros_pos + n_zeros - 1 - i] = '0' + rem;
-    }
-    return record_filename;
-}
+/********************
+ * PLAYER_RECORDING *
+ ********************/
 
-static const char *get_last_or_next_record_filename(bool next){
-    const char *record_filename;
-    int n = 0;
-    while(1){
-        record_filename = get_record_filename(n);
-        FILE *f = fopen(record_filename, "r");
-        if(f == NULL)break;
-        n++;
-    }
-    if(!next){
-        if(n == 0)return NULL;
-        record_filename = get_record_filename(n-1);
-    }
-    return record_filename;
-}
-
-static const char *get_last_record_filename(){
-    return get_last_or_next_record_filename(false);
-}
-
-static const char *get_next_record_filename(){
-    return get_last_or_next_record_filename(true);
-}
-
-
-/**********
- * PLAYER *
- **********/
-
-static void player_recording_reset(player_recording_t *rec){
+void player_recording_cleanup(player_recording_t *rec){
     free(rec->data);
     free(rec->name);
+    free(rec->stateset_name);
+    free(rec->state_name);
     if(rec->file != NULL)fclose(rec->file);
+}
+
+void player_recording_reset(player_recording_t *rec){
+    player_recording_cleanup(rec);
 
     rec->action = 0; /* none */
     rec->data = NULL;
+    rec->stateset_name = NULL;
+    rec->state_name = NULL;
+
+    vec_zero(MAX_VEC_DIMS, rec->pos0);
+    rec->rot0 = 0;
+    rec->turn0 = false;
+
     rec->i = 0;
     rec->size = 0;
     rec->wait = 0;
@@ -78,12 +53,150 @@ static void player_recording_reset(player_recording_t *rec){
     rec->file = NULL;
 }
 
-void player_cleanup(player_t *player){
-    stateset_cleanup(&player->stateset);
-    player_recording_reset(&player->recording);
+void player_recording_init(player_recording_t *rec, hexmap_t *map){
+    rec->map = map;
 }
 
-int player_init(player_t *player, prismelrenderer_t *prend,
+static int player_recording_parse(player_recording_t *rec,
+    fus_lexer_t *lexer, const char *filename
+){
+    int err;
+
+    vecspace_t *space = rec->map->space;
+
+    err = fus_lexer_expect(lexer, "anim");
+    if(err)return err;
+    err = fus_lexer_expect(lexer, "(");
+    if(err)return err;
+    err = fus_lexer_expect_str(lexer, &rec->stateset_name);
+    if(err)return err;
+    err = fus_lexer_expect(lexer, ")");
+    if(err)return err;
+
+    err = fus_lexer_expect(lexer, "state");
+    if(err)return err;
+    err = fus_lexer_expect(lexer, "(");
+    if(err)return err;
+    err = fus_lexer_expect_str(lexer, &rec->state_name);
+    if(err)return err;
+    err = fus_lexer_expect(lexer, ")");
+    if(err)return err;
+
+    err = fus_lexer_expect(lexer, "pos");
+    if(err)return err;
+    err = fus_lexer_expect(lexer, "(");
+    if(err)return err;
+    err = fus_lexer_expect_vec(lexer, space, rec->pos0);
+    if(err)return err;
+    err = fus_lexer_expect(lexer, ")");
+    if(err)return err;
+
+    err = fus_lexer_expect(lexer, "rot");
+    if(err)return err;
+    err = fus_lexer_expect(lexer, "(");
+    if(err)return err;
+    err = fus_lexer_expect_int(lexer, &rec->rot0);
+    if(err)return err;
+    err = fus_lexer_expect(lexer, ")");
+    if(err)return err;
+
+    err = fus_lexer_expect(lexer, "turn");
+    if(err)return err;
+    err = fus_lexer_expect(lexer, "(");
+    if(err)return err;
+    err = fus_lexer_next(lexer);
+    if(err)return err;
+    if(fus_lexer_got(lexer, "yes")){
+        rec->turn0 = true;
+    }else if(fus_lexer_got(lexer, "no")){
+        rec->turn0 = false;
+    }else{
+        return fus_lexer_unexpected(lexer, "yes or no");
+    }
+    err = fus_lexer_expect(lexer, ")");
+    if(err)return err;
+
+    err = fus_lexer_expect(lexer, "data");
+    if(err)return err;
+    err = fus_lexer_expect(lexer, "(");
+    if(err)return err;
+    err = fus_lexer_expect_str(lexer, &rec->data);
+    if(err)return err;
+    err = fus_lexer_expect(lexer, ")");
+    if(err)return err;
+
+    return 0;
+}
+
+int player_recording_load(player_recording_t *rec, const char *filename,
+    hexmap_t *map
+){
+    int err;
+    fus_lexer_t lexer;
+
+    char *text = load_file(filename);
+    if(text == NULL)return 1;
+
+    err = fus_lexer_init(&lexer, text, filename);
+    if(err)return err;
+
+    player_recording_init(rec, map);
+    err = player_recording_parse(rec, &lexer, filename);
+    if(err)return err;
+
+    free(text);
+    return 0;
+}
+
+static const char *get_recording_filename(int n){
+    /* NOT REENTRANT, FORGIVE MEEE :( */
+    static char recording_filename[200] = "data/rec000.fus";
+    static const int zeros_pos = 8;
+    static const int n_zeros = 3;
+    for(int i = 0; i < n_zeros; i++){
+        int rem = n % 10;
+        n = n / 10;
+        recording_filename[zeros_pos + n_zeros - 1 - i] = '0' + rem;
+    }
+    return recording_filename;
+}
+
+static const char *get_last_or_next_recording_filename(bool next){
+    const char *recording_filename;
+    int n = 0;
+    while(1){
+        recording_filename = get_recording_filename(n);
+        FILE *f = fopen(recording_filename, "r");
+        if(f == NULL)break;
+        n++;
+    }
+    if(!next){
+        if(n == 0)return NULL;
+        recording_filename = get_recording_filename(n-1);
+    }
+    return recording_filename;
+}
+
+static const char *get_last_recording_filename(){
+    return get_last_or_next_recording_filename(false);
+}
+
+static const char *get_next_recording_filename(){
+    return get_last_or_next_recording_filename(true);
+}
+
+
+
+/**********
+ * PLAYER *
+ **********/
+
+void player_cleanup(player_t *player){
+    stateset_cleanup(&player->stateset);
+    player_recording_cleanup(&player->recording);
+}
+
+int player_init(player_t *player, hexmap_t *map,
     char *stateset_filename, const char *state_name, int keymap,
     vec_t respawn_pos
 ){
@@ -102,24 +215,44 @@ int player_init(player_t *player, prismelrenderer_t *prend,
         player->key_code[PLAYER_KEY_R] = SDLK_d;
     }
 
-    err = stateset_load(&player->stateset, stateset_filename,
-        prend, &hexspace);
+    if(stateset_filename != NULL){
+        err = player_init_stateset(player, stateset_filename, state_name,
+            map);
+        if(err)return err;
+    }else{
+        /* We really really expect you to call player_init_stateset
+        right away! */
+        player->state = NULL;
+    }
+
+    player->frame_i = 0;
+    player->cooldown = 0;
+    vec_cpy(map->space->dims, player->respawn_pos, respawn_pos);
+    vec_cpy(map->space->dims, player->pos, respawn_pos);
+
+    return 0;
+}
+
+int player_init_stateset(player_t *player, const char *stateset_filename,
+    const char *state_name, hexmap_t *map
+){
+    int err;
+
+    err = stateset_load(&player->stateset, strdup(stateset_filename),
+        map->prend, map->space);
     if(err)return err;
 
     if(state_name != NULL){
-        player->state = stateset_get_state(&player->stateset, state_name);
+        player->state = stateset_get_state(&player->stateset,
+            state_name);
         if(player->state == NULL){
-            fprintf(stderr, "Couldn't init player: "
+            fprintf(stderr, "Couldn't init player stateset: "
                 "couldn't find state %s in stateset %s\n",
                 stateset_filename, state_name);
             return 2;}
     }else{
         player->state = player->stateset.states[0];
     }
-    player->frame_i = 0;
-    player->cooldown = 0;
-    vec_cpy(hexspace.dims, player->respawn_pos, respawn_pos);
-    vec_cpy(hexspace.dims, player->pos, respawn_pos);
 
     return 0;
 }
@@ -224,6 +357,12 @@ rot_t player_get_rot(player_t *player, const vecspace_t *space){
 }
 
 int player_process_event(player_t *player, SDL_Event *event){
+
+    if(player->state == NULL){
+        fprintf(stderr, "%s: Skipping player with NULL state!\n",
+            __FILE__);
+        return 0;}
+
     if(event->type == SDL_KEYDOWN || event->type == SDL_KEYUP){
         if(!event->key.repeat){
             for(int i = 0; i < PLAYER_KEYS; i++){
@@ -243,7 +382,7 @@ int player_process_event(player_t *player, SDL_Event *event){
 static int player_match_rule(player_t *player, hexmap_t *map,
     state_rule_t *rule, bool *rule_matched_ptr
 ){
-    const static vecspace_t *space = &hexspace;
+    vecspace_t *space = map->space;
 
     bool rule_matched = true;
     for(int i = 0; i < rule->conds_len; i++){
@@ -298,8 +437,10 @@ static int player_match_rule(player_t *player, hexmap_t *map,
     return 0;
 }
 
-static int player_apply_rule(player_t *player, state_rule_t *rule){
-    const static vecspace_t *space = &hexspace;
+static int player_apply_rule(player_t *player, hexmap_t *map,
+    state_rule_t *rule
+){
+    vecspace_t *space = map->space;
     for(int i = 0; i < rule->effects_len; i++){
         state_effect_t *effect = rule->effects[i];
         if(DEBUG_RULES)printf("  then: %s\n", effect->type);
@@ -342,6 +483,11 @@ static int player_apply_rule(player_t *player, state_rule_t *rule){
 
 int player_step(player_t *player, hexmap_t *map){
     int err;
+
+    if(player->state == NULL){
+        fprintf(stderr, "%s: Skipping player with NULL state!\n",
+            __FILE__);
+        return 0;}
 
     int rec_action = player->recording.action;
     if(rec_action == 1){
@@ -387,7 +533,7 @@ int player_step(player_t *player, hexmap_t *map){
             if(err)return err;
 
             if(rule_matched){
-                err = player_apply_rule(player, rule);
+                err = player_apply_rule(player, map, rule);
                 if(err)return err;
                 break;
             }
@@ -401,16 +547,64 @@ int player_step(player_t *player, hexmap_t *map){
     return 0;
 }
 
-int player_play_recording(player_t *player, char *data, char *filename){
-    player_recording_reset(&player->recording);
+int player_render(player_t *player,
+    SDL_Renderer *renderer, SDL_Surface *surface,
+    SDL_Palette *pal, int x0, int y0, int zoom,
+    hexmap_t *map, vec_t camera_renderpos, prismelmapper_t *mapper
+){
+    int err;
+
+    if(player->state == NULL){
+        fprintf(stderr, "%s: Skipping player with NULL state!\n",
+            __FILE__);
+        return 0;}
+
+    vecspace_t *space = map->space;
+
+    rendergraph_t *rgraph = player->state->rgraph;
+
+    vec_t pos;
+    vec4_vec_from_hexspace(pos, player->pos);
+    vec_sub(rgraph->space->dims, pos, camera_renderpos);
+    vec_mul(rgraph->space, pos, map->unit);
+
+    rot_t player_rot = player_get_rot(player, space);
+    rot_t rot = vec4_rot_from_hexspace(player_rot);
+    //rot_t rot = vec4_rot_from_hexspace(
+    //    rot_contain(space->rot_max,
+    //        player_rot + rot_inv(space->rot_max, game->camera_rot)));
+    flip_t flip = player->turn;
+    int frame_i = player->frame_i;
+
+    err = rendergraph_render(rgraph, renderer, surface,
+        pal, map->prend,
+        x0, y0, zoom,
+        pos, rot, flip, frame_i, mapper);
+    if(err)return err;
+
+    return 0;
+}
+
+
+
+int player_play_recording(player_t *player){
+    int err;
+
+    player_recording_t *rec = &player->recording;
+
+    err = player_init_stateset(player, rec->stateset_name, rec->state_name,
+        rec->map);
+    if(err)return err;
+
+    vec_cpy(MAX_VEC_DIMS, player->pos, rec->pos0);
+    player->rot = rec->rot0;
+    player->turn = rec->turn0;
+
     player->recording.action = 1; /* play */
-    player->recording.data = data;
-    player->recording.name = filename;
     return 0;
 }
 
 int player_start_recording(player_t *player, char *name){
-    player_recording_reset(&player->recording);
 
     FILE *f = fopen(name, "w");
     if(f == NULL){
@@ -450,7 +644,6 @@ int player_stop_recording(player_t *player){
     fprintf(f, "\"\n");
 
     player_recording_reset(&player->recording);
-
     return 0;
 }
 
@@ -550,107 +743,6 @@ int hexgame_init(hexgame_t *game, hexmap_t *map, char *respawn_filename){
     return 0;
 }
 
-static int hexgame_parse_player_recording(hexgame_t *game, fus_lexer_t *lexer,
-    const char *filename, int keymap
-){
-    int err;
-
-    char *stateset_filename;
-    err = fus_lexer_expect(lexer, "anim");
-    if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
-    if(err)return err;
-    err = fus_lexer_expect_str(lexer, &stateset_filename);
-    if(err)return err;
-    err = fus_lexer_expect(lexer, ")");
-    if(err)return err;
-
-    char *state_name;
-    err = fus_lexer_expect(lexer, "state");
-    if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
-    if(err)return err;
-    err = fus_lexer_expect_str(lexer, &state_name);
-    if(err)return err;
-    err = fus_lexer_expect(lexer, ")");
-    if(err)return err;
-
-    ARRAY_PUSH_NEW(player_t, *game, players, player)
-    err = player_init(player, game->map->prend, stateset_filename,
-        state_name, keymap, game->map->spawn);
-    if(err)return err;
-    free(state_name);
-
-    err = fus_lexer_expect(lexer, "pos");
-    if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
-    if(err)return err;
-    err = fus_lexer_expect_vec(lexer, game->map->space, player->pos);
-    if(err)return err;
-    err = fus_lexer_expect(lexer, ")");
-    if(err)return err;
-
-    rot_t rot;
-    err = fus_lexer_expect(lexer, "rot");
-    if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
-    if(err)return err;
-    err = fus_lexer_expect_int(lexer, &rot);
-    if(err)return err;
-    err = fus_lexer_expect(lexer, ")");
-    if(err)return err;
-    player->rot = rot;
-
-    bool turn;
-    err = fus_lexer_expect(lexer, "turn");
-    if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
-    if(err)return err;
-    err = fus_lexer_next(lexer);
-    if(err)return err;
-    if(fus_lexer_got(lexer, "yes")){
-        turn = true;
-    }else if(fus_lexer_got(lexer, "no")){
-        turn = false;
-    }else{
-        return fus_lexer_unexpected(lexer, "yes or no");
-    }
-    err = fus_lexer_expect(lexer, ")");
-    if(err)return err;
-    player->turn = turn;
-
-    char *data;
-    err = fus_lexer_expect(lexer, "data");
-    if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
-    if(err)return err;
-    err = fus_lexer_expect_str(lexer, &data);
-    if(err)return err;
-    err = fus_lexer_expect(lexer, ")");
-    if(err)return err;
-
-    return player_play_recording(player, data, strdup(filename));
-}
-
-int hexgame_load_player_recording(hexgame_t *game, const char *filename,
-    int keymap
-){
-    int err;
-    fus_lexer_t lexer;
-
-    char *text = load_file(filename);
-    if(text == NULL)return 1;
-
-    err = fus_lexer_init(&lexer, text, filename);
-    if(err)return err;
-
-    err = hexgame_parse_player_recording(game, &lexer, filename, keymap);
-    if(err)return err;
-
-    free(text);
-    return 0;
-}
-
 int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard){
     vec_cpy(game->map->space->dims, player->pos,
         hard? game->map->spawn: player->respawn_pos);
@@ -665,6 +757,26 @@ int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard){
         player->key_wasdown[i] = false;
         player->key_wentdown[i] = false;
     }
+
+    return 0;
+}
+
+int hexgame_load_player_recording(hexgame_t *game, const char *filename,
+    int keymap
+){
+    int err;
+
+    ARRAY_PUSH_NEW(player_t, *game, players, player)
+    err = player_init(player, game->map, NULL, NULL,
+        -1, game->map->spawn);
+    if(err)return err;
+
+    err = player_recording_load(&player->recording, filename,
+        game->map);
+    if(err)return err;
+
+    err = player_play_recording(player);
+    if(err)return err;
 
     return 0;
 }
@@ -692,22 +804,20 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
             }
         }else if(event->key.keysym.sym == SDLK_F10){
             /* load recording */
-            const char *record_filename = get_last_record_filename();
-            if(record_filename == NULL){
+            const char *recording_filename = get_last_recording_filename();
+            if(recording_filename == NULL){
                 fprintf(stderr, "Couldn't find file of last recording. "
                     "Maybe you need to record your first one with "
                     "'R' then 'F9'?\n");
             }else{
-                err = hexgame_load_player_recording(game,
-                    record_filename, -1);
-                if(err)return err;
+                hexgame_load_player_recording(game, recording_filename, -1);
             }
         }else if(event->key.keysym.sym == SDLK_r){
             /* start recording */
             if(game->players_len >= 1){
-                const char *record_filename = get_next_record_filename();
+                const char *recording_filename = get_next_recording_filename();
                 err = player_start_recording(game->players[0],
-                    strdup(record_filename));
+                    strdup(recording_filename));
                 if(err)return err;
             }
         }else if(!event->key.repeat){
@@ -836,9 +946,8 @@ int hexgame_render(hexgame_t *game,
         if(err)return err;
     }
 
-    vecspace_t *space = &hexspace;
-
     hexmap_t *map = game->map;
+    vecspace_t *space = map->space;
 
     vec_t camera_renderpos;
     vec4_vec_from_hexspace(camera_renderpos, game->camera_pos);
@@ -874,25 +983,10 @@ int hexgame_render(hexgame_t *game,
 
     for(int i = 0; i < game->players_len; i++){
         player_t *player = game->players[i];
-        rendergraph_t *rgraph = player->state->rgraph;
-
-        vec_t pos;
-        vec4_vec_from_hexspace(pos, player->pos);
-        vec_sub(rgraph->space->dims, pos, camera_renderpos);
-        vec_mul(rgraph->space, pos, map->unit);
-
-        rot_t player_rot = player_get_rot(player, space);
-        rot_t rot = vec4_rot_from_hexspace(player_rot);
-        //rot_t rot = vec4_rot_from_hexspace(
-        //    rot_contain(space->rot_max,
-        //        player_rot + rot_inv(space->rot_max, game->camera_rot)));
-        flip_t flip = player->turn;
-        int frame_i = player->frame_i;
-
-        err = rendergraph_render(rgraph, renderer, surface,
-            pal, game->map->prend,
-            x0, y0, zoom,
-            pos, rot, flip, frame_i, mapper);
+        err = player_render(player,
+            renderer, surface,
+            pal, x0, y0, zoom,
+            map, camera_renderpos, mapper);
         if(err)return err;
     }
 

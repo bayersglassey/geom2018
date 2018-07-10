@@ -86,30 +86,30 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     err = hexgame_init(&app->hexgame, &app->hexmap, "respawn.txt");
     if(err)return err;
 
-    {
-        vec_t spawn;
-        vec_cpy(app->hexgame.map->space->dims,
-            spawn, app->hexgame.map->spawn);
-
-        FILE *f = fopen("respawn.txt", "r");
-        if(f != NULL){
-            int x, y;
-            int n = fscanf(f, "%i %i\n", &x, &y);
-            if(n == 2){
-                spawn[0] = x;
-                spawn[1] = y;
-            }
-            fclose(f);
+    vec_t spawn;
+    vec_cpy(app->hexgame.map->space->dims,
+        spawn, app->hexgame.map->spawn);
+    FILE *f = fopen("respawn.txt", "r");
+    if(f != NULL){
+        int x, y;
+        int n = fscanf(f, "%i %i\n", &x, &y);
+        if(n == 2){
+            spawn[0] = x;
+            spawn[1] = y;
         }
+        fclose(f);
+    }
 
+    {
+        /* player 0 */
         ARRAY_PUSH_NEW(player_t, app->hexgame, players, player)
-        err = player_init(player, &app->prend,
+        err = player_init(player, &app->hexmap,
             strdup(app->stateset_filename), NULL, 0, spawn);
         if(err)return err;
     }
 
     for(int i = 0; i < app->hexmap.recording_filenames_len; i++){
-        char *recording_filename = app->hexmap.recording_filenames[i];
+        const char *recording_filename = app->hexmap.recording_filenames[i];
         err = hexgame_load_player_recording(&app->hexgame,
             recording_filename, -1);
         if(err)return err;
@@ -165,7 +165,7 @@ int test_app_process_console_input(test_app_t *app){
 
         int player_i = app->hexgame.players_len;
         ARRAY_PUSH_NEW(player_t, app->hexgame, players, player)
-        err = player_init(player, &app->prend, stateset_filename, NULL,
+        err = player_init(player, &app->hexmap, stateset_filename, NULL,
             player_i, app->hexgame.map->spawn);
         if(err)return err;
     }else if(fus_lexer_got(&lexer, "save")){
