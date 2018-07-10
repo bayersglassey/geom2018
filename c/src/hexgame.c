@@ -21,6 +21,45 @@
     /* Largest highly composite number smaller than 2^16 */
 
 
+
+static const char *get_record_filename(int n){
+    /* NOT REENTRANT, FORGIVE MEEE :( */
+    static char record_filename[200] = "data/rec000.fus";
+    static const int zeros_pos = 8;
+    static const int n_zeros = 3;
+    for(int i = 0; i < n_zeros; i++){
+        int rem = n % 10;
+        n = n / 10;
+        record_filename[zeros_pos + n_zeros - 1 - i] = '0' + rem;
+    }
+    return record_filename;
+}
+
+static const char *get_last_or_next_record_filename(bool next){
+    const char *record_filename;
+    int n = 0;
+    while(1){
+        record_filename = get_record_filename(n);
+        FILE *f = fopen(record_filename, "r");
+        if(f == NULL)break;
+        n++;
+    }
+    if(!next){
+        if(n == 0)return NULL;
+        record_filename = get_record_filename(n-1);
+    }
+    return record_filename;
+}
+
+static const char *get_last_record_filename(){
+    return get_last_or_next_record_filename(false);
+}
+
+static const char *get_next_record_filename(){
+    return get_last_or_next_record_filename(true);
+}
+
+
 /**********
  * PLAYER *
  **********/
@@ -641,6 +680,7 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
         }else if(event->key.keysym.sym == SDLK_F7){
             game->follow = true;
         }else if(event->key.keysym.sym == SDLK_F9){
+            /* save recording */
             if(game->players_len >= 1){
                 player_t *player = game->players[0];
                 if(player->recording_action != 2){
@@ -653,12 +693,23 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
                 }
             }
         }else if(event->key.keysym.sym == SDLK_F10){
-            err = hexgame_load_player_recording(game, "data/rec1.fus", -1);
-            if(err)return err;
+            /* load recording */
+            const char *record_filename = get_last_record_filename();
+            if(record_filename == NULL){
+                fprintf(stderr, "Couldn't find file of last recording. "
+                    "Maybe you need to record your first one with "
+                    "'R' then 'F9'?\n");
+            }else{
+                err = hexgame_load_player_recording(game,
+                    record_filename, -1);
+                if(err)return err;
+            }
         }else if(event->key.keysym.sym == SDLK_r){
+            /* start recording */
             if(game->players_len >= 1){
+                const char *record_filename = get_next_record_filename();
                 err = player_start_recording(game->players[0],
-                    strdup("data/rec1.fus"));
+                    strdup(record_filename));
                 if(err)return err;
             }
         }else if(!event->key.repeat){
