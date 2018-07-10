@@ -24,6 +24,18 @@
 #define PLAYER_KEY_R  3
 #define PLAYER_KEYS   4
 
+typedef struct player_recording {
+    int action;
+        /* 0: none, 1: play, 2: record */
+    char *data;
+    state_t *state0;
+    int i;
+    int size;
+    int wait;
+    char *name;
+    FILE *file;
+} player_recording_t;
+
 typedef struct player {
     vec_t respawn_pos;
     vec_t pos;
@@ -39,14 +51,7 @@ typedef struct player {
     int frame_i;
     int cooldown;
 
-    int recording_action;
-        /* 0: none, 1: play, 2: record */
-    char *recording;
-    int recording_i;
-    int recording_size;
-    int recording_wait;
-    char *recording_name;
-    FILE *recording_file;
+    player_recording_t recording;
 } player_t;
 
 void player_cleanup(player_t *player);

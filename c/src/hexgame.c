@@ -64,23 +64,23 @@ static const char *get_next_record_filename(){
  * PLAYER *
  **********/
 
-static void player_reset_recording(player_t *player){
-    free(player->recording);
-    free(player->recording_name);
-    if(player->recording_file != NULL)fclose(player->recording_file);
+static void player_recording_reset(player_recording_t *rec){
+    free(rec->data);
+    free(rec->name);
+    if(rec->file != NULL)fclose(rec->file);
 
-    player->recording_action = 0; /* none */
-    player->recording = NULL;
-    player->recording_i = 0;
-    player->recording_size = 0;
-    player->recording_wait = 0;
-    player->recording_name = NULL;
-    player->recording_file = NULL;
+    rec->action = 0; /* none */
+    rec->data = NULL;
+    rec->i = 0;
+    rec->size = 0;
+    rec->wait = 0;
+    rec->name = NULL;
+    rec->file = NULL;
 }
 
 void player_cleanup(player_t *player){
     stateset_cleanup(&player->stateset);
-    player_reset_recording(player);
+    player_recording_reset(&player->recording);
 }
 
 int player_init(player_t *player, prismelrenderer_t *prend,
@@ -121,16 +121,14 @@ int player_init(player_t *player, prismelrenderer_t *prend,
     vec_cpy(hexspace.dims, player->respawn_pos, respawn_pos);
     vec_cpy(hexspace.dims, player->pos, respawn_pos);
 
-    player->recording_action = 0;
-
     return 0;
 }
 
 static int player_maybe_record_wait(player_t *player){
-    int wait = player->recording_wait;
+    int wait = player->recording.wait;
     if(wait == 0)goto ok;
 
-    fprintf(player->recording_file, " w%i", wait);
+    fprintf(player->recording.file, " w%i", wait);
     if(DEBUG_RECORDINGS)printf("w%i\n", wait);
 
     /*
@@ -144,7 +142,7 @@ static int player_maybe_record_wait(player_t *player){
     if(err){perror("player_record failed");}
     */
 
-    player->recording_wait = 0;
+    player->recording.wait = 0;
 ok:
     return 0;
 }
@@ -155,12 +153,12 @@ void player_keydown(player_t *player, int key_i){
     player->key_wasdown[key_i] = true;
     player->key_wentdown[key_i] = true;
 
-    if(player->recording_action == 2){
+    if(player->recording.action == 2){
         /* record */
         player_maybe_record_wait(player);
 
         char c = player_get_key_c(player, key_i, true);
-        fprintf(player->recording_file, "+%c", c);
+        fprintf(player->recording.file, "+%c", c);
         if(DEBUG_RECORDINGS)printf("+%c\n", c);
 
         /*
@@ -178,12 +176,12 @@ void player_keyup(player_t *player, int key_i){
     if(key_i < 0 || key_i >= PLAYER_KEYS)return;
     player->key_isdown[key_i] = false;
 
-    if(player->recording_action == 2){
+    if(player->recording.action == 2){
         /* record */
         player_maybe_record_wait(player);
 
         char c = player_get_key_c(player, key_i, true);
-        fprintf(player->recording_file, "-%c", c);
+        fprintf(player->recording.file, "-%c", c);
         if(DEBUG_RECORDINGS)printf("-%c\n", c);
 
         /*
@@ -345,16 +343,16 @@ static int player_apply_rule(player_t *player, state_rule_t *rule){
 int player_step(player_t *player, hexmap_t *map){
     int err;
 
-    int rec_action = player->recording_action;
+    int rec_action = player->recording.action;
     if(rec_action == 1){
         /* play */
-        if(player->recording != NULL){
+        if(player->recording.data != NULL){
             err = player_recording_step(player);
             if(err)return err;
         }
     }else if(rec_action == 2){
         /* record */
-        player->recording_wait++;
+        player->recording.wait++;
     }
 
     if(rec_action != 0 && DEBUG_RECORDINGS){
@@ -404,25 +402,25 @@ int player_step(player_t *player, hexmap_t *map){
 }
 
 int player_play_recording(player_t *player, char *data, char *filename){
-    player_reset_recording(player);
-    player->recording_action = 1; /* play */
-    player->recording = data;
-    player->recording_name = filename;
+    player_recording_reset(&player->recording);
+    player->recording.action = 1; /* play */
+    player->recording.data = data;
+    player->recording.name = filename;
     return 0;
 }
 
 int player_start_recording(player_t *player, char *name){
-    player_reset_recording(player);
+    player_recording_reset(&player->recording);
 
     FILE *f = fopen(name, "w");
     if(f == NULL){
         perror("Couldn't start recording");
         return 2;}
 
-    player_reset_recording(player);
-    player->recording_action = 2; /* record */
-    player->recording_name = name;
-    player->recording_file = f;
+    player_recording_reset(&player->recording);
+    player->recording.action = 2; /* record */
+    player->recording.name = name;
+    player->recording.file = f;
 
     fprintf(f, "anim: ");
     fus_write_str(f, player->stateset.filename);
@@ -446,12 +444,12 @@ int player_start_recording(player_t *player, char *name){
 }
 
 int player_stop_recording(player_t *player){
-    FILE *f = player->recording_file;
+    FILE *f = player->recording.file;
     if(f == NULL)return 2;
 
     fprintf(f, "\"\n");
 
-    player_reset_recording(player);
+    player_recording_reset(&player->recording);
 
     return 0;
 }
@@ -460,39 +458,39 @@ int player_record(player_t *player, const char *data){
     /* CURRENTLY UNUSED!.. we write directly to file instead. */
 
     int data_len = strlen(data);
-    int required_size = player->recording_i + data_len + 1;
+    int required_size = player->recording.i + data_len + 1;
 
     if(DEBUG_RECORDINGS){
         printf("RECORD: data=%s, len=%i, req=%i\n",
             data, data_len, required_size);}
 
-    if(required_size >= player->recording_size){
+    if(required_size >= player->recording.size){
         int new_size = required_size + 200;
-        char *new_recording = realloc(player->recording,
+        char *new_recording = realloc(player->recording.data,
             sizeof(char) * new_size);
         if(new_recording == NULL)return 1;
         new_recording[new_size - 1] = '\0';
-        player->recording = new_recording;
-        player->recording_size = new_size;
+        player->recording.data = new_recording;
+        player->recording.size = new_size;
         if(DEBUG_RECORDINGS)printf("  REALLOC: new_size=%i\n", new_size);
     }
-    strcpy(player->recording + player->recording_i, data);
-    player->recording_i += data_len;
+    strcpy(player->recording.data + player->recording.i, data);
+    player->recording.i += data_len;
 
     if(DEBUG_RECORDINGS){
         printf("  OK! i=%i, data=%s\n",
-            player->recording_i, player->recording);}
+            player->recording.i, player->recording.data);}
 
     return 0;
 }
 
 int player_recording_step(player_t *player){
-    if(player->recording_wait > 0){
-        player->recording_wait--;
-        if(player->recording_wait > 0)return 0;}
+    if(player->recording.wait > 0){
+        player->recording.wait--;
+        if(player->recording.wait > 0)return 0;}
 
-    char *rec = player->recording;
-    int i = player->recording_i;
+    char *rec = player->recording.data;
+    int i = player->recording.i;
     char c;
 
     while(rec[i] != '\0'){
@@ -510,20 +508,20 @@ int player_recording_step(player_t *player){
             i++; int wait = atoi(rec + i);
             if(DEBUG_RECORDINGS)printf("w%i\n", wait);
             while(isdigit(rec[i]))i++;
-            player->recording_wait = wait;
+            player->recording.wait = wait;
             break;
         }else{
             fprintf(stderr, "Unrecognized action: %c\n", c);
             fprintf(stderr, "  ...in position %i of recording: %s\n",
-                i, player->recording);
+                i, player->recording.data);
             return 2;
         }
     }
 
     if(rec[i] == '\0'){
-        player_reset_recording(player);
+        player_recording_reset(&player->recording);
     }else{
-        player->recording_i = i;
+        player->recording.i = i;
     }
 
     return 0;
@@ -683,7 +681,7 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
             /* save recording */
             if(game->players_len >= 1){
                 player_t *player = game->players[0];
-                if(player->recording_action != 2){
+                if(player->recording.action != 2){
                     fprintf(stderr,
                         "Can't stop recording without starting first! "
                         "(Try pressing 'R' before 'F9')\n");
