@@ -30,6 +30,7 @@ typedef struct player_keyinfo {
 } player_keyinfo_t;
 
 void player_keyinfo_reset(player_keyinfo_t *info);
+void player_keyinfo_copy(player_keyinfo_t *info1, player_keyinfo_t *info2);
 
 
 
@@ -97,7 +98,7 @@ int player_init_stateset(player_t *player, const char *stateset_filename,
 int player_set_state(player_t *player, const char *state_name);
 void player_keydown(player_t *player, int key_i);
 void player_keyup(player_t *player, int key_i);
-int player_get_key_i(player_t *player, char c);
+int player_get_key_i(player_t *player, char c, bool absolute);
 char player_get_key_c(player_t *player, int key_i, bool absolute);
 rot_t player_get_rot(player_t *player, const vecspace_t *space);
 int player_process_event(player_t *player, SDL_Event *event);

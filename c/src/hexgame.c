@@ -34,6 +34,69 @@ void player_keyinfo_reset(player_keyinfo_t *info){
     }
 }
 
+void player_keyinfo_copy(player_keyinfo_t *info1, player_keyinfo_t *info2){
+    for(int i = 0; i < PLAYER_KEYS; i++){
+        info1->isdown[i] = info2->isdown[i];
+        info1->wasdown[i] = info2->wasdown[i];
+        info1->wentdown[i] = info2->wentdown[i];
+    }
+}
+
+int fus_lexer_get_player_keyinfo(fus_lexer_t *lexer,
+    player_keyinfo_t *info
+){
+    int err;
+    err = fus_lexer_get(lexer, "(");
+    if(err)return err;
+    while(1){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        if(fus_lexer_got(lexer, ")"))break;
+
+        char key_c;
+        char *name;
+        err = fus_lexer_get_name(lexer, &name);
+        if(err)return err;
+        if(strlen(name) != 1 || !strchr("udlrfb", name[0])){
+            return fus_lexer_unexpected(lexer,
+                "u or d or l or r or f or b");}
+        key_c = name[0];
+        free(name);
+
+        int key_i = player_get_key_i(NULL, key_c, true);
+
+        err = fus_lexer_expect(lexer, "(");
+        if(err)return err;
+        while(1){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            if(fus_lexer_got(lexer, ")"))break;
+
+            bool *keystate;
+            if(fus_lexer_got(lexer, "is")){
+                keystate = info->isdown;
+            }else if(fus_lexer_got(lexer, "was")){
+                keystate = info->wasdown;
+            }else if(fus_lexer_got(lexer, "went")){
+                keystate = info->wentdown;
+            }else{
+                return fus_lexer_unexpected(lexer,
+                    "is or was or went");}
+
+            keystate[key_i] = true;
+        }
+    }
+    return 0;
+}
+
+int fus_lexer_expect_player_keyinfo(fus_lexer_t *lexer,
+    player_keyinfo_t *info
+){
+    int err = fus_lexer_next(lexer);
+    if(err)return err;
+    return fus_lexer_get_player_keyinfo(lexer, info);
+}
+
 
 /********************
  * PLAYER RECORDING *
@@ -58,6 +121,8 @@ void player_recording_reset(player_recording_t *rec){
     vec_zero(MAX_VEC_DIMS, rec->pos0);
     rec->rot0 = 0;
     rec->turn0 = false;
+
+    player_keyinfo_reset(&rec->keyinfo);
 
     rec->i = 0;
     rec->size = 0;
@@ -139,6 +204,13 @@ static int player_recording_parse(player_recording_t *rec,
         err = fus_lexer_expect_int(lexer, &rec->offset);
         if(err)return err;
         err = fus_lexer_expect(lexer, ")");
+        if(err)return err;
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+    }
+
+    if(fus_lexer_got(lexer, "keys")){
+        err = fus_lexer_expect_player_keyinfo(lexer, &rec->keyinfo);
         if(err)return err;
         err = fus_lexer_next(lexer);
         if(err)return err;
@@ -365,14 +437,14 @@ void player_keyup(player_t *player, int key_i){
     }
 }
 
-int player_get_key_i(player_t *player, char c){
+int player_get_key_i(player_t *player, char c, bool absolute){
     return
         c == 'u'? PLAYER_KEY_U:
         c == 'd'? PLAYER_KEY_D:
         c == 'l'? PLAYER_KEY_L:
         c == 'r'? PLAYER_KEY_R:
-        c == 'f'? (player->turn? PLAYER_KEY_L: PLAYER_KEY_R):
-        c == 'b'? (player->turn? PLAYER_KEY_R: PLAYER_KEY_L):
+        c == 'f'? (!absolute && player->turn? PLAYER_KEY_L: PLAYER_KEY_R):
+        c == 'b'? (!absolute && player->turn? PLAYER_KEY_R: PLAYER_KEY_L):
         -1;
 }
 
@@ -440,7 +512,7 @@ static int player_match_rule(player_t *player, hexmap_t *map,
                 return 2;}
 
             char c = cond->u.key.c;
-            int key_i = player_get_key_i(player, c);
+            int key_i = player_get_key_i(player, c, false);
             if(key_i == -1){
                 fprintf(stderr, "Unrecognized key char: %c", c);
                 return 2;}
@@ -637,7 +709,7 @@ int player_restart_recording(player_t *player, bool hard){
     rec->i = 0;
     rec->wait = 0;
 
-    player_keyinfo_reset(&player->keyinfo);
+    player_keyinfo_copy(&player->keyinfo, &rec->keyinfo);
     player_set_state(player, rec->state_name);
 
     vec_cpy(MAX_VEC_DIMS, player->pos, rec->pos0);
@@ -681,6 +753,17 @@ int player_start_recording(player_t *player, char *name){
 
     fprintf(f, "rot: %i\n", player->rot);
     fprintf(f, "turn: %s\n", player->turn? "yes": "no");
+
+    fprintf(f, "keys:\n");
+    for(int i = 0; i < PLAYER_KEYS; i++){
+        char key_c = player_get_key_c(player, i, true);
+        fprintf(f, "    %c:", key_c);
+        if(player->keyinfo.isdown[i])fprintf(f, " is");
+        if(player->keyinfo.wasdown[i])fprintf(f, " was");
+        if(player->keyinfo.wentdown[i])fprintf(f, " went");
+        fprintf(f, "\n");
+    }
+
     fprintf(f, "data: \"");
 
     return 0;
@@ -747,7 +830,7 @@ int player_recording_step(player_t *player){
             bool keydown = c == '+';
             char key_c = rec[i+1]; i += 2;
             if(DEBUG_RECORDINGS)printf("%c%c\n", c, key_c);
-            int key_i = player_get_key_i(player, key_c);
+            int key_i = player_get_key_i(player, key_c, false);
             if(keydown)player_keydown(player, key_i);
             else player_keyup(player, key_i);
         }else if(c == 'w'){
@@ -868,7 +951,8 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
                     "Maybe you need to record your first one with "
                     "'R' then 'F9'?\n");
             }else{
-                hexgame_load_player_recording(game, recording_filename, -1);
+                err = hexgame_load_player_recording(game, recording_filename, -1);
+                if(err)return err;
             }
         }else if(event->key.keysym.sym == SDLK_r){
             /* start recording */
