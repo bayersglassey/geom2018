@@ -84,8 +84,8 @@ submaps:
                     :
                         file: "data/maps/demo/tunnels2.fus"
                         pos: eval: (13 1) + (18 8)
-                        camera: (0 0)
-                        mapper: ("double")
+                        camera: (0 5)
+                        mapper: ("triple")
 
 
     :
@@ -96,10 +96,8 @@ submaps:
             : "data/maps/demo/recs/test_001.fus"
             : "data/maps/demo/recs/test_002.fus"
             : "data/maps/demo/recs/test_003.fus"
-            : "data/maps/demo/recs/test_004.fus"
-            : "data/maps/demo/recs/test_005.fus"
-            : "data/maps/demo/recs/test_006.fus"
-            : "data/maps/demo/recs/test_007.fus"
+            : "data/maps/demo/recs/test_roller_000.fus"
+            : "data/maps/demo/recs/test_flier_000.fus"
         submaps:
             :
                 file: "data/maps/test/map3.fus"

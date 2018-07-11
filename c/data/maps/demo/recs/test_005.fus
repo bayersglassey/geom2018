@@ -1,6 +1,0 @@
-anim: "anim/player.fus"
-state: "stand"
-pos: ( 54 72)
-rot: 0
-turn: no
-data: " w3+l w70-l w2+r w83-r"

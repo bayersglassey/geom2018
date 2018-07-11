@@ -770,8 +770,13 @@ int player_start_recording(player_t *player, char *name){
 }
 
 int player_stop_recording(player_t *player){
+    int err;
+
     FILE *f = player->recording.file;
     if(f == NULL)return 2;
+
+    err = player_maybe_record_wait(player);
+    if(err)return err;
 
     fprintf(f, "\"\n");
 

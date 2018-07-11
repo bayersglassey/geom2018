@@ -1,0 +1,11 @@
+anim: "anim/flier.fus"
+state: "fly"
+pos: ( 70 90)
+rot: 2
+turn: no
+keys:
+    u: is was
+    d:
+    l:
+    r:
+data: " w13+l w3-l w14+r w6-r w10+l w5-l w30+l w5-l w5+r w4-r w13+l w7-l w10+r w5-r w32+l w4-l w2+r w3-r w5+l w2-l w2+r w2-r w2+r w7-r w20+l w6-l w9+r w7-r w25+l w1-l w7+r w5-r w11+l w5-l w4+r w5-r w41+r w6-r w10+l w7-l w6+r w6-r w31+r w5-r w4+r w8-r w9+r w3-r w4+r w1-r w21+r w6-r w3+l w6-l w7+l w2-l w9+r w8-r w13+r w7-r w12+l w7-l w11+r w7-r w9+l w6-l w14+r w4-r w12+r w3-r w3+l w6-l w16+l w6-l w1+r w4-r w4+l w6-l w1+r w5-r w3+l w5-l w8+r w5-r w21-u"
