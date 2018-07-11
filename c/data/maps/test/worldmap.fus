@@ -1,19 +1,8 @@
 
 unit: 3 2 0 -1
 spawn: (0 0)
-verts:
-    "0": "map_vert0"
-    "1": "map_vert1"
-edges:
-    "0": "map_edge0"
-    "1": "map_edge1"
-    "2": "map_edge2"
-faces:
-    "0": "map_face0"
-    "1": "map_face1"
-    "S": "map_savepoint"
-
 default_palette: "data/pal1.fus"
+default_tileset: "data/tileset1.fus"
 
 submaps:
     :

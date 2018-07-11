@@ -42,6 +42,134 @@ static int _rem(int x, int y){
 
 
 
+/******************
+ * HEXMAP TILESET *
+ ******************/
+
+void hexmap_tileset_cleanup(hexmap_tileset_t *tileset){
+    free(tileset->name);
+    ARRAY_FREE(hexmap_tileset_entry_t, *tileset, vert_entries, (void))
+    ARRAY_FREE(hexmap_tileset_entry_t, *tileset, edge_entries, (void))
+    ARRAY_FREE(hexmap_tileset_entry_t, *tileset, face_entries, (void))
+}
+
+int hexmap_tileset_init(hexmap_tileset_t *tileset, char *name){
+    tileset->name = name;
+    ARRAY_INIT(*tileset, vert_entries)
+    ARRAY_INIT(*tileset, edge_entries)
+    ARRAY_INIT(*tileset, face_entries)
+    return 0;
+}
+
+static int hexmap_tileset_parse(hexmap_tileset_t *tileset,
+    prismelrenderer_t *prend, char *name,
+    fus_lexer_t *lexer
+){
+    int err;
+
+    err = hexmap_tileset_init(tileset, name);
+    if(err)return err;
+
+    /* parse vert, edge, face, rgraphs */
+    #define GET_RGRAPH(TYPE) { \
+        err = fus_lexer_expect(lexer, #TYPE"s"); \
+        if(err)return err; \
+        err = fus_lexer_expect(lexer, "("); \
+        if(err)return err; \
+        while(1){ \
+            err = fus_lexer_next(lexer); \
+            if(err)return err; \
+            if(fus_lexer_got(lexer, ")"))break; \
+            \
+            char *name; \
+            err = fus_lexer_get_str(lexer, &name); \
+            if(err)return err; \
+            if(strlen(name) != 1){ \
+                fprintf(stderr, "Expected single character, got: %s\n", \
+                    name); \
+                free(name); return 2;} \
+            char tile_c = name[0]; \
+            free(name); \
+            \
+            err = fus_lexer_expect(lexer, "("); \
+            if(err)return err; \
+            err = fus_lexer_expect_str(lexer, &name); \
+            if(err)return err; \
+            rendergraph_t *rgraph = \
+                prismelrenderer_get_rendergraph(prend, name); \
+            if(rgraph == NULL){ \
+                fus_lexer_err_info(lexer); \
+                fprintf(stderr, "Couldn't find shape: %s\n", name); \
+                free(name); return 2;} \
+            free(name); \
+            ARRAY_PUSH_NEW(hexmap_tileset_entry_t, *tileset, \
+                TYPE##_entries, entry) \
+            entry->tile_c = tile_c; \
+            entry->rgraph = rgraph; \
+            err = fus_lexer_expect(lexer, ")"); \
+            if(err)return err; \
+        } \
+    }
+    GET_RGRAPH(vert)
+    GET_RGRAPH(edge)
+    GET_RGRAPH(face)
+    #undef GET_RGRAPH
+
+    return 0;
+}
+
+int hexmap_tileset_load(hexmap_tileset_t *tileset,
+    prismelrenderer_t *prend, const char *filename
+){
+    int err;
+    fus_lexer_t lexer;
+
+    char *text = load_file(filename);
+    if(text == NULL)return 1;
+
+    err = fus_lexer_init(&lexer, text, filename);
+    if(err)return err;
+
+    err = hexmap_tileset_parse(tileset, prend, strdup(filename),
+        &lexer);
+    if(err)return err;
+
+    free(text);
+    return 0;
+}
+
+rendergraph_t *hexmap_tileset_get_rgraph_vert(hexmap_tileset_t *tileset,
+    char tile_c
+){
+    for(int i = 0; i < tileset->vert_entries_len; i++){
+        hexmap_tileset_entry_t *entry = tileset->vert_entries[i];
+        if(entry->tile_c == tile_c)return entry->rgraph;
+    }
+    return NULL;
+}
+
+rendergraph_t *hexmap_tileset_get_rgraph_edge(hexmap_tileset_t *tileset,
+    char tile_c
+){
+    for(int i = 0; i < tileset->edge_entries_len; i++){
+        hexmap_tileset_entry_t *entry = tileset->edge_entries[i];
+        if(entry->tile_c == tile_c)return entry->rgraph;
+    }
+    return NULL;
+}
+
+rendergraph_t *hexmap_tileset_get_rgraph_face(hexmap_tileset_t *tileset,
+    char tile_c
+){
+    for(int i = 0; i < tileset->face_entries_len; i++){
+        hexmap_tileset_entry_t *entry = tileset->face_entries[i];
+        if(entry->tile_c == tile_c)return entry->rgraph;
+    }
+    return NULL;
+}
+
+
+
 /**************
  * HEXCOLLMAP *
  **************/
@@ -453,10 +581,6 @@ void hexmap_cleanup(hexmap_t *map){
 
     ARRAY_FREE(hexmap_submap_t, *map, submaps, hexmap_submap_cleanup)
 
-    ARRAY_FREE(hexmap_rgraph_elem_t, *map, rgraph_verts, (void))
-    ARRAY_FREE(hexmap_rgraph_elem_t, *map, rgraph_edges, (void))
-    ARRAY_FREE(hexmap_rgraph_elem_t, *map, rgraph_faces, (void))
-
     ARRAY_FREE(char, *map, recording_filenames, (void))
 }
 
@@ -473,10 +597,6 @@ int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
     vec_zero(space->dims, map->spawn);
 
     ARRAY_INIT(*map, submaps)
-
-    ARRAY_INIT(*map, rgraph_verts)
-    ARRAY_INIT(*map, rgraph_edges)
-    ARRAY_INIT(*map, rgraph_faces)
 
     ARRAY_INIT(*map, recording_filenames)
     return 0;
@@ -543,53 +663,6 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
     err = fus_lexer_expect(lexer, ")");
     if(err)return err;
 
-
-    /* parse vert, edge, face, rgraphs */
-    #define GET_RGRAPH(TYPE) { \
-        err = fus_lexer_expect(lexer, #TYPE"s"); \
-        if(err)return err; \
-        err = fus_lexer_expect(lexer, "("); \
-        if(err)return err; \
-        while(1){ \
-            err = fus_lexer_next(lexer); \
-            if(err)return err; \
-            if(fus_lexer_got(lexer, ")"))break; \
-            \
-            char *name; \
-            err = fus_lexer_get_str(lexer, &name); \
-            if(err)return err; \
-            if(strlen(name) != 1){ \
-                fprintf(stderr, "Expected single character, got: %s\n", \
-                    name); \
-                free(name); return 2;} \
-            char tile_c = name[0]; \
-            free(name); \
-            \
-            err = fus_lexer_expect(lexer, "("); \
-            if(err)return err; \
-            err = fus_lexer_expect_str(lexer, &name); \
-            if(err)return err; \
-            rendergraph_t *rgraph = \
-                prismelrenderer_get_rendergraph(prend, name); \
-            if(rgraph == NULL){ \
-                fus_lexer_err_info(lexer); \
-                fprintf(stderr, "Couldn't find shape: %s\n", name); \
-                free(name); return 2;} \
-            free(name); \
-            ARRAY_PUSH_NEW(hexmap_rgraph_elem_t, *map, rgraph_##TYPE##s, \
-                rgraph_##TYPE) \
-            rgraph_##TYPE->tile_c = tile_c; \
-            rgraph_##TYPE->rgraph = rgraph; \
-            err = fus_lexer_expect(lexer, ")"); \
-            if(err)return err; \
-        } \
-    }
-    GET_RGRAPH(vert)
-    GET_RGRAPH(edge)
-    GET_RGRAPH(face)
-    #undef GET_RGRAPH
-
-
     /* default palette */
     char *default_palette_filename;
     err = fus_lexer_expect(lexer, "default_palette");
@@ -597,6 +670,17 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
     err = fus_lexer_expect(lexer, "(");
     if(err)return err;
     err = fus_lexer_expect_str(lexer, &default_palette_filename);
+    if(err)return err;
+    err = fus_lexer_expect(lexer, ")");
+    if(err)return err;
+
+    /* default tileset */
+    char *default_tileset_filename;
+    err = fus_lexer_expect(lexer, "default_tileset");
+    if(err)return err;
+    err = fus_lexer_expect(lexer, "(");
+    if(err)return err;
+    err = fus_lexer_expect_str(lexer, &default_tileset_filename);
     if(err)return err;
     err = fus_lexer_expect(lexer, ")");
     if(err)return err;
@@ -615,7 +699,7 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
         if(err)return err;
         err = hexmap_parse_submap(map, lexer,
             (vec_t){0}, (vec_t){0}, 0, NULL,
-            default_palette_filename);
+            default_palette_filename, default_tileset_filename);
         if(err)return err;
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
@@ -627,7 +711,8 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
 
 int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
     vec_t parent_pos, vec_t parent_camera_pos, int parent_camera_type,
-    prismelmapper_t *parent_mapper, char *palette_filename
+    prismelmapper_t *parent_mapper, char *palette_filename,
+    char *tileset_filename
 ){
     int err;
     vecspace_t *space = map->space;
@@ -710,10 +795,22 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
         if(err)return err;
     }
 
+    if(fus_lexer_got(lexer, "tileset")){
+        err = fus_lexer_expect(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_expect_str(lexer, &tileset_filename);
+        if(err)return err;
+        err = fus_lexer_expect(lexer, ")");
+        if(err)return err;
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+    }
+
     if(submap_filename != NULL){
         ARRAY_PUSH_NEW(hexmap_submap_t, *map, submaps, submap)
         err = hexmap_submap_load(map, submap, submap_filename, pos,
-            camera_type, camera_pos, mapper, palette_filename);
+            camera_type, camera_pos, mapper, palette_filename,
+            tileset_filename);
         if(err)return err;
     }
 
@@ -749,7 +846,8 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
             err = fus_lexer_get(lexer, "(");
             if(err)return err;
             err = hexmap_parse_submap(map, lexer, pos,
-                camera_pos, camera_type, mapper, palette_filename);
+                camera_pos, camera_type, mapper,
+                palette_filename, tileset_filename);
             if(err)return err;
             err = fus_lexer_get(lexer, ")");
             if(err)return err;
@@ -827,41 +925,19 @@ bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
     else return false;
 }
 
-rendergraph_t *hexmap_get_rgraph_vert(hexmap_t *map, char tile_c){
-    for(int i = 0; i < map->rgraph_verts_len; i++){
-        hexmap_rgraph_elem_t *elem = map->rgraph_verts[i];
-        if(elem->tile_c == tile_c)return elem->rgraph;
-    }
-    return NULL;
-}
-
-rendergraph_t *hexmap_get_rgraph_edge(hexmap_t *map, char tile_c){
-    for(int i = 0; i < map->rgraph_edges_len; i++){
-        hexmap_rgraph_elem_t *elem = map->rgraph_edges[i];
-        if(elem->tile_c == tile_c)return elem->rgraph;
-    }
-    return NULL;
-}
-
-rendergraph_t *hexmap_get_rgraph_face(hexmap_t *map, char tile_c){
-    for(int i = 0; i < map->rgraph_faces_len; i++){
-        hexmap_rgraph_elem_t *elem = map->rgraph_faces[i];
-        if(elem->tile_c == tile_c)return elem->rgraph;
-    }
-    return NULL;
-}
-
 
 
 
 void hexmap_submap_cleanup(hexmap_submap_t *submap){
     free(submap->filename);
     hexcollmap_cleanup(&submap->collmap);
+    palette_cleanup(&submap->palette);
+    hexmap_tileset_cleanup(&submap->tileset);
 }
 
 int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
     char *filename, vec_t pos, int camera_type, vec_t camera_pos,
-    prismelmapper_t *mapper, char *palette_filename
+    prismelmapper_t *mapper, char *palette_filename, char *tileset_filename
 ){
     int err;
 
@@ -880,12 +956,16 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
     err = palette_load(&submap->palette, palette_filename);
     if(err)return err;
 
+    err = hexmap_tileset_load(&submap->tileset, map->prend,
+        tileset_filename);
+    if(err)return err;
+
     return 0;
 }
 
 int hexmap_submap_load(hexmap_t *map, hexmap_submap_t *submap,
     const char *filename, vec_t pos, int camera_type, vec_t camera_pos,
-    prismelmapper_t *mapper, char *palette_filename
+    prismelmapper_t *mapper, char *palette_filename, char *tileset_filename
 ){
     int err;
     fus_lexer_t lexer;
@@ -897,7 +977,7 @@ int hexmap_submap_load(hexmap_t *map, hexmap_submap_t *submap,
     if(err)return err;
 
     err = hexmap_submap_init(map, submap, strdup(filename), pos,
-        camera_type, camera_pos, mapper, palette_filename);
+        camera_type, camera_pos, mapper, palette_filename, tileset_filename);
     if(err)return err;
     err = hexmap_submap_parse(map, submap, &lexer);
     if(err)return err;
@@ -965,6 +1045,8 @@ int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap){
         n_frames);
     if(err)return err;
 
+    hexmap_tileset_t *tileset = &submap->tileset;
+
     for(int y = 0; y < collmap->h; y++){
         for(int x = 0; x < collmap->w; x++){
             int px = x - collmap->ox;
@@ -981,21 +1063,24 @@ int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap){
                 hexcollmap_elem_t *elem = &tile->vert[i];
                 if(hexcollmap_elem_is_visible(elem)){
                     err = add_tile_rgraph(rgraph,
-                        hexmap_get_rgraph_vert(map, elem->tile_c),
+                        hexmap_tileset_get_rgraph_vert(tileset,
+                            elem->tile_c),
                         space, v, i * 2);
                     if(err)return err;}}
             for(int i = 0; i < 3; i++){
                 hexcollmap_elem_t *elem = &tile->edge[i];
                 if(hexcollmap_elem_is_visible(elem)){
                     err = add_tile_rgraph(rgraph,
-                        hexmap_get_rgraph_edge(map, elem->tile_c),
+                        hexmap_tileset_get_rgraph_edge(tileset,
+                            elem->tile_c),
                         space, v, i * 2);
                     if(err)return err;}}
             for(int i = 0; i < 2; i++){
                 hexcollmap_elem_t *elem = &tile->face[i];
                 if(hexcollmap_elem_is_visible(elem)){
                     err = add_tile_rgraph(rgraph,
-                        hexmap_get_rgraph_face(map, elem->tile_c),
+                        hexmap_tileset_get_rgraph_face(tileset,
+                            elem->tile_c),
                         space, v, i * 2);
                     if(err)return err;}}
         }

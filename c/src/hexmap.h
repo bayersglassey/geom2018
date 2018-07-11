@@ -9,6 +9,40 @@
 #include "prismelrenderer.h"
 
 
+/******************
+ * HEXMAP TILESET *
+ ******************/
+
+typedef struct hexmap_tileset_entry {
+    char tile_c;
+        /* see hexcollmap_elem->tile_c */
+    rendergraph_t *rgraph;
+} hexmap_tileset_entry_t;
+
+typedef struct hexmap_tileset {
+    char *name;
+    ARRAY_DECL(hexmap_tileset_entry_t, vert_entries)
+    ARRAY_DECL(hexmap_tileset_entry_t, edge_entries)
+    ARRAY_DECL(hexmap_tileset_entry_t, face_entries)
+} hexmap_tileset_t;
+
+void hexmap_tileset_cleanup(hexmap_tileset_t *tileset);
+int hexmap_tileset_init(hexmap_tileset_t *tileset, char *name);
+int hexmap_tileset_load(hexmap_tileset_t *tileset,
+    prismelrenderer_t *prend, const char *filename);
+rendergraph_t *hexmap_tileset_get_rgraph_vert(hexmap_tileset_t *tileset,
+    char tile_c);
+rendergraph_t *hexmap_tileset_get_rgraph_edge(hexmap_tileset_t *tileset,
+    char tile_c);
+rendergraph_t *hexmap_tileset_get_rgraph_face(hexmap_tileset_t *tileset,
+    char tile_c);
+
+
+
+/**************
+ * HEXCOLLMAP *
+ **************/
+
 typedef struct hexcollmap_elem {
     char tile_c;
         /* Symbol representing the graphical tile (so, probably
@@ -36,6 +70,12 @@ typedef struct hexcollmap {
     hexcollmap_tile_t *tiles;
 } hexcollmap_t;
 
+
+
+/**********
+ * HEXMAP *
+ **********/
+
 typedef struct hexmap_submap {
     vec_t pos;
     vec_t camera_pos;
@@ -49,13 +89,8 @@ typedef struct hexmap_submap {
     rendergraph_t *rgraph_map;
     prismelmapper_t *mapper;
     palette_t palette;
+    hexmap_tileset_t tileset;
 } hexmap_submap_t;
-
-typedef struct hexmap_rgraph_elem {
-    char tile_c;
-        /* see hexcollmap_elem->tile_c */
-    rendergraph_t *rgraph;
-} hexmap_rgraph_elem_t;
 
 typedef struct hexmap {
     char *name;
@@ -63,10 +98,6 @@ typedef struct hexmap {
     prismelrenderer_t *prend;
     vec_t unit;
     vec_t spawn;
-
-    ARRAY_DECL(hexmap_rgraph_elem_t, rgraph_verts)
-    ARRAY_DECL(hexmap_rgraph_elem_t, rgraph_edges)
-    ARRAY_DECL(hexmap_rgraph_elem_t, rgraph_faces)
 
     ARRAY_DECL(hexmap_submap_t, submaps)
 
@@ -100,21 +131,19 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
     fus_lexer_t *lexer);
 int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
     vec_t parent_pos, vec_t parent_camera_pos, int parent_camera_type,
-    prismelmapper_t *parent_mapper, char *palette_filename);
+    prismelmapper_t *parent_mapper, char *palette_filename,
+    char *tileset_filename);
 bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf, bool all);
-rendergraph_t *hexmap_get_rgraph_vert(hexmap_t *map, char tile_c);
-rendergraph_t *hexmap_get_rgraph_edge(hexmap_t *map, char tile_c);
-rendergraph_t *hexmap_get_rgraph_face(hexmap_t *map, char tile_c);
 
 
 void hexmap_submap_cleanup(hexmap_submap_t *submap);
 int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
     char *filename, vec_t pos, int camera_type, vec_t camera_pos,
-    prismelmapper_t *mapper, char *palette_filename);
+    prismelmapper_t *mapper, char *palette_filename, char *tileset_filename);
 int hexmap_submap_load(hexmap_t *map, hexmap_submap_t *submap,
     const char *filename, vec_t pos, int camera_type, vec_t camera_pos,
-    prismelmapper_t *mapper, char *palette_filename);
+    prismelmapper_t *mapper, char *palette_filename, char *tileset_filename);
 int hexmap_submap_parse(hexmap_t *map, hexmap_submap_t *submap,
     fus_lexer_t *lexer);
 int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap);

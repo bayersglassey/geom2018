@@ -1,19 +1,8 @@
 
 unit: 3 2 0 -1
 spawn: (0 0)
-verts:
-    "0": "map_vert0"
-    "1": "map_vert1"
-edges:
-    "0": "map_edge0"
-    "1": "map_edge1"
-    "2": "map_edge2"
-faces:
-    "0": "map_face0"
-    "1": "map_face1"
-    "S": "map_savepoint"
-
 default_palette: "data/pal1.fus"
+default_tileset: "data/tileset1.fus"
 
 submaps:
     :
@@ -21,31 +10,34 @@ submaps:
         pos: (0 0)
         camera: (5 4)
         mapper: ("quadruple")
-        palette: "data/pals/start.fus"
+        palette: "data/maps/demo/pals/start.fus"
     :
         file: "data/maps/demo/start2.fus"
         pos: (7 11)
         camera: (5 4)
         mapper: ("quadruple")
-        palette: "data/pals/start.fus"
+        palette: "data/maps/demo/pals/start.fus"
         submaps:
             :
                 file: "data/maps/demo/start3.fus"
                 pos: (2 15)
                 camera: (5 -5)
                 mapper: ("triple")
+                tileset: "data/maps/demo/tiles/start.fus"
                 submaps:
                     :
                         file: "data/maps/demo/start4.fus"
                         pos: (19 6)
                         camera: (5 5)
                         mapper: ("quadruple")
+                        tileset: "data/maps/demo/tiles/start.fus"
                     :
                         file: "data/maps/demo/vines.fus"
                         pos: (-4 2)
                         camera: (-5 5)
                         mapper: ("triple")
-                        palette: "data/pals/vines.fus"
+                        palette: "data/maps/demo/pals/vines.fus"
+                        tileset: "data/tileset1.fus"
                         submaps:
                             :
                                 file: "data/maps/demo/vines2.fus"
@@ -75,7 +67,7 @@ submaps:
                         #camera: follow
                         camera: (6 -5)
                         mapper: ("triple")
-                        palette: "data/pals/tunnels.fus"
+                        palette: "data/maps/demo/pals/tunnels.fus"
                         recordings:
                             : "data/maps/demo/recs/tunnels_000.fus"
                             : "data/maps/demo/recs/tunnels_000b.fus"

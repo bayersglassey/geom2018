@@ -103,6 +103,10 @@ WHAT'S NEEDED FOR A PROPER DEMO:
         - Tilesets.
         - Palettes.
         - Background/foreground maps.
+        - Compositing hexcollmaps, so we can build "wilderness" areas
+            more easily.
+            Need a way of specifying "solid emptiness" vs "transparent
+            emptiness" for collmap composition.
     - Better camera scrolling.
     - Music + SFX. Almost anything will do for now.
     - Get rid of hexmap "unit": unit starts as (1 0 0 0) and only
