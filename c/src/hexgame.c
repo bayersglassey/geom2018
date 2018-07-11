@@ -22,8 +22,21 @@
 
 
 
+/*******************
+ * PLAYER KEY INFO *
+ *******************/
+
+void player_keyinfo_reset(player_keyinfo_t *info){
+    for(int i = 0; i < PLAYER_KEYS; i++){
+        info->isdown[i] = false;
+        info->wasdown[i] = false;
+        info->wentdown[i] = false;
+    }
+}
+
+
 /********************
- * PLAYER_RECORDING *
+ * PLAYER RECORDING *
  ********************/
 
 void player_recording_cleanup(player_recording_t *rec){
@@ -206,14 +219,6 @@ static const char *get_next_recording_filename(){
  * PLAYER *
  **********/
 
-static void player_reset_input(player_t *player){
-    for(int i = 0; i < PLAYER_KEYS; i++){
-        player->key_isdown[i] = false;
-        player->key_wasdown[i] = false;
-        player->key_wentdown[i] = false;
-    }
-}
-
 void player_cleanup(player_t *player){
     stateset_cleanup(&player->stateset);
     player_recording_cleanup(&player->recording);
@@ -314,9 +319,9 @@ ok:
 
 void player_keydown(player_t *player, int key_i){
     if(key_i < 0 || key_i >= PLAYER_KEYS)return;
-    player->key_isdown[key_i] = true;
-    player->key_wasdown[key_i] = true;
-    player->key_wentdown[key_i] = true;
+    player->keyinfo.isdown[key_i] = true;
+    player->keyinfo.wasdown[key_i] = true;
+    player->keyinfo.wentdown[key_i] = true;
 
     if(player->recording.action == 2){
         /* record */
@@ -339,7 +344,7 @@ void player_keydown(player_t *player, int key_i){
 
 void player_keyup(player_t *player, int key_i){
     if(key_i < 0 || key_i >= PLAYER_KEYS)return;
-    player->key_isdown[key_i] = false;
+    player->keyinfo.isdown[key_i] = false;
 
     if(player->recording.action == 2){
         /* record */
@@ -426,9 +431,9 @@ static int player_match_rule(player_t *player, hexmap_t *map,
 
             int kstate_i = cond->u.key.kstate;
             bool *kstate =
-                kstate_i == 0? player->key_isdown:
-                kstate_i == 1? player->key_wasdown:
-                kstate_i == 2? player->key_wentdown:
+                kstate_i == 0? player->keyinfo.isdown:
+                kstate_i == 1? player->keyinfo.wasdown:
+                kstate_i == 2? player->keyinfo.wentdown:
                 NULL;
             if(kstate == NULL){
                 fprintf(stderr, "kstate out of range: %i", kstate_i);
@@ -534,9 +539,9 @@ int player_step(player_t *player, hexmap_t *map){
             for(int i = 0; i < PLAYER_KEYS; i++)printf("%i", keys[i]); \
             printf("]"); \
         }
-        DEBUG_PRINT_KEYS(player->key_isdown)
-        DEBUG_PRINT_KEYS(player->key_wasdown)
-        DEBUG_PRINT_KEYS(player->key_wentdown)
+        DEBUG_PRINT_KEYS(player->keyinfo.isdown)
+        DEBUG_PRINT_KEYS(player->keyinfo.wasdown)
+        DEBUG_PRINT_KEYS(player->keyinfo.wentdown)
         #undef DEBUG_PRINT_KEYS
         printf("\n");
     }
@@ -567,8 +572,8 @@ int player_step(player_t *player, hexmap_t *map){
 
         /* start of new frame, no keys have gone down yet. */
         for(int i = 0; i < PLAYER_KEYS; i++){
-            player->key_wasdown[i] = player->key_isdown[i];
-            player->key_wentdown[i] = false;}
+            player->keyinfo.wasdown[i] = player->keyinfo.isdown[i];
+            player->keyinfo.wentdown[i] = false;}
     }
     return 0;
 }
@@ -632,7 +637,7 @@ int player_restart_recording(player_t *player, bool hard){
     rec->i = 0;
     rec->wait = 0;
 
-    player_reset_input(player);
+    player_keyinfo_reset(&player->keyinfo);
     player_set_state(player, rec->state_name);
 
     vec_cpy(MAX_VEC_DIMS, player->pos, rec->pos0);
@@ -809,7 +814,7 @@ int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard){
     player->frame_i = 0;
     player->cooldown = 0;
 
-    player_reset_input(player);
+    player_keyinfo_reset(&player->keyinfo);
 
     return 0;
 }

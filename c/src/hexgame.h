@@ -13,6 +13,26 @@
 #include "array.h"
 
 
+/*******************
+ * PLAYER KEY INFO *
+ *******************/
+
+#define PLAYER_KEY_U  0
+#define PLAYER_KEY_D  1
+#define PLAYER_KEY_L  2
+#define PLAYER_KEY_R  3
+#define PLAYER_KEYS   4
+
+typedef struct player_keyinfo {
+    bool isdown[PLAYER_KEYS];
+    bool wasdown[PLAYER_KEYS];
+    bool wentdown[PLAYER_KEYS];
+} player_keyinfo_t;
+
+void player_keyinfo_reset(player_keyinfo_t *info);
+
+
+
 /********************
  * PLAYER RECORDING *
  ********************/
@@ -29,6 +49,8 @@ typedef struct player_recording {
     vec_t pos0;
     rot_t rot0;
     bool turn0;
+
+    player_keyinfo_t keyinfo;
 
     int i;
     int size;
@@ -49,21 +71,14 @@ int player_recording_load(player_recording_t *rec, const char *filename,
  * PLAYER *
  **********/
 
-#define PLAYER_KEY_U  0
-#define PLAYER_KEY_D  1
-#define PLAYER_KEY_L  2
-#define PLAYER_KEY_R  3
-#define PLAYER_KEYS   4
-
 typedef struct player {
     vec_t respawn_pos;
     vec_t pos;
     rot_t rot;
     bool turn;
     SDL_Keycode key_code[PLAYER_KEYS];
-    bool key_isdown[PLAYER_KEYS];
-    bool key_wasdown[PLAYER_KEYS];
-    bool key_wentdown[PLAYER_KEYS];
+
+    player_keyinfo_t keyinfo;
 
     stateset_t stateset;
     state_t *state;
