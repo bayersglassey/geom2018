@@ -157,3 +157,25 @@ Instead of "import" in .fus files, we should maybe add "require", or anyway
     imports should be idempotent.
 So all you do is specify worldmap, and it loads rgraphs as required.
 
+
+July 12, 2018:
+--------------
+
+hexcollmap "parts":
+    - need to realloc collmap1 as necessary for collmap2 to fit.
+        and/or need '.' to affect boundary.
+    - need to add tile_c 'x', it's invisible like ' ', but in hexcollmap_draw
+        we only check for ' ' when deciding whether to draw tile_c.
+        (So 'x' will be drawn over solid tiles.)
+     - need a reasonable way to specify rotations/flips.
+        "^^^"?.. "^1", "^2"?.. "1", "2"?..
+        The latter is nicest, but would require changing all current "0", "1"
+        to "a", "b" or similar.
+            -> maybe just do that.
+    - maybe below "parts" and "collmap" we can have a "draw" section where
+        we specify collmap filenames and coordinates.
+        It can reuse existing hexcollmap_draw.
+        The coordinates can use int_fancy.
+        We can add a "randint" thing to int_fancy.
+        And then we will have Wilderness.
+
