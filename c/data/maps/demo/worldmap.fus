@@ -23,14 +23,14 @@ submaps:
                 pos: (2 15)
                 camera: (5 -5)
                 mapper: ("triple")
-                tileset: "data/maps/demo/tiles/start.fus"
+                tileset: "data/maps/demo/tiles/shiny.fus"
                 submaps:
                     :
                         file: "data/maps/demo/start4.fus"
                         pos: (19 6)
                         camera: (5 5)
                         mapper: ("quadruple")
-                        tileset: "data/maps/demo/tiles/start.fus"
+                        tileset: "data/maps/demo/tiles/shiny.fus"
                     :
                         file: "data/maps/demo/vines.fus"
                         pos: (-4 2)
@@ -78,6 +78,7 @@ submaps:
                         pos: eval: (13 1) + (18 8)
                         camera: (0 5)
                         mapper: ("triple")
+                        tileset: "data/maps/demo/tiles/shiny.fus"
 
 
     :
