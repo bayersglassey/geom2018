@@ -102,7 +102,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 
     {
         /* player 0 */
-        ARRAY_PUSH_NEW(player_t, app->hexgame, players, player)
+        ARRAY_PUSH_NEW(player_t, app->hexgame.players, player)
         err = player_init(player, &app->hexmap,
             strdup(app->stateset_filename), NULL, 0, spawn);
         if(err)return err;
@@ -150,7 +150,7 @@ int test_app_process_console_input(test_app_t *app){
         console_write_msg(&app->console, "Try F5\n");
         return 0;
     }else if(fus_lexer_got(&lexer, "rem_players")){
-        ARRAY_FREE(player_t, app->hexgame, players, player_cleanup)
+        ARRAY_FREE(player_t, app->hexgame.players, player_cleanup)
     }else if(fus_lexer_got(&lexer, "add_player")){
         char *stateset_filename;
 
@@ -164,7 +164,7 @@ int test_app_process_console_input(test_app_t *app){
         }
 
         int player_i = app->hexgame.players_len;
-        ARRAY_PUSH_NEW(player_t, app->hexgame, players, player)
+        ARRAY_PUSH_NEW(player_t, app->hexgame.players, player)
         err = player_init(player, &app->hexmap, stateset_filename, NULL,
             player_i, app->hexgame.map->spawn);
         if(err)return err;

@@ -89,7 +89,7 @@ int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
         goto ok;
     }
 
-    ARRAY_PUSH_NEW(palettemapper_t, *prend, palmappers, _palmapper)
+    ARRAY_PUSH_NEW(palettemapper_t, prend->palmappers, _palmapper)
     palmapper = _palmapper;
     err = palettemapper_init(palmapper, strdup(name), -1);
     if(err)return err;
@@ -646,7 +646,7 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
         animation_type, n_frames);
     if(err)return err;
 
-    ARRAY_PUSH(rendergraph_t, *prend, rendergraphs, rgraph)
+    ARRAY_PUSH(rendergraph_t, prend->rendergraphs, rgraph)
 
     while(1){
         if(fus_lexer_got(lexer, ")")){
@@ -785,7 +785,7 @@ int fus_lexer_get_mapper(fus_lexer_t *lexer,
     err = prismelmapper_init(mapper, name, prend->space, solid);
     if(err)return err;
 
-    ARRAY_PUSH(prismelmapper_t, *prend, mappers, mapper)
+    ARRAY_PUSH(prismelmapper_t, prend->mappers, mapper)
 
     err = fus_lexer_expect_vec(lexer, prend->space, mapper->unit);
     if(err)return err;

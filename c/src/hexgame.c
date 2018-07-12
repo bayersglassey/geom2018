@@ -877,7 +877,7 @@ int player_recording_step(player_t *player){
 
 
 void hexgame_cleanup(hexgame_t *game){
-    ARRAY_FREE(player_t, *game, players, player_cleanup)
+    ARRAY_FREE(player_t, game->players, player_cleanup)
 }
 
 int hexgame_init(hexgame_t *game, hexmap_t *map, char *respawn_filename){
@@ -889,7 +889,7 @@ int hexgame_init(hexgame_t *game, hexmap_t *map, char *respawn_filename){
     vec_zero(map->space->dims, game->camera_pos);
     game->camera_rot = 0;
     game->cur_submap = NULL;
-    ARRAY_INIT(*game, players)
+    ARRAY_INIT(game->players)
     return 0;
 }
 
@@ -912,7 +912,7 @@ int hexgame_load_player_recording(hexgame_t *game, const char *filename,
 ){
     int err;
 
-    ARRAY_PUSH_NEW(player_t, *game, players, player)
+    ARRAY_PUSH_NEW(player_t, game->players, player)
     err = player_init(player, game->map, NULL, NULL,
         -1, game->map->spawn);
     if(err)return err;

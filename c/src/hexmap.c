@@ -48,16 +48,16 @@ static int _rem(int x, int y){
 
 void hexmap_tileset_cleanup(hexmap_tileset_t *tileset){
     free(tileset->name);
-    ARRAY_FREE(hexmap_tileset_entry_t, *tileset, vert_entries, (void))
-    ARRAY_FREE(hexmap_tileset_entry_t, *tileset, edge_entries, (void))
-    ARRAY_FREE(hexmap_tileset_entry_t, *tileset, face_entries, (void))
+    ARRAY_FREE(hexmap_tileset_entry_t, tileset->vert_entries, (void))
+    ARRAY_FREE(hexmap_tileset_entry_t, tileset->edge_entries, (void))
+    ARRAY_FREE(hexmap_tileset_entry_t, tileset->face_entries, (void))
 }
 
 int hexmap_tileset_init(hexmap_tileset_t *tileset, char *name){
     tileset->name = name;
-    ARRAY_INIT(*tileset, vert_entries)
-    ARRAY_INIT(*tileset, edge_entries)
-    ARRAY_INIT(*tileset, face_entries)
+    ARRAY_INIT(tileset->vert_entries)
+    ARRAY_INIT(tileset->edge_entries)
+    ARRAY_INIT(tileset->face_entries)
     return 0;
 }
 
@@ -102,8 +102,8 @@ static int hexmap_tileset_parse(hexmap_tileset_t *tileset,
                 fprintf(stderr, "Couldn't find shape: %s\n", name); \
                 free(name); return 2;} \
             free(name); \
-            ARRAY_PUSH_NEW(hexmap_tileset_entry_t, *tileset, \
-                TYPE##_entries, entry) \
+            ARRAY_PUSH_NEW(hexmap_tileset_entry_t, \
+                tileset->TYPE##_entries, entry) \
             entry->tile_c = tile_c; \
             entry->rgraph = rgraph; \
             err = fus_lexer_expect(lexer, ")"); \
@@ -659,9 +659,9 @@ bool hexcollmap_elem_is_solid(hexcollmap_elem_t *elem){
 void hexmap_cleanup(hexmap_t *map){
     free(map->name);
 
-    ARRAY_FREE(hexmap_submap_t, *map, submaps, hexmap_submap_cleanup)
+    ARRAY_FREE(hexmap_submap_t, map->submaps, hexmap_submap_cleanup)
 
-    ARRAY_FREE(char, *map, recording_filenames, (void))
+    ARRAY_FREE(char, map->recording_filenames, (void))
 }
 
 int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
@@ -676,9 +676,9 @@ int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
     vec_cpy(prend->space->dims, map->unit, unit);
     vec_zero(space->dims, map->spawn);
 
-    ARRAY_INIT(*map, submaps)
+    ARRAY_INIT(map->submaps)
 
-    ARRAY_INIT(*map, recording_filenames)
+    ARRAY_INIT(map->recording_filenames)
     return 0;
 }
 
@@ -887,7 +887,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
     }
 
     if(submap_filename != NULL){
-        ARRAY_PUSH_NEW(hexmap_submap_t, *map, submaps, submap)
+        ARRAY_PUSH_NEW(hexmap_submap_t, map->submaps, submap)
         err = hexmap_submap_init(map, submap, strdup(submap_filename), pos,
             camera_type, camera_pos, mapper, palette_filename, tileset_filename);
         if(err)return err;
@@ -916,7 +916,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
             if(err)return err;
             err = fus_lexer_expect(lexer, ")");
             if(err)return err;
-            ARRAY_PUSH(char, *map, recording_filenames,
+            ARRAY_PUSH(char, map->recording_filenames,
                 recording_filename)
         }
         err = fus_lexer_next(lexer);
@@ -1081,7 +1081,7 @@ int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap){
     should disable bitmap caching for it (somehow). */
     int n_frames = 36;
 
-    ARRAY_PUSH_NEW(rendergraph_t, *prend, rendergraphs, rgraph)
+    ARRAY_PUSH_NEW(rendergraph_t, prend->rendergraphs, rgraph)
     err = rendergraph_init(rgraph, strdup(map->name), prend,
         rendergraph_animation_type_default,
         n_frames);

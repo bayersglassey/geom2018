@@ -140,7 +140,7 @@ int palette_init(palette_t *pal, char *name){
         entry->frame_i = 0;
         entry->n_frames = 1;
         entry->frame_offset = 0;
-        ARRAY_INIT(*entry, keyframes)
+        ARRAY_INIT(entry->keyframes)
     }
     return 0;
 }
@@ -149,7 +149,7 @@ void palette_cleanup(palette_t *pal){
     free(pal->name);
     for(int i = 0; i < 256; i++){
         palette_entry_t *entry = &pal->entries[i];
-        ARRAY_FREE(palette_entry_keyframe_t, *entry, keyframes, (void))
+        ARRAY_FREE(palette_entry_keyframe_t, entry->keyframes, (void))
     }
 }
 
@@ -285,8 +285,8 @@ static int palette_parse(palette_t *pal, fus_lexer_t *lexer){
                 err = fus_lexer_get(lexer, "(");
                 if(err)return err;
 
-                ARRAY_PUSH_NEW(palette_entry_keyframe_t, *entry,
-                    keyframes, keyframe)
+                ARRAY_PUSH_NEW(palette_entry_keyframe_t, entry->keyframes,
+                    keyframe)
                 err = fus_lexer_expect(lexer, "(");
                 if(err)return err;
                 err = fus_lexer_next(lexer);
@@ -318,8 +318,8 @@ static int palette_parse(palette_t *pal, fus_lexer_t *lexer){
                     entry_i);
                 return 2;}
         }else{
-            ARRAY_PUSH_NEW(palette_entry_keyframe_t, *entry,
-                keyframes, keyframe)
+            ARRAY_PUSH_NEW(palette_entry_keyframe_t, entry->keyframes,
+                keyframe)
             keyframe->n_frames = 1;
             err = palette_parse_color(lexer, &keyframe->color);
             if(err)return err;
@@ -385,7 +385,7 @@ void prismel_cleanup(prismel_t *prismel){
 
     for(int i = 0; i < prismel->n_images; i++){
         prismel_image_t *image = &prismel->images[i];
-        ARRAY_FREE(prismel_image_line_t, *image, lines, (void))
+        ARRAY_FREE(prismel_image_line_t, image->lines, (void))
     }
     free(prismel->images);
 }
@@ -399,13 +399,13 @@ int prismel_create_images(prismel_t *prismel, vecspace_t *space){
 
     for(int i = 0; i < n_images; i++){
         prismel_image_t *image = &images[i];
-        ARRAY_INIT(*image, lines)
+        ARRAY_INIT(image->lines)
     }
     return 0;
 }
 
 int prismel_image_push_line(prismel_image_t *image, int x, int y, int w){
-    ARRAY_PUSH_NEW(prismel_image_line_t, *image, lines, line)
+    ARRAY_PUSH_NEW(prismel_image_line_t, image->lines, line)
     line->x = x;
     line->y = y;
     line->w = w;
@@ -441,20 +441,20 @@ void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box,
 int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space){
     renderer->n_textures = 0;
     renderer->space = space;
-    ARRAY_INIT(*renderer, palmappers)
-    ARRAY_INIT(*renderer, prismels)
-    ARRAY_INIT(*renderer, rendergraphs)
-    ARRAY_INIT(*renderer, mappers)
+    ARRAY_INIT(renderer->palmappers)
+    ARRAY_INIT(renderer->prismels)
+    ARRAY_INIT(renderer->rendergraphs)
+    ARRAY_INIT(renderer->mappers)
     return 0;
 }
 
 void prismelrenderer_cleanup(prismelrenderer_t *renderer){
-    ARRAY_FREE(palettemapper_t, *renderer, palmappers,
+    ARRAY_FREE(palettemapper_t, renderer->palmappers,
         palettemapper_cleanup)
-    ARRAY_FREE(prismel_t, *renderer, prismels, prismel_cleanup)
-    ARRAY_FREE(rendergraph_t, *renderer, rendergraphs,
+    ARRAY_FREE(prismel_t, renderer->prismels, prismel_cleanup)
+    ARRAY_FREE(rendergraph_t, renderer->rendergraphs,
         rendergraph_cleanup)
-    ARRAY_FREE(prismelmapper_t, *renderer, mappers,
+    ARRAY_FREE(prismelmapper_t, renderer->mappers,
         prismelmapper_cleanup)
 }
 
@@ -515,7 +515,7 @@ int prismelrenderer_push_prismel(prismelrenderer_t *renderer, char *name,
     prismel_t **prismel_ptr
 ){
     int err;
-    ARRAY_PUSH_NEW(prismel_t, *renderer, prismels, prismel)
+    ARRAY_PUSH_NEW(prismel_t, renderer->prismels, prismel)
     if(!name){name = generate_indexed_name("prismel",
         renderer->prismels_len - 1);}
     err = prismel_init(prismel, name, renderer->space);
@@ -542,7 +542,7 @@ int prismelrenderer_get_solid_palettemapper(prismelrenderer_t *prend,
     palettemapper_t *palmapper = prismelrenderer_get_palmapper(
         prend, name);
     if(palmapper == NULL){
-        ARRAY_PUSH_NEW(palettemapper_t, *prend, palmappers, _palmapper)
+        ARRAY_PUSH_NEW(palettemapper_t, prend->palmappers, _palmapper)
         palmapper = _palmapper;
         err = palettemapper_init(palmapper, name, color);
         if(err)return err;
@@ -774,9 +774,9 @@ const int rendergraph_n_frames_default = 1;
 void rendergraph_cleanup(rendergraph_t *rendergraph){
     free(rendergraph->name);
 
-    ARRAY_FREE(prismel_trf_t, *rendergraph, prismel_trfs,
+    ARRAY_FREE(prismel_trf_t, rendergraph->prismel_trfs,
         (void))
-    ARRAY_FREE(rendergraph_trf_t, *rendergraph, rendergraph_trfs,
+    ARRAY_FREE(rendergraph_trf_t, rendergraph->rendergraph_trfs,
         (void))
 
     for(int i = 0; i < rendergraph->n_bitmaps; i++){
@@ -800,8 +800,8 @@ int rendergraph_init(rendergraph_t *rendergraph, char *name,
     rendergraph->name = name;
     rendergraph->prend = prend;
     rendergraph->space = space;
-    ARRAY_INIT(*rendergraph, prismel_trfs)
-    ARRAY_INIT(*rendergraph, rendergraph_trfs)
+    ARRAY_INIT(rendergraph->prismel_trfs)
+    ARRAY_INIT(rendergraph->rendergraph_trfs)
 
     rendergraph->animation_type = animation_type;
     rendergraph->n_frames = n_frames;
@@ -904,7 +904,7 @@ int rendergraph_create_bitmaps(rendergraph_t *rendergraph){
 int rendergraph_push_rendergraph_trf(rendergraph_t *rendergraph,
     rendergraph_trf_t **rendergraph_trf_ptr
 ){
-    ARRAY_PUSH_NEW(rendergraph_trf_t, *rendergraph, rendergraph_trfs,
+    ARRAY_PUSH_NEW(rendergraph_trf_t, rendergraph->rendergraph_trfs,
         rendergraph_trf)
     rendergraph_trf->frame_start = 0;
     rendergraph_trf->frame_len = -1;
@@ -918,7 +918,7 @@ int rendergraph_push_rendergraph_trf(rendergraph_t *rendergraph,
 int rendergraph_push_prismel_trf(rendergraph_t *rendergraph,
     prismel_trf_t **prismel_trf_ptr
 ){
-    ARRAY_PUSH_NEW(prismel_trf_t, *rendergraph, prismel_trfs,
+    ARRAY_PUSH_NEW(prismel_trf_t, rendergraph->prismel_trfs,
         prismel_trf)
     prismel_trf->frame_start = 0;
     prismel_trf->frame_len = -1;
@@ -1255,11 +1255,11 @@ int rendergraph_render(rendergraph_t *rgraph,
 void prismelmapper_cleanup(prismelmapper_t *mapper){
     free(mapper->name);
 
-    ARRAY_FREE(prismelmapper_entry_t, *mapper, entries,
+    ARRAY_FREE(prismelmapper_entry_t, mapper->entries,
         (void))
-    ARRAY_FREE(prismelmapper_application_t, *mapper, applications,
+    ARRAY_FREE(prismelmapper_application_t, mapper->applications,
         (void))
-    ARRAY_FREE(prismelmapper_mapplication_t, *mapper, mapplications,
+    ARRAY_FREE(prismelmapper_mapplication_t, mapper->mapplications,
         (void))
 }
 
@@ -1270,9 +1270,9 @@ int prismelmapper_init(prismelmapper_t *mapper, char *name,
     mapper->solid = solid;
     mapper->space = space;
     vec_zero(space->dims, mapper->unit);
-    ARRAY_INIT(*mapper, entries)
-    ARRAY_INIT(*mapper, applications)
-    ARRAY_INIT(*mapper, mapplications)
+    ARRAY_INIT(mapper->entries)
+    ARRAY_INIT(mapper->applications)
+    ARRAY_INIT(mapper->mapplications)
     return 0;
 }
 
@@ -1321,7 +1321,7 @@ void prismelmapper_dump(prismelmapper_t *mapper, FILE *f, int n_spaces){
 int prismelmapper_push_entry(prismelmapper_t *mapper,
     prismel_t *prismel, rendergraph_t *rendergraph
 ){
-    ARRAY_PUSH_NEW(prismelmapper_entry_t, *mapper, entries, entry)
+    ARRAY_PUSH_NEW(prismelmapper_entry_t, mapper->entries, entry)
     entry->prismel = prismel;
     entry->rendergraph = rendergraph;
     return 0;
@@ -1448,7 +1448,7 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
 
     /* Add the resulting_rgraph to the prismelrenderer, makes for
     easier debugging */
-    ARRAY_PUSH(rendergraph_t, *prend, rendergraphs,
+    ARRAY_PUSH(rendergraph_t, prend->rendergraphs,
         resulting_rgraph)
 
     /* Success! */
@@ -1519,7 +1519,7 @@ int prismelmapper_apply_to_mapper(prismelmapper_t *mapper,
 
     /* Add the resulting_mapper to the prismelrenderer, makes for
     easier debugging */
-    ARRAY_PUSH(prismelmapper_t, *prend, mappers,
+    ARRAY_PUSH(prismelmapper_t, prend->mappers,
         resulting_mapper)
 
     /* Success! */
@@ -1530,7 +1530,7 @@ int prismelmapper_apply_to_mapper(prismelmapper_t *mapper,
 int prismelmapper_push_application(prismelmapper_t *mapper,
     rendergraph_t *mapped_rgraph, rendergraph_t *resulting_rgraph
 ){
-    ARRAY_PUSH_NEW(prismelmapper_application_t, *mapper, applications,
+    ARRAY_PUSH_NEW(prismelmapper_application_t, mapper->applications,
         application)
     application->mapped_rgraph = mapped_rgraph;
     application->resulting_rgraph = resulting_rgraph;
@@ -1540,7 +1540,7 @@ int prismelmapper_push_application(prismelmapper_t *mapper,
 int prismelmapper_push_mapplication(prismelmapper_t *mapper,
     prismelmapper_t *mapped_mapper, prismelmapper_t *resulting_mapper
 ){
-    ARRAY_PUSH_NEW(prismelmapper_mapplication_t, *mapper, mapplications,
+    ARRAY_PUSH_NEW(prismelmapper_mapplication_t, mapper->mapplications,
         mapplication)
     mapplication->mapped_mapper = mapped_mapper;
     mapplication->resulting_mapper = resulting_mapper;
@@ -1584,14 +1584,14 @@ int palettemapper_init(palettemapper_t *palmapper, char *name, int color){
     }else{
         for(int i = 1; i < 256; i++)palmapper->table[i] = color;
     }
-    ARRAY_INIT(*palmapper, pmapplications)
+    ARRAY_INIT(palmapper->pmapplications)
     return 0;
 }
 
 void palettemapper_cleanup(palettemapper_t *palmapper){
     free(palmapper->name);
-    ARRAY_FREE(palettemapper_pmapplication_t, *palmapper,
-        pmapplications, (void))
+    ARRAY_FREE(palettemapper_pmapplication_t, palmapper->pmapplications,
+        (void))
 }
 
 int palettemapper_apply_to_palettemapper(palettemapper_t *palmapper,
@@ -1634,8 +1634,7 @@ int palettemapper_apply_to_palettemapper(palettemapper_t *palmapper,
 
     /* Add the resulting_palmapper to the prismelrenderer, makes for
     easier debugging */
-    ARRAY_PUSH(palettemapper_t, *prend, palmappers,
-        resulting_palmapper)
+    ARRAY_PUSH(palettemapper_t, prend->palmappers, resulting_palmapper)
 
     /* Success! */
     *palmapper_ptr = resulting_palmapper;
@@ -1645,7 +1644,7 @@ int palettemapper_apply_to_palettemapper(palettemapper_t *palmapper,
 int palettemapper_push_pmapplication(palettemapper_t *mapper,
     palettemapper_t *mapped_mapper, palettemapper_t *resulting_mapper
 ){
-    ARRAY_PUSH_NEW(palettemapper_pmapplication_t, *mapper, pmapplications,
+    ARRAY_PUSH_NEW(palettemapper_pmapplication_t, mapper->pmapplications,
         pmapplication)
     pmapplication->mapped_mapper = mapped_mapper;
     pmapplication->resulting_mapper = resulting_mapper;
