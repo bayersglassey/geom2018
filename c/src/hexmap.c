@@ -174,6 +174,19 @@ rendergraph_t *hexmap_tileset_get_rgraph_face(hexmap_tileset_t *tileset,
  * HEXCOLLMAP *
  **************/
 
+int hexcollmap_part_init(hexcollmap_part_t *part,
+    char part_c, char *filename
+){
+    part->part_c = part_c;
+    part->filename = filename;
+    return 0;
+}
+
+void hexcollmap_part_cleanup(hexcollmap_part_t *part){
+    free(part->filename);
+}
+
+
 void hexcollmap_cleanup(hexcollmap_t *collmap){
     free(collmap->tiles);
 }
@@ -250,7 +263,7 @@ static void get_map_coords(int x, int y, char c,
 }
 
 static int hexcollmap_parse_lines(hexcollmap_t *collmap,
-    char **lines, int lines_len
+    char **lines, int lines_len, hexcollmap_part_t **parts, int parts_len
 ){
     int err;
 
@@ -380,21 +393,21 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
 
                 if(tilebucket_active){
                     /* Get next non-' ' character in current tile bucket. */
-                    char c;
-                    while(c = *tilebucket, c == ' ')tilebucket++;
-                    if(c == ']'){
+                    char c2;
+                    while(c2 = *tilebucket, c2 == ' ')tilebucket++;
+                    if(c2 == ']'){
                         tilebucket_active = false;
-                    }else if(!isprint(c)){
+                    }else if(!isprint(c2)){
                         fprintf(stderr,
                             "Hexcollmap line %i, char %i: char %li: ",
                             y+1, x+1, tilebucket-line+1);
-                        if(c == '\0'){
+                        if(c2 == '\0'){
                             fprintf(stderr, "Hit end of line\n");}
                         else{fprintf(stderr,
-                            "Hit unprintable character: %x\n", c);}
+                            "Hit unprintable character: %x\n", c2);}
                         return 2;
                     }else{
-                        tile_c = c;
+                        tile_c = c2;
                         tilebucket++;
                     }
                 }
@@ -411,37 +424,81 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                     tile->face[is_face1? 1: 0].tile_c = tile_c;
                 }
             }else if(c == '%' || c == '?'){
-                /* Activate next tile bucket. */
 
-                char c;
+                /* Find next tile bucket. */
+                char c2;
                 if(tilebucket == NULL){
                     tilebucket = &line[x+1];
-                    while(c = *tilebucket, c != '\0' && c != '[')tilebucket++;
-                    if(c != '['){
+                    while(c2 = *tilebucket, c2 != '\0' && c2 != '['){
+                        tilebucket++;}
+                    if(c2 != '['){
                         fprintf(stderr,
                             "Hexcollmap line %i, char %i: ", y+1, x+1);
                         fprintf(stderr, "Didn't find '[' in line\n");
                         return 2;}
                     tilebucket++;
                 }else{
-                    while(c = *tilebucket, c == ' ')tilebucket++;
-                    if(c != ']'){
+                    while(c2 = *tilebucket, c2 == ' ')tilebucket++;
+                    if(c2 != ']'){
                         fprintf(stderr,
                             "Hexcollmap line %i, char %i: char %li: ",
                             y+1, x+1, tilebucket-line+1);
-                        fprintf(stderr, "Expected ']', got '%c'\n", c);
+                        fprintf(stderr, "Expected ']', got '%c'\n", c2);
                         return 2;}
                     tilebucket++;
-                    while(c = *tilebucket, c == ' ')tilebucket++;
-                    if(c != '['){
+                    while(c2 = *tilebucket, c2 == ' ')tilebucket++;
+                    if(c2 != '['){
                         fprintf(stderr,
                             "Hexcollmap line %i, char %i: char %li: ",
                             y+1, x+1, tilebucket-line+1);
-                        fprintf(stderr, "Expected '[', got '%c'\n", c);
+                        fprintf(stderr, "Expected '[', got '%c'\n", c2);
                         return 2;}
                     tilebucket++;
                 }
-                tilebucket_active = true;
+
+                if(c == '%'){
+                    /* Activate the bucket we found. */
+                    tilebucket_active = true;
+                }else if(c == '?'){
+                    /* The bucket we found should contain 1 part reference.
+                    Consume it from the bucket & load a collmap from the file
+                    it names. */
+
+                    /* Get next non-' ' character in current tile bucket. */
+                    char c2;
+                    while(c2 = *tilebucket, c2 == ' ')tilebucket++;
+                    if(c == ']' || !isprint(c2)){
+                        fprintf(stderr,
+                            "Hexcollmap line %i, char %i: char %li: ",
+                            y+1, x+1, tilebucket-line+1);
+                        if(c2 == '\0'){
+                            fprintf(stderr, "Hit end of line\n");}
+                        else if(c2 == ']'){
+                            fprintf(stderr, "Hit early ']'\n");}
+                        else{fprintf(stderr,
+                            "Hit unprintable character: %x\n", c2);}
+                        return 2;
+                    }
+
+                    tilebucket++;
+
+                    char *filename = NULL;
+                    for(int i = 0; i < parts_len; i++){
+                        hexcollmap_part_t *part = parts[i];
+                        if(part->part_c == c2){
+                            filename = part->filename; break;}
+                    }
+
+                    if(filename == NULL){
+                        fprintf(stderr,
+                            "Hexcollmap line %i, char %i: char %li: "
+                            "part not found: %c\n",
+                            y+1, x+1, tilebucket-line+1, c2);
+                        return 2;}
+
+                    printf("FOUND PART: %c -> %s\n", c2, filename);
+                }
+
             }else if(c == '['){
                 break;
             }
@@ -461,6 +518,9 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
     bool just_coll
 ){
     int err;
+
+    ARRAY_DECL(hexcollmap_part_t, parts)
+    ARRAY_INIT(parts)
 
     if(!just_coll){
         err = fus_lexer_next(lexer);
@@ -490,9 +550,9 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
                     char *filename;
                     err = fus_lexer_expect_str(lexer, &filename);
                     if(err)return err;
-                    printf("HEXCOLLMAP PART: %c -> %s\n",
-                        part_c, filename);
-                    free(filename);
+                    ARRAY_PUSH_NEW(hexcollmap_part_t, parts, part)
+                    err = hexcollmap_part_init(part, part_c, filename);
+                    if(err)return err;
                 }
                 err = fus_lexer_expect(lexer, ")");
                 if(err)return err;
@@ -543,7 +603,7 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
 
     /* parse lines */
     err = hexcollmap_parse_lines(collmap,
-        collmap_lines, collmap_lines_len);
+        collmap_lines, collmap_lines_len, parts, parts_len);
     if(err){
         fus_lexer_err_info(lexer);
         fprintf(stderr, "Couldn't parse hexcollmap lines\n");
@@ -559,6 +619,9 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
         free(collmap_lines[i]);
         collmap_lines[i] = NULL;}
     free(collmap_lines);
+
+
+    ARRAY_FREE(hexcollmap_part_t, parts, hexcollmap_part_cleanup)
 
     return 0;
 }

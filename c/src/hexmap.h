@@ -61,6 +61,11 @@ typedef struct hexcollmap_tile {
     hexcollmap_elem_t face[2];
 } hexcollmap_tile_t;
 
+typedef struct hexcollmap_part {
+    char part_c;
+    char *filename;
+} hexcollmap_part_t;
+
 typedef struct hexcollmap {
     int w;
     int h;
@@ -70,6 +75,10 @@ typedef struct hexcollmap {
     hexcollmap_tile_t *tiles;
 } hexcollmap_t;
 
+
+int hexcollmap_part_init(hexcollmap_part_t *part,
+    char part_c, char *filename);
+void hexcollmap_part_cleanup(hexcollmap_part_t *part);
 
 void hexcollmap_cleanup(hexcollmap_t *collmap);
 int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space);
