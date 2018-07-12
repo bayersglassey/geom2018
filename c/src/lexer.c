@@ -451,6 +451,22 @@ int fus_lexer_get_str(fus_lexer_t *lexer, char **s){
     return 0;
 }
 
+int fus_lexer_get_chr(fus_lexer_t *lexer, char *c){
+    int err;
+    char *s;
+    err = fus_lexer_get_str(lexer, &s);
+    if(err)return err;
+    if(strlen(s) != 1){
+        fus_lexer_err_info(lexer); fprintf(stderr,
+            "Expected chr, but got: ");
+        fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
+        return 2;
+    }
+    *c = s[0];
+    free(s);
+    return 0;
+}
+
 int fus_lexer_get_int(fus_lexer_t *lexer, int *i){
     if(!fus_lexer_got_int(lexer)){
         fus_lexer_err_info(lexer); fprintf(stderr,
@@ -580,6 +596,12 @@ int fus_lexer_expect_str(fus_lexer_t *lexer, char **s){
     int err = fus_lexer_next(lexer);
     if(err)return err;
     return fus_lexer_get_str(lexer, s);
+}
+
+int fus_lexer_expect_chr(fus_lexer_t *lexer, char *c){
+    int err = fus_lexer_next(lexer);
+    if(err)return err;
+    return fus_lexer_get_chr(lexer, c);
 }
 
 int fus_lexer_expect_int(fus_lexer_t *lexer, int *i){

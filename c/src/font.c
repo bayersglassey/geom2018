@@ -106,17 +106,12 @@ int font_parse(font_t *font, fus_lexer_t *lexer){
 
         if(fus_lexer_got(lexer, ")"))break;
 
-        char *char_name;
-        err = fus_lexer_get_str(lexer, &char_name);
+        char char_c;
+        err = fus_lexer_get_chr(lexer, &char_c);
         if(err)return err;
-        if(strlen(char_name) < 1){
-            fus_lexer_err_info(lexer);
-            fprintf(stderr, "Empty char name.\n");
-            return 2;}
 
         int char_x, char_y;
-        font_get_char_coords(font, char_name[0], &char_x, &char_y);
-        free(char_name);
+        font_get_char_coords(font, char_c, &char_x, &char_y);
 
         err = fus_lexer_expect(lexer, "(");
         if(err)return err;
