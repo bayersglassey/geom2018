@@ -262,6 +262,12 @@ static void get_map_coords(int x, int y, char c,
     if(is_face1_ptr != NULL)*is_face1_ptr = is_face1;
 }
 
+static int hexcollmap_draw(hexcollmap_t *collmap1, hexcollmap_t *collmap2,
+    int x, int y
+){
+    return 0;
+}
+
 static int hexcollmap_parse_lines(hexcollmap_t *collmap,
     char **lines, int lines_len, hexcollmap_part_t **parts, int parts_len
 ){
@@ -296,7 +302,7 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
             }else if(strchr(" .+/-\\*S%?", c) != NULL){
                 /* these are all fine */
             }else if(c == '['){
-                /* next line plz */
+                /* next line plz, "tilebuckets" don't affect the origin */
                 break;
             }else{
                 fprintf(stderr, "Line %i, char %i: unexpected character."
@@ -331,25 +337,41 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                 map_b = _max(map_b, my);
                 map_l = _min(map_l, mx);
                 map_r = _max(map_r, mx);
+            }else if(strchr(" .+/-\\*S%?()", c) != NULL){
+                /* these are all fine */
+            }else if(c == '['){
+                /* next line plz, "tilebuckets" don't affect bounds */
+                break;
             }
         }
     }
 
-    /* Intermission: Allocate map data */
+    /* Intermission: initialize collmap with empty tile data */
+    /* ...Allocate map data */
     int map_w = map_r - map_l + 1;
     int map_h = map_b - map_t + 1;
     int map_size = map_w * map_h;
     hexcollmap_tile_t *tiles = calloc(map_size, sizeof(*tiles));
     if(tiles == NULL)return 1;
-
-    /* Intermission: Initialize tile elements */
+    /* ...Initialize tile elements */
     for(int i = 0; i < map_size; i++){
         for(int j = 0; j < 1; j++)tiles[i].vert[j].tile_c = ' ';
         for(int j = 0; j < 3; j++)tiles[i].edge[j].tile_c = ' ';
         for(int j = 0; j < 2; j++)tiles[i].face[j].tile_c = ' ';
     }
+    /* ...Assign attributes */
+    collmap->ox = -map_l;
+    collmap->oy = -map_t;
+    collmap->w = map_w;
+    collmap->h = map_h;
+    collmap->tiles = tiles;
 
-    /* Iteration 3: The meat of it all */
+    /* Iterations 3 & 4: The meat of it all - parse tile data */
+    for(int iter_i = 0; iter_i < 2; iter_i++){
+        /* While iter_i == 0, we parse regular tile data.
+        While iter_i == 1, we parse "part references", that is, the '?'
+        character, which loads & draws other collmaps over the tile data
+        we parsed while iter_i == 0. */
     for(int y = 0; y < lines_len; y++){
         char *line = lines[y];
         int line_len = strlen(line);
@@ -375,12 +397,6 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
 
                 bool is_savepoint = c == 'S';
                 if(is_savepoint)c = '*';
-
-                get_map_coords(x-ox, y-oy, c,
-                    &mx, &my, &is_face1);
-                mx -= map_l;
-                my -= map_t;
-                hexcollmap_tile_t *tile = &tiles[my * map_w + mx];
 
                 char tile_c = is_savepoint? 'S': '0';
                     /* The default tile_c is '0'. We could make that
@@ -412,16 +428,24 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                     }
                 }
 
-                if(c == '+'){
-                    tile->vert[0].tile_c = tile_c;
-                }else if(c == '-'){
-                    tile->edge[0].tile_c = tile_c;
-                }else if(c == '/'){
-                    tile->edge[1].tile_c = tile_c;
-                }else if(c == '\\'){
-                    tile->edge[2].tile_c = tile_c;
-                }else if(c == '*'){
-                    tile->face[is_face1? 1: 0].tile_c = tile_c;
+                if(iter_i == 0){
+                    get_map_coords(x-ox, y-oy, c,
+                        &mx, &my, &is_face1);
+                    mx -= map_l;
+                    my -= map_t;
+                    hexcollmap_tile_t *tile = &tiles[my * map_w + mx];
+
+                    if(c == '+'){
+                        tile->vert[0].tile_c = tile_c;
+                    }else if(c == '-'){
+                        tile->edge[0].tile_c = tile_c;
+                    }else if(c == '/'){
+                        tile->edge[1].tile_c = tile_c;
+                    }else if(c == '\\'){
+                        tile->edge[2].tile_c = tile_c;
+                    }else if(c == '*'){
+                        tile->face[is_face1? 1: 0].tile_c = tile_c;
+                    }
                 }
             }else if(c == '%' || c == '?'){
 
@@ -460,57 +484,69 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                     /* Activate the bucket we found. */
                     tilebucket_active = true;
                 }else if(c == '?'){
-                    /* The bucket we found should contain 1 part reference.
-                    Consume it from the bucket & load a collmap from the file
-                    it names. */
+                    /* Load collmaps from the bucket we found and draw them
+                    onto current collmap. */
 
-                    /* Get next non-' ' character in current tile bucket. */
-                    char c2;
-                    while(c2 = *tilebucket, c2 == ' ')tilebucket++;
-                    if(c == ']' || !isprint(c2)){
-                        fprintf(stderr,
-                            "Hexcollmap line %i, char %i: char %li: ",
-                            y+1, x+1, tilebucket-line+1);
-                        if(c2 == '\0'){
-                            fprintf(stderr, "Hit end of line\n");}
-                        else if(c2 == ']'){
-                            fprintf(stderr, "Hit early ']'\n");}
-                        else{fprintf(stderr,
-                            "Hit unprintable character: %x\n", c2);}
-                        return 2;
+                    /* loop through all characters in tilebucket */
+                    while(1){
+                        /* Get next non-' ' character in current tile bucket. */
+                        char c2;
+                        while(c2 = *tilebucket, c2 == ' ')tilebucket++;
+
+                        if(c2 == ']')break;
+
+                        if(!isprint(c2)){
+                            fprintf(stderr,
+                                "Hexcollmap line %i, char %i: char %li: ",
+                                y+1, x+1, tilebucket-line+1);
+                            if(c2 == '\0'){
+                                fprintf(stderr, "Hit end of line\n");}
+                            else{fprintf(stderr,
+                                "Hit unprintable character: %x\n", c2);}
+                            return 2;
+                        }
+
+                        tilebucket++;
+
+                        if(iter_i == 1){
+                            /* Find part with given part_c */
+                            char *filename = NULL;
+                            for(int i = 0; i < parts_len; i++){
+                                hexcollmap_part_t *part = parts[i];
+                                if(part->part_c == c2){
+                                    filename = part->filename; break;}
+                            }
+
+                            if(filename == NULL){
+                                fprintf(stderr,
+                                    "Hexcollmap line %i, char %i: char %li: "
+                                    "part not found: %c\n",
+                                    y+1, x+1, tilebucket-line+1, c2);
+                                return 2;}
+
+                            printf("FOUND PART: %c -> %s\n", c2, filename);
+                            hexcollmap_t part_collmap;
+                            err = hexcollmap_init(&part_collmap, collmap->space);
+                            if(err)return err;
+                            err = hexcollmap_load(&part_collmap, filename);
+                            if(err)return err;
+                            err = hexcollmap_draw(collmap, &part_collmap, x, y);
+                            if(err)return err;
+                            hexcollmap_cleanup(&part_collmap);
+                        }
                     }
-
-                    tilebucket++;
-
-                    char *filename = NULL;
-                    for(int i = 0; i < parts_len; i++){
-                        hexcollmap_part_t *part = parts[i];
-                        if(part->part_c == c2){
-                            filename = part->filename; break;}
-                    }
-
-                    if(filename == NULL){
-                        fprintf(stderr,
-                            "Hexcollmap line %i, char %i: char %li: "
-                            "part not found: %c\n",
-                            y+1, x+1, tilebucket-line+1, c2);
-                        return 2;}
-
-                    printf("FOUND PART: %c -> %s\n", c2, filename);
                 }
 
             }else if(c == '['){
+                /* We hit a tilebucket, so no more regular tile data on
+                this line. Next plz! */
                 break;
             }
         }
     }
+    }
 
     /* OKAY */
-    collmap->ox = -map_l;
-    collmap->oy = -map_t;
-    collmap->w = map_w;
-    collmap->h = map_h;
-    collmap->tiles = tiles;
     return 0;
 }
 
