@@ -252,8 +252,10 @@ static void get_map_coords(int x, int y, char c,
 static int hexcollmap_parse_lines(hexcollmap_t *collmap,
     char **lines, int lines_len
 ){
-    /* We iterate through the lines 3 times!.. can that be improved?.. */
     int err;
+
+    /* NOTE: We iterate through the lines 3 times!..
+    can that be improved?.. */
 
     /* Iteration 1: Find origin */
     int ox = -1;
@@ -278,7 +280,7 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                 ox = x + 1;
                 oy = y;
                 x += 2;
-            }else if(strchr(" .+/-\\*S%", c) != NULL){
+            }else if(strchr(" .+/-\\*S%?", c) != NULL){
                 /* these are all fine */
             }else if(c == '['){
                 /* next line plz */
@@ -301,11 +303,14 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
         int line_len = strlen(line);
         for(int x = 0; x < line_len; x++){
             char c = line[x];
-            if(strchr("+/-\\*S", c) != NULL){
+            if(strchr("+/-\\*S?", c) != NULL){
                 int mx, my; bool is_face1;
 
                 /* savepoint is just a face */
                 if(c == 'S')c = '*';
+
+                /* part reference is just a vert */
+                if(c == '?')c = '+';
 
                 get_map_coords(x-ox, y-oy, c,
                     &mx, &my, &is_face1);
@@ -342,7 +347,13 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
             of the line, surrounded by square brackets, e.g. [1aq].
             While parsing a line, the '%' character indicates that we
             should find the next tile bucket; then, as we encounter
-            '-' '/' '\' '+' '*' characters, we will use */
+            '-' '/' '\' '+' '*' characters, we will use the characters
+            in the bucket one at a time as the tile_c character,
+            instead of the default tile_c.
+            While parsing a line, '?' works similarly to '%' except
+            that instead of modifying tile_c, it loads other collmaps
+            over this one.
+            TODO: Clarify this comment... */
 
         for(int x = 0; x < line_len; x++){
             char c = line[x];
@@ -399,7 +410,7 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                 }else if(c == '*'){
                     tile->face[is_face1? 1: 0].tile_c = tile_c;
                 }
-            }else if(c == '%'){
+            }else if(c == '%' || c == '?'){
                 /* Activate next tile bucket. */
 
                 char c;
@@ -446,8 +457,55 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
     return 0;
 }
 
-int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer){
+int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
+    bool just_coll
+){
     int err;
+
+    if(!just_coll){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+
+        if(fus_lexer_got(lexer, "parts")){
+            err = fus_lexer_expect(lexer, "(");
+            if(err)return err;
+            while(1){
+                err = fus_lexer_next(lexer);
+                if(err)return err;
+                if(fus_lexer_got(lexer, ")"))break;
+
+                char *name;
+                err = fus_lexer_get_str(lexer, &name);
+                if(err)return err;
+                if(strlen(name) != 1){
+                    fprintf(stderr, "Expected single character, got: %s\n",
+                        name);
+                    free(name); return 2;}
+                char part_c = name[0];
+                free(name);
+
+                err = fus_lexer_expect(lexer, "(");
+                if(err)return err;
+                {
+                    char *filename;
+                    err = fus_lexer_expect_str(lexer, &filename);
+                    if(err)return err;
+                    printf("HEXCOLLMAP PART: %c -> %s\n",
+                        part_c, filename);
+                    free(filename);
+                }
+                err = fus_lexer_expect(lexer, ")");
+                if(err)return err;
+            }
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+        }
+
+        err = fus_lexer_get(lexer, "collmap");
+        if(err)return err;
+        err = fus_lexer_expect(lexer, "(");
+        if(err)return err;
+    }
 
     /* set up dynamic array of lines */
     int collmap_lines_len = 0;
@@ -491,12 +549,34 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer){
         fprintf(stderr, "Couldn't parse hexcollmap lines\n");
         return err;}
 
+    if(!just_coll){
+        err = fus_lexer_get(lexer, ")");
+        if(err)return err;
+    }
+
     /* free lines and dynamic array thereof */
     for(int i = 0; i < collmap_lines_len; i++){
         free(collmap_lines[i]);
         collmap_lines[i] = NULL;}
     free(collmap_lines);
 
+    return 0;
+}
+
+int hexcollmap_load(hexcollmap_t *collmap, const char *filename){
+    int err;
+    fus_lexer_t lexer;
+
+    char *text = load_file(filename);
+    if(text == NULL)return 1;
+
+    err = fus_lexer_init(&lexer, text, filename);
+    if(err)return err;
+
+    err = hexcollmap_parse(collmap, &lexer, false);
+    if(err)return err;
+
+    free(text);
     return 0;
 }
 
@@ -808,9 +888,16 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
 
     if(submap_filename != NULL){
         ARRAY_PUSH_NEW(hexmap_submap_t, *map, submaps, submap)
-        err = hexmap_submap_load(map, submap, submap_filename, pos,
-            camera_type, camera_pos, mapper, palette_filename,
-            tileset_filename);
+        err = hexmap_submap_init(map, submap, strdup(submap_filename), pos,
+            camera_type, camera_pos, mapper, palette_filename, tileset_filename);
+        if(err)return err;
+
+        /* load collmap */
+        err = hexcollmap_load(&submap->collmap, submap_filename);
+        if(err)return err;
+
+        /* render submap->rgraph_map */
+        err = hexmap_submap_create_rgraph(map, submap);
         if(err)return err;
     }
 
@@ -958,51 +1045,6 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
 
     err = hexmap_tileset_load(&submap->tileset, map->prend,
         tileset_filename);
-    if(err)return err;
-
-    return 0;
-}
-
-int hexmap_submap_load(hexmap_t *map, hexmap_submap_t *submap,
-    const char *filename, vec_t pos, int camera_type, vec_t camera_pos,
-    prismelmapper_t *mapper, char *palette_filename, char *tileset_filename
-){
-    int err;
-    fus_lexer_t lexer;
-
-    char *text = load_file(filename);
-    if(text == NULL)return 1;
-
-    err = fus_lexer_init(&lexer, text, filename);
-    if(err)return err;
-
-    err = hexmap_submap_init(map, submap, strdup(filename), pos,
-        camera_type, camera_pos, mapper, palette_filename, tileset_filename);
-    if(err)return err;
-    err = hexmap_submap_parse(map, submap, &lexer);
-    if(err)return err;
-
-    free(text);
-    return 0;
-}
-
-int hexmap_submap_parse(hexmap_t *map, hexmap_submap_t *submap,
-    fus_lexer_t *lexer
-){
-    int err;
-
-    /* parse collmap */
-    err = fus_lexer_expect(lexer, "collmap");
-    if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
-    if(err)return err;
-    err = hexcollmap_parse(&submap->collmap, lexer);
-    if(err)return err;
-    err = fus_lexer_get(lexer, ")");
-    if(err)return err;
-
-    /* render rgraph_map */
-    err = hexmap_submap_create_rgraph(map, submap);
     if(err)return err;
 
     return 0;

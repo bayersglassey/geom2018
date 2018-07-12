@@ -71,6 +71,23 @@ typedef struct hexcollmap {
 } hexcollmap_t;
 
 
+void hexcollmap_cleanup(hexcollmap_t *collmap);
+int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space);
+void hexcollmap_dump(hexcollmap_t *collmap, FILE *f, int n_spaces);
+int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
+    bool just_coll);
+int hexcollmap_load(hexcollmap_t *collmap, const char *filename);
+void hexcollmap_normalize_vert(trf_t *index);
+void hexcollmap_normalize_edge(trf_t *index);
+void hexcollmap_normalize_face(trf_t *index);
+hexcollmap_tile_t *hexcollmap_get_tile(hexcollmap_t *collmap, trf_t *index);
+hexcollmap_elem_t *hexcollmap_get_vert(hexcollmap_t *collmap, trf_t *index);
+hexcollmap_elem_t *hexcollmap_get_edge(hexcollmap_t *collmap, trf_t *index);
+hexcollmap_elem_t *hexcollmap_get_face(hexcollmap_t *collmap, trf_t *index);
+bool hexcollmap_elem_is_visible(hexcollmap_elem_t *elem);
+bool hexcollmap_elem_is_solid(hexcollmap_elem_t *elem);
+
+
 
 /**********
  * HEXMAP *
@@ -105,22 +122,6 @@ typedef struct hexmap {
 } hexmap_t;
 
 
-void hexcollmap_cleanup(hexcollmap_t *collmap);
-int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space);
-void hexcollmap_dump(hexcollmap_t *collmap, FILE *f, int n_spaces);
-int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer);
-void hexcollmap_normalize_vert(trf_t *index);
-void hexcollmap_normalize_edge(trf_t *index);
-void hexcollmap_normalize_face(trf_t *index);
-hexcollmap_tile_t *hexcollmap_get_tile(hexcollmap_t *collmap, trf_t *index);
-hexcollmap_elem_t *hexcollmap_get_vert(hexcollmap_t *collmap, trf_t *index);
-hexcollmap_elem_t *hexcollmap_get_edge(hexcollmap_t *collmap, trf_t *index);
-hexcollmap_elem_t *hexcollmap_get_face(hexcollmap_t *collmap, trf_t *index);
-bool hexcollmap_elem_is_visible(hexcollmap_elem_t *elem);
-bool hexcollmap_elem_is_solid(hexcollmap_elem_t *elem);
-
-
-
 void hexmap_cleanup(hexmap_t *map);
 int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
     prismelrenderer_t *prend,
@@ -141,11 +142,6 @@ void hexmap_submap_cleanup(hexmap_submap_t *submap);
 int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
     char *filename, vec_t pos, int camera_type, vec_t camera_pos,
     prismelmapper_t *mapper, char *palette_filename, char *tileset_filename);
-int hexmap_submap_load(hexmap_t *map, hexmap_submap_t *submap,
-    const char *filename, vec_t pos, int camera_type, vec_t camera_pos,
-    prismelmapper_t *mapper, char *palette_filename, char *tileset_filename);
-int hexmap_submap_parse(hexmap_t *map, hexmap_submap_t *submap,
-    fus_lexer_t *lexer);
 int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap);
 
 

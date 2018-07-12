@@ -181,7 +181,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     if(collmap == NULL)return 1;
                     err = hexcollmap_init(collmap, space);
                     if(err)return err;
-                    err = hexcollmap_parse(collmap, lexer);
+                    err = hexcollmap_parse(collmap, lexer, true);
                     if(err)return err;
 
                     ARRAY_PUSH_NEW(state_cond_t, *rule, conds, cond)
