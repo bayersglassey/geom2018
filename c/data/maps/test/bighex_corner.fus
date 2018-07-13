@@ -1,4 +1,7 @@
 
+default_vert: "1"
+default_edge: "1"
+default_face: "1"
 collmap:
     ;;   + - + - +
     ;;  /         \
