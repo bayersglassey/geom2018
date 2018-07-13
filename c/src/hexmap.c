@@ -969,12 +969,20 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
     if(err)return err;
 
     /* parse spawn point */
+    char *spawn_filename = NULL;
     err = fus_lexer_expect(lexer, "spawn");
     if(err)return err;
     err = fus_lexer_expect(lexer, "(");
     if(err)return err;
-    err = fus_lexer_expect_vec(lexer, space, map->spawn);
+    err = fus_lexer_next(lexer);
     if(err)return err;
+    if(fus_lexer_got_str(lexer)){
+        err = fus_lexer_get_str(lexer, &spawn_filename);
+        if(err)return err;
+    }else{
+        err = fus_lexer_get_vec(lexer, space, map->spawn);
+        if(err)return err;
+    }
     err = fus_lexer_expect(lexer, ")");
     if(err)return err;
 
@@ -1019,6 +1027,24 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
     }
+
+
+    /* maybe get spawn point from a submap */
+    if(spawn_filename != NULL){
+        hexmap_submap_t *spawn_submap = NULL;
+        for(int i = 0; i < map->submaps_len; i++){
+            hexmap_submap_t *submap = map->submaps[i];
+            if(strcmp(submap->filename, spawn_filename) == 0){
+                spawn_submap = submap; break;}
+        }
+        if(spawn_submap == NULL){
+            fprintf(stderr, "Couldn't find submap with filename: %s\n",
+                spawn_filename);
+            return 2;}
+        vec_cpy(map->space->dims, map->spawn, spawn_submap->pos);
+        free(spawn_filename);
+    }
+
 
     /* pheeew */
     return 0;

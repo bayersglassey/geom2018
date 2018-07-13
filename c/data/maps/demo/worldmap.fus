@@ -1,6 +1,8 @@
 
 unit: 3 2 0 -1
-spawn: (0 0)
+#spawn: (0 0)
+spawn: "data/maps/demo/start.fus"
+#spawn: "data/maps/demo/pebbles.fus"
 default_palette: "data/pal1.fus"
 default_tileset: "data/tileset1.fus"
 
