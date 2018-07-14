@@ -388,7 +388,7 @@ int test_app_mainloop(test_app_t *app){
                 rgraph->n_frames, rgraph->animation_type);
 
             console_blit(&app->console, &app->font, render_surface,
-                0, 12 * app->font.char_h);
+                0, 20 * app->font.char_h);
 
             /******************************************************************
             * Draw to renderer and present it

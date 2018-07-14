@@ -1337,11 +1337,11 @@ int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap){
     The most correct way to do this is I guess to compute the LCD of
     the tile rgraphs' n_frames, and set the map's rgraph's n_frames
     to that.
-    But for now we use 36, because it has "many" divisors.
+    But for now we use a magic number which has "many" divisors.
     That's a lot of bitmaps to cache for the map's rgraph, though...
     if we're going to allow complicated map animations, maybe we
     should disable bitmap caching for it (somehow). */
-    int n_frames = 36;
+    int n_frames = 24;
 
     ARRAY_PUSH_NEW(rendergraph_t, prend->rendergraphs, rgraph)
     err = rendergraph_init(rgraph, strdup(map->name), prend,

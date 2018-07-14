@@ -76,7 +76,7 @@ shapes:
             : "map_face1_third" (1 1 1 0)  8 f
 
     "map_savepoint_third":
-        animation: cycle 9
+        animation: oscillate 6
         prismels:
             : "tri" ( 0 0 0 0)  0 f eval(1 + 8 + 7) (0 3)
             : "tri" ( 0 0 0 0)  2 f eval(1 + 8 + 7) (0 3)
@@ -91,11 +91,11 @@ shapes:
             : "sq"  (-1 0 1 0)  0 f eval(1 + 0 + 2) (4 1)
 
     "map_savepoint":
-        animation: cycle 9
+        animation: cycle 12
         shapes:
             : "map_savepoint_third" (1 1 1 0)  0 f  0+
-            : "map_savepoint_third" (1 1 1 0)  4 f  3+
-            : "map_savepoint_third" (1 1 1 0)  8 f  6+
+            : "map_savepoint_third" (1 1 1 0)  4 f  4+
+            : "map_savepoint_third" (1 1 1 0)  8 f  8+
 
 mappers:
     "test_map":
