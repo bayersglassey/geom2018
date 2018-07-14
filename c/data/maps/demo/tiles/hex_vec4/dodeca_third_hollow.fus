@@ -1,0 +1,19 @@
+parts:
+    "e": "data/maps/demo/tiles/hex_vec4/edge.fus"
+    "E": "data/maps/demo/tiles/hex_vec4/edge_r.fus"
+    "q": "data/maps/demo/tiles/hex_vec4/sq.fus"
+    "Q": "data/maps/demo/tiles/hex_vec4/sq_r.fus"
+    "t": "data/maps/demo/tiles/hex_vec4/tri.fus"
+    "T": "data/maps/demo/tiles/hex_vec4/tri_r.fus"
+    "d": "data/maps/demo/tiles/hex_vec4/dia.fus"
+    "D": "data/maps/demo/tiles/hex_vec4/dia_r.fus"
+collmap:
+    ;;               .
+    ;;
+    ;;         .   .   .
+    ;;
+    ;;       .   .   .   .
+    ;;
+    ;;    (+)  .   ?   .   .     [E^5 T^5 E]
+    ;;
+    ;;               .   .

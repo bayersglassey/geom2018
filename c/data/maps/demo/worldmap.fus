@@ -62,7 +62,7 @@ submaps:
                         file: "data/maps/demo/pebbles3.fus"
                         pos: (1 -9)
                         camera: (0 -4)
-                        mapper: ("solid_curvy")
+                        mapper: ("triple")
             :
                 file: "data/maps/demo/pebbles2.fus"
                 pos: (22 9)
