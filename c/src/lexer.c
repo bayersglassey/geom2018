@@ -271,14 +271,9 @@ int fus_lexer_next(fus_lexer_t *lexer){
         if(lexer->returning_indents != 0)break;
 
         char c = lexer->text[lexer->pos];
-        if(c == '\0'){
-            /* Reached end of file; report with NULL token */
-            lexer->token = NULL;
-            lexer->token_len = 0;
-            lexer->token_type = FUS_LEXER_TOKEN_DONE;
-            break;
-        }else if(c == '\n'){
-            fus_lexer_eat(lexer);
+        if(c == '\0' || c == '\n'){
+            if(c == '\n')fus_lexer_eat(lexer);
+
             err = fus_lexer_get_indent(lexer);
             if(err)return err;
             int new_indent = lexer->indent;
@@ -291,6 +286,14 @@ int fus_lexer_next(fus_lexer_t *lexer){
                 }else{
                     break;
                 }
+            }
+
+            if(c == '\0'){
+                /* Reached end of file; report with NULL token */
+                lexer->token = NULL;
+                lexer->token_len = 0;
+                lexer->token_type = FUS_LEXER_TOKEN_DONE;
+                break;
             }
         }else if(isspace(c)){
             fus_lexer_eat_whitespace(lexer);
