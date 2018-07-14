@@ -67,16 +67,18 @@ mappers:
         solid
         unit: 2 0 0 0
         entries:
-            : "sq"  -> "double_sq"
-            : "tri" -> "double_tri"
-            : "dia" -> "double_dia"
+            : "vert" -> "vert"
+            : "sq"   -> "double_sq"
+            : "tri"  -> "double_tri"
+            : "dia"  -> "double_dia"
 
     "triple":
         solid
         unit: 3 0 0 0
         entries:
-            : "sq"  -> "triple_sq"
-            : "tri" -> "triple_tri"
-            : "dia" -> "triple_dia"
+            : "vert" -> "vert"
+            : "sq"   -> "triple_sq"
+            : "tri"  -> "triple_tri"
+            : "dia"  -> "triple_dia"
 
     "quadruple": solid map ("double") ("double")
