@@ -9,4 +9,5 @@ edges:
 faces:
     "0": "map_face1"
     "1": "map_face1"
+    "2": "map_face2"
     "S": "map_savepoint"

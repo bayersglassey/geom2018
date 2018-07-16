@@ -1,7 +1,7 @@
 
 unit: 3 2 0 -1
-spawn: "data/maps/demo/start.fus"
-#spawn: "data/maps/demo/pebbles.fus"
+#spawn: "data/maps/demo/start.fus"
+spawn: "data/maps/demo/pebbles3.fus"
 default_palette: "data/pal1.fus"
 default_tileset: "data/tileset1.fus"
 
@@ -62,23 +62,31 @@ submaps:
                         file: "data/maps/demo/pebbles3.fus"
                         pos: (1 -9)
                         camera: (0 -4)
-                        mapper: ("triple")
+                        mapper: ("double")
                         submaps:
                             :
-                                file: "data/maps/demo/dodecas.fus"
+                                file: "data/maps/demo/dodecas_0_0.fus"
                                 pos: (1 -6)
                                 camera: (0 -4)
                             :
-                                file: "data/maps/demo/dodecas.fus"
-                                pos: (-24 -15)
+                                file: "data/maps/demo/dodecas_0_-1.fus"
+                                pos: (-27 -15)
                                 camera: (0 -4)
                             :
-                                file: "data/maps/demo/dodecas.fus"
-                                pos: (-20 -28)
-                                camera: (0 -4)
-                            :
-                                file: "data/maps/demo/dodecas.fus"
+                                file: "data/maps/demo/dodecas_1_0.fus"
                                 pos: (0 -28)
+                                camera: (0 -4)
+                            :
+                                file: "data/maps/demo/dodecas_1_-1.fus"
+                                pos: (-22 -30)
+                                camera: (0 -4)
+                            :
+                                file: "data/maps/demo/dodecas_2_0.fus"
+                                pos: (0 -48)
+                                camera: (0 -4)
+                            :
+                                file: "data/maps/demo/dodecas_2_-1.fus"
+                                pos: (-22 -50)
                                 camera: (0 -4)
             :
                 file: "data/maps/demo/pebbles2.fus"
