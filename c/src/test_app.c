@@ -16,6 +16,7 @@
 #include "hexspace.h"
 
 
+#define MAX_ZOOM 4
 
 
 void test_app_cleanup(test_app_t *app){
@@ -321,7 +322,7 @@ int test_app_mainloop(test_app_t *app){
 
             err = hexgame_render(&app->hexgame, app->renderer, app->surface,
                 app->sdl_palette, app->scw/2 + app->x0, app->sch/2 + app->y0,
-                app->zoom);
+                1 /* app->zoom */);
             if(err)return err;
 
             if(app->surface != NULL){
@@ -547,7 +548,7 @@ int test_app_mainloop(test_app_t *app){
                 BODY}
         IF_APP_KEY(l, if(app->keydown_ctrl){app->x0 += 6;}else{app->rot += 1;})
         IF_APP_KEY(r, if(app->keydown_ctrl){app->x0 -= 6;}else{app->rot -= 1;})
-        IF_APP_KEY(u, if(app->keydown_ctrl){app->y0 += 6;}else if(app->zoom < 10){app->zoom += 1;})
+        IF_APP_KEY(u, if(app->keydown_ctrl){app->y0 += 6;}else if(app->zoom < MAX_ZOOM){app->zoom += 1;})
         IF_APP_KEY(d, if(app->keydown_ctrl){app->y0 -= 6;}else if(app->zoom > 1){app->zoom -= 1;})
         #undef IF_APP_KEY
 

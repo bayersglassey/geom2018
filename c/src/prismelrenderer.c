@@ -1204,6 +1204,21 @@ int rendergraph_render(rendergraph_t *rgraph,
     int animated_frame_i = get_animated_frame_i(
         rgraph->animation_type, rgraph->n_frames, frame_i);
 
+    static const bool MAPPER_ZOOM = true;
+    if(MAPPER_ZOOM){
+        prismelmapper_t *zoom_mapper =
+            zoom == 2? prismelrenderer_get_mapper(prend, "double"):
+            zoom == 3? prismelrenderer_get_mapper(prend, "triple"):
+            zoom == 4? prismelrenderer_get_mapper(prend, "quadruple"):
+            NULL;
+        if(mapper == NULL)mapper = zoom_mapper;
+        else if(zoom_mapper != NULL){
+            err = prismelmapper_apply_to_mapper(zoom_mapper, prend, mapper,
+                NULL, rgraph->space, &mapper);
+            if(err)return err;
+        }
+    }
+
     if(mapper != NULL){
         err = prismelmapper_apply_to_rendergraph(mapper, prend, rgraph,
             NULL, rgraph->space, NULL, &rgraph);
@@ -1223,11 +1238,12 @@ int rendergraph_render(rendergraph_t *rgraph,
     int x, y;
     rgraph->space->vec_render(pos, &x, &y);
 
+    int rect_zoom = MAPPER_ZOOM? 1: zoom;
     SDL_Rect dst_rect = {
-        x0 + (x - bitmap->pbox.x) * zoom,
-        y0 + (y - bitmap->pbox.y) * zoom,
-        bitmap->pbox.w * zoom,
-        bitmap->pbox.h * zoom
+        x0 + (x - bitmap->pbox.x) * rect_zoom,
+        y0 + (y - bitmap->pbox.y) * rect_zoom,
+        bitmap->pbox.w * rect_zoom,
+        bitmap->pbox.h * rect_zoom
     };
 
     if(surface != NULL){
