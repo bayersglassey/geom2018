@@ -1,0 +1,21 @@
+parts:
+    "q": "data/maps/demo/tiles/hex_vec4/sq_face2.fus"
+    "Q": "data/maps/demo/tiles/hex_vec4/sq_r_face2.fus"
+collmap:
+    ;;            .   .   .   .   .
+    ;;
+    ;;          .   .   .   .   .   .
+    ;;
+    ;;        .   .   ?   .   .   .   .       [q]
+    ;;
+    ;;      .   .   .   .   .   .   .   .
+    ;;
+    ;;    .   .   .   .  (.)  .   ?   .   .   [Q]
+    ;;
+    ;;      .   .   .   .   .   .   .   .
+    ;;
+    ;;        .   .   .   .   .   .   .
+    ;;
+    ;;          .   .   .   .   .   .
+    ;;
+    ;;            .   .   .   .   .

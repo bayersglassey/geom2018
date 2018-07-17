@@ -62,8 +62,8 @@ submaps:
                         file: "data/maps/demo/pebbles3.fus"
                         pos: (1 -9)
                         camera: (0 -4)
-                        mapper: ("double")
-                        submaps:
+                        mapper: ("triple")
+                        submaps: : mapper(("double")) submaps:
                             :
                                 file: "data/maps/demo/dodecas_0_0.fus"
                                 pos: (1 -6)

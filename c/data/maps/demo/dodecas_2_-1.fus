@@ -2,6 +2,7 @@
 parts:
     "D": "data/maps/demo/tiles/hex_vec4/dodecas.fus"
     "s": "data/maps/demo/tiles/hex_vec4/dodeca_sign.fus"
+    "g": "data/maps/demo/tiles/hex_vec4/dodeca_sign_solid.fus"
 
 collmap:
     ;;
@@ -19,7 +20,7 @@ collmap:
     ;;
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .  (?)  .   .   .   .   .   .   .   .   ?   .   .   .    [D] []
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .  (?)  .   .   .   .   .   .   .   .   ?   .   .   .    [D] [g]
     ;;
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;

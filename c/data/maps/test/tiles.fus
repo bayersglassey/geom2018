@@ -76,20 +76,24 @@ shapes:
             : "map_face1_third" (1 1 1 0)  8 f
 
     "map_face2_third":
-        animation: oscillate 4
+        animation: oscillate 6
         prismels:
-            : "sq"  (-1 0 1 0)  0 f eval(1 + 0 + 5) (1 1)
+            : "sq"  (-1 0 1 0)  0 f eval(1 + 0 + 5) (2 1)
 
-            : "tri" ( 0 0 0 0)  0 f eval(1 + 0 + 5) (2 1)
-            : "tri" ( 0 0 0 0)  2 f eval(1 + 0 + 5) (2 1)
-            : "sq"  (-1 0 1 0)  0 f eval(1 + 8 + 5) (2 1)
+            : "tri" ( 0 0 0 0)  0 f eval(1 + 0 + 5) (3 1)
+            : "tri" ( 0 0 0 0)  2 f eval(1 + 0 + 5) (3 1)
+            : "sq"  (-1 0 1 0)  0 f eval(1 + 8 + 5) (3 1)
 
-            : "tri" ( 0 0 0 0)  0 f eval(1 + 8 + 5) (3 1)
-            : "tri" ( 0 0 0 0)  2 f eval(1 + 8 + 5) (3 1)
-            : "sq"  (-1 0 1 0)  0 f eval(1 + 8 + 7) (3 1)
+            : "tri" ( 0 0 0 0)  0 f eval(1 + 8 + 5) (4 1)
+            : "tri" ( 0 0 0 0)  2 f eval(1 + 8 + 5) (4 1)
+            : "sq"  (-1 0 1 0)  0 f eval(1 + 8 + 7) (4 1)
+
+            : "tri" ( 0 0 0 0)  0 f eval(1 + 8 + 7) (5 1)
+            : "tri" ( 0 0 0 0)  2 f eval(1 + 8 + 7) (5 1)
+            : "sq"  (-1 0 1 0)  0 f eval(1 + 8 + 7) (5 1)
 
     "map_face2":
-        animation: oscillate 4
+        animation: oscillate 6
         shapes:
             : "map_face2_third" (1 1 1 0)  0 f  0+
             : "map_face2_third" (1 1 1 0)  4 f  0+
