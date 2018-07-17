@@ -88,6 +88,33 @@ submaps:
                                 file: "data/maps/demo/dodecas_2_-1.fus"
                                 pos: (-22 -50)
                                 camera: (0 -4)
+                            :
+                                pos: (20 -50)
+                                submaps:
+                                    :
+                                        file: "data/maps/demo/fisheye.fus"
+                                        pos: (0 0)
+                                        camera: (0 0)
+                                    :
+                                        file: "data/maps/demo/fisheye2.fus"
+                                        pos: (-12 -16)
+                                        camera: (0 0)
+                                    :
+                                        file: "data/maps/demo/fisheye3.fus"
+                                        pos: (-32 -26)
+                                        camera: (0 0)
+                                    :
+                                        file: "data/maps/demo/fisheye4.fus"
+                                        pos: (-48 -28)
+                                        camera: (0 0)
+                                    :
+                                        file: "data/maps/demo/fisheye5.fus"
+                                        pos: (-68 -22)
+                                        camera: (0 0)
+                                    :
+                                        file: "data/maps/demo/fisheye6.fus"
+                                        pos: (-78 -12)
+                                        camera: (0 0)
             :
                 file: "data/maps/demo/pebbles2.fus"
                 pos: (22 9)
