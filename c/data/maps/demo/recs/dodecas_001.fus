@@ -1,0 +1,11 @@
+anim: "anim/player.fus"
+state: "stand"
+pos: ( 14 -13)
+rot: 0
+turn: no
+keys:
+    u:
+    d:
+    l:
+    r:
+data: " w3+d w2+r w19-d w1-r w6+r w6-r w11+d w4+l w10-l w10-d w25+r w12-r w4+r w6-r w2+d w3+l w62-d w4-l w4+r w12-r w22+r w1-r w3+u w3-u w29+d w11+r w7-r w5-d w5+r w21-r w2+d w3+r w58-r w13-d w17+u w2-u w28+r w46-r w1+l w16-l w28+l w26-l w4+r w2-r w38+r w12-r w4+l w3-l w13+u w2-u w25+l w5-l w7+d w6+r w4-r w13+r w5-r w5-d w3+r w20+d w27-d w11-r w10+r w5-r w3+d w3+r w5-r w11-d w1+d w1-d w4+r w60-r w13+r w4-r w9+d w6+r w15-d w3-r w11+r w4-r w8+d w5+l w29-d w8-l w16+d w17-d w3+l w7-l w17+u w3-u w5+l w49-l w22+l w17-l w2+r w3+u w1-r w2-u w10+r w77-r w3+d w4+r w5-r w14-d w8+r w20-r w4+d w7+r w29-r w9-d w7+r w8-r w9+d w3+l w7-l w7-d w1+l w45-l w5+d w20+l w7-l w10-d w10+l w4-l w3+d w3+r w34-r w1-d w3+l w32-l w9+l w12-l w7+d w6+l w16-l w9-d w3+l w38-l w2+d w4+l w6-l w25+l w3-l w1-d w2+l w20-l w6+d w37+r w4-r w16+r w3-r w6-d w9+r w4-r w26+d w7+r w16-r w3-d w8+r w14-r w16+d w1+r w12-r w7-d w6+r w12-r w2+d w3+r w5-r w16+l w8-l w14+l w3-l w8-d w23+r w4-r w4+r w6-r w13+d w3+r w9-r w4-d w9+l w12-l w3+d w4+l w5-l w30+l w9-d w2-l w29+l w19-l w8+l w5-l w4+d w6+l w10-l w15-d w2+l w6-l w13+d w4+r w9-r w9+r w3-r w3-d w11+l w15-l w11"

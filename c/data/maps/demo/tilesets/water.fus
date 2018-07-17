@@ -1,8 +1,12 @@
 
 verts:
     "0": "water_vert"
+    "1": "map_vert1"
+    "2": "map_vert0"
 edges:
     "0": "water_edge"
+    "1": "map_edge1"
+    "2": "map_edge0"
 faces:
     "0": "water_face"
     "S": "map_savepoint"

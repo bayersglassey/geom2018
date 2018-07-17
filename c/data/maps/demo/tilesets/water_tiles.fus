@@ -6,13 +6,17 @@ shapes:
     ##########
 
     "water_vert":
+        animation: cycle 12
         prismels:
-            : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 1
-            : "tri" (0 0 0 0)  2 f eval: 1 + 8 + 1
-            : "tri" (0 0 0 0)  4 f eval: 1 + 0 + 1
-            : "tri" (0 0 0 0)  6 f eval: 1 + 0 + 1
-            : "tri" (0 0 0 0)  8 f eval: 1 + 0 + 1
-            : "tri" (0 0 0 0) 10 f eval: 1 + 0 + 1
+            : "tri" (0 0 0 0)  0 f eval(1 + 0 + 1)
+            : "tri" (0 0 0 0)  2 f eval(1 + 0 + 1)
+            : "tri" (0 0 0 0)  4 f eval(1 + 0 + 1)
+            : "tri" (0 0 0 0)  6 f eval(1 + 0 + 1)
+            : "tri" (0 0 0 0)  8 f eval(1 + 0 + 1)
+            : "tri" (0 0 0 0) 10 f eval(1 + 0 + 1)
+
+            : "tri" (0 0 0 0)  0 f eval(1 + 8 + 1)  (0 4)
+            : "tri" (0 0 0 0)  2 f eval(1 + 8 + 1)  (2 4)
 
     ########
     # EDGE #

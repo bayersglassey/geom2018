@@ -63,6 +63,12 @@ submaps:
                         pos: (1 -9)
                         camera: (0 -4)
                         mapper: ("triple")
+                        recordings:
+                            : "./data/maps/demo/recs/dodecas_000.fus"
+                            : "./data/maps/demo/recs/dodecas_001.fus"
+                            : "./data/maps/demo/recs/dodecas_roller_000.fus"
+                            : "./data/maps/demo/recs/dodecas_roller_001.fus"
+                            : "./data/maps/demo/recs/dodecas_roller_002.fus"
                         submaps: : mapper(("double")) submaps:
                             :
                                 file: "data/maps/demo/dodecas_0_0.fus"

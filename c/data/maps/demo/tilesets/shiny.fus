@@ -2,12 +2,15 @@
 verts:
     "0": "map_vert1"
     "1": "map_vert1"
+    "o": "map_vert0"
 edges:
     "0": "map_edge1"
     "1": "map_edge1"
     "2": "map_edge2"
+    "o": "map_edge0"
 faces:
     "0": "map_face1"
     "1": "map_face1"
     "2": "map_face2"
+    "o": "map_face0"
     "S": "map_savepoint"
