@@ -53,6 +53,8 @@ typedef struct hexcollmap_elem {
         the standard library's isprint function), for debugging
         purposes.
         With that in mind, the default (no tile) value is ' '. */
+    int z;
+        /* z-depth: higher numbers overwrite lower ones */
 } hexcollmap_elem_t;
 
 typedef struct hexcollmap_tile {

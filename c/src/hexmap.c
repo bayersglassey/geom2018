@@ -289,7 +289,7 @@ static void get_map_coords(int x, int y, char c,
 }
 
 static int hexcollmap_draw(hexcollmap_t *collmap1, hexcollmap_t *collmap2,
-    trf_t *trf
+    trf_t *trf, int draw_z
 ){
     int err;
 
@@ -331,8 +331,9 @@ static int hexcollmap_draw(hexcollmap_t *collmap1, hexcollmap_t *collmap2,
                     \
                     hexcollmap_elem_t *elem1 = \
                         hexcollmap_get_##PART(collmap1, &index); \
-                    if(elem1 != NULL){ \
-                        elem1->tile_c = elem2->tile_c;} \
+                    if(elem1 != NULL && draw_z >= elem1->z){ \
+                        elem1->tile_c = elem2->tile_c; \
+                        elem1->z = draw_z;} \
                 }
             HEXCOLLMAP_DRAW(vert, 1)
             HEXCOLLMAP_DRAW(edge, 3)
@@ -493,6 +494,8 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                     is_savepoint then we should skip the check for
                     tilebucket_active entirely? */
 
+                int draw_z = 0;
+
                 if(tilebucket_active){
                     /* Get next non-' ' character in current tile bucket. */
                     char c2;
@@ -511,6 +514,13 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                     }else{
                         tile_c = c2;
                         tilebucket++;
+                        while(1){
+                            if(*tilebucket == '|'){
+                                tilebucket++;
+                                draw_z = atoi(tilebucket);
+                                while(isdigit(*tilebucket))tilebucket++;
+                            }else break;
+                        }
                     }
                 }
 
@@ -521,16 +531,23 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                     my -= map_t;
                     hexcollmap_tile_t *tile = &tiles[my * map_w + mx];
 
+                    hexcollmap_elem_t *elem = NULL;
                     if(c == '+'){
-                        tile->vert[0].tile_c = tile_c;
+                        elem = &tile->vert[0];
                     }else if(c == '-'){
-                        tile->edge[0].tile_c = tile_c;
+                        elem = &tile->edge[0];
                     }else if(c == '/'){
-                        tile->edge[1].tile_c = tile_c;
+                        elem = &tile->edge[1];
                     }else if(c == '\\'){
-                        tile->edge[2].tile_c = tile_c;
+                        elem = &tile->edge[2];
                     }else if(c == '*'){
-                        tile->face[is_face1? 1: 0].tile_c = tile_c;
+                        elem = &tile->face[is_face1? 1: 0];
+                    }
+                    if(elem != NULL){
+                        /* We don't expect elem to be NULL, but it never
+                        hurts to check */
+                        elem->tile_c = tile_c;
+                        elem->z = draw_z;
                     }
                 }
             }else if(c == '%' || c == '?'){
@@ -617,6 +634,7 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                             trf_t trf = {0};
                             trf.add[0] = mx;
                             trf.add[1] = -my;
+                            int draw_z = 0;
                             while(1){
                                 if(*tilebucket == '^'){
                                     tilebucket++;
@@ -626,15 +644,22 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                                 }else if(*tilebucket == '~'){
                                     tilebucket++;
                                     trf.flip = !trf.flip;
+                                }else if(*tilebucket == '|'){
+                                    tilebucket++;
+                                    draw_z = atoi(tilebucket);
+                                    while(isdigit(*tilebucket))tilebucket++;
                                 }else break;
                             }
 
                             hexcollmap_t part_collmap;
-                            err = hexcollmap_init(&part_collmap, collmap->space);
+                            err = hexcollmap_init(&part_collmap,
+                                collmap->space);
                             if(err)return err;
-                            err = hexcollmap_load(&part_collmap, filename);
+                            err = hexcollmap_load(&part_collmap,
+                                filename);
                             if(err)return err;
-                            err = hexcollmap_draw(collmap, &part_collmap, &trf);
+                            err = hexcollmap_draw(collmap, &part_collmap,
+                                &trf, draw_z);
                             if(err)return err;
                             hexcollmap_cleanup(&part_collmap);
                         }
