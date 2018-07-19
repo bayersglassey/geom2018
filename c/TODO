@@ -60,9 +60,6 @@ It seems obvious that the resulting n_frames should be the product of mapper & m
 We could define mapper's n_frames as the LCD of its rendergraphs' n_frames.
 
 
-Standardize all fus_lexer stuff to leave lexer looking at NEXT UNPARSED TOKEN.
-
-
 Jun 27, 2018:
 -------------
 
@@ -142,8 +139,7 @@ July 12, 2018:
 --------------
 
 hexcollmap "parts":
-    - need to realloc collmap1 as necessary for collmap2 to fit.
-        and/or need '.' to affect boundary.
+    - need to realloc collmap1 as necessary for collmap2 to fit. (in hexcollmap_draw)
     - maybe below "parts" and "collmap" we can have a "draw" section where
         we specify collmap filenames and coordinates.
         It can reuse existing hexcollmap_draw.
