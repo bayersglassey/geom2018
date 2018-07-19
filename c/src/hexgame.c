@@ -49,8 +49,6 @@ int fus_lexer_get_player_keyinfo(fus_lexer_t *lexer,
     err = fus_lexer_get(lexer, "(");
     if(err)return err;
     while(1){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
         if(fus_lexer_got(lexer, ")"))break;
 
         char key_c;
@@ -65,11 +63,9 @@ int fus_lexer_get_player_keyinfo(fus_lexer_t *lexer,
 
         int key_i = player_get_key_i(NULL, key_c, true);
 
-        err = fus_lexer_expect(lexer, "(");
+        err = fus_lexer_get(lexer, "(");
         if(err)return err;
         while(1){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
             if(fus_lexer_got(lexer, ")"))break;
 
             bool *keystate;
@@ -81,20 +77,19 @@ int fus_lexer_get_player_keyinfo(fus_lexer_t *lexer,
                 keystate = info->wentdown;
             }else{
                 return fus_lexer_unexpected(lexer,
-                    "is or was or went");}
+                    "is or was or went");
+            }
+            err = fus_lexer_next(lexer);
+            if(err)return err;
 
             keystate[key_i] = true;
         }
+        err = fus_lexer_next(lexer);
+        if(err)return err;
     }
-    return 0;
-}
-
-int fus_lexer_expect_player_keyinfo(fus_lexer_t *lexer,
-    player_keyinfo_t *info
-){
-    int err = fus_lexer_next(lexer);
+    err = fus_lexer_next(lexer);
     if(err)return err;
-    return fus_lexer_get_player_keyinfo(lexer, info);
+    return 0;
 }
 
 
@@ -143,47 +138,45 @@ static int player_recording_parse(player_recording_t *rec,
 
     vecspace_t *space = rec->map->space;
 
-    err = fus_lexer_expect(lexer, "anim");
+    err = fus_lexer_get(lexer, "anim");
     if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
+    err = fus_lexer_get(lexer, "(");
     if(err)return err;
-    err = fus_lexer_expect_str(lexer, &rec->stateset_name);
+    err = fus_lexer_get_str(lexer, &rec->stateset_name);
     if(err)return err;
-    err = fus_lexer_expect(lexer, ")");
-    if(err)return err;
-
-    err = fus_lexer_expect(lexer, "state");
-    if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
-    if(err)return err;
-    err = fus_lexer_expect_str(lexer, &rec->state_name);
-    if(err)return err;
-    err = fus_lexer_expect(lexer, ")");
+    err = fus_lexer_get(lexer, ")");
     if(err)return err;
 
-    err = fus_lexer_expect(lexer, "pos");
+    err = fus_lexer_get(lexer, "state");
     if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
+    err = fus_lexer_get(lexer, "(");
     if(err)return err;
-    err = fus_lexer_expect_vec(lexer, space, rec->pos0);
+    err = fus_lexer_get_str(lexer, &rec->state_name);
     if(err)return err;
-    err = fus_lexer_expect(lexer, ")");
-    if(err)return err;
-
-    err = fus_lexer_expect(lexer, "rot");
-    if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
-    if(err)return err;
-    err = fus_lexer_expect_int(lexer, &rec->rot0);
-    if(err)return err;
-    err = fus_lexer_expect(lexer, ")");
+    err = fus_lexer_get(lexer, ")");
     if(err)return err;
 
-    err = fus_lexer_expect(lexer, "turn");
+    err = fus_lexer_get(lexer, "pos");
     if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
+    err = fus_lexer_get(lexer, "(");
     if(err)return err;
-    err = fus_lexer_next(lexer);
+    err = fus_lexer_get_vec(lexer, space, rec->pos0);
+    if(err)return err;
+    err = fus_lexer_get(lexer, ")");
+    if(err)return err;
+
+    err = fus_lexer_get(lexer, "rot");
+    if(err)return err;
+    err = fus_lexer_get(lexer, "(");
+    if(err)return err;
+    err = fus_lexer_get_int(lexer, &rec->rot0);
+    if(err)return err;
+    err = fus_lexer_get(lexer, ")");
+    if(err)return err;
+
+    err = fus_lexer_get(lexer, "turn");
+    if(err)return err;
+    err = fus_lexer_get(lexer, "(");
     if(err)return err;
     if(fus_lexer_got(lexer, "yes")){
         rec->turn0 = true;
@@ -192,37 +185,36 @@ static int player_recording_parse(player_recording_t *rec,
     }else{
         return fus_lexer_unexpected(lexer, "yes or no");
     }
-    err = fus_lexer_expect(lexer, ")");
-    if(err)return err;
-
     err = fus_lexer_next(lexer);
+    if(err)return err;
+    err = fus_lexer_get(lexer, ")");
     if(err)return err;
 
     if(fus_lexer_got(lexer, "offset")){
-        err = fus_lexer_expect(lexer, "(");
-        if(err)return err;
-        err = fus_lexer_expect_int(lexer, &rec->offset);
-        if(err)return err;
-        err = fus_lexer_expect(lexer, ")");
-        if(err)return err;
         err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_get_int(lexer, &rec->offset);
+        if(err)return err;
+        err = fus_lexer_get(lexer, ")");
         if(err)return err;
     }
 
     if(fus_lexer_got(lexer, "keys")){
-        err = fus_lexer_expect_player_keyinfo(lexer, &rec->keyinfo);
-        if(err)return err;
         err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = fus_lexer_get_player_keyinfo(lexer, &rec->keyinfo);
         if(err)return err;
     }
 
     err = fus_lexer_get(lexer, "data");
     if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
+    err = fus_lexer_get(lexer, "(");
     if(err)return err;
-    err = fus_lexer_expect_str(lexer, &rec->data);
+    err = fus_lexer_get_str(lexer, &rec->data);
     if(err)return err;
-    err = fus_lexer_expect(lexer, ")");
+    err = fus_lexer_get(lexer, ")");
     if(err)return err;
 
     return 0;

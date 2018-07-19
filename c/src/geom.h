@@ -75,6 +75,5 @@ void trf_apply_inv(const vecspace_t *space, trf_t *t, trf_t *s);
 
 
 int fus_lexer_get_vec(fus_lexer_t *lexer, vecspace_t *space, vec_t vec);
-int fus_lexer_expect_vec(fus_lexer_t *lexer, vecspace_t *space, vec_t vec);
 
 #endif

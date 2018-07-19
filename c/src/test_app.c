@@ -137,28 +137,35 @@ int test_app_process_console_input(test_app_t *app){
     rendergraph_t *rgraph =
         app->prend.rendergraphs[app->cur_rgraph_i];
 
-    fus_lexer_t lexer;
-    err = fus_lexer_init(&lexer, app->console.input, "<console input>");
+    fus_lexer_t _lexer;
+    fus_lexer_t *lexer = &_lexer;
+    err = fus_lexer_init(lexer, app->console.input, "<console input>");
     if(err)goto lexer_err;
 
-    err = fus_lexer_next(&lexer);
-    if(err)goto lexer_err;
-    if(fus_lexer_got(&lexer, "exit")){
+    if(fus_lexer_got(lexer, "exit")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
         app->loop = false;
-    }else if(fus_lexer_got(&lexer, "cls")){
+    }else if(fus_lexer_got(lexer, "cls")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
         console_clear(&app->console);
-    }else if(fus_lexer_got(&lexer, "run")){
+    }else if(fus_lexer_got(lexer, "run")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
         console_write_msg(&app->console, "Try F5\n");
         return 0;
-    }else if(fus_lexer_got(&lexer, "rem_players")){
+    }else if(fus_lexer_got(lexer, "rem_players")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
         ARRAY_FREE(player_t, app->hexgame.players, player_cleanup)
-    }else if(fus_lexer_got(&lexer, "add_player")){
+    }else if(fus_lexer_got(lexer, "add_player")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
         char *stateset_filename;
 
-        err = fus_lexer_next(&lexer);
-        if(err)goto lexer_err;
-        if(!fus_lexer_done(&lexer)){
-            err = fus_lexer_get_str(&lexer, &stateset_filename);
+        if(!fus_lexer_done(lexer)){
+            err = fus_lexer_get_str(lexer, &stateset_filename);
             if(err)goto lexer_err;
         }else{
             stateset_filename = strdup(app->stateset_filename);
@@ -169,13 +176,13 @@ int test_app_process_console_input(test_app_t *app){
         err = player_init(player, &app->hexmap, stateset_filename, NULL,
             player_i, app->hexgame.map->spawn);
         if(err)return err;
-    }else if(fus_lexer_got(&lexer, "save")){
+    }else if(fus_lexer_got(lexer, "save")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
         char *filename = NULL;
 
-        err = fus_lexer_next(&lexer);
-        if(err)goto lexer_err;
-        if(!fus_lexer_done(&lexer)){
-            err = fus_lexer_get_str(&lexer, &filename);
+        if(!fus_lexer_done(lexer)){
+            err = fus_lexer_get_str(lexer, &filename);
             if(err)goto lexer_err;
         }
 
@@ -186,43 +193,44 @@ int test_app_process_console_input(test_app_t *app){
             err = prismelrenderer_save(&app->prend, filename);
             if(err)return err;
         }
-    }else if(fus_lexer_got(&lexer, "dump")){
+    }else if(fus_lexer_got(lexer, "dump")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
         int dump_bitmaps = 1;
         int dump_what = 0; /* rgraph, prend */
         while(1){
-            err = fus_lexer_next(&lexer);
-            if(err)goto lexer_err;
-
-            if(fus_lexer_done(&lexer))break;
-            else if(fus_lexer_got(&lexer, "rgraph"))dump_what = 0;
-            else if(fus_lexer_got(&lexer, "prend"))dump_what = 1;
-            else if(fus_lexer_got(&lexer, "nobitmaps"))dump_bitmaps = 0;
-            else if(fus_lexer_got(&lexer, "surfaces")){
+            if(fus_lexer_done(lexer))break;
+            else if(fus_lexer_got(lexer, "rgraph"))dump_what = 0;
+            else if(fus_lexer_got(lexer, "prend"))dump_what = 1;
+            else if(fus_lexer_got(lexer, "nobitmaps"))dump_bitmaps = 0;
+            else if(fus_lexer_got(lexer, "surfaces")){
                 /* WARNING: doing this with "prend" after "renderall" causes
                 my laptop to hang... */
                 dump_bitmaps = 2;}
             else {
                 console_write_msg(&app->console, "Dumper says: idunno\n");
                 dump_what = -1; break;}
+            err = fus_lexer_next(lexer);
+            if(err)return err;
         }
         if(dump_what == 0){
             rendergraph_dump(rgraph, stdout, 0, dump_bitmaps);
         }else if(dump_what == 1){
             prismelrenderer_dump(&app->prend, stdout, dump_bitmaps);
         }
-    }else if(fus_lexer_got(&lexer, "map")){
+    }else if(fus_lexer_got(lexer, "map")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
         char *mapper_name;
         char *mapped_rgraph_name;
         char *resulting_rgraph_name = NULL;
 
-        err = fus_lexer_expect_str(&lexer, &mapper_name);
+        err = fus_lexer_get_str(lexer, &mapper_name);
         if(err)return err;
-        err = fus_lexer_expect_str(&lexer, &mapped_rgraph_name);
+        err = fus_lexer_get_str(lexer, &mapped_rgraph_name);
         if(err)return err;
-        err = fus_lexer_next(&lexer);
-        if(err)return err;
-        if(!fus_lexer_done(&lexer)){
-            err = fus_lexer_get_str(&lexer, &resulting_rgraph_name);
+        if(!fus_lexer_done(lexer)){
+            err = fus_lexer_get_str(lexer, &resulting_rgraph_name);
             if(err)return err;
         }
 
@@ -246,16 +254,18 @@ int test_app_process_console_input(test_app_t *app){
             mapped_rgraph, resulting_rgraph_name, app->prend.space,
             NULL, &rgraph);
         if(err)return err;
-    }else if(fus_lexer_got(&lexer, "renderall")){
+    }else if(fus_lexer_got(lexer, "renderall")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
         SDL_Renderer *renderer = NULL;
-        err = fus_lexer_next(&lexer);
-        if(err)goto lexer_err;
         err = prismelrenderer_render_all_bitmaps(
             &app->prend, app->sdl_palette);
         if(err)return err;
-    }else if(fus_lexer_got(&lexer, "get_shape")){
+    }else if(fus_lexer_got(lexer, "get_shape")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
         char *name;
-        err = fus_lexer_expect_str(&lexer, &name);
+        err = fus_lexer_get_str(lexer, &name);
         if(err)return err;
         bool found = false;
         for(int i = 0; i < app->prend.rendergraphs_len; i++){
@@ -271,7 +281,7 @@ int test_app_process_console_input(test_app_t *app){
             return 2;}
         return 0;
     }else{
-        fus_lexer_unexpected(&lexer, NULL);
+        fus_lexer_unexpected(lexer, NULL);
         console_write_msg(&app->console, "Sorry, what?\n");
         return 0;
     }

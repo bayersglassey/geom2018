@@ -72,22 +72,20 @@ static int hexmap_tileset_parse(hexmap_tileset_t *tileset,
 
     /* parse vert, edge, face, rgraphs */
     #define GET_RGRAPH(TYPE) { \
-        err = fus_lexer_expect(lexer, #TYPE"s"); \
+        err = fus_lexer_get(lexer, #TYPE"s"); \
         if(err)return err; \
-        err = fus_lexer_expect(lexer, "("); \
+        err = fus_lexer_get(lexer, "("); \
         if(err)return err; \
         while(1){ \
-            err = fus_lexer_next(lexer); \
-            if(err)return err; \
             if(fus_lexer_got(lexer, ")"))break; \
             \
             char tile_c; \
             err = fus_lexer_get_chr(lexer, &tile_c); \
             if(err)return err; \
             \
-            err = fus_lexer_expect(lexer, "("); \
+            err = fus_lexer_get(lexer, "("); \
             if(err)return err; \
-            err = fus_lexer_expect_str(lexer, &name); \
+            err = fus_lexer_get_str(lexer, &name); \
             if(err)return err; \
             rendergraph_t *rgraph = \
                 prismelrenderer_get_rendergraph(prend, name); \
@@ -100,9 +98,11 @@ static int hexmap_tileset_parse(hexmap_tileset_t *tileset,
                 tileset->TYPE##_entries, entry) \
             entry->tile_c = tile_c; \
             entry->rgraph = rgraph; \
-            err = fus_lexer_expect(lexer, ")"); \
+            err = fus_lexer_get(lexer, ")"); \
             if(err)return err; \
         } \
+        err = fus_lexer_next(lexer); \
+        if(err)return err; \
     }
     GET_RGRAPH(vert)
     GET_RGRAPH(edge)
@@ -692,32 +692,29 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
     ARRAY_INIT(parts)
 
     if(!just_coll){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-
         if(fus_lexer_got(lexer, "parts")){
-            err = fus_lexer_expect(lexer, "(");
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            err = fus_lexer_get(lexer, "(");
             if(err)return err;
             while(1){
-                err = fus_lexer_next(lexer);
-                if(err)return err;
                 if(fus_lexer_got(lexer, ")"))break;
 
                 char part_c;
                 err = fus_lexer_get_chr(lexer, &part_c);
                 if(err)return err;
 
-                err = fus_lexer_expect(lexer, "(");
+                err = fus_lexer_get(lexer, "(");
                 if(err)return err;
                 {
                     char *filename;
-                    err = fus_lexer_expect_str(lexer, &filename);
+                    err = fus_lexer_get_str(lexer, &filename);
                     if(err)return err;
                     ARRAY_PUSH_NEW(hexcollmap_part_t, parts, part)
                     err = hexcollmap_part_init(part, part_c, filename);
                     if(err)return err;
                 }
-                err = fus_lexer_expect(lexer, ")");
+                err = fus_lexer_get(lexer, ")");
                 if(err)return err;
             }
             err = fus_lexer_next(lexer);
@@ -725,41 +722,41 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
         }
 
         if(fus_lexer_got(lexer, "default_vert")){
-            err = fus_lexer_expect(lexer, "(");
-            if(err)return err;
-            err = fus_lexer_expect_chr(lexer, &default_vert_c);
-            if(err)return err;
-            err = fus_lexer_expect(lexer, ")");
-            if(err)return err;
             err = fus_lexer_next(lexer);
+            if(err)return err;
+            err = fus_lexer_get(lexer, "(");
+            if(err)return err;
+            err = fus_lexer_get_chr(lexer, &default_vert_c);
+            if(err)return err;
+            err = fus_lexer_get(lexer, ")");
             if(err)return err;
         }
 
         if(fus_lexer_got(lexer, "default_edge")){
-            err = fus_lexer_expect(lexer, "(");
-            if(err)return err;
-            err = fus_lexer_expect_chr(lexer, &default_edge_c);
-            if(err)return err;
-            err = fus_lexer_expect(lexer, ")");
-            if(err)return err;
             err = fus_lexer_next(lexer);
+            if(err)return err;
+            err = fus_lexer_get(lexer, "(");
+            if(err)return err;
+            err = fus_lexer_get_chr(lexer, &default_edge_c);
+            if(err)return err;
+            err = fus_lexer_get(lexer, ")");
             if(err)return err;
         }
 
         if(fus_lexer_got(lexer, "default_face")){
-            err = fus_lexer_expect(lexer, "(");
-            if(err)return err;
-            err = fus_lexer_expect_chr(lexer, &default_face_c);
-            if(err)return err;
-            err = fus_lexer_expect(lexer, ")");
-            if(err)return err;
             err = fus_lexer_next(lexer);
+            if(err)return err;
+            err = fus_lexer_get(lexer, "(");
+            if(err)return err;
+            err = fus_lexer_get_chr(lexer, &default_face_c);
+            if(err)return err;
+            err = fus_lexer_get(lexer, ")");
             if(err)return err;
         }
 
         err = fus_lexer_get(lexer, "collmap");
         if(err)return err;
-        err = fus_lexer_expect(lexer, "(");
+        err = fus_lexer_get(lexer, "(");
         if(err)return err;
     }
 
@@ -772,9 +769,6 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
 
     /* read in lines */
     while(1){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-
         if(fus_lexer_got(lexer, ")"))break;
 
         /* resize array of lines, if necessary */
@@ -972,21 +966,18 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
         But ultimately we should really just move the call to
         hexmap_init out of hexmap_parse into hexmap_load. SO DO THAT */
 
-    err = fus_lexer_next(lexer);
-    if(err)return err;
-
 
     /* parse unit */
     vec_t unit;
     err = fus_lexer_get(lexer, "unit");
     if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
+    err = fus_lexer_get(lexer, "(");
     if(err)return err;
     for(int i = 0; i < prend->space->dims; i++){
-        err = fus_lexer_expect_int(lexer, &unit[i]);
+        err = fus_lexer_get_int(lexer, &unit[i]);
         if(err)return err;
     }
-    err = fus_lexer_expect(lexer, ")");
+    err = fus_lexer_get(lexer, ")");
     if(err)return err;
 
     /* init the map */
@@ -995,11 +986,9 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
 
     /* parse spawn point */
     char *spawn_filename = NULL;
-    err = fus_lexer_expect(lexer, "spawn");
+    err = fus_lexer_get(lexer, "spawn");
     if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
-    if(err)return err;
-    err = fus_lexer_next(lexer);
+    err = fus_lexer_get(lexer, "(");
     if(err)return err;
     if(fus_lexer_got_str(lexer)){
         err = fus_lexer_get_str(lexer, &spawn_filename);
@@ -1008,40 +997,38 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
         err = fus_lexer_get_vec(lexer, space, map->spawn);
         if(err)return err;
     }
-    err = fus_lexer_expect(lexer, ")");
+    err = fus_lexer_get(lexer, ")");
     if(err)return err;
 
     /* default palette */
     char *default_palette_filename;
-    err = fus_lexer_expect(lexer, "default_palette");
+    err = fus_lexer_get(lexer, "default_palette");
     if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
+    err = fus_lexer_get(lexer, "(");
     if(err)return err;
-    err = fus_lexer_expect_str(lexer, &default_palette_filename);
+    err = fus_lexer_get_str(lexer, &default_palette_filename);
     if(err)return err;
-    err = fus_lexer_expect(lexer, ")");
+    err = fus_lexer_get(lexer, ")");
     if(err)return err;
 
     /* default tileset */
     char *default_tileset_filename;
-    err = fus_lexer_expect(lexer, "default_tileset");
+    err = fus_lexer_get(lexer, "default_tileset");
     if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
+    err = fus_lexer_get(lexer, "(");
     if(err)return err;
-    err = fus_lexer_expect_str(lexer, &default_tileset_filename);
+    err = fus_lexer_get_str(lexer, &default_tileset_filename);
     if(err)return err;
-    err = fus_lexer_expect(lexer, ")");
+    err = fus_lexer_get(lexer, ")");
     if(err)return err;
 
 
     /* parse submaps */
-    err = fus_lexer_expect(lexer, "submaps");
+    err = fus_lexer_get(lexer, "submaps");
     if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
+    err = fus_lexer_get(lexer, "(");
     if(err)return err;
     while(1){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
         if(fus_lexer_got(lexer, ")"))break;
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
@@ -1052,6 +1039,8 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
     }
+    err = fus_lexer_next(lexer);
+    if(err)return err;
 
 
     /* maybe get spawn point from a submap */
@@ -1083,10 +1072,9 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
     int err;
     vecspace_t *space = map->space;
 
-    err = fus_lexer_next(lexer);
-    if(err)return err;
-
     if(fus_lexer_got(lexer, "skip")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
         err = fus_lexer_parse_silent(lexer);
         if(err)return err;
         return 0;
@@ -1094,25 +1082,25 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
 
     char *submap_filename = NULL;
     if(fus_lexer_got(lexer, "file")){
-        err = fus_lexer_expect(lexer, "(");
-        if(err)return err;
-        err = fus_lexer_expect_str(lexer, &submap_filename);
-        if(err)return err;
-        err = fus_lexer_expect(lexer, ")");
-        if(err)return err;
         err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_get_str(lexer, &submap_filename);
+        if(err)return err;
+        err = fus_lexer_get(lexer, ")");
         if(err)return err;
     }
 
     vec_t pos = {0};
     if(fus_lexer_got(lexer, "pos")){
-        err = fus_lexer_expect(lexer, "(");
-        if(err)return err;
-        err = fus_lexer_expect_vec(lexer, space, pos);
-        if(err)return err;
-        err = fus_lexer_expect(lexer, ")");
-        if(err)return err;
         err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_get_vec(lexer, space, pos);
+        if(err)return err;
+        err = fus_lexer_get(lexer, ")");
         if(err)return err;
     }
     vec_add(space->dims, pos, parent_pos);
@@ -1121,54 +1109,54 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
     vec_t camera_pos;
     vec_cpy(space->dims, camera_pos, parent_camera_pos);
     if(fus_lexer_got(lexer, "camera")){
-        err = fus_lexer_expect(lexer, "(");
-        if(err)return err;
         err = fus_lexer_next(lexer);
         if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
         if(fus_lexer_got(lexer, "follow")){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
             camera_type = 1;
         }else{
             err = fus_lexer_get_vec(lexer, space, camera_pos);
             if(err)return err;
             vec_add(space->dims, camera_pos, pos);
         }
-        err = fus_lexer_expect(lexer, ")");
-        if(err)return err;
-        err = fus_lexer_next(lexer);
+        err = fus_lexer_get(lexer, ")");
         if(err)return err;
     }
 
     prismelmapper_t *mapper = parent_mapper;
     if(fus_lexer_got(lexer, "mapper")){
-        err = fus_lexer_expect(lexer, "(");
-        if(err)return err;
-        err = fus_lexer_expect_mapper(lexer, map->prend, NULL, &mapper);
-        if(err)return err;
-        err = fus_lexer_expect(lexer, ")");
-        if(err)return err;
         err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_get_mapper(lexer, map->prend, NULL, &mapper);
+        if(err)return err;
+        err = fus_lexer_get(lexer, ")");
         if(err)return err;
     }
 
     if(fus_lexer_got(lexer, "palette")){
-        err = fus_lexer_expect(lexer, "(");
-        if(err)return err;
-        err = fus_lexer_expect_str(lexer, &palette_filename);
-        if(err)return err;
-        err = fus_lexer_expect(lexer, ")");
-        if(err)return err;
         err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_get_str(lexer, &palette_filename);
+        if(err)return err;
+        err = fus_lexer_get(lexer, ")");
         if(err)return err;
     }
 
     if(fus_lexer_got(lexer, "tileset")){
-        err = fus_lexer_expect(lexer, "(");
-        if(err)return err;
-        err = fus_lexer_expect_str(lexer, &tileset_filename);
-        if(err)return err;
-        err = fus_lexer_expect(lexer, ")");
-        if(err)return err;
         err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_get_str(lexer, &tileset_filename);
+        if(err)return err;
+        err = fus_lexer_get(lexer, ")");
         if(err)return err;
     }
 
@@ -1188,19 +1176,19 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
     }
 
     if(fus_lexer_got(lexer, "recordings")){
-        err = fus_lexer_expect(lexer, "(");
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
         if(err)return err;
         while(1){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
             if(fus_lexer_got(lexer, ")"))break;
 
             char *recording_filename;
             err = fus_lexer_get(lexer, "(");
             if(err)return err;
-            err = fus_lexer_expect_str(lexer, &recording_filename);
+            err = fus_lexer_get_str(lexer, &recording_filename);
             if(err)return err;
-            err = fus_lexer_expect(lexer, ")");
+            err = fus_lexer_get(lexer, ")");
             if(err)return err;
             ARRAY_PUSH(char, map->recording_filenames,
                 recording_filename)
@@ -1210,11 +1198,11 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
     }
 
     if(fus_lexer_got(lexer, "submaps")){
-        err = fus_lexer_expect(lexer, "(");
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
         if(err)return err;
         while(1){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
             if(fus_lexer_got(lexer, ")"))break;
             err = fus_lexer_get(lexer, "(");
             if(err)return err;

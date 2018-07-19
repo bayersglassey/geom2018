@@ -12,6 +12,8 @@ static int fus_lexer_get_indent(fus_lexer_t *lexer);
 int fus_lexer_init(fus_lexer_t *lexer, const char *text,
     const char *filename
 ){
+    int err;
+
     lexer->debug = false;
 
     int indents_size = INITIAL_INDENTS_SIZE;
@@ -33,7 +35,9 @@ int fus_lexer_init(fus_lexer_t *lexer, const char *text,
     lexer->indents = indents;
     lexer->returning_indents = 0;
 
-    int err = fus_lexer_get_indent(lexer);
+    err = fus_lexer_get_indent(lexer);
+    if(err)return err;
+    err = fus_lexer_next(lexer);
     if(err)return err;
     return 0;
 }
@@ -55,11 +59,16 @@ void fus_lexer_dump(fus_lexer_t *lexer, FILE *f){
     fprintf(f, "  returning_indents = %i\n", lexer->returning_indents);
 }
 
-void fus_lexer_err_info(fus_lexer_t *lexer){
-    fprintf(stderr, "Lexer error: %s: row %i: col %i: ",
+void fus_lexer_info(fus_lexer_t *lexer, FILE *f){
+    fprintf(f, "%s: row %i: col %i: ",
         lexer->filename,
         lexer->row + 1,
         lexer->col - lexer->token_len + 1);
+}
+
+void fus_lexer_err_info(fus_lexer_t *lexer){
+    fprintf(stderr, "Lexer error: ");
+    fus_lexer_info(lexer, stderr);
 }
 
 static void fus_lexer_start_token(fus_lexer_t *lexer){
@@ -394,7 +403,7 @@ int fus_lexer_get(fus_lexer_t *lexer, const char *text){
         fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
         return 2;
     }
-    return 0;
+    return fus_lexer_next(lexer);
 }
 
 int fus_lexer_get_name(fus_lexer_t *lexer, char **name){
@@ -406,7 +415,7 @@ int fus_lexer_get_name(fus_lexer_t *lexer, char **name){
     }
     *name = strndup(lexer->token, lexer->token_len);
     if(*name == NULL)return 1;
-    return 0;
+    return fus_lexer_next(lexer);
 }
 
 int fus_lexer_get_str(fus_lexer_t *lexer, char **s){
@@ -451,7 +460,7 @@ int fus_lexer_get_str(fus_lexer_t *lexer, char **s){
         fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
         return 2;
     }
-    return 0;
+    return fus_lexer_next(lexer);
 }
 
 int fus_lexer_get_chr(fus_lexer_t *lexer, char *c){
@@ -478,7 +487,7 @@ int fus_lexer_get_int(fus_lexer_t *lexer, int *i){
         return 2;
     }
     *i = atoi(lexer->token);
-    return 0;
+    return fus_lexer_next(lexer);
 }
 
 int fus_lexer_get_int_fancy(fus_lexer_t *lexer, int *i_ptr){
@@ -490,42 +499,39 @@ int fus_lexer_get_int_fancy(fus_lexer_t *lexer, int *i_ptr){
         int i = 0;
         err = fus_lexer_get(lexer, "eval");
         if(err)goto err;
-        err = fus_lexer_expect(lexer, "(");
-        if(err)goto err;
-        err = fus_lexer_next(lexer);
+        err = fus_lexer_get(lexer, "(");
         if(err)goto err;
         while(1){
             if(fus_lexer_got(lexer, ")"))break;
 
             bool neg = false;
             if(fus_lexer_got(lexer, "+")){
+                err = fus_lexer_next(lexer);
+                if(err)return err;
                 neg = false;
-                err = fus_lexer_next(lexer);
-                if(err)goto err;
             }else if(fus_lexer_got(lexer, "-")){
-                neg = true;
                 err = fus_lexer_next(lexer);
-                if(err)goto err;
+                if(err)return err;
+                neg = true;
             }
 
             int add;
             err = fus_lexer_get_int(lexer, &add);
             if(err)goto err;
 
-            err = fus_lexer_next(lexer);
-            if(err)goto err;
-
             if(fus_lexer_got(lexer, "*")){
-                int mul;
-                err = fus_lexer_expect_int(lexer, &mul);
-                if(err)goto err;
                 err = fus_lexer_next(lexer);
+                if(err)return err;
+                int mul;
+                err = fus_lexer_get_int(lexer, &mul);
                 if(err)goto err;
                 add *= mul;
             }
 
             i += neg? -add: add;
         }
+        err = fus_lexer_next(lexer);
+        if(err)return err;
         *i_ptr = i;
     }
     return 0;
@@ -540,18 +546,13 @@ int fus_lexer_get_int_range(fus_lexer_t *lexer, int maxlen,
 ){
     int err;
 
-    /* NOTE: Leaves parser looking at next unparsed token, which is
-    how parsing *should* be, but currently everything else leaves parser
-    looking at last parsed token.
-    TODO: All parsing stuff should work like this function. */
-
     int i = 0;
     int len = 1;
 
     if(fus_lexer_got(lexer, "*")){
-        len = maxlen;
         err = fus_lexer_next(lexer);
         if(err)return err;
+        len = maxlen;
     }else{
         err = fus_lexer_get_int(lexer, &i);
         if(err)return err;
@@ -561,11 +562,11 @@ int fus_lexer_get_int_range(fus_lexer_t *lexer, int maxlen,
                 "Expected int within 0..%i, got: %.*s\n",
                 maxlen, lexer->token_len, lexer->token);
             return 2;}
-        err = fus_lexer_next(lexer);
-        if(err)return err;
 
         if(fus_lexer_got(lexer, ",")){
-            err = fus_lexer_expect_int(lexer, &len);
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            err = fus_lexer_get_int(lexer, &len);
             if(err)return err;
             if(len < 0 || i + len > maxlen){
                 fus_lexer_err_info(lexer);
@@ -573,58 +574,12 @@ int fus_lexer_get_int_range(fus_lexer_t *lexer, int maxlen,
                     "Expected int within 0..%i, got: %.*s\n",
                     maxlen-i, lexer->token_len, lexer->token);
                 return 2;}
-            err = fus_lexer_next(lexer);
-            if(err)return err;
         }
     }
 
     *i_ptr = i;
     *len_ptr = len;
     return 0;
-}
-
-int fus_lexer_expect(fus_lexer_t *lexer, const char *text){
-    int err = fus_lexer_next(lexer);
-    if(err)return err;
-    return fus_lexer_get(lexer, text);
-}
-
-int fus_lexer_expect_name(fus_lexer_t *lexer, char **name){
-    int err = fus_lexer_next(lexer);
-    if(err)return err;
-    return fus_lexer_get_name(lexer, name);
-}
-
-int fus_lexer_expect_str(fus_lexer_t *lexer, char **s){
-    int err = fus_lexer_next(lexer);
-    if(err)return err;
-    return fus_lexer_get_str(lexer, s);
-}
-
-int fus_lexer_expect_chr(fus_lexer_t *lexer, char *c){
-    int err = fus_lexer_next(lexer);
-    if(err)return err;
-    return fus_lexer_get_chr(lexer, c);
-}
-
-int fus_lexer_expect_int(fus_lexer_t *lexer, int *i){
-    int err = fus_lexer_next(lexer);
-    if(err)return err;
-    return fus_lexer_get_int(lexer, i);
-}
-
-int fus_lexer_expect_int_fancy(fus_lexer_t *lexer, int *i){
-    int err = fus_lexer_next(lexer);
-    if(err)return err;
-    return fus_lexer_get_int_fancy(lexer, i);
-}
-
-int fus_lexer_expect_int_range(fus_lexer_t *lexer, int maxlen,
-    int *i_ptr, int *len_ptr
-){
-    int err = fus_lexer_next(lexer);
-    if(err)return err;
-    return fus_lexer_get_int_range(lexer, maxlen, i_ptr, len_ptr);
 }
 
 int fus_lexer_unexpected(fus_lexer_t *lexer, const char *expected){
@@ -640,12 +595,13 @@ int fus_lexer_parse_silent(fus_lexer_t *lexer){
     while(1){
         int err;
 
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-
         if(fus_lexer_got(lexer, "(")){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
             depth++;
         }else if(fus_lexer_got(lexer, ")")){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
             depth--;
             if(depth == 0){
                 break;
@@ -654,6 +610,8 @@ int fus_lexer_parse_silent(fus_lexer_t *lexer){
             return fus_lexer_unexpected(lexer, NULL);
         }else{
             /* eat atoms silently */
+            err = fus_lexer_next(lexer);
+            if(err)return err;
         }
     }
     return 0;

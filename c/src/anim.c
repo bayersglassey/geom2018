@@ -63,26 +63,23 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
     int err;
 
     while(1){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-
         if(fus_lexer_done(lexer))break;
 
         char *name;
         err = fus_lexer_get_name(lexer, &name);
         if(err)return err;
 
-        err = fus_lexer_expect(lexer, "(");
+        err = fus_lexer_get(lexer, "(");
         if(err)return err;
 
         char *rgraph_name;
-        err = fus_lexer_expect(lexer, "rgraph");
+        err = fus_lexer_get(lexer, "rgraph");
         if(err)return err;
-        err = fus_lexer_expect(lexer, "(");
+        err = fus_lexer_get(lexer, "(");
         if(err)return err;
-        err = fus_lexer_expect_str(lexer, &rgraph_name);
+        err = fus_lexer_get_str(lexer, &rgraph_name);
         if(err)return err;
-        err = fus_lexer_expect(lexer, ")");
+        err = fus_lexer_get(lexer, ")");
         if(err)return err;
         rendergraph_t *rgraph = prismelrenderer_get_rendergraph(
             prend, rgraph_name);
@@ -96,36 +93,33 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
         if(err)return err;
 
         while(1){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
-
             if(fus_lexer_got(lexer, ")"))break;
 
             ARRAY_PUSH_NEW(state_rule_t, state->rules, rule)
 
             err = fus_lexer_get(lexer, "if");
             if(err)return err;
-            err = fus_lexer_expect(lexer, "(");
+            err = fus_lexer_get(lexer, "(");
             if(err)return err;
             while(1){
-                err = fus_lexer_next(lexer);
-                if(err)return err;
                 if(fus_lexer_got(lexer, ")")){
                     break;
                 }else if(fus_lexer_got(lexer, "false")){
+                    err = fus_lexer_next(lexer);
+                    if(err)return err;
                     ARRAY_PUSH_NEW(state_cond_t, rule->conds, cond)
                     cond->type = state_cond_type_false;
                 }else if(fus_lexer_got(lexer, "key")){
-                    err = fus_lexer_expect(lexer, "(");
-                    if(err)return err;
                     err = fus_lexer_next(lexer);
+                    if(err)return err;
+                    err = fus_lexer_get(lexer, "(");
                     if(err)return err;
 
                     bool yes = true;
                     if(fus_lexer_got(lexer, "not")){
-                        yes = false;
                         err = fus_lexer_next(lexer);
                         if(err)return err;
+                        yes = false;
                     }
 
                     int kstate;
@@ -139,9 +133,11 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                         return fus_lexer_unexpected(lexer,
                             "isdown or wasdown or wentdown");
                     }
+                    err = fus_lexer_next(lexer);
+                    if(err)return err;
 
                     char *name;
-                    err = fus_lexer_expect_name(lexer, &name);
+                    err = fus_lexer_get_name(lexer, &name);
                     if(err)return err;
 
                     char c = name[0];
@@ -157,31 +153,36 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     cond->u.key.yes = yes;
                     free(name);
 
-                    err = fus_lexer_expect(lexer, ")");
+                    err = fus_lexer_get(lexer, ")");
                     if(err)return err;
                 }else if(fus_lexer_got(lexer, "coll")){
-                    err = fus_lexer_expect(lexer, "(");
+                    err = fus_lexer_next(lexer);
+                    if(err)return err;
+                    err = fus_lexer_get(lexer, "(");
                     if(err)return err;
 
                     int flags = 0;
 
-                    err = fus_lexer_next(lexer);
-                    if(err)return err;
                     if(fus_lexer_got(lexer, "all"))flags ^= 1;
                     else if(fus_lexer_got(lexer, "any"))/* don't do nuthin */;
                     else return fus_lexer_unexpected(lexer, "all or any");
-
                     err = fus_lexer_next(lexer);
                     if(err)return err;
+
                     if(fus_lexer_got(lexer, "yes"))flags ^= 2;
                     else if(fus_lexer_got(lexer, "no"))/* dinnae move a muscle */;
                     else return fus_lexer_unexpected(lexer, "yes or no");
+                    err = fus_lexer_next(lexer);
+                    if(err)return err;
 
                     hexcollmap_t *collmap = calloc(1, sizeof(*collmap));
                     if(collmap == NULL)return 1;
                     err = hexcollmap_init(collmap, space);
                     if(err)return err;
                     err = hexcollmap_parse(collmap, lexer, true);
+                    if(err)return err;
+
+                    err = fus_lexer_get(lexer, ")");
                     if(err)return err;
 
                     ARRAY_PUSH_NEW(state_cond_t, rule->conds, cond)
@@ -192,86 +193,104 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     return fus_lexer_unexpected(lexer, NULL);
                 }
             }
-
-            err = fus_lexer_expect(lexer, "then");
+            err = fus_lexer_next(lexer);
             if(err)return err;
-            err = fus_lexer_expect(lexer, "(");
+
+            err = fus_lexer_get(lexer, "then");
+            if(err)return err;
+            err = fus_lexer_get(lexer, "(");
             if(err)return err;
             while(1){
-                err = fus_lexer_next(lexer);
-                if(err)return err;
                 if(fus_lexer_got(lexer, ")")){
                     break;
                 }else if(fus_lexer_got(lexer, "print")){
-                    err = fus_lexer_expect(lexer, "(");
+                    err = fus_lexer_next(lexer);
+                    if(err)return err;
+                    err = fus_lexer_get(lexer, "(");
                     if(err)return err;
                     char *msg;
-                    err = fus_lexer_expect_str(lexer, &msg);
+                    err = fus_lexer_get_str(lexer, &msg);
                     if(err)return err;
                     ARRAY_PUSH_NEW(state_effect_t, rule->effects, effect)
                     effect->type = state_effect_type_print;
                     effect->u.msg = msg;
-                    err = fus_lexer_expect(lexer, ")");
+                    err = fus_lexer_get(lexer, ")");
                     if(err)return err;
                 }else if(fus_lexer_got(lexer, "move")){
-                    err = fus_lexer_expect(lexer, "(");
+                    err = fus_lexer_next(lexer);
+                    if(err)return err;
+                    err = fus_lexer_get(lexer, "(");
                     if(err)return err;
                     ARRAY_PUSH_NEW(state_effect_t, rule->effects, effect)
                     effect->type = state_effect_type_move;
                     for(int i = 0; i < space->dims; i++){
-                        err = fus_lexer_expect_int(lexer, &effect->u.vec[i]);
+                        err = fus_lexer_get_int(lexer, &effect->u.vec[i]);
                         if(err)return err;
                     }
-                    err = fus_lexer_expect(lexer, ")");
+                    err = fus_lexer_get(lexer, ")");
                     if(err)return err;
                 }else if(fus_lexer_got(lexer, "rot")){
-                    err = fus_lexer_expect(lexer, "(");
+                    err = fus_lexer_next(lexer);
+                    if(err)return err;
+                    err = fus_lexer_get(lexer, "(");
                     if(err)return err;
                     int rot;
-                    err = fus_lexer_expect_int(lexer, &rot);
+                    err = fus_lexer_get_int(lexer, &rot);
                     if(err)return err;
                     ARRAY_PUSH_NEW(state_effect_t, rule->effects, effect)
                     effect->type = state_effect_type_rot;
                     effect->u.rot = rot_contain(space->rot_max, rot);
-                    err = fus_lexer_expect(lexer, ")");
+                    err = fus_lexer_get(lexer, ")");
                     if(err)return err;
                 }else if(fus_lexer_got(lexer, "turn")){
+                    err = fus_lexer_next(lexer);
+                    if(err)return err;
                     ARRAY_PUSH_NEW(state_effect_t, rule->effects, effect)
                     effect->type = state_effect_type_turn;
                 }else if(fus_lexer_got(lexer, "goto")){
-                    err = fus_lexer_expect(lexer, "(");
+                    err = fus_lexer_next(lexer);
+                    if(err)return err;
+                    err = fus_lexer_get(lexer, "(");
                     if(err)return err;
 
                     char *goto_name;
-                    err = fus_lexer_expect_name(lexer, &goto_name);
+                    err = fus_lexer_get_name(lexer, &goto_name);
                     if(err)return err;
 
                     ARRAY_PUSH_NEW(state_effect_t, rule->effects, effect)
                     effect->type = state_effect_type_goto;
                     effect->u.goto_name = goto_name;
 
-                    err = fus_lexer_expect(lexer, ")");
+                    err = fus_lexer_get(lexer, ")");
                     if(err)return err;
                 }else if(fus_lexer_got(lexer, "delay")){
-                    err = fus_lexer_expect(lexer, "(");
+                    err = fus_lexer_next(lexer);
+                    if(err)return err;
+                    err = fus_lexer_get(lexer, "(");
                     if(err)return err;
 
                     int delay;
-                    err = fus_lexer_expect_int(lexer, &delay);
+                    err = fus_lexer_get_int(lexer, &delay);
                     if(err)return err;
 
                     ARRAY_PUSH_NEW(state_effect_t, rule->effects, effect)
                     effect->type = state_effect_type_delay;
                     effect->u.delay = delay;
 
-                    err = fus_lexer_expect(lexer, ")");
+                    err = fus_lexer_get(lexer, ")");
                     if(err)return err;
                 }else{
                     return fus_lexer_unexpected(lexer, NULL);
                 }
             }
+            err = fus_lexer_next(lexer);
+            if(err)return err;
         }
+        err = fus_lexer_next(lexer);
+        if(err)return err;
     }
+    err = fus_lexer_next(lexer);
+    if(err)return err;
     return 0;
 }
 

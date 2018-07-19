@@ -15,13 +15,12 @@
         if(err)return err;
 
         while(1){
-            int err = fus_lexer_next(&lexer);
-            if(err)return err;
-
             if(fus_lexer_done(&lexer))break;
             printf("Lexed: ");
             fus_lexer_show(&lexer, stdout);
             printf("\n");
+            int err = fus_lexer_next(&lexer);
+            if(err)return err;
         }
 
 */
@@ -65,6 +64,7 @@ typedef struct fus_lexer {
 int fus_lexer_init(fus_lexer_t *lexer, const char *text,
     const char *filename);
 void fus_lexer_dump(fus_lexer_t *lexer, FILE *f);
+void fus_lexer_info(fus_lexer_t *lexer, FILE *f);
 void fus_lexer_err_info(fus_lexer_t *lexer);
 int fus_lexer_next(fus_lexer_t *lexer);
 bool fus_lexer_done(fus_lexer_t *lexer);
@@ -80,14 +80,6 @@ int fus_lexer_get_chr(fus_lexer_t *lexer, char *c);
 int fus_lexer_get_int(fus_lexer_t *lexer, int *i);
 int fus_lexer_get_int_fancy(fus_lexer_t *lexer, int *i_ptr);
 int fus_lexer_get_int_range(fus_lexer_t *lexer, int maxlen,
-    int *i_ptr, int *len_ptr);
-int fus_lexer_expect(fus_lexer_t *lexer, const char *text);
-int fus_lexer_expect_name(fus_lexer_t *lexer, char **name);
-int fus_lexer_expect_str(fus_lexer_t *lexer, char **s);
-int fus_lexer_expect_chr(fus_lexer_t *lexer, char *c);
-int fus_lexer_expect_int(fus_lexer_t *lexer, int *i);
-int fus_lexer_expect_int_fancy(fus_lexer_t *lexer, int *i);
-int fus_lexer_expect_int_range(fus_lexer_t *lexer, int maxlen,
     int *i_ptr, int *len_ptr);
 int fus_lexer_unexpected(fus_lexer_t *lexer, const char *expected);
 int fus_lexer_parse_silent(fus_lexer_t *lexer);

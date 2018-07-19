@@ -303,23 +303,12 @@ palettemapper_t *palettemapper_get_pmapplication(palettemapper_t *mapper,
  * FUS_LEXER *
  *************/
 
-int fus_lexer_expect_palettemapper(fus_lexer_t *lexer,
-    prismelrenderer_t *prend, char *name, palettemapper_t **palmapper_ptr);
 int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
     prismelrenderer_t *prend, char *name, palettemapper_t **palmapper_ptr);
-
-int fus_lexer_expect_prismel(fus_lexer_t *lexer,
-    prismelrenderer_t *prend, char *name, prismel_t **prismel_ptr);
 int fus_lexer_get_prismel(fus_lexer_t *lexer,
     prismelrenderer_t *prend, char *name, prismel_t **prismel_ptr);
-
-int fus_lexer_expect_rendergraph(fus_lexer_t *lexer,
-    prismelrenderer_t *prend, char *name, rendergraph_t **rgraph_ptr);
 int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
     prismelrenderer_t *prend, char *name, rendergraph_t **rgraph_ptr);
-
-int fus_lexer_expect_mapper(fus_lexer_t *lexer,
-    prismelrenderer_t *prend, char *name, prismelmapper_t **mapper_ptr);
 int fus_lexer_get_mapper(fus_lexer_t *lexer,
     prismelrenderer_t *prend, char *name, prismelmapper_t **mapper_ptr);
 

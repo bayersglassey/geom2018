@@ -51,22 +51,22 @@ int font_parse(font_t *font, fus_lexer_t *lexer){
 
     int char_w, char_h;
 
-    err = fus_lexer_expect(lexer, "char_w");
+    err = fus_lexer_get(lexer, "char_w");
     if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
+    err = fus_lexer_get(lexer, "(");
     if(err)return err;
-    err = fus_lexer_expect_int(lexer, &char_w);
+    err = fus_lexer_get_int(lexer, &char_w);
     if(err)return err;
-    err = fus_lexer_expect(lexer, ")");
+    err = fus_lexer_get(lexer, ")");
     if(err)return err;
 
-    err = fus_lexer_expect(lexer, "char_h");
+    err = fus_lexer_get(lexer, "char_h");
     if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
+    err = fus_lexer_get(lexer, "(");
     if(err)return err;
-    err = fus_lexer_expect_int(lexer, &char_h);
+    err = fus_lexer_get_int(lexer, &char_h);
     if(err)return err;
-    err = fus_lexer_expect(lexer, ")");
+    err = fus_lexer_get(lexer, ")");
     if(err)return err;
 
 
@@ -95,15 +95,12 @@ int font_parse(font_t *font, fus_lexer_t *lexer){
      * PARSE & RENDER CHARS *
      ************************/
 
-    err = fus_lexer_expect(lexer, "chars");
+    err = fus_lexer_get(lexer, "chars");
     if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
+    err = fus_lexer_get(lexer, "(");
     if(err)return err;
 
     while(1){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-
         if(fus_lexer_got(lexer, ")"))break;
 
         char char_c;
@@ -113,12 +110,12 @@ int font_parse(font_t *font, fus_lexer_t *lexer){
         int char_x, char_y;
         font_get_char_coords(font, char_c, &char_x, &char_y);
 
-        err = fus_lexer_expect(lexer, "(");
+        err = fus_lexer_get(lexer, "(");
         if(err)return err;
 
         for(int y = 0; y < char_h; y++){
             char *line;
-            err = fus_lexer_expect_str(lexer, &line);
+            err = fus_lexer_get_str(lexer, &line);
             if(err)return err;
             int line_w = strlen(line);
             if(line_w != char_w){
@@ -141,9 +138,11 @@ int font_parse(font_t *font, fus_lexer_t *lexer){
             free(line);
         }
 
-        err = fus_lexer_expect(lexer, ")");
+        err = fus_lexer_get(lexer, ")");
         if(err)return err;
     }
+    err = fus_lexer_next(lexer);
+    if(err)return err;
 
 
     /*************

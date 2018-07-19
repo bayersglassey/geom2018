@@ -221,9 +221,9 @@ static int palette_parse_color(fus_lexer_t *lexer, SDL_Color *color){
     int r, g, b;
     err = fus_lexer_get_int(lexer, &r);
     if(err)return err;
-    err = fus_lexer_expect_int(lexer, &g);
+    err = fus_lexer_get_int(lexer, &g);
     if(err)return err;
-    err = fus_lexer_expect_int(lexer, &b);
+    err = fus_lexer_get_int(lexer, &b);
     if(err)return err;
 
     color->r = r;
@@ -239,43 +239,35 @@ static int palette_parse(palette_t *pal, fus_lexer_t *lexer){
 
     int entry_i = 1; /* First one was the transparent color */
 
-    err = fus_lexer_expect(lexer, "colors");
+    err = fus_lexer_get(lexer, "colors");
     if(err)return err;
-    err = fus_lexer_expect(lexer, "(");
+    err = fus_lexer_get(lexer, "(");
     if(err)return err;
 
     while(1){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-
         if(fus_lexer_got(lexer, ")"))break;
 
         if(fus_lexer_got_int(lexer)){
             err = fus_lexer_get_int(lexer, &entry_i);
             if(err)return err;
-            err = fus_lexer_next(lexer);
-            if(err)return err;
         }
 
         err = fus_lexer_get(lexer, "(");
-        if(err)return err;
-        err = fus_lexer_next(lexer);
         if(err)return err;
 
         palette_entry_t *entry = &pal->entries[entry_i];
 
         if(fus_lexer_got(lexer, "animate")){
-            err = fus_lexer_expect(lexer, "(");
-            if(err)return err;
-
             err = fus_lexer_next(lexer);
+            if(err)return err;
+            err = fus_lexer_get(lexer, "(");
             if(err)return err;
 
             if(fus_lexer_got(lexer, "+")){
-                err = fus_lexer_expect_int_fancy(lexer,
-                    &entry->frame_offset);
-                if(err)return err;
                 err = fus_lexer_next(lexer);
+                if(err)return err;
+                err = fus_lexer_get_int_fancy(lexer,
+                    &entry->frame_offset);
                 if(err)return err;
             }
 
@@ -287,16 +279,14 @@ static int palette_parse(palette_t *pal, fus_lexer_t *lexer){
 
                 ARRAY_PUSH_NEW(palette_entry_keyframe_t, entry->keyframes,
                     keyframe)
-                err = fus_lexer_expect(lexer, "(");
-                if(err)return err;
-                err = fus_lexer_next(lexer);
+                err = fus_lexer_get(lexer, "(");
                 if(err)return err;
                 err = palette_parse_color(lexer, &keyframe->color);
                 if(err)return err;
-                err = fus_lexer_expect(lexer, ")");
+                err = fus_lexer_get(lexer, ")");
                 if(err)return err;
 
-                err = fus_lexer_expect_int(lexer, &keyframe->n_frames);
+                err = fus_lexer_get_int(lexer, &keyframe->n_frames);
                 if(err)return err;
                 if(keyframe->n_frames <= 0){
                     fus_lexer_err_info(lexer);
@@ -306,11 +296,11 @@ static int palette_parse(palette_t *pal, fus_lexer_t *lexer){
                         keyframe->n_frames);
                     return 2;}
 
-                err = fus_lexer_expect(lexer, ")");
-                if(err)return err;
-                err = fus_lexer_next(lexer);
+                err = fus_lexer_get(lexer, ")");
                 if(err)return err;
             }
+            err = fus_lexer_next(lexer);
+            if(err)return err;
 
             if(entry->keyframes_len == 0){
                 fus_lexer_err_info(lexer);
@@ -325,7 +315,7 @@ static int palette_parse(palette_t *pal, fus_lexer_t *lexer){
             if(err)return err;
         }
 
-        err = fus_lexer_expect(lexer, ")");
+        err = fus_lexer_get(lexer, ")");
         if(err)return err;
 
         int n_frames = 0;
@@ -342,6 +332,8 @@ static int palette_parse(palette_t *pal, fus_lexer_t *lexer){
 
         entry_i++;
     }
+    err = fus_lexer_next(lexer);
+    if(err)return err;
 
     return 0;
 }
