@@ -350,7 +350,7 @@ int player_set_state(player_t *player, const char *state_name){
         if(player->state == NULL){
             fprintf(stderr, "Couldn't init player stateset: "
                 "couldn't find state %s in stateset %s\n",
-                player->stateset.filename, state_name);
+                state_name, player->stateset.filename);
             return 2;}
     }
     player->frame_i = 0;
@@ -926,7 +926,7 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
         if(event->key.keysym.sym == SDLK_F6){
             game->zoomout = true;
         }else if(event->key.keysym.sym == SDLK_F7){
-            game->follow = true;
+            game->follow = !game->follow;
         }else if(event->key.keysym.sym == SDLK_F9){
             /* save recording */
             if(game->players_len >= 1){
@@ -971,8 +971,6 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
     }else if(event->type == SDL_KEYUP){
         if(event->key.keysym.sym == SDLK_F6){
             game->zoomout = false;
-        }else if(event->key.keysym.sym == SDLK_F7){
-            game->follow = false;
         }
     }
 
