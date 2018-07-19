@@ -1,7 +1,7 @@
 
 unit: 3 2 0 -1
-spawn: "data/maps/demo/start.fus"
-#spawn: "data/maps/demo/pebbles3.fus"
+#spawn: "data/maps/demo/start.fus"
+spawn: "data/maps/demo/pebbles3.fus"
 default_palette: "data/pal1.fus"
 default_tileset: "data/tileset1.fus"
 
@@ -70,6 +70,12 @@ submaps:
                             : "./data/maps/demo/recs/dodecas_roller_001.fus"
                             : "./data/maps/demo/recs/dodecas_roller_002.fus"
                         submaps: : mapper(("double")) submaps:
+                            :
+                                file: "data/maps/demo/dodecas_bg.fus"
+                                pos: (-55 -60)
+                            :
+                                file: "data/maps/demo/dodecas_bg2.fus"
+                                pos: (20 -65)
                             :
                                 file: "data/maps/demo/dodecas_0_0.fus"
                                 pos: (1 -6)
