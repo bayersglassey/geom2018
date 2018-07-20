@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include <SDL2/SDL.h>
 
@@ -20,8 +21,20 @@ int main(int n_args, char *args[]){
     int err;
     char driver[200];
 
+    if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO)){
+        fprintf(stderr, "SDL_Init error: %s\n", SDL_GetError());
+        return 2;
+    }
+
+    int n_audio_devices = SDL_GetNumAudioDevices(false);
+    printf("Audio devices:\n");
+    for(int i = 0; i < n_audio_devices; i++){
+        const char *device = SDL_GetAudioDeviceName(i, false);
+        printf("  %s\n", device);
+    }
+
     int n_drivers = SDL_GetNumVideoDrivers();
-    printf("Drivers:\n");
+    printf("Video drivers:\n");
     for(int i = 0; i < n_drivers; i++){
         const char *driver = SDL_GetVideoDriver(i);
         printf("  %s\n", driver);
