@@ -6,22 +6,6 @@ Jun 3, 2018:
 - reload + renderall crashes!
     run valgrind, maybe it will find something
     ...nope, it's happening in SDL dynamic lib somewhere...
-- fus_lexer: Leaving closing quote off a string literal doesn't seem
-    to cause an issue?..
-    (With the console input of main_sdl.c)
-
-
-Jun 9, 2018:
-------------
-
-- review uses of RLE
-    RLEDestFormat - we keep running into undefined reads of these...
-    Specifically as a result of SDL_CreateTextureFromSurface...
-    Look at SDL source, figure out wtf is going on
-
-    Theory: we can recreate the bug by creating a surface, blitting it onto
-    something else, then creating a texture from it.
-        ...nope, didn't work :|
 
 
 Jun 14, 2018:
@@ -87,10 +71,12 @@ Jun 30, 2018:
 
 WHAT'S NEEDED FOR A PROPER DEMO:
 
-    - Better map.
-        - Background/foreground maps.
-    - Better camera scrolling.
+    - Better camera scrolling / palette transitions.
     - Music + SFX. Almost anything will do for now.
+    - Speed. Don't cache so much stuff...
+        -> calculate bitmap bounds without creating surface,
+            compare bounds against camera/screen to decide whether to
+            bother rendering
     - Get rid of hexmap "unit": unit starts as (1 0 0 0) and only
         mappers change it.
         Then add a way in the map.fus files to specify mapper cache
@@ -127,6 +113,14 @@ WHAT'S NEEDED FOR A PROPER DEMO:
         - Bring back "die" state effect?..
         - Can we abuse player->cooldown and have the "jump" state
             trigger death after some amount of time?
+            -> I prefer allowing player to respawn whenever they like,
+                and also letting them fly off into space as far as they
+                "want".
+                So, once exploded, dead=true, and a message can show
+                at bottom of screen "you died, press 1 to respawn" or
+                whatever, but players are free to fly off into space
+                and wait for that message, to see if they'll actually
+                land on something.
 
 
 
