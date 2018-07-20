@@ -221,7 +221,7 @@ static int fus_lexer_parse_str(fus_lexer_t *lexer){
     /* Include leading '"' */
     fus_lexer_eat(lexer);
 
-    while(lexer->pos < lexer->text_len){
+    while(1){
         char c = lexer->text[lexer->pos];
         if(c == '\0'){
             goto err_eof;

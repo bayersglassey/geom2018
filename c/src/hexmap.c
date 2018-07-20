@@ -1032,7 +1032,7 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
         if(fus_lexer_got(lexer, ")"))break;
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
-        err = hexmap_parse_submap(map, lexer,
+        err = hexmap_parse_submap(map, lexer, true,
             (vec_t){0}, (vec_t){0}, 0, NULL,
             default_palette_filename, default_tileset_filename);
         if(err)return err;
@@ -1064,7 +1064,7 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
     return 0;
 }
 
-int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
+int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
     vec_t parent_pos, vec_t parent_camera_pos, int parent_camera_type,
     prismelmapper_t *parent_mapper, char *palette_filename,
     char *tileset_filename
@@ -1078,6 +1078,12 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
         err = fus_lexer_parse_silent(lexer);
         if(err)return err;
         return 0;
+    }
+
+    if(fus_lexer_got(lexer, "bg")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        solid = false;
     }
 
     char *submap_filename = NULL;
@@ -1162,8 +1168,9 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
 
     if(submap_filename != NULL){
         ARRAY_PUSH_NEW(hexmap_submap_t, map->submaps, submap)
-        err = hexmap_submap_init(map, submap, strdup(submap_filename), pos,
-            camera_type, camera_pos, mapper, palette_filename, tileset_filename);
+        err = hexmap_submap_init(map, submap, strdup(submap_filename),
+            solid, pos, camera_type, camera_pos, mapper,
+            palette_filename, tileset_filename);
         if(err)return err;
 
         /* load collmap */
@@ -1206,7 +1213,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
             if(fus_lexer_got(lexer, ")"))break;
             err = fus_lexer_get(lexer, "(");
             if(err)return err;
-            err = hexmap_parse_submap(map, lexer, pos,
+            err = hexmap_parse_submap(map, lexer, true, pos,
                 camera_pos, camera_type, mapper,
                 palette_filename, tileset_filename);
             if(err)return err;
@@ -1260,6 +1267,8 @@ bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
                     bool collide = false; \
                     for(int i = 0; i < map->submaps_len; i++){ \
                         hexmap_submap_t *submap = map->submaps[i]; \
+                        if(!submap->solid)continue; \
+                        \
                         hexcollmap_t *collmap1 = &submap->collmap; \
                         \
                         trf_t subindex; \
@@ -1298,13 +1307,15 @@ void hexmap_submap_cleanup(hexmap_submap_t *submap){
 }
 
 int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
-    char *filename, vec_t pos, int camera_type, vec_t camera_pos,
+    char *filename, bool solid, vec_t pos, int camera_type, vec_t camera_pos,
     prismelmapper_t *mapper, char *palette_filename, char *tileset_filename
 ){
     int err;
 
     submap->filename = filename;
     vec_cpy(MAX_VEC_DIMS, submap->pos, pos);
+
+    submap->solid = solid;
 
     submap->camera_type = camera_type;
     vec_cpy(MAX_VEC_DIMS, submap->camera_pos, camera_pos);

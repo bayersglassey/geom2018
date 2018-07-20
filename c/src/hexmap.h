@@ -105,6 +105,7 @@ bool hexcollmap_elem_is_solid(hexcollmap_elem_t *elem);
  **********/
 
 typedef struct hexmap_submap {
+    bool solid;
     vec_t pos;
     vec_t camera_pos;
     int camera_type;
@@ -141,7 +142,7 @@ int hexmap_load(hexmap_t *map, prismelrenderer_t *prend,
     const char *filename);
 int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
     fus_lexer_t *lexer);
-int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
+int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
     vec_t parent_pos, vec_t parent_camera_pos, int parent_camera_type,
     prismelmapper_t *parent_mapper, char *palette_filename,
     char *tileset_filename);
@@ -151,7 +152,7 @@ bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
 
 void hexmap_submap_cleanup(hexmap_submap_t *submap);
 int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
-    char *filename, vec_t pos, int camera_type, vec_t camera_pos,
+    char *filename, bool solid, vec_t pos, int camera_type, vec_t camera_pos,
     prismelmapper_t *mapper, char *palette_filename, char *tileset_filename);
 int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap);
 

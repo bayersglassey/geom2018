@@ -999,6 +999,8 @@ int hexgame_step(hexgame_t *game){
         bool collide = false;
         for(int i = 0; i < map->submaps_len; i++){
             hexmap_submap_t *submap = map->submaps[i];
+            if(!submap->solid)continue;
+
             hexcollmap_t *collmap = &submap->collmap;
 
             trf_t index = {0};
