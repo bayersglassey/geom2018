@@ -1,7 +1,8 @@
 
 unit: 3 2 0 -1
 #spawn: "data/maps/demo/start.fus"
-spawn: "data/maps/demo/pebbles3.fus"
+#spawn: "data/maps/demo/pebbles3.fus"
+spawn: "data/maps/demo/jungle.fus"
 default_palette: "data/pal1.fus"
 default_tileset: "data/tileset1.fus"
 
@@ -48,10 +49,26 @@ submaps:
                                 submaps:
                                     :
                                         file: "data/maps/demo/vines3.fus"
-                                        pos: (-20 -5)
+                                        pos: (-21 -6)
                                         camera: (-6 7)
                                         mapper: ("quadruple")
                                         palette: "data/maps/demo/pals/water.fus"
+                                    :
+                                        file: "data/maps/demo/vines4.fus"
+                                        pos: (-40 4)
+                                        camera: (0 0)
+                                    :
+                                        pos: (-40 4)
+                                        camera: (-10 -10)
+                                        palette: "data/pal1.fus"
+                                        tileset: "data/tileset1.fus"
+                                        submaps:
+                                            :
+                                                bg
+                                                file: "data/maps/demo/jungle_bg.fus"
+                                                tileset: "data/tileset1_bg.fus"
+                                            :
+                                                file: "data/maps/demo/jungle.fus"
             :
                 file: "data/maps/demo/pebbles.fus"
                 pos: (15 -2)

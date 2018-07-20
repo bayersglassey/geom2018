@@ -1,0 +1,7 @@
+
+verts:
+    "0": "map_vert0_bg"
+edges:
+    "0": "map_edge0_bg"
+faces:
+    "0": "map_face0_bg"
