@@ -17,11 +17,27 @@ int getln(char buf[], int buf_len){
     return 0;
 }
 
-int main(int n_args, char *args[]){
-    int err;
-    char driver[200];
+void show_usage(){
+    printf(
+        "Usage:\n"
+        " -V           Video test\n"
+        " -A           Audio test\n"
+        " -h --help    Show this help screen\n"
+    );
+}
 
-    if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO)){
+void print_audio_spec(SDL_AudioSpec *spec){
+    printf("  freq = %i\n", spec->freq);
+    printf("  format = %i\n", spec->format);
+    printf("  channels = %i\n", spec->channels);
+    printf("  silence = %i\n", spec->silence);
+    printf("  samples = %i\n", spec->samples);
+}
+
+int audio_test(int n_args, char *args[]){
+    int err;
+
+    if(SDL_Init(SDL_INIT_AUDIO)){
         fprintf(stderr, "SDL_Init error: %s\n", SDL_GetError());
         return 2;
     }
@@ -33,6 +49,42 @@ int main(int n_args, char *args[]){
         printf("  %s\n", device);
     }
 
+    printf("Choose device (empty string for best choice): ");
+    char device[200];
+    err = getln(device, 200); if(err)return err;
+
+    SDL_AudioSpec want, have;
+    SDL_AudioDeviceID device_id;
+
+    SDL_zero(want);
+    want.freq = 48000;
+    want.format = AUDIO_S16;
+    want.channels = 1;
+    want.samples = 4096;
+    device_id = SDL_OpenAudioDevice(!strcmp(device, "")? NULL: device,
+        false, &want, &have, SDL_AUDIO_ALLOW_ANY_CHANGE);
+    if(device_id == 0){
+        fprintf(stderr, "SDL_OpenAudioDevice error: %s\n", SDL_GetError());
+        return 2;
+    }
+
+    printf("WANTED:\n");
+    print_audio_spec(&want);
+    printf("GOT:\n");
+    print_audio_spec(&have);
+
+    SDL_AudioQuit();
+    return 0;
+}
+
+int video_test(int n_args, char *args[]){
+    int err;
+
+    if(SDL_Init(SDL_INIT_VIDEO)){
+        fprintf(stderr, "SDL_Init error: %s\n", SDL_GetError());
+        return 2;
+    }
+
     int n_drivers = SDL_GetNumVideoDrivers();
     printf("Video drivers:\n");
     for(int i = 0; i < n_drivers; i++){
@@ -41,7 +93,9 @@ int main(int n_args, char *args[]){
     }
 
     printf("Choose driver: ");
+    char driver[200];
     err = getln(driver, 200); if(err)return err;
+
     printf("Driver %s initializing...", driver);
     fflush(stdout);
     if(SDL_VideoInit(driver)){
@@ -53,6 +107,7 @@ int main(int n_args, char *args[]){
     printf("Fullscreen (y/n)? ");
     char fullscreen[200];
     err = getln(fullscreen, 200); if(err)return err;
+
     printf("Creating window...");
     fflush(stdout);
     SDL_Window* window = SDL_CreateWindow(
@@ -68,7 +123,7 @@ int main(int n_args, char *args[]){
 
     while(1){
         char action[200];
-        printf("Do something: ");
+        printf("Do something (\"exit\" to quit): ");
         err = getln(action, 200); if(err)return err;
         printf("Doing %s\n", action);
         if(strcmp(action, "exit") == 0)break;
@@ -76,6 +131,37 @@ int main(int n_args, char *args[]){
 
     SDL_DestroyWindow(window);
     SDL_VideoQuit();
+    return 0;
+}
+
+int main(int n_args, char *args[]){
+    int err = 0;
+
+    bool did_something = false;
+
+    for(int i = 1; i < n_args; i++){
+        char *arg = args[i];
+        if(!strcmp(arg, "-A")){
+            err = audio_test(n_args - i - 1, &args[i + 1]);
+            did_something = true;
+            break;
+        }else if(!strcmp(arg, "-V")){
+            err = video_test(n_args - i - 1, &args[i + 1]);
+            did_something = true;
+            break;
+        }else if(!strcmp(arg, "-h") || !strcmp(arg, "--help")){
+            show_usage();
+            did_something = true;
+            break;
+        }else{
+            printf("Unrecognized option: %s\n", arg);
+            err = 2;
+            break;
+        }
+    }
+
+    if(!did_something)show_usage();
+
     printf("Quitting!\n");
     return 0;
 }
