@@ -21,6 +21,17 @@ void gen_square(sample_t *data, int data_pos, int data_len, int freq, int vol){
     }
 }
 
+void gen_triangle(sample_t *data, int data_pos, int data_len, int add, int vol){
+    int y = 0;
+    bool up = true;
+    for(int i = 0; i < data_len; i++){
+        data[data_pos + i] += y;
+        y += up? add: -add;
+        if(y >= vol)up = false;
+        if(y <= -vol)up = true;
+    }
+}
+
 int main(int n_args, char *args[]){
     int err;
 
@@ -44,12 +55,16 @@ int main(int n_args, char *args[]){
         return 2;
     }
 
-    static const int data_len = 10000;
+    static const int data_len = 20000;
     sample_t data[MAX_DATA_LEN] = {0};
 
-    gen_square(data, 2000, data_len - 2000, 50, 5000);
-    gen_square(data, 2500, data_len - 2500, 100, 5000);
-    gen_square(data, 3000, data_len - 3000, 25, 5000);
+    gen_square(data, 2000, 10000 - 2000, 50, 5000);
+    gen_square(data, 2500, 10000 - 2500, 100, 5000);
+    gen_square(data, 3000, 10000 - 3000, 25, 5000);
+
+    gen_triangle(data, 1000, 5000, 200, 5000);
+    gen_triangle(data, 1500, 5000, 300, 5000);
+    gen_triangle(data, 2000, 5000, 500, 5000);
 
     RET_IF_SDL_NZ(SDL_QueueAudio(dev, data, data_len));
 
