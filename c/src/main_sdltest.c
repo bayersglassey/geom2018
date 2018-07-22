@@ -6,7 +6,6 @@
 
 #include <SDL2/SDL.h>
 
-char driver_buf[200];
 
 int getln(char buf[], int buf_len){
     if(!fgets(buf, buf_len, stdin)){
