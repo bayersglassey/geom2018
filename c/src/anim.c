@@ -18,7 +18,7 @@
 
 void stateset_cleanup(stateset_t *stateset){
     free(stateset->filename);
-    ARRAY_FREE(state_t*, stateset->states, state_cleanup)
+    ARRAY_FREE_PTR(state_t*, stateset->states, state_cleanup)
 }
 
 int stateset_init(stateset_t *stateset, char *filename){

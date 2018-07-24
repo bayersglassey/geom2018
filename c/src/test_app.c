@@ -158,7 +158,7 @@ int test_app_process_console_input(test_app_t *app){
     }else if(fus_lexer_got(lexer, "rem_players")){
         err = fus_lexer_next(lexer);
         if(err)return err;
-        ARRAY_FREE(player_t*, app->hexgame.players, player_cleanup)
+        ARRAY_FREE_PTR(player_t*, app->hexgame.players, player_cleanup)
     }else if(fus_lexer_got(lexer, "add_player")){
         err = fus_lexer_next(lexer);
         if(err)return err;

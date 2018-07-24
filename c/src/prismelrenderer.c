@@ -149,7 +149,7 @@ void palette_cleanup(palette_t *pal){
     free(pal->name);
     for(int i = 0; i < 256; i++){
         palette_entry_t *entry = &pal->entries[i];
-        ARRAY_FREE(palette_entry_keyframe_t*, entry->keyframes, (void))
+        ARRAY_FREE_PTR(palette_entry_keyframe_t*, entry->keyframes, (void))
     }
 }
 
@@ -377,7 +377,7 @@ void prismel_cleanup(prismel_t *prismel){
 
     for(int i = 0; i < prismel->n_images; i++){
         prismel_image_t *image = &prismel->images[i];
-        ARRAY_FREE(prismel_image_line_t*, image->lines, (void))
+        ARRAY_FREE_PTR(prismel_image_line_t*, image->lines, (void))
     }
     free(prismel->images);
 }
@@ -441,12 +441,12 @@ int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space){
 }
 
 void prismelrenderer_cleanup(prismelrenderer_t *renderer){
-    ARRAY_FREE(palettemapper_t*, renderer->palmappers,
+    ARRAY_FREE_PTR(palettemapper_t*, renderer->palmappers,
         palettemapper_cleanup)
-    ARRAY_FREE(prismel_t*, renderer->prismels, prismel_cleanup)
-    ARRAY_FREE(rendergraph_t*, renderer->rendergraphs,
+    ARRAY_FREE_PTR(prismel_t*, renderer->prismels, prismel_cleanup)
+    ARRAY_FREE_PTR(rendergraph_t*, renderer->rendergraphs,
         rendergraph_cleanup)
-    ARRAY_FREE(prismelmapper_t*, renderer->mappers,
+    ARRAY_FREE_PTR(prismelmapper_t*, renderer->mappers,
         prismelmapper_cleanup)
 }
 
@@ -766,9 +766,9 @@ const int rendergraph_n_frames_default = 1;
 void rendergraph_cleanup(rendergraph_t *rendergraph){
     free(rendergraph->name);
 
-    ARRAY_FREE(prismel_trf_t*, rendergraph->prismel_trfs,
+    ARRAY_FREE_PTR(prismel_trf_t*, rendergraph->prismel_trfs,
         (void))
-    ARRAY_FREE(rendergraph_trf_t*, rendergraph->rendergraph_trfs,
+    ARRAY_FREE_PTR(rendergraph_trf_t*, rendergraph->rendergraph_trfs,
         (void))
 
     for(int i = 0; i < rendergraph->n_bitmaps; i++){
@@ -1263,11 +1263,11 @@ int rendergraph_render(rendergraph_t *rgraph,
 void prismelmapper_cleanup(prismelmapper_t *mapper){
     free(mapper->name);
 
-    ARRAY_FREE(prismelmapper_entry_t*, mapper->entries,
+    ARRAY_FREE_PTR(prismelmapper_entry_t*, mapper->entries,
         (void))
-    ARRAY_FREE(prismelmapper_application_t*, mapper->applications,
+    ARRAY_FREE_PTR(prismelmapper_application_t*, mapper->applications,
         (void))
-    ARRAY_FREE(prismelmapper_mapplication_t*, mapper->mapplications,
+    ARRAY_FREE_PTR(prismelmapper_mapplication_t*, mapper->mapplications,
         (void))
 }
 
@@ -1598,7 +1598,7 @@ int palettemapper_init(palettemapper_t *palmapper, char *name, int color){
 
 void palettemapper_cleanup(palettemapper_t *palmapper){
     free(palmapper->name);
-    ARRAY_FREE(palettemapper_pmapplication_t*, palmapper->pmapplications,
+    ARRAY_FREE_PTR(palettemapper_pmapplication_t*, palmapper->pmapplications,
         (void))
 }
 

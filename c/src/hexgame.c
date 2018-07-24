@@ -869,7 +869,7 @@ int player_recording_step(player_t *player){
 
 
 void hexgame_cleanup(hexgame_t *game){
-    ARRAY_FREE(player_t*, game->players, player_cleanup)
+    ARRAY_FREE_PTR(player_t*, game->players, player_cleanup)
 }
 
 int hexgame_init(hexgame_t *game, hexmap_t *map, char *respawn_filename){

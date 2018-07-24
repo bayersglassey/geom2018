@@ -48,9 +48,9 @@ static int _rem(int x, int y){
 
 void hexmap_tileset_cleanup(hexmap_tileset_t *tileset){
     free(tileset->name);
-    ARRAY_FREE(hexmap_tileset_entry_t*, tileset->vert_entries, (void))
-    ARRAY_FREE(hexmap_tileset_entry_t*, tileset->edge_entries, (void))
-    ARRAY_FREE(hexmap_tileset_entry_t*, tileset->face_entries, (void))
+    ARRAY_FREE_PTR(hexmap_tileset_entry_t*, tileset->vert_entries, (void))
+    ARRAY_FREE_PTR(hexmap_tileset_entry_t*, tileset->edge_entries, (void))
+    ARRAY_FREE_PTR(hexmap_tileset_entry_t*, tileset->face_entries, (void))
 }
 
 int hexmap_tileset_init(hexmap_tileset_t *tileset, char *name){
@@ -812,7 +812,7 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
     free(collmap_lines);
 
 
-    ARRAY_FREE(hexcollmap_part_t*, parts, hexcollmap_part_cleanup)
+    ARRAY_FREE_PTR(hexcollmap_part_t*, parts, hexcollmap_part_cleanup)
 
     return 0;
 }
@@ -913,9 +913,9 @@ bool hexcollmap_elem_is_solid(hexcollmap_elem_t *elem){
 void hexmap_cleanup(hexmap_t *map){
     free(map->name);
 
-    ARRAY_FREE(hexmap_submap_t*, map->submaps, hexmap_submap_cleanup)
+    ARRAY_FREE_PTR(hexmap_submap_t*, map->submaps, hexmap_submap_cleanup)
 
-    ARRAY_FREE(char*, map->recording_filenames, (void))
+    ARRAY_FREE_PTR(char*, map->recording_filenames, (void))
 }
 
 int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
