@@ -60,7 +60,6 @@ submaps:
                                     :
                                         pos: (-40 4)
                                         camera: (-10 -10)
-                                        palette: "data/pal1.fus"
                                         tileset: "data/tileset1.fus"
                                         submaps:
                                             :

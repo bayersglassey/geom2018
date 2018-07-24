@@ -31,6 +31,8 @@
 
 #define MAX_SPACES 256
 
+int int_min(int x, int y);
+int int_max(int x, int y);
 int linear_interpolation(int x0, int x1, int t, int t_max);
 char *load_file(const char *filename);
 bool streq(const char *s1, const char *s2);

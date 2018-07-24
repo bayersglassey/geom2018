@@ -8,6 +8,14 @@
 
 #include "util.h"
 
+int int_min(int x, int y){
+    return x < y? x: y;
+}
+
+int int_max(int x, int y){
+    return x > y? x: y;
+}
+
 int linear_interpolation(int x0, int x1, int t, int t_max){
     int diff = x1 - x0;
     return x0 + diff * t / t_max;
