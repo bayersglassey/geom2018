@@ -48,9 +48,9 @@ static int _rem(int x, int y){
 
 void hexmap_tileset_cleanup(hexmap_tileset_t *tileset){
     free(tileset->name);
-    ARRAY_FREE(hexmap_tileset_entry_t, tileset->vert_entries, (void))
-    ARRAY_FREE(hexmap_tileset_entry_t, tileset->edge_entries, (void))
-    ARRAY_FREE(hexmap_tileset_entry_t, tileset->face_entries, (void))
+    ARRAY_FREE(hexmap_tileset_entry_t*, tileset->vert_entries, (void))
+    ARRAY_FREE(hexmap_tileset_entry_t*, tileset->edge_entries, (void))
+    ARRAY_FREE(hexmap_tileset_entry_t*, tileset->face_entries, (void))
 }
 
 int hexmap_tileset_init(hexmap_tileset_t *tileset, char *name){
@@ -94,7 +94,7 @@ static int hexmap_tileset_parse(hexmap_tileset_t *tileset,
                 fprintf(stderr, "Couldn't find shape: %s\n", name); \
                 free(name); return 2;} \
             free(name); \
-            ARRAY_PUSH_NEW(hexmap_tileset_entry_t, \
+            ARRAY_PUSH_NEW(hexmap_tileset_entry_t*, \
                 tileset->TYPE##_entries, entry) \
             entry->tile_c = tile_c; \
             entry->rgraph = rgraph; \
@@ -688,7 +688,7 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
     char default_edge_c = '0';
     char default_face_c = '0';
 
-    ARRAY_DECL(hexcollmap_part_t, parts)
+    ARRAY_DECL(hexcollmap_part_t*, parts)
     ARRAY_INIT(parts)
 
     if(!just_coll){
@@ -710,7 +710,7 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
                     char *filename;
                     err = fus_lexer_get_str(lexer, &filename);
                     if(err)return err;
-                    ARRAY_PUSH_NEW(hexcollmap_part_t, parts, part)
+                    ARRAY_PUSH_NEW(hexcollmap_part_t*, parts, part)
                     err = hexcollmap_part_init(part, part_c, filename);
                     if(err)return err;
                 }
@@ -812,7 +812,7 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
     free(collmap_lines);
 
 
-    ARRAY_FREE(hexcollmap_part_t, parts, hexcollmap_part_cleanup)
+    ARRAY_FREE(hexcollmap_part_t*, parts, hexcollmap_part_cleanup)
 
     return 0;
 }
@@ -913,9 +913,9 @@ bool hexcollmap_elem_is_solid(hexcollmap_elem_t *elem){
 void hexmap_cleanup(hexmap_t *map){
     free(map->name);
 
-    ARRAY_FREE(hexmap_submap_t, map->submaps, hexmap_submap_cleanup)
+    ARRAY_FREE(hexmap_submap_t*, map->submaps, hexmap_submap_cleanup)
 
-    ARRAY_FREE(char, map->recording_filenames, (void))
+    ARRAY_FREE(char*, map->recording_filenames, (void))
 }
 
 int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
@@ -1167,7 +1167,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
     }
 
     if(submap_filename != NULL){
-        ARRAY_PUSH_NEW(hexmap_submap_t, map->submaps, submap)
+        ARRAY_PUSH_NEW(hexmap_submap_t*, map->submaps, submap)
         err = hexmap_submap_init(map, submap, strdup(submap_filename),
             solid, pos, camera_type, camera_pos, mapper,
             palette_filename, tileset_filename);
@@ -1197,7 +1197,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
             if(err)return err;
             err = fus_lexer_get(lexer, ")");
             if(err)return err;
-            ARRAY_PUSH(char, map->recording_filenames,
+            ARRAY_PUSH(char*, map->recording_filenames,
                 recording_filename)
         }
         err = fus_lexer_next(lexer);
@@ -1367,7 +1367,7 @@ int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap){
     should disable bitmap caching for it (somehow). */
     int n_frames = 24;
 
-    ARRAY_PUSH_NEW(rendergraph_t, prend->rendergraphs, rgraph)
+    ARRAY_PUSH_NEW(rendergraph_t*, prend->rendergraphs, rgraph)
     err = rendergraph_init(rgraph, strdup(map->name), prend,
         rendergraph_animation_type_default,
         n_frames);

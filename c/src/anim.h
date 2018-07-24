@@ -14,17 +14,17 @@
 typedef struct state {
     char *name;
     rendergraph_t *rgraph;
-    ARRAY_DECL(struct state_rule, rules)
+    ARRAY_DECL(struct state_rule*, rules)
 } state_t;
 
 typedef struct stateset {
     char *filename;
-    ARRAY_DECL(struct state, states)
+    ARRAY_DECL(struct state*, states)
 } stateset_t;
 
 typedef struct state_rule {
-    ARRAY_DECL(struct state_cond, conds)
-    ARRAY_DECL(struct state_effect, effects)
+    ARRAY_DECL(struct state_cond*, conds)
+    ARRAY_DECL(struct state_effect*, effects)
 } state_rule_t;
 
 

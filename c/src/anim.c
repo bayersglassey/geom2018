@@ -18,7 +18,7 @@
 
 void stateset_cleanup(stateset_t *stateset){
     free(stateset->filename);
-    ARRAY_FREE(state_t, stateset->states, state_cleanup)
+    ARRAY_FREE(state_t*, stateset->states, state_cleanup)
 }
 
 int stateset_init(stateset_t *stateset, char *filename){
@@ -88,14 +88,14 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             free(rgraph_name); return 2;}
         free(rgraph_name);
 
-        ARRAY_PUSH_NEW(state_t, stateset->states, state)
+        ARRAY_PUSH_NEW(state_t*, stateset->states, state)
         err = state_init(state, name, rgraph);
         if(err)return err;
 
         while(1){
             if(fus_lexer_got(lexer, ")"))break;
 
-            ARRAY_PUSH_NEW(state_rule_t, state->rules, rule)
+            ARRAY_PUSH_NEW(state_rule_t*, state->rules, rule)
 
             err = fus_lexer_get(lexer, "if");
             if(err)return err;
@@ -107,7 +107,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                 }else if(fus_lexer_got(lexer, "false")){
                     err = fus_lexer_next(lexer);
                     if(err)return err;
-                    ARRAY_PUSH_NEW(state_cond_t, rule->conds, cond)
+                    ARRAY_PUSH_NEW(state_cond_t*, rule->conds, cond)
                     cond->type = state_cond_type_false;
                 }else if(fus_lexer_got(lexer, "key")){
                     err = fus_lexer_next(lexer);
@@ -146,7 +146,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                             "u or d or l or r or f or b");
                     }
 
-                    ARRAY_PUSH_NEW(state_cond_t, rule->conds, cond)
+                    ARRAY_PUSH_NEW(state_cond_t*, rule->conds, cond)
                     cond->type = state_cond_type_key;
                     cond->u.key.kstate = kstate;
                     cond->u.key.c = c;
@@ -185,7 +185,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     err = fus_lexer_get(lexer, ")");
                     if(err)return err;
 
-                    ARRAY_PUSH_NEW(state_cond_t, rule->conds, cond)
+                    ARRAY_PUSH_NEW(state_cond_t*, rule->conds, cond)
                     cond->type = state_cond_type_coll;
                     cond->u.coll.collmap = collmap;
                     cond->u.coll.flags = flags;
@@ -211,7 +211,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     char *msg;
                     err = fus_lexer_get_str(lexer, &msg);
                     if(err)return err;
-                    ARRAY_PUSH_NEW(state_effect_t, rule->effects, effect)
+                    ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_print;
                     effect->u.msg = msg;
                     err = fus_lexer_get(lexer, ")");
@@ -221,7 +221,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     if(err)return err;
                     err = fus_lexer_get(lexer, "(");
                     if(err)return err;
-                    ARRAY_PUSH_NEW(state_effect_t, rule->effects, effect)
+                    ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_move;
                     for(int i = 0; i < space->dims; i++){
                         err = fus_lexer_get_int(lexer, &effect->u.vec[i]);
@@ -237,7 +237,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     int rot;
                     err = fus_lexer_get_int(lexer, &rot);
                     if(err)return err;
-                    ARRAY_PUSH_NEW(state_effect_t, rule->effects, effect)
+                    ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_rot;
                     effect->u.rot = rot_contain(space->rot_max, rot);
                     err = fus_lexer_get(lexer, ")");
@@ -245,7 +245,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                 }else if(fus_lexer_got(lexer, "turn")){
                     err = fus_lexer_next(lexer);
                     if(err)return err;
-                    ARRAY_PUSH_NEW(state_effect_t, rule->effects, effect)
+                    ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_turn;
                 }else if(fus_lexer_got(lexer, "goto")){
                     err = fus_lexer_next(lexer);
@@ -257,7 +257,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     err = fus_lexer_get_name(lexer, &goto_name);
                     if(err)return err;
 
-                    ARRAY_PUSH_NEW(state_effect_t, rule->effects, effect)
+                    ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_goto;
                     effect->u.goto_name = goto_name;
 
@@ -273,7 +273,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     err = fus_lexer_get_int(lexer, &delay);
                     if(err)return err;
 
-                    ARRAY_PUSH_NEW(state_effect_t, rule->effects, effect)
+                    ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_delay;
                     effect->u.delay = delay;
 

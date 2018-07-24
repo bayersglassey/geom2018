@@ -21,9 +21,9 @@ typedef struct hexmap_tileset_entry {
 
 typedef struct hexmap_tileset {
     char *name;
-    ARRAY_DECL(hexmap_tileset_entry_t, vert_entries)
-    ARRAY_DECL(hexmap_tileset_entry_t, edge_entries)
-    ARRAY_DECL(hexmap_tileset_entry_t, face_entries)
+    ARRAY_DECL(hexmap_tileset_entry_t*, vert_entries)
+    ARRAY_DECL(hexmap_tileset_entry_t*, edge_entries)
+    ARRAY_DECL(hexmap_tileset_entry_t*, face_entries)
 } hexmap_tileset_t;
 
 void hexmap_tileset_cleanup(hexmap_tileset_t *tileset);
@@ -128,9 +128,9 @@ typedef struct hexmap {
     vec_t unit;
     vec_t spawn;
 
-    ARRAY_DECL(hexmap_submap_t, submaps)
+    ARRAY_DECL(hexmap_submap_t*, submaps)
 
-    ARRAY_DECL(char, recording_filenames)
+    ARRAY_DECL(char*, recording_filenames)
 } hexmap_t;
 
 

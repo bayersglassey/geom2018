@@ -40,7 +40,7 @@ typedef struct palette_entry {
     int frame_i;
     int n_frames;
     int frame_offset;
-    ARRAY_DECL(palette_entry_keyframe_t, keyframes)
+    ARRAY_DECL(palette_entry_keyframe_t*, keyframes)
 } palette_entry_t;
 
 typedef struct palette {
@@ -65,7 +65,7 @@ typedef struct prismel_image_line {
 } prismel_image_line_t;
 
 typedef struct prismel_image {
-    ARRAY_DECL(struct prismel_image_line, lines)
+    ARRAY_DECL(struct prismel_image_line*, lines)
 } prismel_image_t;
 
 typedef struct prismel {
@@ -92,10 +92,10 @@ void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box,
 typedef struct prismelrenderer {
     int n_textures;
     vecspace_t *space;
-    ARRAY_DECL(struct palettemapper, palmappers)
-    ARRAY_DECL(struct prismel, prismels)
-    ARRAY_DECL(struct rendergraph, rendergraphs)
-    ARRAY_DECL(struct prismelmapper, mappers)
+    ARRAY_DECL(struct palettemapper*, palmappers)
+    ARRAY_DECL(struct prismel*, prismels)
+    ARRAY_DECL(struct rendergraph*, rendergraphs)
+    ARRAY_DECL(struct prismelmapper*, mappers)
 } prismelrenderer_t;
 
 
@@ -162,8 +162,8 @@ typedef struct rendergraph {
     prismelrenderer_t *prend;
     char *name;
     vecspace_t *space;
-    ARRAY_DECL(struct prismel_trf, prismel_trfs)
-    ARRAY_DECL(struct rendergraph_trf, rendergraph_trfs)
+    ARRAY_DECL(struct prismel_trf*, prismel_trfs)
+    ARRAY_DECL(struct rendergraph_trf*, rendergraph_trfs)
 
     const char *animation_type;
     int n_frames;
@@ -241,9 +241,9 @@ typedef struct prismelmapper {
     vecspace_t *space;
     vec_t unit;
     bool solid;
-    ARRAY_DECL(prismelmapper_entry_t, entries)
-    ARRAY_DECL(prismelmapper_application_t, applications)
-    ARRAY_DECL(prismelmapper_mapplication_t, mapplications)
+    ARRAY_DECL(prismelmapper_entry_t*, entries)
+    ARRAY_DECL(prismelmapper_application_t*, applications)
+    ARRAY_DECL(prismelmapper_mapplication_t*, mapplications)
 } prismelmapper_t;
 
 
@@ -280,7 +280,7 @@ prismelmapper_t *prismelmapper_get_mapplication(prismelmapper_t *mapper,
 typedef struct palettemapper {
     char *name;
     Uint8 table[256];
-    ARRAY_DECL(struct palettemapper_pmapplication, pmapplications)
+    ARRAY_DECL(struct palettemapper_pmapplication*, pmapplications)
 } palettemapper_t;
 
 typedef struct palettemapper_pmapplication {

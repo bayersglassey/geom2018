@@ -2,7 +2,7 @@
 #define _ARRAY_H_
 
 #define ARRAY_DECL(T, array) \
-    T **array; \
+    T *array; \
     int array##_len; \
     int array##_size;
 
@@ -14,7 +14,7 @@
 #define ARRAY_GROW(T, array) \
 { \
     int new_size; \
-    T **new_array; \
+    T *new_array; \
     if(array##_size == 0){ \
         new_size = 8; \
         new_array = malloc(sizeof(*new_array) * new_size); \
@@ -39,7 +39,7 @@
 }
 
 #define ARRAY_PUSH_NEW(T, array, new_elem) \
-T *new_elem = NULL; \
+T new_elem = NULL; \
 { \
     if(array##_len >= array##_size) \
         ARRAY_GROW(T, array) \

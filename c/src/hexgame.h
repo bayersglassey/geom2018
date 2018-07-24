@@ -130,7 +130,7 @@ typedef struct hexgame {
     hexmap_submap_t *cur_submap;
     vec_t camera_pos;
     rot_t camera_rot;
-    ARRAY_DECL(player_t, players)
+    ARRAY_DECL(player_t*, players)
 } hexgame_t;
 
 
