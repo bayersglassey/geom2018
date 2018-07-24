@@ -9,6 +9,10 @@ const int INITIAL_INDENTS_SIZE = 32;
 
 static int fus_lexer_get_indent(fus_lexer_t *lexer);
 
+void fus_lexer_cleanup(fus_lexer_t *lexer){
+    free(lexer->indents);
+}
+
 int fus_lexer_init(fus_lexer_t *lexer, const char *text,
     const char *filename
 ){
@@ -42,6 +46,33 @@ int fus_lexer_init(fus_lexer_t *lexer, const char *text,
     return 0;
 }
 
+int fus_lexer_copy(fus_lexer_t *lexer1, fus_lexer_t *lexer2){
+    lexer1->debug = lexer2->debug;
+    lexer1->filename = lexer2->filename;
+    lexer1->text = lexer2->text;
+    lexer1->text_len = lexer2->text_len;
+    lexer1->token = lexer2->token;
+    lexer1->token_len = lexer2->token_len;
+    lexer1->token_type = lexer2->token_type;
+    lexer1->pos = lexer2->pos;
+    lexer1->row = lexer2->row;
+    lexer1->col = lexer2->col;
+
+    int indents_size = lexer2->indents_size;
+    int *new_indents = malloc(sizeof(*new_indents) * indents_size);
+    if(new_indents == NULL)return 1;
+    for(int i = 0; i < indents_size; i++){
+        new_indents[i] = lexer2->indents[i];}
+
+    lexer1->indent = lexer2->indent;
+    lexer1->indents_size = lexer2->indents_size;
+    lexer1->n_indents = lexer2->n_indents;
+    lexer1->indents = new_indents;
+    lexer1->returning_indents = lexer2->returning_indents;
+
+    return 0;
+}
+
 void fus_lexer_dump(fus_lexer_t *lexer, FILE *f){
     fprintf(f, "lexer: %p\n", lexer);
     if(lexer == NULL)return;
@@ -69,6 +100,16 @@ void fus_lexer_info(fus_lexer_t *lexer, FILE *f){
 void fus_lexer_err_info(fus_lexer_t *lexer){
     fprintf(stderr, "Lexer error: ");
     fus_lexer_info(lexer, stderr);
+}
+
+int fus_lexer_get_pos(fus_lexer_t *lexer){
+    /* "public getter" */
+    return lexer->pos;
+}
+
+void fus_lexer_set_pos(fus_lexer_t *lexer, int pos){
+    /* "public setter" */
+    lexer->pos = pos;
 }
 
 static void fus_lexer_start_token(fus_lexer_t *lexer){
@@ -579,6 +620,28 @@ int fus_lexer_get_int_range(fus_lexer_t *lexer, int maxlen,
 
     *i_ptr = i;
     *len_ptr = len;
+    return 0;
+}
+
+int fus_lexer_get_attr_int(fus_lexer_t *lexer, const char *attr, int *i,
+    bool optional
+){
+    int err;
+    if(fus_lexer_got(lexer, attr)){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_get_int(lexer, i);
+        if(err)return err;
+        err = fus_lexer_get(lexer, ")");
+        if(err)return err;
+    }else if(!optional){
+        fus_lexer_err_info(lexer); fprintf(stderr,
+            "Expected int attribute \"%s\", but got: ", attr);
+        fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
+        return 2;
+    }
     return 0;
 }
 

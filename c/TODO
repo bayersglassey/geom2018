@@ -141,3 +141,8 @@ hexcollmap "parts":
         We can add a "randint" thing to int_fancy.
         And then we will have Wilderness.
 
+July 24, 2018:
+--------------
+
+Add fus_lexer_cleanup()... need to go add it everywhere T___T
+
