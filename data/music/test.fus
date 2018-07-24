@@ -1,11 +1,21 @@
 
 @loop 8:
-    @square: 1000 40 20  5000
-    @square: 1000 20 10  5000
+    @triangle: 1000 400  9000 addinc1(1)
+    ,,
 
-    + 1500
+    @triangle: 6000 400 11000
+    ,,
 
-    @square: 1000 40  1  5000
-    @square: 1000 20  1  5000
+    @triangle: 1000 1200  9000
+    ,,
 
-    + 1500
+    @square: 2000 40  1  6000  volinc(-5) freq2inc(10)
+    @square: 1000 20  1  6000  offset(10) volinc(-5) freq2inc(10)
+    ,, ,, ,,
+
+    @square: 2000 40 20  6000  volinc(-5) freq2inc(10)
+    @square: 1000 20 10  6000  volinc(-5) freq2inc(50)
+    @triangle: 1000 2200  9000  limit(-1000)
+    ,, ,, ,,
+
+    @triangle: 1000 2200  9000

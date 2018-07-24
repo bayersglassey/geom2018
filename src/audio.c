@@ -152,17 +152,28 @@ int audio_parser_parse(audio_parser_t *parser, fus_lexer_t *lexer){
                 err = fus_lexer_next(lexer);
                 if(err)return err;
 
-                int len, add, vol,
-                    offset=0, limit=0, addinc1=0, addinc2=0;
+                int len, add, vol, limit,
+                    offset=0, addinc1=0, addinc2=0;
                 err = fus_lexer_get(lexer, "(");
-                if(err)return err;
-                err = fus_lexer_get_int(lexer, &parser->pos);
                 if(err)return err;
                 err = fus_lexer_get_int(lexer, &len);
                 if(err)return err;
                 err = fus_lexer_get_int(lexer, &add);
                 if(err)return err;
                 err = fus_lexer_get_int(lexer, &vol);
+                if(err)return err;
+                limit = vol;
+                err = fus_lexer_get_attr_int(lexer,
+                    "offset", &offset, true);
+                if(err)return err;
+                err = fus_lexer_get_attr_int(lexer,
+                    "limit", &limit, true);
+                if(err)return err;
+                err = fus_lexer_get_attr_int(lexer,
+                    "addinc1", &addinc1, true);
+                if(err)return err;
+                err = fus_lexer_get_attr_int(lexer,
+                    "addinc2", &addinc2, true);
                 if(err)return err;
                 err = fus_lexer_get(lexer, ")");
                 if(err)return err;
