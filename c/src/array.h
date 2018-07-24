@@ -25,9 +25,21 @@
     } \
     if(new_array == NULL)return 1; \
     for(int i = array##_size; i < new_size; i++){ \
-        new_array[i] = NULL;} \
+        new_array[i] = 0;} \
     array = new_array; \
     array##_size = new_size; \
+}
+
+#define ARRAY_PUSH_MANY(T, array, new_elem, _n) \
+{ \
+    int n = _n; \
+    while(array##_len + n - 1 >= array##_size) \
+        ARRAY_GROW(T, array) \
+    int old_len = array##_len; \
+    int new_len = old_len + n; \
+    array##_len = new_len; \
+    for(int i = old_len; i < new_len; i++){ \
+        array[i] = (new_elem);} \
 }
 
 #define ARRAY_PUSH(T, array, new_elem) \
