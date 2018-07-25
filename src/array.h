@@ -11,6 +11,11 @@
     array##_len = 0; \
     array##_size = 0;
 
+#define ARRAY_COPY(array, array2) \
+    array = array2; \
+    array##_len = array2##_len; \
+    array##_size = array##_size;
+
 #define ARRAY_GROW(T, array) \
 { \
     int new_size; \
