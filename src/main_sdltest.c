@@ -6,15 +6,8 @@
 
 #include <SDL2/SDL.h>
 
+#include "util.h"
 
-int getln(char buf[], int buf_len){
-    if(!fgets(buf, buf_len, stdin)){
-        perror("fgets failed");
-        return 1;
-    }
-    buf[strcspn(buf, "\n")] = '\0';
-    return 0;
-}
 
 void show_usage(){
     printf(

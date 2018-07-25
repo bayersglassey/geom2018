@@ -21,6 +21,15 @@ int linear_interpolation(int x0, int x1, int t, int t_max){
     return x0 + diff * t / t_max;
 }
 
+int getln(char buf[], int buf_len){
+    if(!fgets(buf, buf_len, stdin)){
+        perror("fgets failed");
+        return 1;
+    }
+    buf[strcspn(buf, "\n")] = '\0';
+    return 0;
+}
+
 char *load_file(const char *filename){
     FILE *f = fopen(filename, "r");
     long f_size;
