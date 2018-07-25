@@ -663,12 +663,10 @@ int fus_lexer_parse_silent(fus_lexer_t *lexer){
             if(err)return err;
             depth++;
         }else if(fus_lexer_got(lexer, ")")){
+            depth--;
+            if(depth == 0)break;
             err = fus_lexer_next(lexer);
             if(err)return err;
-            depth--;
-            if(depth == 0){
-                break;
-            }
         }else if(fus_lexer_done(lexer)){
             return fus_lexer_unexpected(lexer, NULL);
         }else{

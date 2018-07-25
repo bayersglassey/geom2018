@@ -41,6 +41,7 @@ typedef struct audio_parser {
 void audio_parser_cleanup(audio_parser_t *parser);
 int audio_parser_init(audio_parser_t *parser,
     audio_buffer_t *buf, int beat_len);
+int audio_parser_copy(audio_parser_t *parser, audio_parser_t *parser2);
 int audio_parser_parse(audio_parser_t *parser, fus_lexer_t *lexer);
 
 

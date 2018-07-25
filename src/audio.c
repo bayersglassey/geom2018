@@ -88,13 +88,35 @@ int audio_parser_init(audio_parser_t *parser,
     return 0;
 }
 
+int audio_parser_copy(audio_parser_t *parser, audio_parser_t *parser2){
+    parser->buf = parser2->buf;
+    parser->pos = parser2->pos;
+    parser->beat_len = parser2->beat_len;
+    return 0;
+}
+
 int audio_parser_parse(audio_parser_t *parser, fus_lexer_t *lexer){
     int err;
     audio_buffer_t *buf = parser->buf;
     while(1){
         if(fus_lexer_done(lexer) || fus_lexer_got(lexer, ")"))break;
 
-        if(fus_lexer_got(lexer, "+")){
+        if(fus_lexer_got(lexer, "(")){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+
+            audio_parser_t copied_parser;
+            err = audio_parser_copy(&copied_parser, parser);
+            if(err)return err;
+
+            err = audio_parser_parse(&copied_parser, lexer);
+            if(err)return err;
+
+            audio_parser_cleanup(&copied_parser);
+
+            err = fus_lexer_get(lexer, ")");
+            if(err)return err;
+        }else if(fus_lexer_got(lexer, "+")){
             err = fus_lexer_next(lexer);
             if(err)return err;
 
@@ -114,7 +136,18 @@ int audio_parser_parse(audio_parser_t *parser, fus_lexer_t *lexer){
             err = fus_lexer_next(lexer);
             if(err)return err;
 
-            if(fus_lexer_got(lexer, "square")){
+            if(fus_lexer_got(lexer, "silent")){
+                /* Can be used to comment out indented blocks,
+                which is handy */
+                err = fus_lexer_next(lexer);
+                if(err)return err;
+                err = fus_lexer_get(lexer, "(");
+                if(err)return err;
+                err = fus_lexer_parse_silent(lexer);
+                if(err)return err;
+                err = fus_lexer_get(lexer, ")");
+                if(err)return err;
+            }else if(fus_lexer_got(lexer, "square")){
                 err = fus_lexer_next(lexer);
                 if(err)return err;
 
@@ -246,6 +279,7 @@ int gen_square(audio_buffer_t *buf,
         int val = (i + offset) % freq1 < freq2? vol: 0;
         buf->data[pos + i] += val;
         vol += volinc;
+        if(vol < 0)vol = 0;
         freq2 = (freq2 + freq2inc) % freq1;
     }
     return 0;
