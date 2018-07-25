@@ -14,6 +14,8 @@ int audiotest(SDL_AudioDeviceID dev, const char *filename){
     int err;
 
     audio_buffer_t buf;
+    err = audio_buffer_init(&buf);
+    if(err)return err;
     audio_parser_t parser;
     err = audio_parser_init(&parser, &buf);
     if(err)return err;

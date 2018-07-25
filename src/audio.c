@@ -434,6 +434,7 @@ int gen_square(audio_buffer_t *buf,
     return 0;
 }
 
+
 int gen_triangle(audio_buffer_t *buf,
     int pos, int len,
     int add, int vol, int offset,
@@ -446,8 +447,8 @@ int gen_triangle(audio_buffer_t *buf,
         buf->data[pos + i] += int_min(y, limit) - limit;
         y += up? add: -add;
         add += up? addinc1: addinc2;
-        if(y >= vol)up = false;
-        if(y <= -vol)up = true;
+        if(y >= vol){y = vol; up = false;}
+        if(y <= -vol){y = -vol; up = true;}
     }
     return 0;
 }
@@ -473,10 +474,10 @@ int gen_noise(audio_buffer_t *buf, int *rnd_ptr,
         fprintf(stderr, "gen_noise: bumping random seed from 0 to 1\n");
     }
 
-    if(vol == 0)return 0;
-        /* Avoid modulus-by-zero... */
-
     for(int i = 0; i < len; i++){
+        if(vol <= 0)break;
+            /* Avoid modulus-by-zero... */
+
         int y = int_max(rnd % vol, limit) - limit;
         buf->data[pos + i] += y;
         vol += volinc;

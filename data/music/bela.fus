@@ -35,71 +35,124 @@
 @def f3: @square: 500   3 1  6000  volinc(-5)
 @def g3: @square: 500   2 1  6000  volinc(-5)
 
-@def drum1: @triangle: 350 3000 10000 limit(1000)
-@def drum2: @triangle: 250 2000  9000 limit(0)
-@def drum3: @triangle: 250 2000  9000
-@def drum1: @noise: 500 10000 volinc(-10) limit(5000) step(1)
-@def drum2: @noise: 500 10000 volinc(-10) limit(5000) step(2)
-@def drum3: @noise: 500 10000 volinc(-10) limit(5000) step(3)
-@def drums: drum1,, drum2,, drum3,,
+@def drum1: @noise:  500 10000 volinc(-10) limit(5000) step(1)
+@def drum2: @noise:  500 10000 volinc(-10) limit(5000) step(2)
+@def drum3: @noise:  500 10000 volinc(-10) limit(5000) step(3)
+@def cymb1: @noise: 1500 10000 volinc(-10) limit(1000)
+@def drums1:
+    drum1,, drum2,, drum3,,
+    drum1,, drum2,, drum3,,
+    cymb1,,      ,, drum1,,
+    cymb1,, cymb1,, drum2,,
+@def drums2:
+    drum1,, drum2,, drum3,,
+    cymb1,,      ,,      ,,
+    drum1,,      ,,      ,,
+    cymb1,,      ,, drum1,,
+
+@def bass1: @triangle:  500  500 10000 limit(1000)
+@def bass2: @triangle:  500 1000  9000 limit(0)
+@def bass3: @triangle:  500  750  9000 addinc1(1)
+@def bass4: @triangle: 7500 1000 15000 addinc1(-1)
+@def bass:
+    bass1 ,, ,, ,,
+    bass2 ,, ,, ,,
+    bass1 ,, ,, ,,
+    bass3 ,, ,, ,,
+
+    bass1 ,, ,, ,,
+    bass2 ,, ,, ,,
+    bass1 ,, ,, ,,
+    bass4 ,, ,, ,,
 
 
-@def intro: drums drums
+@def verse: @loop 4: @loop 4: ,, ,, ,,
+
+
+@def v1a: a0
+@def v1b: a1
+@def v1c: d1
+@def v1d: e1
+@def v1e: a2
+@def melody1:
+    v1e,,    ,, v1e,,
+       ,,    ,, v1e,,
+    v1b,, v1c,, v1d,,
+    v1e,,    ,, v1e,,
+
+       ,,    ,,    ,,
+       ,,    ,,    ,,
+       ,,    ,,    ,,
+       ,,    ,,    ,,
+
+    v1e,,    ,, v1e,,
+       ,,    ,, v1e,,
+    v1b,, v1c,, v1d,,
+    v1a,,    ,, v1a,,
+
+       ,,    ,,    ,,
+       ,,    ,,    ,,
+       ,,    ,,    ,,
+       ,,    ,,    ,,
+
+@def v2a: a2
+@def v2b: b2
+@def v2c: c2
+@def v2d: e2
+@def v2e: f2
+@def v2f: g2
+@def v2g: a3
+@def melody2:
+    v2g,, v2f,, v2e,,
+    v2f,, v2e,, v2d,,
+    v2e,, v2d,, v2c,,
+    v2c,, v2d,, v2e,,
+
+    v2g,, v2f,, v2e,,
+    v2f,, v2e,, v2d,,
+    v2e,,    ,, v2e,,
+    v2d,, v2e,, v2f,,
+
+    v2g,, v2f,, v2e,,
+    v2f,, v2e,, v2d,,
+    v2e,, v2d,, v2c,,
+    v2c,, v2d,, v2e,,
+
+    v2f,, v2d,, v2c,,
+    v2b,, v2a,, v2a,,
+       ,,    ,,    ,,
+       ,,    ,,    ,,
+
+
+@def intro:
+    drums1
+    drums1
+
+    (bass)
+    drums1
+    drums1
 
 @def verse1:
-    : @loop 4:
-        @loop 4:
-            drums
-
-    a2,,   ,, a2,,
-      ,,   ,, a2,,
-    a1,, d1,, e1,,
-    a2,,   ,, a2,,
-
-      ,,   ,,   ,,
-      ,,   ,,   ,,
-      ,,   ,,   ,,
-      ,,   ,,   ,,
-
-    a2,,   ,, a2,,
-      ,,   ,, a2,,
-    a1,, d1,, e1,,
-    a0,,   ,, a0,,
-
-      ,,   ,,   ,,
-      ,,   ,,   ,,
-      ,,   ,,   ,,
-      ,,   ,,   ,,
+    : @loop 4: drums1
+    : @loop 2: bass
+    melody1
 
 @def verse2:
-    : @loop 4:
-        @loop 4:
-            drums
+    : @loop 4: drums2
+    melody2
 
-    a3,, g2,, e2,,
-    g2,, f2,, e2,,
-    f2,, e2,, c2,,
-    c2,, e2,, f2,,
+@def verse3:
+    : @loop 4: drums1
+    : @loop 2: bass
 
-    a3,, g2,, e2,,
-    g2,, f2,, e2,,
-    f2,,   ,, f2,,
-    e2,, f2,, g2,,
-
-    a3,, g2,, e2,,
-    g2,, f2,, e2,,
-    f2,, e2,, c2,,
-    c2,, e2,, f2,,
-
-    g2,, e2,, c2,,
-    b2,, a2,, a2,,
-      ,,   ,,   ,,
-      ,,   ,,   ,,
-
+    # maybe the melodies harmonize?..
+    (melody1) melody2
 
 
 @def song:
     intro
     @loop 2: verse1
     @loop 2: verse2
+    @loop 2: verse3
 
+@print: "Primary song is in variable \"song\""
