@@ -39,6 +39,10 @@ typedef struct audio_parser {
     int beat_len;
     ARRAY_DECL(struct audio_parser_variable*, vars)
     bool vars_own;
+
+    int rnd;
+        /* Random number */
+
 } audio_parser_t;
 
 typedef struct audio_parser_variable {
@@ -72,6 +76,8 @@ int gen_triangle(audio_buffer_t *buf,
     int pos, int len,
     int add, int vol, int offset,
     int limit, int addinc1, int addinc2);
+int gen_noise(audio_buffer_t *buf, int *rnd_ptr,
+    int pos, int len, int vol, int volinc, int limit, int step);
 
 
 #endif

@@ -90,6 +90,11 @@ int audio_parser_init(audio_parser_t *parser, audio_buffer_t *buf){
     parser->beat_len = 0;
     ARRAY_INIT(parser->vars)
     parser->vars_own = true;
+
+    parser->rnd = 1;
+        /* random seed can't be 0, the pseudo-random algorithm maps 0 to 0
+        and would therefore produce an endless stream of zeroes */
+
     return 0;
 }
 
@@ -99,6 +104,7 @@ int audio_parser_copy(audio_parser_t *parser, audio_parser_t *parser2){
     parser->beat_len = parser2->beat_len;
     ARRAY_COPY(parser->vars, parser2->vars)
     parser->vars_own = false;
+    parser->rnd = parser2->rnd;
     return 0;
 }
 
@@ -182,6 +188,10 @@ int audio_parser_parse(audio_parser_t *parser, fus_lexer_t *lexer){
                 err = fus_lexer_get(lexer, ")");
                 if(err)return err;
 
+                if(freq1 == 0){
+                    return fus_lexer_unexpected(lexer,
+                        "@square: freq1 == 0");}
+
                 err = audio_buffer_extend(buf, parser->pos + len);
                 if(err)return err;
                 err = gen_square(buf, parser->pos,
@@ -223,6 +233,38 @@ int audio_parser_parse(audio_parser_t *parser, fus_lexer_t *lexer){
                 err = gen_triangle(buf, parser->pos, len, add, vol,
                     offset, limit, addinc1, addinc2);
                 if(err)return err;
+            }else if(fus_lexer_got(lexer, "noise")){
+                err = fus_lexer_next(lexer);
+                if(err)return err;
+
+                int len, vol, volinc=0, limit=0, step=1;
+                err = fus_lexer_get(lexer, "(");
+                if(err)return err;
+                err = fus_lexer_get_int(lexer, &len);
+                if(err)return err;
+                err = fus_lexer_get_int(lexer, &vol);
+                if(err)return err;
+                err = fus_lexer_get_attr_int(lexer,
+                    "volinc", &volinc, true);
+                if(err)return err;
+                err = fus_lexer_get_attr_int(lexer,
+                    "limit", &limit, true);
+                if(err)return err;
+                err = fus_lexer_get_attr_int(lexer,
+                    "step", &step, true);
+                if(err)return err;
+                err = fus_lexer_get(lexer, ")");
+                if(err)return err;
+
+                if(step == 0){
+                    return fus_lexer_unexpected(lexer,
+                        "@noise: step == 0");}
+
+                err = audio_buffer_extend(buf, parser->pos + len);
+                if(err)return err;
+                err = gen_noise(buf, &parser->rnd, parser->pos,
+                    len, vol, volinc, limit, step);
+                if(err)return err;
             }else if(fus_lexer_got(lexer, "loop")){
                 err = fus_lexer_next(lexer);
                 if(err)return err;
@@ -249,12 +291,15 @@ int audio_parser_parse(audio_parser_t *parser, fus_lexer_t *lexer){
             }else if(fus_lexer_got(lexer, "dump_vars")){
                 err = fus_lexer_next(lexer);
                 if(err)return err;
-
                 printf("VARS:\n");
                 for(int i = 0; i < parser->vars_len; i++){
                     audio_parser_variable_t *var = parser->vars[i];
                     printf("  %s\n", var->name);
                 }
+            }else if(fus_lexer_got(lexer, "dump_rnd")){
+                err = fus_lexer_next(lexer);
+                if(err)return err;
+                printf("RND: %i\n", parser->rnd);
             }else if(fus_lexer_got(lexer, "def")){
                 err = fus_lexer_next(lexer);
                 if(err)return err;
@@ -396,7 +441,7 @@ int gen_triangle(audio_buffer_t *buf,
     int y = offset;
     bool up = true;
     for(int i = 0; i < len; i++){
-        buf->data[pos + i] += int_min(y, limit);
+        buf->data[pos + i] += int_min(y, limit) - limit;
         y += up? add: -add;
         add += up? addinc1: addinc2;
         if(y >= vol)up = false;
@@ -404,3 +449,38 @@ int gen_triangle(audio_buffer_t *buf,
     }
     return 0;
 }
+
+static int rnd_next(int rnd){
+    /* Galois linear feedback shift register */
+    int bit = rnd & 1;
+    rnd >>= 1;
+    if(bit)rnd ^= 0xB400;
+    return rnd;
+}
+
+int gen_noise(audio_buffer_t *buf, int *rnd_ptr,
+    int pos, int len, int vol, int volinc, int limit, int step
+){
+    AUDIO_BUF_RANGE_CHECK(buf, pos, len)
+    int rnd = *rnd_ptr;
+
+    if(rnd == 0){
+        /* In case random seed ever hits 0, bump it to 1 so we don't
+        get stuck with a stream of zeroes */
+        rnd = 1;
+        fprintf(stderr, "gen_noise: bumping random seed from 0 to 1\n");
+    }
+
+    if(vol == 0)return 0;
+        /* Avoid modulus-by-zero... */
+
+    for(int i = 0; i < len; i++){
+        int y = int_max(rnd % vol, limit) - limit;
+        buf->data[pos + i] += y;
+        vol += volinc;
+        if(i % step == 0)rnd = rnd_next(rnd);
+    }
+    *rnd_ptr = rnd;
+    return 0;
+}
+
