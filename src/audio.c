@@ -59,7 +59,7 @@ int audio_buffer_load(audio_buffer_t *buf, const char *filename){
     err = fus_lexer_init(&lexer, text, filename);
     if(err)return err;
 
-    err = audio_parser_init(&parser, buf, 250);
+    err = audio_parser_init(&parser, buf);
     if(err)return err;
 
     err = audio_parser_parse(&parser, &lexer);
@@ -84,12 +84,10 @@ void audio_parser_cleanup(audio_parser_t *parser){
     }
 }
 
-int audio_parser_init(audio_parser_t *parser,
-    audio_buffer_t *buf, int beat_len
-){
+int audio_parser_init(audio_parser_t *parser, audio_buffer_t *buf){
     parser->buf = buf;
     parser->pos = 0;
-    parser->beat_len = beat_len;
+    parser->beat_len = 0;
     ARRAY_INIT(parser->vars)
     parser->vars_own = true;
     return 0;
@@ -293,6 +291,15 @@ int audio_parser_parse(audio_parser_t *parser, fus_lexer_t *lexer){
                     printf("[audio parser] %s\n", text);
                     free(text);
                 }
+                err = fus_lexer_get(lexer, ")");
+                if(err)return err;
+            }else if(fus_lexer_got(lexer, "beat")){
+                err = fus_lexer_next(lexer);
+                if(err)return err;
+                err = fus_lexer_get(lexer, "(");
+                if(err)return err;
+                err = fus_lexer_get_int(lexer, &parser->beat_len);
+                if(err)return err;
                 err = fus_lexer_get(lexer, ")");
                 if(err)return err;
             }else{

@@ -15,7 +15,7 @@ int audiotest(SDL_AudioDeviceID dev, const char *filename){
 
     audio_buffer_t buf;
     audio_parser_t parser;
-    err = audio_parser_init(&parser, &buf, 250);
+    err = audio_parser_init(&parser, &buf);
     if(err)return err;
 
     printf("Loading %s...\n", filename);
@@ -30,21 +30,22 @@ int audiotest(SDL_AudioDeviceID dev, const char *filename){
         fus_lexer_cleanup(&lexer);
     }
 
-    printf("Playing!.. enter more music, or \"@exit\" to quit.\n");
-    printf("WARNING: don't define new variables with \"@def\", because "
-        "the text buffer is overwritten every time you hit enter...\n");
     SDL_PauseAudioDevice(dev, 0);
+
+    printf("WARNING: don't define new variables with \"@def\", because "
+        "the input buffer is overwritten every time you enter new text...\n");
 
     int pos = 0;
     while(1){
         int end = int_min(buf.data_len, parser.pos);
         int len = end - pos;
-        printf("Parser at sample %i/%i\n", parser.pos, buf.data_len);
         printf("Queueing %i samples starting at %i...\n", len, pos);
         RET_IF_SDL_NZ(SDL_QueueAudio(dev, buf.data + pos,
             len * sizeof(audio_sample_t)));
         pos += len;
 
+        printf("Parser is at sample %i/%i\n", parser.pos, buf.data_len);
+        printf("Enter more music, or \"@exit\" to quit\n");
         printf("> ");
         char buffer[200];
         err = getln(buffer, 200);
@@ -92,6 +93,7 @@ int main(int n_args, char *args[]){
     err = audiotest(dev, filename);
     if(err)return err;
 
+    printf("Closing audio device...\n");
     SDL_CloseAudioDevice(dev);
 
     SDL_AudioQuit();
