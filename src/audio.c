@@ -381,7 +381,9 @@ int audio_parser_parse(audio_parser_t *parser, fus_lexer_t *lexer){
 audio_parser_variable_t *audio_parser_get_var(audio_parser_t *parser,
     const char *name
 ){
-    for(int i = 0; i < parser->vars_len; i++){
+    /* iterate backwards, so freshly-added variables override old ones
+    with same name */
+    for(int i = parser->vars_len - 1; i >= 0; i--){
         audio_parser_variable_t *var = parser->vars[i];
         if(!strcmp(var->name, name))return var;
     }

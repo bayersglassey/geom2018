@@ -38,34 +38,38 @@
 @def drum1: @triangle: 350 3000 10000 limit(1000)
 @def drum2: @triangle: 250 2000  9000 limit(0)
 @def drum3: @triangle: 250 2000  9000
+@def drum1: @noise: 500 10000 volinc(-10) limit(5000) step(1)
+@def drum2: @noise: 500 10000 volinc(-10) limit(5000) step(2)
+@def drum3: @noise: 500 10000 volinc(-10) limit(5000) step(3)
 @def drums: drum1,, drum2,, drum3,,
 
 
 @def intro: drums drums
+
 @def verse1:
     : @loop 4:
         @loop 4:
             drums
 
-    a2,, ,, a2,,
-    ,, ,, a2,,
+    a2,,   ,, a2,,
+      ,,   ,, a2,,
     a1,, d1,, e1,,
-    a2,, ,, a2,,
+    a2,,   ,, a2,,
 
-    ,, ,, ,,
-    ,, ,, ,,
-    ,, ,, ,,
-    ,, ,, ,,
+      ,,   ,,   ,,
+      ,,   ,,   ,,
+      ,,   ,,   ,,
+      ,,   ,,   ,,
 
-    a2,, ,, a2,,
-    ,, ,, a2,,
+    a2,,   ,, a2,,
+      ,,   ,, a2,,
     a1,, d1,, e1,,
-    a0,, ,, a0,,
+    a0,,   ,, a0,,
 
-    ,, ,, ,,
-    ,, ,, ,,
-    ,, ,, ,,
-    ,, ,, ,,
+      ,,   ,,   ,,
+      ,,   ,,   ,,
+      ,,   ,,   ,,
+      ,,   ,,   ,,
 
 @def verse2:
     : @loop 4:
@@ -79,7 +83,7 @@
 
     a3,, g2,, e2,,
     g2,, f2,, e2,,
-    f2,, ,, ,,
+    f2,,   ,, f2,,
     e2,, f2,, g2,,
 
     a3,, g2,, e2,,
@@ -89,8 +93,8 @@
 
     g2,, e2,, c2,,
     b2,, a2,, a2,,
-    ,, ,, ,,
-    ,, ,, ,,
+      ,,   ,,   ,,
+      ,,   ,,   ,,
 
 
 
