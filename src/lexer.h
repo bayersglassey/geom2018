@@ -64,7 +64,7 @@ typedef struct fus_lexer {
 void fus_lexer_cleanup(fus_lexer_t *lexer);
 int fus_lexer_init(fus_lexer_t *lexer, const char *text,
     const char *filename);
-int fus_lexer_copy(fus_lexer_t *lexer1, fus_lexer_t *lexer2);
+int fus_lexer_copy(fus_lexer_t *lexer, fus_lexer_t *lexer2);
 void fus_lexer_dump(fus_lexer_t *lexer, FILE *f);
 void fus_lexer_info(fus_lexer_t *lexer, FILE *f);
 void fus_lexer_err_info(fus_lexer_t *lexer);

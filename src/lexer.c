@@ -46,17 +46,17 @@ int fus_lexer_init(fus_lexer_t *lexer, const char *text,
     return 0;
 }
 
-int fus_lexer_copy(fus_lexer_t *lexer1, fus_lexer_t *lexer2){
-    lexer1->debug = lexer2->debug;
-    lexer1->filename = lexer2->filename;
-    lexer1->text = lexer2->text;
-    lexer1->text_len = lexer2->text_len;
-    lexer1->token = lexer2->token;
-    lexer1->token_len = lexer2->token_len;
-    lexer1->token_type = lexer2->token_type;
-    lexer1->pos = lexer2->pos;
-    lexer1->row = lexer2->row;
-    lexer1->col = lexer2->col;
+int fus_lexer_copy(fus_lexer_t *lexer, fus_lexer_t *lexer2){
+    lexer->debug = lexer2->debug;
+    lexer->filename = lexer2->filename;
+    lexer->text = lexer2->text;
+    lexer->text_len = lexer2->text_len;
+    lexer->token = lexer2->token;
+    lexer->token_len = lexer2->token_len;
+    lexer->token_type = lexer2->token_type;
+    lexer->pos = lexer2->pos;
+    lexer->row = lexer2->row;
+    lexer->col = lexer2->col;
 
     int indents_size = lexer2->indents_size;
     int *new_indents = malloc(sizeof(*new_indents) * indents_size);
@@ -64,11 +64,11 @@ int fus_lexer_copy(fus_lexer_t *lexer1, fus_lexer_t *lexer2){
     for(int i = 0; i < indents_size; i++){
         new_indents[i] = lexer2->indents[i];}
 
-    lexer1->indent = lexer2->indent;
-    lexer1->indents_size = lexer2->indents_size;
-    lexer1->n_indents = lexer2->n_indents;
-    lexer1->indents = new_indents;
-    lexer1->returning_indents = lexer2->returning_indents;
+    lexer->indent = lexer2->indent;
+    lexer->indents_size = lexer2->indents_size;
+    lexer->n_indents = lexer2->n_indents;
+    lexer->indents = new_indents;
+    lexer->returning_indents = lexer2->returning_indents;
 
     return 0;
 }
