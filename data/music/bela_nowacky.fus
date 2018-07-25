@@ -1,0 +1,158 @@
+@beat: 250
+
+# I'm gonna call this a "jazz scale" for now...
+# ...until we can fix it
+
+@def a0: @square: 500  29 1  6000  volinc(-5)
+@def b0: @square: 500  28 1  6000  volinc(-5)
+@def c0: @square: 500  27 1  6000  volinc(-5)
+@def d0: @square: 500  26 1  6000  volinc(-5)
+@def e0: @square: 500  25 1  6000  volinc(-5)
+@def f0: @square: 500  24 1  6000  volinc(-5)
+@def g0: @square: 500  23 1  6000  volinc(-5)
+
+@def a1: @square: 500  22 1  6000  volinc(-5)
+@def b1: @square: 500  21 1  6000  volinc(-5)
+@def c1: @square: 500  20 1  6000  volinc(-5)
+@def d1: @square: 500  19 1  6000  volinc(-5)
+@def e1: @square: 500  18 1  6000  volinc(-5)
+@def f1: @square: 500  17 1  6000  volinc(-5)
+@def g1: @square: 500  16 1  6000  volinc(-5)
+
+@def a2: @square: 500  15 1  6000  volinc(-5)
+@def b2: @square: 500  14 1  6000  volinc(-5)
+@def c2: @square: 500  13 1  6000  volinc(-5)
+@def d2: @square: 500  12 1  6000  volinc(-5)
+@def e2: @square: 500  11 1  6000  volinc(-5)
+@def f2: @square: 500  10 1  6000  volinc(-5)
+@def g2: @square: 500   9 1  6000  volinc(-5)
+
+@def a3: @square: 500   8 1  6000  volinc(-5)
+@def b3: @square: 500   7 1  6000  volinc(-5)
+@def c3: @square: 500   6 1  6000  volinc(-5)
+@def d3: @square: 500   5 1  6000  volinc(-5)
+@def e3: @square: 500   4 1  6000  volinc(-5)
+@def f3: @square: 500   3 1  6000  volinc(-5)
+@def g3: @square: 500   2 1  6000  volinc(-5)
+
+@def drum1: @noise:  500 10000 volinc(-10) limit(5000) step(1)
+@def drum2: @noise:  500 10000 volinc(-10) limit(5000) step(2)
+@def drum3: @noise:  500 10000 volinc(-10) limit(5000) step(3)
+@def cymb1: @noise: 1500 10000 volinc(-10) limit(1000)
+@def drums1:
+    drum1,, drum2,, drum3,,
+    drum1,, drum2,, drum3,,
+    cymb1,,      ,, drum1,,
+    cymb1,, cymb1,, drum2,,
+@def drums2:
+    drum1,, drum2,, drum3,,
+    cymb1,,      ,,      ,,
+    drum1,,      ,,      ,,
+    cymb1,,      ,, drum1,,
+
+@def bass1: @triangle:  500  500 10000 limit(1000)
+@def bass2: @triangle:  500 1000  9000 limit(0)
+@def bass3: @triangle:  500  750  9000 addinc1(1)
+@def bass4: @triangle: 7500 1000 15000 addinc1(-1)
+@def bass:
+    bass1 ,, ,, ,,
+    bass2 ,, ,, ,,
+    bass1 ,, ,, ,,
+    bass3 ,, ,, ,,
+
+    bass1 ,, ,, ,,
+    bass2 ,, ,, ,,
+    bass1 ,, ,, ,,
+    bass4 ,, ,, ,,
+
+
+@def verse: @loop 4: @loop 4: ,, ,, ,,
+
+
+@def v1a: a0
+@def v1b: a1
+@def v1c: d1
+@def v1d: e1
+@def v1e: a2
+@def melody1:
+    v1e,,    ,, v1e,,
+       ,,    ,, v1e,,
+    v1b,, v1c,, v1d,,
+    v1e,,    ,, v1e,,
+
+       ,,    ,,    ,,
+       ,,    ,,    ,,
+       ,,    ,,    ,,
+       ,,    ,,    ,,
+
+    v1e,,    ,, v1e,,
+       ,,    ,, v1e,,
+    v1b,, v1c,, v1d,,
+    v1a,,    ,, v1a,,
+
+       ,,    ,,    ,,
+       ,,    ,,    ,,
+       ,,    ,,    ,,
+       ,,    ,,    ,,
+
+@def v2a: a2
+@def v2b: b2
+@def v2c: c2
+@def v2d: e2
+@def v2e: f2
+@def v2f: g2
+@def v2g: a3
+@def melody2:
+    v2g,, v2f,, v2e,,
+    v2f,, v2e,, v2d,,
+    v2e,, v2d,, v2c,,
+    v2c,, v2d,, v2e,,
+
+    v2g,, v2f,, v2e,,
+    v2f,, v2e,, v2d,,
+    v2e,,    ,, v2e,,
+    v2d,, v2e,, v2f,,
+
+    v2g,, v2f,, v2e,,
+    v2f,, v2e,, v2d,,
+    v2e,, v2d,, v2c,,
+    v2c,, v2d,, v2e,,
+
+    v2f,, v2d,, v2c,,
+    v2b,, v2a,, v2a,,
+       ,,    ,,    ,,
+       ,,    ,,    ,,
+
+
+@def intro:
+    drums1
+    drums1
+
+    (bass)
+    drums1
+    drums1
+
+@def verse1:
+    : @loop 4: drums1
+    : @loop 2: bass
+    melody1
+
+@def verse2:
+    : @loop 4: drums2
+    melody2
+
+@def verse3:
+    : @loop 4: drums1
+    : @loop 2: bass
+
+    # maybe the melodies harmonize?..
+    (melody1) melody2
+
+
+@def song:
+    intro
+    @loop 2: verse1
+    @loop 2: verse2
+    @loop 2: verse3
+
+@print: "Primary song is in variable \"song\""
