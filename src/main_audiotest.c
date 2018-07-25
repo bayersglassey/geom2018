@@ -69,6 +69,22 @@ int audiotest(SDL_AudioDeviceID dev, const char *filename){
 int main(int n_args, char *args[]){
     int err;
 
+    const char *filename = "data/music/test.fus";
+    for(int i = 1; i < n_args; i++){
+        char *arg = args[i];
+        if(!strcmp(arg, "-f")){
+            i++;
+            if(i >= n_args){
+                fprintf(stderr, "Missing argument after %s\n", arg);
+                return 2;
+            }
+            filename = args[i];
+        }else{
+            fprintf(stderr, "Unrecognized option: %s\n", arg);
+            return 2;
+        }
+    }
+
     if(SDL_Init(SDL_INIT_AUDIO)){
         fprintf(stderr, "SDL_Init error: %s\n", SDL_GetError());
         return 2;
@@ -89,7 +105,6 @@ int main(int n_args, char *args[]){
         return 2;
     }
 
-    const char *filename = "data/music/test.fus";
     err = audiotest(dev, filename);
     if(err)return err;
 
