@@ -159,4 +159,8 @@ July 24, 2018:
 * audiotest REPL: push user input onto an array of strings so they can @def
 
 * audiotest REPL: @triangle's "addinc" param needs to avoid the pop!..
-    e.g. @beat(250) @triangle: 7500 1000 15000 addinc1(-1)
+    e.g. @triangle: 7500 1000 15000 addinc1(-1)
+
+    -> ok we fixed the pop, but add it back as an operation somehow...
+        Like @pop(...) - because sometimes it sounds good! Like a bass kick.
+        What are its parameters?..

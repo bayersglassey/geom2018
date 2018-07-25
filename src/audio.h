@@ -76,8 +76,13 @@ int gen_triangle(audio_buffer_t *buf,
     int pos, int len,
     int add, int vol, int offset,
     int limit, int addinc1, int addinc2);
+int gen_triangle_wacky(audio_buffer_t *buf,
+    int pos, int len,
+    int add, int vol, int offset,
+    int limit, int addinc1, int addinc2);
 int gen_noise(audio_buffer_t *buf, int *rnd_ptr,
-    int pos, int len, int vol, int volinc, int limit, int step);
+    int pos, int len, int vol, int volinc, int limit, int step,
+    bool wacky);
 
 
 #endif

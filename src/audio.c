@@ -204,6 +204,7 @@ int audio_parser_parse(audio_parser_t *parser, fus_lexer_t *lexer){
 
                 int len, add, vol, limit,
                     offset=0, addinc1=0, addinc2=0;
+                bool wacky=false;
                 err = fus_lexer_get(lexer, "(");
                 if(err)return err;
                 err = fus_lexer_get_int(lexer, &len);
@@ -225,19 +226,26 @@ int audio_parser_parse(audio_parser_t *parser, fus_lexer_t *lexer){
                 err = fus_lexer_get_attr_int(lexer,
                     "addinc2", &addinc2, true);
                 if(err)return err;
+                err = fus_lexer_get_attr_bool(lexer,
+                    "wacky", &wacky, true);
+                if(err)return err;
                 err = fus_lexer_get(lexer, ")");
                 if(err)return err;
 
                 err = audio_buffer_extend(buf, parser->pos + len);
                 if(err)return err;
-                err = gen_triangle(buf, parser->pos, len, add, vol,
-                    offset, limit, addinc1, addinc2);
+                err = wacky?
+                    gen_triangle(buf, parser->pos, len, add, vol,
+                        offset, limit, addinc1, addinc2):
+                    gen_triangle(buf, parser->pos, len, add, vol,
+                        offset, limit, addinc1, addinc2);
                 if(err)return err;
             }else if(fus_lexer_got(lexer, "noise")){
                 err = fus_lexer_next(lexer);
                 if(err)return err;
 
                 int len, vol, volinc=0, limit=0, step=1;
+                bool wacky=false;
                 err = fus_lexer_get(lexer, "(");
                 if(err)return err;
                 err = fus_lexer_get_int(lexer, &len);
@@ -253,6 +261,9 @@ int audio_parser_parse(audio_parser_t *parser, fus_lexer_t *lexer){
                 err = fus_lexer_get_attr_int(lexer,
                     "step", &step, true);
                 if(err)return err;
+                err = fus_lexer_get_attr_bool(lexer,
+                    "wacky", &wacky, true);
+                if(err)return err;
                 err = fus_lexer_get(lexer, ")");
                 if(err)return err;
 
@@ -263,7 +274,7 @@ int audio_parser_parse(audio_parser_t *parser, fus_lexer_t *lexer){
                 err = audio_buffer_extend(buf, parser->pos + len);
                 if(err)return err;
                 err = gen_noise(buf, &parser->rnd, parser->pos,
-                    len, vol, volinc, limit, step);
+                    len, vol, volinc, limit, step, wacky);
                 if(err)return err;
             }else if(fus_lexer_got(lexer, "loop")){
                 err = fus_lexer_next(lexer);
@@ -300,6 +311,26 @@ int audio_parser_parse(audio_parser_t *parser, fus_lexer_t *lexer){
                 err = fus_lexer_next(lexer);
                 if(err)return err;
                 printf("RND: %i\n", parser->rnd);
+            }else if(fus_lexer_got(lexer, "dump_data")){
+                err = fus_lexer_next(lexer);
+                if(err)return err;
+
+                int addpos, len;
+                err = fus_lexer_get(lexer, "(");
+                if(err)return err;
+                err = fus_lexer_get_int(lexer, &addpos);
+                if(err)return err;
+                err = fus_lexer_get_int(lexer, &len);
+                if(err)return err;
+                err = fus_lexer_get(lexer, ")");
+                if(err)return err;
+
+                int pos = parser->pos + addpos;
+                printf("DATA (%i samples starting at %i):\n", len, pos);
+                for(int i = 0; i < len; i++){
+                    audio_sample_t sample = buf->data[pos + i];
+                    printf("  %i\n", sample);
+                }
             }else if(fus_lexer_got(lexer, "def")){
                 err = fus_lexer_next(lexer);
                 if(err)return err;
@@ -434,7 +465,6 @@ int gen_square(audio_buffer_t *buf,
     return 0;
 }
 
-
 int gen_triangle(audio_buffer_t *buf,
     int pos, int len,
     int add, int vol, int offset,
@@ -444,7 +474,27 @@ int gen_triangle(audio_buffer_t *buf,
     int y = offset;
     bool up = true;
     for(int i = 0; i < len; i++){
-        buf->data[pos + i] += int_min(y, limit) - limit;
+        int value = int_min(y, limit);
+        buf->data[pos + i] += value;
+        y += up? add: -add;
+        add += up? addinc1: addinc2;
+        if(y >= vol){y = vol; up = false;}
+        if(y <= 0){y = 0; up = true;}
+    }
+    return 0;
+}
+
+int gen_triangle_wacky(audio_buffer_t *buf,
+    int pos, int len,
+    int add, int vol, int offset,
+    int limit, int addinc1, int addinc2
+){
+    AUDIO_BUF_RANGE_CHECK(buf, pos, len)
+    int y = offset;
+    bool up = true;
+    for(int i = 0; i < len; i++){
+        int value = int_min(y, limit) - limit;
+        buf->data[pos + i] += value;
         y += up? add: -add;
         add += up? addinc1: addinc2;
         if(y >= vol){y = vol; up = false;}
@@ -462,7 +512,8 @@ static int rnd_next(int rnd){
 }
 
 int gen_noise(audio_buffer_t *buf, int *rnd_ptr,
-    int pos, int len, int vol, int volinc, int limit, int step
+    int pos, int len, int vol, int volinc, int limit, int step,
+    bool wacky
 ){
     AUDIO_BUF_RANGE_CHECK(buf, pos, len)
     int rnd = *rnd_ptr;
@@ -478,7 +529,9 @@ int gen_noise(audio_buffer_t *buf, int *rnd_ptr,
         if(vol <= 0)break;
             /* Avoid modulus-by-zero... */
 
-        int y = int_max(rnd % vol, limit) - limit;
+        int y = wacky?
+            int_max(rnd % vol, limit) - limit:
+            int_min(rnd % vol, limit);
         buf->data[pos + i] += y;
         vol += volinc;
         if(i % step == 0)rnd = rnd_next(rnd);

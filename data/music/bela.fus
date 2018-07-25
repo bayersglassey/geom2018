@@ -35,10 +35,10 @@
 @def f3: @square: 500   3 1  6000  volinc(-5)
 @def g3: @square: 500   2 1  6000  volinc(-5)
 
-@def drum1: @noise:  500 10000 volinc(-10) limit(5000) step(1)
-@def drum2: @noise:  500 10000 volinc(-10) limit(5000) step(2)
-@def drum3: @noise:  500 10000 volinc(-10) limit(5000) step(3)
-@def cymb1: @noise: 1500 10000 volinc(-10) limit(1000)
+@def drum1: @noise:  500 10000 volinc(-10) limit(5000) step(1) wacky(y)
+@def drum2: @noise:  500 10000 volinc(-10) limit(5000) step(2) wacky(y)
+@def drum3: @noise:  500 10000 volinc(-10) limit(5000) step(3) wacky(y)
+@def cymb1: @noise: 1500 10000 volinc(-10) limit(1000) wacky(y)
 @def drums1:
     drum1,, drum2,, drum3,,
     drum1,, drum2,, drum3,,
@@ -50,10 +50,10 @@
     drum1,,      ,,      ,,
     cymb1,,      ,, drum1,,
 
-@def bass1: @triangle:  500  500 10000 limit(1000)
-@def bass2: @triangle:  500 1000  9000 limit(0)
-@def bass3: @triangle:  500  750  9000 addinc1(1)
-@def bass4: @triangle: 7500 1000 15000 addinc1(-1)
+@def bass1: @triangle:  500  500 10000 limit(1000) wacky(y)
+@def bass2: @triangle:  500 1000  9000 limit(0) wacky(y)
+@def bass3: @triangle:  500  750  9000 addinc1(1) wacky(y)
+@def bass4: @triangle: 7500 1000 15000 addinc1(-1) wacky(y)
 @def bass:
     bass1 ,, ,, ,,
     bass2 ,, ,, ,,
