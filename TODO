@@ -144,5 +144,13 @@ hexcollmap "parts":
 July 24, 2018:
 --------------
 
-Add fus_lexer_cleanup()... need to go add it everywhere T___T
+* Add fus_lexer_cleanup()... need to go add it everywhere T___T
+
+* Allow initialization of lexer->pos and lexer->text_len, so we can have variables
+    which point to "sub-texts"... like this:
+
+        def x: 1 2 3
+        0 x 4  # equivalent to 0 1 2 3 4
+
+    (...for use with e.g. audio_parser)
 

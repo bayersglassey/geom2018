@@ -1,3 +1,3 @@
-gcc -Werror -Wall -Wno-unused -lSDL2 -o audiotest \
+gcc -g -Werror -Wall -Wno-unused -lSDL2 -o audiotest \
     src/util.c src/lexer.c src/audio.c src/main_audiotest.c \
     $@

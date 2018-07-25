@@ -1,34 +1,32 @@
 
-@loop 8:
-    :
-        @triangle: 1000 400  9000 addinc1(1)
-        ,,
+@def bass_a: @triangle: 1000 400  9000 addinc1(1)
+@def bass_b: @triangle: 6000 400 11000
+@def bass_c: @triangle: 1000 1200  9000
+@def bass_e:
+    @triangle: 500 2200  9000
+    + 500
+    @triangle: 1000 2200  9000  limit(-1000)
 
-        @triangle: 6000 400 11000
-        ,,
+@def tenor_a:
+    @square: 5000 40  1  6000  volinc(-5) freq2inc(10)
+    @square: 3000 20  1  6000  offset(10) volinc(-5) freq2inc(10)
+@def tenor_b: @square: 500  15 1  6000  volinc(-5)
+@def tenor_c: @square: 500  12 1  6000  volinc(-5)
+@def tenor_d: @square: 500   9 1  6000  volinc(-5)
 
-        @triangle: 1000 1200  9000
-        ,,
+@def zoop:
+    @square: 2000 40 20  6000  volinc(-5) freq2inc(10)
+    @square: 1000 20 10  6000  volinc(-5) freq2inc(50)
+    @triangle: 1000 2200  9000  limit(-1000)
+
+@loop 4:
+    : bass_a,, bass_b,, bass_c
     ,, ,, ,,
 
-    :
-        @square: 5000 40  1  6000  volinc(-5) freq2inc(10)
-        @square: 3000 20  1  6000  offset(10) volinc(-5) freq2inc(10)
-        ,
-        @square: 500  15 1  6000  volinc(-5)
-        ,
-        @square: 500  12 1  6000  volinc(-5)
-        ,,
-        @square: 500   9 1  6000  volinc(-5)
+    : tenor_a, tenor_b, tenor_c,, tenor_d
     ,, ,, ,,
 
-    :
-        @square: 2000 40 20  6000  volinc(-5) freq2inc(10)
-        @square: 1000 20 10  6000  volinc(-5) freq2inc(50)
-        @triangle: 1000 2200  9000  limit(-1000)
+    : zoop
     ,, ,, ,,
 
-    :
-        @triangle: 500 2200  9000
-        + 500
-        @triangle: 1000 2200  9000  limit(-1000)
+    : bass_e

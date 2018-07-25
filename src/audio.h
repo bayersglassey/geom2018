@@ -36,13 +36,25 @@ typedef struct audio_parser {
     audio_buffer_t *buf;
     int pos;
     int beat_len;
+    ARRAY_DECL(struct audio_parser_variable*, vars)
+    bool vars_own;
 } audio_parser_t;
+
+typedef struct audio_parser_variable {
+    char *name;
+    fus_lexer_t lexer;
+} audio_parser_variable_t;
 
 void audio_parser_cleanup(audio_parser_t *parser);
 int audio_parser_init(audio_parser_t *parser,
     audio_buffer_t *buf, int beat_len);
 int audio_parser_copy(audio_parser_t *parser, audio_parser_t *parser2);
 int audio_parser_parse(audio_parser_t *parser, fus_lexer_t *lexer);
+audio_parser_variable_t *audio_parser_get_var(audio_parser_t *parser,
+    const char *name);
+
+void audio_parser_variable_cleanup(audio_parser_variable_t *var);
+int audio_parser_variable_init(audio_parser_variable_t *var, char *name);
 
 
 
