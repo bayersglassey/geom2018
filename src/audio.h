@@ -25,6 +25,7 @@ typedef struct audio_buffer {
 
 void audio_buffer_cleanup(audio_buffer_t *buf);
 int audio_buffer_init(audio_buffer_t *buf);
+int audio_buffer_extend(audio_buffer_t *buf, int new_data_len);
 int audio_buffer_load(audio_buffer_t *buf, const char *filename);
 
 
