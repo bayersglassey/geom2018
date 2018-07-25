@@ -1,3 +1,4 @@
 gcc -g -Werror -Wall -Wno-unused -lSDL2 -o audiotest \
-    src/util.c src/lexer.c src/audio.c src/main_audiotest.c \
+    src/util.c src/lexer.c src/audio.c src/audio_parser.c \
+    src/main_audiotest.c \
     $@
