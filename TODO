@@ -154,3 +154,6 @@ July 24, 2018:
 
     (...for use with e.g. audio_parser)
 
+* audiotest REPL: recover from syntax errors plz
+
+* audiotest REPL: push user input onto an array of strings so they can @def
