@@ -75,7 +75,7 @@ int gen_square(audio_buffer_t *buf,
 int gen_triangle(audio_buffer_t *buf,
     int pos, int len,
     int add, int vol, int offset,
-    int limit, int addinc1, int addinc2);
+    int limit, int addinc1, int addinc2, int plus);
 int gen_triangle_wacky(audio_buffer_t *buf,
     int pos, int len,
     int add, int vol, int offset,

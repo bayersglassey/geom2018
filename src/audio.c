@@ -106,13 +106,13 @@ int gen_square(audio_buffer_t *buf,
 int gen_triangle(audio_buffer_t *buf,
     int pos, int len,
     int add, int vol, int offset,
-    int limit, int addinc1, int addinc2
+    int limit, int addinc1, int addinc2, int plus
 ){
     AUDIO_BUF_RANGE_CHECK(buf, pos, len)
     int y = offset;
     bool up = true;
     for(int i = 0; i < len; i++){
-        int value = int_min(y, limit);
+        int value = int_min(y, limit) + plus;
         buf->data[pos + i] += value;
         y += up? add: -add;
         add += up? addinc1: addinc2;

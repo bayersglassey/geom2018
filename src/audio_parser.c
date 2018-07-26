@@ -143,7 +143,7 @@ int audio_parser_parse(audio_parser_t *parser, fus_lexer_t *lexer){
                 if(err)return err;
 
                 int len, add, vol, limit,
-                    offset=0, addinc1=0, addinc2=0;
+                    offset=0, addinc1=0, addinc2=0, plus=0;
                 bool wacky=false;
                 err = fus_lexer_get(lexer, "(");
                 if(err)return err;
@@ -166,6 +166,9 @@ int audio_parser_parse(audio_parser_t *parser, fus_lexer_t *lexer){
                 err = fus_lexer_get_attr_int(lexer,
                     "addinc2", &addinc2, true);
                 if(err)return err;
+                err = fus_lexer_get_attr_int(lexer,
+                    "plus", &plus, true);
+                if(err)return err;
                 err = fus_lexer_get_attr_bool(lexer,
                     "wacky", &wacky, true);
                 if(err)return err;
@@ -175,10 +178,10 @@ int audio_parser_parse(audio_parser_t *parser, fus_lexer_t *lexer){
                 err = audio_buffer_extend(buf, parser->pos + len);
                 if(err)return err;
                 err = wacky?
-                    gen_triangle(buf, parser->pos, len, add, vol,
+                    gen_triangle_wacky(buf, parser->pos, len, add, vol,
                         offset, limit, addinc1, addinc2):
                     gen_triangle(buf, parser->pos, len, add, vol,
-                        offset, limit, addinc1, addinc2);
+                        offset, limit, addinc1, addinc2, plus);
                 if(err)return err;
             }else if(fus_lexer_got(lexer, "noise")){
                 err = fus_lexer_next(lexer);
