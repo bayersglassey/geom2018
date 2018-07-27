@@ -153,6 +153,7 @@ typedef struct rendergraph_trf {
 } rendergraph_trf_t;
 
 typedef struct rendergraph_bitmap {
+    bool pbox_calculated;
     position_box_t pbox;
     SDL_Surface *surface;
     SDL_Texture *texture;
@@ -196,6 +197,8 @@ int rendergraph_push_rendergraph_trf(rendergraph_t *rendergraph,
 int rendergraph_push_prismel_trf(rendergraph_t *rendergraph,
     prismel_trf_t **prismel_trf_ptr);
 int rendergraph_get_bitmap_i(rendergraph_t *rendergraph,
+    rot_t rot, flip_t flip, int frame_i);
+int rendergraph_calculate_bitmap_bounds(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i);
 int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i,

@@ -950,19 +950,16 @@ int rendergraph_trf_get_frame_i(rendergraph_trf_t *rendergraph_trf,
         rgraph->n_frames, frame_i);
 }
 
-int rendergraph_render_bitmap(rendergraph_t *rendergraph,
-    rot_t rot, flip_t flip, int frame_i,
-    SDL_Palette *pal
+int rendergraph_calculate_bitmap_bounds(rendergraph_t *rendergraph,
+    rot_t rot, flip_t flip, int frame_i
 ){
     int err;
     int bitmap_i = rendergraph_get_bitmap_i(rendergraph, rot, flip,
         frame_i);
     rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[bitmap_i];
 
-#ifdef GEOM_DEBUG_RENDERING_RGRAPH
-    printf("Rendering rgraph: \"%s\" rot=%i flip=%c frame_i=%i\n",
-        rendergraph->name, rot, flip? 'y': 'n', frame_i);
-#endif
+    /* Already calculated bitmap->pbox, early exit */
+    if(bitmap->pbox_calculated)return 0;
 
     /* bitmap->pbox should be the union of its sub-bitmap's pboxes.
     (I mean the set-theoretic union, like the "OR" of Venn diagrams.
@@ -1024,13 +1021,15 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
         int shift_x, shift_y;
         rendergraph->space->vec_render(trf2.add, &shift_x, &shift_y);
 
-        /* Get or render sub-bitmap for this rendergraph_trf */
-        rendergraph_bitmap_t *bitmap2;
-        err = rendergraph_get_or_render_bitmap(rendergraph2,
-            &bitmap2, trf2.rot, trf2.flip, frame_i2, pal);
+        /* Calculate bounds for sub-bitmap for this rendergraph_trf */
+        err = rendergraph_calculate_bitmap_bounds(rendergraph2,
+            trf2.rot, trf2.flip, frame_i2);
         if(err)return err;
 
         /* Union sub-bitmap's bbox into our "accumulating" bbox */
+        int bitmap_i = rendergraph_get_bitmap_i(rendergraph2,
+            trf2.rot, trf2.flip, frame_i2);
+        rendergraph_bitmap_t *bitmap2 = &rendergraph2->bitmaps[bitmap_i];
         boundary_box_t bbox2;
         boundary_box_from_position_box(&bbox2, &bitmap2->pbox);
         boundary_box_shift(&bbox2, shift_x, shift_y);
@@ -1039,9 +1038,29 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
 
     /* Store "accumulated" bbox on bitmap */
     position_box_from_boundary_box(&bitmap->pbox, &bbox);
+    bitmap->pbox_calculated = true;
 
-    /* Bits per pixel */
-    int bpp = 8;
+    return 0;
+}
+
+int rendergraph_render_bitmap(rendergraph_t *rendergraph,
+    rot_t rot, flip_t flip, int frame_i,
+    SDL_Palette *pal
+){
+    int err;
+    int bitmap_i = rendergraph_get_bitmap_i(rendergraph, rot, flip,
+        frame_i);
+    rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[bitmap_i];
+
+    /* Calculate our bounds */
+    err = rendergraph_calculate_bitmap_bounds(rendergraph,
+        rot, flip, frame_i);
+    if(err)return err;
+
+#ifdef GEOM_DEBUG_RENDERING_RGRAPH
+    printf("Rendering rgraph: \"%s\" rot=%i flip=%c frame_i=%i\n",
+        rendergraph->name, rot, flip? 'y': 'n', frame_i);
+#endif
 
     /* Get rid of old bitmap, create new one */
     if(bitmap->surface != NULL){
@@ -1091,7 +1110,6 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
                 p[xx] = c;
             }
         }
-
     }
 
     /* Unlock surface so we can blit to it */
@@ -1115,25 +1133,26 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
         int shift_x, shift_y;
         rendergraph->space->vec_render(trf2.add, &shift_x, &shift_y);
 
-        /* Blit sub-bitmap's surface onto ours */
-        int bitmap_i2 = rendergraph_get_bitmap_i(rendergraph2,
-            trf2.rot, trf2.flip, frame_i2);
-        rendergraph_bitmap_t *bitmap2 = &rendergraph2->bitmaps[bitmap_i2];
-        SDL_Surface *surface2 = bitmap2->surface;
+        /* Get or render sub-bitmap for this rendergraph_trf */
+        rendergraph_bitmap_t *bitmap2;
+        err = rendergraph_get_or_render_bitmap(rendergraph2,
+            &bitmap2, trf2.rot, trf2.flip, frame_i2, pal);
 
+        /* Blit sub-bitmap's surface onto ours */
+        SDL_Surface *surface2 = bitmap2->surface;
         SDL_Rect dst_rect = {
             bitmap->pbox.x + shift_x - bitmap2->pbox.x,
             bitmap->pbox.y + shift_y - bitmap2->pbox.y,
             bitmap2->pbox.w,
             bitmap2->pbox.h
         };
-
         palettemapper_t *palmapper = rendergraph_trf->palmapper;
         Uint8 table[256];
         if(palmapper){
             for(int i = 0; i < 256; i++)table[i] = i;
             for(int i = 0; i < rendergraph_trf->palmapper_n_applications; i++){
-                for(int i = 0; i < 256; i++)table[i] = palmapper->table[table[i]];
+                for(int i = 0; i < 256; i++){
+                    table[i] = palmapper->table[table[i]];}
             }
         }
         RET_IF_SDL_NZ(SDL_PaletteMappedBlit(bitmap2->surface, NULL,
