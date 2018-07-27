@@ -1043,6 +1043,13 @@ int rendergraph_calculate_bitmap_bounds(rendergraph_t *rendergraph,
     return 0;
 }
 
+int rendergraph_render_to_surface(rendergraph_t *rendergraph,
+    SDL_Surface *surface, rot_t rot, flip_t flip, int frame_i
+){
+    int err;
+    return 0;
+}
+
 int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i,
     SDL_Palette *pal
@@ -1212,6 +1219,14 @@ int rendergraph_render(rendergraph_t *rgraph,
 ){
     int err;
 
+    bool to_surface = surface == NULL? false:
+#ifdef GEOM_RGRAPH_RENDER_TO_SURFACE
+        true
+#else
+        false
+#endif
+    ;
+
     int animated_frame_i = get_animated_frame_i(
         rgraph->animation_type, rgraph->n_frames, frame_i);
 
@@ -1239,12 +1254,18 @@ int rendergraph_render(rendergraph_t *rgraph,
     }
 
     rendergraph_bitmap_t *bitmap;
-    err = rendergraph_get_or_render_bitmap(rgraph, &bitmap,
-        rot, flip, animated_frame_i, pal);
-    if(err)return err;
+    if(to_surface){
+        err = rendergraph_calculate_bitmap_bounds(rgraph,
+            rot, flip, animated_frame_i);
+        if(err)return err;
+    }else{
+        err = rendergraph_get_or_render_bitmap(rgraph, &bitmap,
+            rot, flip, animated_frame_i, pal);
+        if(err)return err;
+    }
 
     /* Can't create a texture with either dimension 0, so exit early */
-    if(bitmap->surface->w == 0 || bitmap->surface->h == 0)return 0;
+    if(bitmap->pbox.w == 0 || bitmap->pbox.h == 0)return 0;
 
     int x, y;
     rgraph->space->vec_render(pos, &x, &y);
@@ -1258,8 +1279,14 @@ int rendergraph_render(rendergraph_t *rgraph,
     };
 
     if(surface != NULL){
-        RET_IF_SDL_NZ(SDL_BlitScaled(bitmap->surface, NULL,
-            surface, &dst_rect));
+        if(to_surface){
+            err = rendergraph_render_to_surface(rgraph, surface,
+                rot, flip, animated_frame_i);
+            if(err)return err;
+        }else{
+            RET_IF_SDL_NZ(SDL_BlitScaled(bitmap->surface, NULL,
+                surface, &dst_rect));
+        }
     }else if(renderer != NULL){
         SDL_Texture *bitmap_texture;
         err = rendergraph_bitmap_get_texture(rgraph, bitmap, renderer,
