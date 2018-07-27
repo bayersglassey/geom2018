@@ -146,14 +146,6 @@ July 24, 2018:
 
 * Add fus_lexer_cleanup()... need to go add it everywhere T___T
 
-* Allow initialization of lexer->pos and lexer->text_len, so we can have variables
-    which point to "sub-texts"... like this:
-
-        def x: 1 2 3
-        0 x 4  # equivalent to 0 1 2 3 4
-
-    (...for use with e.g. audio_parser)
-
 * audiotest REPL: recover from syntax errors plz
 
 * audiotest REPL: push user input onto an array of strings so they can @def
@@ -164,3 +156,87 @@ July 24, 2018:
     -> ok we fixed the pop, but add it back as an operation somehow...
         Like @pop(...) - because sometimes it sounds good! Like a bass kick.
         What are its parameters?..
+
+July 26, 2018:
+--------------
+
+We're at the point where all the SDL_Surface caching is dragging the computer
+down to hell.
+Add debugging first of all; then separate boundbox calculation from surface
+rendering, and only render surfaces as they come into contact with the
+screen's boundbox.
+
+...ASK AND YE SHALL RECEIVE:
+
+    * GEOM_HEXGAME_DEBUG_MALLOC
+    * GEOM_DEBUG_RENDERING_RGRAPH
+    * GEOM_ONLY_RENDER_CUR_SUBMAP
+
+    ./compile_demo -DGEOM_HEXGAME_DEBUG_MALLOC -DGEOM_ONLY_RENDER_CUR_SUBMAP
+
+        Initial load:
+            Arena 0:
+            system bytes     =   52518912
+            in use bytes     =   48981472 # 49m
+            Total (incl. mmap):
+            system bytes     =   52518912
+            in use bytes     =   48981472
+            max mmap regions =          3
+            max mmap bytes   =   19873792
+
+        Loading all player surfaces:
+            Arena 0:
+            system bytes     =   52854784
+            in use bytes     =   49419888 # .5m
+            Total (incl. mmap):
+            system bytes     =   52854784
+            in use bytes     =   49419888
+            max mmap regions =          3
+            max mmap bytes   =   19873792
+
+        Loading next submap (same prismelmapper):
+            Arena 0:
+            system bytes     =   64053248
+            in use bytes     =   60519888 # 12m
+            Total (incl. mmap):
+            system bytes     =   64053248
+            in use bytes     =   60519888
+            max mmap regions =          3
+            max mmap bytes   =   19873792
+
+        Loading all player surfaces:
+            Arena 0:
+            system bytes     =   64053248
+            in use bytes     =   60534560 # 14k (whaaa?.. just angles I never was at the first time?)
+            Total (incl. mmap):
+            system bytes     =   64053248
+            in use bytes     =   60534560
+            max mmap regions =          3
+            max mmap bytes   =   19873792
+
+
+    ./compile_demo -DGEOM_HEXGAME_DEBUG_MALLOC -DGEOM_ONLY_RENDER_CUR_SUBMAP
+
+        Running around the whole worldmap:        
+            Arena 0:
+            system bytes     =  144302080
+            in use bytes     =  140812384 # 140m
+            Total (incl. mmap):
+            system bytes     =  144302080
+            in use bytes     =  140812384
+            max mmap regions =          3
+            max mmap bytes   =   19873792
+
+    ./compile_demo -DGEOM_HEXGAME_DEBUG_MALLOC
+
+        Running around the whole worldmap:        
+            Arena 0:
+            system bytes     = 1842372608
+            in use bytes     = 1838830048 # 1.5g
+            Total (incl. mmap):
+            system bytes     = 1842372608
+            in use bytes     = 1838830048
+            max mmap regions =          3
+            max mmap bytes   =   19873792
+
+
