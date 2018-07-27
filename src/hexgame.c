@@ -4,6 +4,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#ifdef GEOM_HEXGAME_DEBUG_MALLOC
+    #include <malloc.h>
+#endif
+
 #include "hexgame.h"
 #include "anim.h"
 #include "hexmap.h"
@@ -290,7 +294,7 @@ void player_cleanup(player_t *player){
 
 int player_init(player_t *player, hexmap_t *map,
     char *stateset_filename, const char *state_name, int keymap,
-    vec_t respawn_pos
+    vec_t respawn_pos, char *respawn_filename
 ){
     int err;
 
@@ -319,6 +323,9 @@ int player_init(player_t *player, hexmap_t *map,
 
     vec_cpy(map->space->dims, player->respawn_pos, respawn_pos);
     vec_cpy(map->space->dims, player->pos, respawn_pos);
+
+    player->cur_submap = NULL;
+    player->respawn_filename = respawn_filename;
 
     return 0;
 }
@@ -584,6 +591,9 @@ int player_step(player_t *player, hexmap_t *map){
             __FILE__);
         return 0;}
 
+    vecspace_t *space = map->space;
+
+    /* Handle recording & playback */
     int rec_action = player->recording.action;
     if(rec_action == 1){
         /* play */
@@ -595,7 +605,6 @@ int player_step(player_t *player, hexmap_t *map){
         /* record */
         player->recording.wait++;
     }
-
     if(rec_action != 0 && DEBUG_RECORDINGS){
         printf("KEYS: ");
         #define DEBUG_PRINT_KEYS(keys) { \
@@ -610,13 +619,14 @@ int player_step(player_t *player, hexmap_t *map){
         printf("\n");
     }
 
+    /* Increment frame */
     player->frame_i++;
     if(player->frame_i == MAX_FRAME_I)player->frame_i = 0;
 
+    /* Handle animation & input */
     if(player->cooldown > 0){
         player->cooldown--;
     }else{
-
         state_t *state = player->state;
         for(int i = 0; i < state->rules_len; i++){
             state_rule_t *rule = state->rules[i];
@@ -639,6 +649,45 @@ int player_step(player_t *player, hexmap_t *map){
             player->keyinfo.wasdown[i] = player->keyinfo.isdown[i];
             player->keyinfo.wentdown[i] = false;}
     }
+
+    /* Figure out current submap */
+    for(int i = 0; i < map->submaps_len; i++){
+        hexmap_submap_t *submap = map->submaps[i];
+        if(!submap->solid)continue;
+
+        hexcollmap_t *collmap = &submap->collmap;
+
+        trf_t index = {0};
+        hexspace_set(index.add,
+             player->pos[0] - submap->pos[0],
+            -player->pos[1] + submap->pos[1]);
+
+        /* savepoints are currently this HACK */
+        /* TODO: separate respawn file for each player? */
+        hexcollmap_elem_t *face =
+            hexcollmap_get_face(collmap, &index);
+        if(face != NULL && face->tile_c == 'S'){
+            if(!vec_eq(space->dims, player->respawn_pos, player->pos)){
+                vec_cpy(space->dims, player->respawn_pos, player->pos);
+                if(player->respawn_filename != NULL){
+                    FILE *f = fopen(player->respawn_filename, "w");
+                    if(f != NULL){
+                        fprintf(f, "%i %i\n",
+                            player->pos[0], player->pos[1]);
+                        fclose(f);
+                    }
+                }
+            }
+        }
+
+        hexcollmap_elem_t *vert =
+            hexcollmap_get_vert(collmap, &index);
+        if(hexcollmap_elem_is_solid(vert)){
+            player->cur_submap = submap;
+            break;
+        }
+    }
+
     return 0;
 }
 
@@ -872,12 +921,11 @@ void hexgame_cleanup(hexgame_t *game){
     ARRAY_FREE_PTR(player_t*, game->players, player_cleanup)
 }
 
-int hexgame_init(hexgame_t *game, hexmap_t *map, char *respawn_filename){
+int hexgame_init(hexgame_t *game, hexmap_t *map){
     game->frame_i = 0;
     game->zoomout = false;
     game->follow = false;
     game->map = map;
-    game->respawn_filename = respawn_filename;
     vec_zero(map->space->dims, game->camera_pos);
     game->camera_rot = 0;
     game->cur_submap = NULL;
@@ -906,7 +954,7 @@ int hexgame_load_player_recording(hexgame_t *game, const char *filename,
 
     ARRAY_PUSH_NEW(player_t*, game->players, player)
     err = player_init(player, game->map, NULL, NULL,
-        -1, game->map->spawn);
+        -1, game->map->spawn, NULL);
     if(err)return err;
 
     err = player_recording_load(&player->recording, filename,
@@ -951,6 +999,10 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
                 err = hexgame_load_player_recording(game, recording_filename, -1);
                 if(err)return err;
             }
+#ifdef GEOM_HEXGAME_DEBUG_MALLOC
+        }else if(event->key.keysym.sym == SDLK_F11){
+            malloc_stats();
+#endif
         }else if(event->key.keysym.sym == SDLK_r){
             /* start recording */
             if(game->players_len >= 1){
@@ -992,58 +1044,30 @@ int hexgame_step(hexgame_t *game){
     hexmap_t *map = game->map;
     vecspace_t *space = map->space;
 
-    /* Figure out current submap */
-    if(game->players_len >= 1){
-        player_t *player = game->players[0];
-
-        bool collide = false;
-        for(int i = 0; i < map->submaps_len; i++){
-            hexmap_submap_t *submap = map->submaps[i];
-            if(!submap->solid)continue;
-
-            hexcollmap_t *collmap = &submap->collmap;
-
-            trf_t index = {0};
-            hexspace_set(index.add,
-                 player->pos[0] - submap->pos[0],
-                -player->pos[1] + submap->pos[1]);
-
-            /* savepoints are currently this HACK */
-            hexcollmap_elem_t *face =
-                hexcollmap_get_face(collmap, &index);
-            if(face != NULL && face->tile_c == 'S'){
-                if(!vec_eq(space->dims, player->respawn_pos, player->pos)){
-                    vec_cpy(space->dims, player->respawn_pos, player->pos);
-                    if(game->respawn_filename != NULL){
-                        FILE *f = fopen(game->respawn_filename, "w");
-                        if(f != NULL){
-                            fprintf(f, "%i %i\n",
-                                player->pos[0], player->pos[1]);
-                            fclose(f);
-                        }
-                    }
-                }
-            }
-
-            hexcollmap_elem_t *vert =
-                hexcollmap_get_vert(collmap, &index);
-            if(hexcollmap_elem_is_solid(vert)){
-                if(submap != game->cur_submap){
-                    /* TODO: Smoothly transition between
-                    old & new palettes */
-                    err = palette_reset(&submap->palette);
-                    if(err)return err;
-                }
-                game->cur_submap = submap;
-                break;
-            }
-        }
-    }
-
     /* Animate palette */
     if(game->cur_submap != NULL){
         err = palette_step(&game->cur_submap->palette);
         if(err)return err;
+    }
+
+    /* Do 1 gameplay step for each player */
+    for(int i = 0; i < game->players_len; i++){
+        player_t *player = game->players[i];
+        err = player_step(player, game->map);
+        if(err)return err;
+    }
+
+    /* Figure out game's current submap */
+    if(game->players_len >= 1){
+        player_t *player = game->players[0];
+        if(game->cur_submap != player->cur_submap){
+            game->cur_submap = player->cur_submap;
+
+            /* TODO: Smoothly transition between
+            old & new palettes */
+            err = palette_reset(&game->cur_submap->palette);
+            if(err)return err;
+        }
     }
 
     /* Set camera */
@@ -1062,13 +1086,6 @@ int hexgame_step(hexgame_t *game){
                 player->pos);
             game->camera_rot = player->rot;
         }
-    }
-
-    /* Do 1 gameplay step for each player */
-    for(int i = 0; i < game->players_len; i++){
-        player_t *player = game->players[i];
-        err = player_step(player, game->map);
-        if(err)return err;
     }
 
     return 0;
@@ -1102,6 +1119,10 @@ int hexgame_render(hexgame_t *game,
         hexmap_submap_t *submap = map->submaps[i];
         rendergraph_t *rgraph = submap->rgraph_map;
 
+#ifdef GEOM_ONLY_RENDER_CUR_SUBMAP
+        if(submap != game->cur_submap)continue;
+#endif
+
         vec_t pos;
         vec4_vec_from_hexspace(pos, submap->pos);
         vec_sub(rgraph->space->dims, pos, camera_renderpos);
@@ -1122,6 +1143,11 @@ int hexgame_render(hexgame_t *game,
 
     for(int i = 0; i < game->players_len; i++){
         player_t *player = game->players[i];
+
+#ifdef GEOM_ONLY_RENDER_CUR_SUBMAP
+        if(player->cur_submap != game->cur_submap)continue;
+#endif
+
         err = player_render(player,
             renderer, surface,
             pal, x0, y0, zoom,

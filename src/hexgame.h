@@ -87,12 +87,15 @@ typedef struct player {
     int cooldown;
 
     player_recording_t recording;
+
+    hexmap_submap_t *cur_submap;
+    char *respawn_filename;
 } player_t;
 
 void player_cleanup(player_t *player);
 int player_init(player_t *player, hexmap_t *map,
     char *stateset_filename, const char *state_name, int keymap,
-    vec_t respawn_pos);
+    vec_t respawn_pos, char *respawn_filename);
 int player_init_stateset(player_t *player, const char *stateset_filename,
     const char *state_name, hexmap_t *map);
 int player_set_state(player_t *player, const char *state_name);
@@ -125,7 +128,6 @@ typedef struct hexgame {
     int frame_i;
     bool zoomout;
     bool follow;
-    char *respawn_filename;
     hexmap_t *map;
     hexmap_submap_t *cur_submap;
     vec_t camera_pos;
@@ -135,7 +137,7 @@ typedef struct hexgame {
 
 
 void hexgame_cleanup(hexgame_t *game);
-int hexgame_init(hexgame_t *game, hexmap_t *map, char *respawn_filename);
+int hexgame_init(hexgame_t *game, hexmap_t *map);
 int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard);
 int hexgame_load_player_recording(hexgame_t *game, const char *filename,
     int keymap);

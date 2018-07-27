@@ -84,7 +84,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     err = hexmap_load(&app->hexmap, &app->prend, app->hexmap_filename);
     if(err)return err;
 
-    err = hexgame_init(&app->hexgame, &app->hexmap, "respawn.txt");
+    err = hexgame_init(&app->hexgame, &app->hexmap);
     if(err)return err;
 
     vec_t spawn;
@@ -105,7 +105,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         /* player 0 */
         ARRAY_PUSH_NEW(player_t*, app->hexgame.players, player)
         err = player_init(player, &app->hexmap,
-            strdup(app->stateset_filename), NULL, 0, spawn);
+            strdup(app->stateset_filename), NULL, 0, spawn, "respawn.txt");
         if(err)return err;
     }
 
@@ -174,7 +174,7 @@ int test_app_process_console_input(test_app_t *app){
         int player_i = app->hexgame.players_len;
         ARRAY_PUSH_NEW(player_t*, app->hexgame.players, player)
         err = player_init(player, &app->hexmap, stateset_filename, NULL,
-            player_i, app->hexgame.map->spawn);
+            player_i, app->hexgame.map->spawn, NULL);
         if(err)return err;
     }else if(fus_lexer_got(lexer, "save")){
         err = fus_lexer_next(lexer);

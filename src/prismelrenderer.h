@@ -214,6 +214,7 @@ int rendergraph_render(rendergraph_t *rgraph,
     int x0, int y0, int zoom,
     vec_t pos, rot_t rot, flip_t flip, int frame_i,
     struct prismelmapper *mapper);
+int rendergraph_render_all_bitmaps(rendergraph_t *rgraph, SDL_Palette *pal);
 
 
 

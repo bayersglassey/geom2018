@@ -731,13 +731,8 @@ int prismelrenderer_render_all_bitmaps(prismelrenderer_t *prend,
     int err;
     for(int i = 0; i < prend->rendergraphs_len; i++){
         rendergraph_t *rgraph = prend->rendergraphs[i];
-        for(int frame_i = 0; frame_i < rgraph->n_frames; frame_i++){
-            for(int rot = 0; rot < rgraph->space->rot_max; rot++){
-                err = rendergraph_get_or_render_bitmap(
-                    rgraph, NULL, rot, false, frame_i, pal);
-                if(err)return err;
-            }
-        }
+        err = rendergraph_render_all_bitmaps(rgraph, pal);
+        if(err)return err;
     }
     return 0;
 }
@@ -963,6 +958,11 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     int bitmap_i = rendergraph_get_bitmap_i(rendergraph, rot, flip,
         frame_i);
     rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[bitmap_i];
+
+#ifdef GEOM_DEBUG_RENDERING_RGRAPH
+    printf("Rendering rgraph: \"%s\" rot=%i flip=%c frame_i=%i\n",
+        rendergraph->name, rot, flip? 'y': 'n', frame_i);
+#endif
 
     /* bitmap->pbox should be the union of its sub-bitmap's pboxes.
     (I mean the set-theoretic union, like the "OR" of Venn diagrams.
@@ -1250,6 +1250,18 @@ int rendergraph_render(rendergraph_t *rgraph,
             NULL, &dst_rect));
     }
 
+    return 0;
+}
+
+int rendergraph_render_all_bitmaps(rendergraph_t *rgraph, SDL_Palette *pal){
+    int err;
+    for(int frame_i = 0; frame_i < rgraph->n_frames; frame_i++){
+        for(int rot = 0; rot < rgraph->space->rot_max; rot++){
+            err = rendergraph_get_or_render_bitmap(
+                rgraph, NULL, rot, false, frame_i, pal);
+            if(err)return err;
+        }
+    }
     return 0;
 }
 
