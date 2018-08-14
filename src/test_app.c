@@ -433,8 +433,8 @@ int test_app_mainloop(test_app_t *app){
 
             if(event.type == SDL_KEYDOWN){
                 if(event.key.keysym.sym == SDLK_ESCAPE){
-                    app->loop = false; break;}
-                if(event.key.keysym.sym == SDLK_F5){
+                    app->loop = false; break;
+                }else if(event.key.keysym.sym == SDLK_F5){
                     if(app->hexgame_running){
                         app->hexgame_running = false;
                         console_write_msg(&app->console, "Game stopped\n");
@@ -446,6 +446,9 @@ int test_app_mainloop(test_app_t *app){
                         SDL_StopTextInput();
                     }
                     continue;
+                }else if(event.key.keysym.sym == SDLK_F11){
+                    printf("Frame rendered in: %i ms\n", took);
+                    printf("  (Aiming for sub-%i ms)\n", app->delay_goal);
                 }
             }
 
