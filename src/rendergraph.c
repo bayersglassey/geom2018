@@ -535,8 +535,8 @@ int rendergraph_render(rendergraph_t *rgraph,
 ){
     int err;
 
-    bool to_surface = surface == NULL? false:
-#ifdef GEOM_RGRAPH_RENDER_TO_SURFACE
+    bool dont_cache_bitmaps = surface == NULL? false:
+#ifdef GEOM_RGRAPH_DONT_CACHE_BITMAPS
         true
 #else
         false
@@ -569,16 +569,13 @@ int rendergraph_render(rendergraph_t *rgraph,
         vec_mul(mapper->space, pos, mapper->unit);
     }
 
-    rendergraph_bitmap_t *bitmap;
-    if(to_surface){
-        err = rendergraph_calculate_bitmap_bounds(rgraph,
-            rot, flip, animated_frame_i);
-        if(err)return err;
-    }else{
-        err = rendergraph_get_or_render_bitmap(rgraph, &bitmap,
-            rot, flip, animated_frame_i, pal);
-        if(err)return err;
-    }
+    err = rendergraph_calculate_bitmap_bounds(rgraph,
+        rot, flip, animated_frame_i);
+    if(err)return err;
+
+    int bitmap_i = rendergraph_get_bitmap_i(rgraph, rot, flip,
+        animated_frame_i);
+    rendergraph_bitmap_t *bitmap = &rgraph->bitmaps[bitmap_i];
 
     /* Can't create a texture with either dimension 0, so exit early */
     if(bitmap->pbox.w == 0 || bitmap->pbox.h == 0)return 0;
@@ -595,7 +592,32 @@ int rendergraph_render(rendergraph_t *rgraph,
     };
 
     if(surface != NULL){
-        if(to_surface){
+        /* Exit early if rgraph wouldn't even show up on target surface. */
+        SDL_Rect target_rect = {0, 0, surface->w, surface->h};
+        if(!SDL_HasIntersection(&dst_rect, &target_rect))return 0;
+    }else if(renderer != NULL){
+        /* MAYBE TODO: exit early if rgraph woldn't even show up on target
+        renderer...
+        We can't implement this at the moment, because SDL_Renderer is
+        totally opaque, so we would have to pass its x, y, w, h into this
+        function somehow. */
+    }
+
+    if(!dont_cache_bitmaps){
+        /* Render rgraph and cache result on one of rgraph's bitmaps */
+
+        /* NOTE: Passing &bitmap in the following call is unnecessary,
+        it should end up being the same as what we got by calling
+        rendergraph_get_bitmap_i above */
+        err = rendergraph_get_or_render_bitmap(rgraph, &bitmap,
+            rot, flip, animated_frame_i, pal);
+        if(err)return err;
+    }
+
+    /* Finally render, blit, or copy the rgraph onto target surface
+    or renderer */
+    if(surface != NULL){
+        if(dont_cache_bitmaps){
             err = rendergraph_render_to_surface(rgraph, surface,
                 rot, flip, animated_frame_i);
             if(err)return err;
