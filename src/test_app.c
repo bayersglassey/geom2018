@@ -5,6 +5,7 @@
 
 #include "test_app.h"
 #include "prismelrenderer.h"
+#include "rendergraph.h"
 #include "array.h"
 #include "vec4.h"
 #include "font.h"

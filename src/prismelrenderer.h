@@ -1,5 +1,5 @@
-#ifndef _PRISMEL_H_
-#define _PRISMEL_H_
+#ifndef _PRISMELRENDERER_H_
+#define _PRISMELRENDERER_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,6 +10,7 @@
 #include "lexer.h"
 #include "bounds.h"
 #include "array.h"
+#include "rendergraph.h"
 
 
 /***********
@@ -123,103 +124,6 @@ int prismelrenderer_save(prismelrenderer_t *prend, const char *filename);
 int prismelrenderer_write(prismelrenderer_t *prend, FILE *f);
 int prismelrenderer_render_all_bitmaps(prismelrenderer_t *prend,
     SDL_Palette *pal);
-
-
-
-/***************
- * RENDERGRAPH *
- ***************/
-
-typedef struct prismel_trf {
-    prismel_t *prismel;
-    Uint8 color;
-    trf_t trf;
-
-    int frame_start;
-    int frame_len;
-} prismel_trf_t;
-
-typedef struct rendergraph_trf {
-    struct rendergraph *rendergraph;
-    trf_t trf;
-    int frame_i;
-    bool frame_i_additive;
-
-    struct palettemapper *palmapper;
-    int palmapper_n_applications;
-
-    int frame_start;
-    int frame_len;
-} rendergraph_trf_t;
-
-typedef struct rendergraph_bitmap {
-    bool pbox_calculated;
-    position_box_t pbox;
-    SDL_Surface *surface;
-    SDL_Texture *texture;
-} rendergraph_bitmap_t;
-
-typedef struct rendergraph {
-    prismelrenderer_t *prend;
-    char *name;
-    vecspace_t *space;
-    ARRAY_DECL(struct prismel_trf*, prismel_trfs)
-    ARRAY_DECL(struct rendergraph_trf*, rendergraph_trfs)
-
-    const char *animation_type;
-    int n_frames;
-
-    int n_bitmaps;
-    rendergraph_bitmap_t *bitmaps;
-    boundbox_t boundbox;
-} rendergraph_t;
-
-
-extern const char rendergraph_animation_type_once[];
-extern const char rendergraph_animation_type_cycle[];
-extern const char rendergraph_animation_type_oscillate[];
-extern const char *rendergraph_animation_types[];
-extern const char *rendergraph_animation_type_default;
-extern const int rendergraph_n_frames_default;
-
-
-void rendergraph_cleanup(rendergraph_t *rendergraph);
-int rendergraph_init(rendergraph_t *rendergraph, char *name,
-    prismelrenderer_t *prend,
-    const char *animation_type, int n_frames);
-void rendergraph_bitmap_dump(rendergraph_bitmap_t *bitmap, FILE *f,
-    int i, int n_spaces, bool dump_surface);
-void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces,
-    int dump_bitmaps);
-int rendergraph_create_bitmaps(rendergraph_t *rendergraph);
-int rendergraph_push_rendergraph_trf(rendergraph_t *rendergraph,
-    rendergraph_trf_t **rendergraph_trf_ptr);
-int rendergraph_push_prismel_trf(rendergraph_t *rendergraph,
-    prismel_trf_t **prismel_trf_ptr);
-int rendergraph_get_bitmap_i(rendergraph_t *rendergraph,
-    rot_t rot, flip_t flip, int frame_i);
-int rendergraph_calculate_bitmap_bounds(rendergraph_t *rendergraph,
-    rot_t rot, flip_t flip, int frame_i);
-int rendergraph_render_to_surface(rendergraph_t *rendergraph,
-    SDL_Surface *surface, rot_t rot, flip_t flip, int frame_i);
-int rendergraph_render_bitmap(rendergraph_t *rendergraph,
-    rot_t rot, flip_t flip, int frame_i,
-    SDL_Palette *pal);
-int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
-    rendergraph_bitmap_t **bitmap_ptr,
-    rot_t rot, flip_t flip, int frame_i,
-    SDL_Palette *pal);
-int rendergraph_bitmap_get_texture(rendergraph_t *rgraph,
-    rendergraph_bitmap_t *bitmap,
-    SDL_Renderer *renderer, bool force_create, SDL_Texture **texture_ptr);
-struct prismelmapper;
-int rendergraph_render(rendergraph_t *rgraph,
-    SDL_Renderer *renderer, SDL_Surface *surface,
-    SDL_Palette *pal, prismelrenderer_t *prend,
-    int x0, int y0, int zoom,
-    vec_t pos, rot_t rot, flip_t flip, int frame_i,
-    struct prismelmapper *mapper);
-int rendergraph_render_all_bitmaps(rendergraph_t *rgraph, SDL_Palette *pal);
 
 
 
