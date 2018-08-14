@@ -950,6 +950,77 @@ int rendergraph_trf_get_frame_i(rendergraph_trf_t *rendergraph_trf,
         rgraph->n_frames, frame_i);
 }
 
+typedef struct {
+    bool done, skip;
+    prismel_trf_t *prismel_trf;
+    prismel_t *prismel;
+    trf_t trf2;
+    int bitmap_i2;
+    int shift_x, shift_y;
+} rendergraph_prismel_trf_iter_t;
+
+static int rendergraph_prismel_trf_iter(
+    rendergraph_prismel_trf_iter_t *iter,
+    rendergraph_t *rendergraph, int i,
+    rot_t rot, flip_t flip, int frame_i
+){
+    int err;
+
+    iter->prismel_trf = rendergraph->prismel_trfs[i];
+    iter->prismel = iter->prismel_trf->prismel;
+    bool visible = prismel_trf_get_frame_visible(
+        iter->prismel_trf, rendergraph->n_frames, frame_i);
+    if(!visible){iter->skip = true; return 0;}
+
+    /* Combine the transformations: trf and prismel_trf->trf */
+    iter->trf2 = iter->prismel_trf->trf;
+    trf_apply(rendergraph->space, &iter->trf2,
+        &(trf_t){flip, rot, {0, 0, 0, 0}});
+    iter->bitmap_i2 = get_bitmap_i(rendergraph->space,
+        iter->trf2.rot, iter->trf2.flip, 1, 0);
+    rendergraph->space->vec_render(iter->trf2.add,
+        &iter->shift_x, &iter->shift_y);
+
+    return 0;
+}
+
+typedef struct {
+    bool done, skip;
+    rendergraph_trf_t *rendergraph_trf;
+    rendergraph_t *rendergraph2;
+    int frame_i2;
+    trf_t trf2;
+    int bitmap_i2;
+    int shift_x, shift_y;
+} rendergraph_rendergraph_trf_iter_t;
+
+static int rendergraph_rendergraph_trf_iter(
+    rendergraph_rendergraph_trf_iter_t *iter,
+    rendergraph_t *rendergraph, int i,
+    rot_t rot, flip_t flip, int frame_i
+){
+    int err;
+
+    iter->rendergraph_trf = rendergraph->rendergraph_trfs[i];
+    iter->rendergraph2 = iter->rendergraph_trf->rendergraph;
+    iter->frame_i2 = rendergraph_trf_get_frame_i(
+        iter->rendergraph_trf, frame_i);
+    bool visible = rendergraph_trf_get_frame_visible(
+        iter->rendergraph_trf, rendergraph->n_frames, frame_i);
+    if(!visible){iter->skip = true; return 0;}
+
+    /* Combine the transformations: trf and prismel_trf->trf */
+    iter->trf2 = iter->rendergraph_trf->trf;
+    trf_apply(rendergraph->space, &iter->trf2,
+        &(trf_t){flip, rot, {0, 0, 0, 0}});
+    iter->bitmap_i2 = rendergraph_get_bitmap_i(iter->rendergraph2,
+        iter->trf2.rot, iter->trf2.flip, iter->frame_i2);
+    rendergraph->space->vec_render(iter->trf2.add,
+        &iter->shift_x, &iter->shift_y);
+
+    return 0;
+}
+
 int rendergraph_calculate_bitmap_bounds(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i
 ){
@@ -982,57 +1053,39 @@ int rendergraph_calculate_bitmap_bounds(rendergraph_t *rendergraph,
     boundary_box_clear(&bbox);
 
     for(int i = 0; i < rendergraph->prismel_trfs_len; i++){
-        prismel_trf_t *prismel_trf = rendergraph->prismel_trfs[i];
-        prismel_t *prismel = prismel_trf->prismel;
-        bool visible = prismel_trf_get_frame_visible(
-            prismel_trf, rendergraph->n_frames, frame_i);
-        if(!visible)continue;
-
-        /* Combine the transformations: trf and prismel_trf->trf */
-        trf_t trf2 = prismel_trf->trf;
-        trf_apply(rendergraph->space, &trf2,
-            &(trf_t){flip, rot, {0, 0, 0, 0}});
-        int bitmap_i2 = get_bitmap_i(rendergraph->space,
-            trf2.rot, trf2.flip, 1, 0);
-        int shift_x, shift_y;
-        rendergraph->space->vec_render(trf2.add, &shift_x, &shift_y);
+        rendergraph_prismel_trf_iter_t iter = {0};
+        err = rendergraph_prismel_trf_iter(&iter,
+            rendergraph, i, rot, flip, frame_i);
+        if(err)return err;
+        if(iter.done)break;
+        if(iter.skip)continue;
 
         /* Calculate & union prismel's bbox into our "accumulating" bbox */
         boundary_box_t bbox2;
-        prismel_get_boundary_box(prismel, &bbox2, bitmap_i2);
-        boundary_box_shift(&bbox2, shift_x, shift_y);
+        prismel_get_boundary_box(iter.prismel, &bbox2, iter.bitmap_i2);
+        boundary_box_shift(&bbox2, iter.shift_x, iter.shift_y);
         boundary_box_union(&bbox, &bbox2);
     }
 
     for(int i = 0; i < rendergraph->rendergraph_trfs_len; i++){
-        rendergraph_trf_t *rendergraph_trf =
-            rendergraph->rendergraph_trfs[i];
-        rendergraph_t *rendergraph2 = rendergraph_trf->rendergraph;
-        int frame_i2 = rendergraph_trf_get_frame_i(
-            rendergraph_trf, frame_i);
-        bool visible = rendergraph_trf_get_frame_visible(
-            rendergraph_trf, rendergraph->n_frames, frame_i);
-        if(!visible)continue;
-
-        /* Combine the transformations: trf and prismel_trf->trf */
-        trf_t trf2 = rendergraph_trf->trf;
-        trf_apply(rendergraph->space, &trf2,
-            &(trf_t){flip, rot, {0, 0, 0, 0}});
-        int shift_x, shift_y;
-        rendergraph->space->vec_render(trf2.add, &shift_x, &shift_y);
+        rendergraph_rendergraph_trf_iter_t iter = {0};
+        err = rendergraph_rendergraph_trf_iter(&iter,
+            rendergraph, i, rot, flip, frame_i);
+        if(err)return err;
+        if(iter.done)break;
+        if(iter.skip)continue;
 
         /* Calculate bounds for sub-bitmap for this rendergraph_trf */
-        err = rendergraph_calculate_bitmap_bounds(rendergraph2,
-            trf2.rot, trf2.flip, frame_i2);
+        err = rendergraph_calculate_bitmap_bounds(iter.rendergraph2,
+            iter.trf2.rot, iter.trf2.flip, iter.frame_i2);
         if(err)return err;
 
         /* Union sub-bitmap's bbox into our "accumulating" bbox */
-        int bitmap_i = rendergraph_get_bitmap_i(rendergraph2,
-            trf2.rot, trf2.flip, frame_i2);
-        rendergraph_bitmap_t *bitmap2 = &rendergraph2->bitmaps[bitmap_i];
+        rendergraph_bitmap_t *bitmap2 =
+            &iter.rendergraph2->bitmaps[iter.bitmap_i2];
         boundary_box_t bbox2;
         boundary_box_from_position_box(&bbox2, &bitmap2->pbox);
-        boundary_box_shift(&bbox2, shift_x, shift_y);
+        boundary_box_shift(&bbox2, iter.shift_x, iter.shift_y);
         boundary_box_union(&bbox, &bbox2);
     }
 
@@ -1089,29 +1142,20 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
 
     /* Render prismels */
     for(int i = 0; i < rendergraph->prismel_trfs_len; i++){
-        prismel_trf_t *prismel_trf = rendergraph->prismel_trfs[i];
-        prismel_t *prismel = prismel_trf->prismel;
-        bool visible = prismel_trf_get_frame_visible(
-            prismel_trf, rendergraph->n_frames, frame_i);
-        if(!visible)continue;
-
-        Uint8 c = prismel_trf->color;
-
-        /* Combine the transformations: trf and prismel_trf->trf */
-        trf_t trf2 = prismel_trf->trf;
-        trf_apply(rendergraph->space, &trf2,
-            &(trf_t){flip, rot, {0, 0, 0, 0}});
-        int bitmap_i2 = get_bitmap_i(rendergraph->space,
-            trf2.rot, trf2.flip, 1, 0);
-        int shift_x, shift_y;
-        rendergraph->space->vec_render(trf2.add, &shift_x, &shift_y);
+        rendergraph_prismel_trf_iter_t iter = {0};
+        err = rendergraph_prismel_trf_iter(&iter,
+            rendergraph, i, rot, flip, frame_i);
+        if(err)return err;
+        if(iter.done)break;
+        if(iter.skip)continue;
 
         /* Draw prismel's image onto SDL surface */
-        prismel_image_t *image = &prismel->images[bitmap_i2];
+        Uint8 c = iter.prismel_trf->color;
+        prismel_image_t *image = &iter.prismel->images[iter.bitmap_i2];
         for(int i = 0; i < image->lines_len; i++){
             prismel_image_line_t *line = image->lines[i];
-            int x = line->x + bitmap->pbox.x + shift_x;
-            int y = line->y + bitmap->pbox.y + shift_y;
+            int x = line->x + bitmap->pbox.x + iter.shift_x;
+            int y = line->y + bitmap->pbox.y + iter.shift_y;
             Uint8 *p = surface8_get_pixel_ptr(surface, x, y);
             for(int xx = 0; xx < line->w; xx++){
                 p[xx] = c;
@@ -1124,40 +1168,34 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
 
     /* Render sub-rendergraphs */
     for(int i = 0; i < rendergraph->rendergraph_trfs_len; i++){
-        rendergraph_trf_t *rendergraph_trf =
-            rendergraph->rendergraph_trfs[i];
-        rendergraph_t *rendergraph2 = rendergraph_trf->rendergraph;
-        int frame_i2 = rendergraph_trf_get_frame_i(
-            rendergraph_trf, frame_i);
-        bool visible = rendergraph_trf_get_frame_visible(
-            rendergraph_trf, rendergraph->n_frames, frame_i);
-        if(!visible)continue;
-
-        /* Combine the transformations: trf and prismel_trf->trf */
-        trf_t trf2 = rendergraph_trf->trf;
-        trf_apply(rendergraph->space, &trf2,
-            &(trf_t){flip, rot, {0, 0, 0, 0}});
-        int shift_x, shift_y;
-        rendergraph->space->vec_render(trf2.add, &shift_x, &shift_y);
+        rendergraph_rendergraph_trf_iter_t iter = {0};
+        err = rendergraph_rendergraph_trf_iter(&iter,
+            rendergraph, i, rot, flip, frame_i);
+        if(err)return err;
+        if(iter.done)break;
+        if(iter.skip)continue;
 
         /* Get or render sub-bitmap for this rendergraph_trf */
         rendergraph_bitmap_t *bitmap2;
-        err = rendergraph_get_or_render_bitmap(rendergraph2,
-            &bitmap2, trf2.rot, trf2.flip, frame_i2, pal);
+        err = rendergraph_get_or_render_bitmap(iter.rendergraph2,
+            &bitmap2, iter.trf2.rot, iter.trf2.flip, iter.frame_i2, pal);
 
         /* Blit sub-bitmap's surface onto ours */
         SDL_Surface *surface2 = bitmap2->surface;
         SDL_Rect dst_rect = {
-            bitmap->pbox.x + shift_x - bitmap2->pbox.x,
-            bitmap->pbox.y + shift_y - bitmap2->pbox.y,
+            bitmap->pbox.x + iter.shift_x - bitmap2->pbox.x,
+            bitmap->pbox.y + iter.shift_y - bitmap2->pbox.y,
             bitmap2->pbox.w,
             bitmap2->pbox.h
         };
-        palettemapper_t *palmapper = rendergraph_trf->palmapper;
+        palettemapper_t *palmapper = iter.rendergraph_trf->palmapper;
         Uint8 table[256];
         if(palmapper){
             for(int i = 0; i < 256; i++)table[i] = i;
-            for(int i = 0; i < rendergraph_trf->palmapper_n_applications; i++){
+            for(int i = 0;
+                i < iter.rendergraph_trf->palmapper_n_applications;
+                i++
+            ){
                 for(int i = 0; i < 256; i++){
                     table[i] = palmapper->table[table[i]];}
             }
