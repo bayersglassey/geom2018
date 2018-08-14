@@ -1,0 +1,125 @@
+
+July 26, 2018:
+--------------
+
+We're at the point where all the SDL_Surface caching is dragging the computer
+down to hell.
+Add debugging first of all; then separate boundbox calculation from surface
+rendering, and only render surfaces as they come into contact with the
+screen's boundbox.
+
+...ASK AND YE SHALL RECEIVE:
+
+    * GEOM_HEXGAME_DEBUG_MALLOC
+    * GEOM_DEBUG_RENDERING_RGRAPH
+    * GEOM_ONLY_RENDER_CUR_SUBMAP
+
+    ./compile_demo -DGEOM_HEXGAME_DEBUG_MALLOC -DGEOM_ONLY_RENDER_CUR_SUBMAP
+
+        Initial load:
+            Arena 0:
+            system bytes     =   52518912
+            in use bytes     =   48981472 # 49m
+            Total (incl. mmap):
+            system bytes     =   52518912
+            in use bytes     =   48981472
+            max mmap regions =          3
+            max mmap bytes   =   19873792
+
+        Loading all player surfaces:
+            Arena 0:
+            system bytes     =   52854784
+            in use bytes     =   49419888 # .5m
+            Total (incl. mmap):
+            system bytes     =   52854784
+            in use bytes     =   49419888
+            max mmap regions =          3
+            max mmap bytes   =   19873792
+
+        Loading next submap (same prismelmapper):
+            Arena 0:
+            system bytes     =   64053248
+            in use bytes     =   60519888 # 12m
+            Total (incl. mmap):
+            system bytes     =   64053248
+            in use bytes     =   60519888
+            max mmap regions =          3
+            max mmap bytes   =   19873792
+
+        Loading all player surfaces:
+            Arena 0:
+            system bytes     =   64053248
+            in use bytes     =   60534560 # 14k (whaaa?.. just angles I never was at the first time?)
+            Total (incl. mmap):
+            system bytes     =   64053248
+            in use bytes     =   60534560
+            max mmap regions =          3
+            max mmap bytes   =   19873792
+
+
+    ./compile_demo -DGEOM_HEXGAME_DEBUG_MALLOC -DGEOM_ONLY_RENDER_CUR_SUBMAP
+
+        Running around the whole worldmap:        
+            Arena 0:
+            system bytes     =  144302080
+            in use bytes     =  140812384 # 140m
+            Total (incl. mmap):
+            system bytes     =  144302080
+            in use bytes     =  140812384
+            max mmap regions =          3
+            max mmap bytes   =   19873792
+
+    ./compile_demo -DGEOM_HEXGAME_DEBUG_MALLOC
+
+        Running around the whole worldmap:        
+            Arena 0:
+            system bytes     = 1842372608
+            in use bytes     = 1838830048 # 1.5g
+            Total (incl. mmap):
+            system bytes     = 1842372608
+            in use bytes     = 1838830048
+            max mmap regions =          3
+            max mmap bytes   =   19873792
+
+
+Aug 13, 2018:
+-------------
+
+    # BEFORE EARLY EXIT IMPLEMENTED:
+    ./compile_demo -DGEOM_HEXGAME_DEBUG_MALLOC
+
+        Initial load:
+            Arena 0:
+            system bytes     =  530796544
+            in use bytes     =  527263296 # 527m
+            Total (incl. mmap):
+            system bytes     =  530796544
+            in use bytes     =  527263296
+            max mmap regions =          3
+            max mmap bytes   =   19873792
+
+
+    # AFTER EARLY EXIT IMPLEMENTED:
+    ./compile_demo -DGEOM_HEXGAME_DEBUG_MALLOC
+
+        Initial load:
+            Arena 0:
+            system bytes     =   74174464
+            in use bytes     =   70669904 # 70m  (only 20m more than with -DGEOM_ONLY_RENDER_CUR_SUBMAP)
+            Total (incl. mmap):
+            system bytes     =   74174464
+            in use bytes     =   70669904
+            max mmap regions =          3
+            max mmap bytes   =   19873792
+
+
+* Add option to render rgraphs directly to some other surface,
+    without caching a rendergraph_bitmap->surface at all.
+    (Compile with -D GEOM_RGRAPH_DONT_CACHE_BITMAPS)
+
+    -> Try running the game like this and measuring RAM usage & speed
+
+    ...Actually, with the "early exit" thing our memory usage is reasonable
+    and speed is back to 60fps.
+    So perhaps let's shelve optimization stuff for now.
+
