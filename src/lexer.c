@@ -1,7 +1,22 @@
 
 
-#include "util.h"
 #include "lexer.h"
+
+
+static size_t fus_strnlen(const char *s, size_t maxlen){
+    size_t len = 0;
+    while(len < maxlen && s[len] != '\0')len++;
+    return len;
+}
+
+static char *fus_strndup(const char *s1, size_t len){
+    size_t s_len = fus_strnlen(s1, len);
+    char *s2 = malloc(s_len + 1);
+    if(s2 == NULL)return NULL;
+    strncpy(s2, s1, len);
+    s2[s_len] = '\0';
+    return s2;
+}
 
 
 
@@ -454,7 +469,7 @@ int fus_lexer_get_name(fus_lexer_t *lexer, char **name){
         fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
         return 2;
     }
-    *name = strndup(lexer->token, lexer->token_len);
+    *name = fus_strndup(lexer->token, lexer->token_len);
     if(*name == NULL)return 1;
     return fus_lexer_next(lexer);
 }
@@ -491,7 +506,7 @@ int fus_lexer_get_str(fus_lexer_t *lexer, char **s){
         /* Length of s is length of token without the leading ";;" */
         int s_len = token_len - 2;
 
-        char *ss = strndup(token+2, s_len);
+        char *ss = fus_strndup(token+2, s_len);
         if(ss == NULL)return 1;
 
         *s = ss;
