@@ -34,35 +34,6 @@ char *generate_mapped_name(char *mapper_name, char *mappee_name){
     return name;
 }
 
-int strlen_of_int(int i){
-    /* Basically log(i), except that strlen of "0" is 1, and strlen of a
-    negative number includes a space for the '-' */
-    if(i == 0)return 1;
-    if(i < 0)return strlen_of_int(-i) + 1;
-    int len = 0;
-    while(i != 0){
-        len++;
-        i /= 10;
-    }
-    return len;
-}
-
-void strncpy_of_int(char *s, int i, int i_len){
-    /* i_len should be strlen_of_int(i) */
-    if(i == 0){
-        *s = '0';
-        return;}
-    if(i < 0){
-        *s = '-';
-        strncpy_of_int(s+1, -i, i_len-1);
-        return;}
-    while(i_len > 0){
-        s[i_len - 1] = '0' + i % 10;
-        i /= 10;
-        i_len--;
-    }
-}
-
 char *generate_indexed_name(char *base_name, int i){
     /* Generate a name, e.g. "<shape 6>" */
     int base_name_len = strlen(base_name);

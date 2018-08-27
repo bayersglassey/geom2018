@@ -21,6 +21,35 @@ int linear_interpolation(int x0, int x1, int t, int t_max){
     return x0 + diff * t / t_max;
 }
 
+int strlen_of_int(int i){
+    /* Basically log(i), except that strlen of "0" is 1, and strlen of a
+    negative number includes a space for the '-' */
+    if(i == 0)return 1;
+    if(i < 0)return strlen_of_int(-i) + 1;
+    int len = 0;
+    while(i != 0){
+        len++;
+    i /= 10;
+    }
+    return len;
+}
+
+void strncpy_of_int(char *s, int i, int i_len){
+    /* i_len should be strlen_of_int(i) */
+    if(i == 0){
+        *s = '0';
+        return;}
+    if(i < 0){
+        *s = '-';
+        strncpy_of_int(s+1, -i, i_len-1);
+        return;}
+    while(i_len > 0){
+        s[i_len - 1] = '0' + i % 10;
+        i /= 10;
+        i_len--;
+    }
+}
+
 int getln(char buf[], int buf_len){
     if(!fgets(buf, buf_len, stdin)){
         perror("fgets failed");
