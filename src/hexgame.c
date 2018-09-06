@@ -532,8 +532,10 @@ static int player_match_rule(player_t *player, hexmap_t *map,
                 cond->u.coll.collmap, &trf, yes? all: !all);
             rule_matched = yes? collide: !collide;
         }else{
-            fprintf(stderr, "Unrecognized state rule condition: %s\n",
-                cond->type);
+            fprintf(stderr, "Unrecognized state rule condition: %s "
+                "(state=%s, stateset=%s)\n",
+                cond->type, rule->state->name,
+                rule->state->stateset->filename);
             return 2;
         }
         if(!rule_matched)break;

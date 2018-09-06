@@ -89,13 +89,15 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
         free(rgraph_name);
 
         ARRAY_PUSH_NEW(state_t*, stateset->states, state)
-        err = state_init(state, name, rgraph);
+        err = state_init(state, stateset, name, rgraph);
         if(err)return err;
 
         while(1){
             if(fus_lexer_got(lexer, ")"))break;
 
             ARRAY_PUSH_NEW(state_rule_t*, state->rules, rule)
+            err = state_rule_init(rule, state);
+            if(err)return err;
 
             err = fus_lexer_get(lexer, "if");
             if(err)return err;
@@ -189,6 +191,21 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     cond->type = state_cond_type_coll;
                     cond->u.coll.collmap = collmap;
                     cond->u.coll.flags = flags;
+                }else if(fus_lexer_got(lexer, "chance")){
+                    err = fus_lexer_next(lexer);
+                    if(err)return err;
+                    err = fus_lexer_get(lexer, "(");
+                    if(err)return err;
+                    int percent = 0;
+                    err = fus_lexer_get_int(lexer, &percent);
+                    if(err)return err;
+                    err = fus_lexer_get(lexer, "%");
+                    if(err)return err;
+                    err = fus_lexer_get(lexer, ")");
+                    if(err)return err;
+                    ARRAY_PUSH_NEW(state_cond_t*, rule->conds, cond)
+                    cond->type = state_cond_type_chance;
+                    cond->u.percent = percent;
                 }else{
                     return fus_lexer_unexpected(lexer, NULL);
                 }
@@ -312,10 +329,12 @@ state_t *stateset_get_state(stateset_t *stateset, const char *name){
 const char state_cond_type_false[] = "false";
 const char state_cond_type_key[] = "key";
 const char state_cond_type_coll[] = "coll";
+const char state_cond_type_chance[] = "chance";
 const char *state_cond_types[] = {
     state_cond_type_false,
     state_cond_type_key,
     state_cond_type_coll,
+    state_cond_type_chance,
     NULL
 };
 
@@ -339,36 +358,17 @@ const char *state_effect_types[] = {
 
 void state_cleanup(state_t *state){
     free(state->name);
-
     for(int i = 0; i < state->rules_len; i++){
         state_rule_t *rule = state->rules[i];
-
-        for(int i = 0; i < rule->conds_len; i++){
-            state_cond_t *cond = rule->conds[i];
-            if(cond->type == state_cond_type_coll){
-                hexcollmap_t *collmap = cond->u.coll.collmap;
-                if(collmap != NULL){
-                    hexcollmap_cleanup(collmap);
-                    free(collmap);
-                }
-            }
-        }
-        free(rule->conds);
-
-        for(int i = 0; i < rule->effects_len; i++){
-            state_effect_t *effect = rule->effects[i];
-            if(effect->type == state_effect_type_print){
-                free(effect->u.msg);
-            }else if(effect->type == state_effect_type_goto){
-                free(effect->u.goto_name);
-            }
-        }
-        free(rule->effects);
+        state_rule_cleanup(rule);
     }
     free(state->rules);
 }
 
-int state_init(state_t *state, char *name, rendergraph_t *rgraph){
+int state_init(state_t *state, stateset_t *stateset, char *name,
+    rendergraph_t *rgraph
+){
+    state->stateset = stateset;
     state->name = name;
     state->rgraph = rgraph;
     ARRAY_INIT(state->rules)
@@ -429,5 +429,37 @@ void state_dump(state_t *state, FILE *f, int n_spaces){
             }
         }
     }
+}
+
+
+void state_rule_cleanup(state_rule_t *rule){
+    for(int i = 0; i < rule->conds_len; i++){
+        state_cond_t *cond = rule->conds[i];
+        if(cond->type == state_cond_type_coll){
+            hexcollmap_t *collmap = cond->u.coll.collmap;
+            if(collmap != NULL){
+                hexcollmap_cleanup(collmap);
+                free(collmap);
+            }
+        }
+    }
+    free(rule->conds);
+
+    for(int i = 0; i < rule->effects_len; i++){
+        state_effect_t *effect = rule->effects[i];
+        if(effect->type == state_effect_type_print){
+            free(effect->u.msg);
+        }else if(effect->type == state_effect_type_goto){
+            free(effect->u.goto_name);
+        }
+    }
+    free(rule->effects);
+}
+
+int state_rule_init(state_rule_t *rule, state_t *state){
+    rule->state = state;
+    ARRAY_INIT(rule->conds)
+    ARRAY_INIT(rule->effects)
+    return 0;
 }
 

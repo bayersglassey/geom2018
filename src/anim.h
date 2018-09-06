@@ -12,6 +12,7 @@
 
 
 typedef struct state {
+    struct stateset *stateset;
     char *name;
     rendergraph_t *rgraph;
     ARRAY_DECL(struct state_rule*, rules)
@@ -23,6 +24,7 @@ typedef struct stateset {
 } stateset_t;
 
 typedef struct state_rule {
+    struct state *state;
     ARRAY_DECL(struct state_cond*, conds)
     ARRAY_DECL(struct state_effect*, effects)
 } state_rule_t;
@@ -56,12 +58,14 @@ typedef struct state_cond {
                     'd' -> down
                 */
         } key;
+        int percent;
     } u;
 } state_cond_t;
 
 extern const char state_cond_type_false[];
 extern const char state_cond_type_key[];
 extern const char state_cond_type_coll[];
+extern const char state_cond_type_chance[];
 extern const char *state_cond_types[];
 
 
@@ -99,7 +103,11 @@ state_t *stateset_get_state(stateset_t *stateset, const char *name);
 
 
 void state_cleanup(state_t *state);
-int state_init(state_t *state, char *name, rendergraph_t *rgraph);
+int state_init(state_t *state, stateset_t *stateset, char *name,
+    rendergraph_t *rgraph);
 void state_dump(state_t *state, FILE *f, int n_spaces);
+
+void state_rule_cleanup(state_rule_t *rule);
+int state_rule_init(state_rule_t *rule, state_t *state);
 
 #endif
