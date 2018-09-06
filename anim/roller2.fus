@@ -7,6 +7,18 @@ stand:
     # (+)- +
 
     if:
+        key: isdown u
+        coll: all yes
+            ;;        +
+            ;;
+            ;; ( )
+    then:
+        move: 2 1
+        rot: 3
+        goto: grab
+        delay: 1
+
+    if:
         key: isdown f
         key: not isdown b
         coll: all yes
@@ -15,6 +27,21 @@ stand:
         move: 1 0
         rot: 1
         goto: stand_flipped
+        delay: 1
+
+    if:
+        key: isdown u
+        key: isdown f
+        key: not isdown b
+        coll: all yes
+            ;; ( )  .   +
+        coll: all no
+            ;;    *\*/*
+            ;; ( )
+    then:
+        move: 2 0
+        rot: 2
+        goto: grab
         delay: 1
 
     if:
@@ -46,8 +73,13 @@ stand_flipped:
 
     if:
         key: isdown d
+        key: isdown f
+        key: not isdown b
+        coll: all no
+            ;; ( )-
+            ;;    *
     then:
-        goto: crawl
+        rot: -1
         delay: 1
 
     if:
@@ -77,4 +109,13 @@ stand_flipped:
     then:
         turn
         rot: 1
+        delay: 1
+
+grab:
+    rgraph: "roller2"
+
+    if:
+        key: not isdown u
+    then:
+        goto: stand
         delay: 1
