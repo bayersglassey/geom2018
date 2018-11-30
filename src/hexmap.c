@@ -182,11 +182,15 @@ void hexcollmap_part_cleanup(hexcollmap_part_t *part){
 
 
 void hexcollmap_cleanup(hexcollmap_t *collmap){
+    free(collmap->name);
     free(collmap->tiles);
 }
 
-int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space){
+int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
+    char *name
+){
     memset(collmap, 0, sizeof(*collmap));
+    collmap->name = name;
     collmap->space = space;
     return 0;
 }
@@ -453,6 +457,7 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
         While iter_i == 1, we parse "part references", that is, the '?'
         character, which loads & draws other collmaps over the tile data
         we parsed while iter_i == 0. */
+        bool parsing_part_references = iter_i == 1;
     for(int y = 0; y < lines_len; y++){
         char *line = lines[y];
         int line_len = strlen(line);
@@ -524,7 +529,7 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                     }
                 }
 
-                if(iter_i == 0){
+                if(!parsing_part_references){
                     get_map_coords(x-ox, y-oy, c,
                         &mx, &my, &is_face1);
                     mx -= map_l;
@@ -611,7 +616,7 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
 
                         tilebucket++;
 
-                        if(iter_i == 1){
+                        if(parsing_part_references){
                             /* Find part with given part_c */
                             char *filename = NULL;
                             for(int i = 0; i < parts_len; i++){
@@ -653,7 +658,7 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
 
                             hexcollmap_t part_collmap;
                             err = hexcollmap_init(&part_collmap,
-                                collmap->space);
+                                collmap->space, strdup(filename));
                             if(err)return err;
                             err = hexcollmap_load(&part_collmap,
                                 filename);
@@ -1320,7 +1325,7 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
     submap->camera_type = camera_type;
     vec_cpy(MAX_VEC_DIMS, submap->camera_pos, camera_pos);
 
-    err = hexcollmap_init(&submap->collmap, map->space);
+    err = hexcollmap_init(&submap->collmap, map->space, strdup(filename));
     if(err)return err;
 
     submap->rgraph_map = NULL;

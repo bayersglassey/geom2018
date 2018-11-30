@@ -69,6 +69,7 @@ typedef struct hexcollmap_part {
 } hexcollmap_part_t;
 
 typedef struct hexcollmap {
+    char *name;
     int w;
     int h;
     int ox;
@@ -83,7 +84,8 @@ int hexcollmap_part_init(hexcollmap_part_t *part,
 void hexcollmap_part_cleanup(hexcollmap_part_t *part);
 
 void hexcollmap_cleanup(hexcollmap_t *collmap);
-int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space);
+int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
+    char *name);
 void hexcollmap_dump(hexcollmap_t *collmap, FILE *f, int n_spaces);
 int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
     bool just_coll);

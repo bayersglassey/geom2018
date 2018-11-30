@@ -179,7 +179,8 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
 
                     hexcollmap_t *collmap = calloc(1, sizeof(*collmap));
                     if(collmap == NULL)return 1;
-                    err = hexcollmap_init(collmap, space);
+                    err = hexcollmap_init(collmap, space,
+                        strdup(lexer->filename));
                     if(err)return err;
                     err = hexcollmap_parse(collmap, lexer, true);
                     if(err)return err;
