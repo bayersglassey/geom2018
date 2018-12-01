@@ -95,3 +95,43 @@ shapes:
             : "roller_foot" (0 0 0  0) 0 f
 
 
+    ############
+    # ROLLER 3 #
+    ############
+
+    "roller3":
+        shapes:
+            : "roller_body" (0 0 0 0) 0 f
+            : "roller_body_hollow" (3 2 0 -1) 2 f
+            : "roller_body_hollow" (3 2 0 -1) 0 f
+            : "roller_foot" (0 0 0 0) 0 f
+
+
+    ################
+    # WATER ROLLER #
+    ################
+
+    "water_roller_foot":
+        animation: cycle 8
+        shapes:
+            : "roller_foot" (0 0 0 0) 0 f
+            : "water_edge" (0 0 0 0) 0 f
+
+    "water_roller_body":
+        animation: cycle 8
+        shapes:
+            : "water_face" (0 0 0 0) 0 f
+
+    "water_roller":
+        animation: cycle 8
+        shapes:
+            : "water_roller_body" (0 0 0 0) 0 f
+            : "water_roller_foot" (0 0 0 0) 0 f
+
+    "water_roller_grab":
+        animation: cycle 8
+        shapes:
+            : "water_roller_body" (0 0 0  0) 0 f
+            : "water_roller_body" (3 2 0 -1) 2 f
+            : "water_roller_foot" (0 0 0  0) 0 f
+
