@@ -78,6 +78,14 @@ shapes:
             : "roller_foot" (0 0 0  0) 0 f
 
 
+    ##############
+    # BIG ROLLER #
+    ##############
+
+    "big_roller": map ("double") ("roller")
+    "big_roller_grab": map ("double") ("roller_grab")
+
+
     ############
     # ROLLER 2 #
     ############
