@@ -68,6 +68,19 @@ submaps:
                                                 tileset: "data/tileset1_bg.fus"
                                             :
                                                 file: "data/maps/demo/jungle.fus"
+                                            :
+                                                pos: (-6 -18)
+                                                camera: (0 -8)
+                                                mapper: ("triple")
+                                                #palette: "data/maps/demo/pals/tunnels.fus"
+                                                submaps:
+                                                    :
+                                                        bg
+                                                        file: "data/maps/demo/jungle2_bg.fus"
+                                                        #tileset: "data/maps/demo/tilesets/water.fus"
+                                                        tileset: "data/tileset1_bg.fus"
+                                                    :
+                                                        file: "data/maps/demo/jungle2.fus"
             :
                 file: "data/maps/demo/pebbles.fus"
                 pos: (15 -2)
