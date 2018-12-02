@@ -3,6 +3,7 @@ unit: 3 2 0 -1
 spawn: "data/maps/demo/start.fus"
 #spawn: "data/maps/demo/pebbles3.fus"
 #spawn: "data/maps/demo/jungle.fus"
+#spawn: "data/maps/demo/big.fus"
 default_palette: "data/pal1.fus"
 default_tileset: "data/tileset1.fus"
 
@@ -132,6 +133,16 @@ submaps:
                             :
                                 pos: (20 -50)
                                 submaps:
+                                    :
+                                        pos: (0 -28)
+                                        camera: (0 0)
+                                        submaps:
+                                            :
+                                                bg
+                                                file: "data/maps/demo/big_bg.fus"
+                                                tileset: "data/tileset1_bg.fus"
+                                            :
+                                                file: "data/maps/demo/big.fus"
                                     :
                                         file: "data/maps/demo/fisheye.fus"
                                         pos: (0 0)
