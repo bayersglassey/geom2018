@@ -1,0 +1,78 @@
+
+shapes:
+
+    ########
+    # BIRD #
+    ########
+
+    "_bird_head_sixth":
+        prismels:
+            : "tri" (0 0 0  0)  0 f eval: 1 + 8 + 4
+
+            : "tri" (1 0 0  0) 11 f eval: 1 + 8 + 7
+            : "sq"  (1 0 0  0)  1 f eval: 1 + 8 + 6
+
+            : "tri" (0 1 1  0)  0 f eval: 1 + 0 + 2
+            : "tri" (1 1 0  0)  2 f eval: 1 + 0 + 2
+            : "tri" (1 1 0  0)  0 f eval: 1 + 0 + 2
+            : "sq"  (1 1 0 -1)  0 f eval: 1 + 0 + 1
+
+    "_bird_head_fringe_sixth":
+        prismels:
+            : "tri" (2 2 0 -1)  3 f eval: 1 + 8 + 1
+            : "tri" (2 2 0 -1)  5 f eval: 1 + 8 + 1
+            : "tri" (2 2 0 -1)  7 f eval: 1 + 8 + 1
+            : "sq"  (1 1 1  0) 10 f eval: 1 + 8 + 2
+            : "sq"  (1 1 1  0)  1 f eval: 1 + 8 + 2
+
+    "_bird_beak":
+        prismels:
+            : "tri" (0 0  0 0)  0 f eval: 1 + 8 + 4
+            : "tri" (0 0  0 0)  2 f eval: 1 + 8 + 4
+            : "tri" (0 0  0 0)  4 f eval: 1 + 8 + 4
+            : "tri" (0 0  0 0)  6 f eval: 1 + 8 + 4
+            : "tri" (0 0  0 0)  8 f eval: 1 + 8 + 4
+            : "tri" (0 0  0 0) 10 f eval: 1 + 8 + 4
+            : "tri" (1 0 -1 0)  0 f eval: 1 + 8 + 4
+
+            : "sq"  (0 0  1 0)  3 f eval: 1 + 0 + 1
+            : "tri" (0 0  1 0)  1 f eval: 1 + 0 + 2
+            : "sq"  (0 0  1 0) 10 f eval: 1 + 0 + 4
+            : "sq"  (2 0 -1 0)  1 f eval: 1 + 0 + 4
+            : "tri" (2 0 -1 0) 11 f eval: 1 + 0 + 4
+
+    "_bird_head":
+        shapes:
+            : "_bird_head_sixth" (0 0 0 0)  0 f
+            : "_bird_head_sixth" (0 0 0 0)  2 f
+            : "_bird_head_sixth" (0 0 0 0)  4 f
+            : "_bird_head_sixth" (0 0 0 0)  6 f
+            : "_bird_head_sixth" (0 0 0 0)  8 f
+            : "_bird_head_sixth" (0 0 0 0) 10 f
+            : "_bird_head_fringe_sixth" (0 0 0 0)  2 f
+            : "_bird_head_fringe_sixth" (0 0 0 0)  4 f
+            : "_bird_head_fringe_sixth" (0 0 0 0)  6 f
+            : "_bird_beak" (2 1 -1 -1) 0 f
+
+    "bird_head":
+        shapes:
+            : "_bird_head" (0 1 3 1) 0 f
+
+    "bird_leg":
+        shapes:
+            : "map_vert1" ( 0  0 0 0) 0 f
+            : "map_edge1" ( 0  0 0 0) 4 f
+            : "map_vert1" (-3 -1 3 2) 0 f
+            : "map_edge1" (-3 -1 3 2) 2 f
+            : "map_vert1" (-3  0 6 3) 0 f
+
+    "bird_stand":
+        shapes:
+            : "bird_leg"  ( 0 0 0  0)  0 f
+            : "bird_leg"  ( 3 2 0 -1)  0 f
+            : "bird_head" (-3 0 6  3)  0 f
+
+    "bird_crawl":
+        shapes:
+            : "bird_head" ( 0 0 0  0)  0 f
+

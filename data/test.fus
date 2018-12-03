@@ -11,5 +11,6 @@ import "data/maps/demo/tilesets/water_tiles.fus"
 import "data/player.fus"
 import "data/roller.fus"
 import "data/flier.fus"
+import "data/bird.fus"
 
 import "data/mappers.fus"
