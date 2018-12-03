@@ -950,6 +950,18 @@ int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard){
     return 0;
 }
 
+int hexgame_reset_player_by_keymap(hexgame_t *game, int keymap, bool hard){
+    for(int i = 0; i < game->players_len; i++){
+        player_t *player = game->players[i];
+        if(player->keymap == keymap){
+            return hexgame_reset_player(game, player, hard);
+        }
+    }
+
+    /* Player not being found with given keymap is fine. */
+    return 0;
+}
+
 int hexgame_load_player_recording(hexgame_t *game, const char *filename,
     int keymap
 ){
@@ -1016,12 +1028,10 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
             }
         }else if(!event->key.repeat){
             bool shift = event->key.keysym.mod & KMOD_SHIFT;
-            if(event->key.keysym.sym == SDLK_1
-                && game->players_len >= 1){
-                    hexgame_reset_player(game, game->players[0], shift);}
-            if(event->key.keysym.sym == SDLK_2
-                && game->players_len >= 2){
-                    hexgame_reset_player(game, game->players[1], shift);}
+            if(event->key.keysym.sym == SDLK_1){
+                hexgame_reset_player_by_keymap(game, 0, shift);}
+            if(event->key.keysym.sym == SDLK_2){
+                hexgame_reset_player_by_keymap(game, 1, shift);}
         }
     }else if(event->type == SDL_KEYUP){
         if(event->key.keysym.sym == SDLK_F6){
