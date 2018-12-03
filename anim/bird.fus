@@ -30,7 +30,15 @@ stand:
     then:
         move: 1 0
         turn
+        goto: turn
         delay: 3
+
+turn:
+    rgraph: "bird_turn"
+
+    if:
+    then:
+        goto: stand
 
 step:
     rgraph: "bird_step"
