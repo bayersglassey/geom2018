@@ -999,6 +999,8 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
                         "Can't stop recording without starting first! "
                         "(Try pressing 'R' before 'F9')\n");
                 }else{
+                    fprintf(stderr, "Finished recording. "
+                        "Press F10 to play it back.\n");
                     err = player_stop_recording(player);
                     if(err)return err;
                 }
@@ -1008,9 +1010,9 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
             const char *recording_filename = get_last_recording_filename();
             if(recording_filename == NULL){
                 fprintf(stderr, "Couldn't find file of last recording. "
-                    "Maybe you need to record your first one with "
-                    "'R' then 'F9'?\n");
+                    "Maybe you need to record your first one with 'R'?\n");
             }else{
+                fprintf(stderr, "Playing back from file: %s\n", recording_filename);
                 err = hexgame_load_player_recording(game, recording_filename, -1);
                 if(err)return err;
             }
@@ -1022,9 +1024,14 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
             /* start recording */
             if(game->players_len >= 1){
                 const char *recording_filename = get_next_recording_filename();
+                fprintf(stderr, "Recording to file: %s "
+                    " (When finished, press F9 to save!)\n",
+                    recording_filename);
                 err = player_start_recording(game->players[0],
                     strdup(recording_filename));
                 if(err)return err;
+            }else{
+                fprintf(stderr, "Can't start recording -- no player!\n");
             }
         }else if(!event->key.repeat){
             bool shift = event->key.keysym.mod & KMOD_SHIFT;
