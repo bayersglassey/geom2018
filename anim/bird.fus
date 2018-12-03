@@ -2,10 +2,42 @@
 stand:
     rgraph: "bird_stand"
 
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;   .   .
+        ;;
+        ;; .   .   .
+        ;;
+        ;;  (.)  .
+
     if:
         key: isdown d
     then:
         goto: crawl
+        delay: 2
+
+    if:
+        key: isdown f
+        coll: all yes
+            ;;              +
+            ;;
+            ;;        .   +
+            ;;
+            ;; ( )  .
+        coll: all no
+            ;;         .   .
+            ;;
+            ;;   .   +   .   .
+            ;;        \
+            ;; .   .   .   .
+            ;;
+            ;;  (.)  .
+    then:
+        move: 3 1
+        rot: 1
         delay: 2
 
     if:
