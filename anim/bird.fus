@@ -17,7 +17,7 @@ stand:
         key: isdown d
     then:
         goto: crawl
-        delay: 2
+        delay: 3
 
     if:
         key: isdown f
@@ -38,7 +38,7 @@ stand:
     then:
         move: 3 1
         rot: 1
-        delay: 2
+        delay: 3
 
     if:
         key: isdown f
@@ -55,7 +55,7 @@ stand:
             ;; ( )  .
     then:
         move: 1 -1
-        delay: 2
+        delay: 3
 
     if:
         key: isdown f
@@ -76,7 +76,7 @@ stand:
             ;; ( )  .
     then:
         move: 2 1
-        delay: 2
+        delay: 3
 
     if:
         key: isdown f
@@ -92,7 +92,7 @@ stand:
             ;;       /     \*/*\*
             ;; ( )  .
     then:
-        delay: 2
+        delay: 3
         goto: tilted
 
     if:
@@ -100,7 +100,7 @@ stand:
     then:
         move: 1 0
         turn
-        delay: 2
+        delay: 3
 
 tilted:
     rgraph: "bird_tilted"
@@ -110,6 +110,7 @@ tilted:
         move: 1 0
         rot: -1
         goto: stand
+        delay: 3
 
 crawl:
     rgraph: "bird_crawl"
@@ -127,7 +128,7 @@ crawl:
             ;;  ( )
     then:
         goto: stand
-        delay: 3
+        delay: 2
 
     if:
         key: isdown f
