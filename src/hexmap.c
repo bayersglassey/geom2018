@@ -619,13 +619,17 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                         if(parsing_part_references){
                             /* Find part with given part_c */
                             char *filename = NULL;
+                            bool found = false;
                             for(int i = 0; i < parts_len; i++){
                                 hexcollmap_part_t *part = parts[i];
                                 if(part->part_c == c2){
-                                    filename = part->filename; break;}
+                                    found = true;
+                                    filename = part->filename;
+                                    break;
+                                }
                             }
 
-                            if(filename == NULL){
+                            if(!found){
                                 fprintf(stderr,
                                     "Hexcollmap line %i, char %i: char %li: "
                                     "part not found: %c\n",
@@ -656,17 +660,22 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                                 }else break;
                             }
 
-                            hexcollmap_t part_collmap;
-                            err = hexcollmap_init(&part_collmap,
-                                collmap->space, strdup(filename));
-                            if(err)return err;
-                            err = hexcollmap_load(&part_collmap,
-                                filename);
-                            if(err)return err;
-                            err = hexcollmap_draw(collmap, &part_collmap,
-                                &trf, draw_z);
-                            if(err)return err;
-                            hexcollmap_cleanup(&part_collmap);
+                            /* If "empty" was specified for this part, then
+                            filename will be NULL and we shouldn't do
+                            anything. */
+                            if(filename != NULL){
+                                hexcollmap_t part_collmap;
+                                err = hexcollmap_init(&part_collmap,
+                                    collmap->space, strdup(filename));
+                                if(err)return err;
+                                err = hexcollmap_load(&part_collmap,
+                                    filename);
+                                if(err)return err;
+                                err = hexcollmap_draw(collmap, &part_collmap,
+                                    &trf, draw_z);
+                                if(err)return err;
+                                hexcollmap_cleanup(&part_collmap);
+                            }
                         }
                     }
                 }
@@ -711,7 +720,13 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
 
                 err = fus_lexer_get(lexer, "(");
                 if(err)return err;
-                {
+                if(fus_lexer_got(lexer, "empty")){
+                    err = fus_lexer_next(lexer);
+                    if(err)return err;
+                    ARRAY_PUSH_NEW(hexcollmap_part_t*, parts, part)
+                    err = hexcollmap_part_init(part, part_c, NULL);
+                    if(err)return err;
+                }else{
                     char *filename;
                     err = fus_lexer_get_str(lexer, &filename);
                     if(err)return err;
