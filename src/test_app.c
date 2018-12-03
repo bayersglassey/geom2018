@@ -175,10 +175,16 @@ int test_app_process_console_input(test_app_t *app){
         vec_ptr_t spawn = (game->players_len > 0)?
             game->players[0]->respawn_pos: game->map->spawn;
 
-        int player_i = game->players_len;
+        int keymap = -1;
+        for(int i = 0; i < game->players_len; i++){
+            player_t *player = game->players[i];
+            if(player->keymap > keymap)keymap = player->keymap;
+        }
+        keymap++;
+
         ARRAY_PUSH_NEW(player_t*, game->players, player)
         err = player_init(player, &app->hexmap, stateset_filename, NULL,
-            player_i, spawn, NULL);
+            keymap, spawn, NULL);
         if(err)return err;
     }else if(fus_lexer_got(lexer, "save")){
         err = fus_lexer_next(lexer);

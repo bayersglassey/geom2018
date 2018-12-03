@@ -298,6 +298,7 @@ int player_init(player_t *player, hexmap_t *map,
 ){
     int err;
 
+    player->keymap = keymap;
     for(int i = 0; i < PLAYER_KEYS; i++)player->key_code[i] = 0;
     if(keymap == 0){
         player->key_code[PLAYER_KEY_U] = SDLK_UP;

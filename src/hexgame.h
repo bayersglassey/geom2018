@@ -79,6 +79,7 @@ typedef struct player {
     bool turn;
     SDL_Keycode key_code[PLAYER_KEYS];
 
+    int keymap;
     player_keyinfo_t keyinfo;
 
     stateset_t stateset;
