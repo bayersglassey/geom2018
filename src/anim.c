@@ -92,6 +92,17 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
         err = state_init(state, stateset, name, rgraph);
         if(err)return err;
 
+        if(fus_lexer_got(lexer, "hitbox")){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            err = fus_lexer_get(lexer, "(");
+            if(err)return err;
+            err = fus_lexer_parse_silent(lexer);
+            if(err)return err;
+            err = fus_lexer_get(lexer, ")");
+            if(err)return err;
+        }
+
         while(1){
             if(fus_lexer_got(lexer, ")"))break;
 
