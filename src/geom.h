@@ -15,6 +15,7 @@
 #endif
 
 typedef int vec_t[MAX_VEC_DIMS];
+typedef int *vec_ptr_t;
 typedef int boundbox_t[MAX_VEC_DIMS*2];
 typedef int rot_t;
 typedef bool flip_t;

@@ -172,10 +172,14 @@ int test_app_process_console_input(test_app_t *app){
             stateset_filename = strdup(app->stateset_filename);
         }
 
-        int player_i = app->hexgame.players_len;
-        ARRAY_PUSH_NEW(player_t*, app->hexgame.players, player)
+        hexgame_t *game = &app->hexgame;
+        vec_ptr_t spawn = (game->players_len > 0)?
+            game->players[0]->respawn_pos: game->map->spawn;
+
+        int player_i = game->players_len;
+        ARRAY_PUSH_NEW(player_t*, game->players, player)
         err = player_init(player, &app->hexmap, stateset_filename, NULL,
-            player_i, app->hexgame.map->spawn, NULL);
+            player_i, spawn, NULL);
         if(err)return err;
     }else if(fus_lexer_got(lexer, "save")){
         err = fus_lexer_next(lexer);
