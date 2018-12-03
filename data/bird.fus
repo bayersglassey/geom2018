@@ -54,29 +54,103 @@ shapes:
             : "_bird_head_fringe_sixth" (0 0 0 0)  6 f
             : "_bird_beak" (2 1 -1 -1) 0 f
 
+    "_bird_leg_calf_beefy":
+        prismels:
+            : "tri" (0 0 0  0)  3 f eval: 1 + 0 + 6
+            : "tri" (0 0 0  0)  5 f eval: 1 + 0 + 6
+            : "tri" (0 0 0  0)  7 f eval: 1 + 0 + 6
+            : "sq"  (0 0 0  0)  0 f eval: 1 + 0 + 7
+            : "sq"  (0 0 0 -1)  0 f eval: 1 + 0 + 7
+            : "sq"  (1 0 0  0)  0 f eval: 1 + 0 + 7
+            : "sq"  (1 0 0 -1)  0 f eval: 1 + 0 + 7
+            : "sq"  (2 0 0  0)  0 f eval: 1 + 0 + 7
+            : "sq"  (2 0 0 -1)  0 f eval: 1 + 0 + 7
+
+            : "tri" (3 1 0  0)  1 f eval: 1 + 0 + 6
+            : "tri" (3 1 0  0)  3 f eval: 1 + 0 + 6
+            : "tri" (3 1 0  0)  5 f eval: 1 + 0 + 6
+            : "tri" (3 1 0  0)  7 f eval: 1 + 0 + 6
+            : "tri" (3 1 0  0)  9 f eval: 1 + 0 + 6
+            : "tri" (3 1 0  0) 11 f eval: 1 + 0 + 6
+
+            : "tri" (3 1 0 -1)  5 f eval: 1 + 0 + 6
+            : "tri" (3 1 0 -1)  7 f eval: 1 + 0 + 6
+            : "tri" (3 1 0 -1)  9 f eval: 1 + 0 + 6
+            : "tri" (3 1 0 -1) 11 f eval: 1 + 0 + 6
+
+    "_bird_leg_thigh_beefy":
+        prismels:
+            : "tri" (0 0 0  0) 11 f eval: 1 + 0 + 6
+            : "sq"  (0 1 0 -1)  0 f eval: 1 + 0 + 7
+            : "sq"  (1 1 0 -1)  0 f eval: 1 + 0 + 7
+            : "sq"  (2 1 0 -1)  0 f eval: 1 + 0 + 7
+            : "tri" (3 2 0 -1)  5 f eval: 1 + 0 + 6
+
+    "_bird_leg_calf":
+        prismels:
+            # ball:
+            : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 1
+            : "tri" (0 0 0 0)  2 f eval: 1 + 8 + 2
+            : "tri" (0 0 0 0)  4 f eval: 1 + 8 + 3
+            : "tri" (0 0 0 0)  6 f eval: 1 + 8 + 4
+            : "tri" (0 0 0 0)  8 f eval: 1 + 8 + 5
+            : "tri" (0 0 0 0) 10 f eval: 1 + 8 + 6
+
+            # stick:
+            : "tri" (1 0 0  0) 11 f eval: 1 + 8 + 4
+            : "sq"  (1 1 0 -1)  0 f eval: 1 + 8 + 6
+            : "tri" (2 2 0 -1)  5 f eval: 1 + 8 + 4
+
+    "_bird_leg_thigh":
+        prismels:
+            # ball:
+            : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 1
+            : "tri" (0 0 0 0)  2 f eval: 1 + 8 + 2
+            : "tri" (0 0 0 0)  4 f eval: 1 + 8 + 3
+            : "tri" (0 0 0 0)  6 f eval: 1 + 8 + 4
+            : "tri" (0 0 0 0)  8 f eval: 1 + 8 + 5
+            : "tri" (0 0 0 0) 10 f eval: 1 + 8 + 6
+
+            # stick:
+            : "tri" (1 0 0  0) 11 f eval: 1 + 8 + 4
+            : "sq"  (1 1 0 -1)  0 f eval: 1 + 8 + 6
+            : "tri" (2 2 0 -1)  5 f eval: 1 + 8 + 4
+
+
+
     "bird_head":
         shapes:
-            : "_bird_head" (0 1 3 1) 0 f
+            : "_bird_head" eval((0 1 3 1) + (1 0 -2 0)) 0 f
 
-    "bird_leg":
+    "bird_leg_calf":
         shapes:
-            : "map_vert1" ( 0  0 0 0) 0 f
-            : "map_edge1" ( 0  0 0 0) 4 f
-            : "map_vert1" (-3 -1 3 2) 0 f
-            : "map_edge1" (-3 -1 3 2) 2 f
-            : "map_vert1" (-3  0 6 3) 0 f
+            : "_bird_leg_calf" (0 0 0 0) 0 f
+
+    "bird_leg_thigh":
+        shapes:
+            : "_bird_leg_thigh" (0 0 0 0) 0 f
+
+    "bird_leg_stand_b":
+        shapes:
+            : "bird_leg_calf"  ( 0  0 0 0) 4 f
+            : "bird_leg_thigh" (-3 -1 3 2) 2 f
+
+    "bird_leg_stand_f":
+        shapes:
+            : "bird_leg_calf"  ( 0  0 0 0) 4 f
+            : "bird_leg_thigh" (-3 -1 3 2) 4 f
 
     "bird_stand":
         shapes:
-            : "bird_leg"  ( 0 0 0  0)  0 f
-            : "bird_leg"  ( 3 2 0 -1)  0 f
+            : "bird_leg_stand_b" ( 0 0 0  0)  0 f
+            : "bird_leg_stand_f" ( 3 2 0 -1)  0 f
             : "bird_head" (-3 0 6  3)  0 f
 
     "bird_tilted":
         shapes:
-            : "bird_leg"  ( 0 0 0  0)  0 f
-            : "bird_leg"  ( 3 2 0 -1)  0 f
-            : "bird_head" ( 3 3 3  0)  0 f
+            : "bird_leg_stand_b" ( 0 0 0  0)  0 f
+            : "bird_leg_stand_f" ( 3 2 0 -1)  0 f
+            : "bird_head" ( 3 3 3  0) -1 f
 
     "bird_crawl":
         shapes:
