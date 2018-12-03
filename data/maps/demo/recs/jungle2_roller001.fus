@@ -1,0 +1,11 @@
+anim: "anim/roller.fus"
+state: "stand"
+pos: ( -68 -1)
+rot: 2
+turn: no
+keys:
+    u:
+    d: is was
+    l: is was
+    r:
+data: " w157-d w65+d w112"

@@ -3,6 +3,7 @@ unit: 3 2 0 -1
 spawn: "data/maps/demo/start.fus"
 #spawn: "data/maps/demo/pebbles3.fus"
 #spawn: "data/maps/demo/jungle.fus"
+#spawn: "data/maps/demo/jungle2.fus"
 #spawn: "data/maps/demo/big.fus"
 default_palette: "data/pal1.fus"
 default_tileset: "data/tileset1.fus"
@@ -78,6 +79,9 @@ submaps:
                                         #palette: "data/maps/demo/pals/water.fus"
                                         tileset: "data/tileset1.fus"
                                         #tileset: "data/maps/demo/tilesets/water.fus"
+                                        recordings:
+                                            : "./data/maps/demo/recs/jungle2_roller000.fus"
+                                            : "./data/maps/demo/recs/jungle2_roller001.fus"
                                         submaps:
                                             :
                                                 bg
