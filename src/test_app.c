@@ -40,7 +40,7 @@ static void test_app_init_input(test_app_t *app){
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
     const char *stateset_filename, const char *hexmap_filename,
-    bool use_textures
+    bool use_textures, int n_players
 ){
     int err;
 
@@ -102,11 +102,10 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         fclose(f);
     }
 
-    {
-        /* player 0 */
+    for(int i = 0; i < n_players; i++){
         ARRAY_PUSH_NEW(player_t*, app->hexgame.players, player)
         err = player_init(player, &app->hexmap,
-            strdup(app->stateset_filename), NULL, 0, spawn, "respawn.txt");
+            strdup(app->stateset_filename), NULL, i, spawn, "respawn.txt");
         if(err)return err;
     }
 
