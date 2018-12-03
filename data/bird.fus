@@ -72,6 +72,12 @@ shapes:
             : "bird_leg"  ( 3 2 0 -1)  0 f
             : "bird_head" (-3 0 6  3)  0 f
 
+    "bird_tilted":
+        shapes:
+            : "bird_leg"  ( 0 0 0  0)  0 f
+            : "bird_leg"  ( 3 2 0 -1)  0 f
+            : "bird_head" ( 3 3 3  0)  0 f
+
     "bird_crawl":
         shapes:
             : "bird_head" ( 0 0 0  0)  0 f

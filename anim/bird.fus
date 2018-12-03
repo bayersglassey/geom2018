@@ -9,11 +9,75 @@ stand:
         delay: 2
 
     if:
+        key: isdown f
+        coll: all yes
+            ;; ( )  .
+            ;;
+            ;;        +   +
+        coll: all no
+            ;;       /*\*/*
+            ;;      + - + -
+            ;;       \*/*\*
+            ;;        +
+            ;;       /
+            ;; ( )  .
+    then:
+        move: 1 -1
+        delay: 2
+
+    if:
+        key: isdown f
+        coll: all yes
+            ;;        +   +
+            ;;
+            ;; ( )  .
+        coll: all no
+            ;;        *\*/*
+            ;;      . - + -
+            ;;       \*/*\*
+            ;;        +
+            ;;       /
+            ;;      +
+            ;;       \
+            ;;        .
+            ;;
+            ;; ( )  .
+    then:
+        move: 2 1
+        delay: 2
+
+    if:
+        key: isdown f
+        coll: all yes
+            ;; ( )  .
+            ;;
+            ;;        +
+        coll: all no
+            ;;       /*\*/*
+            ;;      + - + -
+            ;;       \*/*\*/*\*/*
+            ;;        + - + - + -
+            ;;       /     \*/*\*
+            ;; ( )  .
+    then:
+        delay: 2
+        goto: tilted
+
+    if:
         key: isdown b
     then:
         move: 1 0
         turn
         delay: 2
+
+tilted:
+    rgraph: "bird_tilted"
+
+    if:
+    then:
+        move: 1 0
+        rot: -1
+        goto: stand
 
 crawl:
     rgraph: "bird_crawl"
@@ -21,10 +85,14 @@ crawl:
     if:
         key: not isdown d
         coll: all no
-            ;;  *\*/*
-            ;;  - + -
-            ;;  */ \*
-            ;; ( )
+            ;;   *\*/*
+            ;; . - + - .
+            ;;   */ \*
+            ;;   . - .
+            ;;
+            ;; .   .   .
+            ;;
+            ;;  ( )
     then:
         goto: stand
         delay: 3
@@ -33,7 +101,7 @@ crawl:
         key: isdown f
         coll: all yes
             ;;        +
-            ;;       /
+            ;;
             ;; ( )  +
     then:
         move: 1 0
@@ -43,7 +111,7 @@ crawl:
     if:
         key: isdown f
         coll: all yes
-            ;; ( )  + - +
+            ;; ( )  +   +
         coll: all no
             ;;       \*/*
             ;;        + -
@@ -57,7 +125,7 @@ crawl:
         key: isdown f
         coll: all yes
             ;; ( )  +
-            ;;       \
+            ;;
             ;;        +
         coll: all no
             ;;       \*/*
