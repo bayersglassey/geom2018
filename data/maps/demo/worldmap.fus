@@ -82,6 +82,7 @@ submaps:
                                         recordings:
                                             : "./data/maps/demo/recs/jungle2_roller000.fus"
                                             : "./data/maps/demo/recs/jungle2_roller001.fus"
+                                            : "./data/maps/demo/recs/jungle3_bird000.fus"
                                         submaps:
                                             :
                                                 bg
