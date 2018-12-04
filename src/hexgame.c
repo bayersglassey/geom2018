@@ -283,9 +283,9 @@ static const char *get_next_recording_filename(){
 
 
 
-/**********
- * PLAYER *
- **********/
+/***********************
+ * PLAYER INIT/CLEANUP *
+ ***********************/
 
 void player_cleanup(player_t *player){
     stateset_cleanup(&player->stateset);
@@ -331,6 +331,24 @@ int player_init(player_t *player, hexmap_t *map,
     return 0;
 }
 
+
+/***************
+ * PLAYER MISC *
+ ***************/
+
+rot_t player_get_rot(player_t *player, const vecspace_t *space){
+    rot_t rot = player->rot;
+    if(player->turn){
+        rot = rot_contain(space->rot_max,
+            space->rot_max/2 - rot);}
+    return rot;
+}
+
+
+/****************
+ * PLAYER STATE *
+ ****************/
+
 int player_init_stateset(player_t *player, const char *stateset_filename,
     const char *state_name, hexmap_t *map
 ){
@@ -365,6 +383,11 @@ int player_set_state(player_t *player, const char *state_name){
     player->cooldown = 0;
     return 0;
 }
+
+
+/****************
+ * PLAYER INPUT *
+ ****************/
 
 static int player_maybe_record_wait(player_t *player){
     int wait = player->recording.wait;
@@ -457,14 +480,6 @@ char player_get_key_c(player_t *player, int key_i, bool absolute){
         ' ';
 }
 
-rot_t player_get_rot(player_t *player, const vecspace_t *space){
-    rot_t rot = player->rot;
-    if(player->turn){
-        rot = rot_contain(space->rot_max,
-            space->rot_max/2 - rot);}
-    return rot;
-}
-
 int player_process_event(player_t *player, SDL_Event *event){
 
     if(player->state == NULL){
@@ -487,6 +502,11 @@ int player_process_event(player_t *player, SDL_Event *event){
     }
     return 0;
 }
+
+
+/****************
+ * PLAYER RULES *
+ ****************/
 
 static int player_match_rule(player_t *player, hexmap_t *map,
     state_rule_t *rule, bool *rule_matched_ptr
@@ -585,6 +605,11 @@ static int player_apply_rule(player_t *player, hexmap_t *map,
     }
     return 0;
 }
+
+
+/***************
+ * PLAYER STEP *
+ ***************/
 
 int player_step(player_t *player, hexmap_t *map){
     int err;
@@ -694,6 +719,11 @@ int player_step(player_t *player, hexmap_t *map){
     return 0;
 }
 
+
+/*****************
+ * PLAYER RENDER *
+ *****************/
+
 int player_render(player_t *player,
     SDL_Renderer *renderer, SDL_Surface *surface,
     SDL_Palette *pal, int x0, int y0, int zoom,
@@ -733,6 +763,9 @@ int player_render(player_t *player,
 }
 
 
+/********************
+ * PLAYER RECORDING *
+ ********************/
 
 int player_play_recording(player_t *player){
     int err;
@@ -915,10 +948,11 @@ int player_recording_step(player_t *player){
 }
 
 
+
+
 /***********
  * HEXGAME *
  ***********/
-
 
 void hexgame_cleanup(hexgame_t *game){
     ARRAY_FREE_PTR(player_t*, game->players, player_cleanup)
