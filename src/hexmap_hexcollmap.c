@@ -775,4 +775,11 @@ bool hexcollmap_elem_is_solid(hexcollmap_elem_t *elem){
     return tile_c != ' ' && tile_c != 'x' && tile_c != 'S';
 }
 
+bool hexcollmap_collide(
+    hexcollmap_t *collmap1, trf_t *trf1,
+    hexcollmap_t *collmap2, trf_t *trf2,
+    vecspace_t *space, bool all
+){
+    return false;
+}
 

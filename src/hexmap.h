@@ -99,7 +99,10 @@ hexcollmap_elem_t *hexcollmap_get_edge(hexcollmap_t *collmap, trf_t *index);
 hexcollmap_elem_t *hexcollmap_get_face(hexcollmap_t *collmap, trf_t *index);
 bool hexcollmap_elem_is_visible(hexcollmap_elem_t *elem);
 bool hexcollmap_elem_is_solid(hexcollmap_elem_t *elem);
-
+bool hexcollmap_collide(
+    hexcollmap_t *collmap1, trf_t *trf1,
+    hexcollmap_t *collmap2, trf_t *trf2,
+    vecspace_t *space, bool all);
 
 
 /**********

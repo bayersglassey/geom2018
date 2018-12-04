@@ -18,6 +18,10 @@
 #include "write.h"
 
 
+#ifndef COLLIDE_PLAYERS
+#define COLLIDE_PLAYERS 1
+#endif
+
 
 /***********
  * HEXGAME *
@@ -172,6 +176,44 @@ int hexgame_step(hexgame_t *game){
         err = palette_step(&game->cur_submap->palette);
         if(err)return err;
     }
+
+#if COLLIDE_PLAYERS
+    /* Collide players with each other */
+    for(int i = 0; i < game->players_len; i++){
+        player_t *player = game->players[i];
+        if(player->state == NULL)continue;
+        hexcollmap_t *hitbox = player->state->hitbox;
+        if(hitbox == NULL)continue;
+
+        trf_t hitbox_trf;
+        player_init_trf(player, &hitbox_trf, space);
+
+        /* This player has a hitbox! So collide it against all other players'
+        crushboxes. */
+        for(int j = 0; j < game->players_len; j++){
+            if(i == j)continue;
+            player_t *player_other = game->players[j];
+            if(player_other->state == NULL)continue;
+            hexcollmap_t *crushbox = player_other->state->crushbox;
+            if(crushbox == NULL)continue;
+
+            trf_t crushbox_trf;
+            player_init_trf(player_other, &crushbox_trf, space);
+
+            /* The other player has a crushbox! Do the collision... */
+            bool collide = hexcollmap_collide(hitbox, &hitbox_trf,
+                crushbox, &crushbox_trf, space, false);
+            if(collide){
+                /* There was a collision! So player dies. :( */
+
+                /* Hardcoded "dead" state name... I suppose we could
+                have a char* player->dead_anim_name, but whatever. */
+                err = player_set_state(player, "dead");
+                if(err)return err;
+            }
+        }
+    }
+#endif
 
     /* Do 1 gameplay step for each player */
     for(int i = 0; i < game->players_len; i++){
