@@ -16,8 +16,8 @@ stand:
             ;;         \*
             ;; ( )
         coll: all no
-            ;;   .   /*
-            ;; (.). .
+            ;;       /*
+            ;; (.)  .
     then:
         move: 1 0
         goto: crawl_step
@@ -37,8 +37,8 @@ stand:
             ;; ( )      + -
             ;;         /*\*
         coll: all no
-            ;;   .   /*
-            ;; (.). . -
+            ;;       /*
+            ;; (.)  . -
             ;;        *
     then:
         move: 1 0
@@ -221,8 +221,8 @@ crawl:
         coll: all yes
             ;; ( )  + - +
         coll: all no
-            ;;   . \*/*
-            ;; (.). .
+            ;;     \*/*
+            ;; (.)  .
     then:
         move: 1 0
         goto: crawl_step
@@ -235,8 +235,8 @@ crawl:
             ;;       \
             ;;        +
         coll: all no
-            ;;   . \*/*
-            ;; (.). . -
+            ;;     \*/*
+            ;; (.)  . -
             ;;        *
     then:
         move: 1 0
