@@ -33,6 +33,16 @@ stand:
 
 turn:
     rgraph: "bird_turn"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;   .   .
+        ;;
+        ;; .   .   .
+        ;;
+        ;;  (.)  .
     if() then:
         move: 1 0
         turn
@@ -41,6 +51,17 @@ turn:
 
 step:
     rgraph: "bird_step"
+
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;   .   .
+        ;;
+        ;; .   .   .
+        ;;
+        ;;  (.)  .
 
     if:
         # Turned off for now (with false)... I think I prefer it so
@@ -134,30 +155,121 @@ step:
 
 turn_arrive:
     rgraph: "bird_turn_arrive"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;   .   .
+        ;;
+        ;; .   .   .
+        ;;
+        ;;  (.)  .
     if() then: goto: stand
 
 step_rev:
     rgraph: "bird_step_rev"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;   .   .
+        ;;
+        ;; .   .   .
+        ;;
+        ;;  (.)  .
     if() then: goto: stand
 
 step_rot_up_arrive:
     rgraph: "bird_step_rot_up_arrive"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;   .   .
+        ;;
+        ;; .   .   .
+        ;;
+        ;;  (.)  .
+    crushbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
     if() then: goto: stand
 
 step_down_arrive:
     rgraph: "bird_step_down_arrive"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;   .   .
+        ;;
+        ;; .   .   .
+        ;;
+        ;;  (.)  .
+    crushbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
     if() then: goto: stand
 
 step_up_arrive:
     rgraph: "bird_step_up_arrive"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;   .   .
+        ;;
+        ;; .   .   .
+        ;;
+        ;;  (.)  .
+    crushbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
     if() then: goto: stand
 
 step_rot_down_arrive:
     rgraph: "bird_step_rot_down_arrive"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;   .   .
+        ;;
+        ;; .   .   .
+        ;;
+        ;;  (.)  .
+    crushbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
     if() then: goto: stand
 
 crawl:
     rgraph: "bird_crawl"
+
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
 
     if:
         key: not isdown d

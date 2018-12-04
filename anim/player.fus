@@ -2,6 +2,13 @@
 stand:
     rgraph: "player_stand"
 
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+
     if:
         key: isdown d
     then:
@@ -99,6 +106,13 @@ stand:
 jump:
     rgraph: "player_jump"
 
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+
     if:
         coll: all yes
             ;;        +
@@ -148,18 +162,24 @@ jump:
         goto: jump
         delay: 2
 
-    if:
-    then:
-        goto: dead
+    if() then: goto: dead
 
 step:
     rgraph: "player_step"
-    if:
-    then:
-        goto: stand
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: stand
 
 crawl:
     rgraph: "player_crawl"
+
+    hitbox:
+        ;;     *
+        ;;  (.)  .
 
     if:
         key: not isdown d
@@ -225,9 +245,11 @@ crawl:
 
 crawl_step:
     rgraph: "player_crawl_step"
-    if:
-    then:
-        goto: crawl
+    hitbox:
+        ;;     *
+        ;;  (.)  .
+    if() then: goto: crawl
+
 
 dead:
     rgraph: "player_dead"
