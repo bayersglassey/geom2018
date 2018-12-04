@@ -97,8 +97,16 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             if(err)return err;
             err = fus_lexer_get(lexer, "(");
             if(err)return err;
-            err = fus_lexer_parse_silent(lexer);
+
+            hexcollmap_t *collmap = calloc(1, sizeof(*collmap));
+            if(collmap == NULL)return 1;
+            err = hexcollmap_init(collmap, space,
+                strdup(lexer->filename));
             if(err)return err;
+            err = hexcollmap_parse(collmap, lexer, true);
+            if(err)return err;
+            state->hitbox = collmap;
+
             err = fus_lexer_get(lexer, ")");
             if(err)return err;
         }
@@ -108,7 +116,22 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             if(err)return err;
             err = fus_lexer_get(lexer, "(");
             if(err)return err;
-            err = fus_lexer_parse_silent(lexer);
+
+            if(fus_lexer_got(lexer, "hitbox")){
+                err = fus_lexer_next(lexer);
+                if(err)return err;
+                state->crushbox = state->hitbox;
+            }else{
+                hexcollmap_t *collmap = calloc(1, sizeof(*collmap));
+                if(collmap == NULL)return 1;
+                err = hexcollmap_init(collmap, space,
+                    strdup(lexer->filename));
+                if(err)return err;
+                err = hexcollmap_parse(collmap, lexer, true);
+                if(err)return err;
+                state->crushbox = collmap;
+            }
+
             if(err)return err;
             err = fus_lexer_get(lexer, ")");
             if(err)return err;
@@ -381,6 +404,18 @@ const char *state_effect_types[] = {
 
 void state_cleanup(state_t *state){
     free(state->name);
+    if(state->hitbox != NULL){
+
+        /* Don't free the same hexcollmap twice! */
+        if(state->crushbox == state->hitbox)state->crushbox = NULL;
+
+        hexcollmap_cleanup(state->hitbox);
+        free(state->hitbox);
+    }
+    if(state->crushbox != NULL){
+        hexcollmap_cleanup(state->crushbox);
+        free(state->crushbox);
+    }
     for(int i = 0; i < state->rules_len; i++){
         state_rule_t *rule = state->rules[i];
         state_rule_cleanup(rule);

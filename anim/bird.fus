@@ -270,6 +270,7 @@ crawl:
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
+    crushbox: hitbox
 
     if:
         key: not isdown d
