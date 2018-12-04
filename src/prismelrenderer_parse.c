@@ -326,7 +326,9 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
             : sixth (0 0 0 0)  0 f
             : sixth (0 0 0 0)  2 f
             : sixth (0 0 0 0)  4 f  0 (0 1)
+            : sixth (0 0 0 0)  4 f  0+ (0 1)
             : sixth (0 0 0 0)  6 f "red"  0 (0 1)
+            : sixth (0 0 0 0)  6 f "red"  0+ (0 1)
     */
     int err;
     err = fus_lexer_get(lexer, "(");
