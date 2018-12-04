@@ -103,6 +103,17 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             if(err)return err;
         }
 
+        if(fus_lexer_got(lexer, "crushbox")){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            err = fus_lexer_get(lexer, "(");
+            if(err)return err;
+            err = fus_lexer_parse_silent(lexer);
+            if(err)return err;
+            err = fus_lexer_get(lexer, ")");
+            if(err)return err;
+        }
+
         while(1){
             if(fus_lexer_got(lexer, ")"))break;
 
@@ -383,6 +394,8 @@ int state_init(state_t *state, stateset_t *stateset, char *name,
     state->stateset = stateset;
     state->name = name;
     state->rgraph = rgraph;
+    state->hitbox = NULL;
+    state->crushbox = NULL;
     ARRAY_INIT(state->rules)
     return 0;
 }

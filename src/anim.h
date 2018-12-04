@@ -15,6 +15,8 @@ typedef struct state {
     struct stateset *stateset;
     char *name;
     rendergraph_t *rgraph;
+    hexcollmap_t *hitbox;
+    hexcollmap_t *crushbox;
     ARRAY_DECL(struct state_rule*, rules)
 } state_t;
 
