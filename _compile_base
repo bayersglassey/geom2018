@@ -6,6 +6,7 @@ gcc -g -std=c99 -Wall -Werror -Wno-unused \
     src/util.c src/lexer.c src/write.c \
     src/geom.c src/vec4.c src/hexspace.c src/bounds.c \
     src/test_app.c src/hexgame.c \
+    src/hexgame_player.c src/hexgame_player_recording.c \
     src/prismelrenderer.c src/prismelrenderer_parse.c \
     src/rendergraph.c src/sdl_util.c \
     `sdl2-config --libs` \

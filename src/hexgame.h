@@ -13,6 +13,14 @@
 #include "array.h"
 
 
+#define MAX_FRAME_I 554400
+    /* Largest highly composite number smaller than 2^16 */
+
+#define DEBUG_RULES false
+#define DEBUG_RECORDINGS false
+
+
+
 /*******************
  * PLAYER KEY INFO *
  *******************/
@@ -31,6 +39,8 @@ typedef struct player_keyinfo {
 
 void player_keyinfo_reset(player_keyinfo_t *info);
 void player_keyinfo_copy(player_keyinfo_t *info1, player_keyinfo_t *info2);
+int fus_lexer_get_player_keyinfo(fus_lexer_t *lexer,
+    player_keyinfo_t *info);
 
 
 
@@ -66,6 +76,8 @@ void player_recording_reset(player_recording_t *rec);
 void player_recording_init(player_recording_t *rec, hexmap_t *map);
 int player_recording_load(player_recording_t *rec, const char *filename,
     hexmap_t *map);
+const char *get_last_recording_filename();
+const char *get_next_recording_filename();
 
 
 /**********
@@ -97,15 +109,19 @@ void player_cleanup(player_t *player);
 int player_init(player_t *player, hexmap_t *map,
     char *stateset_filename, const char *state_name, int keymap,
     vec_t respawn_pos, char *respawn_filename);
+
+rot_t player_get_rot(player_t *player, const vecspace_t *space);
+
 int player_init_stateset(player_t *player, const char *stateset_filename,
     const char *state_name, hexmap_t *map);
 int player_set_state(player_t *player, const char *state_name);
+
 void player_keydown(player_t *player, int key_i);
 void player_keyup(player_t *player, int key_i);
 int player_get_key_i(player_t *player, char c, bool absolute);
 char player_get_key_c(player_t *player, int key_i, bool absolute);
-rot_t player_get_rot(player_t *player, const vecspace_t *space);
 int player_process_event(player_t *player, SDL_Event *event);
+
 int player_step(player_t *player, struct hexmap *map);
 int player_render(player_t *player,
     SDL_Renderer *renderer, SDL_Surface *surface,
@@ -117,6 +133,7 @@ int player_restart_recording(player_t *player, bool hard);
 int player_start_recording(player_t *player, char *name);
 int player_stop_recording(player_t *player);
 int player_record(player_t *player, const char *data);
+int player_maybe_record_wait(player_t *player);
 int player_recording_step(player_t *player);
 
 
