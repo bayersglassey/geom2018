@@ -23,7 +23,7 @@ stand:
         key: isdown f
     then:
         goto: step
-        delay: 3
+        delay: 2
 
     if:
         key: isdown b
@@ -33,26 +33,25 @@ stand:
 
 turn:
     rgraph: "bird_turn"
-
-    if:
-    then:
+    if() then:
         move: 1 0
         turn
         goto: turn_arrive
         delay: 1
 
-turn_arrive:
-    rgraph: "bird_turn_arrive"
-
-    if:
-    then:
-        goto: stand
-
 step:
     rgraph: "bird_step"
 
     if:
-        key: isdown f
+        # Turned off for now (with false)... I think I prefer it so
+        # tapping f attempts a full step.
+        false
+        key: not isdown f
+    then:
+        goto: step_rev
+        delay: 2
+
+    if:
         coll: all yes
             ;;              +
             ;;
@@ -70,10 +69,10 @@ step:
     then:
         move: 3 1
         rot: 1
-        goto: stand
+        goto: step_rot_up_arrive
+        delay: 2
 
     if:
-        key: isdown f
         coll: all yes
             ;; ( )  .
             ;;
@@ -87,10 +86,10 @@ step:
             ;; ( )  .
     then:
         move: 1 -1
-        goto: stand
+        goto: step_down_arrive
+        delay: 2
 
     if:
-        key: isdown f
         coll: all yes
             ;;        +   +
             ;;
@@ -108,10 +107,10 @@ step:
             ;; ( )  .
     then:
         move: 2 1
-        goto: stand
+        goto: step_up_arrive
+        delay: 2
 
     if:
-        key: isdown f
         coll: all yes
             ;; ( )  .
             ;;
@@ -126,19 +125,36 @@ step:
     then:
         move: 1 0
         rot: -1
-        goto: stand
+        goto: step_rot_down_arrive
+        delay: 2
 
-    if:
-    then:
+    if() then:
         goto: step_rev
-        delay: 3
+        delay: 2
+
+turn_arrive:
+    rgraph: "bird_turn_arrive"
+    if() then: goto: stand
 
 step_rev:
     rgraph: "bird_step_rev"
+    if() then: goto: stand
 
-    if:
-    then:
-        goto: stand
+step_rot_up_arrive:
+    rgraph: "bird_step_rot_up_arrive"
+    if() then: goto: stand
+
+step_down_arrive:
+    rgraph: "bird_step_down_arrive"
+    if() then: goto: stand
+
+step_up_arrive:
+    rgraph: "bird_step_up_arrive"
+    if() then: goto: stand
+
+step_rot_down_arrive:
+    rgraph: "bird_step_rot_down_arrive"
+    if() then: goto: stand
 
 crawl:
     rgraph: "bird_crawl"

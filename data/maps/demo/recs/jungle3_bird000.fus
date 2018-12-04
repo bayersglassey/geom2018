@@ -1,11 +1,11 @@
 anim: "anim/bird.fus"
-state: "stand"
-pos: ( -49 7)
-rot: 0
-turn: no
+state: "crawl"
+pos: ( -47 2)
+rot: 5
+turn: yes
 keys:
     u:
-    d:
+    d: is was
     l:
     r:
-data: " w3+r w36-r w4+r w1-r w3+l w4-l w22+d w3+l w54-l w6-d w5+r w41-r w5+l w137-l w2+r w4-r w9"
+data: " w82-d w10+l w79-l w9+r w2-r w8+d w75-d w3+r w20-r w19+l w94-l w42+r w4-r w6+l w3-l w68+r w3-r w25+r w41-r w10+d w7+l w47-d w3-l w19+r w37-r w4+l w3-l w9+d w26"
