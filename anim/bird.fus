@@ -23,7 +23,7 @@ stand:
         key: isdown f
     then:
         goto: step
-        delay: 2
+        delay: 1
 
     if:
         key: isdown b
