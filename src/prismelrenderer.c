@@ -71,7 +71,10 @@ bool get_animated_frame_visible(int n_frames,
 int get_animated_frame_i(const char *animation_type,
     int n_frames, int frame_i
 ){
-    if(animation_type == rendergraph_animation_type_cycle){
+    if(animation_type == rendergraph_animation_type_once){
+        /* Is this correct??? */
+        if(frame_i >= n_frames)frame_i = n_frames - 1;
+    }else if(animation_type == rendergraph_animation_type_cycle){
         frame_i = frame_i % n_frames;
     }else if(animation_type == rendergraph_animation_type_oscillate){
         frame_i = frame_i % (n_frames * 2);
