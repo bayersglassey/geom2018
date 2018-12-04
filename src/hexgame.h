@@ -111,6 +111,7 @@ int player_init(player_t *player, hexmap_t *map,
     vec_t respawn_pos, char *respawn_filename);
 
 rot_t player_get_rot(player_t *player, const vecspace_t *space);
+void player_init_trf(player_t *player, trf_t *trf, vecspace_t *space);
 
 int player_init_stateset(player_t *player, const char *stateset_filename,
     const char *state_name, hexmap_t *map);

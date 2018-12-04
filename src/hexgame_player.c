@@ -149,6 +149,12 @@ rot_t player_get_rot(player_t *player, const vecspace_t *space){
     return rot;
 }
 
+void player_init_trf(player_t *player, trf_t *trf, vecspace_t *space){
+    vec_cpy(space->dims, trf->add, player->pos);
+    trf->rot = player_get_rot(player, space);
+    trf->flip = player->turn;
+}
+
 
 /****************
  * PLAYER STATE *
@@ -323,9 +329,7 @@ static int player_match_rule(player_t *player, hexmap_t *map,
             if(!cond->u.key.yes)rule_matched = !rule_matched;
         }else if(cond->type == state_cond_type_coll){
             trf_t trf;
-            vec_cpy(space->dims, trf.add, player->pos);
-            trf.rot = player_get_rot(player, space);
-            trf.flip = player->turn;
+            player_init_trf(player, &trf, space);
 
             int flags = cond->u.coll.flags;
             bool all = flags & 1;
