@@ -80,9 +80,11 @@ submaps:
                                         tileset: "data/tileset1.fus"
                                         #tileset: "data/maps/demo/tilesets/water.fus"
                                         recordings:
-                                            : "./data/maps/demo/recs/jungle2_roller000.fus"
-                                            : "./data/maps/demo/recs/jungle2_roller001.fus"
-                                            : "./data/maps/demo/recs/jungle3_bird000.fus"
+                                            : "data/maps/demo/recs/jungle2_roller000.fus"
+                                            : "data/maps/demo/recs/jungle2_roller001.fus"
+                                            : "data/maps/demo/recs/jungle2_water_roller000.fus"
+                                            : "data/maps/demo/recs/jungle2_bird000.fus"
+                                            : "data/maps/demo/recs/jungle3_bird000.fus"
                                         submaps:
                                             :
                                                 bg
@@ -112,11 +114,11 @@ submaps:
                         camera: (0 -4)
                         mapper: ("triple")
                         recordings:
-                            : "./data/maps/demo/recs/dodecas_000.fus"
-                            : "./data/maps/demo/recs/dodecas_001.fus"
-                            : "./data/maps/demo/recs/dodecas_roller_000.fus"
-                            : "./data/maps/demo/recs/dodecas_roller_001.fus"
-                            : "./data/maps/demo/recs/dodecas_roller_002.fus"
+                            : "data/maps/demo/recs/dodecas_000.fus"
+                            : "data/maps/demo/recs/dodecas_001.fus"
+                            : "data/maps/demo/recs/dodecas_roller_000.fus"
+                            : "data/maps/demo/recs/dodecas_roller_001.fus"
+                            : "data/maps/demo/recs/dodecas_roller_002.fus"
                         submaps: : mapper(("double")) submaps:
                             :
                                 file: "data/maps/demo/dodecas_bg.fus"
