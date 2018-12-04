@@ -28,13 +28,21 @@ stand:
     if:
         key: isdown b
     then:
-        move: 1 0
-        turn
         goto: turn
-        delay: 3
+        delay: 1
 
 turn:
     rgraph: "bird_turn"
+
+    if:
+    then:
+        move: 1 0
+        turn
+        goto: turn_arrive
+        delay: 1
+
+turn_arrive:
+    rgraph: "bird_turn_arrive"
 
     if:
     then:
@@ -116,20 +124,20 @@ step:
             ;;       /     \*/*\*
             ;; ( )  .
     then:
-        goto: tilted
-        delay: 3
-
-    if:
-    then:
-        goto: stand
-
-tilted:
-    rgraph: "bird_tilted"
-
-    if:
-    then:
         move: 1 0
         rot: -1
+        goto: stand
+
+    if:
+    then:
+        goto: step_rev
+        delay: 3
+
+step_rev:
+    rgraph: "bird_step_rev"
+
+    if:
+    then:
         goto: stand
 
 crawl:
