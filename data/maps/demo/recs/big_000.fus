@@ -1,0 +1,11 @@
+anim: "anim/player.fus"
+state: "crawl"
+pos: ( 47 -71)
+rot: 1
+turn: no
+keys:
+    u:
+    d: is was
+    l:
+    r:
+data: " w133+l w3-l w22+r w13-r w55+l w1-l w67+r w3-r w93+r w4-d w9-r w8+u w6-u w7+d w6+r w5-r w14+l w3-l w130+r w8-d w4-r w5+l w10-l w15+r w8-r w3+d w3+l w14-l w62+r w7-r w3+l w3-l w83+l w7-d w10-l w8+r w51-r w3+d w4+l w22-l w13-d w5+l w8-l w8+l w8-l w14+d w4+l w5-l w16+r w7-r w127+l w1-l w121-d w10+r w37+d w13-r w10-d w9+l w53-l w11+l w3-l w5+u w3-u w10+d w2+l w6-l w19+l w4-l w42+l w4-l w1+r w2-r w43"

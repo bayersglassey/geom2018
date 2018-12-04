@@ -156,6 +156,9 @@ submaps:
                                     :
                                         pos: (0 -28)
                                         camera: (0 0)
+                                        recordings:
+                                            : "data/maps/demo/recs/big_000.fus"
+                                            : "data/maps/demo/recs/big_big_roller000.fus"
                                         submaps:
                                             :
                                                 bg

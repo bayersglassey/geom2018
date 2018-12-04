@@ -1,0 +1,11 @@
+anim: "anim/big_roller.fus"
+state: "stand"
+pos: ( 41 -85)
+rot: 0
+turn: no
+keys:
+    u:
+    d: is was
+    l:
+    r:
+data: " w172+l w31-d w51-l w2+r w86-r w3+d w4+l w24-l w3-d w8+r w19+d w12-r w2+l w28-l w178+r w20-d w1-r w1+l w29-l w1+u w4+l w1-u w48-l w13+r w27-r w29+l w8+d w22-l w27+l w15-d w4-l w10+r w42-r w2+r w4+u w1-r w5-u w17+l w74-l w1+d w1+r w27-r w3+l w7-l w179+r w15-d w1-r w8+u w4-u w8+r w36+d w11-d w8+u w4-u w26-r w6+d w3+l w18-l w25-d w20"
