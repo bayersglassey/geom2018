@@ -1,1 +1,1 @@
-gcc -Werror -Wall -Wno-unused -lSDL2 -o main src/main_sdltest.c
+gcc -Werror -Wall -Wno-unused -lSDL2 -o main src/main_sdltest.c src/util.c
