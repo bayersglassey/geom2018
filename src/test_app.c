@@ -355,6 +355,9 @@ int test_app_mainloop(test_app_t *app){
 
             SDL_RenderPresent(app->renderer);
         }else{
+            /*****************
+             * DEBUG CONSOLE *
+             *****************/
 
             /******************************************************************
             * Clear screen
@@ -578,6 +581,13 @@ int test_app_mainloop(test_app_t *app){
         Uint32 tick1 = SDL_GetTicks();
         took = tick1 - tick0;
         if(took < app->delay_goal)SDL_Delay(app->delay_goal - took);
+#ifdef GEOM_HEXGAME_DEBUG_FRAMERATE
+        if(took > app->delay_goal){
+            fprintf(stderr, "WARNING: Frame rendered in %i ms "
+                "(aiming for sub-%i ms)\n",
+                took, app->delay_goal);
+        }
+#endif
     }
     SDL_StopTextInput();
 
