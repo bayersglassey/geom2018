@@ -2,15 +2,15 @@
 stand:
     rgraph: "bird_stand"
 
-    hitbox:
+    crushbox:
         ;;   .   .
         ;;   *\*/*
         ;; . - + - .
         ;;   */*\*
-        ;;   .   .
-        ;;
-        ;; .   .   .
-        ;;
+        ;;   . - .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
         ;;  (.)  .
 
     if:
@@ -33,15 +33,15 @@ stand:
 
 turn:
     rgraph: "bird_turn"
-    hitbox:
+    crushbox:
         ;;   .   .
         ;;   *\*/*
         ;; . - + - .
         ;;   */*\*
-        ;;   .   .
-        ;;
-        ;; .   .   .
-        ;;
+        ;;   . - .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
         ;;  (.)  .
     if() then:
         move: 1 0
@@ -52,15 +52,15 @@ turn:
 step:
     rgraph: "bird_step"
 
-    hitbox:
+    crushbox:
         ;;   .   .
         ;;   *\*/*
         ;; . - + - .
         ;;   */*\*
-        ;;   .   .
-        ;;
-        ;; .   .   .
-        ;;
+        ;;   . - .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
         ;;  (.)  .
 
     if:
@@ -155,46 +155,40 @@ step:
 
 turn_arrive:
     rgraph: "bird_turn_arrive"
-    hitbox:
+    crushbox:
         ;;   .   .
         ;;   *\*/*
         ;; . - + - .
         ;;   */*\*
-        ;;   .   .
-        ;;
-        ;; .   .   .
-        ;;
+        ;;   . - .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
         ;;  (.)  .
     if() then: goto: stand
 
 step_rev:
     rgraph: "bird_step_rev"
-    hitbox:
+    crushbox:
         ;;   .   .
         ;;   *\*/*
         ;; . - + - .
         ;;   */*\*
-        ;;   .   .
-        ;;
-        ;; .   .   .
-        ;;
+        ;;   . - .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
         ;;  (.)  .
     if() then: goto: stand
 
 step_rot_up_arrive:
     rgraph: "bird_step_rot_up_arrive"
-    hitbox:
+    crushbox:
         ;;   .   .
         ;;   *\*/*
         ;; . - + - .
         ;;   */*\*
-        ;;   .   .
-        ;;
-        ;; .   .   .
-        ;;
-        ;;  (.)  .
-    crushbox:
-        ;;   .   .
+        ;;   . - .
         ;;   *\*/*
         ;; . - + - .
         ;;   */*\*
@@ -203,18 +197,12 @@ step_rot_up_arrive:
 
 step_down_arrive:
     rgraph: "bird_step_down_arrive"
-    hitbox:
+    crushbox:
         ;;   .   .
         ;;   *\*/*
         ;; . - + - .
         ;;   */*\*
-        ;;   .   .
-        ;;
-        ;; .   .   .
-        ;;
-        ;;  (.)  .
-    crushbox:
-        ;;   .   .
+        ;;   . - .
         ;;   *\*/*
         ;; . - + - .
         ;;   */*\*
@@ -223,18 +211,12 @@ step_down_arrive:
 
 step_up_arrive:
     rgraph: "bird_step_up_arrive"
-    hitbox:
+    crushbox:
         ;;   .   .
         ;;   *\*/*
         ;; . - + - .
         ;;   */*\*
-        ;;   .   .
-        ;;
-        ;; .   .   .
-        ;;
-        ;;  (.)  .
-    crushbox:
-        ;;   .   .
+        ;;   . - .
         ;;   *\*/*
         ;; . - + - .
         ;;   */*\*
@@ -243,18 +225,12 @@ step_up_arrive:
 
 step_rot_down_arrive:
     rgraph: "bird_step_rot_down_arrive"
-    hitbox:
+    crushbox:
         ;;   .   .
         ;;   *\*/*
         ;; . - + - .
         ;;   */*\*
-        ;;   .   .
-        ;;
-        ;; .   .   .
-        ;;
-        ;;  (.)  .
-    crushbox:
-        ;;   .   .
+        ;;   . - .
         ;;   *\*/*
         ;; . - + - .
         ;;   */*\*
