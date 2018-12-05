@@ -182,6 +182,13 @@ int hexgame_step(hexgame_t *game){
     for(int i = 0; i < game->players_len; i++){
         player_t *player = game->players[i];
         if(player->state == NULL)continue;
+        if(player->recording.action == 1){
+            /* No hitboxes for players whose recording is playing */
+            /* MAYBE TODO: These players should die too, but then their
+            recording should restart after a brief pause.
+            Maybe we can reuse player->colldown for the pause. */
+            continue;
+        }
         hexcollmap_t *hitbox = player->state->hitbox;
         if(hitbox == NULL)continue;
 
