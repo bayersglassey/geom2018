@@ -1,6 +1,12 @@
 
 stand:
     rgraph: "big_roller"
+    crushbox:
+        ;;      .
+        ;;      *
+        ;;    . - .
+        ;;    *\*/*
+        ;; ( )  .   .
 
     if:
         key: wasdown u
@@ -99,6 +105,12 @@ stand:
 
 grab:
     rgraph: "big_roller_grab"
+    crushbox:
+        ;;      .   .   .
+        ;;      *\*/*\*
+        ;;    . - + - .
+        ;;    *\*/*\*
+        ;; ( )  .   .
 
     if:
         key: not isdown u
