@@ -460,7 +460,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
 }
 
 static int hexmap_collide_elem(hexmap_t *map, bool all,
-    int ox2, int oy2, int x2, int y2, trf_t *trf,
+    int x, int y, trf_t *trf,
     hexcollmap_elem_t *elems2, int rot,
     void (*normalize_elem)(trf_t *index),
     hexcollmap_elem_t *(get_elem)(
@@ -475,7 +475,7 @@ static int hexmap_collide_elem(hexmap_t *map, bool all,
         if(!hexcollmap_elem_is_solid(&elems2[r2]))continue;
 
         trf_t index;
-        hexspace_set(index.add, x2 - ox2, y2 - oy2);
+        hexspace_set(index.add, x, y);
         index.rot = r2;
         index.flip = false;
 
@@ -530,20 +530,22 @@ bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
             hexcollmap_tile_t *tile2 = &collmap2->tiles[y2 * w2 + x2];
 
             int collide;
+            int x = x2 - ox2;
+            int y = y2 - oy2;
             collide = hexmap_collide_elem(map, all,
-                ox2, oy2, x2, y2, trf,
+                x, y, trf,
                 tile2->vert, 1,
                 hexcollmap_normalize_vert,
                 hexcollmap_get_vert);
             if(collide != 2)return collide;
             collide = hexmap_collide_elem(map, all,
-                ox2, oy2, x2, y2, trf,
+                x, y, trf,
                 tile2->edge, 3,
                 hexcollmap_normalize_edge,
                 hexcollmap_get_edge);
             if(collide != 2)return collide;
             collide = hexmap_collide_elem(map, all,
-                ox2, oy2, x2, y2, trf,
+                x, y, trf,
                 tile2->face, 2,
                 hexcollmap_normalize_face,
                 hexcollmap_get_face);

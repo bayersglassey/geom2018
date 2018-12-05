@@ -775,11 +775,90 @@ bool hexcollmap_elem_is_solid(hexcollmap_elem_t *elem){
     return tile_c != ' ' && tile_c != 'x' && tile_c != 'S';
 }
 
+static int hexcollmap_collide_elem(hexcollmap_t *collmap1, bool all,
+    vecspace_t *space, int x, int y, trf_t *trf,
+    hexcollmap_elem_t *elems2, int rot,
+    void (*normalize_elem)(trf_t *index),
+    hexcollmap_elem_t *(get_elem)(
+        hexcollmap_t *collmap, trf_t *index)
+){
+    /* Returns true (1) or false (0), or 2 if caller should continue
+    checking for a collision. */
+
+    for(int r2 = 0; r2 < rot; r2++){
+        if(!hexcollmap_elem_is_solid(&elems2[r2]))continue;
+
+        trf_t index;
+        hexspace_set(index.add, x, y);
+        index.rot = r2;
+        index.flip = false;
+
+        /* And now, because we were fools and defined */
+        /* the tile coords such that their Y is flipped */
+        /* compared to vecspaces, we need to flip that Y */
+        /* before calling trf_apply and then flip it back */
+        /* again: */
+        index.add[1] = -index.add[1];
+        trf_apply(space, &index, trf);
+        index.add[1] = -index.add[1];
+        normalize_elem(&index);
+
+        bool collide = false;
+        hexcollmap_elem_t *elem = get_elem(collmap1, &index);
+        collide = hexcollmap_elem_is_solid(elem);
+
+        if((all && !collide) || (!all && collide))return collide;
+    }
+    return 2; /* Caller should keep looking for a collision */
+}
+
 bool hexcollmap_collide(
     hexcollmap_t *collmap1, trf_t *trf1,
     hexcollmap_t *collmap2, trf_t *trf2,
     vecspace_t *space, bool all
 ){
-    return false;
+    int ox2 = collmap2->ox;
+    int oy2 = collmap2->oy;
+    int w2 = collmap2->w;
+    int h2 = collmap2->h;
+
+    //return false;
+
+    /* NOTE: for tile coords (ox, oy, x, y, w, h),
+    Y is reversed (down is positive, up is negative) */
+
+    trf_t trf;
+    trf_cpy(space, &trf, trf2);
+    trf_apply_inv(space, &trf, trf1);
+
+    for(int y2 = 0; y2 < h2; y2++){
+        for(int x2 = 0; x2 < w2; x2++){
+            hexcollmap_tile_t *tile2 = &collmap2->tiles[y2 * w2 + x2];
+
+            int collide;
+            int x = x2 - ox2;
+            int y = y2 - oy2;
+            collide = hexcollmap_collide_elem(collmap1, all,
+                space, x, y, &trf,
+                tile2->vert, 1,
+                hexcollmap_normalize_vert,
+                hexcollmap_get_vert);
+            if(collide != 2)return collide;
+            collide = hexcollmap_collide_elem(collmap1, all,
+                space, x, y, &trf,
+                tile2->edge, 3,
+                hexcollmap_normalize_edge,
+                hexcollmap_get_edge);
+            if(collide != 2)return collide;
+            collide = hexcollmap_collide_elem(collmap1, all,
+                space, x, y, &trf,
+                tile2->face, 2,
+                hexcollmap_normalize_face,
+                hexcollmap_get_face);
+            if(collide != 2)return collide;
+        }
+    }
+    if(all)return true;
+    else return false;
 }
 
