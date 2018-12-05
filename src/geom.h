@@ -67,6 +67,7 @@ void boundbox_init(boundbox_t box, int dims);
 void boundbox_fprintf(FILE *f, int dims, boundbox_t box);
 void boundbox_printf(int dims, boundbox_t box);
 
+void trf_cpy(const vecspace_t *space, trf_t *trf1, trf_t *trf2);
 void trf_fprintf(FILE *f, int dims, trf_t *trf);
 void trf_printf(int dims, trf_t *trf);
 bool trf_eq(const vecspace_t *space, trf_t *t, trf_t *s);

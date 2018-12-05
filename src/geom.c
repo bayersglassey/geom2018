@@ -161,6 +161,12 @@ void boundbox_printf(int dims, boundbox_t box){
 
 
 
+void trf_cpy(const vecspace_t *space, trf_t *trf1, trf_t *trf2){
+    vec_cpy(space->dims, trf1->add, trf2->add);
+    trf1->rot = trf2->rot;
+    trf1->flip = trf2->flip;
+}
+
 void trf_fprintf(FILE *f, int dims, trf_t *trf){
     fprintf(f, "%s %2i ", trf->flip? "T": "F", trf->rot);
     vec_fprintf(f, dims, trf->add);
