@@ -95,6 +95,16 @@ submaps:
                                     :
                                         file: "data/maps/demo/jungle3.fus"
                                         pos: eval: (-40 4) + (-6 -18) + (15 -8)
+                                        camera: (6 0)
+                                        mapper: ("triple")
+                                        palette: "data/maps/demo/pals/vines.fus"
+                                        #palette: "data/maps/demo/pals/tunnels.fus"
+                                        #palette: "data/maps/demo/pals/water.fus"
+                                        tileset: "data/maps/demo/tilesets/water.fus"
+                                        #tileset: "data/tileset1.fus"
+                                    :
+                                        file: "data/maps/demo/jungle4.fus"
+                                        pos: eval: (-40 4) + (-6 -18) + (10 -16)
                                         camera: (0 0)
                                         mapper: ("triple")
                                         palette: "data/maps/demo/pals/vines.fus"
