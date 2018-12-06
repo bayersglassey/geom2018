@@ -497,6 +497,11 @@ int player_step(player_t *player, hexmap_t *map){
         hexcollmap_elem_t *vert =
             hexcollmap_get_vert(collmap, &index);
         if(hexcollmap_elem_is_solid(vert)){
+            if(player->cur_submap != submap && player->keymap >= 0){
+                /* For debugging */
+                fprintf(stderr, "Player %i arrived at submap: %s\n",
+                    player->keymap, submap->filename);
+            }
             player->cur_submap = submap;
             break;
         }
