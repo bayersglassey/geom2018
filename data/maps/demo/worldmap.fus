@@ -15,6 +15,11 @@ submaps:
         camera: (5 4)
         mapper: ("quadruple")
         palette: "data/maps/demo/pals/start.fus"
+        #submaps:
+        #    :
+        #        bg
+        #        file: "data/maps/demo/keys_text.fus"
+        #        tileset: "data/tileset1_bg.fus"
     :
         file: "data/maps/demo/start2.fus"
         pos: (7 11)
