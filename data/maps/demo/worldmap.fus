@@ -90,6 +90,7 @@ submaps:
                                             : "data/maps/demo/recs/jungle2_water_roller000.fus"
                                             : "data/maps/demo/recs/jungle2_bird000.fus"
                                             : "data/maps/demo/recs/jungle3_bird000.fus"
+                                            : "data/maps/demo/recs/jungle5_bird000.fus"
                                         submaps:
                                             :
                                                 bg
@@ -118,15 +119,21 @@ submaps:
                                         tileset: "data/maps/demo/tilesets/water.fus"
                                         #tileset: "data/tileset1.fus"
                                     :
-                                        file: "data/maps/demo/jungle5.fus"
                                         pos: eval: (-40 4) + (-6 -18) + (15 -8) + (24 7)
-                                        camera: (0 0)
-                                        mapper: ("triple")
+                                        camera: follow
+                                        mapper: ("solid_curvy")
                                         palette: "data/maps/demo/pals/vines.fus"
                                         #palette: "data/maps/demo/pals/tunnels.fus"
                                         #palette: "data/maps/demo/pals/water.fus"
                                         tileset: "data/maps/demo/tilesets/water.fus"
                                         #tileset: "data/tileset1.fus"
+                                        submaps:
+                                            :
+                                                bg
+                                                file: "data/maps/demo/jungle5_bg.fus"
+                                                tileset: "data/tileset1_bg.fus"
+                                            :
+                                                file: "data/maps/demo/jungle5.fus"
             :
                 file: "data/maps/demo/pebbles.fus"
                 pos: (15 -2)

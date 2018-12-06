@@ -9,4 +9,6 @@ edges:
     "2": "map_edge0"
 faces:
     "0": "water_face"
+    "1": "map_face1"
+    "2": "map_face0"
     "S": "map_savepoint"
