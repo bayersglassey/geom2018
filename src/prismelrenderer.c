@@ -843,8 +843,6 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
     /* Create a new rendergraph */
     resulting_rgraph = calloc(1, sizeof(rendergraph_t));
     if(resulting_rgraph == NULL)return 1;
-    if(!name){name = generate_indexed_name("shape",
-        prend->rendergraphs_len);}
     err = rendergraph_init(resulting_rgraph, name, prend,
         mapped_rgraph->animation_type, mapped_rgraph->n_frames);
     if(err)return err;
@@ -968,11 +966,14 @@ int prismelmapper_apply_to_mapper(prismelmapper_t *mapper,
         return 0;
     }
 
+    /* If no name specified, generate one like "<curvy double>" */
+    if(name == NULL){
+        name = generate_mapped_name(mapper->name,
+            mapped_mapper->name);}
+
     /* Create a new prismelmapper */
     resulting_mapper = calloc(1, sizeof(prismelmapper_t));
     if(resulting_mapper == NULL)return 1;
-    if(!name){name = generate_indexed_name("mapper",
-        prend->mappers_len);}
     err = prismelmapper_init(resulting_mapper, name, space, false);
     if(err)return err;
 
@@ -1092,6 +1093,57 @@ void palettemapper_apply_to_table(palettemapper_t *palmapper, Uint8 *table){
     }
 }
 
+int palettemapper_apply_to_rendergraph(palettemapper_t *mapper,
+    prismelrenderer_t *prend,
+    rendergraph_t *mapped_rgraph,
+    char *name, vecspace_t *space,
+    rendergraph_t **rgraph_ptr
+){
+    int err;
+
+    rendergraph_t *resulting_rgraph;
+
+    /* Check whether this mapper has already been applied to this
+    mapped_rgraph. If so, return the cached resulting_rgraph. */
+    resulting_rgraph = palettemapper_get_application(
+        mapper, mapped_rgraph);
+    if(resulting_rgraph != NULL){
+        free(name);
+        *rgraph_ptr = resulting_rgraph;
+        return 0;
+    }
+
+    /* If no name specified, generate one like "<pm:red dodeca_sixth>" */
+    if(name == NULL){
+        name = generate_palmapped_name(mapper->name,
+            mapped_rgraph->name);}
+
+    /* resulting_rgraph starts off as a copy of mapped_rgraph */
+    resulting_rgraph = calloc(1, sizeof(rendergraph_t));
+    if(resulting_rgraph == NULL)return 1;
+    err = rendergraph_copy(resulting_rgraph, name, mapped_rgraph);
+    if(err)return err;
+
+    /* Set resulting_rgraph's palmapper to mapper
+    (this was the whole point) */
+    resulting_rgraph->palmapper = mapper;
+
+    /* Cache this resulting_rgraph on the mapper in case it
+    ever gets applied to the same mapped_rgraph again */
+    err = palettemapper_push_application(mapper,
+        mapped_rgraph, resulting_rgraph);
+    if(err)return err;
+
+    /* Add the resulting_rgraph to the prismelrenderer, makes for
+    easier debugging */
+    ARRAY_PUSH(rendergraph_t*, prend->rendergraphs,
+        resulting_rgraph)
+
+    /* Success! */
+    *rgraph_ptr = resulting_rgraph;
+    return 0;
+}
+
 int palettemapper_apply_to_palettemapper(palettemapper_t *palmapper,
     prismelrenderer_t *prend, palettemapper_t *mapped_palmapper,
     char *name, palettemapper_t **palmapper_ptr
@@ -1110,11 +1162,14 @@ int palettemapper_apply_to_palettemapper(palettemapper_t *palmapper,
         return 0;
     }
 
+    /* If no name specified, generate one like "<cycle reverse>" */
+    if(name == NULL){
+        name = generate_mapped_name(palmapper->name,
+            mapped_palmapper->name);}
+
     /* Create a new palettemapper */
     resulting_palmapper = calloc(1, sizeof(palettemapper_t));
     if(resulting_palmapper == NULL)return 1;
-    if(!name){name = generate_indexed_name("palmapper",
-        prend->palmappers_len);}
     err = palettemapper_init(resulting_palmapper, name, -1);
     if(err)return err;
 
@@ -1137,6 +1192,28 @@ int palettemapper_apply_to_palettemapper(palettemapper_t *palmapper,
     /* Success! */
     *palmapper_ptr = resulting_palmapper;
     return 0;
+}
+
+int palettemapper_push_application(palettemapper_t *mapper,
+    rendergraph_t *mapped_rgraph, rendergraph_t *resulting_rgraph
+){
+    ARRAY_PUSH_NEW(palettemapper_application_t*, mapper->applications,
+        application)
+    application->mapped_rgraph = mapped_rgraph;
+    application->resulting_rgraph = resulting_rgraph;
+    return 0;
+}
+
+rendergraph_t *palettemapper_get_application(palettemapper_t *mapper,
+    rendergraph_t *mapped_rgraph
+){
+    for(int i = 0; i < mapper->applications_len; i++){
+        palettemapper_application_t *application =
+            mapper->applications[i];
+        if(application->mapped_rgraph == mapped_rgraph){
+            return application->resulting_rgraph;}
+    }
+    return NULL;
 }
 
 int palettemapper_push_pmapplication(palettemapper_t *mapper,

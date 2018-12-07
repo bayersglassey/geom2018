@@ -192,7 +192,18 @@ typedef struct palettemapper {
     char *name;
     Uint8 table[256];
     ARRAY_DECL(struct palettemapper_pmapplication*, pmapplications)
+    ARRAY_DECL(struct palettemapper_application*, applications)
 } palettemapper_t;
+
+/* TODO: Rename {prismel,palette}mapper_application to just
+mapper_application, etc.
+And then we don't have to have separate structs for prismelmapper
+and palettemapper applications, pmapplications, etc.
+Ja knowmean? */
+typedef struct palettemapper_application {
+    rendergraph_t *mapped_rgraph;
+    rendergraph_t *resulting_rgraph;
+} palettemapper_application_t;
 
 typedef struct palettemapper_pmapplication {
     struct palettemapper *mapped_mapper;
@@ -203,9 +214,18 @@ int palettemapper_init(palettemapper_t *palmapper, char *name, int color);
 void palettemapper_cleanup(palettemapper_t *palmapper);
 Uint8 palettemapper_apply_to_color(palettemapper_t *palmapper, Uint8 c);
 void palettemapper_apply_to_table(palettemapper_t *palmapper, Uint8 *table);
+int palettemapper_apply_to_rendergraph(palettemapper_t *mapper,
+    prismelrenderer_t *prend,
+    rendergraph_t *mapped_rgraph,
+    char *name, vecspace_t *space,
+    rendergraph_t **rgraph_ptr);
 int palettemapper_apply_to_palettemapper(palettemapper_t *palmapper,
     prismelrenderer_t *prend, palettemapper_t *mapped_palmapper,
     char *name, palettemapper_t **palmapper_ptr);
+int palettemapper_push_application(palettemapper_t *mapper,
+    rendergraph_t *mapped_rgraph, rendergraph_t *resulting_rgraph);
+rendergraph_t *palettemapper_get_application(palettemapper_t *mapper,
+    rendergraph_t *mapped_rgraph);
 int palettemapper_push_pmapplication(palettemapper_t *mapper,
     palettemapper_t *mapped_mapper, palettemapper_t *resulting_mapper);
 palettemapper_t *palettemapper_get_pmapplication(palettemapper_t *mapper,
