@@ -117,6 +117,8 @@ int player_init(player_t *player, hexmap_t *map,
         player->key_code[PLAYER_KEY_R] = SDLK_d;
     }
 
+    player->palmapper = NULL;
+
     if(stateset_filename != NULL){
         err = player_init_stateset(player, stateset_filename, state_name,
             map);

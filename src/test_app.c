@@ -102,11 +102,21 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         fclose(f);
     }
 
+    /* palmapper for human players, so you can tell who's who */
+    const char *player_palmapper_name = "cycle1";
+    palettemapper_t *player_palmapper = prismelrenderer_get_palmapper(
+        &app->prend, player_palmapper_name);
+    if(player_palmapper == NULL){
+        fprintf(stderr, "Couldn't find palmapper: %s\n",
+            player_palmapper_name);
+        return 2;}
+
     for(int i = 0; i < n_players; i++){
         ARRAY_PUSH_NEW(player_t*, app->hexgame.players, player)
         err = player_init(player, &app->hexmap,
             strdup(app->stateset_filename), NULL, i, spawn, "respawn.txt");
         if(err)return err;
+        player->palmapper = player_palmapper;
     }
 
     for(int i = 0; i < app->hexmap.recording_filenames_len; i++){

@@ -93,6 +93,7 @@ typedef struct player {
 
     int keymap;
     player_keyinfo_t keyinfo;
+    palettemapper_t *palmapper;
 
     stateset_t stateset;
     state_t *state;
