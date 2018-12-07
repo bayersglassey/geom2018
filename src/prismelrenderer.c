@@ -18,20 +18,42 @@
  * GENERAL *
  ***********/
 
-char *generate_mapped_name(char *mapper_name, char *mappee_name){
-    /* Generate a name, e.g. "<curvy dodeca_sixth>" */
+static char *_generate_mapped_name(char *mapper_name, char *mappee_name,
+    const char *prefix, const char *separator, const char *suffix
+){
+    int prefix_len = strlen(prefix);
+    int separator_len = strlen(separator);
+    int suffix_len = strlen(suffix);
     int mapper_name_len = strlen(mapper_name);
     int mappee_name_len = strlen(mappee_name);
-    int name_len = mapper_name_len + mappee_name_len + 3;
+    int name_len = mapper_name_len + mappee_name_len
+        + prefix_len + separator_len + suffix_len;
     char *name = malloc(sizeof(*name) * (name_len + 1));
     if(name == NULL)return NULL;
-    name[0] = '<';
-    strcpy(name + 1, mapper_name);
-    name[1 + mapper_name_len] = ' ';
-    strcpy(name + 1 + mapper_name_len + 1, mappee_name);
-    name[name_len - 1] = '>';
+
+    char *s = name;
+    strcpy(s, prefix);
+    s += prefix_len;
+    strcpy(s, mapper_name);
+    s += mapper_name_len;
+    strcpy(s, separator);
+    s += separator_len;
+    strcpy(s, mappee_name);
+    s += mappee_name_len;
+    strcpy(s, suffix);
+
     name[name_len] = '\0';
     return name;
+}
+
+char *generate_mapped_name(char *mapper_name, char *mappee_name){
+    /* Generate a name, e.g. "<curvy dodeca_sixth>" */
+    return _generate_mapped_name(mapper_name, mappee_name, "<", " ", ">");
+}
+
+char *generate_palmapped_name(char *mapper_name, char *mappee_name){
+    /* Generate a name, e.g. "<pm:red dodeca_sixth>" */
+    return _generate_mapped_name(mapper_name, mappee_name, "<pm:", " ", ">");
 }
 
 char *generate_indexed_name(char *base_name, int i){
