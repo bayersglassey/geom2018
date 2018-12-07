@@ -81,7 +81,7 @@ struct rendergraph_bitmap;
 
 void rendergraph_cleanup(rendergraph_t *rendergraph);
 int rendergraph_init(rendergraph_t *rendergraph, char *name,
-    struct prismelrenderer *prend,
+    struct prismelrenderer *prend, struct palettemapper *palmapper,
     const char *animation_type, int n_frames);
 int rendergraph_copy(rendergraph_t *rendergraph, char *name,
     rendergraph_t *copy_of);

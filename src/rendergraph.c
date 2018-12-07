@@ -58,7 +58,7 @@ void rendergraph_cleanup(rendergraph_t *rendergraph){
 }
 
 static int _rendergraph_init(rendergraph_t *rendergraph, char *name,
-    prismelrenderer_t *prend,
+    prismelrenderer_t *prend, palettemapper_t *palmapper,
     const char *animation_type, int n_frames
 ){
     /* initialize everything except prismel_trfs and rendergraph_trfs */
@@ -74,7 +74,7 @@ static int _rendergraph_init(rendergraph_t *rendergraph, char *name,
     rendergraph->animation_type = animation_type;
     rendergraph->n_frames = n_frames;
 
-    rendergraph->palmapper = NULL;
+    rendergraph->palmapper = palmapper;
     rendergraph->copy_of = NULL;
 
     err = rendergraph_create_bitmaps(rendergraph);
@@ -84,12 +84,12 @@ static int _rendergraph_init(rendergraph_t *rendergraph, char *name,
 }
 
 int rendergraph_init(rendergraph_t *rendergraph, char *name,
-    prismelrenderer_t *prend,
+    prismelrenderer_t *prend, palettemapper_t *palmapper,
     const char *animation_type, int n_frames
 ){
     int err;
 
-    err = _rendergraph_init(rendergraph, name, prend,
+    err = _rendergraph_init(rendergraph, name, prend, palmapper,
         animation_type, n_frames);
     if(err)return err;
 
@@ -103,7 +103,8 @@ int rendergraph_copy(rendergraph_t *rendergraph, char *name,
 ){
     int err;
 
-    err = _rendergraph_init(rendergraph, name, copy_of->prend,
+    err = _rendergraph_init(rendergraph, name,
+        copy_of->prend, copy_of->palmapper,
         copy_of->animation_type, copy_of->n_frames);
     if(err)return err;
 

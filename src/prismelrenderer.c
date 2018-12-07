@@ -844,6 +844,7 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
     resulting_rgraph = calloc(1, sizeof(rendergraph_t));
     if(resulting_rgraph == NULL)return 1;
     err = rendergraph_init(resulting_rgraph, name, prend,
+        mapped_rgraph->palmapper,
         mapped_rgraph->animation_type, mapped_rgraph->n_frames);
     if(err)return err;
 

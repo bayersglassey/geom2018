@@ -592,7 +592,7 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
     if(rgraph == NULL)return 1;
     if(!name){name = generate_indexed_name("shape",
         prend->rendergraphs_len);}
-    err = rendergraph_init(rgraph, name, prend,
+    err = rendergraph_init(rgraph, name, prend, NULL,
         animation_type, n_frames);
     if(err)return err;
 

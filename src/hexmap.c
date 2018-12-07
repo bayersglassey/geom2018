@@ -628,7 +628,7 @@ int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap){
     int n_frames = 24;
 
     ARRAY_PUSH_NEW(rendergraph_t*, prend->rendergraphs, rgraph)
-    err = rendergraph_init(rgraph, strdup(submap->filename), prend,
+    err = rendergraph_init(rgraph, strdup(submap->filename), prend, NULL,
         rendergraph_animation_type_default,
         n_frames);
     if(err)return err;
