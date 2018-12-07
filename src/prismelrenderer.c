@@ -1082,6 +1082,16 @@ void palettemapper_cleanup(palettemapper_t *palmapper){
         (void))
 }
 
+Uint8 palettemapper_apply_to_color(palettemapper_t *palmapper, Uint8 c){
+    return palmapper->table[c];
+}
+
+void palettemapper_apply_to_table(palettemapper_t *palmapper, Uint8 *table){
+    for(int i = 0; i < 256; i++){
+        table[i] = palettemapper_apply_to_color(palmapper, table[i]);
+    }
+}
+
 int palettemapper_apply_to_palettemapper(palettemapper_t *palmapper,
     prismelrenderer_t *prend, palettemapper_t *mapped_palmapper,
     char *name, palettemapper_t **palmapper_ptr

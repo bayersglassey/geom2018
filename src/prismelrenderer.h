@@ -201,6 +201,8 @@ typedef struct palettemapper_pmapplication {
 
 int palettemapper_init(palettemapper_t *palmapper, char *name, int color);
 void palettemapper_cleanup(palettemapper_t *palmapper);
+Uint8 palettemapper_apply_to_color(palettemapper_t *palmapper, Uint8 c);
+void palettemapper_apply_to_table(palettemapper_t *palmapper, Uint8 *table);
 int palettemapper_apply_to_palettemapper(palettemapper_t *palmapper,
     prismelrenderer_t *prend, palettemapper_t *mapped_palmapper,
     char *name, palettemapper_t **palmapper_ptr);

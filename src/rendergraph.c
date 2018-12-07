@@ -469,13 +469,11 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
         palettemapper_t *palmapper = iter.rendergraph_trf->palmapper;
         Uint8 table[256];
         if(palmapper){
+            int n_applications =
+                iter.rendergraph_trf->palmapper_n_applications;
             for(int i = 0; i < 256; i++)table[i] = i;
-            for(int i = 0;
-                i < iter.rendergraph_trf->palmapper_n_applications;
-                i++
-            ){
-                for(int i = 0; i < 256; i++){
-                    table[i] = palmapper->table[table[i]];}
+            for(int i = 0; i < n_applications; i++){
+                palettemapper_apply_to_table(palmapper, table);
             }
         }
         RET_IF_SDL_NZ(SDL_PaletteMappedBlit(bitmap2->surface, NULL,
