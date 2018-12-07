@@ -1,9 +1,12 @@
 
 palmappers:
 
-    "player_human":
+    "player_cpu":
           :
 
+         # This palmapper is used to mark cpu players, so you can tell
+         # yourself apart from them.
+         #
          # NOTE: we don't change blacks, whites, or reds (because the demo
          # map's palettes have a pulsating animated red for use with player's
          # eye)
