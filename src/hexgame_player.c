@@ -49,9 +49,9 @@ int fus_lexer_get_player_keyinfo(fus_lexer_t *lexer,
         char *name;
         err = fus_lexer_get_name(lexer, &name);
         if(err)return err;
-        if(strlen(name) != 1 || !strchr("udlrfb", name[0])){
+        if(strlen(name) != 1 || !strchr(ANIM_KEY_CS, name[0])){
             return fus_lexer_unexpected(lexer,
-                "u or d or l or r or f or b");}
+                "one of the characters: " ANIM_KEY_CS);}
         key_c = name[0];
         free(name);
 
@@ -106,11 +106,13 @@ int player_init(player_t *player, hexmap_t *map,
     player->keymap = keymap;
     for(int i = 0; i < PLAYER_KEYS; i++)player->key_code[i] = 0;
     if(keymap == 0){
+        player->key_code[PLAYER_KEY_ACTION] = SDLK_SPACE;
         player->key_code[PLAYER_KEY_U] = SDLK_UP;
         player->key_code[PLAYER_KEY_D] = SDLK_DOWN;
         player->key_code[PLAYER_KEY_L] = SDLK_LEFT;
         player->key_code[PLAYER_KEY_R] = SDLK_RIGHT;
     }else if(keymap == 1){
+        player->key_code[PLAYER_KEY_ACTION] = SDLK_f;
         player->key_code[PLAYER_KEY_U] = SDLK_w;
         player->key_code[PLAYER_KEY_D] = SDLK_s;
         player->key_code[PLAYER_KEY_L] = SDLK_a;
@@ -262,7 +264,8 @@ void player_keyup(player_t *player, int key_i){
 }
 
 int player_get_key_i(player_t *player, char c, bool absolute){
-    return
+    int key_i =
+        c == 'x'? PLAYER_KEY_ACTION:
         c == 'u'? PLAYER_KEY_U:
         c == 'd'? PLAYER_KEY_D:
         c == 'l'? PLAYER_KEY_L:
@@ -270,10 +273,12 @@ int player_get_key_i(player_t *player, char c, bool absolute){
         c == 'f'? (!absolute && player->turn? PLAYER_KEY_L: PLAYER_KEY_R):
         c == 'b'? (!absolute && player->turn? PLAYER_KEY_R: PLAYER_KEY_L):
         -1;
+    return key_i;
 }
 
 char player_get_key_c(player_t *player, int key_i, bool absolute){
     return
+        key_i == PLAYER_KEY_ACTION? 'x':
         key_i == PLAYER_KEY_U? 'u':
         key_i == PLAYER_KEY_D? 'd':
         key_i == PLAYER_KEY_L? (absolute? 'l': player->turn? 'f': 'b'):

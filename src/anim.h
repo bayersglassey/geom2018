@@ -9,6 +9,7 @@
 #include "hexmap.h"
 #include "prismelrenderer.h"
 
+#define ANIM_KEY_CS "xudlrfb"
 
 
 typedef struct state {
@@ -58,6 +59,7 @@ typedef struct state_cond {
                     'b' -> back
                     'u' -> up
                     'd' -> down
+                    'x' -> action
                 */
         } key;
         int percent;

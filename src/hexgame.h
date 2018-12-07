@@ -25,11 +25,12 @@
  * PLAYER KEY INFO *
  *******************/
 
-#define PLAYER_KEY_U  0
-#define PLAYER_KEY_D  1
-#define PLAYER_KEY_L  2
-#define PLAYER_KEY_R  3
-#define PLAYER_KEYS   4
+#define PLAYER_KEY_ACTION  0
+#define PLAYER_KEY_U       1
+#define PLAYER_KEY_D       2
+#define PLAYER_KEY_L       3
+#define PLAYER_KEY_R       4
+#define PLAYER_KEYS        5
 
 typedef struct player_keyinfo {
     bool isdown[PLAYER_KEYS];

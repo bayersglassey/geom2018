@@ -188,9 +188,9 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     if(err)return err;
 
                     char c = name[0];
-                    if(strlen(name) != 1 || !strchr("udlrfb", c)){
+                    if(strlen(name) != 1 || !strchr(ANIM_KEY_CS, c)){
                         return fus_lexer_unexpected(lexer,
-                            "u or d or l or r or f or b");
+                            "one of the characters: " ANIM_KEY_CS);
                     }
 
                     ARRAY_PUSH_NEW(state_cond_t*, rule->conds, cond)
