@@ -57,6 +57,8 @@ typedef struct rendergraph {
         In particular, it does *NOT* own its prismel_trfs and
         rendergraph_trfs, so should *NOT* modify or free them. */
 
+    struct palettemapper *palmapper;
+
     const char *animation_type;
     int n_frames;
 

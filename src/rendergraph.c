@@ -74,6 +74,7 @@ static int _rendergraph_init(rendergraph_t *rendergraph, char *name,
     rendergraph->animation_type = animation_type;
     rendergraph->n_frames = n_frames;
 
+    rendergraph->palmapper = NULL;
     rendergraph->copy_of = NULL;
 
     err = rendergraph_create_bitmaps(rendergraph);
@@ -106,6 +107,7 @@ int rendergraph_copy(rendergraph_t *rendergraph, char *name,
         copy_of->animation_type, copy_of->n_frames);
     if(err)return err;
 
+    rendergraph->palmapper = copy_of->palmapper;
     rendergraph->copy_of = copy_of;
 
     rendergraph->prismel_trfs = copy_of->prismel_trfs;
@@ -468,6 +470,9 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
 
         /* Draw prismel's image onto SDL surface */
         Uint8 c = iter.prismel_trf->color;
+        if(rendergraph->palmapper){
+            c = palettemapper_apply_to_color(rendergraph->palmapper, c);
+        }
         prismel_image_t *image = &iter.prismel->images[iter.bitmap_i2];
         for(int i = 0; i < image->lines_len; i++){
             prismel_image_line_t *line = image->lines[i];
@@ -506,17 +511,27 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
             bitmap2->pbox.h
         };
         palettemapper_t *palmapper = iter.rendergraph_trf->palmapper;
-        Uint8 table[256];
+        Uint8 *table = NULL;
+        Uint8 _table[256];
+        if(rendergraph->palmapper){
+            for(int i = 0; i < 256; i++){
+                _table[i] = rendergraph->palmapper->table[i];
+            }
+            table = _table;
+        }
         if(palmapper){
             int n_applications =
                 iter.rendergraph_trf->palmapper_n_applications;
-            for(int i = 0; i < 256; i++)table[i] = i;
+            if(!table){
+                for(int i = 0; i < 256; i++)_table[i] = i;
+                table = _table;
+            }
             for(int i = 0; i < n_applications; i++){
                 palettemapper_apply_to_table(palmapper, table);
             }
         }
         RET_IF_SDL_NZ(SDL_PaletteMappedBlit(bitmap2->surface, NULL,
-            surface, &dst_rect, palmapper? table: NULL));
+            surface, &dst_rect, table));
     }
 
     /* LET'S GO */
