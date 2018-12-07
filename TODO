@@ -180,3 +180,8 @@ to jump along a spread-out path of triangles and parallelograms?
 And then there's something else you need to collect from spidertown.
 Or you have to bring these things to spidertown.
 ...?
+
+
+Move the setting of player->palmapper out of player_init.
+We should be able to specify it for individual entries of the "recs"
+section of each submap.
