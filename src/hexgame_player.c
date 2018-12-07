@@ -529,9 +529,15 @@ int player_render(player_t *player,
             __FILE__);
         return 0;}
 
+    prismelrenderer_t *prend = map->prend;
     vecspace_t *space = map->space;
 
     rendergraph_t *rgraph = player->state->rgraph;
+    if(player->palmapper){
+        err = palettemapper_apply_to_rendergraph(player->palmapper,
+            prend, rgraph, NULL, space, &rgraph);
+        if(err)return err;
+    }
 
     vec_t pos;
     vec4_vec_from_hexspace(pos, player->pos);
@@ -547,7 +553,7 @@ int player_render(player_t *player,
     int frame_i = player->frame_i;
 
     err = rendergraph_render(rgraph, renderer, surface,
-        pal, map->prend,
+        pal, prend,
         x0, y0, zoom,
         pos, rot, flip, frame_i, mapper);
     if(err)return err;
