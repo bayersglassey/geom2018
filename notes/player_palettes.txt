@@ -1,0 +1,128 @@
+
+NOTE: The following was eventually actually implemented.
+But the notes are good.
+(Particularly the bit explaining what we do with SDL palettes...)
+
+
+*** Player palettes:
+
+    We have color tables and palmappers.
+    The former are stored on palmappers.
+    The latter are currently only stored on rendergraph_trf.
+
+    The following functions make use of color tables (Unit8*):
+    * prismelmapper_apply_to_rendergraph ('table' param)
+        Used to find the color passed to
+        prismelrenderer_get_solid_palettemapper used to set
+        new_rendergraph_trf->palmapper
+    * palettemapper_apply_to_palettemapper
+        There are 3 palmappers involved, and the table fields of
+        the first two are used to populate that of the third
+    * rendergraph_render_bitmap
+        When rendering sub-rendergraphs,
+        rendergraph_trf->palmapper->table is used to generate a table
+        passed to SDL_PaletteMappedBlit
+
+    I think we just need rendergraph_render_bitmap to take an optional
+    table argument.
+    Currently it does this:
+
+        Uint8 table[256];
+        if(palmapper){
+            for(int i = 0; i < 256; i++)table[i] = i;     // <------- !!!!!!
+            for(int i = 0;
+                i < iter.rendergraph_trf->palmapper_n_applications;
+                i++
+            ){
+                for(int i = 0; i < 256; i++){
+                    table[i] = palmapper->table[table[i]];}
+            }
+        }
+        RET_IF_SDL_NZ(SDL_PaletteMappedBlit(bitmap2->surface, NULL,
+            surface, &dst_rect, palmapper? table: NULL));
+
+    ...we want to change that to something like this:
+
+        // table is a param
+        if(palmapper){
+            Uint8 _table[256];
+            if(!table){
+                for(int i = 0; i < 256; i++)_table[i] = i;
+                table = _table;
+            }
+            // Everything is the same from here on...
+        }
+        RET_IF_SDL_NZ(SDL_PaletteMappedBlit(bitmap2->surface, NULL,
+            surface, &dst_rect, palmapper? table: NULL));
+
+    ...but this will generate a new rendergraph (?).
+    So we're saying we need a different version of every player-related
+    rendergraph for every player palette, right?
+    If so, perhaps we should only use 2 (human player / CPU player).
+
+    WAIT UP NOW - I think we may want to stick a Unit8 *table on rendergraph_t.
+    Then, rendergraph_render_bitmap doesn't take a 'table' param, it does this:
+
+        Uint8 *table = NULL;
+        Uint8 _table[256];
+        if(player->palmapper){
+            Uint8 *player_table = player->palmapper->table;
+            for(int i = 0; i < 256; i++)_table[i] = player_table[i];
+            table = _table;
+        }
+        if(palmapper){
+            if(!table){
+                for(int i = 0; i < 256; i++)_table[i] = i;
+                table = _table;
+            }
+            // Everything is the same from here on...
+        }
+        RET_IF_SDL_NZ(SDL_PaletteMappedBlit(bitmap2->surface, NULL,
+            surface, &dst_rect, palmapper? table: NULL));
+
+
+    By the way, here's how the game handles actual SDL palettes:
+        There is a palette_t which stores the structure specified by
+        pal1.fus and friends.
+        It stores information about 256 colors, e.g. a set of keyframes
+        for each color.
+
+        There is a field submap->palette.
+        hexgame_step calls palette_step on game->cur_submap->palette.
+
+        There is a function palette_update_sdl_palette.
+        hexgame_render calls it on its 'pal' param.
+        test_app_mainloop calls hexgame_render with app->sdl_palette as
+        the 'pal' param, and later passes app->sdl_palette to
+        rendergraph_render.
+
+        .........so we're modifying an SDL palette and relying on SDL to
+        take that into account when it renders our surfaces!
+        Presumably this doesn't work with textures?..
+        Or anyway, SDL_SetPaletteColors will do whatever needs to be
+        done to ensure that the palette is changed.
+
+
+    Here's how we would currently apply a palmapper to a rendergraph.
+    We would have to create a prismelmapper:
+
+        shapes:
+            "cycle1_sq": shapes: : "sq" (0 0 0 0) 0 f "cycle1"
+            "cycle1_tri": shapes: : "tri" (0 0 0 0) 0 f "cycle1"
+            "cycle1_dia": shapes: : "dia" (0 0 0 0) 0 f "cycle1"
+
+        mappers:
+            "cycle1":
+                unit: 1 0 0 0
+                entries:
+                    : "sq" -> "cycle1_sq"
+                    : "tri" -> "cycle1_tri"
+                    : "dia" -> "cycle1_dia"
+
+    ...that's insane.
+    We could add a "table" to prismelmappers... basically fold palmappers
+    into prismelmappers.
+    That's really what we're going for, is a generic "mapping" struct with
+    which we can build hierarchical structures representing algebraic terms.
+    *waggles eyebrows*
+
