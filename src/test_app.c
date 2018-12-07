@@ -103,7 +103,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     }
 
     /* palmapper for human players, so you can tell who's who */
-    const char *player_palmapper_name = "cycle1";
+    const char *player_palmapper_name = "player_human";
     palettemapper_t *player_palmapper = prismelrenderer_get_palmapper(
         &app->prend, player_palmapper_name);
     if(player_palmapper == NULL){

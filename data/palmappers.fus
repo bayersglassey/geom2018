@@ -1,6 +1,31 @@
 
 palmappers:
 
+    "player_human":
+          :
+
+         # NOTE: we don't change blacks, whites, or reds (because the demo
+         # map's palettes have a pulsating animated red for use with player's
+         # eye)
+
+         1:
+         2:  4
+         3:  6
+         4:  3
+         5:
+         6:  2
+         7:
+         8:
+
+         9:
+        10: 12
+        11: 14
+        12: 11
+        13:
+        14: 10
+        15:
+        16:
+
     "cycle0":
 
     "cycle1":
