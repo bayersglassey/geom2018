@@ -52,6 +52,11 @@ typedef struct rendergraph {
     ARRAY_DECL(struct prismel_trf*, prismel_trfs)
     ARRAY_DECL(struct rendergraph_trf*, rendergraph_trfs)
 
+    struct rendergraph *copy_of;
+        /* If not NULL, this rendergraph is a copy of another one.
+        In particular, it does *NOT* own its prismel_trfs and
+        rendergraph_trfs, so should *NOT* modify or free them. */
+
     const char *animation_type;
     int n_frames;
 
@@ -76,6 +81,8 @@ void rendergraph_cleanup(rendergraph_t *rendergraph);
 int rendergraph_init(rendergraph_t *rendergraph, char *name,
     struct prismelrenderer *prend,
     const char *animation_type, int n_frames);
+int rendergraph_copy(rendergraph_t *rendergraph, char *name,
+    rendergraph_t *copy_of);
 void rendergraph_bitmap_dump(struct rendergraph_bitmap *bitmap, FILE *f,
     int i, int n_spaces, bool dump_surface);
 void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces,

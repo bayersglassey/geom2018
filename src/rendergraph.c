@@ -39,10 +39,12 @@ const int rendergraph_n_frames_default = 1;
 void rendergraph_cleanup(rendergraph_t *rendergraph){
     free(rendergraph->name);
 
-    ARRAY_FREE_PTR(prismel_trf_t*, rendergraph->prismel_trfs,
-        (void))
-    ARRAY_FREE_PTR(rendergraph_trf_t*, rendergraph->rendergraph_trfs,
-        (void))
+    if(!rendergraph->copy_of){
+        ARRAY_FREE_PTR(prismel_trf_t*, rendergraph->prismel_trfs,
+            (void))
+        ARRAY_FREE_PTR(rendergraph_trf_t*, rendergraph->rendergraph_trfs,
+            (void))
+    }
 
     for(int i = 0; i < rendergraph->n_bitmaps; i++){
         rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[i];
@@ -55,25 +57,62 @@ void rendergraph_cleanup(rendergraph_t *rendergraph){
     free(rendergraph->bitmaps);
 }
 
-int rendergraph_init(rendergraph_t *rendergraph, char *name,
+static int _rendergraph_init(rendergraph_t *rendergraph, char *name,
     prismelrenderer_t *prend,
     const char *animation_type, int n_frames
 ){
+    /* initialize everything except prismel_trfs and rendergraph_trfs */
+
     int err;
+
     vecspace_t *space = prend->space;
 
     rendergraph->name = name;
     rendergraph->prend = prend;
     rendergraph->space = space;
-    ARRAY_INIT(rendergraph->prismel_trfs)
-    ARRAY_INIT(rendergraph->rendergraph_trfs)
 
     rendergraph->animation_type = animation_type;
     rendergraph->n_frames = n_frames;
 
+    rendergraph->copy_of = NULL;
+
     err = rendergraph_create_bitmaps(rendergraph);
     if(err)return err;
     boundbox_init(rendergraph->boundbox, space->dims);
+    return 0;
+}
+
+int rendergraph_init(rendergraph_t *rendergraph, char *name,
+    prismelrenderer_t *prend,
+    const char *animation_type, int n_frames
+){
+    int err;
+
+    err = _rendergraph_init(rendergraph, name, prend,
+        animation_type, n_frames);
+    if(err)return err;
+
+    ARRAY_INIT(rendergraph->prismel_trfs)
+    ARRAY_INIT(rendergraph->rendergraph_trfs)
+    return 0;
+}
+
+int rendergraph_copy(rendergraph_t *rendergraph, char *name,
+    rendergraph_t *copy_of
+){
+    int err;
+
+    err = _rendergraph_init(rendergraph, name, copy_of->prend,
+        copy_of->animation_type, copy_of->n_frames);
+    if(err)return err;
+
+    rendergraph->copy_of = copy_of;
+
+    rendergraph->prismel_trfs = copy_of->prismel_trfs;
+    rendergraph->prismel_trfs_len = copy_of->prismel_trfs_len;
+    rendergraph->rendergraph_trfs = copy_of->rendergraph_trfs;
+    rendergraph->rendergraph_trfs_len = copy_of->rendergraph_trfs_len;
+
     return 0;
 }
 
