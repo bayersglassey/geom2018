@@ -334,6 +334,22 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
 
                     err = fus_lexer_get(lexer, ")");
                     if(err)return err;
+                }else if(fus_lexer_got(lexer, "action")){
+                    err = fus_lexer_next(lexer);
+                    if(err)return err;
+                    err = fus_lexer_get(lexer, "(");
+                    if(err)return err;
+
+                    char *action_name;
+                    err = fus_lexer_get_name(lexer, &action_name);
+                    if(err)return err;
+
+                    ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
+                    effect->type = state_effect_type_action;
+                    effect->u.action_name = action_name;
+
+                    err = fus_lexer_get(lexer, ")");
+                    if(err)return err;
                 }else{
                     return fus_lexer_unexpected(lexer, NULL);
                 }
@@ -383,6 +399,7 @@ const char state_effect_type_rot[] = "rot";
 const char state_effect_type_turn[] = "turn";
 const char state_effect_type_goto[] = "goto";
 const char state_effect_type_delay[] = "delay";
+const char state_effect_type_action[] = "action";
 const char *state_effect_types[] = {
     state_effect_type_print,
     state_effect_type_move,
@@ -390,6 +407,7 @@ const char *state_effect_types[] = {
     state_effect_type_turn,
     state_effect_type_goto,
     state_effect_type_delay,
+    state_effect_type_action,
     NULL
 };
 
@@ -447,6 +465,8 @@ void state_rule_cleanup(state_rule_t *rule){
             free(effect->u.msg);
         }else if(effect->type == state_effect_type_goto){
             free(effect->u.goto_name);
+        }else if(effect->type == state_effect_type_action){
+            free(effect->u.action_name);
         }
     }
     free(rule->effects);

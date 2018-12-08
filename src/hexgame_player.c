@@ -401,6 +401,17 @@ static int player_apply_rule(player_t *player, hexmap_t *map,
             if(err)return err;
         }else if(effect->type == state_effect_type_delay){
             player->cooldown = effect->u.delay;
+        }else if(effect->type == state_effect_type_action){
+            const char *action_name = effect->u.action_name;
+            if(!strcmp(action_name, "ping")){
+                fprintf(stderr, "pong\n");
+            }else if(!strcmp(action_name, "spit")){
+                fprintf(stderr, "spat!\n");
+            }else{
+                fprintf(stderr, "Unrecognized player action: %s\n",
+                    action_name);
+                return 2;
+            }
         }else{
             fprintf(stderr, "Unrecognized state rule effect: %s\n",
                 effect->type);

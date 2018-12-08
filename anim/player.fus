@@ -12,6 +12,7 @@ stand:
     if:
         key: wentdown x
     then:
+        action: spit
         goto: spit
         delay: 9
 
@@ -192,6 +193,7 @@ step:
     if:
         key: wentdown x
     then:
+        action: spit
         goto: spit
         delay: 9
 

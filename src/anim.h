@@ -80,6 +80,7 @@ typedef struct state_effect {
         char *msg;
         int delay;
         char *goto_name;
+        char *action_name;
         vec_t vec;
         rot_t rot;
     } u;
@@ -91,6 +92,7 @@ extern const char state_effect_type_rot[];
 extern const char state_effect_type_turn[];
 extern const char state_effect_type_goto[];
 extern const char state_effect_type_delay[];
+extern const char state_effect_type_action[];
 extern const char *state_effect_types[];
 
 
