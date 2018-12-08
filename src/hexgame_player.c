@@ -409,7 +409,14 @@ static int player_apply_rule(player_t *player, hexgame_t *game,
             if(!strcmp(action_name, "ping")){
                 fprintf(stderr, "pong\n");
             }else if(!strcmp(action_name, "spit")){
-                fprintf(stderr, "spat!\n");
+                const char *stateset_filename = "anim/spit.fus";
+                ARRAY_PUSH_NEW(player_t*, game->players, new_player)
+                err = player_init(new_player, map, strdup(stateset_filename),
+                    NULL, -1, player->respawn_pos, NULL);
+                if(err)return err;
+                vec_cpy(space->dims, new_player->pos, player->pos);
+                new_player->rot = player->rot;
+                new_player->turn = player->turn;
             }else{
                 fprintf(stderr, "Unrecognized player action: %s\n",
                     action_name);
