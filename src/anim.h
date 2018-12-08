@@ -98,7 +98,6 @@ extern const char *state_effect_types[];
 
 void stateset_cleanup(stateset_t *stateset);
 int stateset_init(stateset_t *stateset, char *filename);
-void stateset_dump(stateset_t *stateset, FILE *f);
 int stateset_load(stateset_t *stateset, char *filename,
     prismelrenderer_t *prend, vecspace_t *space);
 int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
@@ -109,7 +108,6 @@ state_t *stateset_get_state(stateset_t *stateset, const char *name);
 void state_cleanup(state_t *state);
 int state_init(state_t *state, stateset_t *stateset, char *name,
     rendergraph_t *rgraph);
-void state_dump(state_t *state, FILE *f, int n_spaces);
 
 void state_rule_cleanup(state_rule_t *rule);
 int state_rule_init(state_rule_t *rule, state_t *state);

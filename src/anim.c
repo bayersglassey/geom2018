@@ -27,14 +27,6 @@ int stateset_init(stateset_t *stateset, char *filename){
     return 0;
 }
 
-void stateset_dump(stateset_t *stateset, FILE *f){
-    fprintf(f, "stateset: %p\n", stateset);
-    if(stateset == NULL)return;
-    for(int i = 0; i < stateset->states_len; i++){
-        state_dump(stateset->states[i], f, 2);
-    }
-}
-
 int stateset_load(stateset_t *stateset, char *filename,
     prismelrenderer_t *prend, vecspace_t *space
 ){
@@ -433,62 +425,6 @@ int state_init(state_t *state, stateset_t *stateset, char *name,
     state->crushbox = NULL;
     ARRAY_INIT(state->rules)
     return 0;
-}
-
-void state_dump(state_t *state, FILE *f, int n_spaces){
-    char spaces[MAX_SPACES];
-    get_spaces(spaces, MAX_SPACES, n_spaces);
-
-    fprintf(f, "%sstate: %p\n", spaces, state);
-    if(state == NULL)return;
-    fprintf(f, "%s  name: %s\n", spaces, state->name);
-    for(int i = 0; i < state->rules_len; i++){
-        state_rule_t *rule = state->rules[i];
-        fprintf(f, "%s    if:\n", spaces);
-        for(int i = 0; i < rule->conds_len; i++){
-            state_cond_t *cond = rule->conds[i];
-            fprintf(f, "%s      %s", spaces, cond->type);
-            if(cond->type == state_cond_type_key){
-                int kstate = cond->u.key.kstate;
-                const char *kstate_msg =
-                    kstate == 0? "isdown":
-                    kstate == 1? "wasdown":
-                    kstate == 2? "wentdown":
-                    "<unknown>";
-                fprintf(f, ": %s%s %c\n", cond->u.key.yes? "": "not",
-                    kstate_msg, cond->u.key.c);
-            }else if(cond->type == state_cond_type_coll){
-                fprintf(f, ": %s %s\n",
-                    (cond->u.coll.flags & 1)? "all": "any",
-                    (cond->u.coll.flags & 2)? "yes": "no");
-                hexcollmap_dump(cond->u.coll.collmap,
-                    f, n_spaces + 8);
-            }else{
-                fprintf(f, "\n");
-            }
-        }
-        fprintf(f, "%s    then:\n", spaces);
-        for(int i = 0; i < rule->effects_len; i++){
-            state_effect_t *effect = rule->effects[i];
-            fprintf(f, "%s      %s", spaces, effect->type);
-            if(effect->type == state_effect_type_print){
-                fprintf(f, ": %s\n", effect->u.msg);
-            }else if(effect->type == state_effect_type_move){
-                int *vec = effect->u.vec;
-                fprintf(f, ":");
-                for(int i = 0; i < 4; i++)fprintf(f, " %i", vec[i]);
-                fprintf(f, "\n");
-            }else if(effect->type == state_effect_type_rot){
-                fprintf(f, ": %i\n", effect->u.rot);
-            }else if(effect->type == state_effect_type_turn){
-                fprintf(f, "\n");
-            }else if(effect->type == state_effect_type_goto){
-                fprintf(f, ": %s\n", effect->u.goto_name);
-            }else{
-                fprintf(f, "\n");
-            }
-        }
-    }
 }
 
 
