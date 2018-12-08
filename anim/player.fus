@@ -10,6 +10,12 @@ stand:
         ;;  (.)  .
 
     if:
+        key: wentdown x
+    then:
+        goto: spit
+        delay: 9
+
+    if:
         key: isdown d
     then:
         goto: crawl
@@ -103,6 +109,16 @@ stand:
         goto: step
         delay: 2
 
+spit:
+    rgraph: "player_spit"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: stand
+
 jump:
     rgraph: "player_jump"
 
@@ -172,6 +188,13 @@ step:
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
+
+    if:
+        key: wentdown x
+    then:
+        goto: spit
+        delay: 9
+
     if() then: goto: stand
 
 crawl:

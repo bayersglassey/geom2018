@@ -61,6 +61,33 @@ shapes:
             : "player_leg"  (-1  1  1  1)  0 f
             : "player_leg"  ( 2  1  1  1)  6 t
 
+    "player_spit":
+        animation: cycle 10
+        shapes:
+            # Player stand:
+            #: "player_head" ( 0  1  3  1)  0 f  0 (6 1)
+            #: "player_leg"  ( 0  1  1  1)  0 f  0 (6 1)
+            #: "player_leg"  ( 2  1  1  1)  6 t  0 (6 1)
+
+            # Head
+            : "player_head" (-2  1  3  1)  0 f  0 (0 1)
+            : "player_head" (-2  0  3  1)  0 f  0 (1 4)
+            : "player_head" (-2  1  3  1)  0 f  0 (5 1)
+            : "player_head" (-1  1  3  1)  0 f  0 (6 1)
+            : "player_head" ( 0  1  3  1)  0 f  0 (7 3)
+
+            # Back leg
+            : "player_leg"  (-1  1  1  1)  0 f  0 (0 1)
+            : "player_leg"  (-2  1  1  1)  1 f  0 (1 5)
+            : "player_leg"  (-1  1  1  1)  0 f  0 (6 1)
+            : "player_leg"  ( 0  1  1  1)  0 f  0 (7 3)
+
+            # Front leg
+            : "player_leg"  ( 1  1  1  1)  7 t  0 (0 1)
+            : "player_leg"  ( 0  1  1  1)  7 t  0 (1 1)
+            : "player_leg"  ( 0  1  1  1)  6 t  0 (2 7)
+            : "player_leg"  ( 1  1  1  1)  6 t  0 (9 1)
+
     "_player_jump":
         shapes:
             : "player_head" ( 0  1  3  1)  0 f
