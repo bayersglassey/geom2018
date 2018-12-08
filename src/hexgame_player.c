@@ -315,9 +315,10 @@ int player_process_event(player_t *player, SDL_Event *event){
  * PLAYER RULES *
  ****************/
 
-static int player_match_rule(player_t *player, hexmap_t *map,
+static int player_match_rule(player_t *player, hexgame_t *game,
     state_rule_t *rule, bool *rule_matched_ptr
 ){
+    hexmap_t *map = game->map;
     vecspace_t *space = map->space;
 
     bool rule_matched = true;
@@ -373,10 +374,11 @@ static int player_match_rule(player_t *player, hexmap_t *map,
     return 0;
 }
 
-static int player_apply_rule(player_t *player, hexmap_t *map,
+static int player_apply_rule(player_t *player, hexgame_t *game,
     state_rule_t *rule
 ){
     int err;
+    hexmap_t *map = game->map;
     vecspace_t *space = map->space;
     for(int i = 0; i < rule->effects_len; i++){
         state_effect_t *effect = rule->effects[i];
@@ -427,7 +429,7 @@ static int player_apply_rule(player_t *player, hexmap_t *map,
  * PLAYER STEP *
  ***************/
 
-int player_step(player_t *player, hexmap_t *map){
+int player_step(player_t *player, hexgame_t *game){
     int err;
 
     if(player->state == NULL){
@@ -435,6 +437,7 @@ int player_step(player_t *player, hexmap_t *map){
             __FILE__);
         return 0;}
 
+    hexmap_t *map = game->map;
     vecspace_t *space = map->space;
 
     /* Handle recording & playback */
@@ -478,11 +481,11 @@ int player_step(player_t *player, hexmap_t *map){
             if(DEBUG_RULES)printf("player %p rule %i:\n", player, i);
 
             bool rule_matched;
-            err = player_match_rule(player, map, rule, &rule_matched);
+            err = player_match_rule(player, game, rule, &rule_matched);
             if(err)return err;
 
             if(rule_matched){
-                err = player_apply_rule(player, map, rule);
+                err = player_apply_rule(player, game, rule);
                 if(err)return err;
                 break;
             }

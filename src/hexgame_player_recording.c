@@ -49,8 +49,8 @@ void player_recording_reset(player_recording_t *rec){
     rec->offset = 0;
 }
 
-void player_recording_init(player_recording_t *rec, hexmap_t *map){
-    rec->map = map;
+void player_recording_init(player_recording_t *rec, hexgame_t *game){
+    rec->game = game;
 }
 
 static int player_recording_parse(player_recording_t *rec,
@@ -58,7 +58,8 @@ static int player_recording_parse(player_recording_t *rec,
 ){
     int err;
 
-    vecspace_t *space = rec->map->space;
+    hexmap_t *map = rec->game->map;
+    vecspace_t *space = map->space;
 
     err = fus_lexer_get(lexer, "anim");
     if(err)return err;
@@ -143,7 +144,7 @@ static int player_recording_parse(player_recording_t *rec,
 }
 
 int player_recording_load(player_recording_t *rec, const char *filename,
-    hexmap_t *map
+    hexgame_t *game
 ){
     int err;
     fus_lexer_t lexer;
@@ -154,7 +155,7 @@ int player_recording_load(player_recording_t *rec, const char *filename,
     err = fus_lexer_init(&lexer, text, filename);
     if(err)return err;
 
-    player_recording_init(rec, map);
+    player_recording_init(rec, game);
     err = player_recording_parse(rec, &lexer, filename);
     if(err)return err;
 
@@ -210,7 +211,7 @@ int player_play_recording(player_t *player){
     player_recording_t *rec = &player->recording;
 
     err = player_init_stateset(player, rec->stateset_name, rec->state_name,
-        rec->map);
+        rec->game->map);
     if(err)return err;
 
     player->recording.action = 1; /* play */
@@ -233,7 +234,7 @@ int player_restart_recording(player_t *player, bool hard){
 
     if(!hard){
         for(int i = 0; i < rec->offset; i++){
-            player_step(player, rec->map);
+            player_step(player, rec->game);
         }
     }
 

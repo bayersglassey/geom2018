@@ -79,8 +79,7 @@ int hexgame_load_player_recording(hexgame_t *game, const char *filename,
         -1, game->map->spawn, NULL);
     if(err)return err;
 
-    err = player_recording_load(&player->recording, filename,
-        game->map);
+    err = player_recording_load(&player->recording, filename, game);
     if(err)return err;
 
     err = player_play_recording(player);
@@ -225,7 +224,7 @@ int hexgame_step(hexgame_t *game){
     /* Do 1 gameplay step for each player */
     for(int i = 0; i < game->players_len; i++){
         player_t *player = game->players[i];
-        err = player_step(player, game->map);
+        err = player_step(player, game);
         if(err)return err;
     }
 

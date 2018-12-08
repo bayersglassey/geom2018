@@ -56,7 +56,7 @@ typedef struct player_recording {
     char *stateset_name;
     char *state_name;
 
-    hexmap_t *map;
+    struct hexgame *game;
 
     vec_t pos0;
     rot_t rot0;
@@ -74,9 +74,9 @@ typedef struct player_recording {
 
 void player_recording_cleanup(player_recording_t *rec);
 void player_recording_reset(player_recording_t *rec);
-void player_recording_init(player_recording_t *rec, hexmap_t *map);
+void player_recording_init(player_recording_t *rec, struct hexgame *game);
 int player_recording_load(player_recording_t *rec, const char *filename,
-    hexmap_t *map);
+    struct hexgame *game);
 const char *get_last_recording_filename();
 const char *get_next_recording_filename();
 
@@ -126,7 +126,7 @@ int player_get_key_i(player_t *player, char c, bool absolute);
 char player_get_key_c(player_t *player, int key_i, bool absolute);
 int player_process_event(player_t *player, SDL_Event *event);
 
-int player_step(player_t *player, struct hexmap *map);
+int player_step(player_t *player, struct hexgame *game);
 int player_render(player_t *player,
     SDL_Renderer *renderer, SDL_Surface *surface,
     SDL_Palette *pal, int x0, int y0, int zoom,
