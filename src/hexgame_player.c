@@ -145,6 +145,7 @@ int player_init(player_t *player, hexmap_t *map,
     vec_cpy(map->space->dims, player->respawn_pos, respawn_pos);
     vec_cpy(map->space->dims, player->pos, respawn_pos);
 
+    player->out_of_bounds = false;
     player->cur_submap = NULL;
     player->respawn_filename = respawn_filename;
 
@@ -494,6 +495,7 @@ int player_step(player_t *player, hexmap_t *map){
     }
 
     /* Figure out current submap */
+    bool out_of_bounds = true;
     for(int i = 0; i < map->submaps_len; i++){
         hexmap_submap_t *submap = map->submaps[i];
         if(!submap->solid)continue;
@@ -525,6 +527,7 @@ int player_step(player_t *player, hexmap_t *map){
 
         hexcollmap_elem_t *vert =
             hexcollmap_get_vert(collmap, &index);
+        if(vert != NULL)out_of_bounds = false;
         if(hexcollmap_elem_is_solid(vert)){
             if(player->cur_submap != submap && player->keymap >= 0){
                 /* For debugging */
@@ -535,6 +538,12 @@ int player_step(player_t *player, hexmap_t *map){
             break;
         }
     }
+
+    if(player->out_of_bounds != out_of_bounds && player->keymap >= 0){
+        fprintf(stderr, "Player %i %s the map!\n",
+            player->keymap, out_of_bounds? "left": "returned to");
+    }
+    player->out_of_bounds = out_of_bounds;
 
     return 0;
 }

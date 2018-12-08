@@ -103,6 +103,7 @@ typedef struct player {
 
     player_recording_t recording;
 
+    bool out_of_bounds;
     hexmap_submap_t *cur_submap;
     char *respawn_filename;
 } player_t;
