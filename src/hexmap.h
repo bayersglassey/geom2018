@@ -126,6 +126,11 @@ typedef struct hexmap_submap {
     hexmap_tileset_t tileset;
 } hexmap_submap_t;
 
+typedef struct hexmap_recording {
+    char *filename;
+    palettemapper_t *palmapper;
+} hexmap_recording_t;
+
 typedef struct hexmap {
     char *name;
     vecspace_t *space;
@@ -135,9 +140,13 @@ typedef struct hexmap {
 
     ARRAY_DECL(hexmap_submap_t*, submaps)
 
-    ARRAY_DECL(char*, recording_filenames)
+    ARRAY_DECL(hexmap_recording_t*, recordings)
 } hexmap_t;
 
+
+void hexmap_recording_cleanup(hexmap_recording_t *recording);
+int hexmap_recording_init(hexmap_recording_t *recording, char *filename,
+    palettemapper_t *palmapper);
 
 void hexmap_cleanup(hexmap_t *map);
 int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
@@ -153,7 +162,6 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
     char *tileset_filename);
 bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf, bool all);
-
 
 void hexmap_submap_cleanup(hexmap_submap_t *submap);
 int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,

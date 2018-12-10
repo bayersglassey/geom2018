@@ -109,11 +109,14 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         if(err)return err;
     }
 
-    for(int i = 0; i < app->hexmap.recording_filenames_len; i++){
-        const char *recording_filename = app->hexmap.recording_filenames[i];
+    for(int i = 0; i < app->hexmap.recordings_len; i++){
+        hexmap_recording_t *recording = app->hexmap.recordings[i];
         err = hexgame_load_player_recording(&app->hexgame,
-            recording_filename, -1);
+            recording->filename, -1);
         if(err)return err;
+        player_t *loaded_player = app->hexgame.players[
+            app->hexgame.players_len - 1];
+        loaded_player->palmapper = recording->palmapper;
     }
 
     app->cur_rgraph_i = 0;

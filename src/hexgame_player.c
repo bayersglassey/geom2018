@@ -120,17 +120,6 @@ int player_init(player_t *player, hexmap_t *map,
     }
 
     player->palmapper = NULL;
-    if(keymap < 0){
-        /* palmapper applied to cpu players, so you can tell who's who */
-        const char *player_palmapper_name = "player_cpu";
-        palettemapper_t *player_palmapper = prismelrenderer_get_palmapper(
-            map->prend, player_palmapper_name);
-        if(player_palmapper == NULL){
-            fprintf(stderr, "Couldn't find palmapper: %s\n",
-                player_palmapper_name);
-            return 2;}
-        player->palmapper = player_palmapper;
-    }
 
     if(stateset_filename != NULL){
         err = player_init_stateset(player, stateset_filename, state_name,

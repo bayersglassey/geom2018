@@ -138,6 +138,24 @@ rendergraph_t *hexmap_tileset_get_rgraph_face(hexmap_tileset_t *tileset,
 
 
 
+/********************
+ * HEXMAP RECORDING *
+ ********************/
+
+void hexmap_recording_cleanup(hexmap_recording_t *recording){
+    free(recording->filename);
+}
+
+int hexmap_recording_init(hexmap_recording_t *recording, char *filename,
+    palettemapper_t *palmapper
+){
+    recording->filename = filename;
+    recording->palmapper = palmapper;
+    return 0;
+}
+
+
+
 /**********
  * HEXMAP *
  **********/
@@ -147,7 +165,8 @@ void hexmap_cleanup(hexmap_t *map){
 
     ARRAY_FREE_PTR(hexmap_submap_t*, map->submaps, hexmap_submap_cleanup)
 
-    ARRAY_FREE_PTR(char*, map->recording_filenames, (void))
+    ARRAY_FREE_PTR(hexmap_recording_t*, map->recordings,
+        hexmap_recording_cleanup)
 }
 
 int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
@@ -164,7 +183,7 @@ int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
 
     ARRAY_INIT(map->submaps)
 
-    ARRAY_INIT(map->recording_filenames)
+    ARRAY_INIT(map->recordings)
     return 0;
 }
 
@@ -303,6 +322,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
 ){
     int err;
     vecspace_t *space = map->space;
+    prismelrenderer_t *prend = map->prend;
 
     if(fus_lexer_got(lexer, "skip")){
         err = fus_lexer_next(lexer);
@@ -422,15 +442,33 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
         while(1){
             if(fus_lexer_got(lexer, ")"))break;
 
-            char *recording_filename;
+            char *filename;
+            palettemapper_t *palmapper = NULL;
             err = fus_lexer_get(lexer, "(");
             if(err)return err;
-            err = fus_lexer_get_str(lexer, &recording_filename);
+            err = fus_lexer_get_str(lexer, &filename);
             if(err)return err;
+            if(!fus_lexer_got(lexer, ")")){
+                char *palmapper_name;
+                err = fus_lexer_get_str(lexer, &palmapper_name);
+                if(err)return err;
+                palmapper =
+                    prismelrenderer_get_palmapper(prend, palmapper_name);
+                if(palmapper == NULL){
+                    fprintf(stderr, "Couldn't find palmapper: %s\n",
+                        palmapper_name);
+                    free(palmapper_name); return 2;
+                }
+                free(palmapper_name);
+            }
             err = fus_lexer_get(lexer, ")");
             if(err)return err;
-            ARRAY_PUSH(char*, map->recording_filenames,
-                recording_filename)
+
+            ARRAY_PUSH_NEW(hexmap_recording_t*, map->recordings,
+                recording)
+            err = hexmap_recording_init(recording,
+                filename, palmapper);
+            if(err)return err;
         }
         err = fus_lexer_next(lexer);
         if(err)return err;
@@ -558,6 +596,9 @@ bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
 
 
 
+/*****************
+ * HEXMAP SUBMAP *
+ *****************/
 
 void hexmap_submap_cleanup(hexmap_submap_t *submap){
     free(submap->filename);
