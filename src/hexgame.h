@@ -129,6 +129,9 @@ int player_get_key_i(player_t *player, char c, bool absolute);
 char player_get_key_c(player_t *player, int key_i, bool absolute);
 int player_process_event(player_t *player, SDL_Event *event);
 
+struct actor;
+int state_handle_rules(state_t *state, player_t *player,
+    struct actor *actor, struct hexgame *game);
 int player_step(player_t *player, struct hexgame *game);
 int player_render(player_t *player,
     SDL_Renderer *renderer, SDL_Surface *surface,

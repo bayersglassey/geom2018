@@ -304,19 +304,37 @@ int player_process_event(player_t *player, SDL_Event *event){
  * PLAYER RULES *
  ****************/
 
-static int player_match_rule(player_t *player, hexgame_t *game,
+static int player_match_rule(player_t *player,
+    actor_t *actor, hexgame_t *game,
     state_rule_t *rule, bool *rule_matched_ptr
 ){
     hexmap_t *map = game->map;
     vecspace_t *space = map->space;
 
+    /* NOTE: player and/or actor may be NULL.
+    We are basically reusing the rule/cond/effect structure for players
+    and actors; most conds/effects naturally apply to one or the other.
+    E.g. keypress stuff is for the player; "play" is for actor.
+    However, actor may want to check some stuff about the player, so
+    it may make use of "player-oriented" rules. */
+
     bool rule_matched = true;
     for(int i = 0; i < rule->conds_len; i++){
         state_cond_t *cond = rule->conds[i];
         if(DEBUG_RULES)printf("  if: %s\n", cond->type);
+
+        #define RULE_PERROR() \
+            fprintf(stderr, " (cond=%s, state=%s, stateset=%s)\n", \
+                cond->type, rule->state->name, \
+                rule->state->stateset->filename);
+
         if(cond->type == state_cond_type_false){
             rule_matched = false;
         }else if(cond->type == state_cond_type_key){
+            if(player == NULL){
+                fprintf(stderr, "No player");
+                RULE_PERROR()
+                break;}
 
             int kstate_i = cond->u.key.kstate;
             bool *kstate =
@@ -326,17 +344,24 @@ static int player_match_rule(player_t *player, hexgame_t *game,
                 NULL;
             if(kstate == NULL){
                 fprintf(stderr, "kstate out of range: %i", kstate_i);
+                RULE_PERROR()
                 return 2;}
 
             char c = cond->u.key.c;
             int key_i = player_get_key_i(player, c, false);
             if(key_i == -1){
                 fprintf(stderr, "Unrecognized key char: %c", c);
+                RULE_PERROR()
                 return 2;}
 
             rule_matched = kstate[key_i];
             if(!cond->u.key.yes)rule_matched = !rule_matched;
         }else if(cond->type == state_cond_type_coll){
+            if(player == NULL){
+                fprintf(stderr, "No player");
+                RULE_PERROR()
+                break;}
+
             trf_t trf;
             player_init_trf(player, &trf, space);
 
@@ -348,13 +373,13 @@ static int player_match_rule(player_t *player, hexgame_t *game,
                 cond->u.coll.collmap, &trf, yes? all: !all);
             rule_matched = yes? collide: !collide;
         }else{
-            fprintf(stderr, "Unrecognized state rule condition: %s "
-                "(state=%s, stateset=%s)\n",
-                cond->type, rule->state->name,
-                rule->state->stateset->filename);
+            fprintf(stderr, "Unrecognized state rule condition: %s",
+                cond->type);
+            RULE_PERROR()
             return 2;
         }
         if(!rule_matched)break;
+        #undef RULE_PERROR
     }
 
     if(DEBUG_RULES && !rule_matched)printf("    NO MATCH\n");
@@ -363,18 +388,36 @@ static int player_match_rule(player_t *player, hexgame_t *game,
     return 0;
 }
 
-static int player_apply_rule(player_t *player, hexgame_t *game,
+static int player_apply_rule(player_t *player,
+    actor_t *actor, hexgame_t *game,
     state_rule_t *rule
 ){
     int err;
     hexmap_t *map = game->map;
     vecspace_t *space = map->space;
+
+    /* NOTE: player and/or actor may be NULL.
+    See comment on player_match_rule. */
+
     for(int i = 0; i < rule->effects_len; i++){
         state_effect_t *effect = rule->effects[i];
         if(DEBUG_RULES)printf("  then: %s\n", effect->type);
+
+        #define RULE_PERROR() \
+            fprintf(stderr, " (effect=%s, state=%s, stateset=%s)\n", \
+                effect->type, rule->state->name, \
+                rule->state->stateset->filename);
+
         if(effect->type == state_effect_type_print){
-            printf("player %p says: %s\n", player, effect->u.msg);
+            if(player != NULL)printf("player %p", player);
+            else printf("unknown player");
+            if(actor != NULL)printf(" (actor %p)", actor);
+            printf(" says: %s\n", effect->u.msg);
         }else if(effect->type == state_effect_type_move){
+            if(player == NULL){
+                fprintf(stderr, "No player");
+                RULE_PERROR()
+                break;}
             vec_t vec;
             vec_cpy(space->dims, vec, effect->u.vec);
             rot_t rot = player_get_rot(player, space);
@@ -382,16 +425,39 @@ static int player_apply_rule(player_t *player, hexgame_t *game,
             space->vec_rot(vec, rot);
             vec_add(space->dims, player->pos, vec);
         }else if(effect->type == state_effect_type_rot){
+            if(player == NULL){
+                fprintf(stderr, "No player");
+                RULE_PERROR()
+                break;}
             rot_t effect_rot = effect->u.rot;
             player->rot = rot_rot(space->rot_max,
                 player->rot, effect_rot);
         }else if(effect->type == state_effect_type_turn){
+            if(player == NULL){
+                fprintf(stderr, "No player");
+                RULE_PERROR()
+                break;}
             player->turn = !player->turn;
             player->rot = rot_flip(space->rot_max, player->rot, true);
         }else if(effect->type == state_effect_type_goto){
-            err = player_set_state(player, effect->u.goto_name);
-            if(err)return err;
+            if(actor != NULL){
+                /* HACK! TODO: Make it more explicit whether "goto" is
+                referring to player or actor. */
+                err = actor_set_state(actor, effect->u.goto_name);
+                if(err)return err;
+            }else{
+                if(player == NULL){
+                    fprintf(stderr, "No player");
+                    RULE_PERROR()
+                    break;}
+                err = player_set_state(player, effect->u.goto_name);
+                if(err)return err;
+            }
         }else if(effect->type == state_effect_type_delay){
+            if(player == NULL){
+                fprintf(stderr, "No player");
+                RULE_PERROR()
+                break;}
             player->cooldown = effect->u.delay;
         }else if(effect->type == state_effect_type_action){
             const char *action_name = effect->u.action_name;
@@ -401,6 +467,10 @@ static int player_apply_rule(player_t *player, hexgame_t *game,
                 !strcmp(action_name, "spit") ||
                 !strcmp(action_name, "spit_crouch")
             ){
+                if(player == NULL){
+                    fprintf(stderr, "No player");
+                    RULE_PERROR()
+                    break;}
                 bool crouch = action_name[4] == '_';
                 const char *stateset_filename = "anim/spit.fus";
                 ARRAY_PUSH_NEW(player_t*, game->players, new_player)
@@ -412,20 +482,51 @@ static int player_apply_rule(player_t *player, hexgame_t *game,
                 new_player->rot = player->rot;
                 new_player->turn = player->turn;
             }else{
-                fprintf(stderr, "Unrecognized player action: %s\n",
+                fprintf(stderr, "Unrecognized action: %s\n",
                     action_name);
                 return 2;
             }
         }else if(effect->type == state_effect_type_die){
+            if(player == NULL){
+                fprintf(stderr, "No player");
+                RULE_PERROR()
+                break;}
             player->dead = true;
         }else{
             fprintf(stderr, "Unrecognized state rule effect: %s\n",
                 effect->type);
             return 2;
         }
+        #undef RULE_PERROR
     }
     return 0;
 }
+
+int state_handle_rules(state_t *state, player_t *player,
+    actor_t *actor, hexgame_t *game
+){
+    int err;
+
+    for(int i = 0; i < state->rules_len; i++){
+        state_rule_t *rule = state->rules[i];
+
+        if(DEBUG_RULES)printf("player %p rule %i:\n", player, i);
+
+        bool rule_matched;
+        err = player_match_rule(player, NULL, game, rule,
+            &rule_matched);
+        if(err)return err;
+
+        if(rule_matched){
+            err = player_apply_rule(player, NULL, game, rule);
+            if(err)return err;
+            break;
+        }
+    }
+
+    return 0;
+}
+
 
 
 /***************
@@ -475,22 +576,9 @@ int player_step(player_t *player, hexgame_t *game){
     if(player->cooldown > 0){
         player->cooldown--;
     }else{
-        state_t *state = player->state;
-        for(int i = 0; i < state->rules_len; i++){
-            state_rule_t *rule = state->rules[i];
-
-            if(DEBUG_RULES)printf("player %p rule %i:\n", player, i);
-
-            bool rule_matched;
-            err = player_match_rule(player, game, rule, &rule_matched);
-            if(err)return err;
-
-            if(rule_matched){
-                err = player_apply_rule(player, game, rule);
-                if(err)return err;
-                break;
-            }
-        }
+        /* Handle current state's rules */
+        err = state_handle_rules(player->state, player, NULL, game);
+        if(err)return err;
 
         /* start of new frame, no keys have gone down yet. */
         for(int i = 0; i < PLAYER_KEYS; i++){
