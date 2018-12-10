@@ -120,6 +120,14 @@ spit:
         ;;  (.)  .
     if() then: goto: stand
 
+crawl_spit:
+    rgraph: "player_crawl_spit"
+    hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)  .
+    if() then: goto: crawl
+
 jump:
     rgraph: "player_jump"
 
@@ -203,8 +211,16 @@ crawl:
     rgraph: "player_crawl"
 
     hitbox:
+        ;;     .
         ;;     *
         ;;  (.)  .
+
+    if:
+        key: wentdown x
+    then:
+        action: spit_crouch
+        goto: crawl_spit
+        delay: 9
 
     if:
         key: not isdown d
@@ -271,8 +287,17 @@ crawl:
 crawl_step:
     rgraph: "player_crawl_step"
     hitbox:
+        ;;     .
         ;;     *
         ;;  (.)  .
+
+    if:
+        key: wentdown x
+    then:
+        action: spit_crouch
+        goto: crawl_spit
+        delay: 9
+
     if() then: goto: crawl
 
 

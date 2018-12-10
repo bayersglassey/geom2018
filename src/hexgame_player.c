@@ -98,7 +98,7 @@ void player_cleanup(player_t *player){
 }
 
 int player_init(player_t *player, hexmap_t *map,
-    char *stateset_filename, const char *state_name, int keymap,
+    const char *stateset_filename, const char *state_name, int keymap,
     vec_t respawn_pos, char *respawn_filename
 ){
     int err;
@@ -408,11 +408,16 @@ static int player_apply_rule(player_t *player, hexgame_t *game,
             const char *action_name = effect->u.action_name;
             if(!strcmp(action_name, "ping")){
                 fprintf(stderr, "pong\n");
-            }else if(!strcmp(action_name, "spit")){
+            }else if(
+                !strcmp(action_name, "spit") ||
+                !strcmp(action_name, "spit_crouch")
+            ){
+                bool crouch = action_name[4] == '_';
                 const char *stateset_filename = "anim/spit.fus";
                 ARRAY_PUSH_NEW(player_t*, game->players, new_player)
-                err = player_init(new_player, map, strdup(stateset_filename),
-                    NULL, -1, player->respawn_pos, NULL);
+                err = player_init(new_player, map, stateset_filename,
+                    crouch? "crouch_fly": "fly", -1,
+                    player->respawn_pos, NULL);
                 if(err)return err;
                 vec_cpy(space->dims, new_player->pos, player->pos);
                 new_player->rot = player->rot;

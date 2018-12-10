@@ -110,7 +110,7 @@ typedef struct player {
 
 void player_cleanup(player_t *player);
 int player_init(player_t *player, hexmap_t *map,
-    char *stateset_filename, const char *state_name, int keymap,
+    const char *stateset_filename, const char *state_name, int keymap,
     vec_t respawn_pos, char *respawn_filename);
 
 rot_t player_get_rot(player_t *player, const vecspace_t *space);
