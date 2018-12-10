@@ -185,12 +185,12 @@ int player_init_stateset(player_t *player, const char *stateset_filename,
         map->prend, map->space);
     if(err)return err;
 
-    if(state_name != NULL){
-        err = player_set_state(player, state_name);
-        if(err)return err;
-    }else{
-        player->state = player->stateset.states[0];
+    if(state_name == NULL){
+        state_name = player->stateset.states[0]->name;
     }
+
+    err = player_set_state(player, state_name);
+    if(err)return err;
 
     return 0;
 }
@@ -208,6 +208,7 @@ int player_set_state(player_t *player, const char *state_name){
     }
     player->frame_i = 0;
     player->cooldown = 0;
+    player->dead = false;
     return 0;
 }
 
@@ -427,6 +428,8 @@ static int player_apply_rule(player_t *player, hexgame_t *game,
                     action_name);
                 return 2;
             }
+        }else if(effect->type == state_effect_type_die){
+            player->dead = true;
         }else{
             fprintf(stderr, "Unrecognized state rule effect: %s\n",
                 effect->type);

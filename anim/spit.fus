@@ -18,6 +18,7 @@ fly:
             ;;  ( )  .
     then:
         goto: dead
+        delay: 11
 
     if:
         coll: all yes
@@ -48,6 +49,7 @@ crouch_fly:
             ;; ( )  .
     then:
         goto: crouch_dead
+        delay: 11
 
     if:
         coll: all yes
@@ -63,9 +65,11 @@ crouch_fly:
 
 dead:
     rgraph: "spit_dead"
+    if() then: die
 
 crouch_dead:
     rgraph: "spit_crouch_dead"
+    if() then: die
 
 
 

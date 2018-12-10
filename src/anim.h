@@ -93,6 +93,7 @@ extern const char state_effect_type_turn[];
 extern const char state_effect_type_goto[];
 extern const char state_effect_type_delay[];
 extern const char state_effect_type_action[];
+extern const char state_effect_type_die[];
 extern const char *state_effect_types[];
 
 

@@ -350,6 +350,11 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
 
                     err = fus_lexer_get(lexer, ")");
                     if(err)return err;
+                }else if(fus_lexer_got(lexer, "die")){
+                    err = fus_lexer_next(lexer);
+                    if(err)return err;
+                    ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
+                    effect->type = state_effect_type_die;
                 }else{
                     return fus_lexer_unexpected(lexer, NULL);
                 }
@@ -400,6 +405,7 @@ const char state_effect_type_turn[] = "turn";
 const char state_effect_type_goto[] = "goto";
 const char state_effect_type_delay[] = "delay";
 const char state_effect_type_action[] = "action";
+const char state_effect_type_die[] = "die";
 const char *state_effect_types[] = {
     state_effect_type_print,
     state_effect_type_move,
@@ -408,6 +414,7 @@ const char *state_effect_types[] = {
     state_effect_type_goto,
     state_effect_type_delay,
     state_effect_type_action,
+    state_effect_type_die,
     NULL
 };
 

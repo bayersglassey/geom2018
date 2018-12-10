@@ -322,4 +322,4 @@ crawl:
 
 dead:
     rgraph: "player_dead"
-
+    if() then: die

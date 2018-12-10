@@ -100,6 +100,7 @@ typedef struct player {
     state_t *state;
     int frame_i;
     int cooldown;
+    bool dead;
 
     player_recording_t recording;
 

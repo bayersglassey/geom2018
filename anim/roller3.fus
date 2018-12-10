@@ -151,6 +151,7 @@ jump:
     if:
     then:
         goto: dead
+        delay: 11
 
 step:
     rgraph: "roller3"

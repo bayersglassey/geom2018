@@ -187,7 +187,9 @@ jump:
         goto: jump
         delay: 2
 
-    if() then: goto: dead
+    if() then:
+        goto: dead
+        delay: 11
 
 step:
     rgraph: "player_step"
@@ -303,6 +305,7 @@ crawl_step:
 
 dead:
     rgraph: "player_dead"
+    if() then: die
 
 
 
