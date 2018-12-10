@@ -40,6 +40,7 @@ typedef struct state_cond {
     const char *type;
     union {
         struct {
+            bool against_players;
             int flags;
                 /*
                     flags & 1: 0 -> any, 1 -> all
@@ -83,6 +84,7 @@ typedef struct state_effect {
         int delay;
         char *goto_name;
         char *action_name;
+        char *play_name;
         vec_t vec;
         rot_t rot;
     } u;
@@ -95,6 +97,7 @@ extern const char state_effect_type_turn[];
 extern const char state_effect_type_goto[];
 extern const char state_effect_type_delay[];
 extern const char state_effect_type_action[];
+extern const char state_effect_type_play[];
 extern const char state_effect_type_die[];
 extern const char *state_effect_types[];
 

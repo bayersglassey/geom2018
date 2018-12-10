@@ -71,21 +71,24 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
 
-        char *rgraph_name;
-        err = fus_lexer_get(lexer, "rgraph");
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
-        err = fus_lexer_get_str(lexer, &rgraph_name);
-        if(err)return err;
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
-        rendergraph_t *rgraph = prismelrenderer_get_rendergraph(
-            prend, rgraph_name);
-        if(rgraph == NULL){
-            fprintf(stderr, "Couldn't find shape: %s\n", rgraph_name);
-            free(rgraph_name); return 2;}
-        free(rgraph_name);
+        rendergraph_t *rgraph = NULL;
+        if(fus_lexer_got(lexer, "rgraph")){
+            char *rgraph_name;
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            err = fus_lexer_get(lexer, "(");
+            if(err)return err;
+            err = fus_lexer_get_str(lexer, &rgraph_name);
+            if(err)return err;
+            err = fus_lexer_get(lexer, ")");
+            if(err)return err;
+            rgraph = prismelrenderer_get_rendergraph(
+                prend, rgraph_name);
+            if(rgraph == NULL){
+                fprintf(stderr, "Couldn't find shape: %s\n", rgraph_name);
+                free(rgraph_name); return 2;}
+            free(rgraph_name);
+        }
 
         ARRAY_PUSH_NEW(state_t*, stateset->states, state)
         err = state_init(state, stateset, name, rgraph);
@@ -187,6 +190,13 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     err = fus_lexer_get(lexer, "(");
                     if(err)return err;
 
+                    bool against_players = false;
+                    if(fus_lexer_got(lexer, "player")){
+                        err = fus_lexer_next(lexer);
+                        if(err)return err;
+                        against_players = true;
+                    }
+
                     int flags = 0;
 
                     if(fus_lexer_got(lexer, "all"))flags ^= 1;
@@ -216,6 +226,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     cond->type = state_cond_type_coll;
                     cond->u.coll.collmap = collmap;
                     cond->u.coll.flags = flags;
+                    cond->u.coll.against_players = against_players;
                 }else if(fus_lexer_got(lexer, "chance")){
                     err = fus_lexer_next(lexer);
                     if(err)return err;
@@ -342,6 +353,22 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     if(err)return err;
                     ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_die;
+                }else if(fus_lexer_got(lexer, "play")){
+                    err = fus_lexer_next(lexer);
+                    if(err)return err;
+                    err = fus_lexer_get(lexer, "(");
+                    if(err)return err;
+
+                    char *play_name;
+                    err = fus_lexer_get_str(lexer, &play_name);
+                    if(err)return err;
+
+                    ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
+                    effect->type = state_effect_type_play;
+                    effect->u.play_name = play_name;
+
+                    err = fus_lexer_get(lexer, ")");
+                    if(err)return err;
                 }else{
                     return fus_lexer_unexpected(lexer, NULL);
                 }
@@ -392,6 +419,7 @@ const char state_effect_type_turn[] = "turn";
 const char state_effect_type_goto[] = "goto";
 const char state_effect_type_delay[] = "delay";
 const char state_effect_type_action[] = "action";
+const char state_effect_type_play[] = "play";
 const char state_effect_type_die[] = "die";
 const char *state_effect_types[] = {
     state_effect_type_print,
@@ -401,6 +429,7 @@ const char *state_effect_types[] = {
     state_effect_type_goto,
     state_effect_type_delay,
     state_effect_type_action,
+    state_effect_type_play,
     state_effect_type_die,
     NULL
 };
@@ -453,6 +482,8 @@ void state_rule_cleanup(state_rule_t *rule){
             free(effect->u.goto_name);
         }else if(effect->type == state_effect_type_action){
             free(effect->u.action_name);
+        }else if(effect->type == state_effect_type_play){
+            free(effect->u.play_name);
         }
     }
     free(rule->effects);
