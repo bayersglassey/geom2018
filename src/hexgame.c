@@ -96,7 +96,7 @@ int hexgame_load_player_recording(hexgame_t *game, const char *filename,
 
     ARRAY_PUSH_NEW(player_t*, game->players, player)
     err = player_init(player, game->map, NULL, NULL,
-        -1, game->map->spawn, NULL);
+        keymap, game->map->spawn, NULL);
     if(err)return err;
 
     err = player_recording_load(&player->recording, filename, game, loop);
