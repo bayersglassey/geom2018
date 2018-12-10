@@ -49,8 +49,11 @@ void player_recording_reset(player_recording_t *rec){
     rec->offset = 0;
 }
 
-void player_recording_init(player_recording_t *rec, hexgame_t *game){
+void player_recording_init(player_recording_t *rec, hexgame_t *game,
+    bool loop
+){
     rec->game = game;
+    rec->loop = loop;
 }
 
 static int player_recording_parse(player_recording_t *rec,
@@ -144,7 +147,7 @@ static int player_recording_parse(player_recording_t *rec,
 }
 
 int player_recording_load(player_recording_t *rec, const char *filename,
-    hexgame_t *game
+    hexgame_t *game, bool loop
 ){
     int err;
     fus_lexer_t lexer;
@@ -155,7 +158,7 @@ int player_recording_load(player_recording_t *rec, const char *filename,
     err = fus_lexer_init(&lexer, text, filename);
     if(err)return err;
 
-    player_recording_init(rec, game);
+    player_recording_init(rec, game, loop);
     err = player_recording_parse(rec, &lexer, filename);
     if(err)return err;
 
@@ -364,7 +367,7 @@ int player_recording_step(player_t *player){
     int i = player->recording.i;
     char c;
 
-    bool loop = true;
+    bool loop = player->recording.loop;
 
     while(1){
         while(rec[i] == ' ')i++;

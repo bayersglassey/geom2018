@@ -90,7 +90,7 @@ int hexgame_reset_player_by_keymap(hexgame_t *game, int keymap, bool hard){
 }
 
 int hexgame_load_player_recording(hexgame_t *game, const char *filename,
-    int keymap
+    int keymap, bool loop
 ){
     int err;
 
@@ -99,7 +99,7 @@ int hexgame_load_player_recording(hexgame_t *game, const char *filename,
         -1, game->map->spawn, NULL);
     if(err)return err;
 
-    err = player_recording_load(&player->recording, filename, game);
+    err = player_recording_load(&player->recording, filename, game, loop);
     if(err)return err;
 
     err = player_play_recording(player);
@@ -138,8 +138,10 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
                 fprintf(stderr, "Couldn't find file of last recording. "
                     "Maybe you need to record your first one with 'R'?\n");
             }else{
-                fprintf(stderr, "Playing back from file: %s\n", recording_filename);
-                err = hexgame_load_player_recording(game, recording_filename, -1);
+                fprintf(stderr, "Playing back from file: %s\n",
+                    recording_filename);
+                err = hexgame_load_player_recording(game, recording_filename,
+                    -1, true);
                 if(err)return err;
             }
 #ifdef GEOM_HEXGAME_DEBUG_MALLOC

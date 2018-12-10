@@ -52,6 +52,7 @@ int fus_lexer_get_player_keyinfo(fus_lexer_t *lexer,
 typedef struct player_recording {
     int action;
         /* 0: none, 1: play, 2: record */
+    bool loop;
     char *data;
     char *stateset_name;
     char *state_name;
@@ -74,9 +75,10 @@ typedef struct player_recording {
 
 void player_recording_cleanup(player_recording_t *rec);
 void player_recording_reset(player_recording_t *rec);
-void player_recording_init(player_recording_t *rec, struct hexgame *game);
+void player_recording_init(player_recording_t *rec, struct hexgame *game,
+    bool loop);
 int player_recording_load(player_recording_t *rec, const char *filename,
-    struct hexgame *game);
+    struct hexgame *game, bool loop);
 const char *get_last_recording_filename();
 const char *get_next_recording_filename();
 
@@ -187,7 +189,7 @@ int hexgame_load_actors(hexgame_t *game);
 int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard);
 int hexgame_reset_player_by_keymap(hexgame_t *game, int keymap, bool hard);
 int hexgame_load_player_recording(hexgame_t *game, const char *filename,
-    int keymap);
+    int keymap, bool loop);
 int hexgame_process_event(hexgame_t *game, SDL_Event *event);
 int hexgame_step(hexgame_t *game);
 int hexgame_render(hexgame_t *game,
