@@ -149,11 +149,17 @@ int player_recording_step(player_t *player);
 
 typedef struct actor {
     player_t *player;
+    stateset_t stateset;
+    state_t *state;
 } actor_t;
 
 void actor_cleanup(actor_t *actor);
-int actor_init(actor_t *actor);
+int actor_init(actor_t *actor, hexmap_t *map, player_t *player,
+    const char *stateset_filename, const char *state_name);
 
+int actor_init_stateset(actor_t *actor, const char *stateset_filename,
+    const char *state_name, hexmap_t *map);
+int actor_set_state(actor_t *actor, const char *state_name);
 int actor_step(actor_t *actor, struct hexgame *game);
 
 
