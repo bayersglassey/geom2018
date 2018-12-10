@@ -1,0 +1,51 @@
+
+start:
+    if:
+        player_coll:
+            stateset: "anim/player.fus"
+            ;;
+            ;;
+            ;;        .   .
+            ;;        *\*/*\*/*\
+            ;; ( )  . - + - + - +
+            ;;        */
+            ;;        .   .   .   .
+    then:
+        play: "actor/guide/rec/start_to_start2.fus"
+        goto: start2
+    if() then:
+        play: "actor/guide/rec/start.fus"
+
+start2:
+    if:
+        player_coll:
+            stateset: "anim/player.fus"
+            ;;  + - + - + - + - +
+            ;; /*\*/*\*/*\*/*\*/*\
+            ;;+ - + - + - + - + - +
+            ;; \*/*\*/*\*/*\*/*\*/
+            ;;  + - + - + - + - +
+            ;;           \*/*\*/
+            ;;           (+)- +
+    then:
+        play: "actor/guide/rec/start2_to_start3.fus"
+        goto: start2
+    if() then:
+        play: "actor/guide/rec/start2.fus"
+
+start3:
+    if:
+        player_coll:
+            stateset: "anim/player.fus"
+            ;;   + - + - + - + - +
+            ;;  /*\*/*\*/*\*/*\*/*\
+            ;; + - + - + - + - + - +
+            ;;  \*/*\*/*\*/*\*/*\*/
+            ;;  (+)- + - + - + - +
+    then:
+        play: "actor/guide/rec/start3_to_dodecas_0_0.fus"
+        goto: dodecas_0_0
+    if() then:
+        play: "actor/guide/rec/start3.fus"
+
+dodecas_0_0()

@@ -1,0 +1,12 @@
+anim: "anim/player.fus"
+state: "stand"
+pos: ( 5 5)
+rot: 0
+turn: yes
+keys:
+    x:
+    u:
+    d:
+    l:
+    r:
+data: " w10"

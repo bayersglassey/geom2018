@@ -1,0 +1,12 @@
+anim: "anim/player.fus"
+state: "stand"
+pos: ( 13 18)
+rot: 0
+turn: yes
+keys:
+    x:
+    u:
+    d:
+    l:
+    r:
+data: " w64+r w2-r w88+l w3-l w65"
