@@ -8,6 +8,9 @@ spawn: "data/maps/demo/start.fus"
 default_palette: "data/pal1.fus"
 default_tileset: "data/tileset1.fus"
 
+actors:
+    : "actor/guide/actor.fus"
+
 submaps:
     :
         file: "data/maps/demo/start.fus"

@@ -27,7 +27,7 @@ start2:
             ;;           (+)- +
     then:
         play: "actor/guide/rec/start2_to_start3.fus"
-        goto: start2
+        goto: start3
     if() then:
         play: "actor/guide/rec/start2.fus"
 
