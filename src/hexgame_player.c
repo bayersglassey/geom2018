@@ -281,8 +281,6 @@ char player_get_key_c(player_t *player, int key_i, bool absolute){
 int player_process_event(player_t *player, SDL_Event *event){
 
     if(player->state == NULL){
-        fprintf(stderr, "%s: Skipping player with NULL state!\n",
-            __FILE__);
         return 0;}
 
     if(event->type == SDL_KEYDOWN || event->type == SDL_KEYUP){
@@ -438,8 +436,6 @@ int player_step(player_t *player, hexgame_t *game){
     int err;
 
     if(player->state == NULL){
-        fprintf(stderr, "%s: Skipping player with NULL state!\n",
-            __FILE__);
         return 0;}
 
     hexmap_t *map = game->map;
@@ -569,8 +565,6 @@ int player_render(player_t *player,
     int err;
 
     if(player->state == NULL){
-        fprintf(stderr, "%s: Skipping player with NULL state!\n",
-            __FILE__);
         return 0;}
 
     prismelrenderer_t *prend = map->prend;
