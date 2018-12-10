@@ -1,7 +1,8 @@
 
 stand:
     rgraph: "big_roller"
-    crushbox:
+    crushes
+    hitbox:
         ;;      .
         ;;      *
         ;;    . - .
@@ -105,7 +106,8 @@ stand:
 
 grab:
     rgraph: "big_roller_grab"
-    crushbox:
+    crushes
+    hitbox:
         ;;      .   .   .
         ;;      *\*/*\*
         ;;    . - + - .

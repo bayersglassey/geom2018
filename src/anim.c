@@ -24,6 +24,7 @@ void stateset_cleanup(stateset_t *stateset){
 int stateset_init(stateset_t *stateset, char *filename){
     stateset->filename = filename;
     ARRAY_INIT(stateset->states)
+    stateset->is_projectile = false;
     return 0;
 }
 
@@ -53,6 +54,12 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
     prismelrenderer_t *prend, vecspace_t *space
 ){
     int err;
+
+    if(fus_lexer_got(lexer, "projectile")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        stateset->is_projectile = true;
+    }
 
     while(1){
         if(fus_lexer_done(lexer))break;
@@ -84,6 +91,12 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
         err = state_init(state, stateset, name, rgraph);
         if(err)return err;
 
+        if(fus_lexer_got(lexer, "crushes")){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            state->crushes = true;
+        }
+
         if(fus_lexer_got(lexer, "hitbox")){
             err = fus_lexer_next(lexer);
             if(err)return err;
@@ -99,32 +112,6 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             if(err)return err;
             state->hitbox = collmap;
 
-            err = fus_lexer_get(lexer, ")");
-            if(err)return err;
-        }
-
-        if(fus_lexer_got(lexer, "crushbox")){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
-            err = fus_lexer_get(lexer, "(");
-            if(err)return err;
-
-            if(fus_lexer_got(lexer, "hitbox")){
-                err = fus_lexer_next(lexer);
-                if(err)return err;
-                state->crushbox = state->hitbox;
-            }else{
-                hexcollmap_t *collmap = calloc(1, sizeof(*collmap));
-                if(collmap == NULL)return 1;
-                err = hexcollmap_init(collmap, space,
-                    strdup(lexer->filename));
-                if(err)return err;
-                err = hexcollmap_parse(collmap, lexer, true);
-                if(err)return err;
-                state->crushbox = collmap;
-            }
-
-            if(err)return err;
             err = fus_lexer_get(lexer, ")");
             if(err)return err;
         }
@@ -422,16 +409,8 @@ const char *state_effect_types[] = {
 void state_cleanup(state_t *state){
     free(state->name);
     if(state->hitbox != NULL){
-
-        /* Don't free the same hexcollmap twice! */
-        if(state->crushbox == state->hitbox)state->crushbox = NULL;
-
         hexcollmap_cleanup(state->hitbox);
         free(state->hitbox);
-    }
-    if(state->crushbox != NULL){
-        hexcollmap_cleanup(state->crushbox);
-        free(state->crushbox);
     }
     for(int i = 0; i < state->rules_len; i++){
         state_rule_t *rule = state->rules[i];
@@ -447,7 +426,7 @@ int state_init(state_t *state, stateset_t *stateset, char *name,
     state->name = name;
     state->rgraph = rgraph;
     state->hitbox = NULL;
-    state->crushbox = NULL;
+    state->crushes = false;
     ARRAY_INIT(state->rules)
     return 0;
 }

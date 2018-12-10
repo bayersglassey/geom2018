@@ -17,13 +17,15 @@ typedef struct state {
     char *name;
     rendergraph_t *rgraph;
     hexcollmap_t *hitbox;
-    hexcollmap_t *crushbox;
+    bool crushes;
     ARRAY_DECL(struct state_rule*, rules)
 } state_t;
 
 typedef struct stateset {
     char *filename;
     ARRAY_DECL(struct state*, states)
+
+    bool is_projectile;
 } stateset_t;
 
 typedef struct state_rule {

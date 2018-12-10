@@ -195,27 +195,33 @@ int hexgame_step(hexgame_t *game){
         player_init_trf(player, &hitbox_trf, space);
 
         /* This player has a hitbox! So collide it against all other players'
-        crushboxes. */
-        for(int j = 0; j < game->players_len; j++){
-            if(i == j)continue;
+        hitboxes. */
+        for(int j = i + 1; j < game->players_len; j++){
             player_t *player_other = game->players[j];
             if(player_other->state == NULL)continue;
-            hexcollmap_t *crushbox = player_other->state->crushbox;
-            if(crushbox == NULL)continue;
+            hexcollmap_t *hitbox_other = player_other->state->hitbox;
+            if(hitbox_other == NULL)continue;
 
-            trf_t crushbox_trf;
-            player_init_trf(player_other, &crushbox_trf, space);
+            trf_t hitbox_other_trf;
+            player_init_trf(player_other, &hitbox_other_trf, space);
 
-            /* The other player has a crushbox! Do the collision... */
+            /* The other player has a hitbox! Do the collision... */
             bool collide = hexcollmap_collide(hitbox, &hitbox_trf,
-                crushbox, &crushbox_trf, space, false);
+                hitbox_other, &hitbox_other_trf, space, false);
             if(collide){
-                /* There was a collision! So player dies. :( */
+                /* There was a collision!
+                Now we find out who was right... and who was dead. */
 
                 /* Hardcoded "dead" state name... I suppose we could
                 have a char* player->dead_anim_name, but whatever. */
-                err = player_set_state(player, "dead");
-                if(err)return err;
+                if(player->state->crushes){
+                    err = player_set_state(player_other, "dead");
+                    if(err)return err;
+                }
+                if(player_other->state->crushes){
+                    err = player_set_state(player, "dead");
+                    if(err)return err;
+                }
             }
         }
     }
