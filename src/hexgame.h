@@ -143,6 +143,21 @@ int player_recording_step(player_t *player);
 
 
 
+/*********
+ * ACTOR *
+ *********/
+
+typedef struct actor {
+    player_t *player;
+} actor_t;
+
+void actor_cleanup(actor_t *actor);
+int actor_init(actor_t *actor);
+
+int actor_step(actor_t *actor, struct hexgame *game);
+
+
+
 /***********
  * HEXGAME *
  ***********/
@@ -156,6 +171,7 @@ typedef struct hexgame {
     vec_t camera_pos;
     rot_t camera_rot;
     ARRAY_DECL(player_t*, players)
+    ARRAY_DECL(actor_t*, actors)
 } hexgame_t;
 
 

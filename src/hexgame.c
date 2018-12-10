@@ -29,6 +29,7 @@
 
 void hexgame_cleanup(hexgame_t *game){
     ARRAY_FREE_PTR(player_t*, game->players, player_cleanup)
+    ARRAY_FREE_PTR(actor_t*, game->actors, actor_cleanup)
 }
 
 int hexgame_init(hexgame_t *game, hexmap_t *map){
@@ -40,6 +41,7 @@ int hexgame_init(hexgame_t *game, hexmap_t *map){
     game->camera_rot = 0;
     game->cur_submap = NULL;
     ARRAY_INIT(game->players)
+    ARRAY_INIT(game->actors)
     return 0;
 }
 
@@ -173,6 +175,13 @@ int hexgame_step(hexgame_t *game){
     /* Animate palette */
     if(game->cur_submap != NULL){
         err = palette_step(&game->cur_submap->palette);
+        if(err)return err;
+    }
+
+    /* Do 1 gameplay step for each actor */
+    for(int i = 0; i < game->actors_len; i++){
+        actor_t *actor = game->actors[i];
+        err = actor_step(actor, game);
         if(err)return err;
     }
 
