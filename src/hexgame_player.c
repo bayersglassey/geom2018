@@ -369,9 +369,14 @@ static int player_match_rule(player_t *player,
             bool all = flags & 1;
             bool yes = flags & 2;
 
-            bool collide = hexmap_collide(map,
-                cond->u.coll.collmap, &trf, yes? all: !all);
-            rule_matched = yes? collide: !collide;
+            if(cond->u.coll.against_players){
+                /* TODO: Implement this! */
+                rule_matched = false;
+            }else{
+                bool collide = hexmap_collide(map,
+                    cond->u.coll.collmap, &trf, yes? all: !all);
+                rule_matched = yes? collide: !collide;
+            }
         }else{
             fprintf(stderr, "Unrecognized state rule condition: %s",
                 cond->type);
@@ -486,6 +491,20 @@ static int player_apply_rule(player_t *player,
                     action_name);
                 return 2;
             }
+        }else if(effect->type == state_effect_type_play){
+            if(actor == NULL){
+                fprintf(stderr, "No actor");
+                RULE_PERROR()
+                break;}
+
+            const char *play_filename = effect->u.play_filename;
+            player_recording_reset(&player->recording);
+            err = player_recording_load(&player->recording,
+                play_filename, game, false);
+            if(err)return err;
+
+            err = player_play_recording(player);
+            if(err)return err;
         }else if(effect->type == state_effect_type_die){
             if(player == NULL){
                 fprintf(stderr, "No player");
@@ -510,15 +529,16 @@ int state_handle_rules(state_t *state, player_t *player,
     for(int i = 0; i < state->rules_len; i++){
         state_rule_t *rule = state->rules[i];
 
-        if(DEBUG_RULES)printf("player %p rule %i:\n", player, i);
+        if(DEBUG_RULES){printf("player %p, actor %p, rule %i:\n",
+            player, actor, i);}
 
         bool rule_matched;
-        err = player_match_rule(player, NULL, game, rule,
+        err = player_match_rule(player, actor, game, rule,
             &rule_matched);
         if(err)return err;
 
         if(rule_matched){
-            err = player_apply_rule(player, NULL, game, rule);
+            err = player_apply_rule(player, actor, game, rule);
             if(err)return err;
             break;
         }

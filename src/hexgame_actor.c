@@ -66,5 +66,14 @@ int actor_set_state(actor_t *actor, const char *state_name){
 }
 
 int actor_step(actor_t *actor, struct hexgame *game){
+    int err;
+    player_t *player = actor->player;
+    if(player == NULL || player->recording.action == 0){
+        /* No player, or recording not playing */
+
+        /* Handle current state's rules */
+        err = state_handle_rules(actor->state, player, actor, game);
+        if(err)return err;
+    }
     return 0;
 }
