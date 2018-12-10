@@ -162,9 +162,8 @@ int hexmap_recording_init(hexmap_recording_t *recording, char *filename,
 
 void hexmap_cleanup(hexmap_t *map){
     free(map->name);
-
+    ARRAY_FREE_PTR(char*, map->actor_filenames, (void));
     ARRAY_FREE_PTR(hexmap_submap_t*, map->submaps, hexmap_submap_cleanup)
-
     ARRAY_FREE_PTR(hexmap_recording_t*, map->recordings,
         hexmap_recording_cleanup)
 }
@@ -181,8 +180,8 @@ int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
     vec_cpy(prend->space->dims, map->unit, unit);
     vec_zero(space->dims, map->spawn);
 
+    ARRAY_INIT(map->actor_filenames)
     ARRAY_INIT(map->submaps)
-
     ARRAY_INIT(map->recordings)
     return 0;
 }
@@ -271,6 +270,28 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
     err = fus_lexer_get_str(lexer, &default_tileset_filename);
     if(err)return err;
     err = fus_lexer_get(lexer, ")");
+    if(err)return err;
+
+
+    /* parse actors */
+    err = fus_lexer_get(lexer, "actors");
+    if(err)return err;
+    err = fus_lexer_get(lexer, "(");
+    if(err)return err;
+    while(1){
+        if(fus_lexer_got(lexer, ")"))break;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+
+        char *actor_filename;
+        err = fus_lexer_get_str(lexer, &actor_filename);
+        if(err)return err;
+        ARRAY_PUSH(char*, map->actor_filenames, actor_filename);
+
+        err = fus_lexer_get(lexer, ")");
+        if(err)return err;
+    }
+    err = fus_lexer_next(lexer);
     if(err)return err;
 
 

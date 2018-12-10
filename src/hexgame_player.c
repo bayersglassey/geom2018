@@ -131,6 +131,7 @@ int player_init(player_t *player, hexmap_t *map,
         player_set_state(player, NULL);
     }
 
+    if(respawn_pos == NULL)respawn_pos = map->spawn;
     vec_cpy(map->space->dims, player->respawn_pos, respawn_pos);
     vec_cpy(map->space->dims, player->pos, respawn_pos);
 

@@ -183,6 +183,7 @@ typedef struct hexgame {
 
 void hexgame_cleanup(hexgame_t *game);
 int hexgame_init(hexgame_t *game, hexmap_t *map);
+int hexgame_load_actors(hexgame_t *game);
 int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard);
 int hexgame_reset_player_by_keymap(hexgame_t *game, int keymap, bool hard);
 int hexgame_load_player_recording(hexgame_t *game, const char *filename,

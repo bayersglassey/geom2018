@@ -109,6 +109,9 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         if(err)return err;
     }
 
+    err = hexgame_load_actors(&app->hexgame);
+    if(err)return err;
+
     for(int i = 0; i < app->hexmap.recordings_len; i++){
         hexmap_recording_t *recording = app->hexmap.recordings[i];
         err = hexgame_load_player_recording(&app->hexgame,

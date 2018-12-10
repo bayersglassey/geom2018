@@ -45,6 +45,24 @@ int hexgame_init(hexgame_t *game, hexmap_t *map){
     return 0;
 }
 
+int hexgame_load_actors(hexgame_t *game){
+    int err;
+    hexmap_t *map = game->map;
+    for(int i = 0; i < map->actor_filenames_len; i++){
+        const char *filename = map->actor_filenames[i];
+
+        ARRAY_PUSH_NEW(player_t*, game->players, player)
+        err = player_init(player, game->map, NULL, NULL,
+            -1, NULL, NULL);
+        if(err)return err;
+
+        ARRAY_PUSH_NEW(actor_t*, game->actors, actor)
+        err = actor_init(actor, game->map, player, filename, NULL);
+        if(err)return err;
+    }
+    return 0;
+}
+
 int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard){
     vec_cpy(game->map->space->dims, player->pos,
         hard? game->map->spawn: player->respawn_pos);
