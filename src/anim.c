@@ -359,13 +359,13 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     err = fus_lexer_get(lexer, "(");
                     if(err)return err;
 
-                    char *play_name;
-                    err = fus_lexer_get_str(lexer, &play_name);
+                    char *play_filename;
+                    err = fus_lexer_get_str(lexer, &play_filename);
                     if(err)return err;
 
                     ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_play;
-                    effect->u.play_name = play_name;
+                    effect->u.play_filename = play_filename;
 
                     err = fus_lexer_get(lexer, ")");
                     if(err)return err;
@@ -483,7 +483,7 @@ void state_rule_cleanup(state_rule_t *rule){
         }else if(effect->type == state_effect_type_action){
             free(effect->u.action_name);
         }else if(effect->type == state_effect_type_play){
-            free(effect->u.play_name);
+            free(effect->u.play_filename);
         }
     }
     free(rule->effects);

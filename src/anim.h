@@ -84,7 +84,7 @@ typedef struct state_effect {
         int delay;
         char *goto_name;
         char *action_name;
-        char *play_name;
+        char *play_filename;
         vec_t vec;
         rot_t rot;
     } u;
