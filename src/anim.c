@@ -191,7 +191,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     if(err)return err;
 
                     bool against_players = false;
-                    if(fus_lexer_got(lexer, "player")){
+                    if(fus_lexer_got(lexer, "players")){
                         err = fus_lexer_next(lexer);
                         if(err)return err;
                         against_players = true;
