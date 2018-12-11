@@ -516,13 +516,9 @@ static int player_apply_rule(player_t *player,
                 fprintf(stderr, "No actor");
                 RULE_PERROR()
                 break;}
-
             const char *play_filename = effect->u.play_filename;
-            player_recording_reset(&player->recording);
-            err = player_recording_load(&player->recording,
-                play_filename, game, false);
+            err = player_load_recording(player, play_filename, game, false);
             if(err)return err;
-
             err = player_play_recording(player);
             if(err)return err;
         }else if(effect->type == state_effect_type_die){

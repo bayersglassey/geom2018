@@ -209,6 +209,18 @@ const char *get_next_recording_filename(){
  * PLAYER RECORDING *
  ********************/
 
+int player_load_recording(player_t *player, const char *filename,
+    hexgame_t *game, bool loop
+){
+    int err;
+    player_recording_t *rec = &player->recording;
+
+    player_recording_reset(rec);
+    err = player_recording_load(rec, filename, game, loop);
+    if(err)return err;
+    return 0;
+}
+
 int player_play_recording(player_t *player){
     int err;
     player_recording_t *rec = &player->recording;

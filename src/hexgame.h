@@ -138,6 +138,8 @@ int player_render(player_t *player,
     SDL_Palette *pal, int x0, int y0, int zoom,
     hexmap_t *map, vec_t camera_renderpos, prismelmapper_t *mapper);
 
+int player_load_recording(player_t *player, const char *filename,
+    struct hexgame *game, bool loop);
 int player_play_recording(player_t *player);
 int player_restart_recording(player_t *player, bool hard);
 int player_start_recording(player_t *player, char *name);
