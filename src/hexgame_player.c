@@ -362,19 +362,39 @@ static int player_match_rule(player_t *player,
                 RULE_PERROR()
                 break;}
 
-            trf_t trf;
-            player_init_trf(player, &trf, space);
+            if(player->state == NULL){
+                rule_matched = false;
+                break;}
+
+            trf_t hitbox_trf;
+            player_init_trf(player, &hitbox_trf, space);
+            hexcollmap_t *hitbox = cond->u.coll.collmap;
 
             int flags = cond->u.coll.flags;
             bool all = flags & 1;
             bool yes = flags & 2;
 
             if(cond->u.coll.against_players){
-                /* TODO: Implement this! */
-                rule_matched = false;
+                int n_matches = 0;
+                for(int j = 0; j < game->players_len; j++){
+                    player_t *player_other = game->players[j];
+                    if(player == player_other)continue;
+                    if(player_other->state == NULL)continue;
+                    hexcollmap_t *hitbox_other = player_other->state->hitbox;
+                    if(hitbox_other == NULL)continue;
+
+                    trf_t hitbox_other_trf;
+                    player_init_trf(player_other, &hitbox_other_trf, space);
+
+                    /* The other player has a hitbox! Do the collision... */
+                    bool collide = hexcollmap_collide(hitbox, &hitbox_trf,
+                        hitbox_other, &hitbox_other_trf, space, yes? all: !all);
+                    if(yes? collide: !collide)n_matches++;
+                }
+                rule_matched = n_matches > 0;
             }else{
                 bool collide = hexmap_collide(map,
-                    cond->u.coll.collmap, &trf, yes? all: !all);
+                    hitbox, &hitbox_trf, yes? all: !all);
                 rule_matched = yes? collide: !collide;
             }
         }else{
