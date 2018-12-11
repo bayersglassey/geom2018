@@ -182,11 +182,6 @@ Or you have to bring these things to spidertown.
 ...?
 
 
-Move the setting of player->palmapper out of player_init.
-We should be able to specify it for individual entries of the "recs"
-section of each submap.
-
-
 Dec 9, 2018:
 ------------
 

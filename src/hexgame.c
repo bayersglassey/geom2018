@@ -48,13 +48,17 @@ int hexgame_init(hexgame_t *game, hexmap_t *map){
 int hexgame_load_actors(hexgame_t *game){
     int err;
     hexmap_t *map = game->map;
-    for(int i = 0; i < map->actor_filenames_len; i++){
-        const char *filename = map->actor_filenames[i];
+    for(int i = 0; i < map->actor_recordings_len; i++){
+        hexmap_recording_t *actor_recording =
+            map->actor_recordings[i];
+        const char *filename = actor_recording->filename;
 
         ARRAY_PUSH_NEW(player_t*, game->players, player)
         err = player_init(player, game->map, NULL, NULL,
             -1, NULL, NULL);
         if(err)return err;
+
+        player->palmapper = actor_recording->palmapper;
 
         ARRAY_PUSH_NEW(actor_t*, game->actors, actor)
         err = actor_init(actor, game->map, player, filename, NULL);

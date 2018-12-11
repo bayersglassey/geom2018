@@ -9,7 +9,7 @@ default_palette: "data/pal1.fus"
 default_tileset: "data/tileset1.fus"
 
 actors:
-    : "actor/guide/actor.fus"
+    : "actor/guide/actor.fus" "player_cpu"
 
 submaps:
     :
