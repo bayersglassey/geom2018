@@ -202,3 +202,18 @@ Something is weird about the "-2+" etc in the following:
 
 ...I think those should all either be "0+" or the non-negative versions
 of themselves (if you see what I mean).
+
+
+Dec 10, 2018:
+-------------
+
+Actor states should maybe come with a "pos" so we don't have to rely on
+the position of the last recording to have played...
+
+Actor recordings: if we get a fus format for ranges of frames, and a
+half-decent tool for stepping through a recording (e.g. if player->keymap
+>= 0 then the arrow keys control their recording, maybe left/right is
+forward/back a frame, up/down jumps to start/end, action pauses/unpauses),
+then we could specify on which frames the given rules of an actor state
+should be run.
+
