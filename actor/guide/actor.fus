@@ -1,7 +1,7 @@
 
 start:
     if:
-        coll: player any yes
+        coll: players any yes
             ;;
             ;;
             ;;        .   .
@@ -17,14 +17,14 @@ start:
 
 start2:
     if:
-        coll: player any yes
-            ;;  + - + - + - + - +
-            ;; /*\*/*\*/*\*/*\*/*\
-            ;;+ - + - + - + - + - +
-            ;; \*/*\*/*\*/*\*/*\*/
-            ;;  + - + - + - + - +
-            ;;           \*/*\*/
-            ;;           (+)- +
+        coll: players any yes
+            ;;   + - + - +
+            ;;  /*\*/*\*/*\
+            ;; + - + - + - + - + - +
+            ;;  \*/*\*/*\*/*\*/*\*/*\
+            ;;   + - + - + - + - + - +
+            ;;    \*/*\*/*\*/*\*/*\*/
+            ;;    (+)- + - + - + - +
     then:
         play: "actor/guide/rec/start2_to_start3.fus"
         goto: start3
@@ -33,7 +33,7 @@ start2:
 
 start3:
     if:
-        coll: player any yes
+        coll: players any yes
             ;;   + - + - + - + - +
             ;;  /*\*/*\*/*\*/*\*/*\
             ;; + - + - + - + - + - +
@@ -45,4 +45,6 @@ start3:
     if() then:
         play: "actor/guide/rec/start3.fus"
 
-dodecas_0_0()
+dodecas_0_0:
+    if() then:
+        play: "actor/guide/rec/dodecas_0_0.fus"
