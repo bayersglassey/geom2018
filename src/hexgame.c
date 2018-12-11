@@ -133,6 +133,7 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
             }
         }else if(event->key.keysym.sym == SDLK_F10){
             /* load recording */
+            bool shift = event->key.keysym.mod & KMOD_SHIFT;
             const char *recording_filename = get_last_recording_filename();
             if(recording_filename == NULL){
                 fprintf(stderr, "Couldn't find file of last recording. "
@@ -140,9 +141,21 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
             }else{
                 fprintf(stderr, "Playing back from file: %s\n",
                     recording_filename);
-                err = hexgame_load_player_recording(game, recording_filename,
-                    -1, true);
-                if(err)return err;
+                if(shift){
+                    if(game->players_len < 1){
+                        fprintf(stderr, "No player!\n");
+                        return 2;}
+                    player_t *player = game->players[0];
+                    err = player_load_recording(player,
+                        recording_filename, game, true);
+                    if(err)return err;
+                    err = player_play_recording(player);
+                    if(err)return err;
+                }else{
+                    err = hexgame_load_player_recording(game,
+                        recording_filename, -1, true);
+                    if(err)return err;
+                }
             }
 #ifdef GEOM_HEXGAME_DEBUG_MALLOC
         }else if(event->key.keysym.sym == SDLK_F11){
