@@ -212,3 +212,9 @@ forward/back a frame, up/down jumps to start/end, action pauses/unpauses),
 then we could specify on which frames the given rules of an actor state
 should be run.
 
+
+Dec 11, 2018:
+-------------
+
+Need that "press '1' to go back..." message ASAP for useability, I believe.
+
