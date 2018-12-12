@@ -1,9 +1,16 @@
-# GEOM 2018
+# DEPTHS OF UO
 
-## What is this
 
-A graphics library dealing with tesselations of the plane.
-And a bit of a game demo, a kind of puzzly arcadey look at the triangular grid.
+## What is "Depths of Uo"?
+
+A game in development, a kind of puzzly arcadey look at the triangular grid.
+
+
+## What is "geom2018"?
+
+A graphics library for tesselating the plane with squares & triangles.
+The game demo has sprouted from it, and come to overshadow the library...
+
 
 ## How to compile & run the game
 
@@ -15,11 +22,34 @@ Once the game is running, use the arrow keys to move, Escape to quit.
 If you die or get stuck, press '1' to respawn at the last save point you touched.
 (Save points are the glowing rotating green things.)
 
-F5 enters/exits the debug console, if you want to poke around a bit.
+Hold shift while pressing '1' to return to the very start of the game.
 
-Not very user-friendly yet, is it? Don't worry, we're getting there.
+Press Spacebar to spit harmless balls.
+Their only use is to look cool, and help you judge your jumps.
 
-## Screenshots
+
+## "Depths of Uo" screenshots
+
+### Why hello.
+![](/img/start_0.gif)
+
+### Don't get crushed
+![](/img/big_0.gif)
+
+### Strange creatures in the depths
+![](/img/jungle_0.gif)
+
+### Run run run
+![](/img/jungle_1.gif)
+
+### RUUUNNNN
+![](/img/jungle_2.gif)
+
+### Your useless bouncing spit
+![](/img/map1_0.gif)
+
+
+## "geom2018" screenshots
 
 ### A little pattern:
 ![](/img/screen4.png)
