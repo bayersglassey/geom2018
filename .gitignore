@@ -4,4 +4,9 @@
 /gmon.out
 /respawn.txt
 /data/rec???.fus
+
+# core dumps
 vgcore.*
+
+# byzanz output (e.g. gameplay video GIFs)
+out.*
