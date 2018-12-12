@@ -209,11 +209,17 @@ int hexgame_step(hexgame_t *game){
     hexmap_t *map = game->map;
     vecspace_t *space = map->space;
 
+#ifndef DONT_ANIMATE_PALETTE
     /* Animate palette */
+    /* NOTE: compiling with -DDONT_ANIMATE_PALETTE is useful for producing
+    animated GIF gameplay clips, since our palette changes are too subtle
+    for my GIF capturing software (byzanz), leading to periodic flashes of
+    different colours. */
     if(game->cur_submap != NULL){
         err = palette_step(&game->cur_submap->palette);
         if(err)return err;
     }
+#endif
 
     /* Do 1 gameplay step for each actor */
     for(int i = 0; i < game->actors_len; i++){
