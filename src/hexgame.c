@@ -36,8 +36,10 @@ int hexgame_init(hexgame_t *game, hexmap_t *map){
     game->frame_i = 0;
     game->zoomout = false;
     game->follow = false;
+    game->smooth_scroll = false;
     game->map = map;
     vec_zero(map->space->dims, game->camera_pos);
+    vec_zero(vec4.dims, game->camera_renderpos);
     game->camera_rot = 0;
     game->cur_submap = NULL;
     ARRAY_INIT(game->players)
@@ -120,6 +122,8 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
             game->zoomout = true;
         }else if(event->key.keysym.sym == SDLK_F7){
             game->follow = !game->follow;
+        }else if(event->key.keysym.sym == SDLK_F8){
+            game->smooth_scroll = !game->smooth_scroll;
         }else if(event->key.keysym.sym == SDLK_F9){
             /* save recording */
             if(game->players_len >= 1){
@@ -317,6 +321,22 @@ int hexgame_step(hexgame_t *game){
         }
     }
 
+    /* Scroll renderpos */
+    if(game->smooth_scroll){
+        vec_t target_renderpos;
+        vec4_vec_from_hexspace(target_renderpos, game->camera_pos);
+
+        vec_ptr_t camera_renderpos = game->camera_renderpos;
+        for(int i = 0; i < vec4.dims; i++){
+            int a0 = camera_renderpos[i];
+            int a1 = target_renderpos[i];
+            int add = (a1 > a0)? 1: (a1 < a0)? -1: 0;
+            camera_renderpos[i] = a0 + add;
+        }
+    }else{
+        vec4_vec_from_hexspace(game->camera_renderpos, game->camera_pos);
+    }
+
     return 0;
 }
 
@@ -334,8 +354,7 @@ int hexgame_render(hexgame_t *game,
     hexmap_t *map = game->map;
     vecspace_t *space = map->space;
 
-    vec_t camera_renderpos;
-    vec4_vec_from_hexspace(camera_renderpos, game->camera_pos);
+    vec_ptr_t camera_renderpos = game->camera_renderpos;
 
     prismelmapper_t *mapper = NULL;
 

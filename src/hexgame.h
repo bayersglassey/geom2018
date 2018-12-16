@@ -179,9 +179,11 @@ typedef struct hexgame {
     int frame_i;
     bool zoomout;
     bool follow;
+    bool smooth_scroll;
     hexmap_t *map;
     hexmap_submap_t *cur_submap;
-    vec_t camera_pos;
+    vec_t camera_pos; /* pos within hexmap */
+    vec_t camera_renderpos; /* vec4 pos used for rendering */
     rot_t camera_rot;
     ARRAY_DECL(player_t*, players)
     ARRAY_DECL(actor_t*, actors)
