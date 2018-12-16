@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "vec4.h"
+#include "hexspace.h"
 #include "bounds.h"
 
 
@@ -9,12 +10,39 @@ char ok_char(bool ok){
     return ok? '.': 'X';
 }
 
+int hexspace_test(vec_t v, int x, int y){
+    vec_t w;
+    hexspace_set(w, x, y);
+    bool ok = vec_eq(HEXSPACE_DIMS, v, w);
+    printf("%c ", ok_char(ok)); vec_printf(HEXSPACE_DIMS, v);
+    printf(" == "); vec_printf(HEXSPACE_DIMS, w); printf("\n");
+    return ok? 0: 1;
+}
+
+int hexspace_test_angle(vec_t v, rot_t rot_expected,
+    int dist_expected, int angle_expected
+){
+    rot_t rot;
+    int dist;
+    int angle;
+    hexspace_angle(v, &rot, &dist, &angle);
+    bool ok =
+        (rot == rot_expected) &&
+        (dist == dist_expected) &&
+        (angle == angle_expected);
+    printf("%c ", ok_char(ok)); vec_printf(HEXSPACE_DIMS, v);
+    printf(" -> (%i, %i, %i) == (%i, %i, %i)\n",
+        rot, dist, angle,
+        rot_expected, dist_expected, angle_expected);
+    return ok? 0: 1;
+}
+
 int vec4_test(vec_t v, int a, int b, int c, int d){
     vec_t w;
     vec4_set(w, a, b, c, d);
-    bool ok = vec_eq(4, v, w);
-    printf("%c ", ok_char(ok)); vec_printf(4, v);
-    printf(" == "); vec_printf(4, w); printf("\n");
+    bool ok = vec_eq(VEC4_DIMS, v, w);
+    printf("%c ", ok_char(ok)); vec_printf(VEC4_DIMS, v);
+    printf(" == "); vec_printf(VEC4_DIMS, w); printf("\n");
     return ok? 0: 1;
 }
 
@@ -54,7 +82,7 @@ int position_box_test(position_box_t *b1, int x, int y, int w, int h){
 }
 
 void print_title(const char *title){
-    printf("\n  << %s >>\n", title);
+    printf("\n  %s\n", title);
 }
 
 
@@ -66,46 +94,73 @@ int vec4_tests(){
     position_box_t pbox;
 
 
-    /****** VEC_T TESTS ******/
+    /****** HEXSPACE TESTS ******/
 
-        print_title("R A = B");
+        print_title("[hexspace] R X = X + Y");
+        hexspace_set(v, 1, 0);
+        hexspace_rot(v, 1);
+        fails += hexspace_test(v, 1, 1);
+
+        print_title("[hexspace] angle X");
+        hexspace_set(v, 1, 0);
+        fails += hexspace_test_angle(v, 0, 1, 0);
+
+        print_title("[hexspace] angle 3X");
+        hexspace_set(v, 3, 0);
+        fails += hexspace_test_angle(v, 0, 3, 0);
+
+        print_title("[hexspace] angle Y");
+        hexspace_set(v, 0, 1);
+        fails += hexspace_test_angle(v, 2, 1, 0);
+
+        print_title("[hexspace] angle (3X + Y)");
+        hexspace_set(v, 3, 1);
+        fails += hexspace_test_angle(v, 0, 3, 1);
+
+        print_title("[hexspace] angle (3X + 3Y - 2X)");
+        hexspace_set(v, 3 - 2, 3);
+        fails += hexspace_test_angle(v, 1, 3, 2);
+
+    /****** VEC4 VEC_T TESTS ******/
+
+        print_title("[vec4] R A = B");
         vec4_set(v, 1, 0, 0, 0);
         vec4_rot(v, 1);
         fails += vec4_test(v, 0, 1, 0, 0);
 
-        print_title("R^-1 B = A");
+        print_title("[vec4] R^-1 B = A");
         vec4_set(v, 0, 1, 0, 0);
         vec4_rot(v, vec4.rot_max-1);
         fails += vec4_test(v, 1, 0, 0, 0);
 
-        print_title("R^-1 (R D) = D");
+        print_title("[vec4] R^-1 (R D) = D");
         vec4_set(v, -1, 0, 1, 0);
         vec4_rot(v, vec4.rot_max-1);
         fails += vec4_test(v, 0, 0, 0, 1);
 
-        print_title("Stress test of rot");
+        print_title("[vec4] Stress test of rot");
         vec4_set(v, 1, 2, 3, 4);
         vec4_rot(v, 2);
         fails += vec4_test(v, -3, -4, 4, 6);
 
-        print_title("Stress test of flip");
+        print_title("[vec4] Stress test of flip");
         vec4_set(v, 1, 2, 3, 4);
         vec4_flip(v, true);
         fails += vec4_test(v, 4, 2, -3, -6);
 
-        print_title("2C 3B = 6D");
+        print_title("[vec4] 2C 3B = 6D");
         vec4_set(v, 0, 3, 0, 0);
         vec4_set(w, 0, 0, 2, 0);
         vec_mul(&vec4, v, w);
         fails += vec4_test(v, 0, 0, 0, 6);
 
-        print_title("Stress test of mul");
+        print_title("[vec4] Stress test of mul");
         vec4_set(v, 1, 2, 3, 4);
         vec4_set(w, 5, 6, 7, 8);
         vec_mul(&vec4, v, w);
         fails += vec4_test(v, -88, -36, 95, 112);
 
-        print_title("Test of render");
+        print_title("[vec4] Test of render");
         vec4_set(v, 1, 2, 3, 4);
         {
             int x, y;
@@ -113,9 +168,9 @@ int vec4_tests(){
             fails += renderpair_test(x, y, 9, -16);
         }
 
-    /****** TRF_T TESTS ******/
+    /****** VEC4 TRF_T TESTS ******/
 
-        print_title("Test identity trf");
+        print_title("[vec4] Test identity trf");
         vec4_set(v, 2, 3, 4, 5);
         t.flip = false;
         t.rot = 7;
@@ -132,7 +187,7 @@ int vec4_tests(){
         fails += vec4_test(v, 2, 3, 4, 5);
         fails += trf4_test(&t, false, 7, 2, 3, 4, 5);
 
-        print_title("Stress test {vec,trf}_apply & {vec,trf}_apply_inv");
+        print_title("[vec4] Stress test {vec,trf}_apply & {vec,trf}_apply_inv");
         vec4_set(v, 2, 3, 4, 5);
         t.flip = false;
         t.rot = 7;
@@ -156,7 +211,7 @@ int vec4_tests(){
             #####
             #####
         */
-        print_title("Conversion back & forth between position and "
+        print_title("[bounds] Conversion back & forth between position and "
             "boundary boxes");
         position_box_set(&pbox, 2, 1, 5, 4);
         boundary_box_from_position_box(&bbox, &pbox);
@@ -164,6 +219,7 @@ int vec4_tests(){
         position_box_from_boundary_box(&pbox, &bbox);
         fails += position_box_test(&pbox, 2, 1, 5, 4);
 
+results:
     /****** RESULTS ******/
 
     if(fails > 0){
