@@ -218,3 +218,19 @@ Dec 11, 2018:
 
 Need that "press '1' to go back..." message ASAP for useability, I believe.
 
+So, current objectives:
+
+    * Smooth scrolling
+    * Smooth transition between palettes
+        * Right now palettes live on submaps,
+          instead should live on hexmap & have names
+            * Can we make a generalized key-value storage thing yet?
+              Just use void* for goodness' sake
+    * Smooth transition between prismelmappers??? ("zoom levels")
+    * Display text on screen
+    * Improve "actors"...
+        * better recording tools
+        * actor states have a pos
+        * actor states run through ruleset on multiple frames
+        * actor variables
+
