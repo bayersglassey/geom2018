@@ -361,7 +361,7 @@ int test_app_mainloop(test_app_t *app){
             if(app->surface != NULL){
                 if(app->show_controls){
                     font_blitmsg(&app->font, app->surface, 0, 0,
-                        "Controls:\n"
+                        "*Controls:\n"
                         "  Arrow keys  -> Movement\n"
                         "  Spacebar    -> Spit\n"
                         "  1           -> Return to checkpoint\n"
