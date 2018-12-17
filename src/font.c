@@ -20,9 +20,10 @@ void font_get_char_coords(font_t *font, char c, int *char_x, int *char_y){
 }
 
 
-int font_load(font_t *font, const char *filename){
+int font_load(font_t *font, const char *filename, SDL_Palette *pal){
     font->char_w = 0;
     font->char_h = 0;
+    font->pal = pal;
     font->surface = NULL;
 
     int err;
@@ -77,18 +78,14 @@ int font_parse(font_t *font, fus_lexer_t *lexer){
     static const int n_chars_x = 16;
     static const int n_chars_y = 16;
 
-    SDL_Surface *surface = surface32_create(
-        char_w * n_chars_x, char_h * n_chars_y, true, false);
+    SDL_Surface *surface = surface8_create(
+        char_w * n_chars_x, char_h * n_chars_y, true, true, font->pal);
     if(surface == NULL)return 2;
 
     SDL_LockSurface(surface);
     SDL_memset(surface->pixels, 0, surface->h * surface->pitch);
 
-    Uint32 color_values[10] = {0};
-    for(int i = 1; i < 10; i++){
-        int c = 255 / 10 * i;
-        color_values[i] = SDL_MapRGB(surface->format, c, c, c);
-    }
+    Uint8 color_values[3] = {1+8, 1+7, 1+15};
 
 
     /************************
@@ -124,14 +121,19 @@ int font_parse(font_t *font, fus_lexer_t *lexer){
                     line_w, char_w);
                 return 2;}
 
-            Uint32 *p = surface32_get_pixel_ptr(surface,
+            Uint8 *p = surface8_get_pixel_ptr(surface,
                 char_x * char_w,
                 char_y * char_h + y);
 
             for(int x = 0; x < char_w; x++){
                 char c = line[x];
-                if(c >= '0' && c <= '9'){
+                if(c >= '0' && c <= '2'){
                     p[x] = color_values[c - '0'];
+                }else if(c == ' '){
+                    /* ok */
+                }else{
+                    fus_lexer_unexpected(lexer, "'0', '1', '2', or ' '");
+                    return 2;
                 }
             }
 

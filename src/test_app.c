@@ -68,7 +68,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         if(app->surface == NULL)return 1;
     }
 
-    err = font_load(&app->font, "data/font.fus");
+    err = font_load(&app->font, "data/font.fus", app->sdl_palette);
     if(err)return err;
 
     err = console_init(&app->console, 80, 40, 20000);
