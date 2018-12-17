@@ -235,10 +235,3 @@ So, current objectives:
         * actor states run through ruleset on multiple frames
         * actor variables
 
-
-Dec 17, 2018:
--------------
-
-Something's off about the camera...
-E.g. go to "pebbles" area, camera isn't quite where it's supposed to be.
-Tapping F7 twice results in slightly different camera pos

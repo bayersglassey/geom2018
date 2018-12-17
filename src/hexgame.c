@@ -345,7 +345,7 @@ int hexgame_step(hexgame_t *game){
         int dist, angle;
         hexspace_angle(diff, &rot, &dist, &angle);
 
-        if(dist > 1){
+        if(dist > 0){
             vec_t add;
             if(angle > 0){
                 /* X + R X */
