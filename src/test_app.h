@@ -39,6 +39,7 @@ typedef struct test_app {
     hexmap_t hexmap;
     hexgame_t hexgame;
     bool hexgame_running;
+    bool show_controls;
 
     int x0;
     int y0;

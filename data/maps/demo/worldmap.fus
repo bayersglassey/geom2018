@@ -19,10 +19,10 @@ submaps:
         mapper: ("quadruple")
         palette: "data/maps/demo/pals/start.fus"
         submaps:
-            :
-                bg
-                file: "data/maps/demo/keys_text.fus"
-                tileset: "data/tileset1_bg.fus"
+            #:
+            #    bg
+            #    file: "data/maps/demo/keys_text.fus"
+            #    tileset: "data/tileset1_bg.fus"
     :
         file: "data/maps/demo/start2.fus"
         pos: (7 11)

@@ -137,6 +137,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->frame_i = 0;
     app->loop = true;
     app->hexgame_running = true;
+    app->show_controls = true;
 
     test_app_init_input(app);
     return 0;
@@ -358,6 +359,17 @@ int test_app_mainloop(test_app_t *app){
             if(err)return err;
 
             if(app->surface != NULL){
+                if(app->show_controls){
+                    font_blitmsg(&app->font, app->surface, 0, 0,
+                        "Controls:\n"
+                        "  Arrow keys  -> Movement\n"
+                        "  Spacebar    -> Spit\n"
+                        "  1           -> Return to checkpoint\n"
+                        "  Shift + 1   -> Return to start of game\n"
+                        "  Enter       -> Show/hide this message\n"
+                    );
+                }
+
                 SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
                     app->renderer, app->surface);
                 RET_IF_SDL_NULL(render_texture);
@@ -458,6 +470,8 @@ int test_app_mainloop(test_app_t *app){
             if(event.type == SDL_KEYDOWN){
                 if(event.key.keysym.sym == SDLK_ESCAPE){
                     app->loop = false; break;
+                }else if(event.key.keysym.sym == SDLK_RETURN){
+                    app->show_controls = !app->show_controls; break;
                 }else if(event.key.keysym.sym == SDLK_F5){
                     if(app->hexgame_running){
                         app->hexgame_running = false;
