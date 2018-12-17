@@ -109,6 +109,12 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         if(err)return err;
     }
 
+    app->hexgame.reset_camera = true;
+        /* game is initialized with camera at (0, 0).
+        If smooth scrolling is on, it'll scroll from there to player 0's
+        spawn position.
+        But we want camera to start off at player's spawn position. */
+
     err = hexgame_load_actors(&app->hexgame);
     if(err)return err;
 

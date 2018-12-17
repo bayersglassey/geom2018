@@ -187,6 +187,9 @@ typedef struct hexgame {
     vec_t camera_scrollpos;
         /* pos to which we have scrolled so far */
     rot_t camera_rot;
+    bool reset_camera;
+        /* If true, on next step camera_scrollpos should jump to camera_pos
+        and reset_camera should be set to false. */
     ARRAY_DECL(player_t*, players)
     ARRAY_DECL(actor_t*, actors)
 } hexgame_t;
@@ -194,6 +197,8 @@ typedef struct hexgame {
 
 void hexgame_cleanup(hexgame_t *game);
 int hexgame_init(hexgame_t *game, hexmap_t *map);
+void hexgame_set_camera(hexgame_t *game, vec_t camera_pos,
+    rot_t camera_rot);
 int hexgame_load_actors(hexgame_t *game);
 int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard);
 int hexgame_reset_player_by_keymap(hexgame_t *game, int keymap, bool hard);

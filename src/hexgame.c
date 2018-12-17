@@ -38,13 +38,21 @@ int hexgame_init(hexgame_t *game, hexmap_t *map){
     game->follow = false;
     game->smooth_scroll = true;
     game->map = map;
-    vec_zero(map->space->dims, game->camera_pos);
-    vec_zero(map->space->dims, game->camera_scrollpos);
-    game->camera_rot = 0;
     game->cur_submap = NULL;
+    hexgame_set_camera(game, (vec_t){0}, 0);
     ARRAY_INIT(game->players)
     ARRAY_INIT(game->actors)
     return 0;
+}
+
+void hexgame_set_camera(hexgame_t *game, vec_t camera_pos,
+    rot_t camera_rot
+){
+    vecspace_t *space = game->map->space;
+    vec_cpy(space->dims, game->camera_pos, camera_pos);
+    vec_cpy(space->dims, game->camera_scrollpos, camera_pos);
+    game->camera_rot = camera_rot;
+    game->reset_camera = false;
 }
 
 int hexgame_load_actors(hexgame_t *game){
@@ -185,7 +193,8 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
         }else if(!event->key.repeat){
             bool shift = event->key.keysym.mod & KMOD_SHIFT;
             if(event->key.keysym.sym == SDLK_1){
-                hexgame_reset_player_by_keymap(game, 0, shift);}
+                hexgame_reset_player_by_keymap(game, 0, shift);
+                game->reset_camera = true;}
             if(event->key.keysym.sym == SDLK_2){
                 hexgame_reset_player_by_keymap(game, 1, shift);}
         }
@@ -322,7 +331,7 @@ int hexgame_step(hexgame_t *game){
     }
 
     /* Scroll renderpos */
-    if(game->smooth_scroll){
+    if(game->smooth_scroll && !game->reset_camera){
         vec_ptr_t camera_scrollpos = game->camera_scrollpos;
 
         vec_t target_scrollpos;
@@ -350,6 +359,7 @@ int hexgame_step(hexgame_t *game){
         }
     }else{
         vec_cpy(space->dims, game->camera_scrollpos, game->camera_pos);
+        game->reset_camera = false;
     }
 
     return 0;
