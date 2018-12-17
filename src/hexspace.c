@@ -69,9 +69,9 @@ void hexspace_render(vec_t v, int *x, int *y){
 
 void hexspace_angle(vec_t v, rot_t *rot_ptr, int *dist, int *angle){
     if(v[0] == 0 && v[1] == 0){
-        fprintf(stderr,
-            "%s: doesn't make sense to get angle at the origin!\n",
-            __func__);
+        /* Doesn't make sense to get the angle at the origin; but
+        we do return dist, which will be zero, and caller can check that,
+        ignoring rot and angle unless dist > 0. */
         *rot_ptr = 0;
         *dist = 0;
         *angle = 0;

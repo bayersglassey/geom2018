@@ -39,7 +39,7 @@ int hexgame_init(hexgame_t *game, hexmap_t *map){
     game->smooth_scroll = false;
     game->map = map;
     vec_zero(map->space->dims, game->camera_pos);
-    vec_zero(vec4.dims, game->camera_renderpos);
+    vec_zero(map->space->dims, game->camera_scrollpos);
     game->camera_rot = 0;
     game->cur_submap = NULL;
     ARRAY_INIT(game->players)
@@ -323,18 +323,33 @@ int hexgame_step(hexgame_t *game){
 
     /* Scroll renderpos */
     if(game->smooth_scroll){
-        vec_t target_renderpos;
-        vec4_vec_from_hexspace(target_renderpos, game->camera_pos);
+        vec_ptr_t camera_scrollpos = game->camera_scrollpos;
 
-        vec_ptr_t camera_renderpos = game->camera_renderpos;
-        for(int i = 0; i < vec4.dims; i++){
-            int a0 = camera_renderpos[i];
-            int a1 = target_renderpos[i];
-            int add = (a1 > a0)? 1: (a1 < a0)? -1: 0;
-            camera_renderpos[i] = a0 + add;
+        vec_t target_scrollpos;
+        vec_cpy(space->dims, target_scrollpos, game->camera_pos);
+
+        vec_t diff;
+        vec_cpy(space->dims, diff, target_scrollpos);
+        vec_sub(space->dims, diff, camera_scrollpos);
+
+        rot_t rot;
+        int dist, angle;
+        hexspace_angle(diff, &rot, &dist, &angle);
+
+        if(dist > 1){
+            vec_t add;
+            if(angle > 0){
+                /* X + R X */
+                hexspace_set(add, 2, 1);
+            }else{
+                /* X */
+                hexspace_set(add, 1, 0);
+            }
+            hexspace_rot(add, rot);
+            vec_add(space->dims, camera_scrollpos, add);
         }
     }else{
-        vec4_vec_from_hexspace(game->camera_renderpos, game->camera_pos);
+        vec_cpy(space->dims, game->camera_scrollpos, game->camera_pos);
     }
 
     return 0;
@@ -354,7 +369,8 @@ int hexgame_render(hexgame_t *game,
     hexmap_t *map = game->map;
     vecspace_t *space = map->space;
 
-    vec_ptr_t camera_renderpos = game->camera_renderpos;
+    vec_t camera_renderpos;
+    vec4_vec_from_hexspace(camera_renderpos, game->camera_scrollpos);
 
     prismelmapper_t *mapper = NULL;
 

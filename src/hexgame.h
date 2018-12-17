@@ -182,8 +182,10 @@ typedef struct hexgame {
     bool smooth_scroll;
     hexmap_t *map;
     hexmap_submap_t *cur_submap;
-    vec_t camera_pos; /* pos within hexmap */
-    vec_t camera_renderpos; /* vec4 pos used for rendering */
+    vec_t camera_pos;
+        /* target pos within hexmap, to which we are scrolling */
+    vec_t camera_scrollpos;
+        /* pos to which we have scrolled so far */
     rot_t camera_rot;
     ARRAY_DECL(player_t*, players)
     ARRAY_DECL(actor_t*, actors)
