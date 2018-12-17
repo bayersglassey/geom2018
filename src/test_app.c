@@ -362,11 +362,14 @@ int test_app_mainloop(test_app_t *app){
                 if(app->show_controls){
                     font_blitmsg(&app->font, app->surface, 0, 0,
                         "*Controls:\n"
-                        "  Arrow keys  -> Movement\n"
+                        "  Left/right  -> Walk\n"
+                        "  Up          -> Jump\n"
+                        "  Down        -> Crawl\n"
                         "  Spacebar    -> Spit\n"
                         "  1           -> Return to checkpoint\n"
                         "  Shift + 1   -> Return to start of game\n"
                         "  Enter       -> Show/hide this message\n"
+                        "  Escape      -> Quit\n"
                     );
                 }
 
