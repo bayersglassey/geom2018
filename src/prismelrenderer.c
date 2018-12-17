@@ -168,15 +168,25 @@ int palette_step(palette_t *pal){
     return 0;
 }
 
-int palette_update_sdl_palette(palette_t *pal, SDL_Palette *sdl_pal){
-    SDL_Color colors[256];
+static void interpolate_color(SDL_Color *c, Uint8 r, Uint8 g, Uint8 b,
+    int t, int t_max
+){
+    c->r = linear_interpolation(c->r, r, t, t_max);
+    c->g = linear_interpolation(c->g, g, t, t_max);
+    c->b = linear_interpolation(c->b, b, t, t_max);
+}
+
+static int palette_update_colors(palette_t *pal, SDL_Color *colors,
+    int t, int t_max
+){
+    /* SDL_Color colors[256] */
     for(int i = 0; i < 256; i++){
         int entry_i = i;
         palette_entry_t *entry = &pal->entries[i];
         SDL_Color *c = &colors[i];
 
         if(entry->keyframes_len == 0){
-            c->r = c->g = c->b = 0;
+            interpolate_color(c, 0, 0, 0, t, t_max);
             continue;}
 
         int frame_i = entry->frame_i;
@@ -199,14 +209,22 @@ int palette_update_sdl_palette(palette_t *pal, SDL_Palette *sdl_pal){
                 pal->name, entry_i, entry->frame_i);
             return 2;}
 
-        c->r = linear_interpolation(keyframe->color.r,
+        Uint8 r = linear_interpolation(keyframe->color.r,
             next_keyframe->color.r, frame_i, keyframe->n_frames);
-        c->g = linear_interpolation(keyframe->color.g,
+        Uint8 g = linear_interpolation(keyframe->color.g,
             next_keyframe->color.g, frame_i, keyframe->n_frames);
-        c->b = linear_interpolation(keyframe->color.b,
+        Uint8 b = linear_interpolation(keyframe->color.b,
             next_keyframe->color.b, frame_i, keyframe->n_frames);
+        interpolate_color(c, r, g, b, t, t_max);
     }
+    return 0;
+}
 
+int palette_update_sdl_palette(palette_t *pal, SDL_Palette *sdl_pal){
+    int err;
+    SDL_Color colors[256] = {0};
+    err = palette_update_colors(pal, colors, 1, 1);
+    if(err)return err;
     RET_IF_SDL_NZ(SDL_SetPaletteColors(sdl_pal, colors, 0, 256));
     return 0;
 }
