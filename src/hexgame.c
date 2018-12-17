@@ -36,7 +36,7 @@ int hexgame_init(hexgame_t *game, hexmap_t *map){
     game->frame_i = 0;
     game->zoomout = false;
     game->follow = false;
-    game->smooth_scroll = false;
+    game->smooth_scroll = true;
     game->map = map;
     vec_zero(map->space->dims, game->camera_pos);
     vec_zero(map->space->dims, game->camera_scrollpos);
