@@ -182,6 +182,11 @@ typedef struct hexgame {
     bool smooth_scroll;
     hexmap_t *map;
     hexmap_submap_t *cur_submap;
+
+    SDL_Color colors[256];
+    int colors_fade;
+    #define HEXGAME_MAX_COLORS_FADE 10
+
     vec_t camera_pos;
         /* target pos within hexmap, to which we are scrolling */
     vec_t camera_scrollpos;

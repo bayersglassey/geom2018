@@ -39,6 +39,10 @@ int hexgame_init(hexgame_t *game, hexmap_t *map){
     game->smooth_scroll = true;
     game->map = map;
     game->cur_submap = NULL;
+
+    memset(game->colors, 0, sizeof(game->colors));
+    game->colors_fade = 0;
+
     hexgame_set_camera(game, (vec_t){0}, 0);
     ARRAY_INIT(game->players)
     ARRAY_INIT(game->actors)
@@ -213,6 +217,17 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
     return 0;
 }
 
+static int hexgame_colors_step(hexgame_t *game, palette_t *palette){
+    int err;
+    if(game->cur_submap != NULL){
+        err = palette_update_colors(palette, game->colors,
+            game->colors_fade, HEXGAME_MAX_COLORS_FADE);
+        if(err)return err;
+        if(game->colors_fade < HEXGAME_MAX_COLORS_FADE)game->colors_fade++;
+    }
+    return 0;
+}
+
 int hexgame_step(hexgame_t *game){
     int err;
 
@@ -233,6 +248,9 @@ int hexgame_step(hexgame_t *game){
         if(err)return err;
     }
 #endif
+
+    err = hexgame_colors_step(game, &game->cur_submap->palette);
+    if(err)return err;
 
     /* Do 1 gameplay step for each actor */
     for(int i = 0; i < game->actors_len; i++){
@@ -305,8 +323,13 @@ int hexgame_step(hexgame_t *game){
         if(game->cur_submap != player->cur_submap){
             game->cur_submap = player->cur_submap;
 
-            /* TODO: Smoothly transition between
-            old & new palettes */
+#ifndef DONT_ANIMATE_PALETTE
+            if(game->smooth_scroll && !game->reset_camera){
+                /* Smoothly transition between old & new palettes */
+                game->colors_fade = 0;
+            }
+#endif
+
             err = palette_reset(&game->cur_submap->palette);
             if(err)return err;
         }
@@ -371,10 +394,8 @@ int hexgame_render(hexgame_t *game,
 ){
     int err;
 
-    if(game->cur_submap != NULL){
-        err = palette_update_sdl_palette(&game->cur_submap->palette, pal);
-        if(err)return err;
-    }
+    err = update_sdl_palette(pal, game->colors);
+    if(err)return err;
 
     hexmap_t *map = game->map;
     vecspace_t *space = map->space;
