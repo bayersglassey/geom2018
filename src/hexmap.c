@@ -275,7 +275,8 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
 
 
     /* parse actors */
-    err = fus_lexer_get(lexer, "actors");
+    if(fus_lexer_got(lexer, "actors")){
+    err = fus_lexer_next(lexer);
     if(err)return err;
     err = fus_lexer_get(lexer, "(");
     if(err)return err;
@@ -312,6 +313,7 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
     }
     err = fus_lexer_next(lexer);
     if(err)return err;
+    }
 
 
     /* parse submaps */
