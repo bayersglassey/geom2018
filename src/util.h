@@ -34,6 +34,8 @@
 int int_min(int x, int y);
 int int_max(int x, int y);
 int linear_interpolation(int x0, int x1, int t, int t_max);
+void interpolate_color(SDL_Color *c, Uint8 r, Uint8 g, Uint8 b,
+    int t, int t_max);
 int strlen_of_int(int i);
 void strncpy_of_int(char *s, int i, int i_len);
 int getln(char buf[], int buf_len);

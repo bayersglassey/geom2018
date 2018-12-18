@@ -168,14 +168,6 @@ int palette_step(palette_t *pal){
     return 0;
 }
 
-static void interpolate_color(SDL_Color *c, Uint8 r, Uint8 g, Uint8 b,
-    int t, int t_max
-){
-    c->r = linear_interpolation(c->r, r, t, t_max);
-    c->g = linear_interpolation(c->g, g, t, t_max);
-    c->b = linear_interpolation(c->b, b, t, t_max);
-}
-
 int palette_update_colors(palette_t *pal, SDL_Color *colors,
     int t, int t_max
 ){

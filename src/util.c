@@ -21,6 +21,14 @@ int linear_interpolation(int x0, int x1, int t, int t_max){
     return x0 + diff * t / t_max;
 }
 
+void interpolate_color(SDL_Color *c, Uint8 r, Uint8 g, Uint8 b,
+    int t, int t_max
+){
+    c->r = linear_interpolation(c->r, r, t, t_max);
+    c->g = linear_interpolation(c->g, g, t, t_max);
+    c->b = linear_interpolation(c->b, b, t, t_max);
+}
+
 int strlen_of_int(int i){
     /* Basically log(i), except that strlen of "0" is 1, and strlen of a
     negative number includes a space for the '-' */
