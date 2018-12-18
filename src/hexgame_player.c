@@ -622,24 +622,19 @@ int player_step(player_t *player, hexgame_t *game){
             player->keyinfo.wentdown[i] = false;}
     }
 
-    /* Figure out current submap */
-    bool out_of_bounds = true;
-    for(int i = 0; i < map->submaps_len; i++){
-        hexmap_submap_t *submap = map->submaps[i];
-        if(!submap->solid)continue;
+    /* Collide player against map, looking for special tiles like
+    savepoints & doors */
+    hexcollmap_t *hitbox = player->state? player->state->hitbox: NULL;
+    if(hitbox != NULL && player->keymap >= 0){
+        trf_t hitbox_trf;
+        player_init_trf(player, &hitbox_trf, space);
 
-        hexcollmap_t *collmap = &submap->collmap;
+        bool collide_savepoint = false;
+        bool collide_door = false;
+        hexmap_collide_special(game->map, hitbox, &hitbox_trf,
+            &collide_savepoint, &collide_door);
 
-        trf_t index = {0};
-        hexspace_set(index.add,
-             player->pos[0] - submap->pos[0],
-            -player->pos[1] + submap->pos[1]);
-
-        /* savepoints are currently this HACK */
-        /* TODO: separate respawn file for each player? */
-        hexcollmap_elem_t *face =
-            hexcollmap_get_face(collmap, &index);
-        if(face != NULL && face->tile_c == 'S'){
+        if(collide_savepoint){
             if(!vec_eq(space->dims, player->respawn_pos, player->pos)){
                 vec_cpy(space->dims, player->respawn_pos, player->pos);
                 if(player->respawn_filename != NULL){
@@ -652,6 +647,24 @@ int player_step(player_t *player, hexgame_t *game){
                 }
             }
         }
+
+        if(collide_door){
+            /* Switch hexmaps... */
+        }
+    }
+
+    /* Figure out current submap */
+    bool out_of_bounds = true;
+    for(int i = 0; i < map->submaps_len; i++){
+        hexmap_submap_t *submap = map->submaps[i];
+        if(!submap->solid)continue;
+
+        hexcollmap_t *collmap = &submap->collmap;
+
+        trf_t index = {0};
+        hexspace_set(index.add,
+             player->pos[0] - submap->pos[0],
+            -player->pos[1] + submap->pos[1]);
 
         hexcollmap_elem_t *vert =
             hexcollmap_get_vert(collmap, &index);

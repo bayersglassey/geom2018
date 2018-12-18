@@ -162,6 +162,8 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
     char *tileset_filename);
 bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf, bool all);
+void hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
+    trf_t *trf, bool *collide_savepoint_ptr, bool *collide_door_ptr);
 
 void hexmap_submap_cleanup(hexmap_submap_t *submap);
 int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,

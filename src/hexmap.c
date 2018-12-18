@@ -539,12 +539,13 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
     return 0;
 }
 
-static int hexmap_collide_elem(hexmap_t *map, bool all,
+static int hexmap_collide_elem(hexmap_t *map, int all_type,
     int x, int y, trf_t *trf,
     hexcollmap_elem_t *elems2, int rot,
     void (*normalize_elem)(trf_t *index),
     hexcollmap_elem_t *(get_elem)(
-        hexcollmap_t *collmap, trf_t *index)
+        hexcollmap_t *collmap, trf_t *index),
+    bool *collide_savepoint_ptr, bool *collide_door_ptr
 ){
     /* Returns true (1) or false (0), or 2 if caller should continue
     checking for a collision. */
@@ -584,17 +585,28 @@ static int hexmap_collide_elem(hexmap_t *map, bool all,
             subindex.flip = index.flip;
 
             hexcollmap_elem_t *elem = get_elem(collmap1, &subindex);
+            if(elem != NULL){
+                if(elem->tile_c == 'S')*collide_savepoint_ptr = true;
+                if(elem->tile_c == 'D')*collide_door_ptr = true;
+            }
             if(hexcollmap_elem_is_solid(elem)){
                 collide = true; break;}
         }
-        if((all && !collide) || (!all && collide))return collide;
+        if(all_type != 2){
+            bool all = all_type;
+            if((all && !collide) || (!all && collide))return collide;
+        }else{
+            /* Just looking for savepoints & doors... */
+        }
     }
     return 2; /* Caller should keep looking for a collision */
 }
 
-bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
-    trf_t *trf, bool all
+static bool _hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
+    trf_t *trf, int all_type,
+    bool *collide_savepoint_ptr, bool *collide_door_ptr
 ){
+
     int ox2 = collmap2->ox;
     int oy2 = collmap2->oy;
     int w2 = collmap2->w;
@@ -612,28 +624,55 @@ bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
             int collide;
             int x = x2 - ox2;
             int y = y2 - oy2;
-            collide = hexmap_collide_elem(map, all,
+            collide = hexmap_collide_elem(map, all_type,
                 x, y, trf,
                 tile2->vert, 1,
                 hexcollmap_normalize_vert,
-                hexcollmap_get_vert);
+                hexcollmap_get_vert,
+                collide_savepoint_ptr, collide_door_ptr);
             if(collide != 2)return collide;
-            collide = hexmap_collide_elem(map, all,
+            collide = hexmap_collide_elem(map, all_type,
                 x, y, trf,
                 tile2->edge, 3,
                 hexcollmap_normalize_edge,
-                hexcollmap_get_edge);
+                hexcollmap_get_edge,
+                collide_savepoint_ptr, collide_door_ptr);
             if(collide != 2)return collide;
-            collide = hexmap_collide_elem(map, all,
+            collide = hexmap_collide_elem(map, all_type,
                 x, y, trf,
                 tile2->face, 2,
                 hexcollmap_normalize_face,
-                hexcollmap_get_face);
+                hexcollmap_get_face,
+                collide_savepoint_ptr, collide_door_ptr);
             if(collide != 2)return collide;
         }
     }
-    if(all)return true;
-    else return false;
+    if(all_type == 2){
+        /* Return value doesn't matter, we were just looking for
+        savepoints & doors */
+        return false;
+    }else{
+        bool all = all_type;
+        if(all)return true;
+        else return false;
+    }
+}
+
+bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
+    trf_t *trf, bool all
+){
+    bool collide_savepoint;
+    bool collide_door;
+    return _hexmap_collide(map, collmap2, trf, all,
+        &collide_savepoint, &collide_door);
+}
+
+void hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
+    trf_t *trf, bool *collide_savepoint_ptr, bool *collide_door_ptr
+){
+    int all_type = 2;
+    _hexmap_collide(map, collmap2, trf, all_type,
+        collide_savepoint_ptr, collide_door_ptr);
 }
 
 
