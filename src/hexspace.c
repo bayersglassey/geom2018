@@ -94,6 +94,17 @@ void hexspace_angle(vec_t v, rot_t *rot_ptr, int *dist, int *angle){
     *angle = v_cpy[1];
 }
 
+int hexspace_dist(vec_t v, vec_t w){
+    rot_t rot;
+    int angle, dist;
+    vec_t diff;
+    vec_cpy(HEXSPACE_DIMS, diff, v);
+    vec_sub(HEXSPACE_DIMS, diff, w);
+    hexspace_angle(diff, &rot, &dist, &angle);
+    return dist;
+}
+
+
 void vec4_vec_from_hexspace(vec_t v, vec_t w){
     /* Hexspace to vec4: X -> A, Y -> C - A */
     v[0] = w[0] - w[1];
