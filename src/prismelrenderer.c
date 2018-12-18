@@ -176,7 +176,7 @@ static void interpolate_color(SDL_Color *c, Uint8 r, Uint8 g, Uint8 b,
     c->b = linear_interpolation(c->b, b, t, t_max);
 }
 
-static int palette_update_colors(palette_t *pal, SDL_Color *colors,
+int palette_update_colors(palette_t *pal, SDL_Color *colors,
     int t, int t_max
 ){
     /* SDL_Color colors[256] */
@@ -220,13 +220,17 @@ static int palette_update_colors(palette_t *pal, SDL_Color *colors,
     return 0;
 }
 
+int update_sdl_palette(SDL_Palette *sdl_pal, SDL_Color *colors){
+    RET_IF_SDL_NZ(SDL_SetPaletteColors(sdl_pal, colors, 0, 256));
+    return 0;
+}
+
 int palette_update_sdl_palette(palette_t *pal, SDL_Palette *sdl_pal){
     int err;
     SDL_Color colors[256] = {0};
     err = palette_update_colors(pal, colors, 1, 1);
     if(err)return err;
-    RET_IF_SDL_NZ(SDL_SetPaletteColors(sdl_pal, colors, 0, 256));
-    return 0;
+    return update_sdl_palette(sdl_pal, colors);
 }
 
 static int palette_parse_color(fus_lexer_t *lexer, SDL_Color *color){

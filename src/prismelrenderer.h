@@ -54,6 +54,9 @@ int palette_init(palette_t *pal, char *name);
 void palette_cleanup(palette_t *pal);
 int palette_reset(palette_t *pal);
 int palette_step(palette_t *pal);
+int palette_update_colors(palette_t *pal, SDL_Color *colors,
+    int t, int t_max);
+int update_sdl_palette(SDL_Palette *sdl_pal, SDL_Color *colors);
 int palette_update_sdl_palette(palette_t *pal, SDL_Palette *sdl_pal);
 int palette_load(palette_t *pal, const char *filename);
 
