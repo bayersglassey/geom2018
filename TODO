@@ -235,3 +235,12 @@ So, current objectives:
         * actor states run through ruleset on multiple frames
         * actor variables
 
+
+Dec 17, 2018:
+-------------
+
+Palette transitions which are intended to be "instantaneous"
+(e.g. if !game->smooth_scroll || game->reset_camera) actually lag
+behind camera pos by 1 frame.
+
+
