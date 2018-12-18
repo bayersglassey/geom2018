@@ -89,6 +89,9 @@ const char *get_next_recording_filename();
 
 typedef struct player {
     vec_t respawn_pos;
+    rot_t respawn_rot;
+    bool respawn_turn;
+
     vec_t pos;
     rot_t rot;
     bool turn;
@@ -114,7 +117,8 @@ typedef struct player {
 void player_cleanup(player_t *player);
 int player_init(player_t *player, hexmap_t *map,
     const char *stateset_filename, const char *state_name, int keymap,
-    vec_t respawn_pos, char *respawn_filename);
+    vec_t respawn_pos, rot_t respawn_rot, bool respawn_turn,
+    char *respawn_filename);
 
 rot_t player_get_rot(player_t *player, const vecspace_t *space);
 void player_init_trf(player_t *player, trf_t *trf, vecspace_t *space);

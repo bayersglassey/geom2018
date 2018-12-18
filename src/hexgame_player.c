@@ -99,7 +99,8 @@ void player_cleanup(player_t *player){
 
 int player_init(player_t *player, hexmap_t *map,
     const char *stateset_filename, const char *state_name, int keymap,
-    vec_t respawn_pos, char *respawn_filename
+    vec_t respawn_pos, rot_t respawn_rot, bool respawn_turn,
+    char *respawn_filename
 ){
     int err;
 
@@ -134,6 +135,10 @@ int player_init(player_t *player, hexmap_t *map,
     if(respawn_pos == NULL)respawn_pos = map->spawn;
     vec_cpy(map->space->dims, player->respawn_pos, respawn_pos);
     vec_cpy(map->space->dims, player->pos, respawn_pos);
+    player->respawn_rot = respawn_rot;
+    player->respawn_turn = respawn_turn;
+    player->rot = respawn_rot;
+    player->turn = respawn_turn;
 
     player->out_of_bounds = false;
     player->cur_submap = NULL;
@@ -501,7 +506,7 @@ static int player_apply_rule(player_t *player,
                 ARRAY_PUSH_NEW(player_t*, game->players, new_player)
                 err = player_init(new_player, map, stateset_filename,
                     crouch? "crouch_fly": "fly", -1,
-                    player->respawn_pos, NULL);
+                    NULL, 0, false, NULL);
                 if(err)return err;
                 vec_cpy(space->dims, new_player->pos, player->pos);
                 new_player->rot = player->rot;
@@ -634,14 +639,22 @@ int player_step(player_t *player, hexgame_t *game){
         hexmap_collide_special(game->map, hitbox, &hitbox_trf,
             &collide_savepoint, &collide_door);
 
-        if(collide_savepoint){
-            if(!vec_eq(space->dims, player->respawn_pos, player->pos)){
+        if(collide_savepoint && player->rot == 0){
+            bool at_respawn =
+                vec_eq(space->dims, player->pos, player->respawn_pos) &&
+                player->respawn_rot == player->rot &&
+                player->respawn_turn == player->turn;
+            if(!at_respawn){
+                /* We're not at previous respawn location, so update it */
                 vec_cpy(space->dims, player->respawn_pos, player->pos);
+                player->respawn_rot = player->rot;
+                player->respawn_turn = player->turn;
                 if(player->respawn_filename != NULL){
                     FILE *f = fopen(player->respawn_filename, "w");
                     if(f != NULL){
-                        fprintf(f, "%i %i\n",
-                            player->pos[0], player->pos[1]);
+                        fprintf(f, "%i %i %i %i\n",
+                            player->respawn_pos[0], player->respawn_pos[1],
+                            player->respawn_rot, player->respawn_turn);
                         fclose(f);
                     }
                 }

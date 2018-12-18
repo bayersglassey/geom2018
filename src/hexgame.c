@@ -69,7 +69,7 @@ int hexgame_load_actors(hexgame_t *game){
 
         ARRAY_PUSH_NEW(player_t*, game->players, player)
         err = player_init(player, game->map, NULL, NULL,
-            -1, NULL, NULL);
+            -1, NULL, 0, false, NULL);
         if(err)return err;
 
         player->palmapper = actor_recording->palmapper;
@@ -82,10 +82,15 @@ int hexgame_load_actors(hexgame_t *game){
 }
 
 int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard){
-    vec_cpy(game->map->space->dims, player->pos,
-        hard? game->map->spawn: player->respawn_pos);
-    player->rot = 0;
-    player->turn = false;
+    if(hard){
+        vec_cpy(game->map->space->dims, player->pos, game->map->spawn);
+        player->rot = 0;
+        player->turn = false;
+    }else{
+        vec_cpy(game->map->space->dims, player->pos, player->respawn_pos);
+        player->rot = player->respawn_rot;
+        player->turn = player->respawn_turn;
+    }
     player->state = player->stateset.states[0];
     player->frame_i = 0;
     player->cooldown = 0;
@@ -114,7 +119,7 @@ int hexgame_load_player_recording(hexgame_t *game, const char *filename,
 
     ARRAY_PUSH_NEW(player_t*, game->players, player)
     err = player_init(player, game->map, NULL, NULL,
-        keymap, game->map->spawn, NULL);
+        keymap, game->map->spawn, 0, false, NULL);
     if(err)return err;
 
     err = player_recording_load(&player->recording, filename, game, loop);

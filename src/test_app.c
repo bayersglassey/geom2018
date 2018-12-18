@@ -89,13 +89,15 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     if(err)return err;
 
     vec_t spawn;
+    int spawn_rot;
+    int spawn_turn;
     vec_cpy(app->hexgame.map->space->dims,
         spawn, app->hexgame.map->spawn);
     FILE *f = fopen("respawn.txt", "r");
     if(f != NULL){
         int x, y;
-        int n = fscanf(f, "%i %i\n", &x, &y);
-        if(n == 2){
+        int n = fscanf(f, "%i %i %i %i\n", &x, &y, &spawn_rot, &spawn_turn);
+        if(n == 4){
             spawn[0] = x;
             spawn[1] = y;
         }
@@ -105,7 +107,8 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     for(int i = 0; i < n_players; i++){
         ARRAY_PUSH_NEW(player_t*, app->hexgame.players, player)
         err = player_init(player, &app->hexmap,
-            strdup(app->stateset_filename), NULL, i, spawn, "respawn.txt");
+            strdup(app->stateset_filename), NULL, i,
+            spawn, spawn_rot, spawn_turn, "respawn.txt");
         if(err)return err;
     }
 
@@ -185,8 +188,15 @@ int test_app_process_console_input(test_app_t *app){
         }
 
         hexgame_t *game = &app->hexgame;
-        vec_ptr_t spawn = (game->players_len > 0)?
-            game->players[0]->respawn_pos: game->map->spawn;
+        vec_ptr_t spawn = game->map->spawn;
+        rot_t spawn_rot = 0;
+        bool spawn_turn = false;
+        if(game->players_len > 0){
+            player_t *player = game->players[0];
+            spawn = player->respawn_pos;
+            spawn_rot = player->respawn_rot;
+            spawn_turn = player->respawn_turn;
+        }
 
         int keymap = -1;
         for(int i = 0; i < game->players_len; i++){
@@ -197,7 +207,7 @@ int test_app_process_console_input(test_app_t *app){
 
         ARRAY_PUSH_NEW(player_t*, game->players, player)
         err = player_init(player, &app->hexmap, stateset_filename, NULL,
-            keymap, spawn, NULL);
+            keymap, spawn, spawn_rot, spawn_turn, NULL);
         if(err)return err;
     }else if(fus_lexer_got(lexer, "save")){
         err = fus_lexer_next(lexer);
