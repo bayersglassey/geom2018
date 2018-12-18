@@ -203,9 +203,15 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
             bool shift = event->key.keysym.mod & KMOD_SHIFT;
             if(event->key.keysym.sym == SDLK_1){
                 hexgame_reset_player_by_keymap(game, 0, shift);
-                game->reset_camera = true;}
+                game->reset_camera = true;
+                    /* hack - we happen to know player 0 is always followed
+                    by camera */
+                hexgame_colors_flash_white(game, 30);
+            }
             if(event->key.keysym.sym == SDLK_2){
-                hexgame_reset_player_by_keymap(game, 1, shift);}
+                hexgame_reset_player_by_keymap(game, 1, shift);
+                hexgame_colors_flash_white(game, 30);
+            }
         }
     }else if(event->type == SDL_KEYUP){
         if(event->key.keysym.sym == SDLK_F6){
@@ -220,6 +226,20 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
     }
 
     return 0;
+}
+
+void hexgame_colors_flash(hexgame_t *game, Uint8 r, Uint8 g, Uint8 b,
+    int percent
+){
+    for(int i = 0; i < 256; i++){
+        SDL_Color *c = &game->colors[i];
+        interpolate_color(c, r, g, b, percent, 100);
+    }
+    game->colors_fade = 0;
+}
+
+void hexgame_colors_flash_white(hexgame_t *game, int percent){
+    hexgame_colors_flash(game, 255, 255, 255, percent);
 }
 
 static int hexgame_colors_step(hexgame_t *game, palette_t *palette){

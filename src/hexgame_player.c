@@ -640,10 +640,16 @@ int player_step(player_t *player, hexgame_t *game){
             &collide_savepoint, &collide_door);
 
         if(collide_savepoint && player->rot == 0){
-            bool at_respawn =
-                vec_eq(space->dims, player->pos, player->respawn_pos) &&
-                player->respawn_rot == player->rot &&
-                player->respawn_turn == player->turn;
+
+            /* Don't use the savepoint if it's already our respawn point!
+            In particular, I want to avoid screen flashing white if e.g.
+            player turns around in-place.
+            The reason we can't just check equality of player->pos and
+            player->respawn_pos is that turning around actually affects
+            player's pos (moves it by 1). */
+            int dist = hexspace_dist(player->pos, player->respawn_pos);
+            bool at_respawn = dist <= 1;
+
             if(!at_respawn){
                 /* We're not at previous respawn location, so update it */
                 vec_cpy(space->dims, player->respawn_pos, player->pos);
@@ -658,6 +664,9 @@ int player_step(player_t *player, hexgame_t *game){
                         fclose(f);
                     }
                 }
+
+                /* Flash screen white so play knows something happened */
+                hexgame_colors_flash_white(game, 30);
             }
         }
 

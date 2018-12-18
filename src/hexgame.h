@@ -214,6 +214,9 @@ int hexgame_reset_player_by_keymap(hexgame_t *game, int keymap, bool hard);
 int hexgame_load_player_recording(hexgame_t *game, const char *filename,
     int keymap, bool loop);
 int hexgame_process_event(hexgame_t *game, SDL_Event *event);
+void hexgame_colors_flash(hexgame_t *game, Uint8 r, Uint8 g, Uint8 b,
+    int percent);
+void hexgame_colors_flash_white(hexgame_t *game, int percent);
 int hexgame_step(hexgame_t *game);
 int hexgame_render(hexgame_t *game,
     SDL_Renderer *renderer, SDL_Surface *surface,
