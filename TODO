@@ -71,7 +71,6 @@ Jun 30, 2018:
 
 WHAT'S NEEDED FOR A PROPER DEMO:
 
-    - Better camera scrolling / palette transitions.
     - Music + SFX. Almost anything will do for now.
     - Get rid of hexmap "unit": unit starts as (1 0 0 0) and only
         mappers change it.
@@ -153,33 +152,6 @@ July 24, 2018:
     -> ok we fixed the pop, but add it back as an operation somehow...
         Like @pop(...) - because sometimes it sounds good! Like a bass kick.
         What are its parameters?..
-
-
-Dec 4, 2018:
-------------
-
-Time to update README and screenshots!
-Maybe add some GIFs?..
-
-
-Dec 5, 2018:
-------------
-
-I think collision detection with save points doesn't work properly when
-you're facing left?..
-
-
-Dec 6, 2018:
-------------
-
-The end of the "water" section should involve collecting 2 things from
-inside/beside the giant bluegreen thing?
-And the end of the "wilderness" section should involve collecting 2 things,
-one of which you need to sneak by lots of big_rollers, the other you need
-to jump along a spread-out path of triangles and parallelograms?
-And then there's something else you need to collect from spidertown.
-Or you have to bring these things to spidertown.
-...?
 
 
 Dec 9, 2018:
