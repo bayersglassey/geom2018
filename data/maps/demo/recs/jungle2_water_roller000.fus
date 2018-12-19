@@ -1,11 +1,12 @@
 anim: "anim/water_roller.fus"
 state: "stand"
-pos: ( -67 1)
-rot: 3
-turn: yes
+pos: ( -65 5)
+rot: 5
+turn: no
 keys:
+    x:
     u:
     d:
     l:
     r:
-data: " w244+l w34-l w307+r w51-r w218+r w59-r w293+r w63-r w1"
+data: " w361+r w55-r w13+l w5-l w329+r w52-r w368+r w97-r w263+r w20"

@@ -218,10 +218,3 @@ Palette transitions which are intended to be "instantaneous"
 (e.g. if !game->smooth_scroll || game->reset_camera) actually lag
 behind camera pos by 1 frame.
 
-
-Dec 18, 2018:
--------------
-
-The recordings for the rollers in jungle2 are out of whack since we
-removed a couple map edges.
-
