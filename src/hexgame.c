@@ -316,15 +316,16 @@ int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard){
     return 0;
 }
 
-int hexgame_reset_player_by_keymap(hexgame_t *game, int keymap, bool hard){
+int hexgame_reset_players_by_keymap(hexgame_t *game, int keymap, bool hard){
+    int err;
     for(int i = 0; i < game->players_len; i++){
         player_t *player = game->players[i];
         if(player->keymap == keymap){
-            return hexgame_reset_player(game, player, hard);
+            err = hexgame_reset_player(game, player, hard);
+            if(err)return err;
         }
     }
 
-    /* Player not being found with given keymap is fine. */
     return 0;
 }
 
@@ -431,14 +432,15 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
         }else if(!event->key.repeat){
             bool shift = event->key.keysym.mod & KMOD_SHIFT;
             if(event->key.keysym.sym == SDLK_1){
-                hexgame_reset_player_by_keymap(game, 0, shift);
+                hexgame_reset_players_by_keymap(game, 0, shift);
                 game->camera.should_reset = true;
                     /* hack - we happen to know player 0 is always followed
                     by camera */
+                    /* Possible solution: for camera in game->cameras... ? */
                 camera_colors_flash_white(&game->camera, 30);
             }
             if(event->key.keysym.sym == SDLK_2){
-                hexgame_reset_player_by_keymap(game, 1, shift);
+                hexgame_reset_players_by_keymap(game, 1, shift);
                 camera_colors_flash_white(&game->camera, 30);
             }
         }
