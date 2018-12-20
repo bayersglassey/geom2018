@@ -123,7 +123,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 
     for(int i = 0; i < app->hexmap.recordings_len; i++){
         hexmap_recording_t *recording = app->hexmap.recordings[i];
-        err = hexgame_load_player_recording(&app->hexgame,
+        err = hexgame_load_recording(&app->hexgame,
             recording->filename, -1, true);
         if(err)return err;
         player_t *loaded_player = app->hexgame.players[

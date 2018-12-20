@@ -112,7 +112,7 @@ int hexgame_reset_player_by_keymap(hexgame_t *game, int keymap, bool hard){
     return 0;
 }
 
-int hexgame_load_player_recording(hexgame_t *game, const char *filename,
+int hexgame_load_recording(hexgame_t *game, const char *filename,
     int keymap, bool loop
 ){
     int err;
@@ -122,7 +122,7 @@ int hexgame_load_player_recording(hexgame_t *game, const char *filename,
         keymap, game->map->spawn, 0, false, NULL);
     if(err)return err;
 
-    err = player_recording_load(&player->recording, filename, game, loop);
+    err = recording_load(&player->recording, filename, game, loop);
     if(err)return err;
 
     err = player_play_recording(player);
@@ -177,7 +177,7 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
                     err = player_play_recording(player);
                     if(err)return err;
                 }else{
-                    err = hexgame_load_player_recording(game,
+                    err = hexgame_load_recording(game,
                         recording_filename, -1, true);
                     if(err)return err;
                 }

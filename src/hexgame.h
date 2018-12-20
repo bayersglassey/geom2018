@@ -49,7 +49,7 @@ int fus_lexer_get_player_keyinfo(fus_lexer_t *lexer,
  * PLAYER RECORDING *
  ********************/
 
-typedef struct player_recording {
+typedef struct recording {
     int action;
         /* 0: none, 1: play, 2: record */
     bool loop;
@@ -71,13 +71,13 @@ typedef struct player_recording {
     char *name;
     FILE *file;
     int offset;
-} player_recording_t;
+} recording_t;
 
-void player_recording_cleanup(player_recording_t *rec);
-void player_recording_reset(player_recording_t *rec);
-void player_recording_init(player_recording_t *rec, struct hexgame *game,
+void recording_cleanup(recording_t *rec);
+void recording_reset(recording_t *rec);
+void recording_init(recording_t *rec, struct hexgame *game,
     bool loop);
-int player_recording_load(player_recording_t *rec, const char *filename,
+int recording_load(recording_t *rec, const char *filename,
     struct hexgame *game, bool loop);
 const char *get_last_recording_filename();
 const char *get_next_recording_filename();
@@ -107,7 +107,7 @@ typedef struct player {
     int cooldown;
     bool dead;
 
-    player_recording_t recording;
+    recording_t recording;
 
     bool out_of_bounds;
     hexmap_submap_t *cur_submap;
@@ -150,7 +150,7 @@ int player_start_recording(player_t *player, char *name);
 int player_stop_recording(player_t *player);
 int player_record(player_t *player, const char *data);
 int player_maybe_record_wait(player_t *player);
-int player_recording_step(player_t *player);
+int recording_step(player_t *player);
 
 
 
@@ -211,7 +211,7 @@ void hexgame_set_camera(hexgame_t *game, vec_t camera_pos,
 int hexgame_load_actors(hexgame_t *game);
 int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard);
 int hexgame_reset_player_by_keymap(hexgame_t *game, int keymap, bool hard);
-int hexgame_load_player_recording(hexgame_t *game, const char *filename,
+int hexgame_load_recording(hexgame_t *game, const char *filename,
     int keymap, bool loop);
 int hexgame_process_event(hexgame_t *game, SDL_Event *event);
 void hexgame_colors_flash(hexgame_t *game, Uint8 r, Uint8 g, Uint8 b,

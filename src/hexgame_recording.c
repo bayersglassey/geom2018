@@ -19,7 +19,7 @@
  * RECORDING *
  *************/
 
-void player_recording_cleanup(player_recording_t *rec){
+void recording_cleanup(recording_t *rec){
     free(rec->data);
     free(rec->name);
     free(rec->stateset_name);
@@ -27,8 +27,8 @@ void player_recording_cleanup(player_recording_t *rec){
     if(rec->file != NULL)fclose(rec->file);
 }
 
-void player_recording_reset(player_recording_t *rec){
-    player_recording_cleanup(rec);
+void recording_reset(recording_t *rec){
+    recording_cleanup(rec);
 
     rec->action = 0; /* none */
     rec->data = NULL;
@@ -49,14 +49,14 @@ void player_recording_reset(player_recording_t *rec){
     rec->offset = 0;
 }
 
-void player_recording_init(player_recording_t *rec, hexgame_t *game,
+void recording_init(recording_t *rec, hexgame_t *game,
     bool loop
 ){
     rec->game = game;
     rec->loop = loop;
 }
 
-static int player_recording_parse(player_recording_t *rec,
+static int recording_parse(recording_t *rec,
     fus_lexer_t *lexer, const char *filename
 ){
     int err;
@@ -146,7 +146,7 @@ static int player_recording_parse(player_recording_t *rec,
     return 0;
 }
 
-int player_recording_load(player_recording_t *rec, const char *filename,
+int recording_load(recording_t *rec, const char *filename,
     hexgame_t *game, bool loop
 ){
     int err;
@@ -158,8 +158,8 @@ int player_recording_load(player_recording_t *rec, const char *filename,
     err = fus_lexer_init(&lexer, text, filename);
     if(err)return err;
 
-    player_recording_init(rec, game, loop);
-    err = player_recording_parse(rec, &lexer, filename);
+    recording_init(rec, game, loop);
+    err = recording_parse(rec, &lexer, filename);
     if(err)return err;
 
     free(text);
@@ -213,17 +213,17 @@ int player_load_recording(player_t *player, const char *filename,
     hexgame_t *game, bool loop
 ){
     int err;
-    player_recording_t *rec = &player->recording;
+    recording_t *rec = &player->recording;
 
-    player_recording_reset(rec);
-    err = player_recording_load(rec, filename, game, loop);
+    recording_reset(rec);
+    err = recording_load(rec, filename, game, loop);
     if(err)return err;
     return 0;
 }
 
 int player_play_recording(player_t *player){
     int err;
-    player_recording_t *rec = &player->recording;
+    recording_t *rec = &player->recording;
 
     err = player_init_stateset(player, rec->stateset_name, rec->state_name,
         rec->game->map);
@@ -235,7 +235,7 @@ int player_play_recording(player_t *player){
 
 int player_restart_recording(player_t *player, bool hard){
     int err;
-    player_recording_t *rec = &player->recording;
+    recording_t *rec = &player->recording;
 
     rec->i = 0;
     rec->wait = 0;
@@ -263,7 +263,7 @@ int player_start_recording(player_t *player, char *name){
         perror("Couldn't start recording");
         return 2;}
 
-    player_recording_reset(&player->recording);
+    recording_reset(&player->recording);
     player->recording.action = 2; /* record */
     player->recording.name = name;
     player->recording.file = f;
@@ -311,7 +311,7 @@ int player_stop_recording(player_t *player){
 
     fprintf(f, "\"\n");
 
-    player_recording_reset(&player->recording);
+    recording_reset(&player->recording);
     return 0;
 }
 
@@ -368,7 +368,7 @@ ok:
     return 0;
 }
 
-int player_recording_step(player_t *player){
+int recording_step(player_t *player){
     int err;
 
     if(player->recording.wait > 0){
@@ -418,7 +418,7 @@ int player_recording_step(player_t *player){
     player->recording.i = i;
 
     if(!loop && rec[i] == '\0'){
-        player_recording_reset(&player->recording);
+        recording_reset(&player->recording);
     }
 
     return 0;

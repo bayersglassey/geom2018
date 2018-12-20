@@ -94,7 +94,7 @@ int fus_lexer_get_player_keyinfo(fus_lexer_t *lexer,
 
 void player_cleanup(player_t *player){
     stateset_cleanup(&player->stateset);
-    player_recording_cleanup(&player->recording);
+    recording_cleanup(&player->recording);
 }
 
 int player_init(player_t *player, hexmap_t *map,
@@ -588,7 +588,7 @@ int player_step(player_t *player, hexgame_t *game){
     if(rec_action == 1){
         /* play */
         if(player->recording.data != NULL){
-            err = player_recording_step(player);
+            err = recording_step(player);
             if(err)return err;
         }
     }else if(rec_action == 2){
