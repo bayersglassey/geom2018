@@ -138,6 +138,8 @@ typedef struct hexmap {
     vec_t unit;
     vec_t spawn;
 
+    ARRAY_DECL(struct body*, bodies)
+
     ARRAY_DECL(hexmap_submap_t*, submaps)
     ARRAY_DECL(hexmap_recording_t*, recordings)
     ARRAY_DECL(hexmap_recording_t*, actor_recordings)

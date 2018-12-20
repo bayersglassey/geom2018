@@ -18,12 +18,12 @@ void actor_cleanup(actor_t *actor){
     stateset_cleanup(&actor->stateset);
 }
 
-int actor_init(actor_t *actor, hexmap_t *map, player_t *player,
+int actor_init(actor_t *actor, hexmap_t *map, body_t *body,
     const char *stateset_filename, const char *state_name
 ){
     int err;
 
-    actor->player = player;
+    actor->body = body;
 
     err = actor_init_stateset(actor, stateset_filename, state_name, map);
     if(err)return err;
@@ -67,12 +67,12 @@ int actor_set_state(actor_t *actor, const char *state_name){
 
 int actor_step(actor_t *actor, struct hexgame *game){
     int err;
-    player_t *player = actor->player;
-    if(player == NULL || player->recording.action == 0){
-        /* No player, or recording not playing */
+    body_t *body = actor->body;
+    if(body == NULL || body->recording.action == 0){
+        /* No body, or recording not playing */
 
         /* Handle current state's rules */
-        err = state_handle_rules(actor->state, player, actor, game);
+        err = state_handle_rules(actor->state, body, actor, game);
         if(err)return err;
     }
     return 0;

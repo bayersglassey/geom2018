@@ -1,7 +1,7 @@
 
 start:
     if:
-        coll: players any yes
+        coll: bodies any yes
             ;;
             ;;
             ;;        .   .
@@ -17,7 +17,7 @@ start:
 
 start2:
     if:
-        coll: players any yes
+        coll: bodies any yes
             ;;   + - + - +
             ;;  /*\*/*\*/*\
             ;; + - + - + - + - + - +
@@ -33,7 +33,7 @@ start2:
 
 start3:
     if:
-        coll: players any yes
+        coll: bodies any yes
             ;;   + - + - + - + - +
             ;;  /*\*/*\*/*\*/*\*/*\
             ;; + - + - + - + - + - +

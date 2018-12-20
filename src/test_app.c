@@ -105,14 +105,18 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     }
 
     for(int i = 0; i < n_players; i++){
+        ARRAY_PUSH_NEW(body_t*, app->hexmap.bodies, body)
+        err = body_init(body, &app->hexgame, &app->hexmap,
+            strdup(app->stateset_filename), NULL, NULL);
+        if(err)return err;
+
         ARRAY_PUSH_NEW(player_t*, app->hexgame.players, player)
-        err = player_init(player, &app->hexmap,
-            strdup(app->stateset_filename), NULL, i,
+        err = player_init(player, body, i,
             spawn, spawn_rot, spawn_turn, "respawn.txt");
         if(err)return err;
     }
 
-    app->hexgame.reset_camera = true;
+    app->hexgame.camera.should_reset = true;
         /* game is initialized with camera at (0, 0).
         If smooth scrolling is on, it'll scroll from there to player 0's
         spawn position.
@@ -124,11 +128,8 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     for(int i = 0; i < app->hexmap.recordings_len; i++){
         hexmap_recording_t *recording = app->hexmap.recordings[i];
         err = hexgame_load_recording(&app->hexgame,
-            recording->filename, -1, true);
+            recording->filename, -1, recording->palmapper, true);
         if(err)return err;
-        player_t *loaded_player = app->hexgame.players[
-            app->hexgame.players_len - 1];
-        loaded_player->palmapper = recording->palmapper;
     }
 
     app->cur_rgraph_i = 0;
@@ -171,10 +172,6 @@ int test_app_process_console_input(test_app_t *app){
         if(err)return err;
         console_write_msg(&app->console, "Try F5\n");
         return 0;
-    }else if(fus_lexer_got(lexer, "rem_players")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        ARRAY_FREE_PTR(player_t*, app->hexgame.players, player_cleanup)
     }else if(fus_lexer_got(lexer, "add_player")){
         err = fus_lexer_next(lexer);
         if(err)return err;
@@ -188,7 +185,8 @@ int test_app_process_console_input(test_app_t *app){
         }
 
         hexgame_t *game = &app->hexgame;
-        vec_ptr_t spawn = game->map->spawn;
+        hexmap_t *map = game->map;
+        vec_ptr_t spawn = map->spawn;
         rot_t spawn_rot = 0;
         bool spawn_turn = false;
         if(game->players_len > 0){
@@ -205,9 +203,13 @@ int test_app_process_console_input(test_app_t *app){
         }
         keymap++;
 
+        ARRAY_PUSH_NEW(body_t*, map->bodies, body)
+        err = body_init(body, game, map, stateset_filename, NULL, NULL);
+        if(err)return err;
+
         ARRAY_PUSH_NEW(player_t*, game->players, player)
-        err = player_init(player, &app->hexmap, stateset_filename, NULL,
-            keymap, spawn, spawn_rot, spawn_turn, NULL);
+        err = player_init(player, body, keymap,
+            spawn, spawn_rot, spawn_turn, NULL);
         if(err)return err;
     }else if(fus_lexer_got(lexer, "save")){
         err = fus_lexer_next(lexer);
@@ -363,7 +365,8 @@ int test_app_mainloop(test_app_t *app){
                 RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
             }
 
-            err = hexgame_render(&app->hexgame, app->renderer, app->surface,
+            err = camera_render(&app->hexgame.camera,
+                app->renderer, app->surface,
                 app->sdl_palette, app->scw/2 + app->x0, app->sch/2 + app->y0,
                 1 /* app->zoom */);
             if(err)return err;

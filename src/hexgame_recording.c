@@ -39,7 +39,7 @@ void recording_reset(recording_t *rec){
     rec->rot0 = 0;
     rec->turn0 = false;
 
-    player_keyinfo_reset(&rec->keyinfo);
+    keyinfo_reset(&rec->keyinfo);
 
     rec->i = 0;
     rec->size = 0;
@@ -49,10 +49,10 @@ void recording_reset(recording_t *rec){
     rec->offset = 0;
 }
 
-void recording_init(recording_t *rec, hexgame_t *game,
+void recording_init(recording_t *rec, body_t *body,
     bool loop
 ){
-    rec->game = game;
+    rec->body = body;
     rec->loop = loop;
 }
 
@@ -61,7 +61,7 @@ static int recording_parse(recording_t *rec,
 ){
     int err;
 
-    hexmap_t *map = rec->game->map;
+    hexmap_t *map = rec->body->map;
     vecspace_t *space = map->space;
 
     err = fus_lexer_get(lexer, "anim");
@@ -130,7 +130,7 @@ static int recording_parse(recording_t *rec,
     if(fus_lexer_got(lexer, "keys")){
         err = fus_lexer_next(lexer);
         if(err)return err;
-        err = fus_lexer_get_player_keyinfo(lexer, &rec->keyinfo);
+        err = fus_lexer_get_keyinfo(lexer, &rec->keyinfo);
         if(err)return err;
     }
 
@@ -147,7 +147,7 @@ static int recording_parse(recording_t *rec,
 }
 
 int recording_load(recording_t *rec, const char *filename,
-    hexgame_t *game, bool loop
+    body_t *body, bool loop
 ){
     int err;
     fus_lexer_t lexer;
@@ -158,7 +158,7 @@ int recording_load(recording_t *rec, const char *filename,
     err = fus_lexer_init(&lexer, text, filename);
     if(err)return err;
 
-    recording_init(rec, game, loop);
+    recording_init(rec, body, loop);
     err = recording_parse(rec, &lexer, filename);
     if(err)return err;
 
@@ -205,93 +205,91 @@ const char *get_next_recording_filename(){
 
 
 
-/********************
- * PLAYER RECORDING *
- ********************/
+/******************
+ * BODY RECORDING *
+ ******************/
 
-int player_load_recording(player_t *player, const char *filename,
-    hexgame_t *game, bool loop
-){
+int body_load_recording(body_t *body, const char *filename, bool loop){
     int err;
-    recording_t *rec = &player->recording;
+    recording_t *rec = &body->recording;
 
     recording_reset(rec);
-    err = recording_load(rec, filename, game, loop);
+    err = recording_load(rec, filename, body, loop);
     if(err)return err;
     return 0;
 }
 
-int player_play_recording(player_t *player){
+int body_play_recording(body_t *body){
     int err;
-    recording_t *rec = &player->recording;
+    recording_t *rec = &body->recording;
 
-    err = player_init_stateset(player, rec->stateset_name, rec->state_name,
-        rec->game->map);
+    err = body_init_stateset(body, rec->stateset_name, rec->state_name,
+        body->map);
     if(err)return err;
 
-    player->recording.action = 1; /* play */
-    return player_restart_recording(player, false);
+    body->recording.action = 1; /* play */
+    return body_restart_recording(body, false);
 }
 
-int player_restart_recording(player_t *player, bool hard){
+int body_restart_recording(body_t *body, bool hard){
     int err;
-    recording_t *rec = &player->recording;
+    recording_t *rec = &body->recording;
 
     rec->i = 0;
     rec->wait = 0;
 
-    player_keyinfo_copy(&player->keyinfo, &rec->keyinfo);
-    player_set_state(player, rec->state_name);
+    keyinfo_copy(&body->keyinfo, &rec->keyinfo);
+    body_set_state(body, rec->state_name);
 
-    vec_cpy(MAX_VEC_DIMS, player->pos, rec->pos0);
-    player->rot = rec->rot0;
-    player->turn = rec->turn0;
+    vec_cpy(MAX_VEC_DIMS, body->pos, rec->pos0);
+    body->rot = rec->rot0;
+    body->turn = rec->turn0;
 
     if(!hard){
         for(int i = 0; i < rec->offset; i++){
-            player_step(player, rec->game);
+            body_step(body, body->game);
         }
     }
 
     return 0;
 }
 
-int player_start_recording(player_t *player, char *name){
+int body_start_recording(body_t *body, char *name){
 
     FILE *f = fopen(name, "w");
     if(f == NULL){
         perror("Couldn't start recording");
         return 2;}
 
-    recording_reset(&player->recording);
-    player->recording.action = 2; /* record */
-    player->recording.name = name;
-    player->recording.file = f;
+    recording_reset(&body->recording);
+    body->recording.action = 2; /* record */
+    body->recording.name = name;
+    body->recording.file = f;
 
     fprintf(f, "anim: ");
-    fus_write_str(f, player->stateset.filename);
+    fus_write_str(f, body->stateset.filename);
     fprintf(f, "\n");
 
     fprintf(f, "state: ");
-    fus_write_str(f, player->state->name);
+    fus_write_str(f, body->state->name);
     fprintf(f, "\n");
 
     fprintf(f, "pos: (");
     for(int i = 0; i < hexspace.dims; i++){
-        fprintf(f, " %i", player->pos[i]);
+        fprintf(f, " %i", body->pos[i]);
     }
     fprintf(f, ")\n");
 
-    fprintf(f, "rot: %i\n", player->rot);
-    fprintf(f, "turn: %s\n", player->turn? "yes": "no");
+    fprintf(f, "rot: %i\n", body->rot);
+    fprintf(f, "turn: %s\n", body->turn? "yes": "no");
 
     fprintf(f, "keys:\n");
-    for(int i = 0; i < PLAYER_KEYS; i++){
-        char key_c = player_get_key_c(player, i, true);
+    for(int i = 0; i < KEYINFO_KEYS; i++){
+        char key_c = body_get_key_c(body, i, true);
         fprintf(f, "    %c:", key_c);
-        if(player->keyinfo.isdown[i])fprintf(f, " is");
-        if(player->keyinfo.wasdown[i])fprintf(f, " was");
-        if(player->keyinfo.wentdown[i])fprintf(f, " went");
+        if(body->keyinfo.isdown[i])fprintf(f, " is");
+        if(body->keyinfo.wasdown[i])fprintf(f, " was");
+        if(body->keyinfo.wentdown[i])fprintf(f, " went");
         fprintf(f, "\n");
     }
 
@@ -300,56 +298,56 @@ int player_start_recording(player_t *player, char *name){
     return 0;
 }
 
-int player_stop_recording(player_t *player){
+int body_stop_recording(body_t *body){
     int err;
 
-    FILE *f = player->recording.file;
+    FILE *f = body->recording.file;
     if(f == NULL)return 2;
 
-    err = player_maybe_record_wait(player);
+    err = body_maybe_record_wait(body);
     if(err)return err;
 
     fprintf(f, "\"\n");
 
-    recording_reset(&player->recording);
+    recording_reset(&body->recording);
     return 0;
 }
 
-int player_record(player_t *player, const char *data){
+int body_record(body_t *body, const char *data){
     /* CURRENTLY UNUSED!.. we write directly to file instead. */
 
     int data_len = strlen(data);
-    int required_size = player->recording.i + data_len + 1;
+    int required_size = body->recording.i + data_len + 1;
 
     if(DEBUG_RECORDINGS){
         printf("RECORD: data=%s, len=%i, req=%i\n",
             data, data_len, required_size);}
 
-    if(required_size >= player->recording.size){
+    if(required_size >= body->recording.size){
         int new_size = required_size + 200;
-        char *new_recording = realloc(player->recording.data,
+        char *new_recording = realloc(body->recording.data,
             sizeof(char) * new_size);
         if(new_recording == NULL)return 1;
         new_recording[new_size - 1] = '\0';
-        player->recording.data = new_recording;
-        player->recording.size = new_size;
+        body->recording.data = new_recording;
+        body->recording.size = new_size;
         if(DEBUG_RECORDINGS)printf("  REALLOC: new_size=%i\n", new_size);
     }
-    strcpy(player->recording.data + player->recording.i, data);
-    player->recording.i += data_len;
+    strcpy(body->recording.data + body->recording.i, data);
+    body->recording.i += data_len;
 
     if(DEBUG_RECORDINGS){
         printf("  OK! i=%i, data=%s\n",
-            player->recording.i, player->recording.data);}
+            body->recording.i, body->recording.data);}
 
     return 0;
 }
 
-int player_maybe_record_wait(player_t *player){
-    int wait = player->recording.wait;
+int body_maybe_record_wait(body_t *body){
+    int wait = body->recording.wait;
     if(wait == 0)goto ok;
 
-    fprintf(player->recording.file, " w%i", wait);
+    fprintf(body->recording.file, " w%i", wait);
     if(DEBUG_RECORDINGS)printf("w%i\n", wait);
 
     /*
@@ -359,49 +357,51 @@ int player_maybe_record_wait(player_t *player){
     buffer[2] = '1'; // <---- ummmmm
     buffer[3] = '\0';
 
-    int err = player_record(player, buffer);
-    if(err){perror("player_record failed");}
+    int err = body_record(body, buffer);
+    if(err){perror("body_record failed");}
     */
 
-    player->recording.wait = 0;
+    body->recording.wait = 0;
 ok:
     return 0;
 }
 
-int recording_step(player_t *player){
+int recording_step(recording_t *rec){
     int err;
 
-    if(player->recording.wait > 0){
-        player->recording.wait--;
-        if(player->recording.wait > 0)return 0;}
+    body_t *body = rec->body;
 
-    char *rec = player->recording.data;
-    int i = player->recording.i;
+    if(rec->wait > 0){
+        rec->wait--;
+        if(rec->wait > 0)return 0;}
+
+    char *data = rec->data;
+    int i = rec->i;
     char c;
 
-    bool loop = player->recording.loop;
+    bool loop = rec->loop;
 
     while(1){
-        while(rec[i] == ' ')i++;
+        while(data[i] == ' ')i++;
 
-        c = rec[i];
+        c = data[i];
         if(c == '+' || c == '-'){
             bool keydown = c == '+';
-            char key_c = rec[i+1]; i += 2;
+            char key_c = data[i+1]; i += 2;
             if(DEBUG_RECORDINGS)printf("%c%c\n", c, key_c);
-            int key_i = player_get_key_i(player, key_c, false);
-            if(keydown)player_keydown(player, key_i);
-            else player_keyup(player, key_i);
+            int key_i = body_get_key_i(body, key_c, false);
+            if(keydown)body_keydown(body, key_i);
+            else body_keyup(body, key_i);
         }else if(c == 'w'){
-            i++; int wait = atoi(rec + i);
+            i++; int wait = atoi(data + i);
             if(DEBUG_RECORDINGS)printf("w%i\n", wait);
-            while(isdigit(rec[i]))i++;
-            player->recording.wait = wait;
+            while(isdigit(data[i]))i++;
+            rec->wait = wait;
             break;
         }else if(c == '\0'){
             if(loop){
                 /* loop! */
-                err = player_restart_recording(player, true);
+                err = body_restart_recording(body, true);
                 if(err)return err;
                 i = 0;
             }else{
@@ -410,15 +410,15 @@ int recording_step(player_t *player){
         }else{
             fprintf(stderr, "Unrecognized action: %c\n", c);
             fprintf(stderr, "  ...in position %i of recording: %s\n",
-                i, player->recording.data);
+                i, rec->data);
             return 2;
         }
     }
 
-    player->recording.i = i;
+    rec->i = i;
 
-    if(!loop && rec[i] == '\0'){
-        recording_reset(&player->recording);
+    if(!loop && data[i] == '\0'){
+        recording_reset(rec);
     }
 
     return 0;

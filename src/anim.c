@@ -190,11 +190,11 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     err = fus_lexer_get(lexer, "(");
                     if(err)return err;
 
-                    bool against_players = false;
-                    if(fus_lexer_got(lexer, "players")){
+                    bool against_bodies = false;
+                    if(fus_lexer_got(lexer, "bodies")){
                         err = fus_lexer_next(lexer);
                         if(err)return err;
-                        against_players = true;
+                        against_bodies = true;
                     }
 
                     int flags = 0;
@@ -226,7 +226,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     cond->type = state_cond_type_coll;
                     cond->u.coll.collmap = collmap;
                     cond->u.coll.flags = flags;
-                    cond->u.coll.against_players = against_players;
+                    cond->u.coll.against_bodies = against_bodies;
                 }else if(fus_lexer_got(lexer, "chance")){
                     err = fus_lexer_next(lexer);
                     if(err)return err;

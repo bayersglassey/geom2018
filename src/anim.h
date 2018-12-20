@@ -40,7 +40,7 @@ typedef struct state_cond {
     const char *type;
     union {
         struct {
-            bool against_players;
+            bool against_bodies; /* as opposed to against map */
             int flags;
                 /*
                     flags & 1: 0 -> any, 1 -> all

@@ -160,8 +160,12 @@ int hexmap_recording_init(hexmap_recording_t *recording, char *filename,
  * HEXMAP *
  **********/
 
+void body_cleanup(struct body *body);
 void hexmap_cleanup(hexmap_t *map){
     free(map->name);
+
+    ARRAY_FREE_PTR(body_t*, map->bodies, body_cleanup)
+
     ARRAY_FREE_PTR(hexmap_submap_t*, map->submaps, hexmap_submap_cleanup)
     ARRAY_FREE_PTR(hexmap_recording_t*, map->recordings,
         hexmap_recording_cleanup)
@@ -180,6 +184,8 @@ int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
     map->prend = prend;
     vec_cpy(prend->space->dims, map->unit, unit);
     vec_zero(space->dims, map->spawn);
+
+    ARRAY_INIT(map->bodies)
 
     ARRAY_INIT(map->submaps)
     ARRAY_INIT(map->recordings)
