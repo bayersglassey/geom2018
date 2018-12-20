@@ -405,6 +405,16 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
         }else if(event->key.keysym.sym == SDLK_F11){
             malloc_stats();
 #endif
+        }else if(event->key.keysym.sym == SDLK_F12){
+            if(game->players_len < 1){
+                fprintf(stderr, "No player!\n");
+                return 2;}
+            player_t *player = game->players[0];
+            body_t *body = player->body;
+            hexmap_t *map = body->map;
+            hexmap_submap_t *submap = body->cur_submap;
+            fprintf(stderr, "Player %i submap: %s\n",
+                player->keymap, submap->filename);
         }else if(event->key.keysym.sym == SDLK_r){
             /* start recording */
             if(game->players_len >= 1){
