@@ -205,7 +205,7 @@ crawl:
     if:
         key: isdown f
         coll: all no
-            ;;     \
+            ;;     \*
             ;; ( )
         coll: all yes
             ;;        +
