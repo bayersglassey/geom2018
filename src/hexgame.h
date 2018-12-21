@@ -173,6 +173,11 @@ int player_init(player_t *player, body_t *body, int keymap,
     vec_t respawn_pos, rot_t respawn_rot, bool respawn_turn,
     char *respawn_filename);
 
+int player_respawn_save(const char *filename, vec_t pos,
+    rot_t rot, bool turn);
+int player_respawn_load(const char *filename, vec_t pos,
+    rot_t *rot_ptr, bool *turn_ptr);
+
 int player_process_event(player_t *player, SDL_Event *event);
 int player_step(player_t *player, struct hexgame *game);
 

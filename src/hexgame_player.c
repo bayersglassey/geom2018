@@ -60,6 +60,46 @@ int player_init(player_t *player, body_t *body, int keymap,
     return 0;
 }
 
+int player_respawn_save(const char *filename, vec_t pos,
+    rot_t rot, bool turn
+){
+    FILE *f = fopen(filename, "w");
+    if(f == NULL){
+        fprintf(stderr, "Couldn't save player to %s: ", filename);
+        perror(NULL);
+        return 2;
+    }
+    fprintf(f, "%i %i %i %i\n", pos[0], pos[1], rot, turn);
+    fclose(f);
+    return 0;
+}
+
+int player_respawn_load(const char *filename, vec_t pos,
+    rot_t *rot_ptr, bool *turn_ptr
+){
+    FILE *f = fopen(filename, "r");
+    if(f == NULL){
+        fprintf(stderr, "Couldn't load player from %s: ", filename);
+        perror(NULL);
+        return 2;
+    }
+
+    int x, y, rot, turn;
+    int n = fscanf(f, "%i %i %i %i\n", &x, &y, &rot, &turn);
+    if(n != 4){
+        fprintf(stderr, "Couldn't load player from %s (bad format): ",
+            filename);
+        perror(NULL);
+        return 2;
+    }
+    pos[0] = x;
+    pos[1] = y;
+    *rot_ptr = rot;
+    *turn_ptr = turn;
+    fclose(f);
+    return 0;
+}
+
 
 int player_process_event(player_t *player, SDL_Event *event){
     body_t *body = player->body;
@@ -120,13 +160,10 @@ int player_step(player_t *player, hexgame_t *game){
                 player->respawn_rot = body->rot;
                 player->respawn_turn = body->turn;
                 if(player->respawn_filename != NULL){
-                    FILE *f = fopen(player->respawn_filename, "w");
-                    if(f != NULL){
-                        fprintf(f, "%i %i %i %i\n",
-                            player->respawn_pos[0], player->respawn_pos[1],
-                            player->respawn_rot, player->respawn_turn);
-                        fclose(f);
-                    }
+                    err = player_respawn_save(player->respawn_filename,
+                        player->respawn_pos, player->respawn_rot,
+                        player->respawn_turn);
+                    if(err)return err;
                 }
 
                 for(int i = 0; i < game->cameras_len; i++){

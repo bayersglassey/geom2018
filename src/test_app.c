@@ -97,21 +97,14 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         static char respawn_filename[] = "respawn_N.txt";
         respawn_filename[8] = '0' + i;
 
-        vec_t spawn;
-        int spawn_rot;
-        int spawn_turn;
-        vec_cpy(space->dims, spawn, map->spawn);
-        FILE *f = fopen(respawn_filename, "r");
-        if(f != NULL){
-            int x, y;
-            int n = fscanf(f, "%i %i %i %i\n", &x, &y,
-                &spawn_rot, &spawn_turn);
-            if(n == 4){
-                spawn[0] = x;
-                spawn[1] = y;
-            }
-            fclose(f);
-        }
+        vec_t spawn_pos;
+        rot_t spawn_rot = 0;
+        bool spawn_turn = false;
+        vec_cpy(space->dims, spawn_pos, map->spawn);
+        err = player_respawn_load(respawn_filename,
+            spawn_pos, &spawn_rot, &spawn_turn);
+        /* If there was an "err", we do nothing -- just keep default spawn
+        location we got from map. */
 
         ARRAY_PUSH_NEW(body_t*, map->bodies, body)
         err = body_init(body, game, map,
@@ -120,7 +113,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 
         ARRAY_PUSH_NEW(player_t*, game->players, player)
         err = player_init(player, body, i,
-            spawn, spawn_rot, spawn_turn, respawn_filename);
+            spawn_pos, spawn_rot, spawn_turn, respawn_filename);
         if(err)return err;
     }
 
@@ -202,12 +195,12 @@ int test_app_process_console_input(test_app_t *app){
 
         hexgame_t *game = &app->hexgame;
         hexmap_t *map = game->maps[0];
-        vec_ptr_t spawn = map->spawn;
+        vec_ptr_t spawn_pos = map->spawn;
         rot_t spawn_rot = 0;
         bool spawn_turn = false;
         if(game->players_len > 0){
             player_t *player = game->players[0];
-            spawn = player->respawn_pos;
+            spawn_pos = player->respawn_pos;
             spawn_rot = player->respawn_rot;
             spawn_turn = player->respawn_turn;
         }
@@ -225,7 +218,7 @@ int test_app_process_console_input(test_app_t *app){
 
         ARRAY_PUSH_NEW(player_t*, game->players, player)
         err = player_init(player, body, keymap,
-            spawn, spawn_rot, spawn_turn, NULL);
+            spawn_pos, spawn_rot, spawn_turn, NULL);
         if(err)return err;
     }else if(fus_lexer_got(lexer, "save")){
         err = fus_lexer_next(lexer);
