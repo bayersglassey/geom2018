@@ -93,22 +93,26 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     hexmap_t *map = game->maps[0];
     vecspace_t *space = map->space;
 
-    vec_t spawn;
-    int spawn_rot;
-    int spawn_turn;
-    vec_cpy(space->dims, spawn, map->spawn);
-    FILE *f = fopen("respawn.txt", "r");
-    if(f != NULL){
-        int x, y;
-        int n = fscanf(f, "%i %i %i %i\n", &x, &y, &spawn_rot, &spawn_turn);
-        if(n == 4){
-            spawn[0] = x;
-            spawn[1] = y;
-        }
-        fclose(f);
-    }
-
     for(int i = 0; i < n_players; i++){
+        static char respawn_filename[] = "respawn_N.txt";
+        respawn_filename[8] = '0' + i;
+
+        vec_t spawn;
+        int spawn_rot;
+        int spawn_turn;
+        vec_cpy(space->dims, spawn, map->spawn);
+        FILE *f = fopen(respawn_filename, "r");
+        if(f != NULL){
+            int x, y;
+            int n = fscanf(f, "%i %i %i %i\n", &x, &y,
+                &spawn_rot, &spawn_turn);
+            if(n == 4){
+                spawn[0] = x;
+                spawn[1] = y;
+            }
+            fclose(f);
+        }
+
         ARRAY_PUSH_NEW(body_t*, map->bodies, body)
         err = body_init(body, game, map,
             strdup(app->stateset_filename), NULL, NULL);
@@ -116,7 +120,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 
         ARRAY_PUSH_NEW(player_t*, game->players, player)
         err = player_init(player, body, i,
-            spawn, spawn_rot, spawn_turn, "respawn.txt");
+            spawn, spawn_rot, spawn_turn, respawn_filename);
         if(err)return err;
     }
 
