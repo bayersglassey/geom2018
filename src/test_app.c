@@ -24,7 +24,6 @@ void test_app_cleanup(test_app_t *app){
     palette_cleanup(&app->palette);
     SDL_FreePalette(app->sdl_palette);
     prismelrenderer_cleanup(&app->prend);
-    hexmap_cleanup(&app->hexmap);
     hexgame_cleanup(&app->hexgame);
 }
 
@@ -54,10 +53,12 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->stateset_filename = stateset_filename;
     app->hexmap_filename = hexmap_filename;
 
-    app->sdl_palette = SDL_AllocPalette(256);
-    RET_IF_SDL_NULL(app->sdl_palette);
+    SDL_Palette *sdl_palette = SDL_AllocPalette(256);
+    app->sdl_palette = sdl_palette;
+    RET_IF_SDL_NULL(sdl_palette);
 
-    err = palette_load(&app->palette, "data/pal1.fus");
+    palette_t *palette = &app->palette;
+    err = palette_load(palette, "data/pal1.fus");
     if(err)return err;
 
     if(use_textures){
@@ -68,31 +69,34 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         if(app->surface == NULL)return 1;
     }
 
-    err = font_load(&app->font, "data/font.fus", app->sdl_palette);
+    font_t *font = &app->font;
+    err = font_load(font, "data/font.fus", sdl_palette);
     if(err)return err;
 
-    err = console_init(&app->console, 80, 40, 20000);
+    console_t *console = &app->console;
+    err = console_init(console, 80, 40, 20000);
     if(err)return err;
 
-    err = prismelrenderer_init(&app->prend, &vec4);
+    prismelrenderer_t *prend = &app->prend;
+    err = prismelrenderer_init(prend, &vec4);
     if(err)return err;
-    err = prismelrenderer_load(&app->prend, app->prend_filename);
+    err = prismelrenderer_load(prend, app->prend_filename);
     if(err)return err;
-    if(app->prend.rendergraphs_len < 1){
+    if(prend->rendergraphs_len < 1){
         fprintf(stderr, "No rendergraphs in %s\n", app->prend_filename);
         return 2;}
 
-    err = hexmap_load(&app->hexmap, &app->prend, app->hexmap_filename);
+    hexgame_t *game = &app->hexgame;
+    err = hexgame_init(game, prend, app->hexmap_filename);
     if(err)return err;
 
-    err = hexgame_init(&app->hexgame, &app->hexmap);
-    if(err)return err;
+    hexmap_t *map = game->maps[0];
+    vecspace_t *space = map->space;
 
     vec_t spawn;
     int spawn_rot;
     int spawn_turn;
-    vec_cpy(app->hexgame.map->space->dims,
-        spawn, app->hexgame.map->spawn);
+    vec_cpy(space->dims, spawn, map->spawn);
     FILE *f = fopen("respawn.txt", "r");
     if(f != NULL){
         int x, y;
@@ -105,31 +109,39 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     }
 
     for(int i = 0; i < n_players; i++){
-        ARRAY_PUSH_NEW(body_t*, app->hexmap.bodies, body)
-        err = body_init(body, &app->hexgame, &app->hexmap,
+        ARRAY_PUSH_NEW(body_t*, map->bodies, body)
+        err = body_init(body, game, map,
             strdup(app->stateset_filename), NULL, NULL);
         if(err)return err;
 
-        ARRAY_PUSH_NEW(player_t*, app->hexgame.players, player)
+        ARRAY_PUSH_NEW(player_t*, game->players, player)
         err = player_init(player, body, i,
             spawn, spawn_rot, spawn_turn, "respawn.txt");
         if(err)return err;
     }
 
-    app->hexgame.camera.should_reset = true;
-        /* game is initialized with camera at (0, 0).
-        If smooth scrolling is on, it'll scroll from there to player 0's
-        spawn position.
-        But we want camera to start off at player's spawn position. */
+    {
+        /* Find first body for player 0 (going to point camera at it) */
+        body_t *body = NULL;
+        for(int i = 0; i < game->players_len; i++){
+            player_t *player = game->players[i];
+            if(player->keymap != 0)continue;
+            body = player->body;
+            break;
+        }
 
-    err = hexgame_load_actors(&app->hexgame);
-    if(err)return err;
-
-    for(int i = 0; i < app->hexmap.recordings_len; i++){
-        hexmap_recording_t *recording = app->hexmap.recordings[i];
-        err = hexgame_load_recording(&app->hexgame,
-            recording->filename, -1, recording->palmapper, true);
+        /* Create camera */
+        ARRAY_PUSH_NEW(camera_t*, game->cameras, camera)
+        err = camera_init(camera, game, map, body);
         if(err)return err;
+
+        app->camera = camera;
+        camera->should_reset = true;
+            /* game is initialized with camera at (0, 0).
+            If smooth scrolling is on, it'll scroll from there to
+            player 0's spawn position.
+            But we want camera to start at player's spawn position,
+            not scroll there. */
     }
 
     app->cur_rgraph_i = 0;
@@ -185,7 +197,7 @@ int test_app_process_console_input(test_app_t *app){
         }
 
         hexgame_t *game = &app->hexgame;
-        hexmap_t *map = game->map;
+        hexmap_t *map = game->maps[0];
         vec_ptr_t spawn = map->spawn;
         rot_t spawn_rot = 0;
         bool spawn_turn = false;
@@ -365,7 +377,7 @@ int test_app_mainloop(test_app_t *app){
                 RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
             }
 
-            err = camera_render(&app->hexgame.camera,
+            err = camera_render(app->camera,
                 app->renderer, app->surface,
                 app->sdl_palette, app->scw/2 + app->x0, app->sch/2 + app->y0,
                 1 /* app->zoom */);
@@ -500,9 +512,19 @@ int test_app_mainloop(test_app_t *app){
                         SDL_StopTextInput();
                     }
                     continue;
+                }else if(event.key.keysym.sym == SDLK_F6){
+                    app->camera->zoomout = true;
+                }else if(event.key.keysym.sym == SDLK_F7){
+                    app->camera->follow = !app->camera->follow;
+                }else if(event.key.keysym.sym == SDLK_F8){
+                    app->camera->smooth_scroll = !app->camera->smooth_scroll;
                 }else if(event.key.keysym.sym == SDLK_F11){
                     printf("Frame rendered in: %i ms\n", took);
                     printf("  (Aiming for sub-%i ms)\n", app->delay_goal);
+                }
+            }else if(event.type == SDL_KEYUP){
+                if(event.key.keysym.sym == SDLK_F6){
+                    app->camera->zoomout = false;
                 }
             }
 

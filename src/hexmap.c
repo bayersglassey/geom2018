@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "hexmap.h"
+#include "hexgame.h"
 #include "lexer.h"
 #include "util.h"
 #include "mathutil.h"
@@ -173,29 +174,30 @@ void hexmap_cleanup(hexmap_t *map){
         hexmap_recording_cleanup)
 }
 
-int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
-    prismelrenderer_t *prend,
+int hexmap_init(hexmap_t *map, hexgame_t *game, char *name,
     vec_t unit
 ){
     int err;
 
+    prismelrenderer_t *prend = game->prend;
+    vecspace_t *space = &hexspace;
+
     map->name = name;
+    map->game = game;
     map->space = space;
-    map->prend = prend;
-    vec_cpy(prend->space->dims, map->unit, unit);
     vec_zero(space->dims, map->spawn);
 
-    ARRAY_INIT(map->bodies)
+    map->prend = prend;
+    vec_cpy(prend->space->dims, map->unit, unit);
 
+    ARRAY_INIT(map->bodies)
     ARRAY_INIT(map->submaps)
     ARRAY_INIT(map->recordings)
     ARRAY_INIT(map->actor_recordings)
     return 0;
 }
 
-int hexmap_load(hexmap_t *map, prismelrenderer_t *prend,
-    const char *filename
-){
+int hexmap_load(hexmap_t *map, hexgame_t *game, const char *filename){
     int err;
     fus_lexer_t lexer;
 
@@ -205,24 +207,43 @@ int hexmap_load(hexmap_t *map, prismelrenderer_t *prend,
     err = fus_lexer_init(&lexer, text, filename);
     if(err)return err;
 
-    err = hexmap_parse(map, prend, strdup(filename), &lexer);
+    err = hexmap_parse(map, game, strdup(filename), &lexer);
     if(err)return err;
+
+    /* Load actors */
+    for(int i = 0; i < map->actor_recordings_len; i++){
+        hexmap_recording_t *actor_recording =
+            map->actor_recordings[i];
+        const char *filename = actor_recording->filename;
+
+        ARRAY_PUSH_NEW(body_t*, map->bodies, body)
+        err = body_init(body, game, map, NULL, NULL,
+            actor_recording->palmapper);
+        if(err)return err;
+
+        ARRAY_PUSH_NEW(actor_t*, game->actors, actor)
+        err = actor_init(actor, map, body, filename, NULL);
+        if(err)return err;
+    }
+
+    /* Load recordings */
+    for(int i = 0; i < map->recordings_len; i++){
+        hexmap_recording_t *recording = map->recordings[i];
+        err = hexmap_load_recording(map, recording->filename,
+            recording->palmapper, true);
+        if(err)return err;
+    }
 
     free(text);
     return 0;
 }
 
-int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
+int hexmap_parse(hexmap_t *map, hexgame_t *game, char *name,
     fus_lexer_t *lexer
 ){
     int err;
-    vecspace_t *space = &hexspace;
-        /* hexmap's space is always hexspace. we will pass it
-        to hexmap_init below, instead of just settings it here,
-        which would probably make more sense.
-        But ultimately we should really just move the call to
-        hexmap_init out of hexmap_parse into hexmap_load. SO DO THAT */
 
+    prismelrenderer_t *prend = game->prend;
 
     /* parse unit */
     vec_t unit;
@@ -238,7 +259,7 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
     if(err)return err;
 
     /* init the map */
-    err = hexmap_init(map, name, space, prend, unit);
+    err = hexmap_init(map, game, name, unit);
     if(err)return err;
 
     /* parse spawn point */
@@ -251,7 +272,7 @@ int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
         err = fus_lexer_get_str(lexer, &spawn_filename);
         if(err)return err;
     }else{
-        err = fus_lexer_get_vec(lexer, space, map->spawn);
+        err = fus_lexer_get_vec(lexer, map->space, map->spawn);
         if(err)return err;
     }
     err = fus_lexer_get(lexer, ")");
@@ -545,6 +566,26 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
     return 0;
 }
 
+int hexmap_load_recording(hexmap_t *map, const char *filename,
+    palettemapper_t *palmapper, bool loop
+){
+    int err;
+
+    hexgame_t *game = map->game;
+
+    ARRAY_PUSH_NEW(body_t*, map->bodies, body)
+    err = body_init(body, game, map, NULL, NULL, palmapper);
+    if(err)return err;
+
+    err = recording_load(&body->recording, filename, body, loop);
+    if(err)return err;
+
+    err = body_play_recording(body);
+    if(err)return err;
+
+    return 0;
+}
+
 static int hexmap_collide_elem(hexmap_t *map, int all_type,
     int x, int y, trf_t *trf,
     hexcollmap_elem_t *elems2, int rot,
@@ -679,6 +720,58 @@ void hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
     int all_type = 2;
     _hexmap_collide(map, collmap2, trf, all_type,
         collide_savepoint_ptr, collide_door_ptr);
+}
+
+
+int hexmap_step(hexmap_t *map){
+    int err;
+
+    hexgame_t *game = map->game;
+    vecspace_t *space = game->space;
+
+    /* Collide bodies with each other */
+    for(int i = 0; i < map->bodies_len; i++){
+        body_t *body = map->bodies[i];
+        if(body->state == NULL)continue;
+        hexcollmap_t *hitbox = body->state->hitbox;
+        if(hitbox == NULL)continue;
+
+        trf_t hitbox_trf;
+        body_init_trf(body, &hitbox_trf);
+
+        /* This body has a hitbox! So collide it against all other bodies'
+        hitboxes. */
+        for(int j = i + 1; j < map->bodies_len; j++){
+            body_t *body_other = map->bodies[j];
+            if(body_other->state == NULL)continue;
+            hexcollmap_t *hitbox_other = body_other->state->hitbox;
+            if(hitbox_other == NULL)continue;
+
+            trf_t hitbox_other_trf;
+            body_init_trf(body_other, &hitbox_other_trf);
+
+            /* The other body has a hitbox! Do the collision... */
+            bool collide = hexcollmap_collide(hitbox, &hitbox_trf,
+                hitbox_other, &hitbox_other_trf, space, false);
+            if(collide){
+                /* There was a collision!
+                Now we find out who was right... and who was dead. */
+                err = body_collide_against_body(body, body_other);
+                if(err)return err;
+                err = body_collide_against_body(body_other, body);
+                if(err)return err;
+            }
+        }
+    }
+
+    /* Do 1 gameplay step for each body */
+    for(int i = 0; i < map->bodies_len; i++){
+        body_t *body = map->bodies[i];
+        err = body_step(body, game);
+        if(err)return err;
+    }
+
+    return 0;
 }
 
 

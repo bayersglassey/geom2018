@@ -615,6 +615,23 @@ int body_step(body_t *body, hexgame_t *game){
     return 0;
 }
 
+int body_collide_against_body(body_t *body, body_t *body_other){
+    int err;
+    if(body_other->state->crushes){
+        /* Bodies whose recording is playing cannot die */
+        /* MAYBE TODO: These bodies should die too, but then their
+        recording should restart after a brief pause?
+        Maybe we can reuse body->cooldown for the pause. */
+        if(body->recording.action != 1){
+            /* Hardcoded "dead" state name... I suppose we could
+            have a char* body->dead_anim_name or something, but whatever. */
+            err = body_set_state(body, "dead");
+            if(err)return err;
+        }
+    }
+    return 0;
+}
+
 
 /***************
  * BODY RENDER *

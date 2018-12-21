@@ -132,6 +132,7 @@ struct hexgame;
 int state_handle_rules(state_t *state, body_t *body,
     struct actor *actor, struct hexgame *game);
 int body_step(body_t *body, struct hexgame *game);
+int body_collide_against_body(body_t *body, body_t *body_other);
 int body_render(body_t *body,
     SDL_Renderer *renderer, SDL_Surface *surface,
     SDL_Palette *pal, int x0, int y0, int zoom,
@@ -207,12 +208,7 @@ typedef struct camera {
     hexmap_t *map;
     hexmap_submap_t *cur_submap;
 
-    /* player_t *player;
-    ...it makes some sense for a camera to not have a player; I can imagine
-    a camera which just scrolls around the map, controlled directly by arrow
-    keys.
-    However, when camera is following a player, it should have a pointer to
-    it, instead of currently hardcoded "look for body 0" nonsense. */
+    body_t *body; /* optional: camera follows a body */
 
     bool zoomout;
     bool follow;
@@ -233,9 +229,9 @@ typedef struct camera {
 } camera_t;
 
 void camera_cleanup(camera_t *camera);
-int camera_init(camera_t *camera, struct hexgame *game);
+int camera_init(camera_t *camera, struct hexgame *game, struct hexmap *map,
+    body_t *body);
 void camera_set(camera_t *camera, vec_t pos, rot_t rot);
-body_t *camera_get_body(camera_t *camera);
 void camera_colors_flash(camera_t *camera, Uint8 r, Uint8 g, Uint8 b,
     int percent);
 void camera_colors_flash_white(camera_t *camera, int percent);
@@ -251,28 +247,22 @@ int camera_render(camera_t *camera,
 
 typedef struct hexgame {
     int frame_i;
-
-    hexmap_t *map;
-        /* currently not owned by game, but really should be
-        (and should be an array of maps!) */
-    /* ARRAY_DECL(hexmap_t*, maps) */
-
-    camera_t camera;
-        /* should be an array so we can have better hotseat multiplayer */
-    /* ARRAY_DECL(camera_t*, cameras) */
-
+    prismelrenderer_t *prend;
+    vecspace_t *space;
+        /* should always be hexspace!
+        NOT the same as prend->space! */
+    ARRAY_DECL(hexmap_t*, maps)
+    ARRAY_DECL(camera_t*, cameras)
     ARRAY_DECL(player_t*, players)
     ARRAY_DECL(actor_t*, actors)
 } hexgame_t;
 
 
 void hexgame_cleanup(hexgame_t *game);
-int hexgame_init(hexgame_t *game, hexmap_t *map);
-int hexgame_load_actors(hexgame_t *game);
+int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
+    const char *map_filename);
 int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard);
 int hexgame_reset_players_by_keymap(hexgame_t *game, int keymap, bool hard);
-int hexgame_load_recording(hexgame_t *game, const char *filename,
-    int keymap, palettemapper_t *palmapper, bool loop);
 int hexgame_process_event(hexgame_t *game, SDL_Event *event);
 int hexgame_step(hexgame_t *game);
 

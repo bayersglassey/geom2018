@@ -129,8 +129,14 @@ int player_step(player_t *player, hexgame_t *game){
                     }
                 }
 
-                /* Flash screen white so play knows something happened */
-                camera_colors_flash_white(&game->camera, 30);
+                for(int i = 0; i < game->cameras_len; i++){
+                    camera_t *camera = game->cameras[i];
+                    if(camera->body != body)continue;
+
+                    /* Flash screen white so player knows something
+                    happened */
+                    camera_colors_flash_white(camera, 30);
+                }
             }
         }
 

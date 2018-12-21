@@ -133,13 +133,14 @@ typedef struct hexmap_recording {
 
 typedef struct hexmap {
     char *name;
-    vecspace_t *space;
-    prismelrenderer_t *prend;
-    vec_t unit;
+    struct hexgame *game;
+    vecspace_t *space; /* Always hexspace! */
     vec_t spawn;
 
-    ARRAY_DECL(struct body*, bodies)
+    prismelrenderer_t *prend;
+    vec_t unit;
 
+    ARRAY_DECL(struct body*, bodies)
     ARRAY_DECL(hexmap_submap_t*, submaps)
     ARRAY_DECL(hexmap_recording_t*, recordings)
     ARRAY_DECL(hexmap_recording_t*, actor_recordings)
@@ -151,21 +152,22 @@ int hexmap_recording_init(hexmap_recording_t *recording, char *filename,
     palettemapper_t *palmapper);
 
 void hexmap_cleanup(hexmap_t *map);
-int hexmap_init(hexmap_t *map, char *name, vecspace_t *space,
-    prismelrenderer_t *prend,
+int hexmap_init(hexmap_t *map, struct hexgame *game, char *name,
     vec_t unit);
-int hexmap_load(hexmap_t *map, prismelrenderer_t *prend,
-    const char *filename);
-int hexmap_parse(hexmap_t *map, prismelrenderer_t *prend, char *name,
+int hexmap_load(hexmap_t *map, struct hexgame *game, const char *filename);
+int hexmap_parse(hexmap_t *map, struct hexgame *game, char *name,
     fus_lexer_t *lexer);
 int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
     vec_t parent_pos, vec_t parent_camera_pos, int parent_camera_type,
     prismelmapper_t *parent_mapper, char *palette_filename,
     char *tileset_filename);
+int hexmap_load_recording(hexmap_t *map, const char *filename,
+    palettemapper_t *palmapper, bool loop);
 bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf, bool all);
 void hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf, bool *collide_savepoint_ptr, bool *collide_door_ptr);
+int hexmap_step(hexmap_t *map);
 
 void hexmap_submap_cleanup(hexmap_submap_t *submap);
 int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,

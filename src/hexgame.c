@@ -27,10 +27,13 @@ void camera_cleanup(camera_t *camera){
     /* Nuthin */
 }
 
-int camera_init(camera_t *camera, hexgame_t *game){
+int camera_init(camera_t *camera, hexgame_t *game, hexmap_t *map,
+    body_t *body
+){
     camera->game = game;
-    camera->map = game->map;
+    camera->map = map;
     camera->cur_submap = NULL;
+    camera->body = body;
 
     camera->zoomout = false;
     camera->follow = false;
@@ -51,14 +54,6 @@ void camera_set(camera_t *camera, vec_t pos,
     vec_cpy(space->dims, camera->scrollpos, pos);
     camera->rot = rot;
     camera->should_reset = false;
-}
-
-body_t *camera_get_body(camera_t *camera){
-    /* HERE'S THE HACKY PART WHERE WE ASSUME CAMERA ALWAYS POINTS AT
-    BODY 0. TODO: implement camera->body instead */
-    hexmap_t *map = camera->map;
-    if(map->bodies_len >= 1)return map->bodies[0];
-    return NULL;
 }
 
 void camera_colors_flash(camera_t *camera, Uint8 r, Uint8 g, Uint8 b,
@@ -92,7 +87,7 @@ int camera_step(camera_t *camera){
     hexgame_t *game = camera->game;
     hexmap_t *map = camera->map;
     vecspace_t *space = map->space;
-    body_t *body = camera_get_body(camera);
+    body_t *body = camera->body;
 
 #ifndef DONT_ANIMATE_PALETTE
     /* Animate palette */
@@ -257,53 +252,43 @@ int camera_render(camera_t *camera,
  ***********/
 
 void hexgame_cleanup(hexgame_t *game){
-    camera_cleanup(&game->camera);
+    ARRAY_FREE_PTR(hexmap_t*, game->maps, hexmap_cleanup)
+    ARRAY_FREE_PTR(camera_t*, game->cameras, camera_cleanup)
     ARRAY_FREE_PTR(player_t*, game->players, player_cleanup)
     ARRAY_FREE_PTR(actor_t*, game->actors, actor_cleanup)
 }
 
-int hexgame_init(hexgame_t *game, hexmap_t *map){
+int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
+    const char *map_filename
+){
     int err;
 
     game->frame_i = 0;
-    game->map = map;
+    game->prend = prend;
+    game->space = &hexspace; /* NOT the same as prend->space! */
 
-    err = camera_init(&game->camera, game);
-    if(err)return err;
-
+    ARRAY_INIT(game->maps)
+    ARRAY_INIT(game->cameras)
     ARRAY_INIT(game->players)
     ARRAY_INIT(game->actors)
-    return 0;
-}
 
-int hexgame_load_actors(hexgame_t *game){
-    int err;
-    hexmap_t *map = game->map;
-    for(int i = 0; i < map->actor_recordings_len; i++){
-        hexmap_recording_t *actor_recording =
-            map->actor_recordings[i];
-        const char *filename = actor_recording->filename;
+    ARRAY_PUSH_NEW(hexmap_t*, game->maps, map)
+    err = hexmap_load(map, game, map_filename);
+    if(err)return err;
 
-        ARRAY_PUSH_NEW(body_t*, map->bodies, body)
-        err = body_init(body, game, map, NULL, NULL,
-            actor_recording->palmapper);
-        if(err)return err;
-
-        ARRAY_PUSH_NEW(actor_t*, game->actors, actor)
-        err = actor_init(actor, game->map, body, filename, NULL);
-        if(err)return err;
-    }
     return 0;
 }
 
 int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard){
+    vecspace_t *space = game->space;
     body_t *body = player->body;
     if(hard){
-        vec_cpy(game->map->space->dims, body->pos, game->map->spawn);
+        hexmap_t *map = game->maps[0];
+        vec_cpy(space->dims, body->pos, map->spawn);
         body->rot = 0;
         body->turn = false;
     }else{
-        vec_cpy(game->map->space->dims, body->pos, player->respawn_pos);
+        vec_cpy(space->dims, body->pos, player->respawn_pos);
         body->rot = player->respawn_rot;
         body->turn = player->respawn_turn;
     }
@@ -312,6 +297,14 @@ int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard){
     body->cooldown = 0;
 
     keyinfo_reset(&body->keyinfo);
+
+    for(int i = 0; i < game->cameras_len; i++){
+        camera_t *camera = game->cameras[i];
+        if(camera->body == body){
+            camera->should_reset = true;
+            camera_colors_flash_white(camera, 30);
+        }
+    }
 
     return 0;
 }
@@ -329,40 +322,16 @@ int hexgame_reset_players_by_keymap(hexgame_t *game, int keymap, bool hard){
     return 0;
 }
 
-int hexgame_load_recording(hexgame_t *game, const char *filename,
-    int keymap, palettemapper_t *palmapper, bool loop
-){
-    int err;
-
-    hexmap_t *map = game->map;
-
-    ARRAY_PUSH_NEW(body_t*, map->bodies, body)
-    err = body_init(body, game, map, NULL, NULL, palmapper);
-    if(err)return err;
-
-    err = recording_load(&body->recording, filename, body, loop);
-    if(err)return err;
-
-    err = body_play_recording(body);
-    if(err)return err;
-
-    return 0;
-}
-
 int hexgame_process_event(hexgame_t *game, SDL_Event *event){
     int err;
 
     if(event->type == SDL_KEYDOWN){
-        if(event->key.keysym.sym == SDLK_F6){
-            game->camera.zoomout = true;
-        }else if(event->key.keysym.sym == SDLK_F7){
-            game->camera.follow = !game->camera.follow;
-        }else if(event->key.keysym.sym == SDLK_F8){
-            game->camera.smooth_scroll = !game->camera.smooth_scroll;
-        }else if(event->key.keysym.sym == SDLK_F9){
+        if(event->key.keysym.sym == SDLK_F9){
             /* save recording */
-            if(game->players_len >= 1){
-                player_t *player = game->players[0];
+            for(int i = 0; i < game->players_len; i++){
+                player_t *player = game->players[i];
+                if(player->keymap != 0)continue;
+
                 body_t *body = player->body;
                 if(body->recording.action != 2){
                     fprintf(stderr,
@@ -385,21 +354,26 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
             }else{
                 fprintf(stderr, "Playing back from file: %s\n",
                     recording_filename);
-                if(shift){
-                    if(game->players_len < 1){
-                        fprintf(stderr, "No player!\n");
-                        return 2;}
-                    player_t *player = game->players[0];
-                    body_t *body = player->body;
-                    err = body_load_recording(body, recording_filename,
-                        true);
-                    if(err)return err;
-                    err = body_play_recording(body);
-                    if(err)return err;
-                }else{
-                    err = hexgame_load_recording(game,
-                        recording_filename, -1, NULL, true);
-                    if(err)return err;
+                for(int i = 0; i < game->players_len; i++){
+                    player_t *player = game->players[i];
+                    if(player->keymap != 0)continue;
+
+                    if(shift){
+                        body_t *body = player->body;
+                        err = body_load_recording(body, recording_filename,
+                            true);
+                        if(err)return err;
+                        err = body_play_recording(body);
+                        if(err)return err;
+                    }else{
+                        /* TODO: Recordings need to state which map they
+                        expect! The following is a hack: you must play
+                        recordings belonging to your correct map... */
+                        body_t *body = player->body;
+                        err = hexmap_load_recording(body->map,
+                            recording_filename, NULL, true);
+                        if(err)return err;
+                    }
                 }
             }
 #ifdef GEOM_HEXGAME_DEBUG_MALLOC
@@ -407,46 +381,36 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
             malloc_stats();
 #endif
         }else if(event->key.keysym.sym == SDLK_F12){
-            if(game->players_len < 1){
-                fprintf(stderr, "No player!\n");
-                return 2;}
-            player_t *player = game->players[0];
-            body_t *body = player->body;
-            hexmap_t *map = body->map;
-            hexmap_submap_t *submap = body->cur_submap;
-            fprintf(stderr, "Player %i submap: %s\n",
-                player->keymap, submap->filename);
+            for(int i = 0; i < game->players_len; i++){
+                player_t *player = game->players[i];
+                if(player->keymap < 0)continue;
+
+                body_t *body = player->body;
+                hexmap_t *map = body->map;
+                hexmap_submap_t *submap = body->cur_submap;
+                fprintf(stderr, "Player %i submap: %s\n",
+                    player->keymap, submap->filename);
+            }
         }else if(event->key.keysym.sym == SDLK_r){
             /* start recording */
-            if(game->players_len >= 1){
-                body_t *body = game->players[0]->body;
+            for(int i = 0; i < game->players_len; i++){
+                player_t *player = game->players[i];
+                if(player->keymap != 0)continue;
+
+                body_t *body = player->body;
                 const char *recording_filename = get_next_recording_filename();
                 fprintf(stderr, "Recording to file: %s "
                     " (When finished, press F9 to save!)\n",
                     recording_filename);
                 err = body_start_recording(body, strdup(recording_filename));
                 if(err)return err;
-            }else{
-                fprintf(stderr, "Can't start recording -- no player!\n");
             }
         }else if(!event->key.repeat){
             bool shift = event->key.keysym.mod & KMOD_SHIFT;
             if(event->key.keysym.sym == SDLK_1){
-                hexgame_reset_players_by_keymap(game, 0, shift);
-                game->camera.should_reset = true;
-                    /* hack - we happen to know player 0 is always followed
-                    by camera */
-                    /* Possible solution: for camera in game->cameras... ? */
-                camera_colors_flash_white(&game->camera, 30);
-            }
+                hexgame_reset_players_by_keymap(game, 0, shift);}
             if(event->key.keysym.sym == SDLK_2){
-                hexgame_reset_players_by_keymap(game, 1, shift);
-                camera_colors_flash_white(&game->camera, 30);
-            }
-        }
-    }else if(event->type == SDL_KEYUP){
-        if(event->key.keysym.sym == SDLK_F6){
-            game->camera.zoomout = false;
+                hexgame_reset_players_by_keymap(game, 1, shift);}
         }
     }
 
@@ -465,8 +429,7 @@ int hexgame_step(hexgame_t *game){
     game->frame_i++;
     if(game->frame_i == MAX_FRAME_I)game->frame_i = 0;
 
-    hexmap_t *map = game->map;
-    vecspace_t *space = map->space;
+    vecspace_t *space = game->space;
 
     /* Do 1 gameplay step for each actor */
     for(int i = 0; i < game->actors_len; i++){
@@ -475,59 +438,10 @@ int hexgame_step(hexgame_t *game){
         if(err)return err;
     }
 
-    /* Collide bodies with each other */
-    for(int i = 0; i < map->bodies_len; i++){
-        body_t *body = map->bodies[i];
-        if(body->state == NULL)continue;
-        if(body->recording.action == 1){
-            /* No hitboxes for bodies whose recording is playing */
-            /* MAYBE TODO: These bodies should die too, but then their
-            recording should restart after a brief pause.
-            Maybe we can reuse body->cooldown for the pause. */
-            continue;
-        }
-        hexcollmap_t *hitbox = body->state->hitbox;
-        if(hitbox == NULL)continue;
-
-        trf_t hitbox_trf;
-        body_init_trf(body, &hitbox_trf);
-
-        /* This body has a hitbox! So collide it against all other bodies'
-        hitboxes. */
-        for(int j = i + 1; j < map->bodies_len; j++){
-            body_t *body_other = map->bodies[j];
-            if(body_other->state == NULL)continue;
-            hexcollmap_t *hitbox_other = body_other->state->hitbox;
-            if(hitbox_other == NULL)continue;
-
-            trf_t hitbox_other_trf;
-            body_init_trf(body_other, &hitbox_other_trf);
-
-            /* The other body has a hitbox! Do the collision... */
-            bool collide = hexcollmap_collide(hitbox, &hitbox_trf,
-                hitbox_other, &hitbox_other_trf, space, false);
-            if(collide){
-                /* There was a collision!
-                Now we find out who was right... and who was dead. */
-
-                /* Hardcoded "dead" state name... I suppose we could
-                have a char* body->dead_anim_name, but whatever. */
-                if(body->state->crushes){
-                    err = body_set_state(body_other, "dead");
-                    if(err)return err;
-                }
-                if(body_other->state->crushes){
-                    err = body_set_state(body, "dead");
-                    if(err)return err;
-                }
-            }
-        }
-    }
-
-    /* Do 1 gameplay step for each body */
-    for(int i = 0; i < map->bodies_len; i++){
-        body_t *body = map->bodies[i];
-        err = body_step(body, game);
+    /* Do 1 gameplay step for each map */
+    for(int i = 0; i < game->maps_len; i++){
+        hexmap_t *map = game->maps[i];
+        err = hexmap_step(map);
         if(err)return err;
     }
 
@@ -538,9 +452,12 @@ int hexgame_step(hexgame_t *game){
         if(err)return err;
     }
 
-    /* Do 1 step for the camera */
-    err = camera_step(&game->camera);
-    if(err)return err;
+    /* Do 1 step for each camera */
+    for(int i = 0; i < game->cameras_len; i++){
+        camera_t *camera = game->cameras[i];
+        err = camera_step(camera);
+        if(err)return err;
+    }
 
     return 0;
 }

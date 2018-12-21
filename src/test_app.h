@@ -38,6 +38,7 @@ typedef struct test_app {
     stateset_t stateset;
     hexmap_t hexmap;
     hexgame_t hexgame;
+    camera_t *camera;
     bool hexgame_running;
     bool show_controls;
 
