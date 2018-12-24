@@ -4,8 +4,9 @@ pos: ( 56 79)
 rot: 2
 turn: no
 keys:
+    x:
     u:
     d:
     l:
     r:
-data: " w6+l w160-l w6+r w23+d w25-d w33-r w14+l w3+u w8-u w1-l w12+l w29+u w14-u w32+u w17-u w34+u w15-u w27-l w8+l w8-l w2+l w11-l w7+l w1+u w4-l w1-u w18+l w33-l w10+d w5+l w126-d w24-l w1+r w23+d w1-r w1+l w26-d w22+d w45-d w2-l w25+d w4+r w11-r w1-d w1+l w175-l"
+data: " w4+l w128-l w29+r w34-r w1+d w2+l w19-d w22-l w14+r w75-r w1+u w9-u w10+r w5+u w1-r w2-u w15+u w6-u w3+r w3-r w1+u w3-u w18+r w25-r w3+u w4-u w10+l w3+u w1-l w2-u w13+l w38-l w3+u w6-u w11+r w36-r w4+u w3-u w15+l w4-l w1+u w2-u w10+l w49-l w1+u w5-u w4+r w47-r w8+l w24+u w3-l w1-u w7+l w32+d w115-d w46-l w2+d w1+r w37-d w15+d w27-d w2-r w6+l w14+d w20-l w12+l w51-d w3-l w1+u w6-u w8+l w72-l w1+l w7"
