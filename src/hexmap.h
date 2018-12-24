@@ -129,6 +129,7 @@ typedef struct hexmap_submap {
     rot_t door_rot;
     bool door_turn;
     char *door_map_filename;
+    char *door_anim_filename;
 } hexmap_submap_t;
 
 typedef struct hexmap_recording {
