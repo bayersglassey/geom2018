@@ -419,6 +419,57 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
         if(err)return err;
     }
 
+    vec_t door_pos;
+    vec_zero(space->dims, door_pos);
+    rot_t door_rot = 0;
+    bool door_turn = false;
+    char *door_map_filename = NULL;
+    if(fus_lexer_got(lexer, "door")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        {
+            err = fus_lexer_get(lexer, "map");
+            if(err)return err;
+            err = fus_lexer_get(lexer, "(");
+            if(err)return err;
+            err = fus_lexer_get_str(lexer, &door_map_filename);
+            if(err)return err;
+            err = fus_lexer_get(lexer, ")");
+            if(err)return err;
+
+            err = fus_lexer_get(lexer, "pos");
+            if(err)return err;
+            err = fus_lexer_get(lexer, "(");
+            if(err)return err;
+            err = fus_lexer_get_vec(lexer, space, door_pos);
+            if(err)return err;
+            err = fus_lexer_get(lexer, ")");
+            if(err)return err;
+
+            err = fus_lexer_get(lexer, "rot");
+            if(err)return err;
+            err = fus_lexer_get(lexer, "(");
+            if(err)return err;
+            err = fus_lexer_get_int(lexer, &door_rot);
+            if(err)return err;
+            err = fus_lexer_get(lexer, ")");
+            if(err)return err;
+
+            err = fus_lexer_get(lexer, "turn");
+            if(err)return err;
+            err = fus_lexer_get(lexer, "(");
+            if(err)return err;
+            err = fus_lexer_get_bool(lexer, &door_turn);
+            if(err)return err;
+            err = fus_lexer_get(lexer, ")");
+            if(err)return err;
+        }
+        err = fus_lexer_get(lexer, ")");
+        if(err)return err;
+    }
+
     vec_t pos = {0};
     if(fus_lexer_got(lexer, "pos")){
         err = fus_lexer_next(lexer);
@@ -501,6 +552,12 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
         /* render submap->rgraph_map */
         err = hexmap_submap_create_rgraph(map, submap);
         if(err)return err;
+
+        /* door stuff */
+        vec_cpy(space->dims, submap->door_pos, door_pos);
+        submap->door_rot = door_rot;
+        submap->door_turn = door_turn;
+        submap->door_map_filename = door_map_filename;
     }
 
     if(fus_lexer_got(lexer, "recordings")){
@@ -782,6 +839,7 @@ int hexmap_step(hexmap_t *map){
 
 void hexmap_submap_cleanup(hexmap_submap_t *submap){
     free(submap->filename);
+    free(submap->door_map_filename);
     hexcollmap_cleanup(&submap->collmap);
     palette_cleanup(&submap->palette);
     hexmap_tileset_cleanup(&submap->tileset);
@@ -813,6 +871,11 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
     err = hexmap_tileset_load(&submap->tileset, map->prend,
         tileset_filename);
     if(err)return err;
+
+    vec_zero(MAX_VEC_DIMS, submap->door_pos);
+    submap->door_rot = 0;
+    submap->door_turn = false;
+    submap->door_map_filename = NULL;
 
     return 0;
 }

@@ -124,6 +124,11 @@ typedef struct hexmap_submap {
     prismelmapper_t *mapper;
     palette_t palette;
     hexmap_tileset_t tileset;
+
+    vec_t door_pos;
+    rot_t door_rot;
+    bool door_turn;
+    char *door_map_filename;
 } hexmap_submap_t;
 
 typedef struct hexmap_recording {
