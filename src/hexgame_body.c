@@ -167,6 +167,26 @@ void body_init_trf(body_t *body, trf_t *trf){
     trf->flip = body->turn;
 }
 
+void body_flash_cameras(body_t *body, Uint8 r, Uint8 g, Uint8 b,
+    int percent
+){
+    hexgame_t *game = body->game;
+    for(int i = 0; i < game->cameras_len; i++){
+        camera_t *camera = game->cameras[i];
+        if(camera->body != body)continue;
+        camera_colors_flash_white(camera, 30);
+    }
+}
+
+void body_reset_cameras(body_t *body){
+    hexgame_t *game = body->game;
+    for(int i = 0; i < game->cameras_len; i++){
+        camera_t *camera = game->cameras[i];
+        if(camera->body != body)continue;
+        camera->should_reset = true;
+    }
+}
+
 int body_move_to_map(body_t *body, hexmap_t *map){
     /* WARNING: this function modifies map->bodies for two maps.
     So if caller is trying to loop over map->bodies in the usual way,
@@ -180,18 +200,20 @@ int body_move_to_map(body_t *body, hexmap_t *map){
 
     /* Do the thing we all came here for */
     body->map = map;
-    body->cur_submap = NULL;
 
     /* Move body from old to new map's array of bodies */
     ARRAY_UNHOOK(old_map->bodies, body)
     ARRAY_PUSH(body_t*, map->bodies, body)
+
+    /* Update body->cur_submap */
+    body_update_cur_submap(body);
 
     /* Update any cameras following this body */
     for(int i = 0; i < game->cameras_len; i++){
         camera_t *camera = game->cameras[i];
         if(camera->body == body){
             camera->map = map;
-            camera->cur_submap = NULL;
+            camera->cur_submap = body->cur_submap;
         }
     }
     return 0;
@@ -589,6 +611,35 @@ int state_handle_rules(state_t *state, body_t *body,
  * BODY STEP *
  *************/
 
+void body_update_cur_submap(body_t *body){
+    /* Sets body->cur_submap, body->out_of_bounds by colliding body
+    against body->map */
+    hexmap_t *map = body->map;
+    vecspace_t *space = map->space;
+
+    bool out_of_bounds = true;
+    for(int i = 0; i < map->submaps_len; i++){
+        hexmap_submap_t *submap = map->submaps[i];
+        if(!submap->solid)continue;
+
+        hexcollmap_t *collmap = &submap->collmap;
+
+        trf_t index = {0};
+        hexspace_set(index.add,
+             body->pos[0] - submap->pos[0],
+            -body->pos[1] + submap->pos[1]);
+
+        hexcollmap_elem_t *vert =
+            hexcollmap_get_vert(collmap, &index);
+        if(vert != NULL)out_of_bounds = false;
+        if(hexcollmap_elem_is_solid(vert)){
+            body->cur_submap = submap;
+            break;
+        }
+    }
+    body->out_of_bounds = out_of_bounds;
+}
+
 int body_step(body_t *body, hexgame_t *game){
     int err;
 
@@ -643,27 +694,7 @@ int body_step(body_t *body, hexgame_t *game){
     }
 
     /* Figure out current submap */
-    bool out_of_bounds = true;
-    for(int i = 0; i < map->submaps_len; i++){
-        hexmap_submap_t *submap = map->submaps[i];
-        if(!submap->solid)continue;
-
-        hexcollmap_t *collmap = &submap->collmap;
-
-        trf_t index = {0};
-        hexspace_set(index.add,
-             body->pos[0] - submap->pos[0],
-            -body->pos[1] + submap->pos[1]);
-
-        hexcollmap_elem_t *vert =
-            hexcollmap_get_vert(collmap, &index);
-        if(vert != NULL)out_of_bounds = false;
-        if(hexcollmap_elem_is_solid(vert)){
-            body->cur_submap = submap;
-            break;
-        }
-    }
-    body->out_of_bounds = out_of_bounds;
+    body_update_cur_submap(body);
 
     return 0;
 }

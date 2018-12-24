@@ -206,14 +206,8 @@ int player_step(player_t *player, hexgame_t *game){
                     if(err)return err;
                 }
 
-                for(int i = 0; i < game->cameras_len; i++){
-                    camera_t *camera = game->cameras[i];
-                    if(camera->body != body)continue;
-
-                    /* Flash screen white so player knows something
-                    happened */
-                    camera_colors_flash_white(camera, 30);
-                }
+                /* Flash screen white so player knows something happened */
+                body_flash_cameras(body, 255, 255, 255, 30);
             }
         }
 

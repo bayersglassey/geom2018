@@ -144,12 +144,6 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         if(err)return err;
 
         app->camera = camera;
-        camera->should_reset = true;
-            /* game is initialized with camera at (0, 0).
-            If smooth scrolling is on, it'll scroll from there to
-            player 0's spawn position.
-            But we want camera to start at player's spawn position,
-            not scroll there. */
     }
 
     app->cur_rgraph_i = 0;

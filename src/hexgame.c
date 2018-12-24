@@ -53,7 +53,7 @@ void camera_set(camera_t *camera, vec_t pos,
     vec_cpy(space->dims, camera->pos, pos);
     vec_cpy(space->dims, camera->scrollpos, pos);
     camera->rot = rot;
-    camera->should_reset = false;
+    camera->should_reset = true;
 }
 
 void camera_colors_flash(camera_t *camera, Uint8 r, Uint8 g, Uint8 b,
@@ -173,8 +173,10 @@ int camera_step(camera_t *camera){
             vec_add(space->dims, scrollpos, add);
         }
     }else{
-        vec_cpy(space->dims, camera->scrollpos, camera->pos);
-        camera->should_reset = false;
+        if(camera->should_reset){
+            vec_cpy(space->dims, camera->scrollpos, camera->pos);
+            camera->should_reset = false;
+        }
     }
 
     return 0;
@@ -337,14 +339,8 @@ int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard){
     err = body_respawn(body, pos, rot, turn, map);
     if(err)return err;
 
-    for(int i = 0; i < game->cameras_len; i++){
-        camera_t *camera = game->cameras[i];
-        if(camera->body == body){
-            camera->should_reset = true;
-            camera_colors_flash_white(camera, 30);
-        }
-    }
-
+    body_reset_cameras(body);
+    body_flash_cameras(body, 255, 255, 255, 30);
     return 0;
 }
 

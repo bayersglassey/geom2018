@@ -124,6 +124,9 @@ int body_respawn(body_t *body, vec_t pos, rot_t rot, bool turn,
 
 rot_t body_get_rot(body_t *body);
 void body_init_trf(body_t *body, trf_t *trf);
+void body_flash_cameras(body_t *body, Uint8 r, Uint8 g, Uint8 b,
+    int percent);
+void body_reset_cameras(body_t *body);
 int body_move_to_map(body_t *body, hexmap_t *map);
 
 int body_init_stateset(body_t *body, const char *stateset_filename,
@@ -134,6 +137,7 @@ struct actor;
 struct hexgame;
 int state_handle_rules(state_t *state, body_t *body,
     struct actor *actor, struct hexgame *game);
+void body_update_cur_submap(body_t *body);
 int body_step(body_t *body, struct hexgame *game);
 int body_collide_against_body(body_t *body, body_t *body_other);
 int body_render(body_t *body,
