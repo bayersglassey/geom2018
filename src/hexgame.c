@@ -272,11 +272,37 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     ARRAY_INIT(game->players)
     ARRAY_INIT(game->actors)
 
-    ARRAY_PUSH_NEW(hexmap_t*, game->maps, map)
-    err = hexmap_load(map, game, map_filename);
+    hexmap_t *map;
+    err = hexgame_load_map(game, map_filename, &map);
     if(err)return err;
 
     return 0;
+}
+
+int hexgame_load_map(hexgame_t *game, const char *map_filename,
+    hexmap_t **map_ptr
+){
+    int err;
+    ARRAY_PUSH_NEW(hexmap_t*, game->maps, map)
+    err = hexmap_load(map, game, map_filename);
+    if(err)return err;
+    *map_ptr = map;
+    return 0;
+}
+
+hexmap_t *hexgame_get_or_load_map(hexgame_t *game, const char *map_filename){
+    int err;
+
+    for(int i = 0; i < game->maps_len; i++){
+        hexmap_t *map = game->maps[i];
+        if(!strcmp(map->name, map_filename))return map;
+    }
+
+    hexmap_t *map;
+    err = hexgame_load_map(game, map_filename, &map);
+    if(err)return NULL;
+
+    return map;
 }
 
 int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard){
