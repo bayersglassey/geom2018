@@ -11,10 +11,26 @@
     array##_len = 0; \
     array##_size = 0;
 
+/* WARNING: ARRAY_COPY doesn't actually copy the array, it copies a
+reference to it. Is that really what we want? Should we rename this? */
 #define ARRAY_COPY(array, array2) \
     array = array2; \
     array##_len = array2##_len; \
     array##_size = array##_size;
+
+#define ARRAY_UNHOOK(array, elem) \
+{ \
+    int i1 = array##_len; \
+    for(int i = 0; i < i1; i++){ \
+        if(array[i] == elem){ \
+            int j1 = array##_len - 1; \
+            for(int j = i; j < j1; j++){ \
+                array[j] = array[j + 1]; \
+            } \
+            array##_len--; \
+        } \
+    } \
+}
 
 #define ARRAY_GROW(T, array) \
 { \

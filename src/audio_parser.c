@@ -42,6 +42,9 @@ int audio_parser_copy(audio_parser_t *parser, audio_parser_t *parser2){
     parser->buf = parser2->buf;
     parser->pos = parser2->pos;
     parser->beat_len = parser2->beat_len;
+    /* WARNING: ARRAY_COPY doesn't actually copy the array, it copies a
+    reference to it. So after the following call,
+    parser->vars == parser2->vars */
     ARRAY_COPY(parser->vars, parser2->vars)
     parser->vars_own = false;
     parser->rnd = parser2->rnd;
