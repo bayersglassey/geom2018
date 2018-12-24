@@ -1,0 +1,12 @@
+anim: "anim/bird.fus"
+state: "crawl"
+pos: ( 8 -25)
+rot: 0
+turn: yes
+keys:
+    x:
+    u:
+    d: is was
+    l:
+    r:
+data: " w147-d w16+r w16-r w16+r w7-r w24+l w2-l w73+r w3-r w111+l w9-l w43+l w15-l w4+d w13"

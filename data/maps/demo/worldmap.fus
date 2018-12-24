@@ -256,6 +256,11 @@ submaps:
         submaps:
             :
                 file: "data/maps/test/map3.fus"
+                door:
+                    map: "data/maps/test/worldmap.fus"
+                    pos: (0 0)
+                    rot: 0
+                    turn: n
                 pos: (0 0)
                 camera: (0 4)
                 mapper: ("triple")
@@ -271,6 +276,11 @@ submaps:
                 submaps:
                     :
                         file: "data/maps/test/map3x.fus"
+                        door:
+                            map: "data/maps/demo/worldmap.fus"
+                            pos: (62 85)
+                            rot: 0
+                            turn: y
                         pos: (1 10)
             :
                 pos: (-1 -10)
