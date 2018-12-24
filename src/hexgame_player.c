@@ -180,8 +180,31 @@ int player_step(player_t *player, hexgame_t *game){
         hexmap_collide_special(map, hitbox, &hitbox_trf,
             &collide_savepoint, &collide_door);
 
-        if(collide_savepoint && body->rot == 0){
+        /* A SERIES OF WILD HACKS FOLLOW
+        TODO: Replace them with The Real Thing, whatever that should be */
+        if(collide_savepoint || collide_door){
+            bool standing_flat = body->rot == 0;
 
+            /* HACK so you can use doors as a roller...
+            Often it looks like you have rot == 0 when it's really 2.
+            NOTE: If you save with rot == 2 as a roller, and then respawn
+            as a spider, you'll probably be in some weird position.
+            TODO: Fix whatever needs to be fixed so we don't need this hack */
+            if(!strcmp(body->stateset.filename, "anim/roller.fus")){
+                standing_flat = body->rot == 0 || body->rot == 2;
+            }
+
+            if(!standing_flat){
+                collide_savepoint = false;
+                collide_door = false;
+            }else{
+                /* HACK: Only spiders can use savepoints */
+                if(strcmp(body->stateset.filename, "anim/player.fus")){
+                    collide_savepoint = false;}
+            }
+        }
+
+        if(collide_savepoint){
             /* Don't use the savepoint if it's already our respawn point!
             In particular, I want to avoid screen flashing white if e.g.
             player turns around in-place.
@@ -211,7 +234,7 @@ int player_step(player_t *player, hexgame_t *game){
             }
         }
 
-        if(collide_door && body->rot == 0){
+        if(collide_door){
             hexmap_submap_t *cur_submap = body->cur_submap;
             const char *door_map_filename = cur_submap->door_map_filename;
             const char *door_anim_filename = cur_submap->door_anim_filename;
@@ -232,6 +255,13 @@ int player_step(player_t *player, hexgame_t *game){
 
                 if(door_anim_filename != NULL){
                     /* Switch anim (stateset) */
+
+                    /* HACK: If you've become something other than a spider,
+                    anim-changing doors change you back into a spider. */
+                    if(strcmp(body->stateset.filename, "anim/player.fus")){
+                        door_anim_filename = "anim/player.fus";
+                    }
+
                     err = body_set_stateset(body, door_anim_filename, NULL);
                     if(err)return err;
                 }
