@@ -4,7 +4,7 @@ stand:
     hitbox:
         ;;    .
         ;;    *
-        ;; ( )  .
+        ;; (.)  .
 
     if:
         key: wasdown u
@@ -95,7 +95,7 @@ grab:
     hitbox:
         ;;    .   .
         ;;    *\*
-        ;; ( )  .
+        ;; (.)  .
 
     if:
         key: not isdown u
