@@ -172,49 +172,20 @@ int body_move_to_map(body_t *body, hexmap_t *map){
     So if caller is trying to loop over map->bodies in the usual way,
     the behaviour of that loop is probably gonna be super wrong. */
     int err;
+    hexgame_t *game = body->game;
+    hexmap_t *old_map = body->map;
 
     /* Don't do nuthin rash if you don't gotta */
     if(body->map == map)return 0;
 
-    {
-        /* DEBUG LOGGING, COS ARRAY_UNHOOK IS NEW & UNTESTED */
-        hexmap_t *body_map = body->map;
+    /* Do the thing we all came here for */
+    body->map = map;
+    body->cur_submap = NULL;
 
-        fprintf(stderr, "UNHOOKING BODY: %p\n", body);
-        fprintf(stderr, "  BEFORE:\n");
+    /* Move body from old to new map's array of bodies */
+    ARRAY_UNHOOK(old_map->bodies, body)
+    ARRAY_PUSH(body_t*, map->bodies, body)
 
-        fprintf(stderr, "    body->map->bodies (%i/%i):\n",
-            body_map->bodies_len, body_map->bodies_size);
-        for(int i = 0; i < body_map->bodies_len; i++){
-            fprintf(stderr, "      %p\n", body_map->bodies[i]);
-        }
-
-        fprintf(stderr, "    map->bodies (%i/%i):\n",
-            map->bodies_len, map->bodies_size);
-        for(int i = 0; i < map->bodies_len; i++){
-            fprintf(stderr, "      %p\n", map->bodies[i]);
-        }
-
-        ARRAY_UNHOOK(body->map->bodies, body)
-        ARRAY_PUSH(body_t*, map->bodies, body)
-
-        fprintf(stderr, "  AFTER:\n");
-
-        fprintf(stderr, "    body->map->bodies (%i/%i):\n",
-            body_map->bodies_len, body_map->bodies_size);
-        for(int i = 0; i < body_map->bodies_len; i++){
-            fprintf(stderr, "      %p\n", body_map->bodies[i]);
-        }
-
-        fprintf(stderr, "    map->bodies (%i/%i):\n",
-            map->bodies_len, map->bodies_size);
-        for(int i = 0; i < map->bodies_len; i++){
-            fprintf(stderr, "      %p\n", map->bodies[i]);
-        }
-    }
-
-
-    hexgame_t *game = body->game;
     /* Update any cameras following this body */
     for(int i = 0; i < game->cameras_len; i++){
         camera_t *camera = game->cameras[i];
