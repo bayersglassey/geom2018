@@ -1,6 +1,10 @@
 
 stand:
     rgraph: "roller"
+    hitbox:
+        ;;    .
+        ;;    *
+        ;; ( )  .
 
     if:
         key: wasdown u
@@ -88,9 +92,17 @@ stand:
 
 grab:
     rgraph: "roller_grab"
+    hitbox:
+        ;;    .   .
+        ;;    *\*
+        ;; ( )  .
 
     if:
         key: not isdown u
     then:
         goto: stand
         delay: 1
+
+dead:
+    rgraph: "player_dead"
+    if() then: die
