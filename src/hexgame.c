@@ -85,9 +85,28 @@ int camera_step(camera_t *camera){
     int err;
 
     hexgame_t *game = camera->game;
+    body_t *body = camera->body;
+
+    /* Figure out camera's current submap */
+    if(body != NULL){
+        camera->map = body->map;
+        if(camera->cur_submap != body->cur_submap){
+            camera->cur_submap = body->cur_submap;
+
+#ifndef DONT_ANIMATE_PALETTE
+            if(camera->smooth_scroll && !camera->should_reset){
+                /* Smoothly transition between old & new palettes */
+                camera->colors_fade = 0;
+            }
+#endif
+
+            err = palette_reset(&camera->cur_submap->palette);
+            if(err)return err;
+        }
+    }
+
     hexmap_t *map = camera->map;
     vecspace_t *space = map->space;
-    body_t *body = camera->body;
 
 #ifndef DONT_ANIMATE_PALETTE
     /* Animate palette */
@@ -108,23 +127,6 @@ int camera_step(camera_t *camera){
 
     err = camera_colors_step(camera, &camera->cur_submap->palette);
     if(err)return err;
-
-    /* Figure out camera's current submap */
-    if(body != NULL){
-        if(camera->cur_submap != body->cur_submap){
-            camera->cur_submap = body->cur_submap;
-
-#ifndef DONT_ANIMATE_PALETTE
-            if(camera->smooth_scroll && !camera->should_reset){
-                /* Smoothly transition between old & new palettes */
-                camera->colors_fade = 0;
-            }
-#endif
-
-            err = palette_reset(&camera->cur_submap->palette);
-            if(err)return err;
-        }
-    }
 
     /* Set camera */
     int camera_type = -1;
