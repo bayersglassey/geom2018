@@ -130,7 +130,9 @@ void body_reset_cameras(body_t *body);
 int body_move_to_map(body_t *body, hexmap_t *map);
 
 int body_init_stateset(body_t *body, const char *stateset_filename,
-    const char *state_name, hexmap_t *map);
+    const char *state_name);
+int body_set_stateset(body_t *body, const char *stateset_filename,
+    const char *state_name);
 int body_set_state(body_t *body, const char *state_name);
 
 struct actor;

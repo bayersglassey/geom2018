@@ -106,19 +106,18 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
     body->game = game;
     body->palmapper = palmapper;
 
+    body->out_of_bounds = false;
+    body->map = map;
+    body->cur_submap = NULL;
+
     if(stateset_filename != NULL){
-        err = body_init_stateset(body, stateset_filename, state_name,
-            map);
+        err = body_init_stateset(body, stateset_filename, state_name);
         if(err)return err;
     }else{
         /* We really really expect you to call body_init_stateset
         right away! */
         body_set_state(body, NULL);
     }
-
-    body->out_of_bounds = false;
-    body->map = map;
-    body->cur_submap = NULL;
 
     return 0;
 }
@@ -225,9 +224,10 @@ int body_move_to_map(body_t *body, hexmap_t *map){
  **************/
 
 int body_init_stateset(body_t *body, const char *stateset_filename,
-    const char *state_name, hexmap_t *map
+    const char *state_name
 ){
     int err;
+    hexmap_t *map = body->map;
 
     err = stateset_load(&body->stateset, strdup(stateset_filename),
         map->prend, map->space);
@@ -241,6 +241,13 @@ int body_init_stateset(body_t *body, const char *stateset_filename,
     if(err)return err;
 
     return 0;
+}
+
+int body_set_stateset(body_t *body, const char *stateset_filename,
+    const char *state_name
+){
+    stateset_cleanup(&body->stateset);
+    return body_init_stateset(body, stateset_filename, state_name);
 }
 
 int body_set_state(body_t *body, const char *state_name){
