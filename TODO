@@ -190,7 +190,6 @@ Dec 11, 2018:
 
 Current objectives:
 
-    * Multiple hexmaps
     * Display text on screen
         * Ok, we can do this now - so where all do we use it?
             * "press '1' to go back..."
@@ -219,8 +218,36 @@ Palette transitions which are intended to be "instantaneous"
 behind camera pos by 1 frame.
 
 
-Dec 20, 2018:
+Dec 24, 2018:
 -------------
 
-The roller in spidertown is messed up since we added that door &
-changed the surrounding map.
+We need player->respawn_stateset_filename
+
+Hardcoded "dead" anim: each stateset should be able to specify its
+dead_anim_name, and if NULL, body can't die.
+
+Improve roller's "grab" so it can get around easier, particularly
+the pebbles area
+
+Currently spider -> roller transformation is kinda hacky as far as
+map design goes; in particular, there's no way to turn back.
+
+    * Can we make doors which are only visible to rollers? Too hacky!
+
+    * Can we have doors better indicate their effect?
+        E.g. after submap is loaded, if its door_anim_filename is non-NULL,
+        change it in some way, perhaps adding a body of the proper anim
+        with no recording, so it just stands there showing you what you
+        will become...
+
+    * Perhaps we design the dodecas area such that rollers can't escape.
+        That way we just need to add a "roller -> player" door somewhere
+        within it.
+        Like on the other side of a puzzle which can't be passed by
+        spiders...
+        It should be at the far left side where the other rollers are,
+        so they act as a hint that you should head there as a roller!..
+        THEY COULD BE ACTORS WHICH DETECT A FELLOW ROLLER ENTERING THE
+        AREA!...
+        *hyperventilating slightly*
+
