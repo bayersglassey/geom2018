@@ -72,7 +72,7 @@ int player_set_respawn(player_t *player, vec_ptr_t pos, rot_t rot, bool turn,
     vec_cpy(space->dims, player->respawn_pos, pos);
     player->respawn_rot = rot;
     player->respawn_turn = turn;
-    if(!strcmp(player->respawn_map_filename, map_filename)){
+    if(strcmp(player->respawn_map_filename, map_filename)){
         free(player->respawn_map_filename);
         player->respawn_map_filename = strdup(map_filename);
     }
