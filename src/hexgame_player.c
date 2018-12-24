@@ -214,17 +214,27 @@ int player_step(player_t *player, hexgame_t *game){
         if(collide_door && body->rot == 0){
             hexmap_submap_t *cur_submap = body->cur_submap;
             const char *door_map_filename = cur_submap->door_map_filename;
-            if(door_map_filename != NULL){
-                /* Switch hexmaps... */
-                hexmap_t *new_map;
-                err = hexgame_get_or_load_map(game,
-                    cur_submap->door_map_filename, &new_map);
-                if(err)return err;
+            const char *door_anim_filename = cur_submap->door_anim_filename;
+
+            if(door_map_filename || door_anim_filename){
+                hexmap_t *new_map = body->map;
+                if(door_map_filename != NULL){
+                    /* Switch map */
+                    err = hexgame_get_or_load_map(game,
+                        cur_submap->door_map_filename, &new_map);
+                    if(err)return err;
+                }
 
                 err = body_respawn(body, cur_submap->door_pos,
                     cur_submap->door_rot, cur_submap->door_turn,
                     new_map);
                 if(err)return err;
+
+                if(door_anim_filename != NULL){
+                    /* Switch anim (stateset) */
+                    err = body_set_stateset(body, door_anim_filename, NULL);
+                    if(err)return err;
+                }
 
                 /* Flash screen cyan so player knows something happened */
                 body_flash_cameras(body, 0, 255, 255, 60);
