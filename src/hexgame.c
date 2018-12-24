@@ -421,10 +421,11 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
                 if(player->keymap < 0)continue;
 
                 body_t *body = player->body;
-                hexmap_t *map = body->map;
                 hexmap_submap_t *submap = body->cur_submap;
-                fprintf(stderr, "Player %i submap: %s\n",
-                    player->keymap, submap->filename);
+                fprintf(stderr, "Player %i:\n", player->keymap);
+                fprintf(stderr, "  map: %s\n", body->map->name);
+                fprintf(stderr, "  submap: %s\n",
+                    body->cur_submap->filename);
             }
         }else if(event->key.keysym.sym == SDLK_r){
             /* start recording */
