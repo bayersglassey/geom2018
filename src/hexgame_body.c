@@ -123,6 +123,29 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
     return 0;
 }
 
+int body_respawn(body_t *body, vec_t pos, rot_t rot, bool turn,
+    hexmap_t *map
+){
+    int err;
+    hexgame_t *game = body->game;
+    vecspace_t *space = game->space;
+
+    vec_cpy(space->dims, body->pos, pos);
+    body->rot = rot;
+    body->turn = turn;
+    body->state = body->stateset.states[0];
+    body->frame_i = 0;
+    body->cooldown = 0;
+
+    err = body_move_to_map(body, map);
+    if(err)return err;
+
+    keyinfo_reset(&body->keyinfo);
+
+    return 0;
+}
+
+
 
 /*************
  * BODY MISC *
@@ -142,6 +165,65 @@ void body_init_trf(body_t *body, trf_t *trf){
     vec_cpy(space->dims, trf->add, body->pos);
     trf->rot = body_get_rot(body);
     trf->flip = body->turn;
+}
+
+int body_move_to_map(body_t *body, hexmap_t *map){
+    /* WARNING: this function modifies map->bodies for two maps.
+    So if caller is trying to loop over map->bodies in the usual way,
+    the behaviour of that loop is probably gonna be super wrong. */
+    int err;
+
+    /* Don't do nuthin rash if you don't gotta */
+    if(body->map == map)return 0;
+
+    {
+        /* DEBUG LOGGING, COS ARRAY_UNHOOK IS NEW & UNTESTED */
+        hexmap_t *body_map = body->map;
+
+        fprintf(stderr, "UNHOOKING BODY: %p\n", body);
+        fprintf(stderr, "  BEFORE:\n");
+
+        fprintf(stderr, "    body->map->bodies (%i/%i):\n",
+            body_map->bodies_len, body_map->bodies_size);
+        for(int i = 0; i < body_map->bodies_len; i++){
+            fprintf(stderr, "      %p\n", body_map->bodies[i]);
+        }
+
+        fprintf(stderr, "    map->bodies (%i/%i):\n",
+            map->bodies_len, map->bodies_size);
+        for(int i = 0; i < map->bodies_len; i++){
+            fprintf(stderr, "      %p\n", map->bodies[i]);
+        }
+
+        ARRAY_UNHOOK(body->map->bodies, body)
+        ARRAY_PUSH(body_t*, map->bodies, body)
+
+        fprintf(stderr, "  AFTER:\n");
+
+        fprintf(stderr, "    body->map->bodies (%i/%i):\n",
+            body_map->bodies_len, body_map->bodies_size);
+        for(int i = 0; i < body_map->bodies_len; i++){
+            fprintf(stderr, "      %p\n", body_map->bodies[i]);
+        }
+
+        fprintf(stderr, "    map->bodies (%i/%i):\n",
+            map->bodies_len, map->bodies_size);
+        for(int i = 0; i < map->bodies_len; i++){
+            fprintf(stderr, "      %p\n", map->bodies[i]);
+        }
+    }
+
+
+    hexgame_t *game = body->game;
+    /* Update any cameras following this body */
+    for(int i = 0; i < game->cameras_len; i++){
+        camera_t *camera = game->cameras[i];
+        if(camera->body == body){
+            camera->map = map;
+            camera->cur_submap = NULL;
+        }
+    }
+    return 0;
 }
 
 

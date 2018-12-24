@@ -25,6 +25,7 @@ int player_init(player_t *player, body_t *body, int keymap,
     char *respawn_map_filename, char *respawn_filename
 ){
     int err;
+    hexgame_t *game = body->game;
 
     player->body = body;
     player->keymap = keymap;
@@ -44,7 +45,9 @@ int player_init(player_t *player, body_t *body, int keymap,
         player->key_code[KEYINFO_KEY_R] = SDLK_d;
     }
 
-    hexmap_t *map = body->map;
+    hexmap_t *map;
+    err = hexgame_get_or_load_map(game, respawn_map_filename, &map);
+    if(err)return err;
     vecspace_t *space = map->space;
     if(respawn_pos == NULL)respawn_pos = map->spawn;
     vec_cpy(space->dims, player->respawn_pos, respawn_pos);
@@ -54,10 +57,25 @@ int player_init(player_t *player, body_t *body, int keymap,
     player->respawn_filename = respawn_filename;
 
     /* Move player's body to the respawn location */
-    vec_cpy(space->dims, body->pos, respawn_pos);
-    body->rot = respawn_rot;
-    body->turn = respawn_turn;
+    err = body_respawn(body, respawn_pos, respawn_rot, respawn_turn, map);
+    if(err)return err;
 
+    return 0;
+}
+
+int player_set_respawn(player_t *player, vec_ptr_t pos, rot_t rot, bool turn,
+    const char *map_filename
+){
+    hexgame_t *game = player->body->game;
+    vecspace_t *space = game->space;
+
+    vec_cpy(space->dims, player->respawn_pos, pos);
+    player->respawn_rot = rot;
+    player->respawn_turn = turn;
+    if(!strcmp(player->respawn_map_filename, map_filename)){
+        free(player->respawn_map_filename);
+        player->respawn_map_filename = strdup(map_filename);
+    }
     return 0;
 }
 
@@ -70,7 +88,7 @@ int player_respawn_save(const char *filename, vec_t pos,
         perror(NULL);
         return 2;
     }
-    fprintf(f, "%i %i %i %i ", pos[0], pos[1], rot, turn? 'y': 'n');
+    fprintf(f, "%i %i %i %c ", pos[0], pos[1], rot, turn? 'y': 'n');
     fus_write_str(f, map_filename);
     fclose(f);
     return 0;
@@ -175,9 +193,11 @@ int player_step(player_t *player, hexgame_t *game){
 
             if(!at_respawn){
                 /* We're not at previous respawn location, so update it */
-                vec_cpy(space->dims, player->respawn_pos, body->pos);
-                player->respawn_rot = body->rot;
-                player->respawn_turn = body->turn;
+                err = player_set_respawn(player, body->pos, body->rot,
+                    body->turn, map->name);
+                if(err)return err;
+
+                /* Save player's new respawn location */
                 if(player->respawn_filename != NULL){
                     err = player_respawn_save(player->respawn_filename,
                         player->respawn_pos, player->respawn_rot,

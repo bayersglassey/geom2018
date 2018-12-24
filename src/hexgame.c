@@ -290,39 +290,50 @@ int hexgame_load_map(hexgame_t *game, const char *map_filename,
     return 0;
 }
 
-hexmap_t *hexgame_get_or_load_map(hexgame_t *game, const char *map_filename){
+int hexgame_get_or_load_map(hexgame_t *game, const char *map_filename,
+    hexmap_t **map_ptr
+){
     int err;
 
     for(int i = 0; i < game->maps_len; i++){
         hexmap_t *map = game->maps[i];
-        if(!strcmp(map->name, map_filename))return map;
+        if(!strcmp(map->name, map_filename)){
+            *map_ptr = map;
+            return 0;
+        }
     }
 
-    hexmap_t *map;
-    err = hexgame_load_map(game, map_filename, &map);
-    if(err)return NULL;
-
-    return map;
+    return hexgame_load_map(game, map_filename, map_ptr);
 }
 
 int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard){
+    /* WARNING: this function calls body_respawn, which calls
+    body_move_to_map, which modifies map->bodies for two maps.
+    So if caller is trying to loop over map->bodies in the usual way,
+    the behaviour of that loop is probably gonna be super wrong. */
+
+    int err;
     vecspace_t *space = game->space;
     body_t *body = player->body;
-    if(hard){
-        hexmap_t *map = game->maps[0];
-        vec_cpy(space->dims, body->pos, map->spawn);
-        body->rot = 0;
-        body->turn = false;
-    }else{
-        vec_cpy(space->dims, body->pos, player->respawn_pos);
-        body->rot = player->respawn_rot;
-        body->turn = player->respawn_turn;
-    }
-    body->state = body->stateset.states[0];
-    body->frame_i = 0;
-    body->cooldown = 0;
+    hexmap_t *map = NULL;
+    vec_ptr_t pos = NULL;
+    rot_t rot = 0;
+    bool turn = false;
 
-    keyinfo_reset(&body->keyinfo);
+    if(hard){
+        map = game->maps[0];
+        pos = map->spawn;
+    }else{
+        err = hexgame_get_or_load_map(game, player->respawn_map_filename,
+            &map);
+        if(err)return err;
+        pos = player->respawn_pos;
+        rot = player->respawn_rot;
+        turn = player->respawn_turn;
+    }
+
+    err = body_respawn(body, pos, rot, turn, map);
+    if(err)return err;
 
     for(int i = 0; i < game->cameras_len; i++){
         camera_t *camera = game->cameras[i];

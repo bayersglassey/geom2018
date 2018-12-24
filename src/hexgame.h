@@ -119,9 +119,12 @@ void body_cleanup(body_t *body);
 int body_init(body_t *body, struct hexgame *game, hexmap_t *map,
     const char *stateset_filename, const char *state_name,
     palettemapper_t *palmapper);
+int body_respawn(body_t *body, vec_t pos, rot_t rot, bool turn,
+    hexmap_t *map);
 
 rot_t body_get_rot(body_t *body);
 void body_init_trf(body_t *body, trf_t *trf);
+int body_move_to_map(body_t *body, hexmap_t *map);
 
 int body_init_stateset(body_t *body, const char *stateset_filename,
     const char *state_name, hexmap_t *map);
@@ -173,6 +176,8 @@ void player_cleanup(player_t *player);
 int player_init(player_t *player, body_t *body, int keymap,
     vec_t respawn_pos, rot_t respawn_rot, bool respawn_turn,
     char *respawn_map_filename, char *respawn_filename);
+int player_set_respawn(player_t *player, vec_ptr_t pos, rot_t rot, bool turn,
+    const char *map_filename);
 
 int player_respawn_save(const char *filename, vec_t pos,
     rot_t rot, bool turn, const char *map_filename_ptr);
@@ -269,7 +274,8 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     const char *map_filename);
 int hexgame_load_map(hexgame_t *game, const char *map_filename,
     hexmap_t **map_ptr);
-hexmap_t *hexgame_get_or_load_map(hexgame_t *game, const char *map_filename);
+int hexgame_get_or_load_map(hexgame_t *game, const char *map_filename,
+    hexmap_t **map_ptr);
 int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard);
 int hexgame_reset_players_by_keymap(hexgame_t *game, int keymap, bool hard);
 int hexgame_process_event(hexgame_t *game, SDL_Event *event);

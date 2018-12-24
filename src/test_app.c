@@ -111,8 +111,13 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
             respawn_map_filename = strdup(map->name);
         }
 
-        ARRAY_PUSH_NEW(body_t*, map->bodies, body)
-        err = body_init(body, game, map,
+        hexmap_t *respawn_map;
+        err = hexgame_get_or_load_map(game, respawn_map_filename,
+            &respawn_map);
+        if(err)return err;
+
+        ARRAY_PUSH_NEW(body_t*, respawn_map->bodies, body)
+        err = body_init(body, game, respawn_map,
             strdup(app->stateset_filename), NULL, NULL);
         if(err)return err;
 
@@ -217,6 +222,11 @@ int test_app_process_console_input(test_app_t *app){
             respawn_map_filename = strdup(map->name);
         }
 
+        hexmap_t *respawn_map;
+        err = hexgame_get_or_load_map(game, respawn_map_filename,
+            &respawn_map);
+        if(err)return err;
+
         int keymap = -1;
         for(int i = 0; i < game->players_len; i++){
             player_t *player = game->players[i];
@@ -224,8 +234,9 @@ int test_app_process_console_input(test_app_t *app){
         }
         keymap++;
 
-        ARRAY_PUSH_NEW(body_t*, map->bodies, body)
-        err = body_init(body, game, map, stateset_filename, NULL, NULL);
+        ARRAY_PUSH_NEW(body_t*, respawn_map->bodies, body)
+        err = body_init(body, game, respawn_map, stateset_filename,
+            NULL, NULL);
         if(err)return err;
 
         ARRAY_PUSH_NEW(player_t*, game->players, player)
