@@ -201,6 +201,11 @@ submaps:
                                                 tileset: "data/tileset1_bg.fus"
                                             :
                                                 file: "data/maps/demo/big.fus"
+                                                door:
+                                                    map: "data/maps/trees/worldmap.fus"
+                                                    pos: (1 1)
+                                                    rot: 0
+                                                    turn: n
                                     :
                                         file: "data/maps/demo/fisheye.fus"
                                         pos: (0 0)
