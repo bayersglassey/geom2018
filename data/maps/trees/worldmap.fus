@@ -2,16 +2,27 @@
 unit: 3 2 0 -1
 spawn: (0 0)
 default_palette: "data/maps/trees/pals/realistic.fus"
-default_tileset: "data/tileset1.fus"
+default_tileset: "data/maps/trees/tileset.fus"
 
 submaps:
     :
-        file: "data/maps/trees/start.fus"
-        door:
-            map: "data/maps/demo/worldmap.fus"
-            pos: (36 -71)
-            rot: 0
-            turn: y
-        pos: (0 0)
-        camera: (12 0)
+        bg
+        file: "data/maps/trees/start_bg.fus"
+        tileset: "data/maps/trees/tileset_bg.fus"
+        submaps:
+            :
+                file: "data/maps/trees/start.fus"
+                door:
+                    map: "data/maps/demo/worldmap.fus"
+                    pos: (36 -71)
+                    rot: 0
+                    turn: y
+                pos: (0 0)
+                camera: (12 0)
+                mapper: ("triple")
+                tileset: "data/maps/trees/tileset.fus"
+    :
+        file: "data/maps/trees/start2.fus"
+        pos: (32 10)
+        camera: (-10 0)
         mapper: ("triple")

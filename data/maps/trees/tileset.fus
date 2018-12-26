@@ -1,0 +1,14 @@
+
+verts:
+    "0": "map_vert0"
+    "1": "map_vert1"
+edges:
+    "0": "map_edge0"
+    "1": "map_edge1"
+    "2": "map_edge2"
+faces:
+    "0": "map_face0"
+    "1": "map_face1"
+    "2": "map_face2"
+    "S": "map_savepoint"
+    "D": "map_door"

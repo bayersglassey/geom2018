@@ -24,6 +24,15 @@ shapes:
             : "tri" (0 0 0 0) 10 f eval: 1 + 8 + 6
 
 
+    "map_vert0_dark":
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval: 1 + 0 + 4
+            : "tri" (0 0 0 0)  2 f eval: 1 + 0 + 4
+            : "tri" (0 0 0 0)  4 f eval: 1 + 0 + 4
+            : "tri" (0 0 0 0)  6 f eval: 1 + 0 + 4
+            : "tri" (0 0 0 0)  8 f eval: 1 + 0 + 4
+            : "tri" (0 0 0 0) 10 f eval: 1 + 0 + 4
+
     "map_vert0_bg":
         prismels:
             : "tri" (0 0 0 0)  0 f eval: 1 + 16 + 4
@@ -56,6 +65,12 @@ shapes:
             : "tri" (2 0 0  0) 11 f eval: 1 + 8 + 1
             : "tri" (2 2 0 -1)  5 f eval: 1 + 8 + 3
 
+    "map_edge0_dark":
+        prismels:
+            : "tri" (1 0 0  0) 11 f eval: 1 + 0 + 6
+            : "sq"  (1 1 0 -1)  0 f eval: 1 + 0 + 1
+            : "tri" (2 2 0 -1)  5 f eval: 1 + 0 + 6
+
     "map_edge0_bg":
         prismels:
             : "tri" (1 0 0  0) 11 f eval: 1 + 16 + 6
@@ -71,7 +86,6 @@ shapes:
             : "tri" ( 0 0 0 0)  0 f eval: 1 + 0 + 1
             : "tri" ( 0 0 0 0)  2 f eval: 1 + 0 + 1
             : "sq"  (-1 0 1 0)  0 f eval: 1 + 8 + 1
-            #: "tri" (-1 0 1 1)  0 f eval: 1 + 8 + 3
 
     "map_face0":
         shapes:
@@ -120,13 +134,24 @@ shapes:
             : "tri" ( 0 0 0 0)  0 f eval: 1 + 16 + 1
             : "tri" ( 0 0 0 0)  2 f eval: 1 + 16 + 1
             : "sq"  (-1 0 1 0)  0 f eval: 1 +  0 + 1
-            #: "tri" (-1 0 1 1)  0 f eval: 1 +  0 + 3
 
     "map_face0_bg":
         shapes:
             : "map_face0_bg_third" (1 1 1 0)  0 f
             : "map_face0_bg_third" (1 1 1 0)  4 f
             : "map_face0_bg_third" (1 1 1 0)  8 f
+
+    "map_face0_dark_third":
+        prismels:
+            : "tri" ( 0 0 0 0)  0 f eval: 1 +  0 + 1
+            : "tri" ( 0 0 0 0)  2 f eval: 1 +  0 + 1
+            : "sq"  (-1 0 1 0)  0 f eval: 1 +  0 + 2
+
+    "map_face0_dark":
+        shapes:
+            : "map_face0_dark_third" (1 1 1 0)  0 f
+            : "map_face0_dark_third" (1 1 1 0)  4 f
+            : "map_face0_dark_third" (1 1 1 0)  8 f
 
     "map_savepoint_third":
         animation: oscillate 6
