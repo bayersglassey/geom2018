@@ -513,6 +513,22 @@ void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
     }
 }
 
+static void _dump_size(int size, int count, FILE *f){
+    int size_avg = size / count;
+    fprintf(f, "      B   %12i %8i\n",
+        size,
+        size_avg);
+    fprintf(f, "      KiB %12i %8i\n",
+        size / 1024,
+        size_avg / 1024);
+    fprintf(f, "      MiB %12i %8i\n",
+        size / 1024 / 1024,
+        size_avg / 1024 / 1024);
+    fprintf(f, "      GiB %12i %8i\n",
+        size / 1024 / 1024 / 1024,
+        size_avg / 1024 / 1024 / 1024);
+}
+
 void prismelrenderer_dump_stats(prismelrenderer_t *prend, FILE *f){
     int n_bitmaps = 0;
     int n_textures = 0;
@@ -535,14 +551,10 @@ void prismelrenderer_dump_stats(prismelrenderer_t *prend, FILE *f){
     }
 
     fprintf(f, "Prismelrenderer stats:\n");
-    fprintf(f, "  n_bitmaps: %i\n", n_bitmaps);
-    fprintf(f, "    bitmaps_size:\n");
-    fprintf(f, "      %i B\n", bitmaps_size);
-    fprintf(f, "      %i KiB\n", bitmaps_size / 1024);
-    fprintf(f, "      %i MiB\n", bitmaps_size / 1024 / 1024);
-    fprintf(f, "      %i GiB\n", bitmaps_size / 1024 / 1024 / 1024);
-    fprintf(f, "    avg size per bitmap: %i\n", bitmaps_size / n_bitmaps);
-    fprintf(f, "  n_textures: %i\n", n_textures);
+    fprintf(f, "  bitmaps: %i\n", n_bitmaps);
+    fprintf(f, "    size (total | avg):\n");
+    _dump_size(bitmaps_size, n_bitmaps, f);
+    fprintf(f, "  textures: %i\n", n_textures);
 }
 
 int prismelrenderer_push_prismel(prismelrenderer_t *renderer, char *name,
