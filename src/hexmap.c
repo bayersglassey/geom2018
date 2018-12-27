@@ -60,19 +60,28 @@ static int hexmap_tileset_parse(hexmap_tileset_t *tileset,
             \
             err = fus_lexer_get(lexer, "("); \
             if(err)return err; \
-            err = fus_lexer_get_str(lexer, &name); \
-            if(err)return err; \
-            rendergraph_t *rgraph = \
-                prismelrenderer_get_rendergraph(prend, name); \
-            if(rgraph == NULL){ \
-                fus_lexer_err_info(lexer); \
-                fprintf(stderr, "Couldn't find shape: %s\n", name); \
-                free(name); return 2;} \
-            free(name); \
             ARRAY_PUSH_NEW(hexmap_tileset_entry_t*, \
                 tileset->TYPE##_entries, entry) \
+            entry->n_rgraphs = 0; \
             entry->tile_c = tile_c; \
-            entry->rgraph = rgraph; \
+            while(1){ \
+                if(!fus_lexer_got_str(lexer))break; \
+                char *rgraph_name; \
+                err = fus_lexer_get_str(lexer, &rgraph_name); \
+                if(err)return err; \
+                rendergraph_t *rgraph = \
+                    prismelrenderer_get_rendergraph(prend, rgraph_name); \
+                if(rgraph == NULL){ \
+                    fus_lexer_err_info(lexer); \
+                    fprintf(stderr, "Couldn't find shape: %s\n", \
+                        rgraph_name); \
+                    free(rgraph_name); return 2;} \
+                free(rgraph_name); \
+                entry->rgraphs[entry->n_rgraphs] = rgraph; \
+                entry->n_rgraphs++; \
+            } \
+            if(entry->n_rgraphs == 0){ \
+                return fus_lexer_unexpected(lexer, "str");} \
             err = fus_lexer_get(lexer, ")"); \
             if(err)return err; \
         } \
@@ -107,35 +116,32 @@ int hexmap_tileset_load(hexmap_tileset_t *tileset,
     return 0;
 }
 
-rendergraph_t *hexmap_tileset_get_rgraph_vert(hexmap_tileset_t *tileset,
-    char tile_c
-){
-    for(int i = 0; i < tileset->vert_entries_len; i++){
-        hexmap_tileset_entry_t *entry = tileset->vert_entries[i];
-        if(entry->tile_c == tile_c)return entry->rgraph;
+#define HEXMAP_TILESET_GET_RGRAPH(TYPE) \
+    void hexmap_tileset_get_rgraph_##TYPE(hexmap_tileset_t *tileset, \
+        char tile_c, rot_t rot, \
+        rendergraph_t **rgraph_ptr, bool *rot_ok_ptr \
+    ){ \
+        /* rgraph: non-NULL if we found an entry with matching tile_c */ \
+        /* rot_ok: whether the entry we found had an rgraph for the */ \
+        /* requested rot; if false, rgraph is the entry's rgraph for */ \
+        /* rot=0 and caller should rotate the rgraph manually */ \
+        bool rot_ok = false; \
+        rendergraph_t *rgraph = NULL; \
+        for(int i = 0; i < tileset->TYPE##_entries_len; i++){ \
+            hexmap_tileset_entry_t *entry = tileset->TYPE##_entries[i]; \
+            if(entry->tile_c != tile_c)continue; \
+            if(entry->n_rgraphs > rot){ \
+                rot_ok = true; \
+                rgraph = entry->rgraphs[rot]; \
+            }else rgraph = entry->rgraphs[0]; \
+            break; \
+        } \
+        *rgraph_ptr = rgraph; \
+        *rot_ok_ptr = rot_ok; \
     }
-    return NULL;
-}
-
-rendergraph_t *hexmap_tileset_get_rgraph_edge(hexmap_tileset_t *tileset,
-    char tile_c
-){
-    for(int i = 0; i < tileset->edge_entries_len; i++){
-        hexmap_tileset_entry_t *entry = tileset->edge_entries[i];
-        if(entry->tile_c == tile_c)return entry->rgraph;
-    }
-    return NULL;
-}
-
-rendergraph_t *hexmap_tileset_get_rgraph_face(hexmap_tileset_t *tileset,
-    char tile_c
-){
-    for(int i = 0; i < tileset->face_entries_len; i++){
-        hexmap_tileset_entry_t *entry = tileset->face_entries[i];
-        if(entry->tile_c == tile_c)return entry->rgraph;
-    }
-    return NULL;
-}
+HEXMAP_TILESET_GET_RGRAPH(vert)
+HEXMAP_TILESET_GET_RGRAPH(edge)
+HEXMAP_TILESET_GET_RGRAPH(face)
 
 
 
@@ -956,15 +962,17 @@ int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap){
                 for(int i = 0; i < ROT; i++){ \
                     hexcollmap_elem_t *elem = &tile->PART[i]; \
                     if(!hexcollmap_elem_is_visible(elem))continue; \
-                    rendergraph_t *rgraph_tile = \
-                        hexmap_tileset_get_rgraph_##PART( \
-                            tileset, elem->tile_c); \
+                    rendergraph_t *rgraph_tile; \
+                    bool rot_ok; \
+                    hexmap_tileset_get_rgraph_##PART(tileset, \
+                            elem->tile_c, i, \
+                            &rgraph_tile, &rot_ok); \
                     if(rgraph_tile == NULL){ \
                         fprintf(stderr, "Couldn't find " #PART " tile " \
                             "for character: %c\n", elem->tile_c); \
                         return 2;} \
                     err = add_tile_rgraph(rgraph, rgraph_tile, \
-                        space, v, i * 2); \
+                        space, v, rot_ok? 0: i * 2); \
                     if(err)return err; \
                 }
             HEXMAP_ADD_TILE(vert, 1)

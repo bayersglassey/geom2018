@@ -16,7 +16,9 @@
 typedef struct hexmap_tileset_entry {
     char tile_c;
         /* see hexcollmap_elem->tile_c */
-    rendergraph_t *rgraph;
+    int n_rgraphs;
+        /* Between 1 and 3 (index is a rot_t value). */
+    rendergraph_t *rgraphs[3];
 } hexmap_tileset_entry_t;
 
 typedef struct hexmap_tileset {
@@ -30,12 +32,6 @@ void hexmap_tileset_cleanup(hexmap_tileset_t *tileset);
 int hexmap_tileset_init(hexmap_tileset_t *tileset, char *name);
 int hexmap_tileset_load(hexmap_tileset_t *tileset,
     prismelrenderer_t *prend, const char *filename);
-rendergraph_t *hexmap_tileset_get_rgraph_vert(hexmap_tileset_t *tileset,
-    char tile_c);
-rendergraph_t *hexmap_tileset_get_rgraph_edge(hexmap_tileset_t *tileset,
-    char tile_c);
-rendergraph_t *hexmap_tileset_get_rgraph_face(hexmap_tileset_t *tileset,
-    char tile_c);
 
 
 
