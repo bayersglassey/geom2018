@@ -57,6 +57,26 @@ shapes:
             : "sq"  ( 1  0 -1  0) 11 f eval: 1 + 8 + 1
 
 
+    ##########################
+    # BARK_SIMPLE VERT, FACE #
+    ##########################
+
+    "bark_simple_vert_r0":
+        shapes:
+            : "bark_flake_center_c1" ( 0  0  0  0)  0 f
+            : "bark_flake_perimeter_c1" ( 0  0  0  0)  0 f
+
+    "bark_simple_face_r0":
+        shapes:
+            : "bark_flake_center_c1" ( 1  1  1  0)  0 f
+            : "bark_flake_perimeter_c1" ( 1  1  1  0)  0 f
+
+    "bark_simple_face_r1":
+        shapes:
+            : "bark_flake_center_c1" (-1  0  2  1)  0 f
+            : "bark_flake_perimeter_c1" (-1  0  2  1)  0 f
+
+
     #########################
     # BARK VERT, EDGE, FACE #
     #########################
