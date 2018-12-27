@@ -1,0 +1,14 @@
+
+verts:
+    "0":
+        "bark_vert_r0"
+edges:
+    "0":
+        "bark_edge_r0"
+        "bark_edge_r1"
+        "bark_edge_r2"
+faces:
+    "0":
+        "bark_face_r0"
+        "bark_face_r1"
+    "S": "map_savepoint"

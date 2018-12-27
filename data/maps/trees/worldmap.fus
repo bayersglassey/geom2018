@@ -6,10 +6,18 @@ default_tileset: "data/maps/trees/tileset.fus"
 
 submaps:
     :
-        bg
-        file: "data/maps/trees/start_bg.fus"
-        tileset: "data/maps/trees/tileset_bg.fus"
+        pos: (0 0)
+        camera: (12 0)
+        mapper: ("triple")
         submaps:
+            #:
+            #    bg
+            #    file: "data/maps/trees/start_bg_bark.fus"
+            #    tileset: "data/maps/trees/tilesets/bark.fus"
+            :
+                bg
+                file: "data/maps/trees/start_bg.fus"
+                tileset: "data/maps/trees/tileset_bg.fus"
             :
                 file: "data/maps/trees/start.fus"
                 door:
@@ -17,9 +25,6 @@ submaps:
                     pos: (36 -71)
                     rot: 0
                     turn: y
-                pos: (0 0)
-                camera: (12 0)
-                mapper: ("triple")
                 tileset: "data/maps/trees/tileset.fus"
     :
         file: "data/maps/trees/start2.fus"

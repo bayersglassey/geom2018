@@ -1,0 +1,87 @@
+
+shapes:
+
+    ##############
+    # BARK FLAKE #
+    ##############
+
+    "bark_flake_center_c1":
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval: 1 + 0 + 6
+            : "tri" (0 0 0 0)  2 f eval: 1 + 0 + 6
+            : "tri" (0 0 0 0)  4 f eval: 1 + 0 + 6
+            : "tri" (0 0 0 0)  6 f eval: 1 + 0 + 6
+            : "tri" (0 0 0 0)  8 f eval: 1 + 0 + 6
+            : "tri" (0 0 0 0) 10 f eval: 1 + 0 + 6
+
+    "bark_flake_center_c2":
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval: 1 + 0 + 5
+            : "tri" (0 0 0 0)  2 f eval: 1 + 0 + 5
+            : "tri" (0 0 0 0)  4 f eval: 1 + 0 + 5
+            : "tri" (0 0 0 0)  6 f eval: 1 + 0 + 5
+            : "tri" (0 0 0 0)  8 f eval: 1 + 0 + 5
+            : "tri" (0 0 0 0) 10 f eval: 1 + 0 + 5
+
+    "bark_flake_center_c3":
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval: 1 + 0 + 4
+            : "tri" (0 0 0 0)  2 f eval: 1 + 0 + 4
+            : "tri" (0 0 0 0)  4 f eval: 1 + 0 + 4
+            : "tri" (0 0 0 0)  6 f eval: 1 + 0 + 4
+            : "tri" (0 0 0 0)  8 f eval: 1 + 0 + 4
+            : "tri" (0 0 0 0) 10 f eval: 1 + 0 + 4
+
+    "bark_flake_perimeter_c1":
+        prismels:
+            : "sq"  (-1  0  1  0)  0 f eval: 1 + 8 + 2
+            : "tri" ( 0  0  1  0)  1 f eval: 1 + 8 + 6
+            : "sq"  ( 1  0  0  0)  1 f eval: 1 + 8 + 2
+            : "tri" ( 1  0  0  0) 11 f eval: 1 + 8 + 6
+            : "sq"  ( 1  0 -1  0) 11 f eval: 1 + 8 + 2
+
+    "bark_flake_perimeter_c2":
+        prismels:
+            : "sq"  (-1  0  1  0)  0 f eval: 1 + 8 + 3
+            : "tri" ( 0  0  1  0)  1 f eval: 1 + 8 + 5
+            : "sq"  ( 1  0  0  0)  1 f eval: 1 + 8 + 3
+            : "tri" ( 1  0  0  0) 11 f eval: 1 + 8 + 5
+            : "sq"  ( 1  0 -1  0) 11 f eval: 1 + 8 + 3
+
+    "bark_flake_perimeter_c3":
+        prismels:
+            : "sq"  (-1  0  1  0)  0 f eval: 1 + 8 + 1
+            : "tri" ( 0  0  1  0)  1 f eval: 1 + 8 + 4
+            : "sq"  ( 1  0  0  0)  1 f eval: 1 + 8 + 1
+            : "tri" ( 1  0  0  0) 11 f eval: 1 + 8 + 4
+            : "sq"  ( 1  0 -1  0) 11 f eval: 1 + 8 + 1
+
+
+    #########################
+    # BARK VERT, EDGE, FACE #
+    #########################
+
+    "bark_vert_r0":
+        shapes:
+            : "bark_flake_center_c1" ( 0  0  0  0)  0 f
+
+    "bark_edge_r0":
+        shapes:
+            : "bark_flake_perimeter_c1" ( 0  0  0  0)  0 f
+
+    "bark_edge_r1":
+        shapes:
+            : "bark_flake_perimeter_c2" ( 1  1  1  0)  0 f
+
+    "bark_edge_r2":
+        shapes:
+            : "bark_flake_perimeter_c3" (-1  0  2  1)  0 f
+
+    "bark_face_r0":
+        shapes:
+            : "bark_flake_center_c2" ( 1  1  1  0)  0 f
+
+    "bark_face_r1":
+        shapes:
+            : "bark_flake_center_c3" (-1  0  2  1)  0 f
+
