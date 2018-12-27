@@ -513,6 +513,38 @@ void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
     }
 }
 
+void prismelrenderer_dump_stats(prismelrenderer_t *prend, FILE *f){
+    int n_bitmaps = 0;
+    int n_textures = 0;
+    int bitmaps_size = 0;
+
+    for(int i = 0; i < prend->rendergraphs_len; i++){
+        rendergraph_t *rgraph = prend->rendergraphs[i];
+        for(int i = 0; i < rgraph->n_bitmaps; i++){
+            rendergraph_bitmap_t *bitmap = &rgraph->bitmaps[i];
+            SDL_Surface *surface = bitmap->surface;
+            SDL_Texture *texture = bitmap->texture;
+            if(surface != NULL){
+                n_bitmaps++;
+                bitmaps_size += surface->h * surface->pitch;
+            }
+            if(texture != NULL){
+                n_textures++;
+            }
+        }
+    }
+
+    fprintf(f, "Prismelrenderer stats:\n");
+    fprintf(f, "  n_bitmaps: %i\n", n_bitmaps);
+    fprintf(f, "    bitmaps_size:\n");
+    fprintf(f, "      %i B\n", bitmaps_size);
+    fprintf(f, "      %i KiB\n", bitmaps_size / 1024);
+    fprintf(f, "      %i MiB\n", bitmaps_size / 1024 / 1024);
+    fprintf(f, "      %i GiB\n", bitmaps_size / 1024 / 1024 / 1024);
+    fprintf(f, "    avg size per bitmap: %i\n", bitmaps_size / n_bitmaps);
+    fprintf(f, "  n_textures: %i\n", n_textures);
+}
+
 int prismelrenderer_push_prismel(prismelrenderer_t *renderer, char *name,
     prismel_t **prismel_ptr
 ){

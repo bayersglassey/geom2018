@@ -536,6 +536,8 @@ int test_app_mainloop(test_app_t *app){
                 }else if(event.key.keysym.sym == SDLK_F11){
                     printf("Frame rendered in: %i ms\n", took);
                     printf("  (Aiming for sub-%i ms)\n", app->delay_goal);
+
+                    prismelrenderer_dump_stats(&app->prend, stdout);
                 }
             }else if(event.type == SDL_KEYUP){
                 if(event.key.keysym.sym == SDLK_F6){

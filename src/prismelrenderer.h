@@ -109,6 +109,7 @@ int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space);
 void prismelrenderer_cleanup(prismelrenderer_t *renderer);
 void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
     int dump_bitmaps);
+void prismelrenderer_dump_stats(prismelrenderer_t *renderer, FILE *f);
 int prismelrenderer_push_prismel(prismelrenderer_t *renderer, char *name,
     prismel_t **prismel_ptr);
 struct prismel *prismelrenderer_get_prismel(prismelrenderer_t *prend,
