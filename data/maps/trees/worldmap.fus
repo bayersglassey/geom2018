@@ -26,7 +26,29 @@ submaps:
                     rot: 0
                     turn: y
     :
-        file: "data/maps/trees/start2.fus"
         pos: (32 10)
-        camera: (-10 0)
+        camera: (0 0)
         mapper: ("triple")
+        submaps:
+            :
+                bg
+                file: "data/maps/trees/start2_bg.fus"
+                tileset: "data/maps/trees/tilesets/trees_dark.fus"
+            :
+                file: "data/maps/trees/start2.fus"
+            :
+                file: "data/maps/trees/start3.fus"
+                pos: (5 5)
+                camera: (6 6)
+            :
+                file: "data/maps/trees/start4.fus"
+                pos: eval: (5 5) + (12 5)
+                camera: (9 6)
+            :
+                file: "data/maps/trees/start5.fus"
+                pos: eval: (5 5) + (11 14)
+                camera: (6 6)
+            :
+                file: "data/maps/trees/start6.fus"
+                pos: eval: (5 5) + (11 14) + (10 16)
+                camera: (9 6)
