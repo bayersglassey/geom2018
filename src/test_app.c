@@ -514,7 +514,7 @@ int test_app_mainloop(test_app_t *app){
                 if(event.key.keysym.sym == SDLK_ESCAPE){
                     app->loop = false; break;
                 }else if(event.key.keysym.sym == SDLK_RETURN){
-                    app->show_controls = !app->show_controls; break;
+                    app->show_controls = !app->show_controls;
                 }else if(event.key.keysym.sym == SDLK_F5){
                     if(app->hexgame_running){
                         app->hexgame_running = false;
