@@ -177,8 +177,9 @@ int player_step(player_t *player, hexgame_t *game){
 
         bool collide_savepoint = false;
         bool collide_door = false;
+        bool collide_water = false;
         hexmap_collide_special(map, hitbox, &hitbox_trf,
-            &collide_savepoint, &collide_door);
+            &collide_savepoint, &collide_door, &collide_water);
 
         /* A SERIES OF WILD HACKS FOLLOW
         TODO: Replace them with The Real Thing, whatever that should be */

@@ -229,7 +229,7 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                 ox = x + 1;
                 oy = y;
                 x += 2;
-            }else if(strchr(" x.+/-\\*SD%?", c) != NULL){
+            }else if(strchr(" x.+/-\\*SDw%?", c) != NULL){
                 /* these are all fine */
             }else if(c == '['){
                 /* next line plz, "tilebuckets" don't affect the origin */
@@ -252,11 +252,11 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
         int line_len = strlen(line);
         for(int x = 0; x < line_len; x++){
             char c = line[x];
-            if(strchr(".+/-\\*SD?", c) != NULL){
+            if(strchr(".+/-\\*SDw?", c) != NULL){
                 int mx, my; bool is_face1;
 
                 /* savepoints, doors are just faces */
-                if(c == 'S' || c == 'D')c = '*';
+                if(c == 'S' || c == 'D' || c == 'w')c = '*';
 
                 /* dots & part references are just verts */
                 if(c == '.' || c == '?')c = '+';
@@ -274,7 +274,7 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                 map_b = _max(map_b, my);
                 map_l = _min(map_l, mx);
                 map_r = _max(map_r, mx);
-            }else if(strchr(" x.+/-\\*SD%?()", c) != NULL){
+            }else if(strchr(" x.+/-\\*SDw%?()", c) != NULL){
                 /* these are all fine */
             }else if(c == '['){
                 /* next line plz, "tilebuckets" don't affect bounds */
@@ -330,12 +330,13 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
 
         for(int x = 0; x < line_len; x++){
             char c = line[x];
-            if(strchr("x+/-\\*SD", c) != NULL){
+            if(strchr("x+/-\\*SDw", c) != NULL){
                 int mx, my; bool is_face1;
 
                 bool is_savepoint = c == 'S';
                 bool is_door = c == 'D';
-                if(is_savepoint || is_door)c = '*';
+                bool is_water = c == 'w';
+                if(is_savepoint || is_door || is_water)c = '*';
 
                 bool is_hard_transparent = c == 'x';
                 if(is_hard_transparent)c = get_map_elem_type(x-ox, y-oy);
@@ -343,6 +344,7 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                 char tile_c =
                     is_savepoint? 'S':
                     is_door? 'D':
+                    is_water? 'w':
                     is_hard_transparent? 'x':
                     represents_vert(c)? default_vert_c:
                     represents_edge(c)? default_edge_c:
@@ -774,7 +776,7 @@ bool hexcollmap_elem_is_visible(hexcollmap_elem_t *elem){
 bool hexcollmap_elem_is_solid(hexcollmap_elem_t *elem){
     if(elem == NULL)return false;
     char tile_c = elem->tile_c;
-    return tile_c != ' ' && tile_c != 'x' && tile_c != 'S' && tile_c != 'D';
+    return strchr(" xSDw", tile_c) == NULL;
 }
 
 static int hexcollmap_collide_elem(hexcollmap_t *collmap1, bool all,

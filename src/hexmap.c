@@ -674,7 +674,8 @@ static int hexmap_collide_elem(hexmap_t *map, int all_type,
     void (*normalize_elem)(trf_t *index),
     hexcollmap_elem_t *(get_elem)(
         hexcollmap_t *collmap, trf_t *index),
-    bool *collide_savepoint_ptr, bool *collide_door_ptr
+    bool *collide_savepoint_ptr, bool *collide_door_ptr,
+    bool *collide_water_ptr
 ){
     /* Returns true (1) or false (0), or 2 if caller should continue
     checking for a collision. */
@@ -717,6 +718,7 @@ static int hexmap_collide_elem(hexmap_t *map, int all_type,
             if(elem != NULL){
                 if(elem->tile_c == 'S')*collide_savepoint_ptr = true;
                 if(elem->tile_c == 'D')*collide_door_ptr = true;
+                if(elem->tile_c == 'w')*collide_water_ptr = true;
             }
             if(hexcollmap_elem_is_solid(elem)){
                 collide = true; break;}
@@ -733,7 +735,8 @@ static int hexmap_collide_elem(hexmap_t *map, int all_type,
 
 static bool _hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf, int all_type,
-    bool *collide_savepoint_ptr, bool *collide_door_ptr
+    bool *collide_savepoint_ptr, bool *collide_door_ptr,
+    bool *collide_water_ptr
 ){
 
     int ox2 = collmap2->ox;
@@ -758,21 +761,24 @@ static bool _hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
                 tile2->vert, 1,
                 hexcollmap_normalize_vert,
                 hexcollmap_get_vert,
-                collide_savepoint_ptr, collide_door_ptr);
+                collide_savepoint_ptr, collide_door_ptr,
+                collide_water_ptr);
             if(collide != 2)return collide;
             collide = hexmap_collide_elem(map, all_type,
                 x, y, trf,
                 tile2->edge, 3,
                 hexcollmap_normalize_edge,
                 hexcollmap_get_edge,
-                collide_savepoint_ptr, collide_door_ptr);
+                collide_savepoint_ptr, collide_door_ptr,
+                collide_water_ptr);
             if(collide != 2)return collide;
             collide = hexmap_collide_elem(map, all_type,
                 x, y, trf,
                 tile2->face, 2,
                 hexcollmap_normalize_face,
                 hexcollmap_get_face,
-                collide_savepoint_ptr, collide_door_ptr);
+                collide_savepoint_ptr, collide_door_ptr,
+                collide_water_ptr);
             if(collide != 2)return collide;
         }
     }
@@ -792,16 +798,18 @@ bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
 ){
     bool collide_savepoint;
     bool collide_door;
+    bool collide_water;
     return _hexmap_collide(map, collmap2, trf, all,
-        &collide_savepoint, &collide_door);
+        &collide_savepoint, &collide_door, &collide_water);
 }
 
 void hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
-    trf_t *trf, bool *collide_savepoint_ptr, bool *collide_door_ptr
+    trf_t *trf, bool *collide_savepoint_ptr, bool *collide_door_ptr,
+    bool *collide_water_ptr
 ){
     int all_type = 2;
     _hexmap_collide(map, collmap2, trf, all_type,
-        collide_savepoint_ptr, collide_door_ptr);
+        collide_savepoint_ptr, collide_door_ptr, collide_water_ptr);
 }
 
 

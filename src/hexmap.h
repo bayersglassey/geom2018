@@ -168,7 +168,8 @@ int hexmap_load_recording(hexmap_t *map, const char *filename,
 bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf, bool all);
 void hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
-    trf_t *trf, bool *collide_savepoint_ptr, bool *collide_door_ptr);
+    trf_t *trf, bool *collide_savepoint_ptr, bool *collide_door_ptr,
+    bool *collide_water_ptr);
 int hexmap_step(hexmap_t *map);
 
 void hexmap_submap_cleanup(hexmap_submap_t *submap);
