@@ -52,3 +52,7 @@ submaps:
                 file: "data/maps/trees/start6.fus"
                 pos: eval: (5 5) + (11 14) + (10 16)
                 camera: (9 6)
+            :
+                file: "data/maps/trees/start7.fus"
+                pos: eval: (5 5) + (12 5) + (22 3)
+                camera: (6 6)
