@@ -139,6 +139,19 @@ jump:
         ;;  (.)  .
 
     if:
+        key: not isdown u
+        key: not isdown f
+        coll: water any yes
+            ;;   .   .
+            ;;   *\*/*
+            ;; . - + - .
+            ;;   */*\*
+            ;;  (.)  .
+    then:
+        goto: swim
+        delay: 5
+
+    if:
         coll: all yes
             ;;        +
             ;;       /
@@ -301,6 +314,49 @@ crawl_step:
         delay: 9
 
     if() then: goto: crawl
+
+swim:
+    rgraph: "player_swim"
+
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+
+    if:
+        key: wasdown d
+        key: wentdown b
+    then:
+        move: 1 0
+        rot: 1
+        goto: swim
+        delay: 5
+
+    if:
+        key: wasdown d
+        key: wentdown f
+    then:
+        move: 0 1
+        rot: -1
+        goto: swim
+        delay: 5
+
+    if:
+        key: not wasdown d
+        key: wentdown u
+    then:
+        goto: jump
+
+    if:
+        key: not wasdown d
+        key: wentdown b
+    then:
+        move: 1 0
+        turn
+        goto: swim
+        delay: 5
 
 
 dead:
