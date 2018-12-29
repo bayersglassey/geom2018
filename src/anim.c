@@ -190,14 +190,17 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     err = fus_lexer_get(lexer, "(");
                     if(err)return err;
 
-                    bool against_bodies = false;
-                    if(fus_lexer_got(lexer, "bodies")){
+                    int flags = 0;
+
+                    if(fus_lexer_got(lexer, "water")){
                         err = fus_lexer_next(lexer);
                         if(err)return err;
-                        against_bodies = true;
+                        flags ^= 4;
+                    }else if(fus_lexer_got(lexer, "bodies")){
+                        err = fus_lexer_next(lexer);
+                        if(err)return err;
+                        flags ^= 8;
                     }
-
-                    int flags = 0;
 
                     if(fus_lexer_got(lexer, "all"))flags ^= 1;
                     else if(fus_lexer_got(lexer, "any"))/* don't do nuthin */;
@@ -226,7 +229,6 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     cond->type = state_cond_type_coll;
                     cond->u.coll.collmap = collmap;
                     cond->u.coll.flags = flags;
-                    cond->u.coll.against_bodies = against_bodies;
                 }else if(fus_lexer_got(lexer, "chance")){
                     err = fus_lexer_next(lexer);
                     if(err)return err;

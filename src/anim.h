@@ -40,11 +40,12 @@ typedef struct state_cond {
     const char *type;
     union {
         struct {
-            bool against_bodies; /* as opposed to against map */
             int flags;
                 /*
                     flags & 1: 0 -> any, 1 -> all
                     flags & 2: 0 -> no,  1 -> yes
+                    flags & 4: 1 -> water
+                    flags & 8: 0 -> against map, 1 -> against bodies
                 */
             hexcollmap_t *collmap;
         } coll;

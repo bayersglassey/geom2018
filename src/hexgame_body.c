@@ -418,8 +418,10 @@ static int body_match_rule(body_t *body,
             int flags = cond->u.coll.flags;
             bool all = flags & 1;
             bool yes = flags & 2;
+            bool water = flags & 4;
+            bool against_bodies = flags & 8;
 
-            if(cond->u.coll.against_bodies){
+            if(against_bodies){
                 int n_matches = 0;
                 for(int j = 0; j < map->bodies_len; j++){
                     body_t *body_other = map->bodies[j];
@@ -433,10 +435,18 @@ static int body_match_rule(body_t *body,
 
                     /* The other body has a hitbox! Do the collision... */
                     bool collide = hexcollmap_collide(hitbox, &hitbox_trf,
-                        hitbox_other, &hitbox_other_trf, space, yes? all: !all);
+                        hitbox_other, &hitbox_other_trf, space,
+                        yes? all: !all);
                     if(yes? collide: !collide)n_matches++;
                 }
                 rule_matched = n_matches > 0;
+            }else if(water){
+                bool collide_savepoint = false;
+                bool collide_door = false;
+                bool collide_water = false;
+                hexmap_collide_special(map, hitbox, &hitbox_trf,
+                    &collide_savepoint, &collide_door, &collide_water);
+                rule_matched = yes? collide_water: !collide_water;
             }else{
                 bool collide = hexmap_collide(map,
                     hitbox, &hitbox_trf, yes? all: !all);
