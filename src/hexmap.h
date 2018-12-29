@@ -18,6 +18,10 @@ typedef struct hexmap_tileset_entry {
         /* see hexcollmap_elem->tile_c */
     int n_rgraphs;
         /* Between 1 and 3 (index is a rot_t value). */
+    int frame_offset;
+        /* How tiles' positions should affect the frame offset of
+        their animation.
+        For now, should basically be treated as a bool (0/1). */
     rendergraph_t *rgraphs[3];
 } hexmap_tileset_entry_t;
 

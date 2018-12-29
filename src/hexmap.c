@@ -64,6 +64,17 @@ static int hexmap_tileset_parse(hexmap_tileset_t *tileset,
                 tileset->TYPE##_entries, entry) \
             entry->n_rgraphs = 0; \
             entry->tile_c = tile_c; \
+            entry->frame_offset = 0; \
+            if(fus_lexer_got(lexer, "frame_offset")){ \
+                err = fus_lexer_next(lexer); \
+                if(err)return err; \
+                err = fus_lexer_get(lexer, "("); \
+                if(err)return err; \
+                err = fus_lexer_get_int(lexer, &entry->frame_offset); \
+                if(err)return err; \
+                err = fus_lexer_get(lexer, ")"); \
+                if(err)return err; \
+            } \
             while(1){ \
                 if(!fus_lexer_got_str(lexer))break; \
                 char *rgraph_name; \
@@ -119,13 +130,15 @@ int hexmap_tileset_load(hexmap_tileset_t *tileset,
 #define HEXMAP_TILESET_GET_RGRAPH(TYPE) \
     void hexmap_tileset_get_rgraph_##TYPE(hexmap_tileset_t *tileset, \
         char tile_c, rot_t rot, \
-        rendergraph_t **rgraph_ptr, bool *rot_ok_ptr \
+        rendergraph_t **rgraph_ptr, bool *rot_ok_ptr, \
+        int *frame_offset_ptr \
     ){ \
         /* rgraph: non-NULL if we found an entry with matching tile_c */ \
         /* rot_ok: whether the entry we found had an rgraph for the */ \
         /* requested rot; if false, rgraph is the entry's rgraph for */ \
         /* rot=0 and caller should rotate the rgraph manually */ \
         bool rot_ok = false; \
+        int frame_offset = 0; \
         rendergraph_t *rgraph = NULL; \
         for(int i = 0; i < tileset->TYPE##_entries_len; i++){ \
             hexmap_tileset_entry_t *entry = tileset->TYPE##_entries[i]; \
@@ -134,10 +147,12 @@ int hexmap_tileset_load(hexmap_tileset_t *tileset,
                 rot_ok = true; \
                 rgraph = entry->rgraphs[rot]; \
             }else rgraph = entry->rgraphs[0]; \
+            frame_offset = entry->frame_offset; \
             break; \
         } \
         *rgraph_ptr = rgraph; \
         *rot_ok_ptr = rot_ok; \
+        *frame_offset_ptr = frame_offset; \
     }
 HEXMAP_TILESET_GET_RGRAPH(vert)
 HEXMAP_TILESET_GET_RGRAPH(edge)
@@ -916,7 +931,7 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
 }
 
 static int add_tile_rgraph(rendergraph_t *rgraph, rendergraph_t *rgraph2,
-    vecspace_t *space, vec_t add, rot_t rot
+    vecspace_t *space, vec_t add, rot_t rot, int frame_i
 ){
     int err;
     rendergraph_trf_t *rendergraph_trf;
@@ -924,6 +939,7 @@ static int add_tile_rgraph(rendergraph_t *rgraph, rendergraph_t *rgraph2,
     if(err)return err;
     rendergraph_trf->rendergraph = rgraph2;
     rendergraph_trf->trf.rot = rot;
+    rendergraph_trf->frame_i = frame_i;
     vec_cpy(space->dims, rendergraph_trf->trf.add, add);
     return 0;
 }
@@ -972,15 +988,17 @@ int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap){
                     if(!hexcollmap_elem_is_visible(elem))continue; \
                     rendergraph_t *rgraph_tile; \
                     bool rot_ok; \
+                    int frame_offset; \
                     hexmap_tileset_get_rgraph_##PART(tileset, \
                             elem->tile_c, i, \
-                            &rgraph_tile, &rot_ok); \
+                            &rgraph_tile, &rot_ok, &frame_offset); \
+                    int frame_i = frame_offset? x: 0; \
                     if(rgraph_tile == NULL){ \
                         fprintf(stderr, "Couldn't find " #PART " tile " \
                             "for character: %c\n", elem->tile_c); \
                         return 2;} \
                     err = add_tile_rgraph(rgraph, rgraph_tile, \
-                        space, v, rot_ok? 0: i * 2); \
+                        space, v, rot_ok? 0: i * 2, frame_i); \
                     if(err)return err; \
                 }
             HEXMAP_ADD_TILE(vert, 1)
