@@ -56,3 +56,11 @@ submaps:
                 file: "data/maps/trees/start7.fus"
                 pos: eval: (5 5) + (12 5) + (22 3)
                 camera: (6 6)
+            :
+                pos: eval: (5 5) + (12 5) + (22 3) + (23 8)
+                submaps:
+                    :
+                        file: "data/maps/trees/bubbles.fus"
+                        pos: (0 0)
+                        camera: (10 0)
+
