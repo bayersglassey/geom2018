@@ -305,19 +305,20 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                 }else if(fus_lexer_got(lexer, "goto")){
                     err = fus_lexer_next(lexer);
                     if(err)return err;
+
+                    bool immediate = false;
+                    if(fus_lexer_got(lexer, "immediate")){
+                        err = fus_lexer_next(lexer);
+                        if(err)return err;
+                        immediate = true;
+                    }
+
                     err = fus_lexer_get(lexer, "(");
                     if(err)return err;
 
                     char *goto_name;
                     err = fus_lexer_get_name(lexer, &goto_name);
                     if(err)return err;
-
-                    bool immediate = false;
-                    if(fus_lexer_got(lexer, "!")){
-                        err = fus_lexer_next(lexer);
-                        if(err)return err;
-                        immediate = true;
-                    }
 
                     ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_goto;

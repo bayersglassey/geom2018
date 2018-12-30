@@ -72,7 +72,7 @@ int actor_step(actor_t *actor, struct hexgame *game){
         /* No body, or recording not playing */
 
         /* Handle current state's rules */
-        do{
+        handle: {
             state_effect_goto_t *gotto = NULL;
             err = state_handle_rules(actor->state, body, actor, game,
                 &gotto);
@@ -81,11 +81,11 @@ int actor_step(actor_t *actor, struct hexgame *game){
                 err = actor_set_state(actor, gotto->name);
                 if(err)return err;
 
-                if(gotto->immediate)continue;
+                if(gotto->immediate)goto handle;
                     /* If there was an "immediate goto" effect,
                     then we immediately handle the new state's rules */
             }
-        }while(0);
+        }
     }
     return 0;
 }

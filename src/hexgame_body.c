@@ -692,7 +692,7 @@ int body_step(body_t *body, hexgame_t *game){
         body->cooldown--;
     }else{
         /* Handle current state's rules */
-        do{
+        handle: {
             state_effect_goto_t *gotto = NULL;
             err = state_handle_rules(body->state, body, NULL, game,
                 &gotto);
@@ -701,11 +701,11 @@ int body_step(body_t *body, hexgame_t *game){
                 err = body_set_state(body, gotto->name, false);
                 if(err)return err;
 
-                if(gotto->immediate)continue;
+                if(gotto->immediate)goto handle;
                     /* If there was an "immediate goto" effect,
                     then we immediately handle the new state's rules */
             }
-        }while(0);
+        }
 
         /* Start of new frame, no keys have gone down yet.
         Note this only happens after cooldown is finished, which allows
@@ -750,13 +750,14 @@ int body_render(body_t *body,
 ){
     int err;
 
-    if(body->state == NULL){
-        return 0;}
+    if(body->state == NULL)return 0;
+
+    rendergraph_t *rgraph = body->state->rgraph;
+    if(rgraph == NULL)return 0;
 
     prismelrenderer_t *prend = map->prend;
     vecspace_t *space = map->space;
 
-    rendergraph_t *rgraph = body->state->rgraph;
     if(body->palmapper){
         err = palettemapper_apply_to_rendergraph(body->palmapper,
             prend, rgraph, NULL, space, &rgraph);
