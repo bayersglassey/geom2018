@@ -78,12 +78,17 @@ extern const char *state_cond_types[];
 
 
 
+typedef struct state_effect_goto {
+    char *name;
+    bool immediate;
+} state_effect_goto_t;
+
 typedef struct state_effect {
     const char *type;
     union {
         char *msg;
         int delay;
-        char *goto_name;
+        state_effect_goto_t gotto;
         char *action_name;
         char *play_filename;
         vec_t vec;

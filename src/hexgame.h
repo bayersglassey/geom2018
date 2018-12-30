@@ -133,12 +133,14 @@ int body_init_stateset(body_t *body, const char *stateset_filename,
     const char *state_name);
 int body_set_stateset(body_t *body, const char *stateset_filename,
     const char *state_name);
-int body_set_state(body_t *body, const char *state_name);
+int body_set_state(body_t *body, const char *state_name,
+    bool reset_cooldown);
 
 struct actor;
 struct hexgame;
 int state_handle_rules(state_t *state, body_t *body,
-    struct actor *actor, struct hexgame *game);
+    struct actor *actor, struct hexgame *game,
+    state_effect_goto_t **gotto_ptr);
 void body_update_cur_submap(body_t *body);
 int body_step(body_t *body, struct hexgame *game);
 int body_collide_against_body(body_t *body, body_t *body_other);

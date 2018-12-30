@@ -312,9 +312,17 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     err = fus_lexer_get_name(lexer, &goto_name);
                     if(err)return err;
 
+                    bool immediate = false;
+                    if(fus_lexer_got(lexer, "!")){
+                        err = fus_lexer_next(lexer);
+                        if(err)return err;
+                        immediate = true;
+                    }
+
                     ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_goto;
-                    effect->u.goto_name = goto_name;
+                    effect->u.gotto.name = goto_name;
+                    effect->u.gotto.immediate = immediate;
 
                     err = fus_lexer_get(lexer, ")");
                     if(err)return err;
@@ -481,7 +489,7 @@ void state_rule_cleanup(state_rule_t *rule){
         if(effect->type == state_effect_type_print){
             free(effect->u.msg);
         }else if(effect->type == state_effect_type_goto){
-            free(effect->u.goto_name);
+            free(effect->u.gotto.name);
         }else if(effect->type == state_effect_type_action){
             free(effect->u.action_name);
         }else if(effect->type == state_effect_type_play){

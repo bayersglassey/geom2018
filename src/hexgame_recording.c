@@ -238,7 +238,7 @@ int body_restart_recording(body_t *body, bool hard){
     rec->wait = 0;
 
     keyinfo_copy(&body->keyinfo, &rec->keyinfo);
-    body_set_state(body, rec->state_name);
+    body_set_state(body, rec->state_name, true);
 
     vec_cpy(MAX_VEC_DIMS, body->pos, rec->pos0);
     body->rot = rec->rot0;

@@ -116,7 +116,7 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
     }else{
         /* We really really expect you to call body_init_stateset
         right away! */
-        body_set_state(body, NULL);
+        body_set_state(body, NULL, true);
     }
 
     return 0;
@@ -237,7 +237,7 @@ int body_init_stateset(body_t *body, const char *stateset_filename,
         state_name = body->stateset.states[0]->name;
     }
 
-    err = body_set_state(body, state_name);
+    err = body_set_state(body, state_name, true);
     if(err)return err;
 
     return 0;
@@ -250,7 +250,9 @@ int body_set_stateset(body_t *body, const char *stateset_filename,
     return body_init_stateset(body, stateset_filename, state_name);
 }
 
-int body_set_state(body_t *body, const char *state_name){
+int body_set_state(body_t *body, const char *state_name,
+    bool reset_cooldown
+){
     if(state_name == NULL){
         body->state = NULL;
     }else{
@@ -262,7 +264,7 @@ int body_set_state(body_t *body, const char *state_name){
             return 2;}
     }
     body->frame_i = 0;
-    body->cooldown = 0;
+    if(reset_cooldown)body->cooldown = 0;
     body->dead = false;
     return 0;
 }
@@ -470,7 +472,7 @@ static int body_match_rule(body_t *body,
 
 static int body_apply_rule(body_t *body,
     actor_t *actor, hexgame_t *game,
-    state_rule_t *rule
+    state_rule_t *rule, state_effect_goto_t **gotto_ptr
 ){
     int err;
 
@@ -524,19 +526,7 @@ static int body_apply_rule(body_t *body,
             body->turn = !body->turn;
             body->rot = rot_flip(space->rot_max, body->rot, true);
         }else if(effect->type == state_effect_type_goto){
-            if(actor != NULL){
-                /* HACK! TODO: Make it more explicit whether "goto" is
-                referring to body or actor. */
-                err = actor_set_state(actor, effect->u.goto_name);
-                if(err)return err;
-            }else{
-                if(body == NULL){
-                    fprintf(stderr, "No body");
-                    RULE_PERROR()
-                    break;}
-                err = body_set_state(body, effect->u.goto_name);
-                if(err)return err;
-            }
+            *gotto_ptr = &effect->u.gotto;
         }else if(effect->type == state_effect_type_delay){
             if(body == NULL){
                 fprintf(stderr, "No body");
@@ -597,7 +587,7 @@ static int body_apply_rule(body_t *body,
 }
 
 int state_handle_rules(state_t *state, body_t *body,
-    actor_t *actor, hexgame_t *game
+    actor_t *actor, hexgame_t *game, state_effect_goto_t **gotto_ptr
 ){
     int err;
 
@@ -613,7 +603,8 @@ int state_handle_rules(state_t *state, body_t *body,
         if(err)return err;
 
         if(rule_matched){
-            err = body_apply_rule(body, actor, game, rule);
+            err = body_apply_rule(body, actor, game, rule,
+                gotto_ptr);
             if(err)return err;
             break;
         }
@@ -701,10 +692,24 @@ int body_step(body_t *body, hexgame_t *game){
         body->cooldown--;
     }else{
         /* Handle current state's rules */
-        err = state_handle_rules(body->state, body, NULL, game);
-        if(err)return err;
+        do{
+            state_effect_goto_t *gotto = NULL;
+            err = state_handle_rules(body->state, body, NULL, game,
+                &gotto);
+            if(err)return err;
+            if(gotto != NULL){
+                err = body_set_state(body, gotto->name, false);
+                if(err)return err;
 
-        /* start of new frame, no keys have gone down yet. */
+                if(gotto->immediate)continue;
+                    /* If there was an "immediate goto" effect,
+                    then we immediately handle the new state's rules */
+            }
+        }while(0);
+
+        /* Start of new frame, no keys have gone down yet.
+        Note this only happens after cooldown is finished, which allows
+        for simple "buffering" of keypresses. */
         for(int i = 0; i < KEYINFO_KEYS; i++){
             body->keyinfo.wasdown[i] = body->keyinfo.isdown[i];
             body->keyinfo.wentdown[i] = false;}
@@ -726,7 +731,7 @@ int body_collide_against_body(body_t *body, body_t *body_other){
         if(body->recording.action != 1){
             /* Hardcoded "dead" state name... I suppose we could
             have a char* body->dead_anim_name or something, but whatever. */
-            err = body_set_state(body, "dead");
+            err = body_set_state(body, "dead", true);
             if(err)return err;
         }
     }
