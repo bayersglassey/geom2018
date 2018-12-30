@@ -134,6 +134,13 @@ shapes:
             : "_player_jump" (-1 0 0  0) 0 f  0 (0 2)
             : "_player_jump" ( 0 0 0  0) 0 f  0 (2 1)
 
+    "player_swim_jump":
+        animation: cycle 5
+        shapes:
+            : "_player_jump" (-2 0 0  0) 0 f  0 (0 1)
+            : "_player_jump" (-1 0 0  0) 0 f  0 (1 2)
+            : "_player_jump" ( 0 0 0  0) 0 f  0 (3 2)
+
     "player_crawl":
         shapes:
             : "player_head" ( 0  1  2  0)  0 f

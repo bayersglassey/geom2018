@@ -43,8 +43,7 @@ stand:
             ;; ( )
     then:
         move: 1 0
-        goto: jump
-        delay: 2
+        goto immediate: start_jump
 
     if:
         key: isdown f
@@ -87,8 +86,7 @@ stand:
     then:
         move: 1 0
         rot: 1
-        goto: jump
-        delay: 2
+        goto immediate: start_jump
 
     if:
         key: isdown f
@@ -99,8 +97,7 @@ stand:
             ;; ( )
     then:
         move: 1 0
-        goto: jump
-        delay: 2
+        goto immediate: start_jump
 
     if:
         key: isdown b
@@ -128,6 +125,22 @@ crawl_spit:
         ;;  (.)  .
     if() then: goto: crawl
 
+start_jump:
+    if:
+        coll: water any yes
+            ;;   .   .
+            ;;   *\*/*
+            ;; . - + - .
+            ;;   */*\*
+            ;;  (.)  .
+    then:
+        goto: swim_jump
+        delay: 4
+
+    if() then:
+        goto: jump
+        delay: 2
+
 jump:
     rgraph: "player_jump"
 
@@ -137,18 +150,6 @@ jump:
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-
-    if:
-        key: not isdown u
-        coll: water any yes
-            ;;   .   .
-            ;;   *\*/*
-            ;; . - + - .
-            ;;   */*\*
-            ;;  (.)  .
-    then:
-        goto: swim
-        delay: 5
 
     if:
         coll: all yes
@@ -171,8 +172,7 @@ jump:
     then:
         move: 1 0
         rot: 1
-        goto: jump
-        delay: 2
+        goto immediate: start_jump
 
     if:
         key: not isdown u
@@ -196,8 +196,7 @@ jump:
             ;; ( )
     then:
         move: 1 0
-        goto: jump
-        delay: 2
+        goto immediate: start_jump
 
     if:
         coll: water any yes
@@ -325,6 +324,16 @@ crawl_step:
 
     if() then: goto: crawl
 
+swim_jump:
+    rgraph: "player_swim_jump"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto immediate: swim
+
 swim:
     rgraph: "player_swim"
 
@@ -340,31 +349,27 @@ swim:
     then:
         move: 2 1
         rot: 1
-        goto: jump
-        delay: 2
+        goto immediate: start_jump
 
     if:
         key: isdown d
     then:
         move: 0 0
         rot: -1
-        goto: jump
-        delay: 2
+        goto immediate: start_jump
 
     if:
         key: isdown f
     then:
         move: 1 0
-        goto: jump
-        delay: 2
+        goto immediate: start_jump
 
     if:
         key: isdown b
     then:
         move: 1 0
         turn
-        goto: jump
-        delay: 2
+        goto immediate: start_jump
 
 
 dead:
