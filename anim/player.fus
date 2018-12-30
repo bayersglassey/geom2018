@@ -125,6 +125,16 @@ crawl_spit:
         ;;  (.)  .
     if() then: goto: crawl
 
+swim_spit:
+    rgraph: "player_swim_spit"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: swim
+
 start_jump:
     if:
         coll: water any yes
@@ -355,6 +365,13 @@ swim:
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
+
+    if:
+        key: wentdown x
+    then:
+        action: spit
+        goto: swim_spit
+        delay: 9
 
     if:
         key: isdown u
