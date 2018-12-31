@@ -6,6 +6,7 @@
 #include <stdbool.h>
 
 #include "anim.h"
+#include "vars.h"
 #include "hexmap.h"
 #include "prismelrenderer.h"
 #include "geom.h"
@@ -96,6 +97,8 @@ typedef struct body {
     bool turn;
 
     keyinfo_t keyinfo;
+
+    vars_t vars;
 
     recording_t recording;
         /* This can be used by player (while they create/edit

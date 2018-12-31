@@ -93,6 +93,7 @@ int fus_lexer_get_keyinfo(fus_lexer_t *lexer,
  *********************/
 
 void body_cleanup(body_t *body){
+    vars_cleanup(&body->vars);
     stateset_cleanup(&body->stateset);
     recording_cleanup(&body->recording);
 }
@@ -109,6 +110,9 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
     body->out_of_bounds = false;
     body->map = map;
     body->cur_submap = NULL;
+
+    err = vars_init(&body->vars);
+    if(err)return err;
 
     if(stateset_filename != NULL){
         err = body_init_stateset(body, stateset_filename, state_name);
