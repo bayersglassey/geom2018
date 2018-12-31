@@ -443,12 +443,13 @@ static int body_match_rule(body_t *body,
                 }
                 rule_matched = n_matches > 0;
             }else if(water){
-                bool collide_savepoint = false;
-                bool collide_door = false;
-                bool collide_water = false;
+                hexmap_submap_t *collide_savepoint = NULL;
+                hexmap_submap_t *collide_door = NULL;
+                hexmap_submap_t *collide_water = NULL;
                 hexmap_collide_special(map, hitbox, &hitbox_trf,
                     &collide_savepoint, &collide_door, &collide_water);
-                rule_matched = yes? collide_water: !collide_water;
+                bool collide = collide_water != NULL;
+                rule_matched = yes? collide: !collide;
             }else{
                 bool collide = hexmap_collide(map,
                     hitbox, &hitbox_trf, yes? all: !all);
@@ -622,9 +623,13 @@ int state_handle_rules(state_t *state, body_t *body,
 void body_update_cur_submap(body_t *body){
     /* Sets body->cur_submap, body->out_of_bounds by colliding body
     against body->map */
+
     hexmap_t *map = body->map;
     vecspace_t *space = map->space;
 
+    hexmap_submap_t *new_submap = NULL;
+
+    /* Check if body's pos is touching a vert of any submap */
     bool out_of_bounds = true;
     for(int i = 0; i < map->submaps_len; i++){
         hexmap_submap_t *submap = map->submaps[i];
@@ -632,6 +637,7 @@ void body_update_cur_submap(body_t *body){
 
         hexcollmap_t *collmap = &submap->collmap;
 
+        /* A HACK! */
         trf_t index = {0};
         hexspace_set(index.add,
              body->pos[0] - submap->pos[0],
@@ -641,11 +647,32 @@ void body_update_cur_submap(body_t *body){
             hexcollmap_get_vert(collmap, &index);
         if(vert != NULL)out_of_bounds = false;
         if(hexcollmap_elem_is_solid(vert)){
-            body->cur_submap = submap;
+            new_submap = submap;
             break;
         }
     }
     body->out_of_bounds = out_of_bounds;
+
+    if(new_submap == NULL){
+        /* Check if body's hitbox is touching the water face of
+        any submap */
+
+        hexcollmap_t *hitbox = body->state? body->state->hitbox: NULL;
+        if(hitbox != NULL){
+            trf_t hitbox_trf;
+            body_init_trf(body, &hitbox_trf);
+
+            hexmap_submap_t *collide_savepoint = NULL;
+            hexmap_submap_t *collide_door = NULL;
+            hexmap_submap_t *collide_water = NULL;
+            hexmap_collide_special(map, hitbox, &hitbox_trf,
+                &collide_savepoint, &collide_door, &collide_water);
+
+            if(collide_water)new_submap = collide_water;
+        }
+    }
+
+    if(new_submap != NULL)body->cur_submap = new_submap;
 }
 
 int body_step(body_t *body, hexgame_t *game){

@@ -175,9 +175,9 @@ int player_step(player_t *player, hexgame_t *game){
         trf_t hitbox_trf;
         body_init_trf(body, &hitbox_trf);
 
-        bool collide_savepoint = false;
-        bool collide_door = false;
-        bool collide_water = false;
+        hexmap_submap_t *collide_savepoint = NULL;
+        hexmap_submap_t *collide_door = NULL;
+        hexmap_submap_t *collide_water = NULL;
         hexmap_collide_special(map, hitbox, &hitbox_trf,
             &collide_savepoint, &collide_door, &collide_water);
 
@@ -236,7 +236,7 @@ int player_step(player_t *player, hexgame_t *game){
         }
 
         if(collide_door){
-            hexmap_submap_t *cur_submap = body->cur_submap;
+            hexmap_submap_t *cur_submap = collide_door;
             const char *door_map_filename = cur_submap->door_map_filename;
             const char *door_anim_filename = cur_submap->door_anim_filename;
 
