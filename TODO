@@ -251,3 +251,61 @@ map design goes; in particular, there's no way to turn back.
         AREA!...
         *hyperventilating slightly*
 
+
+Dec 31, 2018:
+-------------
+
+vars:
+
+    Should be saved in recordings.
+    So e.g. we can set vars of recordings in data/maps by editing the files.
+
+    We want new getter/setter conds an effects:
+        if:
+            eval: get "x" < 3
+            eval: get "name" == "joe"
+            eval: get "is_active"
+        then:
+            set "x": get "x" + 1
+
+    For "coll" cond with "bodies", we want something like:
+        coll:
+            bodies
+            count: >= 3
+            where: get his "x" < 3
+            where: get his "name" == "joe"
+            where: get his "group" == get my "group"
+            where: get his "is_active" and: not get his "is_dead"
+            ;; .....
+
+    We also want some way for a state to affect other bodies:
+        for bodies:
+            where: get his "group" == get my "group"
+            coll:
+                ;; ....
+        do:
+            # If you only have 1 thing to do:
+            set his "x": 3
+
+            # If you have multiple things to do:
+            : set his "x": 3
+            : set my "guy": get his "name"
+
+    Can we have a "do" block for each stateset, run when it's loaded?
+    (So e.g. player/roller/whatever can have certain vars always set)
+
+    TODO: How do we implement "crushing" with this?
+        for bodies:
+            where: get his "crushable"
+            coll: ...
+        do:
+            set his state: "dead"
+
+    We could implement "pickups" too, e.g.:
+        for bodies:
+            where: get his "uses_pickups"
+            coll: ...
+        do:
+            : set his "heat": get his "heat" + 10
+            : die
+
