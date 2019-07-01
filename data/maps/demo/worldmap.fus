@@ -288,6 +288,7 @@ submaps:
                         file: "data/maps/test/map3x.fus"
                         door:
                             map: "data/maps/demo/worldmap.fus"
+                            anim: "anim/roller.fus"
                             pos: (62 85)
                             rot: 0
                             turn: y
