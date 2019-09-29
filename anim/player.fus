@@ -10,7 +10,7 @@ stand:
         ;;  (.)  .
 
     if:
-        key: wentdown x
+        key: wentdown y
     then:
         action: spit
         goto: spit
@@ -33,6 +33,21 @@ stand:
         rot: 1
         goto: step
         delay: 2
+
+    if:
+        key: wasdown x
+        key: wasdown u
+        coll: all no
+            ;;    *\*/*
+            ;;    - + -
+            ;;       \*
+            ;;
+            ;;
+            ;; ( )
+    then:
+        move: 1 0
+        rot: 1
+        goto immediate: start_jump
 
     if:
         key: wasdown u
@@ -106,6 +121,53 @@ stand:
         turn
         goto: step
         delay: 2
+
+    if:
+        key: isdown x
+    then:
+        goto: look_up
+
+look_up:
+    rgraph: "player_look_up"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: looking_up
+
+looking_up:
+    rgraph: "player_looking_up"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+
+    if: key: not isdown x
+    then: goto: stand
+
+    if:
+        key: wasdown u
+        coll: all no
+            ;;    *\*/*
+            ;;    - + -
+            ;;       \*
+            ;;
+            ;;
+            ;; ( )
+    then:
+        move: 1 0
+        rot: 1
+        goto immediate: start_jump
+
+    if: key: isdown f
+    then: goto immediate: stand
+
+    if: key: isdown b
+    then: goto immediate: stand
 
 spit:
     rgraph: "player_spit"
@@ -245,7 +307,7 @@ step:
         ;;  (.)  .
 
     if:
-        key: wentdown x
+        key: wentdown y
     then:
         action: spit
         goto: spit
@@ -262,7 +324,7 @@ crawl:
         ;;  (.)  .
 
     if:
-        key: wentdown x
+        key: wentdown y
     then:
         action: spit_crouch
         goto: crawl_spit
@@ -338,7 +400,7 @@ crawl_step:
         ;;  (.)  .
 
     if:
-        key: wentdown x
+        key: wentdown y
     then:
         action: spit_crouch
         goto: crawl_spit
@@ -367,7 +429,7 @@ swim:
         ;;  (.)  .
 
     if:
-        key: wentdown x
+        key: wentdown y
     then:
         action: spit
         goto: swim_spit
@@ -420,7 +482,7 @@ test:
         turn
         delay: 3
 
-    if: key: wasdown u
+    if: key: wasdown x
     then:
         move: 1 0
         rot: 1

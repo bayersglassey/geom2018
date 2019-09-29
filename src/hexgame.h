@@ -26,12 +26,13 @@
  * KEY INFO *
  ************/
 
-#define KEYINFO_KEY_ACTION  0
-#define KEYINFO_KEY_U       1
-#define KEYINFO_KEY_D       2
-#define KEYINFO_KEY_L       3
-#define KEYINFO_KEY_R       4
-#define KEYINFO_KEYS        5
+#define KEYINFO_KEY_ACTION1 0
+#define KEYINFO_KEY_ACTION2 1
+#define KEYINFO_KEY_U       2
+#define KEYINFO_KEY_D       3
+#define KEYINFO_KEY_L       4
+#define KEYINFO_KEY_R       5
+#define KEYINFO_KEYS        6
 
 typedef struct keyinfo {
     bool isdown[KEYINFO_KEYS];

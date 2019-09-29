@@ -328,7 +328,8 @@ void body_keyup(body_t *body, int key_i){
 
 int body_get_key_i(body_t *body, char c, bool absolute){
     int key_i =
-        c == 'x'? KEYINFO_KEY_ACTION:
+        c == 'x'? KEYINFO_KEY_ACTION1:
+        c == 'y'? KEYINFO_KEY_ACTION2:
         c == 'u'? KEYINFO_KEY_U:
         c == 'd'? KEYINFO_KEY_D:
         c == 'l'? KEYINFO_KEY_L:
@@ -341,7 +342,8 @@ int body_get_key_i(body_t *body, char c, bool absolute){
 
 char body_get_key_c(body_t *body, int key_i, bool absolute){
     return
-        key_i == KEYINFO_KEY_ACTION? 'x':
+        key_i == KEYINFO_KEY_ACTION1? 'x':
+        key_i == KEYINFO_KEY_ACTION2? 'y':
         key_i == KEYINFO_KEY_U? 'u':
         key_i == KEYINFO_KEY_D? 'd':
         key_i == KEYINFO_KEY_L? (absolute? 'l': body->turn? 'f': 'b'):

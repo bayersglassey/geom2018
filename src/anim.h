@@ -9,7 +9,7 @@
 #include "hexmap.h"
 #include "prismelrenderer.h"
 
-#define ANIM_KEY_CS "xudlrfb"
+#define ANIM_KEY_CS "xyudlrfb"
 
 
 typedef struct state {

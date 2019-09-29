@@ -51,6 +51,18 @@ shapes:
             : "player_leg"  ( 0  1  1  1)  0 f
             : "player_leg"  ( 2  1  1  1)  6 t
 
+    "player_look_up":
+        shapes:
+            : "player_head" ( 0  1  3  1)  1 f
+            : "player_leg"  ( 0  1  1  1)  0 f
+            : "player_leg"  ( 2  1  1  1)  6 t
+
+    "player_looking_up":
+        shapes:
+            : "player_head" ( 0  1  3  1)  2 f
+            : "player_leg"  ( 0  1  1  1)  0 f
+            : "player_leg"  ( 2  1  1  1)  6 t
+
     "player_step":
         animation: cycle 4
         shapes:

@@ -32,13 +32,15 @@ int player_init(player_t *player, body_t *body, int keymap,
 
     for(int i = 0; i < KEYINFO_KEYS; i++)player->key_code[i] = 0;
     if(keymap == 0){
-        player->key_code[KEYINFO_KEY_ACTION] = SDLK_SPACE;
+        player->key_code[KEYINFO_KEY_ACTION1] = SDLK_LSHIFT;
+        player->key_code[KEYINFO_KEY_ACTION2] = SDLK_SPACE;
         player->key_code[KEYINFO_KEY_U] = SDLK_UP;
         player->key_code[KEYINFO_KEY_D] = SDLK_DOWN;
         player->key_code[KEYINFO_KEY_L] = SDLK_LEFT;
         player->key_code[KEYINFO_KEY_R] = SDLK_RIGHT;
     }else if(keymap == 1){
-        player->key_code[KEYINFO_KEY_ACTION] = SDLK_f;
+        player->key_code[KEYINFO_KEY_ACTION1] = SDLK_f;
+        player->key_code[KEYINFO_KEY_ACTION2] = SDLK_g;
         player->key_code[KEYINFO_KEY_U] = SDLK_w;
         player->key_code[KEYINFO_KEY_D] = SDLK_s;
         player->key_code[KEYINFO_KEY_L] = SDLK_a;
