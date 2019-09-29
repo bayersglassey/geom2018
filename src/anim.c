@@ -9,6 +9,8 @@
 #include "hexmap.h"
 #include "util.h"
 #include "prismelrenderer.h"
+#include "lexer.h"
+#include "lexer_macros.h"
 
 
 
@@ -53,35 +55,27 @@ int stateset_load(stateset_t *stateset, char *filename,
 int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
     prismelrenderer_t *prend, vecspace_t *space
 ){
-    int err;
+    INIT
 
-    if(fus_lexer_got(lexer, "projectile")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
+    if(GOT("projectile")){
+        NEXT
         stateset->is_projectile = true;
     }
 
     while(1){
-        if(fus_lexer_done(lexer))break;
+        if(DONE)break;
 
         char *name;
-        err = fus_lexer_get_name(lexer, &name);
-        if(err)return err;
-
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
+        GET_NAME(&name)
+        GET("(")
 
         rendergraph_t *rgraph = NULL;
-        if(fus_lexer_got(lexer, "rgraph")){
+        if(GOT("rgraph")){
             char *rgraph_name;
-            err = fus_lexer_next(lexer);
-            if(err)return err;
-            err = fus_lexer_get(lexer, "(");
-            if(err)return err;
-            err = fus_lexer_get_str(lexer, &rgraph_name);
-            if(err)return err;
-            err = fus_lexer_get(lexer, ")");
-            if(err)return err;
+            NEXT
+            GET("(")
+            GET_STR(&rgraph_name)
+            GET(")")
             rgraph = prismelrenderer_get_rendergraph(
                 prend, rgraph_name);
             if(rgraph == NULL){
@@ -94,17 +88,14 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
         err = state_init(state, stateset, name, rgraph);
         if(err)return err;
 
-        if(fus_lexer_got(lexer, "crushes")){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
+        if(GOT("crushes")){
+            NEXT
             state->crushes = true;
         }
 
-        if(fus_lexer_got(lexer, "hitbox")){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
-            err = fus_lexer_get(lexer, "(");
-            if(err)return err;
+        if(GOT("hitbox")){
+            NEXT
+            GET("(")
 
             hexcollmap_t *collmap = calloc(1, sizeof(*collmap));
             if(collmap == NULL)return 1;
@@ -115,63 +106,54 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             if(err)return err;
             state->hitbox = collmap;
 
-            err = fus_lexer_get(lexer, ")");
-            if(err)return err;
+            GET(")")
         }
 
         while(1){
-            if(fus_lexer_got(lexer, ")"))break;
+            if(GOT(")"))break;
 
             ARRAY_PUSH_NEW(state_rule_t*, state->rules, rule)
             err = state_rule_init(rule, state);
             if(err)return err;
 
-            err = fus_lexer_get(lexer, "if");
-            if(err)return err;
-            err = fus_lexer_get(lexer, "(");
-            if(err)return err;
+            GET("if")
+            GET("(")
             while(1){
-                if(fus_lexer_got(lexer, ")")){
+                if(GOT(")")){
                     break;
-                }else if(fus_lexer_got(lexer, "false")){
-                    err = fus_lexer_next(lexer);
-                    if(err)return err;
+                }else if(GOT("false")){
+                    NEXT
                     ARRAY_PUSH_NEW(state_cond_t*, rule->conds, cond)
                     cond->type = state_cond_type_false;
-                }else if(fus_lexer_got(lexer, "key")){
-                    err = fus_lexer_next(lexer);
-                    if(err)return err;
-                    err = fus_lexer_get(lexer, "(");
-                    if(err)return err;
+                }else if(GOT("key")){
+                    NEXT
+                    GET("(")
 
                     bool yes = true;
-                    if(fus_lexer_got(lexer, "not")){
-                        err = fus_lexer_next(lexer);
-                        if(err)return err;
+                    if(GOT("not")){
+                        NEXT
                         yes = false;
                     }
 
                     int kstate;
-                    if(fus_lexer_got(lexer, "isdown")){
+                    if(GOT("isdown")){
                         kstate = 0;
-                    }else if(fus_lexer_got(lexer, "wasdown")){
+                    }else if(GOT("wasdown")){
                         kstate = 1;
-                    }else if(fus_lexer_got(lexer, "wentdown")){
+                    }else if(GOT("wentdown")){
                         kstate = 2;
                     }else{
-                        return fus_lexer_unexpected(lexer,
+                        return UNEXPECTED(
                             "isdown or wasdown or wentdown");
                     }
-                    err = fus_lexer_next(lexer);
-                    if(err)return err;
+                    NEXT
 
                     char *name;
-                    err = fus_lexer_get_name(lexer, &name);
-                    if(err)return err;
+                    GET_NAME(&name)
 
                     char c = name[0];
                     if(strlen(name) != 1 || !strchr(ANIM_KEY_CS, c)){
-                        return fus_lexer_unexpected(lexer,
+                        UNEXPECTED(
                             "one of the characters: " ANIM_KEY_CS);
                     }
 
@@ -182,37 +164,30 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     cond->u.key.yes = yes;
                     free(name);
 
-                    err = fus_lexer_get(lexer, ")");
-                    if(err)return err;
-                }else if(fus_lexer_got(lexer, "coll")){
-                    err = fus_lexer_next(lexer);
-                    if(err)return err;
-                    err = fus_lexer_get(lexer, "(");
-                    if(err)return err;
+                    GET(")")
+                }else if(GOT("coll")){
+                    NEXT
+                    GET("(")
 
                     int flags = 0;
 
-                    if(fus_lexer_got(lexer, "water")){
-                        err = fus_lexer_next(lexer);
-                        if(err)return err;
+                    if(GOT("water")){
+                        NEXT
                         flags ^= 4;
-                    }else if(fus_lexer_got(lexer, "bodies")){
-                        err = fus_lexer_next(lexer);
-                        if(err)return err;
+                    }else if(GOT("bodies")){
+                        NEXT
                         flags ^= 8;
                     }
 
-                    if(fus_lexer_got(lexer, "all"))flags ^= 1;
-                    else if(fus_lexer_got(lexer, "any"))/* don't do nuthin */;
-                    else return fus_lexer_unexpected(lexer, "all or any");
-                    err = fus_lexer_next(lexer);
-                    if(err)return err;
+                    if(GOT("all"))flags ^= 1;
+                    else if(GOT("any"))/* don't do nuthin */;
+                    else return UNEXPECTED("all or any");
+                    NEXT
 
-                    if(fus_lexer_got(lexer, "yes"))flags ^= 2;
-                    else if(fus_lexer_got(lexer, "no"))/* dinnae move a muscle */;
-                    else return fus_lexer_unexpected(lexer, "yes or no");
-                    err = fus_lexer_next(lexer);
-                    if(err)return err;
+                    if(GOT("yes"))flags ^= 2;
+                    else if(GOT("no"))/* dinnae move a muscle */;
+                    else return UNEXPECTED("yes or no");
+                    NEXT
 
                     hexcollmap_t *collmap = calloc(1, sizeof(*collmap));
                     if(collmap == NULL)return 1;
@@ -222,176 +197,133 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     err = hexcollmap_parse(collmap, lexer, true);
                     if(err)return err;
 
-                    err = fus_lexer_get(lexer, ")");
-                    if(err)return err;
+                    GET(")")
 
                     ARRAY_PUSH_NEW(state_cond_t*, rule->conds, cond)
                     cond->type = state_cond_type_coll;
                     cond->u.coll.collmap = collmap;
                     cond->u.coll.flags = flags;
-                }else if(fus_lexer_got(lexer, "chance")){
-                    err = fus_lexer_next(lexer);
-                    if(err)return err;
-                    err = fus_lexer_get(lexer, "(");
-                    if(err)return err;
+                }else if(GOT("chance")){
+                    NEXT
+                    GET("(")
                     int percent = 0;
-                    err = fus_lexer_get_int(lexer, &percent);
-                    if(err)return err;
-                    err = fus_lexer_get(lexer, "%");
-                    if(err)return err;
-                    err = fus_lexer_get(lexer, ")");
-                    if(err)return err;
+                    GET_INT(&percent)
+                    GET("%")
+                    GET(")")
                     ARRAY_PUSH_NEW(state_cond_t*, rule->conds, cond)
                     cond->type = state_cond_type_chance;
                     cond->u.percent = percent;
                 }else{
-                    return fus_lexer_unexpected(lexer, NULL);
+                    return UNEXPECTED(NULL);
                 }
             }
-            err = fus_lexer_next(lexer);
-            if(err)return err;
+            NEXT
 
-            err = fus_lexer_get(lexer, "then");
-            if(err)return err;
-            err = fus_lexer_get(lexer, "(");
-            if(err)return err;
+            GET("then")
+            GET("(")
             while(1){
-                if(fus_lexer_got(lexer, ")")){
+                if(GOT(")")){
                     break;
-                }else if(fus_lexer_got(lexer, "print")){
-                    err = fus_lexer_next(lexer);
-                    if(err)return err;
-                    err = fus_lexer_get(lexer, "(");
-                    if(err)return err;
+                }else if(GOT("print")){
+                    NEXT
+                    GET("(")
                     char *msg;
-                    err = fus_lexer_get_str(lexer, &msg);
-                    if(err)return err;
+                    GET_STR(&msg)
                     ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_print;
                     effect->u.msg = msg;
-                    err = fus_lexer_get(lexer, ")");
-                    if(err)return err;
-                }else if(fus_lexer_got(lexer, "move")){
-                    err = fus_lexer_next(lexer);
-                    if(err)return err;
-                    err = fus_lexer_get(lexer, "(");
-                    if(err)return err;
+                    GET(")")
+                }else if(GOT("move")){
+                    NEXT
+                    GET("(")
                     ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_move;
                     for(int i = 0; i < space->dims; i++){
-                        err = fus_lexer_get_int(lexer, &effect->u.vec[i]);
-                        if(err)return err;
+                        GET_INT(&effect->u.vec[i]);
                     }
-                    err = fus_lexer_get(lexer, ")");
-                    if(err)return err;
-                }else if(fus_lexer_got(lexer, "rot")){
-                    err = fus_lexer_next(lexer);
-                    if(err)return err;
-                    err = fus_lexer_get(lexer, "(");
-                    if(err)return err;
+                    GET(")")
+                }else if(GOT("rot")){
+                    NEXT
+                    GET("(")
                     int rot;
-                    err = fus_lexer_get_int(lexer, &rot);
-                    if(err)return err;
+                    GET_INT(&rot)
                     ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_rot;
                     effect->u.rot = rot_contain(space->rot_max, rot);
-                    err = fus_lexer_get(lexer, ")");
-                    if(err)return err;
-                }else if(fus_lexer_got(lexer, "turn")){
-                    err = fus_lexer_next(lexer);
-                    if(err)return err;
+                    GET(")")
+                }else if(GOT("turn")){
+                    NEXT
                     ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_turn;
-                }else if(fus_lexer_got(lexer, "goto")){
-                    err = fus_lexer_next(lexer);
-                    if(err)return err;
+                }else if(GOT("goto")){
+                    NEXT
 
                     bool immediate = false;
-                    if(fus_lexer_got(lexer, "immediate")){
-                        err = fus_lexer_next(lexer);
-                        if(err)return err;
+                    if(GOT("immediate")){
+                        NEXT
                         immediate = true;
                     }
 
-                    err = fus_lexer_get(lexer, "(");
-                    if(err)return err;
+                    GET("(")
 
                     char *goto_name;
-                    err = fus_lexer_get_name(lexer, &goto_name);
-                    if(err)return err;
+                    GET_NAME(&goto_name)
 
                     ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_goto;
                     effect->u.gotto.name = goto_name;
                     effect->u.gotto.immediate = immediate;
 
-                    err = fus_lexer_get(lexer, ")");
-                    if(err)return err;
-                }else if(fus_lexer_got(lexer, "delay")){
-                    err = fus_lexer_next(lexer);
-                    if(err)return err;
-                    err = fus_lexer_get(lexer, "(");
-                    if(err)return err;
+                    GET(")")
+                }else if(GOT("delay")){
+                    NEXT
+                    GET("(")
 
                     int delay;
-                    err = fus_lexer_get_int(lexer, &delay);
-                    if(err)return err;
+                    GET_INT(&delay)
 
                     ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_delay;
                     effect->u.delay = delay;
 
-                    err = fus_lexer_get(lexer, ")");
-                    if(err)return err;
-                }else if(fus_lexer_got(lexer, "action")){
-                    err = fus_lexer_next(lexer);
-                    if(err)return err;
-                    err = fus_lexer_get(lexer, "(");
-                    if(err)return err;
+                    GET(")")
+                }else if(GOT("action")){
+                    NEXT
+                    GET("(")
 
                     char *action_name;
-                    err = fus_lexer_get_name(lexer, &action_name);
-                    if(err)return err;
+                    GET_NAME(&action_name)
 
                     ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_action;
                     effect->u.action_name = action_name;
 
-                    err = fus_lexer_get(lexer, ")");
-                    if(err)return err;
-                }else if(fus_lexer_got(lexer, "die")){
-                    err = fus_lexer_next(lexer);
-                    if(err)return err;
+                    GET(")")
+                }else if(GOT("die")){
+                    NEXT
                     ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_die;
-                }else if(fus_lexer_got(lexer, "play")){
-                    err = fus_lexer_next(lexer);
-                    if(err)return err;
-                    err = fus_lexer_get(lexer, "(");
-                    if(err)return err;
+                }else if(GOT("play")){
+                    NEXT
+                    GET("(")
 
                     char *play_filename;
-                    err = fus_lexer_get_str(lexer, &play_filename);
-                    if(err)return err;
+                    GET_STR(&play_filename)
 
                     ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_play;
                     effect->u.play_filename = play_filename;
 
-                    err = fus_lexer_get(lexer, ")");
-                    if(err)return err;
+                    GET(")")
                 }else{
-                    return fus_lexer_unexpected(lexer, NULL);
+                    return UNEXPECTED(NULL);
                 }
             }
-            err = fus_lexer_next(lexer);
-            if(err)return err;
+            NEXT
         }
-        err = fus_lexer_next(lexer);
-        if(err)return err;
+        NEXT
     }
-    err = fus_lexer_next(lexer);
-    if(err)return err;
+    NEXT
     return 0;
 }
 
