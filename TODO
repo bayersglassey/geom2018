@@ -309,3 +309,62 @@ vars:
             : set his "heat": get his "heat" + 10
             : die
 
+
+Sep 27, 2019:
+-------------
+
+GAMEPLAY THOUGHTS!
+...I don't like having to fear dying from a bad jump.
+It would be more fun if, after exploding, hitting spacebar respawned you
+wherever you'd jumped from.
+(So there are 2 kinds of explosion - jump-explode vs crushed-by-enemy-explode.)
+
+
+Sep 28, 2019:
+-------------
+
+The text format for editing is cute, but really it's like a slightly worse
+version of a keyboard-based in-game editor.
+So let's make a keyboard-based in-game editor instead!
+We would want to be able to modify the hexmaps and submaps (e.g. worldmap.fus)
+and hexmapcolls (e.g. start.fus).
+So presumably 2 different modes.
+We could do this by using cobj and then blablabla, but then we'd need to
+serialize and deserialize between obj_t and other stuff.
+So might as well just do what we're currently doing - serialize and deserialize
+between text and other stuff (with the halp of lexer_t).
+So: no fus, not even any cobj?.. only shitty thing is we'll lose comments
+and indentation/formatting/etc if saving your edits involves reserializing
+straight to text.
+...but I guess the point is you're never supposed to see the text.
+So actually, comments etc *should* be removed.
+If we want them, they should be added at the C level.
+
+Should we replace almost all lexer_get_str with lexer_get_sym?..
+Is it even feasible to update all the .fus files?..
+We could just make lexer_get_sym and lexer_get_str be one function
+which actually accepts either syntax!..
+    -> This doesn't really matter if we're moving to keyboard-based
+        editor which writes the fus files for us
+
+MAPPERS: These should be generic. Mapped and mappee should both be void*...
+And then have mapped_type and mappee_type, with some kind of enum whose
+values are PALETTE, RGRAPH, MAPPER, etc.
+
+DICTS: Can we make a dict.h, similar to array.h and llist.h?..
+This would avoid:
+    struct prismel *prismelrenderer_get_prismel(prismelrenderer_t *prend,
+        const char *name);
+    struct rendergraph *prismelrenderer_get_rendergraph(prismelrenderer_t *prend,
+        const char *name);
+    struct prismelmapper *prismelrenderer_get_mapper(prismelrenderer_t *prend,
+        const char *name);
+    struct palettemapper *prismelrenderer_get_palmapper(prismelrenderer_t *prend,
+        const char *name);
+
+
+Sep 29, 2019:
+-------------
+
+Don't use raw strdup, malloc, etc -- make sure these things are gonna perror
+and exit() for you eh.
