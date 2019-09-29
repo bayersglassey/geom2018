@@ -193,6 +193,7 @@ Current objectives:
     * Display text on screen
         * Ok, we can do this now - so where all do we use it?
             * "press '1' to go back..."
+                OK, more or less done
             * Controls at start of game?
                 Is current approach (Enter to hide/show) ok for now?
             * Talk to other players? Or everybody's silent?
@@ -260,7 +261,7 @@ vars:
     Should be saved in recordings.
     So e.g. we can set vars of recordings in data/maps by editing the files.
 
-    We want new getter/setter conds an effects:
+    We want new getter/setter conds and effects:
         if:
             eval: get "x" < 3
             eval: get "name" == "joe"
@@ -308,16 +309,6 @@ vars:
         do:
             : set his "heat": get his "heat" + 10
             : die
-
-
-Sep 27, 2019:
--------------
-
-GAMEPLAY THOUGHTS!
-...I don't like having to fear dying from a bad jump.
-It would be more fun if, after exploding, hitting spacebar respawned you
-wherever you'd jumped from.
-(So there are 2 kinds of explosion - jump-explode vs crushed-by-enemy-explode.)
 
 
 Sep 28, 2019:
