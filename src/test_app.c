@@ -208,10 +208,10 @@ int test_app_process_console_input(test_app_t *app){
         if(game->players_len > 0){
             /* HACK: we just grab players[0] */
             player_t *player = game->players[0];
-            respawn_pos = player->respawn_pos;
-            respawn_rot = player->respawn_rot;
-            respawn_turn = player->respawn_turn;
-            respawn_map_filename = strdup(player->respawn_map_filename);
+            respawn_pos = player->respawn_location.pos;
+            respawn_rot = player->respawn_location.rot;
+            respawn_turn = player->respawn_location.turn;
+            respawn_map_filename = strdup(player->respawn_location.map_filename);
         }else{
             respawn_map_filename = strdup(map->name);
         }
@@ -359,6 +359,8 @@ lexer_err:
 int test_app_mainloop(test_app_t *app){
     int err;
 
+    hexgame_t *game = &app->hexgame;
+
     SDL_Surface *render_surface = surface32_create(app->scw, app->sch,
         false, true);
     if(render_surface == NULL)return 2;
@@ -380,7 +382,7 @@ int test_app_mainloop(test_app_t *app){
         if(err)return err;
 
         if(app->hexgame_running){
-            err = hexgame_step(&app->hexgame);
+            err = hexgame_step(game);
             if(err)return err;
 
             if(app->surface != NULL){
@@ -399,13 +401,33 @@ int test_app_mainloop(test_app_t *app){
             if(err)return err;
 
             if(app->surface != NULL){
+                int line_y = 0;
+                for(int i = 0; i < game->players_len; i++){
+                    player_t *player = game->players[i];
+                    body_t *body = player->body;
+                    if(!body)continue;
+                    if(body->dead == BODY_MOSTLY_DEAD){
+                        font_blitmsg(&app->font, app->surface, 0, line_y,
+                            "You ran into a wall! "
+                            "Press jump to retry from where you jumped.\n");
+                        line_y += app->font.char_h;
+                    }else if(body->dead == BODY_ALL_DEAD){
+                        static char msg[] =
+                            "You were crushed! "
+                            "Press X to retry from last save point.\n";
+                        msg[24] = '0' + i + 1;
+                        font_blitmsg(&app->font, app->surface, 0, line_y, msg);
+                        line_y += app->font.char_h;
+                    }
+                }
                 if(app->show_controls){
-                    font_blitmsg(&app->font, app->surface, 0, 0,
+                    font_blitmsg(&app->font, app->surface, 0, line_y,
                         "*Controls:\n"
                         "  Left/right  -> Walk\n"
                         "  Up          -> Jump\n"
                         "  Down        -> Crawl\n"
                         "  Spacebar    -> Spit\n"
+                        "  Shift       -> Look up\n"
                         "  1           -> Return to checkpoint\n"
                         "  Shift + 1   -> Return to start of game\n"
                         "  Enter       -> Show/hide this message\n"
@@ -546,7 +568,7 @@ int test_app_mainloop(test_app_t *app){
             }
 
             if(app->hexgame_running){
-                err = hexgame_process_event(&app->hexgame, &event);
+                err = hexgame_process_event(game, &event);
                 if(err)return err;
                 continue;}
 

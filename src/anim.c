@@ -88,6 +88,10 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
         err = state_init(state, stateset, name, rgraph);
         if(err)return err;
 
+        if(GOT("unsafe")){
+            NEXT
+            state->safe = false;
+        }
         if(GOT("crushes")){
             NEXT
             state->crushes = true;
@@ -402,6 +406,7 @@ int state_init(state_t *state, stateset_t *stateset, char *name,
     state->name = name;
     state->rgraph = rgraph;
     state->hitbox = NULL;
+    state->safe = true;
     state->crushes = false;
     ARRAY_INIT(state->rules)
     return 0;

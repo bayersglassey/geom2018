@@ -232,6 +232,7 @@ start_jump:
 
 jump:
     rgraph: "player_jump"
+    unsafe
 
     hitbox:
         ;;   .   .
@@ -481,10 +482,12 @@ swim:
 
 mostly_dead:
     rgraph: "player_dead"
+    unsafe
     if() then: die mostly
 
 dead:
     rgraph: "player_dead"
+    unsafe
     if() then: die
 
 

@@ -19,6 +19,7 @@ typedef struct state {
     rendergraph_t *rgraph;
     hexcollmap_t *hitbox;
     bool crushes;
+    bool safe;
     ARRAY_DECL(struct state_rule*, rules)
 } state_t;
 

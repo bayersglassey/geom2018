@@ -310,7 +310,11 @@ int hexgame_get_or_load_map(hexgame_t *game, const char *map_filename,
     return hexgame_load_map(game, map_filename, map_ptr);
 }
 
-int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard){
+int hexgame_reset_player(hexgame_t *game, player_t *player, int reset_level){
+    /* reset_level:
+    RESET_TO_SAFETY is to player->safe_location, RESET_SOFT is to
+    player->respawn_location, RESET_HARD is to start of game. */
+
     /* WARNING: this function calls body_respawn, which calls
     body_move_to_map, which modifies map->bodies for two maps.
     So if caller is trying to loop over map->bodies in the usual way,
@@ -324,16 +328,19 @@ int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard){
     rot_t rot = 0;
     bool turn = false;
 
-    if(hard){
+    if(reset_level == RESET_HARD){
         map = game->maps[0];
         pos = map->spawn;
     }else{
-        err = hexgame_get_or_load_map(game, player->respawn_map_filename,
+        location_t *location = reset_level == RESET_SOFT?
+            &player->respawn_location:
+            &player->safe_location;
+        err = hexgame_get_or_load_map(game, location->map_filename,
             &map);
         if(err)return err;
-        pos = player->respawn_pos;
-        rot = player->respawn_rot;
-        turn = player->respawn_turn;
+        pos = location->pos;
+        rot = location->rot;
+        turn = location->turn;
     }
 
     err = body_respawn(body, pos, rot, turn, map);
@@ -344,12 +351,12 @@ int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard){
     return 0;
 }
 
-int hexgame_reset_players_by_keymap(hexgame_t *game, int keymap, bool hard){
+int hexgame_reset_players_by_keymap(hexgame_t *game, int keymap, int reset_level){
     int err;
     for(int i = 0; i < game->players_len; i++){
         player_t *player = game->players[i];
         if(player->keymap == keymap){
-            err = hexgame_reset_player(game, player, hard);
+            err = hexgame_reset_player(game, player, reset_level);
             if(err)return err;
         }
     }
@@ -447,10 +454,11 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
             }
         }else if(!event->key.repeat){
             bool shift = event->key.keysym.mod & KMOD_SHIFT;
+            int reset_level = shift? RESET_HARD: RESET_SOFT;
             if(event->key.keysym.sym == SDLK_1){
-                hexgame_reset_players_by_keymap(game, 0, shift);}
+                hexgame_reset_players_by_keymap(game, 0, reset_level);}
             if(event->key.keysym.sym == SDLK_2){
-                hexgame_reset_players_by_keymap(game, 1, shift);}
+                hexgame_reset_players_by_keymap(game, 1, reset_level);}
         }
     }
 

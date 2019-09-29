@@ -21,6 +21,14 @@
 #define DEBUG_RULES false
 #define DEBUG_RECORDINGS false
 
+/* RESET_TO_SAFETY is to player->safe_location, RESET_SOFT is to
+player->respawn_location, RESET_HARD is to start of game. */
+enum reset_level {
+    RESET_TO_SAFETY,
+    RESET_SOFT,
+    RESET_HARD
+};
+
 
 
 /************
@@ -113,6 +121,7 @@ typedef struct body {
     int frame_i;
     int cooldown;
     int dead; /* enum body_dead */
+    bool safe; /* lets player know it should update its safe_location */
 
     bool out_of_bounds;
     hexmap_t *map;
@@ -174,10 +183,8 @@ int body_maybe_record_wait(body_t *body);
 typedef struct player {
     body_t *body;
 
-    vec_t respawn_pos;
-    rot_t respawn_rot;
-    bool respawn_turn;
-    char *respawn_map_filename;
+    location_t respawn_location;
+    location_t safe_location;
     char *respawn_filename;
 
     int keymap;
@@ -189,6 +196,8 @@ int player_init(player_t *player, body_t *body, int keymap,
     vec_t respawn_pos, rot_t respawn_rot, bool respawn_turn,
     char *respawn_map_filename, char *respawn_filename);
 int player_set_respawn(player_t *player, vec_ptr_t pos, rot_t rot, bool turn,
+    const char *map_filename);
+int player_set_safe_location(player_t *player, vec_ptr_t pos, rot_t rot, bool turn,
     const char *map_filename);
 
 int player_respawn_save(const char *filename, vec_t pos,
@@ -288,8 +297,8 @@ int hexgame_load_map(hexgame_t *game, const char *map_filename,
     hexmap_t **map_ptr);
 int hexgame_get_or_load_map(hexgame_t *game, const char *map_filename,
     hexmap_t **map_ptr);
-int hexgame_reset_player(hexgame_t *game, player_t *player, bool hard);
-int hexgame_reset_players_by_keymap(hexgame_t *game, int keymap, bool hard);
+int hexgame_reset_player(hexgame_t *game, player_t *player, int reset_level);
+int hexgame_reset_players_by_keymap(hexgame_t *game, int keymap, int reset_level);
 int hexgame_process_event(hexgame_t *game, SDL_Event *event);
 int hexgame_step(hexgame_t *game);
 

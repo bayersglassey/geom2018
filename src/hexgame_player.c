@@ -17,7 +17,8 @@
 
 
 void player_cleanup(player_t *player){
-    free(player->respawn_map_filename);
+    location_cleanup(&player->respawn_location);
+    location_cleanup(&player->safe_location);
 }
 
 int player_init(player_t *player, body_t *body, int keymap,
@@ -52,10 +53,18 @@ int player_init(player_t *player, body_t *body, int keymap,
     if(err)return err;
     vecspace_t *space = map->space;
     if(respawn_pos == NULL)respawn_pos = map->spawn;
-    vec_cpy(space->dims, player->respawn_pos, respawn_pos);
-    player->respawn_rot = respawn_rot;
-    player->respawn_turn = respawn_turn;
-    player->respawn_map_filename = respawn_map_filename;
+
+    location_init(&player->respawn_location);
+    location_set(&player->respawn_location, space,
+        respawn_pos, respawn_rot, respawn_turn, respawn_map_filename);
+
+    /* Locations own their map filenames, so need to strdup */
+    char *jump_map_filename = strdup(respawn_map_filename);
+
+    location_init(&player->safe_location);
+    location_set(&player->safe_location, space,
+        respawn_pos, respawn_rot, respawn_turn, jump_map_filename);
+
     player->respawn_filename = respawn_filename;
 
     /* Move player's body to the respawn location */
@@ -65,20 +74,39 @@ int player_init(player_t *player, body_t *body, int keymap,
     return 0;
 }
 
-int player_set_respawn(player_t *player, vec_ptr_t pos, rot_t rot, bool turn,
-    const char *map_filename
+static int _player_set_location(player_t *player, location_t *location,
+    vec_ptr_t pos, rot_t rot, bool turn, const char *map_filename
 ){
     hexgame_t *game = player->body->game;
     vecspace_t *space = game->space;
 
-    vec_cpy(space->dims, player->respawn_pos, pos);
-    player->respawn_rot = rot;
-    player->respawn_turn = turn;
-    if(strcmp(player->respawn_map_filename, map_filename)){
-        free(player->respawn_map_filename);
-        player->respawn_map_filename = strdup(map_filename);
+    /* Only assign new map_filename if it compares as different to
+    the old one */
+    char *new_map_filename = location->map_filename;
+    if(strcmp(location->map_filename, map_filename)){
+        new_map_filename = strdup(map_filename);
+        if(!new_map_filename){
+            perror("strdup");
+            return 1;
+        }
     }
+
+    location_set(location, space, pos, rot, turn, new_map_filename);
     return 0;
+}
+
+int player_set_respawn(player_t *player,
+    vec_ptr_t pos, rot_t rot, bool turn, const char *map_filename
+){
+    return _player_set_location(player, &player->respawn_location,
+        pos, rot, turn, map_filename);
+}
+
+int player_set_safe_location(player_t *player,
+    vec_ptr_t pos, rot_t rot, bool turn, const char *map_filename
+){
+    return _player_set_location(player, &player->safe_location,
+        pos, rot, turn, map_filename);
 }
 
 int player_respawn_save(const char *filename, vec_t pos,
@@ -164,11 +192,31 @@ int player_step(player_t *player, hexgame_t *game){
     int err;
 
     body_t *body = player->body;
+
+    /* Respawn body if player hit the right key while dead */
+    if(body && body->dead && body->keyinfo.wasdown[KEYINFO_KEY_U]){
+        /* Soft reset */
+        int reset_level =
+            body->dead == BODY_ALL_DEAD? RESET_SOFT: RESET_TO_SAFETY;
+        hexgame_reset_player(game, player, reset_level);
+
+        /* Player may have gotten a new body object */
+        body = player->body;
+    }
+
     if(body->state == NULL){
         return 0;}
 
     hexmap_t *map = body->map;
     vecspace_t *space = map->space;
+
+    if(body->state->safe){
+        /* We're safe (e.g. not jumping), so update our jump location
+        (where we'll be respawned if we do jump and hit something) */
+        err = player_set_safe_location(player, body->pos, body->rot,
+            body->turn, map->name);
+        if(err)return err;
+    }
 
     /* Collide body against map, looking for special tiles like
     savepoints & doors */
@@ -212,9 +260,9 @@ int player_step(player_t *player, hexgame_t *game){
             In particular, I want to avoid screen flashing white if e.g.
             player turns around in-place.
             The reason we can't just check equality of body->pos and
-            player->respawn_pos is that turning around actually affects
+            player->respawn_location.pos is that turning around actually affects
             body's pos (moves it by 1). */
-            int dist = hexspace_dist(body->pos, player->respawn_pos);
+            int dist = hexspace_dist(body->pos, player->respawn_location.pos);
             bool at_respawn = dist <= 1;
 
             if(!at_respawn){
@@ -226,9 +274,9 @@ int player_step(player_t *player, hexgame_t *game){
                 /* Save player's new respawn location */
                 if(player->respawn_filename != NULL){
                     err = player_respawn_save(player->respawn_filename,
-                        player->respawn_pos, player->respawn_rot,
-                        player->respawn_turn,
-                        player->respawn_map_filename);
+                        player->respawn_location.pos, player->respawn_location.rot,
+                        player->respawn_location.turn,
+                        player->respawn_location.map_filename);
                     if(err)return err;
                 }
 

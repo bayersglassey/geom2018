@@ -136,9 +136,8 @@ int body_respawn(body_t *body, vec_t pos, rot_t rot, bool turn,
     vec_cpy(space->dims, body->pos, pos);
     body->rot = rot;
     body->turn = turn;
-    body->state = body->stateset.states[0];
-    body->frame_i = 0;
-    body->cooldown = 0;
+    err = body_set_state(body, body->stateset.states[0]->name, true);
+    if(err)return err;
 
     err = body_move_to_map(body, map);
     if(err)return err;
