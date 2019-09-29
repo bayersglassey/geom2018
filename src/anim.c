@@ -303,6 +303,10 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     NEXT
                     ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_die;
+                    if(GOT("mostly")){
+                        NEXT
+                        effect->u.dead = BODY_MOSTLY_DEAD;
+                    }else effect->u.dead = BODY_ALL_DEAD;
                 }else if(GOT("play")){
                     NEXT
                     GET("(")

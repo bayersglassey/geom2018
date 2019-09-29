@@ -7,6 +7,7 @@
 #include "geom.h"
 #include "lexer.h"
 #include "hexmap.h"
+#include "body_dead.h"
 #include "prismelrenderer.h"
 
 #define ANIM_KEY_CS "xyudlrfb"
@@ -89,6 +90,7 @@ typedef struct state_effect {
         char *msg;
         int delay;
         state_effect_goto_t gotto;
+        int dead; /* enum body_dead */
         char *action_name;
         char *play_filename;
         vec_t vec;

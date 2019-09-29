@@ -269,7 +269,7 @@ int body_set_state(body_t *body, const char *state_name,
     }
     body->frame_i = 0;
     if(reset_cooldown)body->cooldown = 0;
-    body->dead = false;
+    body->dead = BODY_NOT_DEAD;
     return 0;
 }
 

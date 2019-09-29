@@ -6,6 +6,7 @@
 #include <stdbool.h>
 
 #include "anim.h"
+#include "body_dead.h"
 #include "vars.h"
 #include "hexmap.h"
 #include "prismelrenderer.h"
@@ -44,7 +45,6 @@ void keyinfo_reset(keyinfo_t *info);
 void keyinfo_copy(keyinfo_t *info1, keyinfo_t *info2);
 int fus_lexer_get_keyinfo(fus_lexer_t *lexer,
     keyinfo_t *info);
-
 
 
 /*************
@@ -112,7 +112,7 @@ typedef struct body {
     state_t *state;
     int frame_i;
     int cooldown;
-    bool dead;
+    int dead; /* enum body_dead */
 
     bool out_of_bounds;
     hexmap_t *map;

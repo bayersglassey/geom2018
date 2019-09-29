@@ -311,7 +311,7 @@ jump:
         delay: 11
 
     if() then:
-        goto: dead
+        goto: mostly_dead
         delay: 11
 
 step:
@@ -478,6 +478,10 @@ swim:
         turn
         delay: 2
 
+
+mostly_dead:
+    rgraph: "player_dead"
+    if() then: die mostly
 
 dead:
     rgraph: "player_dead"
