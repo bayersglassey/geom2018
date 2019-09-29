@@ -546,13 +546,15 @@ static int body_apply_rule(body_t *body,
                 fprintf(stderr, "pong\n");
             }else if(
                 !strcmp(action_name, "spit") ||
-                !strcmp(action_name, "spit_crouch")
+                !strcmp(action_name, "spit_crouch") ||
+                !strcmp(action_name, "spit_up")
             ){
                 if(body == NULL){
                     fprintf(stderr, "No body");
                     RULE_PERROR()
                     break;}
-                bool crouch = action_name[4] == '_';
+                bool crouch = action_name[4] == '_' && action_name[5] == 'c';
+                bool up = action_name[4] == '_' && action_name[5] == 'u';
                 const char *stateset_filename = "anim/spit.fus";
                 ARRAY_PUSH_NEW(body_t*, body->map->bodies, new_body)
                 err = body_init(new_body, body->game, body->map,
@@ -560,7 +562,16 @@ static int body_apply_rule(body_t *body,
                 if(err)return err;
                 vecspace_t *space = body->map->space;
                 vec_cpy(space->dims, new_body->pos, body->pos);
-                new_body->rot = body->rot;
+                if(up){
+                    vec_t vec = {1, 0};
+                    rot_t rot = body_get_rot(body);
+                    space->vec_flip(vec, body->turn);
+                    space->vec_rot(vec, rot);
+                    vec_add(space->dims, new_body->pos, vec);
+                }
+                new_body->rot = up?
+                    rot_rot(space->rot_max, body->rot, 1):
+                    body->rot;
                 new_body->turn = body->turn;
             }else{
                 fprintf(stderr, "Unrecognized action: %s\n",
@@ -582,7 +593,7 @@ static int body_apply_rule(body_t *body,
                 fprintf(stderr, "No body");
                 RULE_PERROR()
                 break;}
-            body->dead = true;
+            body->dead = effect->u.dead;
         }else{
             fprintf(stderr, "Unrecognized state rule effect: %s\n",
                 effect->type);
@@ -763,7 +774,9 @@ int body_collide_against_body(body_t *body, body_t *body_other){
         Maybe we can reuse body->cooldown for the pause. */
         if(body->recording.action != 1){
             /* Hardcoded "dead" state name... I suppose we could
-            have a char* body->dead_anim_name or something, but whatever. */
+            have a char* body->dead_anim_name or something, but whatever.
+            We more or less expect this "dead" state to, for instance,
+            cause the body to die. Maybe after exploding or whatever. */
             err = body_set_state(body, "dead", true);
             if(err)return err;
         }

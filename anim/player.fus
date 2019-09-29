@@ -146,8 +146,12 @@ looking_up:
         ;;   */*\*
         ;;  (.)  .
 
-    if: key: not isdown x
-    then: goto: stand
+    if:
+        key: wentdown y
+    then:
+        action: spit_up
+        goto: looking_up_spit
+        delay: 9
 
     if:
         key: wasdown u
@@ -169,6 +173,9 @@ looking_up:
     if: key: isdown b
     then: goto immediate: stand
 
+    if: key: not isdown x
+    then: goto: stand
+
 spit:
     rgraph: "player_spit"
     hitbox:
@@ -178,6 +185,16 @@ spit:
         ;;   */*\*
         ;;  (.)  .
     if() then: goto: stand
+
+looking_up_spit:
+    rgraph: "player_looking_up_spit"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: looking_up
 
 crawl_spit:
     rgraph: "player_crawl_spit"
