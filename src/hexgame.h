@@ -134,6 +134,10 @@ int body_init(body_t *body, struct hexgame *game, hexmap_t *map,
     palettemapper_t *palmapper);
 int body_respawn(body_t *body, vec_t pos, rot_t rot, bool turn,
     hexmap_t *map);
+int body_add_body(body_t *body, body_t **new_body_ptr,
+    const char *stateset_filename, const char *state_name,
+    palettemapper_t *palmapper,
+    vec_t addpos, rot_t addrot, bool turn);
 
 rot_t body_get_rot(body_t *body);
 void body_init_trf(body_t *body, trf_t *trf);

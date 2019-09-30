@@ -147,6 +147,34 @@ int body_respawn(body_t *body, vec_t pos, rot_t rot, bool turn,
     return 0;
 }
 
+int body_add_body(body_t *body, body_t **new_body_ptr,
+    const char *stateset_filename, const char *state_name,
+    palettemapper_t *palmapper,
+    vec_t addpos, rot_t addrot, bool turn
+){
+    /* Adds a new body at same location as another body */
+    int err;
+    ARRAY_PUSH_NEW(body_t*, body->map->bodies, new_body)
+    err = body_init(new_body, body->game, body->map,
+        stateset_filename, state_name, palmapper);
+    if(err)return err;
+    vecspace_t *space = body->map->space;
+
+    vec_cpy(space->dims, new_body->pos, body->pos);
+    rot_t rot = body_get_rot(body);
+    space->vec_flip(addpos, body->turn);
+    space->vec_rot(addpos, rot);
+    vec_add(space->dims, new_body->pos, addpos);
+
+    new_body->rot =
+        rot_rot(space->rot_max, body->rot, addrot);
+
+    new_body->turn = turn? !body->turn: body->turn;
+
+    if(new_body_ptr)*new_body_ptr = new_body;
+    return 0;
+}
+
 
 
 /*************
@@ -554,24 +582,17 @@ static int body_apply_rule(body_t *body,
                     break;}
                 bool crouch = action_name[4] == '_' && action_name[5] == 'c';
                 bool up = action_name[4] == '_' && action_name[5] == 'u';
-                const char *stateset_filename = "anim/spit.fus";
-                ARRAY_PUSH_NEW(body_t*, body->map->bodies, new_body)
-                err = body_init(new_body, body->game, body->map,
-                    stateset_filename, crouch? "crouch_fly": "fly", NULL);
+
+                vec_t addpos = {0, 0};
+                if(up)addpos[0] = 1;
+                rot_t addrot = up? 1: 0;
+                bool turn = false;
+
+                body_t *new_body;
+                err = body_add_body(body, &new_body, "anim/spit.fus",
+                    crouch? "crouch_fly": "fly", NULL,
+                    addpos, addrot, turn);
                 if(err)return err;
-                vecspace_t *space = body->map->space;
-                vec_cpy(space->dims, new_body->pos, body->pos);
-                if(up){
-                    vec_t vec = {1, 0};
-                    rot_t rot = body_get_rot(body);
-                    space->vec_flip(vec, body->turn);
-                    space->vec_rot(vec, rot);
-                    vec_add(space->dims, new_body->pos, vec);
-                }
-                new_body->rot = up?
-                    rot_rot(space->rot_max, body->rot, 1):
-                    body->rot;
-                new_body->turn = body->turn;
             }else{
                 fprintf(stderr, "Unrecognized action: %s\n",
                     action_name);
