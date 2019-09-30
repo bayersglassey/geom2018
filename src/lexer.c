@@ -546,18 +546,28 @@ int fus_lexer_get_int(fus_lexer_t *lexer, int *i){
     return fus_lexer_next(lexer);
 }
 
-int fus_lexer_get_bool(fus_lexer_t *lexer, bool *b){
-    if(fus_lexer_got(lexer, "y")){
+static int _fus_lexer_get_bool(fus_lexer_t *lexer, bool *b,
+    const char *t, const char *f
+){
+    if(fus_lexer_got(lexer, t)){
         *b = true;
-    }else if(fus_lexer_got(lexer, "n")){
+    }else if(fus_lexer_got(lexer, f)){
         *b = false;
     }else{
         fus_lexer_err_info(lexer); fprintf(stderr,
-            "Expected bool (y or n), but got: ");
+            "Expected bool (%s or %s), but got: ", t, f);
         fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
         return 2;
     }
     return fus_lexer_next(lexer);
+}
+
+int fus_lexer_get_bool(fus_lexer_t *lexer, bool *b){
+    return _fus_lexer_get_bool(lexer, b, "t", "f");
+}
+
+int fus_lexer_get_yesno(fus_lexer_t *lexer, bool *b){
+    return _fus_lexer_get_bool(lexer, b, "y", "n");
 }
 
 int fus_lexer_get_int_fancy(fus_lexer_t *lexer, int *i_ptr){
@@ -674,8 +684,8 @@ int fus_lexer_get_attr_int(fus_lexer_t *lexer, const char *attr, int *i,
     return 0;
 }
 
-int fus_lexer_get_attr_bool(fus_lexer_t *lexer, const char *attr, bool *b,
-    bool optional
+static int _fus_lexer_get_attr_bool(fus_lexer_t *lexer, const char *attr, bool *b,
+    bool optional, const char *t, const char *f
 ){
     int err;
     if(fus_lexer_got(lexer, attr)){
@@ -694,6 +704,18 @@ int fus_lexer_get_attr_bool(fus_lexer_t *lexer, const char *attr, bool *b,
         return 2;
     }
     return 0;
+}
+
+int fus_lexer_get_attr_yesno(fus_lexer_t *lexer, const char *attr, bool *b,
+    bool optional
+){
+    return _fus_lexer_get_attr_bool(lexer, attr, b, optional, "y", "n");
+}
+
+int fus_lexer_get_attr_bool(fus_lexer_t *lexer, const char *attr, bool *b,
+    bool optional
+){
+    return _fus_lexer_get_attr_bool(lexer, attr, b, optional, "t", "f");
 }
 
 int fus_lexer_unexpected(fus_lexer_t *lexer, const char *expected){

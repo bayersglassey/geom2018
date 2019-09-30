@@ -66,7 +66,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
         if(DONE)break;
 
         char *name;
-        GET_NAME(&name)
+        GET_NAME(name)
         GET("(")
 
         rendergraph_t *rgraph = NULL;
@@ -74,7 +74,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             char *rgraph_name;
             NEXT
             GET("(")
-            GET_STR(&rgraph_name)
+            GET_STR(rgraph_name)
             GET(")")
             rgraph = prismelrenderer_get_rendergraph(
                 prend, rgraph_name);
@@ -153,7 +153,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     NEXT
 
                     char *name;
-                    GET_NAME(&name)
+                    GET_NAME(name)
 
                     char c = name[0];
                     if(strlen(name) != 1 || !strchr(ANIM_KEY_CS, c)){
@@ -211,7 +211,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     NEXT
                     GET("(")
                     int percent = 0;
-                    GET_INT(&percent)
+                    GET_INT(percent)
                     GET("%")
                     GET(")")
                     ARRAY_PUSH_NEW(state_cond_t*, rule->conds, cond)
@@ -232,7 +232,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     NEXT
                     GET("(")
                     char *msg;
-                    GET_STR(&msg)
+                    GET_STR(msg)
                     ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_print;
                     effect->u.msg = msg;
@@ -243,14 +243,14 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_move;
                     for(int i = 0; i < space->dims; i++){
-                        GET_INT(&effect->u.vec[i]);
+                        GET_INT(effect->u.vec[i]);
                     }
                     GET(")")
                 }else if(GOT("rot")){
                     NEXT
                     GET("(")
                     int rot;
-                    GET_INT(&rot)
+                    GET_INT(rot)
                     ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_rot;
                     effect->u.rot = rot_contain(space->rot_max, rot);
@@ -271,7 +271,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     GET("(")
 
                     char *goto_name;
-                    GET_NAME(&goto_name)
+                    GET_NAME(goto_name)
 
                     ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_goto;
@@ -284,7 +284,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     GET("(")
 
                     int delay;
-                    GET_INT(&delay)
+                    GET_INT(delay)
 
                     ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_delay;
@@ -296,7 +296,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     GET("(")
 
                     char *action_name;
-                    GET_NAME(&action_name)
+                    GET_NAME(action_name)
 
                     ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_action;
@@ -316,7 +316,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     GET("(")
 
                     char *play_filename;
-                    GET_STR(&play_filename)
+                    GET_STR(play_filename)
 
                     ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
                     effect->type = state_effect_type_play;

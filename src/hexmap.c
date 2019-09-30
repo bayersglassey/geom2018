@@ -527,7 +527,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
             if(err)return err;
             err = fus_lexer_get(lexer, "(");
             if(err)return err;
-            err = fus_lexer_get_bool(lexer, &door_turn);
+            err = fus_lexer_get_yesno(lexer, &door_turn);
             if(err)return err;
             err = fus_lexer_get(lexer, ")");
             if(err)return err;

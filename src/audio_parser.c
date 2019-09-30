@@ -172,7 +172,7 @@ int audio_parser_parse(audio_parser_t *parser, fus_lexer_t *lexer){
                 err = fus_lexer_get_attr_int(lexer,
                     "plus", &plus, true);
                 if(err)return err;
-                err = fus_lexer_get_attr_bool(lexer,
+                err = fus_lexer_get_attr_yesno(lexer,
                     "wacky", &wacky, true);
                 if(err)return err;
                 err = fus_lexer_get(lexer, ")");
@@ -207,7 +207,7 @@ int audio_parser_parse(audio_parser_t *parser, fus_lexer_t *lexer){
                 err = fus_lexer_get_attr_int(lexer,
                     "step", &step, true);
                 if(err)return err;
-                err = fus_lexer_get_attr_bool(lexer,
+                err = fus_lexer_get_attr_yesno(lexer,
                     "wacky", &wacky, true);
                 if(err)return err;
                 err = fus_lexer_get(lexer, ")");

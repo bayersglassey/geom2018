@@ -150,7 +150,7 @@ int player_respawn_load(const char *filename, vec_t pos,
     if(err)goto err;
     err = fus_lexer_get_int(&lexer, &rot);
     if(err)goto err;
-    err = fus_lexer_get_bool(&lexer, &turn);
+    err = fus_lexer_get_yesno(&lexer, &turn);
     if(err)goto err;
     err = fus_lexer_get_str(&lexer, &map_filename);
     if(err)goto err;
