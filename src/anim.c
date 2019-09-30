@@ -27,6 +27,7 @@ int stateset_init(stateset_t *stateset, char *filename){
     stateset->filename = filename;
     ARRAY_INIT(stateset->states)
     stateset->is_projectile = false;
+    stateset->is_collectible = false;
     return 0;
 }
 
@@ -60,6 +61,11 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
     if(GOT("projectile")){
         NEXT
         stateset->is_projectile = true;
+    }
+
+    if(GOT("collectible")){
+        NEXT
+        stateset->is_collectible = true;
     }
 
     while(1){

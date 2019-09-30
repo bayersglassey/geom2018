@@ -787,7 +787,11 @@ int body_step(body_t *body, hexgame_t *game){
 
 int body_collide_against_body(body_t *body, body_t *body_other){
     int err;
-    if(body_other->state->crushes){
+    bool crushed = body_other->state->crushes;
+    bool collected =
+        body->stateset.is_collectible &&
+        !body_other->stateset.is_collectible;
+    if(crushed || collected){
         /* Bodies whose recording is playing cannot die */
         /* MAYBE TODO: These bodies should die too, but then their
         recording should restart after a brief pause?

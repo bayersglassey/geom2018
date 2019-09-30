@@ -351,13 +351,63 @@ int hexgame_reset_player(hexgame_t *game, player_t *player, int reset_level){
     return 0;
 }
 
-int hexgame_reset_players_by_keymap(hexgame_t *game, int keymap, int reset_level){
-    int err;
+static player_t *hexgame_get_player_by_keymap(hexgame_t *game, int keymap){
     for(int i = 0; i < game->players_len; i++){
         player_t *player = game->players[i];
-        if(player->keymap == keymap){
-            err = hexgame_reset_player(game, player, reset_level);
-            if(err)return err;
+        if(player->keymap == keymap)return player;
+    }
+    return NULL;
+}
+
+int hexgame_reset_players_by_keymap(hexgame_t *game, int keymap, int reset_level){
+    int err;
+    player_t *player = hexgame_get_player_by_keymap(game, keymap);
+    if(!player)return 2;
+    err = hexgame_reset_player(game, player, reset_level);
+    if(err)return err;
+    return 0;
+}
+
+static int hexgame_add_random_coins_by_keymap(hexgame_t *game, int keymap){
+    int err;
+    player_t *player = hexgame_get_player_by_keymap(game, keymap);
+    if(!player)return 0;
+    body_t *body = player->body;
+    if(!body)return 0;
+
+    hexmap_t *map = body->map;
+    vecspace_t *space = map->space;
+    hexmap_submap_t *submap = body->cur_submap;
+    hexcollmap_t *collmap = &submap->collmap;
+
+    /* cx, cy: origin of submap */
+    int cx = submap->pos[0] - collmap->ox;
+    int cy = submap->pos[1] + collmap->oy;
+
+    int i = 0;
+    int step = 7;
+    for(int y = 0; y < collmap->h; y++){
+        for(int x = 0; x < collmap->w; x++){
+            if(i % step == 0){
+                hexcollmap_tile_t *tile =
+                    &collmap->tiles[y * collmap->w + x];
+                hexcollmap_elem_t *vert = &tile->vert[0];
+                if(hexcollmap_elem_is_solid(vert))continue;
+
+                /* px, py: coin's position */
+                int px = cx + x;
+                int py = cy + y;
+
+                ARRAY_PUSH_NEW(body_t*, map->bodies, new_body)
+                err = body_init(new_body, game, map,
+                    "anim/coin.fus", "stand", NULL);
+                if(err)return err;
+                vec_add(space->dims, new_body->pos, submap->pos);
+
+                new_body->pos[0] = cx + x;
+                new_body->pos[1] = cy - y;
+            }
+            i++;
         }
     }
 
@@ -454,11 +504,20 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
             }
         }else if(!event->key.repeat){
             bool shift = event->key.keysym.mod & KMOD_SHIFT;
+            bool ctrl = event->key.keysym.mod & KMOD_CTRL;
             int reset_level = shift? RESET_HARD: RESET_SOFT;
-            if(event->key.keysym.sym == SDLK_1){
-                hexgame_reset_players_by_keymap(game, 0, reset_level);}
-            if(event->key.keysym.sym == SDLK_2){
-                hexgame_reset_players_by_keymap(game, 1, reset_level);}
+            int keymap = -1;
+            if(event->key.keysym.sym == SDLK_1)keymap = 0;
+            if(event->key.keysym.sym == SDLK_2)keymap = 1;
+            if(keymap > -1){
+                if(ctrl){
+                    err = hexgame_add_random_coins_by_keymap(game, keymap);
+                    if(err)return err;
+                }else{
+                    err = hexgame_reset_players_by_keymap(game, keymap, reset_level);
+                    if(err)return err;
+                }
+            }
         }
     }
 
@@ -509,4 +568,3 @@ int hexgame_step(hexgame_t *game){
 
     return 0;
 }
-

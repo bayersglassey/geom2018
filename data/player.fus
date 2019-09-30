@@ -313,3 +313,30 @@ shapes:
             : "player_dead_particle" (1 1 2 0) 3 f -2+ (2 6)
             : "player_dead_particle" (1 1 2 0) 6 f -3+ (3 6)
             : "player_dead_particle" (1 1 2 0) 9 f -5+ (5 6)
+
+    "_coin":
+        prismels:
+            : "tri" ( 0  0  0  0)  0 f eval: 5 + 0 + 1
+            : "tri" ( 0  0  0  0)  2 f eval: 5 + 0 + 1
+            : "tri" ( 0  0  0  0)  4 f eval: 5 + 8 + 1
+            : "tri" ( 0  0  0  0)  6 f eval: 5 + 8 + 1
+            : "tri" ( 0  0  0  0)  8 f eval: 7 + 8 + 1
+            : "tri" ( 0  0  0  0) 10 f eval: 5 + 8 + 1
+
+    "coin":
+        animation: cycle 12
+        shapes:
+            : "_coin" (0 0 0 0)  0 f  0 ( 0 1)
+            : "_coin" (0 0 0 0)  1 f  0 ( 1 1)
+            : "_coin" (0 0 0 0)  2 f  0 ( 2 1)
+            : "_coin" (0 0 0 0)  3 f  0 ( 3 1)
+            : "_coin" (0 0 0 0)  4 f  0 ( 4 1)
+            : "_coin" (0 0 0 0)  5 f  0 ( 5 1)
+            : "_coin" (0 0 0 0)  6 f  0 ( 6 1)
+            : "_coin" (0 0 0 0)  7 f  0 ( 7 1)
+            : "_coin" (0 0 0 0)  8 f  0 ( 8 1)
+            : "_coin" (0 0 0 0)  9 f  0 ( 9 1)
+            : "_coin" (0 0 0 0) 10 f  0 (10 1)
+            : "_coin" (0 0 0 0) 11 f  0 (11 1)
+
+    "coin_dead":

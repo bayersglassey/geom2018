@@ -28,6 +28,7 @@ typedef struct stateset {
     ARRAY_DECL(struct state*, states)
 
     bool is_projectile;
+    bool is_collectible;
 } stateset_t;
 
 typedef struct state_rule {
