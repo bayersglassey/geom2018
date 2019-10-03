@@ -301,10 +301,13 @@ shapes:
 
     "spit_crouch_fly":
         shapes:
-            # NOTE: The center of a face is at (1 1 1 0)
-            # We elevate that to (1 1 2 0) so it lines up with
-            # player's nose
-            : "_spit" ( 1  1 2 0)  0 f  0 (1 1)
+            # NOTE: The center of a face is at (1 1 1 0).
+            # But if you want that to line up with player's nose,
+            # you need to elevate it to (1 1 2 0).
+            # But then crouching spit and crouching coins don't
+            # line up!..
+            # So we should probably fix player's nose when crouching.
+            : "_spit" ( 1  1 1 0)  0 f  0 (1 1)
 
     "spit_crouch_dead":
         animation: once 12
