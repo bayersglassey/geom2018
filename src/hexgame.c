@@ -368,6 +368,23 @@ int hexgame_reset_players_by_keymap(hexgame_t *game, int keymap, int reset_level
     return 0;
 }
 
+static int hexgame_add_coin(hexgame_t *game, hexmap_t *map,
+    hexmap_submap_t *submap, int x, int y, const char *state_name
+){
+    int err;
+    vecspace_t *space = map->space;
+
+    ARRAY_PUSH_NEW(body_t*, map->bodies, new_body)
+    err = body_init(new_body, game, map,
+        "anim/coin.fus", state_name, NULL);
+    if(err)return err;
+
+    new_body->pos[0] = x;
+    new_body->pos[1] = y;
+
+    return 0;
+}
+
 static int hexgame_add_random_coins_by_keymap(hexgame_t *game, int keymap){
     int err;
     player_t *player = hexgame_get_player_by_keymap(game, keymap);
@@ -376,7 +393,6 @@ static int hexgame_add_random_coins_by_keymap(hexgame_t *game, int keymap){
     if(!body)return 0;
 
     hexmap_t *map = body->map;
-    vecspace_t *space = map->space;
     hexmap_submap_t *submap = body->cur_submap;
     hexcollmap_t *collmap = &submap->collmap;
 
@@ -386,29 +402,19 @@ static int hexgame_add_random_coins_by_keymap(hexgame_t *game, int keymap){
 
     int i = 0;
     int step = 7;
-    bool crouch = false;
+    int step_crouch = 11;
     for(int y = 0; y < collmap->h; y++){
         for(int x = 0; x < collmap->w; x++){
+            /* px, py: coin's position */
+            int px = cx + x;
+            int py = cy - y;
             if(i % step == 0){
-                hexcollmap_tile_t *tile =
-                    &collmap->tiles[y * collmap->w + x];
-                hexcollmap_elem_t *vert = &tile->vert[0];
-                if(hexcollmap_elem_is_solid(vert))continue;
-
-                /* px, py: coin's position */
-                int px = cx + x;
-                int py = cy + y;
-
-                ARRAY_PUSH_NEW(body_t*, map->bodies, new_body)
-                err = body_init(new_body, game, map,
-                    "anim/coin.fus", crouch? "crouch": "stand", NULL);
+                err = hexgame_add_coin(game, map, submap, px, py, "stand");
                 if(err)return err;
-                vec_add(space->dims, new_body->pos, submap->pos);
-
-                new_body->pos[0] = cx + x;
-                new_body->pos[1] = cy - y;
-
-                crouch = !crouch;
+            }
+            if(i % step_crouch == 0){
+                err = hexgame_add_coin(game, map, submap, px, py, "crouch");
+                if(err)return err;
             }
             i++;
         }
