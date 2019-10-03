@@ -89,7 +89,7 @@ stand:
     then:
         move: 1 0
         rot: -1
-        goto: step
+        goto: step_down
         delay: 2
 
     if:
@@ -314,6 +314,24 @@ jump:
     if() then:
         goto: mostly_dead
         delay: 11
+
+step_down:
+    rgraph: "player_step"
+    hitbox:
+        ;;   .   .   .
+        ;;   *\*/*\*/*
+        ;; . - + - + - .
+        ;;   */*\*/*\*
+        ;;   .  (.)  .
+
+    if:
+        key: wentdown y
+    then:
+        action: spit
+        goto: spit
+        delay: 9
+
+    if() then: goto: stand
 
 step:
     rgraph: "player_step"
