@@ -442,6 +442,7 @@ void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box,
 
 int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space){
     renderer->n_textures = 0;
+    renderer->cache_bitmaps = true;
     renderer->space = space;
     ARRAY_INIT(renderer->palmappers)
     ARRAY_INIT(renderer->prismels)
@@ -531,8 +532,9 @@ static void _dump_size(int size, int count, FILE *f){
 
 void prismelrenderer_dump_stats(prismelrenderer_t *prend, FILE *f){
     int n_bitmaps = 0;
+    int n_surfaces = 0;
     int n_textures = 0;
-    int bitmaps_size = 0;
+    int surfaces_size = 0;
 
     for(int i = 0; i < prend->rendergraphs_len; i++){
         rendergraph_t *rgraph = prend->rendergraphs[i];
@@ -540,9 +542,10 @@ void prismelrenderer_dump_stats(prismelrenderer_t *prend, FILE *f){
             rendergraph_bitmap_t *bitmap = &rgraph->bitmaps[i];
             SDL_Surface *surface = bitmap->surface;
             SDL_Texture *texture = bitmap->texture;
+            n_bitmaps++;
             if(surface != NULL){
-                n_bitmaps++;
-                bitmaps_size += surface->h * surface->pitch;
+                n_surfaces++;
+                surfaces_size += surface->h * surface->pitch;
             }
             if(texture != NULL){
                 n_textures++;
@@ -552,8 +555,9 @@ void prismelrenderer_dump_stats(prismelrenderer_t *prend, FILE *f){
 
     fprintf(f, "Prismelrenderer stats:\n");
     fprintf(f, "  bitmaps: %i\n", n_bitmaps);
+    fprintf(f, "  surfaces: %i\n", n_surfaces);
     fprintf(f, "    size (total | avg):\n");
-    _dump_size(bitmaps_size, n_bitmaps, f);
+    _dump_size(surfaces_size, n_bitmaps, f);
     fprintf(f, "  textures: %i\n", n_textures);
 }
 

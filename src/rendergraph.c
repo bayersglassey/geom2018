@@ -416,13 +416,6 @@ int rendergraph_calculate_bitmap_bounds(rendergraph_t *rendergraph,
     return 0;
 }
 
-int rendergraph_render_to_surface(rendergraph_t *rendergraph,
-    SDL_Surface *surface, rot_t rot, flip_t flip, int frame_i
-){
-    int err;
-    return 0;
-}
-
 int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i,
     SDL_Palette *pal
@@ -459,6 +452,24 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     /* Fill new bitmap with transparent colour */
     SDL_LockSurface(surface);
     SDL_memset(surface->pixels, 0, surface->h * surface->pitch);
+
+    err = rendergraph_render_to_surface(rendergraph, surface,
+        rot, flip, frame_i, pal);
+    if(err)return err;
+
+    bitmap->surface = surface;
+    return 0;
+}
+
+
+int rendergraph_render_to_surface(rendergraph_t *rendergraph,
+    SDL_Surface *surface, rot_t rot, flip_t flip, int frame_i,
+    SDL_Palette *pal
+){
+    int err;
+    int bitmap_i = rendergraph_get_bitmap_i(rendergraph, rot, flip,
+        frame_i);
+    rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[bitmap_i];
 
     /* Render prismels */
     for(int i = 0; i < rendergraph->prismel_trfs_len; i++){
@@ -536,7 +547,6 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     }
 
     /* LET'S GO */
-    bitmap->surface = surface;
     return 0;
 }
 
@@ -588,13 +598,7 @@ int rendergraph_render(rendergraph_t *rgraph,
 ){
     int err;
 
-    bool dont_cache_bitmaps = surface == NULL? false:
-#ifdef GEOM_RGRAPH_DONT_CACHE_BITMAPS
-        true
-#else
-        false
-#endif
-    ;
+    bool cache_bitmaps = surface == NULL? true: prend->cache_bitmaps;
 
     int animated_frame_i = get_animated_frame_i(
         rgraph->animation_type, rgraph->n_frames, frame_i);
@@ -656,7 +660,7 @@ int rendergraph_render(rendergraph_t *rgraph,
         function somehow. */
     }
 
-    if(!dont_cache_bitmaps){
+    if(cache_bitmaps){
         /* Render rgraph and cache result on one of rgraph's bitmaps */
 
         /* NOTE: Passing &bitmap in the following call is unnecessary,
@@ -670,13 +674,13 @@ int rendergraph_render(rendergraph_t *rgraph,
     /* Finally render, blit, or copy the rgraph onto target surface
     or renderer */
     if(surface != NULL){
-        if(dont_cache_bitmaps){
-            err = rendergraph_render_to_surface(rgraph, surface,
-                rot, flip, animated_frame_i);
-            if(err)return err;
-        }else{
+        if(cache_bitmaps){
             RET_IF_SDL_NZ(SDL_BlitScaled(bitmap->surface, NULL,
                 surface, &dst_rect));
+        }else{
+            err = rendergraph_render_to_surface(rgraph, surface,
+                rot, flip, animated_frame_i, pal);
+            if(err)return err;
         }
     }else if(renderer != NULL){
         SDL_Texture *bitmap_texture;

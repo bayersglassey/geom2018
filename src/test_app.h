@@ -65,7 +65,7 @@ int test_app_load_rendergraphs(test_app_t *app);
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
     const char *stateset_filename, const char *hexmap_filename,
-    bool use_textures, int n_players);
+    bool use_textures, bool cache_bitmaps, int n_players);
 int test_app_process_console_input(test_app_t *app);
 int test_app_mainloop(test_app_t *app);
 

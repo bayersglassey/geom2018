@@ -96,6 +96,7 @@ void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box,
 
 typedef struct prismelrenderer {
     int n_textures;
+    bool cache_bitmaps;
     vecspace_t *space;
     ARRAY_DECL(struct palettemapper*, palmappers)
     ARRAY_DECL(struct prismel*, prismels)

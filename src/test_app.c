@@ -39,7 +39,7 @@ static void test_app_init_input(test_app_t *app){
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
     const char *stateset_filename, const char *hexmap_filename,
-    bool use_textures, int n_players
+    bool use_textures, bool cache_bitmaps, int n_players
 ){
     int err;
 
@@ -85,6 +85,8 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     if(prend->rendergraphs_len < 1){
         fprintf(stderr, "No rendergraphs in %s\n", app->prend_filename);
         return 2;}
+
+    prend->cache_bitmaps = cache_bitmaps;
 
     hexgame_t *game = &app->hexgame;
     err = hexgame_init(game, prend, app->hexmap_filename);

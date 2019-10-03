@@ -99,7 +99,8 @@ int rendergraph_get_bitmap_i(rendergraph_t *rendergraph,
 int rendergraph_calculate_bitmap_bounds(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i);
 int rendergraph_render_to_surface(rendergraph_t *rendergraph,
-    SDL_Surface *surface, rot_t rot, flip_t flip, int frame_i);
+    SDL_Surface *surface, rot_t rot, flip_t flip, int frame_i,
+    SDL_Palette *pal);
 int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i,
     SDL_Palette *pal);

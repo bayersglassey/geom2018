@@ -21,6 +21,7 @@ int main(int n_args, char *args[]){
     const char *stateset_filename = "anim/player.fus";
     const char *hexmap_filename = "data/maps/demo/worldmap.fus";
     bool use_textures = false;
+    bool cache_bitmaps = false;
     int n_players = 1;
 
     for(int arg_i = 1; arg_i < n_args; arg_i++){
@@ -52,6 +53,8 @@ int main(int n_args, char *args[]){
             hexmap_filename = arg;
         }else if(!strcmp(arg, "--use_textures")){
             use_textures = true;
+        }else if(!strcmp(arg, "--cache_bitmaps")){
+            cache_bitmaps = true;
         }else if(!strcmp(arg, "--players")){
             arg_i++;
             if(arg_i >= n_args){
@@ -90,7 +93,7 @@ int main(int n_args, char *args[]){
                 test_app_t app;
                 if(test_app_init(&app, SCW, SCH, DELAY_GOAL,
                     window, renderer, prend_filename, stateset_filename,
-                    hexmap_filename, use_textures, n_players)
+                    hexmap_filename, use_textures, cache_bitmaps, n_players)
                 ){
                     e = 1;
                     fprintf(stderr, "Couldn't init test app\n");
