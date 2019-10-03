@@ -171,10 +171,22 @@ SDL_Surface *surface32_create(int w, int h,
 }
 
 Uint8 *surface8_get_pixel_ptr(SDL_Surface *surface, int x, int y){
+    if(x < 0 || y < 0 || x >= surface->w || y >= surface->h){
+        fprintf(stderr,
+            "%s: out of bounds: x=%i, y=%i, surface->w=%i, surface->h=%i",
+            __func__, x, y, surface->w, surface->h);
+        return (Uint8 *)surface->pixels;
+    }
     return (Uint8 *)surface->pixels + y*surface->pitch + x;
 }
 
 Uint32 *surface32_get_pixel_ptr(SDL_Surface *surface, int x, int y){
+    if(x < 0 || y < 0 || x >= surface->w || y >= surface->h){
+        fprintf(stderr,
+            "%s: out of bounds: x=%i, y=%i, surface->w=%i, surface->h=%i",
+            __func__, x, y, surface->w, surface->h);
+        return (Uint32 *)surface->pixels;
+    }
     return (Uint32 *)(
         (Uint8 *)surface->pixels + y*surface->pitch + x*(32/8)
     );
