@@ -240,6 +240,14 @@ int rendergraph_get_bitmap_i(rendergraph_t *rendergraph,
         rendergraph->n_frames, frame_i);
 }
 
+rendergraph_bitmap_t *rendergraph_get_bitmap(rendergraph_t *rendergraph,
+    rot_t rot, flip_t flip, int frame_i
+){
+    int bitmap_i = rendergraph_get_bitmap_i(rendergraph,
+        rot, flip, frame_i);
+    return &rendergraph->bitmaps[bitmap_i];
+}
+
 bool prismel_trf_get_frame_visible(prismel_trf_t *prismel_trf,
     int n_frames, int frame_i
 ){
@@ -344,10 +352,14 @@ static int rendergraph_rendergraph_trf_iter(
 int rendergraph_calculate_bitmap_bounds(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i
 ){
+    /* Looks up bitmap for given rot, flip, frame_i.
+    Immediately exits if bitmap->pbox_calculated.
+    Otherwise, calculates bitmap->pbox, recursively doing the
+    same for all rendergraph's rendergraph_trfs. */
+
     int err;
-    int bitmap_i = rendergraph_get_bitmap_i(rendergraph, rot, flip,
-        frame_i);
-    rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[bitmap_i];
+    rendergraph_bitmap_t *bitmap = rendergraph_get_bitmap(rendergraph,
+        rot, flip, frame_i);
 
     /* Already calculated bitmap->pbox, early exit */
     if(bitmap->pbox_calculated)return 0;
@@ -421,9 +433,8 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     SDL_Palette *pal
 ){
     int err;
-    int bitmap_i = rendergraph_get_bitmap_i(rendergraph, rot, flip,
-        frame_i);
-    rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[bitmap_i];
+    rendergraph_bitmap_t *bitmap = rendergraph_get_bitmap(rendergraph,
+        rot, flip, frame_i);
 
     /* Calculate our bounds */
     err = rendergraph_calculate_bitmap_bounds(rendergraph,
@@ -453,7 +464,8 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     SDL_LockSurface(surface);
     SDL_memset(surface->pixels, 0, surface->h * surface->pitch);
 
-    err = rendergraph_render_to_surface(rendergraph, surface,
+    SDL_Rect dst_rect = {0, 0, bitmap->pbox.w, bitmap->pbox.h};
+    err = rendergraph_render_to_surface(rendergraph, surface, &dst_rect,
         rot, flip, frame_i, pal);
     if(err)return err;
 
@@ -463,13 +475,21 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
 
 
 int rendergraph_render_to_surface(rendergraph_t *rendergraph,
-    SDL_Surface *surface, rot_t rot, flip_t flip, int frame_i,
+    SDL_Surface *surface, SDL_Rect *dst_rect,
+    rot_t rot, flip_t flip, int frame_i,
     SDL_Palette *pal
 ){
     int err;
-    int bitmap_i = rendergraph_get_bitmap_i(rendergraph, rot, flip,
-        frame_i);
-    rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[bitmap_i];
+    rendergraph_bitmap_t *bitmap = rendergraph_get_bitmap(rendergraph,
+        rot, flip, frame_i);
+
+    /* NOTE: We seem to assume that bitmap's pbox has already been
+    calculated, probably because this function was originally refactored
+    out of rendergraph_render_bitmap which calls
+    rendergraph_calculate_bitmap_bounds up front.
+    But these days we can call rendergraph_calculate_bitmap_bounds
+    and have it exit early if bounds were already calculated, so
+    shouldn't we just rely on that instead?.. */
 
     /* Render prismels */
     for(int i = 0; i < rendergraph->prismel_trfs_len; i++){
@@ -488,8 +508,8 @@ int rendergraph_render_to_surface(rendergraph_t *rendergraph,
         prismel_image_t *image = &iter.prismel->images[iter.bitmap_i2];
         for(int i = 0; i < image->lines_len; i++){
             prismel_image_line_t *line = image->lines[i];
-            int x = line->x + bitmap->pbox.x + iter.shift_x;
-            int y = line->y + bitmap->pbox.y + iter.shift_y;
+            int x = dst_rect->x + line->x + bitmap->pbox.x + iter.shift_x;
+            int y = dst_rect->y + line->y + bitmap->pbox.y + iter.shift_y;
             Uint8 *p = surface8_get_pixel_ptr(surface, x, y);
             for(int xx = 0; xx < line->w; xx++){
                 p[xx] = c;
@@ -509,19 +529,33 @@ int rendergraph_render_to_surface(rendergraph_t *rendergraph,
         if(iter.done)break;
         if(iter.skip)continue;
 
+        rendergraph_bitmap_t *bitmap2 = rendergraph_get_bitmap(
+            iter.rendergraph2,
+            iter.trf2.rot, iter.trf2.flip, iter.frame_i2);
+        SDL_Rect dst_rect2 = {
+            dst_rect->x + bitmap->pbox.x + iter.shift_x - bitmap2->pbox.x,
+            dst_rect->y + bitmap->pbox.y + iter.shift_y - bitmap2->pbox.y,
+            bitmap2->pbox.w,
+            bitmap2->pbox.h
+        };
+
+        if(!rendergraph->prend->cache_bitmaps){
+            /* Recurse and continue */
+            err = rendergraph_render_to_surface(iter.rendergraph2, surface,
+                &dst_rect2,
+                iter.trf2.rot, iter.trf2.flip, iter.frame_i2, pal);
+            if(err)return err;
+            continue;
+        }
+
         /* Get or render sub-bitmap for this rendergraph_trf */
-        rendergraph_bitmap_t *bitmap2;
+        /* NOTE: &bitmap2 should be redundant, it should result the same
+        pointer value we already had */
         err = rendergraph_get_or_render_bitmap(iter.rendergraph2,
             &bitmap2, iter.trf2.rot, iter.trf2.flip, iter.frame_i2, pal);
 
         /* Blit sub-bitmap's surface onto ours */
         SDL_Surface *surface2 = bitmap2->surface;
-        SDL_Rect dst_rect = {
-            bitmap->pbox.x + iter.shift_x - bitmap2->pbox.x,
-            bitmap->pbox.y + iter.shift_y - bitmap2->pbox.y,
-            bitmap2->pbox.w,
-            bitmap2->pbox.h
-        };
         palettemapper_t *palmapper = iter.rendergraph_trf->palmapper;
         Uint8 *table = NULL;
         Uint8 _table[256];
@@ -543,7 +577,7 @@ int rendergraph_render_to_surface(rendergraph_t *rendergraph,
             }
         }
         RET_IF_SDL_NZ(SDL_PaletteMappedBlit(bitmap2->surface, NULL,
-            surface, &dst_rect, table));
+            surface, &dst_rect2, table));
     }
 
     /* LET'S GO */
@@ -556,9 +590,9 @@ int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
     SDL_Palette *pal
 ){
     int err;
-    int bitmap_i = rendergraph_get_bitmap_i(rendergraph, rot, flip, frame_i);
+    rendergraph_bitmap_t *bitmap = rendergraph_get_bitmap(rendergraph,
+        rot, flip, frame_i);
 
-    rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[bitmap_i];
     if(bitmap->surface == NULL){
         err = rendergraph_render_bitmap(rendergraph, rot, flip, frame_i,
             pal);
@@ -630,9 +664,8 @@ int rendergraph_render(rendergraph_t *rgraph,
         rot, flip, animated_frame_i);
     if(err)return err;
 
-    int bitmap_i = rendergraph_get_bitmap_i(rgraph, rot, flip,
-        animated_frame_i);
-    rendergraph_bitmap_t *bitmap = &rgraph->bitmaps[bitmap_i];
+    rendergraph_bitmap_t *bitmap = rendergraph_get_bitmap(rgraph,
+        rot, flip, animated_frame_i);
 
     /* Can't create a texture with either dimension 0, so exit early */
     if(bitmap->pbox.w == 0 || bitmap->pbox.h == 0)return 0;
@@ -665,7 +698,7 @@ int rendergraph_render(rendergraph_t *rgraph,
 
         /* NOTE: Passing &bitmap in the following call is unnecessary,
         it should end up being the same as what we got by calling
-        rendergraph_get_bitmap_i above */
+        rendergraph_get_bitmap above */
         err = rendergraph_get_or_render_bitmap(rgraph, &bitmap,
             rot, flip, animated_frame_i, pal);
         if(err)return err;
@@ -678,7 +711,7 @@ int rendergraph_render(rendergraph_t *rgraph,
             RET_IF_SDL_NZ(SDL_BlitScaled(bitmap->surface, NULL,
                 surface, &dst_rect));
         }else{
-            err = rendergraph_render_to_surface(rgraph, surface,
+            err = rendergraph_render_to_surface(rgraph, surface, &dst_rect,
                 rot, flip, animated_frame_i, pal);
             if(err)return err;
         }

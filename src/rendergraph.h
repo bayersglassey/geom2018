@@ -96,10 +96,13 @@ int rendergraph_push_prismel_trf(rendergraph_t *rendergraph,
     prismel_trf_t **prismel_trf_ptr);
 int rendergraph_get_bitmap_i(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i);
+rendergraph_bitmap_t *rendergraph_get_bitmap(rendergraph_t *rendergraph,
+    rot_t rot, flip_t flip, int frame_i);
 int rendergraph_calculate_bitmap_bounds(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i);
 int rendergraph_render_to_surface(rendergraph_t *rendergraph,
-    SDL_Surface *surface, rot_t rot, flip_t flip, int frame_i,
+    SDL_Surface *surface, SDL_Rect *dst_rect,
+    rot_t rot, flip_t flip, int frame_i,
     SDL_Palette *pal);
 int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i,
