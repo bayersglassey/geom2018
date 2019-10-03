@@ -21,7 +21,7 @@ int main(int n_args, char *args[]){
     const char *stateset_filename = "anim/player.fus";
     const char *hexmap_filename = "data/maps/demo/worldmap.fus";
     bool use_textures = false;
-    bool cache_bitmaps = false;
+    bool cache_bitmaps = true;
     int n_players = 1;
 
     for(int arg_i = 1; arg_i < n_args; arg_i++){
@@ -53,8 +53,8 @@ int main(int n_args, char *args[]){
             hexmap_filename = arg;
         }else if(!strcmp(arg, "--use_textures")){
             use_textures = true;
-        }else if(!strcmp(arg, "--cache_bitmaps")){
-            cache_bitmaps = true;
+        }else if(!strcmp(arg, "--dont_cache_bitmaps")){
+            cache_bitmaps = false;
         }else if(!strcmp(arg, "--players")){
             arg_i++;
             if(arg_i >= n_args){
