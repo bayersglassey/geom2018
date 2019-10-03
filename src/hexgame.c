@@ -386,6 +386,7 @@ static int hexgame_add_random_coins_by_keymap(hexgame_t *game, int keymap){
 
     int i = 0;
     int step = 7;
+    bool crouch = false;
     for(int y = 0; y < collmap->h; y++){
         for(int x = 0; x < collmap->w; x++){
             if(i % step == 0){
@@ -400,12 +401,14 @@ static int hexgame_add_random_coins_by_keymap(hexgame_t *game, int keymap){
 
                 ARRAY_PUSH_NEW(body_t*, map->bodies, new_body)
                 err = body_init(new_body, game, map,
-                    "anim/coin.fus", "stand", NULL);
+                    "anim/coin.fus", crouch? "crouch": "stand", NULL);
                 if(err)return err;
                 vec_add(space->dims, new_body->pos, submap->pos);
 
                 new_body->pos[0] = cx + x;
                 new_body->pos[1] = cy - y;
+
+                crouch = !crouch;
             }
             i++;
         }

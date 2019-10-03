@@ -6,5 +6,12 @@ stand:
     hitbox:
         ;;  (+)
 
+crouch:
+    rgraph: "coin_crouch"
+    hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)  .
+
 dead:
     rgraph: "coin_dead"
