@@ -417,7 +417,7 @@ crawl:
     then:
         move: 1 0
         rot: -1
-        goto: crawl_step
+        goto: crawl_step_down
         delay: 2
 
     if:
@@ -428,12 +428,28 @@ crawl:
         goto: crawl_step
         delay: 2
 
+crawl_step_down:
+    rgraph: "player_crawl_step"
+    hitbox:
+        ;;    .   .
+        ;;    *\*/*
+        ;;  . -(.)  .
+
+    if:
+        key: wentdown y
+    then:
+        action: spit_crouch
+        goto: crawl_spit
+        delay: 9
+
+    if() then: goto: crawl
+
 crawl_step:
     rgraph: "player_crawl_step"
     hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)  .
+        ;;    .   .
+        ;;      */*
+        ;;     (.)  .
 
     if:
         key: wentdown y
