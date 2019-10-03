@@ -3,11 +3,8 @@ collectible
 
 stand:
     rgraph: "coin"
-
     hitbox:
-        ;;     .
-        ;;     *
-        ;;  ( )  .
+        ;;  (+)
 
 dead:
     rgraph: "coin_dead"
