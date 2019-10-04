@@ -158,6 +158,7 @@ typedef struct hexmap_submap {
 typedef struct hexmap_recording {
     char *filename;
     palettemapper_t *palmapper;
+    trf_t trf;
 } hexmap_recording_t;
 
 typedef struct hexmap {

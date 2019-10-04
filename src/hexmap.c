@@ -200,6 +200,7 @@ int hexmap_recording_init(hexmap_recording_t *recording, char *filename,
 ){
     recording->filename = filename;
     recording->palmapper = palmapper;
+    trf_zero(&recording->trf);
     return 0;
 }
 
