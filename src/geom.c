@@ -50,8 +50,8 @@ bool rot_eq(int rot_max, rot_t r1, rot_t r2){
 
 
 
-void vec_zero(int dims, vec_t v){
-    for(int i = dims - 1; i >= 0; i--){
+void vec_zero(vec_t v){
+    for(int i = MAX_VEC_DIMS - 1; i >= 0; i--){
         v[i] = 0;
     }
 }
@@ -161,6 +161,12 @@ void boundbox_printf(int dims, boundbox_t box){
 
 
 
+void trf_zero(trf_t *trf){
+    vec_zero(trf->add);
+    trf->rot = 0;
+    trf->flip = false;
+}
+
 void trf_cpy(const vecspace_t *space, trf_t *trf1, trf_t *trf2){
     vec_cpy(space->dims, trf1->add, trf2->add);
     trf1->rot = trf2->rot;
@@ -249,7 +255,7 @@ int fus_lexer_get_vec(fus_lexer_t *lexer, vecspace_t *space, vec_t vec){
     err = fus_lexer_get(lexer, "(");
     if(err)return err;
 
-    vec_zero(space->dims, vec);
+    vec_zero(vec);
     while(1){
         vec_t add;
 

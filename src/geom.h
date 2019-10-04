@@ -49,7 +49,7 @@ rot_t rot_contain(int rot_max, rot_t r);
 rot_t rot_rot(int rot_max, rot_t r1, rot_t r2);
 bool rot_eq(int rot_max, rot_t r1, rot_t r2);
 
-void vec_zero(int dims, vec_t v);
+void vec_zero(vec_t v);
 void vec_neg(int dims, vec_t v);
 void vec_fprintf(FILE *f, int dims, vec_t v);
 void vec_printf(int dims, vec_t v);
@@ -67,6 +67,7 @@ void boundbox_init(boundbox_t box, int dims);
 void boundbox_fprintf(FILE *f, int dims, boundbox_t box);
 void boundbox_printf(int dims, boundbox_t box);
 
+void trf_zero(trf_t *trf);
 void trf_cpy(const vecspace_t *space, trf_t *trf1, trf_t *trf2);
 void trf_fprintf(FILE *f, int dims, trf_t *trf);
 void trf_printf(int dims, trf_t *trf);

@@ -35,7 +35,7 @@ void recording_reset(recording_t *rec){
     rec->stateset_name = NULL;
     rec->state_name = NULL;
 
-    vec_zero(MAX_VEC_DIMS, rec->pos0);
+    vec_zero(rec->pos0);
     rec->rot0 = 0;
     rec->turn0 = false;
 

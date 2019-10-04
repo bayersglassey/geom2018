@@ -819,7 +819,7 @@ int prismelmapper_init(prismelmapper_t *mapper, char *name,
     mapper->name = name;
     mapper->solid = solid;
     mapper->space = space;
-    vec_zero(space->dims, mapper->unit);
+    vec_zero(mapper->unit);
     ARRAY_INIT(mapper->entries)
     ARRAY_INIT(mapper->applications)
     ARRAY_INIT(mapper->mapplications)

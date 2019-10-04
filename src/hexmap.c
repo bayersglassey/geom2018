@@ -21,7 +21,7 @@
  ************/
 
 void location_init(location_t *location){
-    vec_zero(MAX_VEC_DIMS, location->pos);
+    vec_zero(location->pos);
     location->rot = 0;
     location->turn = false;
     location->map_filename = NULL;
@@ -233,7 +233,7 @@ int hexmap_init(hexmap_t *map, hexgame_t *game, char *name,
     map->name = name;
     map->game = game;
     map->space = space;
-    vec_zero(space->dims, map->spawn);
+    vec_zero(map->spawn);
 
     map->prend = prend;
     vec_cpy(prend->space->dims, map->unit, unit);
@@ -468,7 +468,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
     }
 
     vec_t door_pos;
-    vec_zero(space->dims, door_pos);
+    vec_zero(door_pos);
     rot_t door_rot = 0;
     bool door_turn = false;
     char *door_map_filename = NULL;
@@ -952,7 +952,7 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
         tileset_filename);
     if(err)return err;
 
-    vec_zero(MAX_VEC_DIMS, submap->door_pos);
+    vec_zero(submap->door_pos);
     submap->door_rot = 0;
     submap->door_turn = false;
     submap->door_map_filename = NULL;
