@@ -21,10 +21,11 @@
  **************/
 
 int hexcollmap_part_init(hexcollmap_part_t *part,
-    char part_c, char *filename
+    char part_c, char *filename, int type
 ){
     part->part_c = part_c;
     part->filename = filename;
+    part->type = type;
     return 0;
 }
 
@@ -200,6 +201,36 @@ static int hexcollmap_draw(hexcollmap_t *collmap1, hexcollmap_t *collmap2,
     return 0;
 }
 
+static int hexcollmap_draw_part(hexcollmap_t *collmap,
+    hexcollmap_part_t *part, trf_t trf, int draw_z
+){
+    int err;
+    if(part->type == HEXCOLLMAP_PART_TYPE_HEXCOLLMAP){
+        /* If "empty" was specified for this part, then filename will
+        be NULL and we shouldn't do anything. */
+        if(part->filename == NULL)return 0;
+
+        hexcollmap_t part_collmap;
+        err = hexcollmap_init(&part_collmap,
+            collmap->space, strdup(part->filename));
+        if(err)return err;
+        err = hexcollmap_load(&part_collmap,
+            part->filename);
+        if(err)return err;
+        err = hexcollmap_draw(collmap, &part_collmap,
+            &trf, draw_z);
+        if(err)return err;
+        hexcollmap_cleanup(&part_collmap);
+    }else if(part->type == HEXCOLLMAP_PART_TYPE_RECORDING){
+        /* TODO */
+    }else{
+        fprintf(stderr, "Unrecognized part type: %i\n", part->type);
+        return 2;
+    }
+
+    return 0;
+}
+
 static int hexcollmap_parse_lines(hexcollmap_t *collmap,
     char **lines, int lines_len, hexcollmap_part_t **parts, int parts_len,
     char default_vert_c, char default_edge_c, char default_face_c
@@ -324,8 +355,9 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
             in the bucket one at a time as the tile_c character,
             instead of the default tile_c.
             While parsing a line, '?' works similarly to '%' except
-            that instead of modifying tile_c, it loads other collmaps
-            over this one.
+            that instead of modifying tile_c, it loads and draws other
+            collmaps over this one, according to the "parts" indicated
+            at the top of the file.
             TODO: Clarify this comment... */
 
         for(int x = 0; x < line_len; x++){
@@ -473,25 +505,6 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                         tilebucket++;
 
                         if(parsing_part_references){
-                            /* Find part with given part_c */
-                            char *filename = NULL;
-                            bool found = false;
-                            for(int i = 0; i < parts_len; i++){
-                                hexcollmap_part_t *part = parts[i];
-                                if(part->part_c == c2){
-                                    found = true;
-                                    filename = part->filename;
-                                    break;
-                                }
-                            }
-
-                            if(!found){
-                                fprintf(stderr,
-                                    "Hexcollmap line %i, char %i: char %li: "
-                                    "part not found: %c\n",
-                                    y+1, x+1, tilebucket-line+1, c2);
-                                return 2;}
-
                             int mx, my; bool is_face1;
                             get_map_coords(x-ox, y-oy, '+',
                                 &mx, &my, NULL);
@@ -516,22 +529,24 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                                 }else break;
                             }
 
-                            /* If "empty" was specified for this part, then
-                            filename will be NULL and we shouldn't do
-                            anything. */
-                            if(filename != NULL){
-                                hexcollmap_t part_collmap;
-                                err = hexcollmap_init(&part_collmap,
-                                    collmap->space, strdup(filename));
+                            /* Find and draw parts with given part_c */
+                            bool found = false;
+                            for(int i = 0; i < parts_len; i++){
+                                hexcollmap_part_t *part = parts[i];
+                                if(part->part_c != c2)continue;
+                                found = true;
+                                err = hexcollmap_draw_part(collmap,
+                                    part, trf, draw_z);
                                 if(err)return err;
-                                err = hexcollmap_load(&part_collmap,
-                                    filename);
-                                if(err)return err;
-                                err = hexcollmap_draw(collmap, &part_collmap,
-                                    &trf, draw_z);
-                                if(err)return err;
-                                hexcollmap_cleanup(&part_collmap);
                             }
+                            if(!found){
+                                fprintf(stderr,
+                                    "Hexcollmap line %i, char %i: char %li: "
+                                    "part not found: %c\n",
+                                    y+1, x+1, tilebucket-line+1, c2);
+                                return 2;
+                            }
+
                         }
                     }
                 }
@@ -565,6 +580,7 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
         if(fus_lexer_got(lexer, "parts")){
             err = fus_lexer_next(lexer);
             if(err)return err;
+
             err = fus_lexer_get(lexer, "(");
             if(err)return err;
             while(1){
@@ -574,23 +590,31 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
                 err = fus_lexer_get_chr(lexer, &part_c);
                 if(err)return err;
 
+                int type = HEXCOLLMAP_PART_TYPE_HEXCOLLMAP;
+                char *filename = NULL;
                 err = fus_lexer_get(lexer, "(");
                 if(err)return err;
-                if(fus_lexer_got(lexer, "empty")){
-                    err = fus_lexer_next(lexer);
-                    if(err)return err;
-                    ARRAY_PUSH_NEW(hexcollmap_part_t*, parts, part)
-                    err = hexcollmap_part_init(part, part_c, NULL);
-                    if(err)return err;
-                }else{
-                    char *filename;
-                    err = fus_lexer_get_str(lexer, &filename);
-                    if(err)return err;
-                    ARRAY_PUSH_NEW(hexcollmap_part_t*, parts, part)
-                    err = hexcollmap_part_init(part, part_c, filename);
-                    if(err)return err;
+                {
+                    if(fus_lexer_got(lexer, "recording")){
+                        err = fus_lexer_next(lexer);
+                        if(err)return err;
+                        type = HEXCOLLMAP_PART_TYPE_RECORDING;
+                    }
+
+                    if(fus_lexer_got(lexer, "empty")){
+                        err = fus_lexer_next(lexer);
+                        if(err)return err;
+                    }else{
+                        err = fus_lexer_get_str(lexer, &filename);
+                        if(err)return err;
+                    }
                 }
                 err = fus_lexer_get(lexer, ")");
+                if(err)return err;
+
+                ARRAY_PUSH_NEW(hexcollmap_part_t*, parts, part)
+                err = hexcollmap_part_init(part, part_c,
+                    filename, type);
                 if(err)return err;
             }
             err = fus_lexer_next(lexer);

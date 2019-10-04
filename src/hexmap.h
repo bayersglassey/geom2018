@@ -80,9 +80,15 @@ typedef struct hexcollmap_tile {
     hexcollmap_elem_t face[2];
 } hexcollmap_tile_t;
 
+enum hexcollmap_part_type {
+    HEXCOLLMAP_PART_TYPE_HEXCOLLMAP,
+    HEXCOLLMAP_PART_TYPE_RECORDING,
+};
+
 typedef struct hexcollmap_part {
     char part_c;
     char *filename;
+    int type; /* enum hexcollmap_part_type */
 } hexcollmap_part_t;
 
 typedef struct hexcollmap {
@@ -97,7 +103,7 @@ typedef struct hexcollmap {
 
 
 int hexcollmap_part_init(hexcollmap_part_t *part,
-    char part_c, char *filename);
+    char part_c, char *filename, int type);
 void hexcollmap_part_cleanup(hexcollmap_part_t *part);
 
 void hexcollmap_cleanup(hexcollmap_t *collmap);
