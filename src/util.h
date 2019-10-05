@@ -41,9 +41,7 @@ void strncpy_of_int(char *s, int i, int i_len);
 int getln(char buf[], int buf_len);
 char *load_file(const char *filename);
 bool streq(const char *s1, const char *s2);
-size_t strnlen(const char *s, size_t maxlen);
 char *strdup(const char *s1);
-char *strndup(const char *s1, size_t len);
 void get_spaces(char *spaces, int max_spaces, int n_spaces);
 void palette_printf(SDL_Palette *pal);
 SDL_Surface *surface8_create(int w, int h,
