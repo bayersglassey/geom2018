@@ -28,7 +28,7 @@ elif [ "$TARGET" = "emcc" ]
 then
     CC="emcc"
     OUTFILE="main.html"
-    CFLAGS+=" -s USE_SDL=2"
+    CFLAGS+=" -s USE_SDL=2 -s ALLOW_MEMORY_GROWTH=1"
     CFLAGS+=" --preload-file data --preload-file actor --preload-file anim"
 else
     echo "Bad target: $TARGET"

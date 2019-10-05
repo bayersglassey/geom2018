@@ -13,6 +13,18 @@
 #define DELAY_GOAL 30
 
 
+#ifdef __EMSCRIPTEN__
+#include "emscripten.h"
+static void test_app_mainloop_emcc(void *arg){
+    test_app_t *app = arg;
+    int e = test_app_mainloop_step(app);
+    if(e){
+        fprintf(stderr, "%s: Exiting with error: %i\n", __func__, e);
+        exit(e);
+    }
+}
+#endif
+
 
 int main(int n_args, char *args[]){
     int e = 0;
@@ -98,7 +110,13 @@ int main(int n_args, char *args[]){
                     e = 1;
                     fprintf(stderr, "Couldn't init test app\n");
                 }else{
+#ifdef __EMSCRIPTEN__
+                    SDL_StartTextInput();
+                    emscripten_set_main_loop_arg(&test_app_mainloop_emcc,
+                        &app, 0, true);
+#else
                     e = test_app_mainloop(&app);
+#endif
                     fprintf(stderr, "Cleaning up...\n");
                     test_app_cleanup(&app);
                 }

@@ -160,6 +160,11 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->show_controls = true;
 
     test_app_init_input(app);
+
+    app->render_surface = surface32_create(app->scw, app->sch,
+        false, true);
+    if(app->render_surface == NULL)return 2;
+
     return 0;
 }
 
@@ -359,19 +364,20 @@ lexer_err:
 
 
 int test_app_mainloop(test_app_t *app){
-    int err;
-
-    hexgame_t *game = &app->hexgame;
-
-    SDL_Surface *render_surface = surface32_create(app->scw, app->sch,
-        false, true);
-    if(render_surface == NULL)return 2;
-
-    Uint32 took = 0;
-
     SDL_StartTextInput();
     while(app->loop){
+        int err = test_app_mainloop_step(app);
+        if(err)return err;
+    }
+    SDL_StopTextInput();
+    return 0;
+}
+
+int test_app_mainloop_step(test_app_t *app){
+        int err;
         Uint32 tick0 = SDL_GetTicks();
+
+        hexgame_t *game = &app->hexgame;
 
         rendergraph_t *rgraph =
             app->prend.rendergraphs[app->cur_rgraph_i];
@@ -454,7 +460,7 @@ int test_app_mainloop(test_app_t *app){
             * Clear screen
             */
 
-            RET_IF_SDL_NZ(SDL_FillRect(render_surface, NULL, 0));
+            RET_IF_SDL_NZ(SDL_FillRect(app->render_surface, NULL, 0));
 
             if(app->surface != NULL){
                 RET_IF_SDL_NZ(SDL_FillRect(app->surface, NULL, 0));
@@ -479,7 +485,7 @@ int test_app_mainloop(test_app_t *app){
             * Render text
             */
 
-            font_blitmsg(&app->font, render_surface, 0, 0,
+            font_blitmsg(&app->font, app->render_surface, 0, 0,
                 "Game running? %c\n"
                 "Frame rendered in: %i ms\n"
                 "  (Aiming for sub-%i ms)\n"
@@ -494,7 +500,7 @@ int test_app_mainloop(test_app_t *app){
                 "Currently displaying rendergraph %i / %i: %s\n"
                 "  pan=(%i,%i), rot = %i, flip = %c, zoom = %i,"
                     " frame_i = %i (%i) / %i (%s)",
-                app->hexgame_running? 'y': 'n', took, app->delay_goal,
+                app->hexgame_running? 'y': 'n', app->took, app->delay_goal,
                 app->prend.n_textures,
                 app->prend_filename, app->cur_rgraph_i,
                 app->prend.rendergraphs_len, rgraph->name,
@@ -502,7 +508,7 @@ int test_app_mainloop(test_app_t *app){
                 app->frame_i, animated_frame_i,
                 rgraph->n_frames, rgraph->animation_type);
 
-            console_blit(&app->console, &app->font, render_surface,
+            console_blit(&app->console, &app->font, app->render_surface,
                 0, 20 * app->font.char_h);
 
             /******************************************************************
@@ -519,7 +525,7 @@ int test_app_mainloop(test_app_t *app){
 
             {
                 SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
-                    app->renderer, render_surface);
+                    app->renderer, app->render_surface);
                 RET_IF_SDL_NULL(render_texture);
                 SDL_RenderCopy(app->renderer, render_texture, NULL, NULL);
                 SDL_DestroyTexture(render_texture);
@@ -558,7 +564,7 @@ int test_app_mainloop(test_app_t *app){
                 }else if(event.key.keysym.sym == SDLK_F8){
                     app->camera->smooth_scroll = !app->camera->smooth_scroll;
                 }else if(event.key.keysym.sym == SDLK_F11){
-                    printf("Frame rendered in: %i ms\n", took);
+                    printf("Frame rendered in: %i ms\n", app->took);
                     printf("  (Aiming for sub-%i ms)\n", app->delay_goal);
 
                     prismelrenderer_dump_stats(&app->prend, stdout);
@@ -684,18 +690,16 @@ int test_app_mainloop(test_app_t *app){
         #undef IF_APP_KEY
 
         Uint32 tick1 = SDL_GetTicks();
-        took = tick1 - tick0;
-        if(took < app->delay_goal)SDL_Delay(app->delay_goal - took);
+        app->took = tick1 - tick0;
+        if(app->took < app->delay_goal)SDL_Delay(app->delay_goal - app->took);
 #ifdef GEOM_HEXGAME_DEBUG_FRAMERATE
-        if(took > app->delay_goal){
+        if(app->took > app->delay_goal){
             fprintf(stderr, "WARNING: Frame rendered in %i ms "
                 "(aiming for sub-%i ms)\n",
-                took, app->delay_goal);
+                app->took, app->delay_goal);
         }
 #endif
-    }
-    SDL_StopTextInput();
 
-    return 0;
+        return 0;
 }
 
