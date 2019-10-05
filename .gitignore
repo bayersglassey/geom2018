@@ -8,6 +8,7 @@
 /gmon.out
 /respawn*.txt
 /data/rec???.fus
+/ip.sh
 
 # core dumps
 vgcore.*
