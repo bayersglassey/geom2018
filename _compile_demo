@@ -1,0 +1,38 @@
+
+TARGET="$1"
+shift
+
+MAIN_C="src/main_demo.c"
+
+CFLAGS=""
+CFLAGS+="-g -std=c99 -Wall -Werror -Wno-unused -Wno-missing-braces"
+CFLAGS+=" -DGEOM_HEXGAME_DEBUG_FRAMERATE"
+
+SOURCES=""
+SOURCES+=" src/anim.c src/hexmap.c src/hexmap_hexcollmap.c"
+SOURCES+=" src/util.c src/lexer.c src/write.c src/vars.c"
+SOURCES+=" src/geom.c src/vec4.c src/hexspace.c src/bounds.c"
+SOURCES+=" src/font.c src/console.c"
+SOURCES+=" src/test_app.c src/hexgame.c"
+SOURCES+=" src/hexgame_body.c src/hexgame_player.c src/hexgame_recording.c"
+SOURCES+=" src/hexgame_actor.c"
+SOURCES+=" src/prismelrenderer.c src/prismelrenderer_parse.c"
+SOURCES+=" src/rendergraph.c src/sdl_util.c"
+
+if [ "$TARGET" = "bin" ]
+then
+    CC="gcc"
+    OUTFILE="main"
+    CFLAGS+=" `sdl2-config --libs --cflags`"
+elif [ "$TARGET" = "emcc" ]
+then
+    CC="emcc"
+    OUTFILE="main.html"
+    CFLAGS+=" -s USE_SDL=2"
+    CFLAGS+=" --preload-file data --preload-file actor --preload-file anim"
+else
+    echo "Bad target: $TARGET"
+    exit 1
+fi
+
+"$CC" $CFLAGS $SOURCES "$MAIN_C" -o "$OUTFILE" $@

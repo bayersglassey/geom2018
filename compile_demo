@@ -1,1 +1,1 @@
-./_compile_sdl -DGEOM_HEXGAME_DEBUG_FRAMERATE src/main_demo.c $@
+./_compile_demo bin

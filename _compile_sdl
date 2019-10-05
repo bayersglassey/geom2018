@@ -1,4 +1,0 @@
-./_compile_base \
-    src/font.c src/console.c \
-    `sdl2-config --cflags` \
-    $@
