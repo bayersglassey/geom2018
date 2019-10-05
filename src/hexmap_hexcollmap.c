@@ -397,7 +397,7 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                         tilebucket_active = false;
                     }else if(!isprint(c2)){
                         fprintf(stderr,
-                            "Hexcollmap line %i, char %i: char %li: ",
+                            "Hexcollmap line %i, char %i: char %td: ",
                             y+1, x+1, tilebucket-line+1);
                         if(c2 == '\0'){
                             fprintf(stderr, "Hit end of line\n");}
@@ -461,7 +461,7 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                     while(c2 = *tilebucket, c2 == ' ')tilebucket++;
                     if(c2 != ']'){
                         fprintf(stderr,
-                            "Hexcollmap line %i, char %i: char %li: ",
+                            "Hexcollmap line %i, char %i: char %td: ",
                             y+1, x+1, tilebucket-line+1);
                         fprintf(stderr, "Expected ']', got '%c'\n", c2);
                         return 2;}
@@ -469,7 +469,7 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                     while(c2 = *tilebucket, c2 == ' ')tilebucket++;
                     if(c2 != '['){
                         fprintf(stderr,
-                            "Hexcollmap line %i, char %i: char %li: ",
+                            "Hexcollmap line %i, char %i: char %td: ",
                             y+1, x+1, tilebucket-line+1);
                         fprintf(stderr, "Expected '[', got '%c'\n", c2);
                         return 2;}
@@ -493,7 +493,7 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
 
                         if(!isprint(c2)){
                             fprintf(stderr,
-                                "Hexcollmap line %i, char %i: char %li: ",
+                                "Hexcollmap line %i, char %i: char %td: ",
                                 y+1, x+1, tilebucket-line+1);
                             if(c2 == '\0'){
                                 fprintf(stderr, "Hit end of line\n");}
@@ -541,7 +541,7 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                             }
                             if(!found){
                                 fprintf(stderr,
-                                    "Hexcollmap line %i, char %i: char %li: "
+                                    "Hexcollmap line %i, char %i: char %td: "
                                     "part not found: %c\n",
                                     y+1, x+1, tilebucket-line+1, c2);
                                 return 2;
