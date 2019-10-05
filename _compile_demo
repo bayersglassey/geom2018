@@ -1,11 +1,22 @@
+set -e
 
 TARGET="$1"
 shift
 
+RELEASE=0
+if [ "$1" = "release" ]
+then
+    RELEASE=1
+    shift
+    echo "Starting a release build..."
+else
+    echo "Starting a debug build..."
+fi
+
 MAIN_C="src/main_demo.c"
 
 CFLAGS=""
-CFLAGS+="-g -std=c99 -Wall -Werror -Wno-unused -Wno-missing-braces"
+CFLAGS+=" -std=c99 -Wall -Werror -Wno-unused -Wno-missing-braces"
 CFLAGS+=" -DGEOM_HEXGAME_DEBUG_FRAMERATE"
 
 SOURCES=""
@@ -24,15 +35,34 @@ then
     CC="gcc"
     OUTFILE="main"
     CFLAGS+=" `sdl2-config --libs --cflags`"
+    if [ "$RELEASE" = 1 ]
+    then
+        CFLAGS+=" -O2"
+    else
+        CFLAGS+=" -g"
+    fi
 elif [ "$TARGET" = "emcc" ]
 then
     CC="emcc"
     OUTFILE="main.html"
-    CFLAGS+=" -s USE_SDL=2 -s ALLOW_MEMORY_GROWTH=1"
+    CFLAGS+=" -s USE_SDL=2 "
+    CFLAGS+=" -s TOTAL_MEMORY=1073741824" # 1024*1024*1024 = 1G
+    #CFLAGS+="-s ALLOW_MEMORY_GROWTH=1"
     CFLAGS+=" --preload-file data --preload-file actor --preload-file anim"
+    if [ "$RELEASE" = 1 ]
+    then
+        CFLAGS+=" -O2"
+    else
+        CFLAGS+=" -g"
+    fi
 else
     echo "Bad target: $TARGET"
     exit 1
 fi
 
 "$CC" $CFLAGS $SOURCES "$MAIN_C" -o "$OUTFILE" $@
+
+if [ "$TARGET" = "emcc" -a "$RELEASE" = 1 ]
+then
+    cp main.{js,html,html.mem,data} www/
+fi

@@ -1,1 +1,1 @@
-./_compile_demo bin
+./_compile_demo bin $@
