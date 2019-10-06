@@ -195,9 +195,10 @@ void hexmap_recording_cleanup(hexmap_recording_t *recording){
     free(recording->filename);
 }
 
-int hexmap_recording_init(hexmap_recording_t *recording, char *filename,
-    palettemapper_t *palmapper
+int hexmap_recording_init(hexmap_recording_t *recording, int type,
+    char *filename, palettemapper_t *palmapper
 ){
+    recording->type = type;
     recording->filename = filename;
     recording->palmapper = palmapper;
     trf_zero(&recording->trf);
@@ -218,8 +219,6 @@ void hexmap_cleanup(hexmap_t *map){
 
     ARRAY_FREE_PTR(hexmap_submap_t*, map->submaps, hexmap_submap_cleanup)
     ARRAY_FREE_PTR(hexmap_recording_t*, map->recordings,
-        hexmap_recording_cleanup)
-    ARRAY_FREE_PTR(hexmap_recording_t*, map->actor_recordings,
         hexmap_recording_cleanup)
 }
 
@@ -242,7 +241,6 @@ int hexmap_init(hexmap_t *map, hexgame_t *game, char *name,
     ARRAY_INIT(map->bodies)
     ARRAY_INIT(map->submaps)
     ARRAY_INIT(map->recordings)
-    ARRAY_INIT(map->actor_recordings)
     return 0;
 }
 
@@ -259,28 +257,27 @@ int hexmap_load(hexmap_t *map, hexgame_t *game, const char *filename){
     err = hexmap_parse(map, game, strdup(filename), &lexer);
     if(err)return err;
 
-    /* Load actors */
-    for(int i = 0; i < map->actor_recordings_len; i++){
-        hexmap_recording_t *actor_recording =
-            map->actor_recordings[i];
-        const char *filename = actor_recording->filename;
-
-        ARRAY_PUSH_NEW(body_t*, map->bodies, body)
-        err = body_init(body, game, map, NULL, NULL,
-            actor_recording->palmapper);
-        if(err)return err;
-
-        ARRAY_PUSH_NEW(actor_t*, game->actors, actor)
-        err = actor_init(actor, map, body, filename, NULL);
-        if(err)return err;
-    }
-
-    /* Load recordings */
+    /* Load recordings & actors */
     for(int i = 0; i < map->recordings_len; i++){
         hexmap_recording_t *recording = map->recordings[i];
-        err = hexmap_load_recording(map, recording->filename,
-            recording->palmapper, true);
-        if(err)return err;
+        if(recording->type == HEXMAP_RECORDING_TYPE_RECORDING){
+            err = hexmap_load_recording(map, recording->filename,
+                recording->palmapper, true);
+            if(err)return err;
+        }else if(recording->type == HEXMAP_RECORDING_TYPE_ACTOR){
+            ARRAY_PUSH_NEW(body_t*, map->bodies, body)
+            err = body_init(body, game, map, NULL, NULL,
+                recording->palmapper);
+            if(err)return err;
+
+            ARRAY_PUSH_NEW(actor_t*, game->actors, actor)
+            err = actor_init(actor, map, body, recording->filename, NULL);
+            if(err)return err;
+        }else{
+            fprintf(stderr, "%s: Unrecognized hexmap recording type: %i\n",
+                __func__, recording->type);
+            return 2;
+        }
     }
 
     free(text);
@@ -381,9 +378,10 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, char *name,
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
 
-        ARRAY_PUSH_NEW(hexmap_recording_t*, map->actor_recordings,
+        ARRAY_PUSH_NEW(hexmap_recording_t*, map->recordings,
             recording)
         err = hexmap_recording_init(recording,
+            HEXMAP_RECORDING_TYPE_ACTOR,
             filename, palmapper);
         if(err)return err;
     }
@@ -661,6 +659,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
             ARRAY_PUSH_NEW(hexmap_recording_t*, map->recordings,
                 recording)
             err = hexmap_recording_init(recording,
+                HEXMAP_RECORDING_TYPE_RECORDING,
                 filename, palmapper);
             if(err)return err;
         }

@@ -155,7 +155,13 @@ typedef struct hexmap_submap {
     char *door_anim_filename;
 } hexmap_submap_t;
 
+enum hexmap_recording_type {
+    HEXMAP_RECORDING_TYPE_RECORDING,
+    HEXMAP_RECORDING_TYPE_ACTOR
+};
+
 typedef struct hexmap_recording {
+    int type; /* enum hexmap_recording_type */
     char *filename;
     palettemapper_t *palmapper;
     trf_t trf;
@@ -173,13 +179,12 @@ typedef struct hexmap {
     ARRAY_DECL(struct body*, bodies)
     ARRAY_DECL(hexmap_submap_t*, submaps)
     ARRAY_DECL(hexmap_recording_t*, recordings)
-    ARRAY_DECL(hexmap_recording_t*, actor_recordings)
 } hexmap_t;
 
 
 void hexmap_recording_cleanup(hexmap_recording_t *recording);
-int hexmap_recording_init(hexmap_recording_t *recording, char *filename,
-    palettemapper_t *palmapper);
+int hexmap_recording_init(hexmap_recording_t *recording, int type,
+    char *filename, palettemapper_t *palmapper);
 
 void hexmap_cleanup(hexmap_t *map);
 int hexmap_init(hexmap_t *map, struct hexgame *game, char *name,
