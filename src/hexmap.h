@@ -71,13 +71,13 @@ enum hexmap_recording_type {
 typedef struct hexmap_recording {
     int type; /* enum hexmap_recording_type */
     char *filename;
-    palettemapper_t *palmapper;
+    char *palmapper_name;
     trf_t trf;
 } hexmap_recording_t;
 
 void hexmap_recording_cleanup(hexmap_recording_t *recording);
 int hexmap_recording_init(hexmap_recording_t *recording, int type,
-    char *filename, palettemapper_t *palmapper);
+    char *filename, char *palmapper_name);
 
 
 
@@ -113,6 +113,7 @@ enum hexcollmap_part_type {
 typedef struct hexcollmap_part {
     char part_c;
     char *filename;
+    char *palmapper_name;
     int type; /* enum hexcollmap_part_type */
 } hexcollmap_part_t;
 
@@ -129,7 +130,7 @@ typedef struct hexcollmap {
 
 
 int hexcollmap_part_init(hexcollmap_part_t *part,
-    char part_c, char *filename, int type);
+    char part_c, char *filename, char *palmapper_name, int type);
 void hexcollmap_part_cleanup(hexcollmap_part_t *part);
 
 void hexcollmap_cleanup(hexcollmap_t *collmap);

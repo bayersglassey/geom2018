@@ -193,14 +193,15 @@ HEXMAP_TILESET_GET_RGRAPH(face)
 
 void hexmap_recording_cleanup(hexmap_recording_t *recording){
     free(recording->filename);
+    free(recording->palmapper_name);
 }
 
 int hexmap_recording_init(hexmap_recording_t *recording, int type,
-    char *filename, palettemapper_t *palmapper
+    char *filename, char *palmapper_name
 ){
     recording->type = type;
     recording->filename = filename;
-    recording->palmapper = palmapper;
+    recording->palmapper_name = palmapper_name;
     trf_zero(&recording->trf);
     return 0;
 }
@@ -260,14 +261,26 @@ int hexmap_load(hexmap_t *map, hexgame_t *game, const char *filename){
     /* Load recordings & actors */
     for(int i = 0; i < map->recordings_len; i++){
         hexmap_recording_t *recording = map->recordings[i];
+
+        /* Get palmapper */
+        palettemapper_t *palmapper = NULL;
+        if(recording->palmapper_name != NULL){
+            palmapper = prismelrenderer_get_palmapper(
+                game->prend, recording->palmapper_name);
+            if(palmapper == NULL){
+                fprintf(stderr, "Couldn't find palmapper: %s\n",
+                    recording->palmapper_name);
+                return 2;
+            }
+        }
+
         if(recording->type == HEXMAP_RECORDING_TYPE_RECORDING){
             err = hexmap_load_recording(map, recording->filename,
-                recording->palmapper, true);
+                palmapper, true);
             if(err)return err;
         }else if(recording->type == HEXMAP_RECORDING_TYPE_ACTOR){
             ARRAY_PUSH_NEW(body_t*, map->bodies, body)
-            err = body_init(body, game, map, NULL, NULL,
-                recording->palmapper);
+            err = body_init(body, game, map, NULL, NULL, palmapper);
             if(err)return err;
 
             ARRAY_PUSH_NEW(actor_t*, game->actors, actor)
@@ -357,23 +370,14 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, char *name,
         if(fus_lexer_got(lexer, ")"))break;
 
         char *filename;
-        palettemapper_t *palmapper = NULL;
+        char *palmapper_name = NULL;
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
         err = fus_lexer_get_str(lexer, &filename);
         if(err)return err;
         if(!fus_lexer_got(lexer, ")")){
-            char *palmapper_name;
             err = fus_lexer_get_str(lexer, &palmapper_name);
             if(err)return err;
-            palmapper =
-                prismelrenderer_get_palmapper(prend, palmapper_name);
-            if(palmapper == NULL){
-                fprintf(stderr, "Couldn't find palmapper: %s\n",
-                    palmapper_name);
-                free(palmapper_name); return 2;
-            }
-            free(palmapper_name);
         }
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
@@ -382,7 +386,7 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, char *name,
             recording)
         err = hexmap_recording_init(recording,
             HEXMAP_RECORDING_TYPE_ACTOR,
-            filename, palmapper);
+            filename, palmapper_name);
         if(err)return err;
     }
     err = fus_lexer_next(lexer);
@@ -634,33 +638,26 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
         while(1){
             if(fus_lexer_got(lexer, ")"))break;
 
-            char *filename;
-            palettemapper_t *palmapper = NULL;
             err = fus_lexer_get(lexer, "(");
             if(err)return err;
+
+            char *filename;
+            char *palmapper_name = NULL;
             err = fus_lexer_get_str(lexer, &filename);
             if(err)return err;
             if(!fus_lexer_got(lexer, ")")){
-                char *palmapper_name;
                 err = fus_lexer_get_str(lexer, &palmapper_name);
                 if(err)return err;
-                palmapper =
-                    prismelrenderer_get_palmapper(prend, palmapper_name);
-                if(palmapper == NULL){
-                    fprintf(stderr, "Couldn't find palmapper: %s\n",
-                        palmapper_name);
-                    free(palmapper_name); return 2;
-                }
-                free(palmapper_name);
             }
-            err = fus_lexer_get(lexer, ")");
-            if(err)return err;
 
             ARRAY_PUSH_NEW(hexmap_recording_t*, map->recordings,
                 recording)
             err = hexmap_recording_init(recording,
                 HEXMAP_RECORDING_TYPE_RECORDING,
-                filename, palmapper);
+                filename, palmapper_name);
+            if(err)return err;
+
+            err = fus_lexer_get(lexer, ")");
             if(err)return err;
         }
         err = fus_lexer_next(lexer);

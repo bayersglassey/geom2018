@@ -21,16 +21,18 @@
  **************/
 
 int hexcollmap_part_init(hexcollmap_part_t *part,
-    char part_c, char *filename, int type
+    char part_c, char *filename, char *palmapper_name, int type
 ){
     part->part_c = part_c;
     part->filename = filename;
+    part->palmapper_name = palmapper_name;
     part->type = type;
     return 0;
 }
 
 void hexcollmap_part_cleanup(hexcollmap_part_t *part){
     free(part->filename);
+    free(part->palmapper_name);
 }
 
 
@@ -225,7 +227,17 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
         if(err)return err;
         hexcollmap_cleanup(&part_collmap);
     }else if(part->type == HEXCOLLMAP_PART_TYPE_RECORDING){
-        /* TODO */
+        char *filename = part->filename?
+            strdup(part->filename): NULL;
+        char *palmapper_name = part->palmapper_name?
+            strdup(part->palmapper_name): NULL;
+        ARRAY_PUSH_NEW(hexmap_recording_t*, collmap->recordings,
+            recording)
+        err = hexmap_recording_init(recording,
+            HEXMAP_RECORDING_TYPE_RECORDING,
+            filename, palmapper_name);
+        if(err)return err;
+        /* TODO: modify recording->trf according to trf */
     }else{
         fprintf(stderr, "Unrecognized part type: %i\n", part->type);
         return 2;
@@ -595,6 +607,7 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
 
                 int type = HEXCOLLMAP_PART_TYPE_HEXCOLLMAP;
                 char *filename = NULL;
+                char *palmapper_name = NULL;
                 err = fus_lexer_get(lexer, "(");
                 if(err)return err;
                 {
@@ -611,13 +624,18 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
                         err = fus_lexer_get_str(lexer, &filename);
                         if(err)return err;
                     }
+
+                    if(!fus_lexer_got(lexer, ")")){
+                        err = fus_lexer_get_str(lexer, &palmapper_name);
+                        if(err)return err;
+                    }
                 }
                 err = fus_lexer_get(lexer, ")");
                 if(err)return err;
 
                 ARRAY_PUSH_NEW(hexcollmap_part_t*, parts, part)
                 err = hexcollmap_part_init(part, part_c,
-                    filename, type);
+                    filename, palmapper_name, type);
                 if(err)return err;
             }
             err = fus_lexer_next(lexer);
