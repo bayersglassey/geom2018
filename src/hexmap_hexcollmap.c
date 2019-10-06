@@ -153,6 +153,8 @@ static void get_map_coords(int x, int y, char c,
 static int hexcollmap_draw(hexcollmap_t *collmap1, hexcollmap_t *collmap2,
     trf_t *trf, int draw_z
 ){
+    /* Draw collmap2 onto collmap1 */
+
     int err;
 
     int ox2 = collmap2->ox;
@@ -203,13 +205,33 @@ static int hexcollmap_draw(hexcollmap_t *collmap1, hexcollmap_t *collmap2,
             #undef HEXCOLLMAP_DRAW
         }
     }
+
+    /* "Draw" recordings from collmap2 onto collmap1, in other words copy
+    them while adjusting recording->trf appropriately */
+    for(int i = 0; i < collmap2->recordings_len; i++){
+        hexmap_recording_t *recording2 = collmap2->recordings[i];
+
+        char *filename = recording2->filename?
+            strdup(recording2->filename): NULL;
+        char *palmapper_name = recording2->palmapper_name?
+            strdup(recording2->palmapper_name): NULL;
+
+        ARRAY_PUSH_NEW(hexmap_recording_t*, collmap1->recordings,
+            recording1)
+        err = hexmap_recording_init(recording1, recording2->type,
+            filename, palmapper_name);
+        if(err)return err;
+        trf_apply(space, &recording1->trf, trf);
+    }
+
     return 0;
 }
 
 static int hexcollmap_draw_part(hexcollmap_t *collmap,
-    hexcollmap_part_t *part, trf_t trf, int draw_z
+    hexcollmap_part_t *part, trf_t *trf, int draw_z
 ){
     int err;
+    vecspace_t *space = collmap->space;
     if(part->type == HEXCOLLMAP_PART_TYPE_HEXCOLLMAP){
         /* If "empty" was specified for this part, then filename will
         be NULL and we shouldn't do anything. */
@@ -223,7 +245,7 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
             part->filename);
         if(err)return err;
         err = hexcollmap_draw(collmap, &part_collmap,
-            &trf, draw_z);
+            trf, draw_z);
         if(err)return err;
         hexcollmap_cleanup(&part_collmap);
     }else if(part->type == HEXCOLLMAP_PART_TYPE_RECORDING){
@@ -237,7 +259,7 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
             HEXMAP_RECORDING_TYPE_RECORDING,
             filename, palmapper_name);
         if(err)return err;
-        /* TODO: modify recording->trf according to trf */
+        trf_apply(space, &recording->trf, trf);
     }else{
         fprintf(stderr, "Unrecognized part type: %i\n", part->type);
         return 2;
@@ -551,7 +573,7 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
                                 if(part->part_c != c2)continue;
                                 found = true;
                                 err = hexcollmap_draw_part(collmap,
-                                    part, trf, draw_z);
+                                    part, &trf, draw_z);
                                 if(err)return err;
                             }
                             if(!found){
