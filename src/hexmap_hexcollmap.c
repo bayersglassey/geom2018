@@ -37,6 +37,8 @@ void hexcollmap_part_cleanup(hexcollmap_part_t *part){
 void hexcollmap_cleanup(hexcollmap_t *collmap){
     free(collmap->name);
     free(collmap->tiles);
+    ARRAY_FREE_PTR(hexmap_recording_t*, collmap->recordings,
+        hexmap_recording_cleanup)
 }
 
 int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
@@ -45,6 +47,7 @@ int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
     memset(collmap, 0, sizeof(*collmap));
     collmap->name = name;
     collmap->space = space;
+    ARRAY_INIT(collmap->recordings);
     return 0;
 }
 

@@ -56,6 +56,31 @@ int hexmap_tileset_load(hexmap_tileset_t *tileset,
 
 
 
+/********************
+ * HEXMAP RECORDING *
+ ********************/
+
+/* ...that is, enough information to start a recording at a given
+location on a hexmap... */
+
+enum hexmap_recording_type {
+    HEXMAP_RECORDING_TYPE_RECORDING,
+    HEXMAP_RECORDING_TYPE_ACTOR
+};
+
+typedef struct hexmap_recording {
+    int type; /* enum hexmap_recording_type */
+    char *filename;
+    palettemapper_t *palmapper;
+    trf_t trf;
+} hexmap_recording_t;
+
+void hexmap_recording_cleanup(hexmap_recording_t *recording);
+int hexmap_recording_init(hexmap_recording_t *recording, int type,
+    char *filename, palettemapper_t *palmapper);
+
+
+
 /**************
  * HEXCOLLMAP *
  **************/
@@ -99,6 +124,7 @@ typedef struct hexcollmap {
     int oy;
     vecspace_t *space;
     hexcollmap_tile_t *tiles;
+    ARRAY_DECL(hexmap_recording_t*, recordings)
 } hexcollmap_t;
 
 
@@ -155,18 +181,6 @@ typedef struct hexmap_submap {
     char *door_anim_filename;
 } hexmap_submap_t;
 
-enum hexmap_recording_type {
-    HEXMAP_RECORDING_TYPE_RECORDING,
-    HEXMAP_RECORDING_TYPE_ACTOR
-};
-
-typedef struct hexmap_recording {
-    int type; /* enum hexmap_recording_type */
-    char *filename;
-    palettemapper_t *palmapper;
-    trf_t trf;
-} hexmap_recording_t;
-
 typedef struct hexmap {
     char *name;
     struct hexgame *game;
@@ -181,10 +195,6 @@ typedef struct hexmap {
     ARRAY_DECL(hexmap_recording_t*, recordings)
 } hexmap_t;
 
-
-void hexmap_recording_cleanup(hexmap_recording_t *recording);
-int hexmap_recording_init(hexmap_recording_t *recording, int type,
-    char *filename, palettemapper_t *palmapper);
 
 void hexmap_cleanup(hexmap_t *map);
 int hexmap_init(hexmap_t *map, struct hexgame *game, char *name,
