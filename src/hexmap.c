@@ -245,6 +245,44 @@ int hexmap_init(hexmap_t *map, hexgame_t *game, char *name,
     return 0;
 }
 
+static int hexmap_load_hexmap_recording(hexmap_t *map, hexgame_t *game,
+    hexmap_recording_t *recording
+){
+    int err;
+
+    /* Get palmapper */
+    palettemapper_t *palmapper = NULL;
+    if(recording->palmapper_name != NULL){
+        palmapper = prismelrenderer_get_palmapper(
+            game->prend, recording->palmapper_name);
+        if(palmapper == NULL){
+            fprintf(stderr, "Couldn't find palmapper: %s\n",
+                recording->palmapper_name);
+            return 2;
+        }
+    }
+
+    if(recording->type == HEXMAP_RECORDING_TYPE_RECORDING){
+        err = hexmap_load_recording(map, recording->filename,
+            palmapper, true);
+        if(err)return err;
+    }else if(recording->type == HEXMAP_RECORDING_TYPE_ACTOR){
+        ARRAY_PUSH_NEW(body_t*, map->bodies, body)
+        err = body_init(body, game, map, NULL, NULL, palmapper);
+        if(err)return err;
+
+        ARRAY_PUSH_NEW(actor_t*, game->actors, actor)
+        err = actor_init(actor, map, body, recording->filename, NULL);
+        if(err)return err;
+    }else{
+        fprintf(stderr, "%s: Unrecognized hexmap recording type: %i\n",
+            __func__, recording->type);
+        return 2;
+    }
+
+    return 0;
+}
+
 int hexmap_load(hexmap_t *map, hexgame_t *game, const char *filename){
     int err;
     fus_lexer_t lexer;
@@ -261,36 +299,8 @@ int hexmap_load(hexmap_t *map, hexgame_t *game, const char *filename){
     /* Load recordings & actors */
     for(int i = 0; i < map->recordings_len; i++){
         hexmap_recording_t *recording = map->recordings[i];
-
-        /* Get palmapper */
-        palettemapper_t *palmapper = NULL;
-        if(recording->palmapper_name != NULL){
-            palmapper = prismelrenderer_get_palmapper(
-                game->prend, recording->palmapper_name);
-            if(palmapper == NULL){
-                fprintf(stderr, "Couldn't find palmapper: %s\n",
-                    recording->palmapper_name);
-                return 2;
-            }
-        }
-
-        if(recording->type == HEXMAP_RECORDING_TYPE_RECORDING){
-            err = hexmap_load_recording(map, recording->filename,
-                palmapper, true);
-            if(err)return err;
-        }else if(recording->type == HEXMAP_RECORDING_TYPE_ACTOR){
-            ARRAY_PUSH_NEW(body_t*, map->bodies, body)
-            err = body_init(body, game, map, NULL, NULL, palmapper);
-            if(err)return err;
-
-            ARRAY_PUSH_NEW(actor_t*, game->actors, actor)
-            err = actor_init(actor, map, body, recording->filename, NULL);
-            if(err)return err;
-        }else{
-            fprintf(stderr, "%s: Unrecognized hexmap recording type: %i\n",
-                __func__, recording->type);
-            return 2;
-        }
+        err = hexmap_load_hexmap_recording(map, game, recording);
+        if(err)return err;
     }
 
     free(text);
