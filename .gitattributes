@@ -1,3 +1,4 @@
 *.js -diff
 *.data -diff
+*.html.map -diff
 *.html.mem -diff

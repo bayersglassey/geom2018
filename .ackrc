@@ -1,1 +1,4 @@
+--ignore-file=is:main.js
+--ignore-file=is:main.data
 --ignore-file=is:main.html.map
+--ignore-file=is:main.html.mem
