@@ -45,6 +45,7 @@ elif [ "$TARGET" = "emcc" ]
 then
     CC="emcc"
     OUTFILE="main.html"
+    CFLAGS+=" -DNO_EXECINFO"
     CFLAGS+=" -s USE_SDL=2 "
     CFLAGS+=" -s TOTAL_MEMORY=1073741824" # 1024*1024*1024 = 1G
     #CFLAGS+="-s ALLOW_MEMORY_GROWTH=1"
