@@ -6,6 +6,16 @@
 #include <stdbool.h>
 #include <SDL2/SDL.h>
 
+#ifndef NO_EXECINFO
+#   include <execinfo.h> /* backtrace_symbols_fd */
+#   define BACKTRACE(N) { \
+    void *buffer[N]; \
+    backtrace_symbols_fd(buffer, N, 2); \
+}
+#else
+#   define BACKTRACE(N) ;
+#endif
+
 #define ERR_INFO() fprintf(stderr, "%s:%s:%i: ", \
     __FILE__, __func__, __LINE__)
 #define RET_IF_SDL_NZ(x) { \
