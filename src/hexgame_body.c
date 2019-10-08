@@ -39,6 +39,8 @@ void keyinfo_copy(keyinfo_t *info1, keyinfo_t *info2){
 int fus_lexer_get_keyinfo(fus_lexer_t *lexer,
     keyinfo_t *info
 ){
+    /* Load keyinfo from file, e.g. the files written when you touch
+    a save point */
     int err;
     err = fus_lexer_get(lexer, "(");
     if(err)return err;
@@ -129,6 +131,7 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
 int body_respawn(body_t *body, vec_t pos, rot_t rot, bool turn,
     hexmap_t *map
 ){
+    /* Respawn body at given map and location */
     int err;
     hexgame_t *game = body->game;
     vecspace_t *space = game->space;
@@ -152,7 +155,8 @@ int body_add_body(body_t *body, body_t **new_body_ptr,
     palettemapper_t *palmapper,
     vec_t addpos, rot_t addrot, bool turn
 ){
-    /* Adds a new body at same location as another body */
+    /* Adds a new body at same location as another body
+    (used for e.g. emitting projectiles) */
     int err;
     ARRAY_PUSH_NEW(body_t*, body->map->bodies, new_body)
     err = body_init(new_body, body->game, body->map,
@@ -182,6 +186,9 @@ int body_add_body(body_t *body, body_t **new_body_ptr,
  *************/
 
 rot_t body_get_rot(body_t *body){
+    /* Coverts body->rot/turn into the rot_t value representing
+    the vector parallel to body's bottom (that is, the bottom of
+    body's hitbox, where the body rests upon the ground) */
     vecspace_t *space = body->map->space;
     rot_t rot = body->rot;
     if(body->turn){
@@ -191,6 +198,11 @@ rot_t body_get_rot(body_t *body){
 }
 
 void body_init_trf(body_t *body, trf_t *trf){
+    /* Initializes trf so that it represents the transformation needed to
+    bring a body from zero pos/rot/turn to body->pos/rot/turn.
+    If you see what I mean.
+    In particular, we use this to set up transformations which will move
+    the body's hitbox over top of it. */
     vecspace_t *space = body->map->space;
     vec_cpy(space->dims, trf->add, body->pos);
     trf->rot = body_get_rot(body);
@@ -200,15 +212,17 @@ void body_init_trf(body_t *body, trf_t *trf){
 void body_flash_cameras(body_t *body, Uint8 r, Uint8 g, Uint8 b,
     int percent
 ){
+    /* Flash all cameras targeting given body */
     hexgame_t *game = body->game;
     for(int i = 0; i < game->cameras_len; i++){
         camera_t *camera = game->cameras[i];
         if(camera->body != body)continue;
-        camera_colors_flash_white(camera, 30);
+        camera_colors_flash(camera, r, g, b, percent);
     }
 }
 
 void body_reset_cameras(body_t *body){
+    /* Reset all cameras targeting given body */
     hexgame_t *game = body->game;
     for(int i = 0; i < game->cameras_len; i++){
         camera_t *camera = game->cameras[i];
@@ -786,6 +800,7 @@ int body_step(body_t *body, hexgame_t *game){
 }
 
 int body_collide_against_body(body_t *body, body_t *body_other){
+    /* Do whatever happens when two bodies collide */
     int err;
     bool crushed = body_other->state->crushes;
     bool collected =
@@ -818,6 +833,7 @@ int body_render(body_t *body,
     SDL_Palette *pal, int x0, int y0, int zoom,
     hexmap_t *map, vec_t camera_renderpos, prismelmapper_t *mapper
 ){
+    /* RENDER THAT BODY */
     int err;
 
     if(body->state == NULL)return 0;
