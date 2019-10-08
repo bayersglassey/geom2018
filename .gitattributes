@@ -1,0 +1,3 @@
+*.js -diff
+*.data -diff
+*.html.mem -diff
