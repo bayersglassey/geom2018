@@ -581,7 +581,8 @@ static int body_apply_rule(body_t *body,
                 RULE_PERROR()
                 break;}
             body->cooldown = effect->u.delay;
-        }else if(effect->type == state_effect_type_action){
+        }else if(effect->type == state_effect_type_spawn){
+            /*
             const char *action_name = effect->u.action_name;
             if(!strcmp(action_name, "ping")){
                 fprintf(stderr, "pong\n");
@@ -612,6 +613,7 @@ static int body_apply_rule(body_t *body,
                     action_name);
                 return 2;
             }
+            */
         }else if(effect->type == state_effect_type_play){
             if(actor == NULL){
                 fprintf(stderr, "No actor");

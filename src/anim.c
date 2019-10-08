@@ -297,16 +297,23 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     effect->u.delay = delay;
 
                     GET(")")
-                }else if(GOT("action")){
+                }else if(GOT("spawn")){
                     NEXT
                     GET("(")
 
-                    char *action_name;
-                    GET_NAME(action_name)
+                    state_effect_spawn_t spawn = {0};
+                    GET_STR(spawn.stateset_filename)
+                    GET_STR(spawn.state_name)
+                    GET("(")
+                    GET_INT(spawn.pos[0])
+                    GET_INT(spawn.pos[1])
+                    GET(")")
+                    GET_INT(spawn.rot)
+                    GET_BOOL(spawn.turn)
 
                     ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
-                    effect->type = state_effect_type_action;
-                    effect->u.action_name = action_name;
+                    effect->type = state_effect_type_spawn;
+                    effect->u.spawn = spawn;
 
                     GET(")")
                 }else if(GOT("die")){
@@ -375,7 +382,7 @@ const char state_effect_type_rot[] = "rot";
 const char state_effect_type_turn[] = "turn";
 const char state_effect_type_goto[] = "goto";
 const char state_effect_type_delay[] = "delay";
-const char state_effect_type_action[] = "action";
+const char state_effect_type_spawn[] = "spawn";
 const char state_effect_type_play[] = "play";
 const char state_effect_type_die[] = "die";
 const char *state_effect_types[] = {
@@ -385,7 +392,7 @@ const char *state_effect_types[] = {
     state_effect_type_turn,
     state_effect_type_goto,
     state_effect_type_delay,
-    state_effect_type_action,
+    state_effect_type_spawn,
     state_effect_type_play,
     state_effect_type_die,
     NULL
@@ -438,8 +445,10 @@ void state_rule_cleanup(state_rule_t *rule){
             free(effect->u.msg);
         }else if(effect->type == state_effect_type_goto){
             free(effect->u.gotto.name);
-        }else if(effect->type == state_effect_type_action){
-            free(effect->u.action_name);
+        }else if(effect->type == state_effect_type_spawn){
+            free(effect->u.spawn.stateset_filename);
+            free(effect->u.spawn.state_name);
+            free(effect->u.spawn.palmapper_name);
         }else if(effect->type == state_effect_type_play){
             free(effect->u.play_filename);
         }

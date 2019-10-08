@@ -12,7 +12,7 @@ stand:
     if:
         key: wentdown y
     then:
-        action: spit
+        spawn: "anim/spit.fus" "fly" (0 0) 0 f
         goto: spit
         delay: 9
 
@@ -149,7 +149,7 @@ looking_up:
     if:
         key: wentdown y
     then:
-        action: spit_up
+        spawn: "anim/spit.fus" "fly" (1 0) 1 f
         goto: looking_up_spit
         delay: 9
 
@@ -327,7 +327,7 @@ step_down:
     if:
         key: wentdown y
     then:
-        action: spit
+        spawn: "anim/spit.fus" "fly" (0 0) 0 f
         goto: spit
         delay: 9
 
@@ -345,7 +345,7 @@ step:
     if:
         key: wentdown y
     then:
-        action: spit
+        spawn: "anim/spit.fus" "fly" (0 0) 0 f
         goto: spit
         delay: 9
 
@@ -362,7 +362,7 @@ crawl:
     if:
         key: wentdown y
     then:
-        action: spit_crouch
+        spawn: "anim/spit.fus" "crouch" (0 0) 0 f
         goto: crawl_spit
         delay: 9
 
@@ -438,7 +438,7 @@ crawl_step_down:
     if:
         key: wentdown y
     then:
-        action: spit_crouch
+        spawn: "anim/spit.fus" "crouch" (0 0) 0 f
         goto: crawl_spit
         delay: 9
 
@@ -454,7 +454,7 @@ crawl_step:
     if:
         key: wentdown y
     then:
-        action: spit_crouch
+        spawn: "anim/spit.fus" "crouch" (0 0) 0 f
         goto: crawl_spit
         delay: 9
 
@@ -483,7 +483,7 @@ swim:
     if:
         key: wentdown y
     then:
-        action: spit
+        spawn: "anim/spit.fus" "fly" (0 0) 0 f
         goto: swim_spit
         delay: 9
 

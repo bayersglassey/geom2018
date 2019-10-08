@@ -86,6 +86,15 @@ typedef struct state_effect_goto {
     bool immediate;
 } state_effect_goto_t;
 
+typedef struct state_effect_spawn {
+    char *stateset_filename;
+    char *state_name;
+    char *palmapper_name;
+    vec_t pos;
+    rot_t rot;
+    bool turn;
+} state_effect_spawn_t;
+
 typedef struct state_effect {
     const char *type;
     union {
@@ -93,7 +102,7 @@ typedef struct state_effect {
         int delay;
         state_effect_goto_t gotto;
         int dead; /* enum body_dead */
-        char *action_name;
+        state_effect_spawn_t spawn;
         char *play_filename;
         vec_t vec;
         rot_t rot;
@@ -106,7 +115,7 @@ extern const char state_effect_type_rot[];
 extern const char state_effect_type_turn[];
 extern const char state_effect_type_goto[];
 extern const char state_effect_type_delay[];
-extern const char state_effect_type_action[];
+extern const char state_effect_type_spawn[];
 extern const char state_effect_type_play[];
 extern const char state_effect_type_die[];
 extern const char *state_effect_types[];
