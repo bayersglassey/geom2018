@@ -73,8 +73,14 @@ void trf_fprintf(FILE *f, int dims, trf_t *trf);
 void trf_printf(int dims, trf_t *trf);
 bool trf_eq(const vecspace_t *space, trf_t *t, trf_t *s);
 void trf_inv(const vecspace_t *space, trf_t *t);
+void trf_rot(const vecspace_t *space, trf_t *t, rot_t rot);
+void trf_rot_inv(const vecspace_t *space, trf_t *t, rot_t rot);
+void trf_flip1(const vecspace_t *space, trf_t *t);
+void trf_flip(const vecspace_t *space, trf_t *t, flip_t f);
 void trf_apply(const vecspace_t *space, trf_t *t, trf_t *s);
 void trf_apply_inv(const vecspace_t *space, trf_t *t, trf_t *s);
+void trf_apply_separately(const vecspace_t *space, trf_t *t,
+    vec_t add, rot_t rot, flip_t flip);
 
 
 int fus_lexer_get_vec(fus_lexer_t *lexer, vecspace_t *space, vec_t vec);

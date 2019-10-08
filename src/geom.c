@@ -199,27 +199,45 @@ void trf_inv(const vecspace_t *space, trf_t *t){
     t->rot = rot_flip(space->rot_max, f, r);
 }
 
+void trf_rot(const vecspace_t *space, trf_t *t, rot_t rot){
+    t->rot = rot_rot(space->rot_max, t->rot, rot);
+    space->vec_rot(t->add, rot);
+}
+
+void trf_rot_inv(const vecspace_t *space, trf_t *t, rot_t rot){
+    rot_t r = rot_inv(space->rot_max, rot);
+    space->vec_rot(t->add, r);
+    t->rot = rot_rot(space->rot_max, t->rot, r);
+}
+
+void trf_flip1(const vecspace_t *space, trf_t *t){
+    t->flip = flip_inv(t->flip);
+    t->rot = rot_inv(space->rot_max, t->rot);
+    space->vec_flip(t->add, true);
+}
+
+void trf_flip(const vecspace_t *space, trf_t *t, flip_t f){
+    if(f)trf_flip1(space, t);
+}
+
 void trf_apply(const vecspace_t *space, trf_t *t, trf_t *s){
-    if(s->flip){
-        t->flip = flip_inv(t->flip);
-        t->rot = rot_inv(space->rot_max, t->rot);
-        space->vec_flip(t->add, s->flip);
-    }
-    t->rot = rot_rot(space->rot_max, t->rot, s->rot);
-    space->vec_rot(t->add, s->rot);
+    trf_flip(space, t, s->flip);
+    trf_rot(space, t, s->rot);
     vec_add(space->dims, t->add, s->add);
 }
 
 void trf_apply_inv(const vecspace_t *space, trf_t *t, trf_t *s){
     vec_sub(space->dims, t->add, s->add);
-    rot_t r = rot_inv(space->rot_max, s->rot);
-    space->vec_rot(t->add, r);
-    t->rot = rot_rot(space->rot_max, t->rot, r);
-    if(s->flip){
-        t->flip = flip_inv(t->flip);
-        t->rot = rot_inv(space->rot_max, t->rot);
-        space->vec_flip(t->add, s->flip);
-    }
+    trf_rot_inv(space, t, s->rot);
+    trf_flip(space, t, s->flip);
+}
+
+void trf_apply_separately(const vecspace_t *space, trf_t *t,
+    vec_t add, rot_t rot, flip_t flip
+){
+    trf_flip(space, t, flip);
+    trf_rot(space, t, rot);
+    vec_add(space->dims, t->add, add);
 }
 
 
