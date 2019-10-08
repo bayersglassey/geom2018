@@ -39,7 +39,7 @@ then
     then
         CFLAGS+=" -O2"
     else
-        CFLAGS+=" -g"
+        CFLAGS+=" -O0 -g -rdynamic"
     fi
 elif [ "$TARGET" = "emcc" ]
 then
@@ -53,7 +53,7 @@ then
     then
         CFLAGS+=" -O2"
     else
-        CFLAGS+=" -g"
+        CFLAGS+=" -O0 -g"
     fi
 else
     echo "Bad target: $TARGET"
