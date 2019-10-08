@@ -806,19 +806,24 @@ int body_collide_against_body(body_t *body, body_t *body_other){
     bool collected =
         body->stateset.is_collectible &&
         !body_other->stateset.is_collectible;
-    if(crushed || collected){
-        /* Bodies whose recording is playing cannot die */
-        /* MAYBE TODO: These bodies should die too, but then their
+    bool playing_recording = body->recording.action == 1;
+    if((crushed && !playing_recording) || collected){
+        /* Bodies whose recording is playing cannot be "killed" by
+        other bodies.
+        MAYBE TODO: These bodies should die too, but then their
         recording should restart after a brief pause?
         Maybe we can reuse body->cooldown for the pause. */
-        if(body->recording.action != 1){
-            /* Hardcoded "dead" state name... I suppose we could
-            have a char* body->dead_anim_name or something, but whatever.
-            We more or less expect this "dead" state to, for instance,
-            cause the body to die. Maybe after exploding or whatever. */
-            err = body_set_state(body, "dead", true);
-            if(err)return err;
-        }
+
+        /* Hardcoded "dead" state name... I suppose we could
+        have a char* body->dead_anim_name or something, but whatever.
+        We more or less expect this "dead" state to, for instance,
+        cause the body to die. Maybe after exploding or whatever. */
+        err = body_set_state(body, "dead", true);
+        if(err)return err;
+
+        /* Stop playing the recording (so coins stay "dead" after you
+        collect them, etc) */
+        if(collected)body->recording.action = 0;
     }
     return 0;
 }

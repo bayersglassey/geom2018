@@ -472,7 +472,7 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
                         recordings belonging to your correct map... */
                         body_t *body = player->body;
                         err = hexmap_load_recording(body->map,
-                            recording_filename, NULL, true);
+                            recording_filename, NULL, true, NULL);
                         if(err)return err;
                     }
                 }

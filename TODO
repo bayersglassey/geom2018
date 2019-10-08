@@ -359,3 +359,15 @@ Sep 29, 2019:
 
 Don't use raw strdup, malloc, etc -- make sure these things are gonna perror
 and exit() for you eh.
+
+Use more water?.. e.g. in dodecas area?..
+Add swimming_rollers... or some kind of water creatures...
+
+
+Oct 3, 2019:
+------------
+
+COINS ARE FUN
+Let's make different kinds of collectibles...
+Little flies, berries, that kind of thing.
+And place them on the maps.

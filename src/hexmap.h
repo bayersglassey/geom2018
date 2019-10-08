@@ -208,7 +208,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
     prismelmapper_t *parent_mapper, char *palette_filename,
     char *tileset_filename);
 int hexmap_load_recording(hexmap_t *map, const char *filename,
-    palettemapper_t *palmapper, bool loop);
+    palettemapper_t *palmapper, bool loop, trf_t *trf);
 bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf, bool all);
 void hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,

@@ -245,10 +245,13 @@ int hexmap_init(hexmap_t *map, hexgame_t *game, char *name,
     return 0;
 }
 
-static int hexmap_load_hexmap_recording(hexmap_t *map, hexgame_t *game,
+static int hexmap_load_hexmap_recording(
+    hexmap_t *map, hexmap_submap_t *submap, hexgame_t *game,
     hexmap_recording_t *recording
 ){
+    /* NOTE: submap may be NULL! */
     int err;
+    vecspace_t *space = map->space;
 
     /* Get palmapper */
     palettemapper_t *palmapper = NULL;
@@ -263,8 +266,12 @@ static int hexmap_load_hexmap_recording(hexmap_t *map, hexgame_t *game,
     }
 
     if(recording->type == HEXMAP_RECORDING_TYPE_RECORDING){
+        trf_t trf = {0};
+        trf_cpy(space, &trf, &recording->trf);
+        if(submap)vec_add(space->dims, trf.add, submap->pos);
+
         err = hexmap_load_recording(map, recording->filename,
-            palmapper, true);
+            palmapper, true, &trf);
         if(err)return err;
     }else if(recording->type == HEXMAP_RECORDING_TYPE_ACTOR){
         ARRAY_PUSH_NEW(body_t*, map->bodies, body)
@@ -274,6 +281,11 @@ static int hexmap_load_hexmap_recording(hexmap_t *map, hexgame_t *game,
         ARRAY_PUSH_NEW(actor_t*, game->actors, actor)
         err = actor_init(actor, map, body, recording->filename, NULL);
         if(err)return err;
+
+        /* MAYBE TODO: add actor->pos0/rot0/turn0, so that we can
+        instantiate actors at different places in various submaps,
+        by setting actor->pos0/rot0/turn0 here based on submap->pos
+        and recording->trf. */
     }else{
         fprintf(stderr, "%s: Unrecognized hexmap recording type: %i\n",
             __func__, recording->type);
@@ -299,8 +311,16 @@ int hexmap_load(hexmap_t *map, hexgame_t *game, const char *filename){
     /* Load recordings & actors */
     for(int i = 0; i < map->recordings_len; i++){
         hexmap_recording_t *recording = map->recordings[i];
-        err = hexmap_load_hexmap_recording(map, game, recording);
+        err = hexmap_load_hexmap_recording(map, NULL, game, recording);
         if(err)return err;
+    }
+    for(int j = 0; j < map->submaps_len; j++){
+        hexmap_submap_t *submap = map->submaps[j];
+        for(int i = 0; i < submap->collmap.recordings_len; i++){
+            hexmap_recording_t *recording = submap->collmap.recordings[i];
+            err = hexmap_load_hexmap_recording(map, submap, game, recording);
+            if(err)return err;
+        }
     }
 
     free(text);
@@ -698,7 +718,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
 }
 
 int hexmap_load_recording(hexmap_t *map, const char *filename,
-    palettemapper_t *palmapper, bool loop
+    palettemapper_t *palmapper, bool loop, trf_t *trf
 ){
     int err;
 
@@ -710,6 +730,14 @@ int hexmap_load_recording(hexmap_t *map, const char *filename,
 
     err = recording_load(&body->recording, filename, body, loop);
     if(err)return err;
+
+    if(trf){
+        vecspace_t *space = map->space;
+        if(trf->flip)body->recording.turn0 = !body->recording.turn0;
+        body->recording.rot0 = rot_rot(space->rot_max,
+            body->recording.rot0, trf->rot);
+        vec_add(space->dims, body->recording.pos0, trf->add);
+    }
 
     err = body_play_recording(body);
     if(err)return err;
