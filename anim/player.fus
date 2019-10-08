@@ -362,7 +362,7 @@ crawl:
     if:
         key: wentdown y
     then:
-        spawn: "anim/spit.fus" "crouch" (0 0) 0 f
+        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
         goto: crawl_spit
         delay: 9
 
@@ -438,7 +438,7 @@ crawl_step_down:
     if:
         key: wentdown y
     then:
-        spawn: "anim/spit.fus" "crouch" (0 0) 0 f
+        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
         goto: crawl_spit
         delay: 9
 
@@ -454,7 +454,7 @@ crawl_step:
     if:
         key: wentdown y
     then:
-        spawn: "anim/spit.fus" "crouch" (0 0) 0 f
+        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
         goto: crawl_spit
         delay: 9
 

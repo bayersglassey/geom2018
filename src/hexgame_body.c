@@ -164,11 +164,15 @@ int body_add_body(body_t *body, body_t **new_body_ptr,
     if(err)return err;
     vecspace_t *space = body->map->space;
 
-    vec_cpy(space->dims, new_body->pos, body->pos);
     rot_t rot = body_get_rot(body);
-    space->vec_flip(addpos, body->turn);
-    space->vec_rot(addpos, rot);
-    vec_add(space->dims, new_body->pos, addpos);
+
+    vec_t addpos_cpy;
+    vec_cpy(space->dims, addpos_cpy, addpos);
+    space->vec_flip(addpos_cpy, body->turn);
+    space->vec_rot(addpos_cpy, rot);
+
+    vec_cpy(space->dims, new_body->pos, body->pos);
+    vec_add(space->dims, new_body->pos, addpos_cpy);
 
     new_body->rot =
         rot_rot(space->rot_max, body->rot, addrot);
@@ -582,38 +586,22 @@ static int body_apply_rule(body_t *body,
                 break;}
             body->cooldown = effect->u.delay;
         }else if(effect->type == state_effect_type_spawn){
-            /*
-            const char *action_name = effect->u.action_name;
-            if(!strcmp(action_name, "ping")){
-                fprintf(stderr, "pong\n");
-            }else if(
-                !strcmp(action_name, "spit") ||
-                !strcmp(action_name, "spit_crouch") ||
-                !strcmp(action_name, "spit_up")
-            ){
-                if(body == NULL){
-                    fprintf(stderr, "No body");
-                    RULE_PERROR()
-                    break;}
-                bool crouch = action_name[4] == '_' && action_name[5] == 'c';
-                bool up = action_name[4] == '_' && action_name[5] == 'u';
+            if(body == NULL){
+                fprintf(stderr, "No body");
+                RULE_PERROR()
+                break;}
 
-                vec_t addpos = {0, 0};
-                if(up)addpos[0] = 1;
-                rot_t addrot = up? 1: 0;
-                bool turn = false;
+            state_effect_spawn_t *spawn = &effect->u.spawn;
 
-                body_t *new_body;
-                err = body_add_body(body, &new_body, "anim/spit.fus",
-                    crouch? "crouch_fly": "fly", NULL,
-                    addpos, addrot, turn);
-                if(err)return err;
-            }else{
-                fprintf(stderr, "Unrecognized action: %s\n",
-                    action_name);
-                return 2;
-            }
-            */
+            /* TODO: look up palmapper from spawn->palmapper_name */
+            palettemapper_t *palmapper = NULL;
+
+            body_t *new_body;
+            err = body_add_body(body, &new_body,
+                spawn->stateset_filename,
+                spawn->state_name, palmapper,
+                spawn->pos, spawn->rot, spawn->turn);
+            if(err)return err;
         }else if(effect->type == state_effect_type_play){
             if(actor == NULL){
                 fprintf(stderr, "No actor");
