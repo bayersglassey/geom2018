@@ -154,6 +154,33 @@ shapes:
             : "player_leg"  ( 0  1  1  1)  6 t  0 (2 7)
             : "player_leg"  ( 1  1  1  1)  6 t  0 (9 1)
 
+    "player_crawl_looking_up_spit":
+        animation: cycle 10
+        shapes:
+            # player_crawl_looking_up:
+            #: "player_head" ( 3  1  1  1)  2 f
+            #: "player_leg"  ( 1  1  1  1)  0 f
+            #: "player_leg"  ( 4  2  0  0)  5 t
+
+            # Head
+            : "player_head" ( 1  1  1  1)  2 f  0 (0 1)
+            : "player_head" ( 1  0  1  1)  2 f  0 (1 4)
+            : "player_head" ( 1  1  1  1)  2 f  0 (5 1)
+            : "player_head" ( 2  1  1  1)  2 f  0 (6 1)
+            : "player_head" ( 3  1  1  1)  2 f  0 (7 3)
+
+            # Back leg
+            : "player_leg"  ( 0  1  1  1)  0 f  0 (0 1)
+            : "player_leg"  (-1  1  1  1)  1 f  0 (1 5)
+            : "player_leg"  ( 0  1  1  1)  0 f  0 (6 1)
+            : "player_leg"  ( 1  1  1  1)  0 f  0 (7 3)
+
+            # Front leg
+            : "player_leg"  ( 2  2  1  0)  7 t  0 (0 1)
+            : "player_leg"  ( 1  2  1  0)  7 t  0 (1 1)
+            : "player_leg"  ( 1  2  1  0)  6 t  0 (2 7)
+            : "player_leg"  ( 2  2  1  0)  6 t  0 (9 1)
+
     "_player_swim_spit_leg":
         animation: cycle 10
         shapes:
@@ -220,6 +247,19 @@ shapes:
             : "player_head" ( 0  1  2  0)  0 f
             : "player_leg"  (-1  1  1  1)  0 f
             : "player_leg"  ( 2  1  1  1)  6 t
+
+    "player_crawl_look_up":
+        shapes:
+            : "player_head" ( 1  1  2  0)  1 f
+            : "player_leg"  ( 1  0  2  1) 11 f
+            : "player_leg"  ( 3  1  1  1)  5 t
+
+    "player_crawl_looking_up":
+        shapes:
+            : "player_head" ( 3  1  1  1)  2 f
+            : "player_leg"  ( 1  1  1  1)  0 f
+            : "player_leg"  ( 4  2  0  0)  5 t
+
 
     "player_crawl_step":
         animation: cycle 3

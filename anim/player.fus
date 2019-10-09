@@ -173,8 +173,48 @@ looking_up:
     if: key: isdown b
     then: goto immediate: stand
 
+    if:
+        key: isdown d
+    then:
+        goto: crawl_looking_up
+        delay: 2
+
     if: key: not isdown x
     then: goto: stand
+
+crawl_looking_up:
+    rgraph: "player_crawl_looking_up"
+    hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)  .
+
+    if:
+        key: wentdown y
+    then:
+        spawn: "anim/spit.fus" "crouch_fly" (1 0) 1 f
+        goto: crawl_looking_up_spit
+        delay: 9
+
+    if:
+        key: not isdown d
+        coll: all no
+            ;;  *\*/*
+            ;;  - + -
+            ;;  */ \*
+            ;; ( )
+    then:
+        goto: looking_up
+        delay: 3
+
+    if: key: isdown f
+    then: goto immediate: crawl
+
+    if: key: isdown b
+    then: goto immediate: crawl
+
+    if: key: not isdown x
+    then: goto: crawl
 
 spit:
     rgraph: "player_spit"
@@ -203,6 +243,14 @@ crawl_spit:
         ;;     *
         ;;  (.)  .
     if() then: goto: crawl
+
+crawl_looking_up_spit:
+    rgraph: "player_crawl_looking_up_spit"
+    hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)  .
+    if() then: goto: crawl_looking_up
 
 swim_spit:
     rgraph: "player_swim_spit"
@@ -427,6 +475,19 @@ crawl:
         turn
         goto: crawl_step
         delay: 2
+
+    if:
+        key: isdown x
+    then:
+        goto: crawl_look_up
+
+crawl_look_up:
+    rgraph: "player_crawl_look_up"
+    hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)  .
+    if() then: goto: crawl_looking_up
 
 crawl_step_down:
     rgraph: "player_crawl_step"

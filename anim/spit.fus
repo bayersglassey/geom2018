@@ -41,7 +41,7 @@ crouch_fly:
 
     hitbox:
         ;;    .
-        ;;    *
+        ;;  */*\
         ;; ( )  .
 
     if:
