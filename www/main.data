@@ -345,6 +345,33 @@ shapes:
             : "player_leg"  ( 0  1  1  1)  6 t  0 (2 7)
             : "player_leg"  ( 1  1  1  1)  6 t  0 (9 1)
 
+    "player_crawl_looking_up_spit":
+        animation: cycle 10
+        shapes:
+            # player_crawl_looking_up:
+            #: "player_head" ( 3  1  1  1)  2 f
+            #: "player_leg"  ( 1  1  1  1)  0 f
+            #: "player_leg"  ( 4  2  0  0)  5 t
+
+            # Head
+            : "player_head" ( 1  1  1  1)  2 f  0 (0 1)
+            : "player_head" ( 1  0  1  1)  2 f  0 (1 4)
+            : "player_head" ( 1  1  1  1)  2 f  0 (5 1)
+            : "player_head" ( 2  1  1  1)  2 f  0 (6 1)
+            : "player_head" ( 3  1  1  1)  2 f  0 (7 3)
+
+            # Back leg
+            : "player_leg"  ( 0  1  1  1)  0 f  0 (0 1)
+            : "player_leg"  (-1  1  1  1)  1 f  0 (1 5)
+            : "player_leg"  ( 0  1  1  1)  0 f  0 (6 1)
+            : "player_leg"  ( 1  1  1  1)  0 f  0 (7 3)
+
+            # Front leg
+            : "player_leg"  ( 2  2  1  0)  7 t  0 (0 1)
+            : "player_leg"  ( 1  2  1  0)  7 t  0 (1 1)
+            : "player_leg"  ( 1  2  1  0)  6 t  0 (2 7)
+            : "player_leg"  ( 2  2  1  0)  6 t  0 (9 1)
+
     "_player_swim_spit_leg":
         animation: cycle 10
         shapes:
@@ -411,6 +438,19 @@ shapes:
             : "player_head" ( 0  1  2  0)  0 f
             : "player_leg"  (-1  1  1  1)  0 f
             : "player_leg"  ( 2  1  1  1)  6 t
+
+    "player_crawl_look_up":
+        shapes:
+            : "player_head" ( 1  1  2  0)  1 f
+            : "player_leg"  ( 1  0  2  1) 11 f
+            : "player_leg"  ( 3  1  1  1)  5 t
+
+    "player_crawl_looking_up":
+        shapes:
+            : "player_head" ( 3  1  1  1)  2 f
+            : "player_leg"  ( 1  1  1  1)  0 f
+            : "player_leg"  ( 4  2  0  0)  5 t
+
 
     "player_crawl_step":
         animation: cycle 3
@@ -3396,6 +3436,11 @@ collmap:
     ;;
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
+parts:
+    "c": recording "data/maps/demo/recs/coin.fus"
+    "C": recording "data/maps/demo/recs/coin_crouch.fus"
+    "D": recording "data/maps/demo/recs/coin_crouch.fus"
+    "D": "data/maps/demo/vert.fus"
 
 collmap:
     ;;
@@ -3403,7 +3448,7 @@ collmap:
     ;;                 *
     ;;   .   .   .   . - + - +   .   .   + - +   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                 */     \         /*    \         /*\*  \
-    ;; .   .   .   .   +   .   +   .   +   +   +   .   +   .   +   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   ?   ?   +   .   +   +   +   .   +   ?   +   .   .   .   .   .   .   .   .   .   .   .   .  [D][C]  [C]
     ;;                 *\               \*   */               /        *
     ;;   .   .   .   .   +   .   .   .   +   +   .   .   .   +   .   +   .   .   .   .   .   .   .   .   .   .
     ;;                    \
@@ -3419,7 +3464,7 @@ collmap:
     ;;                 *                   S
     ;;   .   .   .   . -(+)- +   .   .   + - +   .   .   + - +   .   +   .   .   .   .   .   .   .   .   .   .
     ;;                 */     \         /     \               \        *
-    ;; .   .   .   .   +   .   +   .   +   .   +   .   + - .   +   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   +   .   +   .   +   .   +   .   + - ?   +   .   .   .   .   .   .   .   .   .   .   .   .    [C]
     ;;                  \     /         \     /         \  *\ /
     ;;   .   .   .   .   + - +   .   .   + - +   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
@@ -3427,7 +3472,7 @@ collmap:
     ;;
     ;;   .   .   .   .   .   .   +   +   .       .   +   .   +   +   .   .   .   .   .   .   .   .   .   .   .
     ;;                          /*    \             / \        * * *
-    ;; .   .   .   .   .   .   +   .   +   .   + - +   +   .   .   +   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   +   ?   +   .   + - +   +   .   .   +   .   .   .   .   .   .   .   .   .   .   .     [C]
     ;;                          \*/* */*\       \*    /
     ;;   .   .   .   .   +   .   + - + - +   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                   *
@@ -4819,7 +4864,7 @@ keys:
     d:
     l:
     r:
-data: "w1"anim: "anim/big_roller.fus"
+data: "w12"anim: "anim/big_roller.fus"
 state: "stand"
 pos: ( 41 -85)
 rot: 0
@@ -4840,7 +4885,7 @@ keys:
     d:
     l:
     r:
-data: "w1"anim: "anim/roller.fus"
+data: "w12"anim: "anim/roller.fus"
 state: "stand"
 pos: ( -9 -27)
 rot: 2
@@ -7760,7 +7805,7 @@ crouch_fly:
 
     hitbox:
         ;;    .
-        ;;    *
+        ;;  */*\
         ;; ( )  .
 
     if:
@@ -7843,7 +7888,7 @@ stand:
     if:
         key: wentdown y
     then:
-        action: spit
+        spawn: "anim/spit.fus" "fly" (0 0) 0 f
         goto: spit
         delay: 9
 
@@ -7980,7 +8025,7 @@ looking_up:
     if:
         key: wentdown y
     then:
-        action: spit_up
+        spawn: "anim/spit.fus" "fly" (1 0) 1 f
         goto: looking_up_spit
         delay: 9
 
@@ -8004,8 +8049,48 @@ looking_up:
     if: key: isdown b
     then: goto immediate: stand
 
+    if:
+        key: isdown d
+    then:
+        goto: crawl_looking_up
+        delay: 2
+
     if: key: not isdown x
     then: goto: stand
+
+crawl_looking_up:
+    rgraph: "player_crawl_looking_up"
+    hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)  .
+
+    if:
+        key: wentdown y
+    then:
+        spawn: "anim/spit.fus" "crouch_fly" (1 0) 1 f
+        goto: crawl_looking_up_spit
+        delay: 9
+
+    if:
+        key: not isdown d
+        coll: all no
+            ;;  *\*/*
+            ;;  - + -
+            ;;  */ \*
+            ;; ( )
+    then:
+        goto: looking_up
+        delay: 3
+
+    if: key: isdown f
+    then: goto immediate: crawl
+
+    if: key: isdown b
+    then: goto immediate: crawl
+
+    if: key: not isdown x
+    then: goto: crawl
 
 spit:
     rgraph: "player_spit"
@@ -8034,6 +8119,14 @@ crawl_spit:
         ;;     *
         ;;  (.)  .
     if() then: goto: crawl
+
+crawl_looking_up_spit:
+    rgraph: "player_crawl_looking_up_spit"
+    hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)  .
+    if() then: goto: crawl_looking_up
 
 swim_spit:
     rgraph: "player_swim_spit"
@@ -8158,7 +8251,7 @@ step_down:
     if:
         key: wentdown y
     then:
-        action: spit
+        spawn: "anim/spit.fus" "fly" (0 0) 0 f
         goto: spit
         delay: 9
 
@@ -8176,7 +8269,7 @@ step:
     if:
         key: wentdown y
     then:
-        action: spit
+        spawn: "anim/spit.fus" "fly" (0 0) 0 f
         goto: spit
         delay: 9
 
@@ -8193,7 +8286,7 @@ crawl:
     if:
         key: wentdown y
     then:
-        action: spit_crouch
+        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
         goto: crawl_spit
         delay: 9
 
@@ -8259,6 +8352,19 @@ crawl:
         goto: crawl_step
         delay: 2
 
+    if:
+        key: isdown x
+    then:
+        goto: crawl_look_up
+
+crawl_look_up:
+    rgraph: "player_crawl_look_up"
+    hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)  .
+    if() then: goto: crawl_looking_up
+
 crawl_step_down:
     rgraph: "player_crawl_step"
     hitbox:
@@ -8269,7 +8375,7 @@ crawl_step_down:
     if:
         key: wentdown y
     then:
-        action: spit_crouch
+        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
         goto: crawl_spit
         delay: 9
 
@@ -8285,7 +8391,7 @@ crawl_step:
     if:
         key: wentdown y
     then:
-        action: spit_crouch
+        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
         goto: crawl_spit
         delay: 9
 
@@ -8314,7 +8420,7 @@ swim:
     if:
         key: wentdown y
     then:
-        action: spit
+        spawn: "anim/spit.fus" "fly" (0 0) 0 f
         goto: swim_spit
         delay: 9
 
@@ -9196,298 +9302,6 @@ crawl:
 dead:
     rgraph: "player_dead"
     if() then: die
-
-# A version of the player for whom crawling actions have higher
-# priority than jumping.
-
-stand:
-    rgraph: "player_stand"
-
-    if:
-        key: isdown f
-        key: not isdown u
-        coll: all yes
-            ;; ( )  + - +
-        coll: any yes
-            ;;       \*/*
-            ;;        + -
-            ;;         \*
-            ;; ( )
-        coll: all no
-            ;;       /*
-            ;; (.)  .
-    then:
-        move: 1 0
-        goto: crawl_step
-        delay: 2
-
-    if:
-        key: isdown f
-        key: not isdown u
-        coll: all yes
-            ;; ( )  +
-            ;;       \
-            ;;        +
-        coll: any yes
-            ;;       \*/*
-            ;;        + -
-            ;;         \*/*
-            ;; ( )      + -
-            ;;         /*\*
-        coll: all no
-            ;;       /*
-            ;; (.)  . -
-            ;;        *
-    then:
-        move: 1 0
-        rot: -1
-        goto: crawl_step
-        delay: 2
-
-    if:
-        key: isdown d
-    then:
-        goto: crawl
-        delay: 2
-
-    if:
-        key: isdown f
-        coll: all yes
-            ;;        +
-            ;;       /
-            ;; ( )  +
-    then:
-        move: 1 0
-        rot: 1
-        goto: step
-        delay: 2
-
-    if:
-        key: isdown f
-        coll: all yes
-            ;; ( )  + - +
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*
-            ;; ( )
-    then:
-        move: 1 0
-        goto: step
-        delay: 2
-
-    if:
-        key: isdown f
-        coll: all yes
-            ;; ( )  +
-            ;;       \
-            ;;        +
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*/*
-            ;; ( )    - + -
-            ;;        */*\*
-    then:
-        move: 1 0
-        rot: -1
-        goto: step
-        delay: 2
-
-    if:
-        key: isdown f
-        coll: all yes
-            ;;        +
-            ;;
-            ;; ( )
-    then:
-        move: 1 0
-        rot: 1
-        goto: jump
-        delay: 2
-
-    if:
-        key: isdown f
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*
-            ;; ( )
-    then:
-        move: 1 0
-        goto: jump
-        delay: 2
-
-    if:
-        key: isdown b
-    then:
-        move: 1 0
-        turn
-        goto: step
-        delay: 2
-
-jump:
-    rgraph: "player_jump"
-
-    if:
-        coll: all yes
-            ;;        +
-            ;;       /
-            ;; ( )  +
-    then:
-        move: 1 0
-        rot: 1
-        goto: step
-        delay: 2
-
-    if:
-        coll: all yes
-            ;;        +
-            ;;
-            ;; ( )  +
-    then:
-        move: 1 0
-        rot: 1
-        goto: jump
-        delay: 2
-
-    if:
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*
-            ;; ( )
-        coll: all yes
-            ;; ( )  + - +
-    then:
-        move: 1 0
-        goto: step
-        delay: 2
-
-    if:
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*
-            ;; ( )
-    then:
-        move: 1 0
-        goto: jump
-        delay: 2
-
-    if:
-    then:
-        goto: dead
-        delay: 11
-
-step:
-    rgraph: "player_step"
-    if:
-    then:
-        goto: stand
-
-crawl:
-    rgraph: "player_crawl"
-
-    if:
-        key: not isdown d
-        coll: all no
-            ;;  *\*/*
-            ;;  - + -
-            ;;  */ \*
-            ;; ( )
-    then:
-        goto: stand
-        delay: 2
-
-    if:
-        key: isdown f
-        coll: all no
-            ;;     \*
-            ;; ( )
-        coll: all yes
-            ;;        +
-            ;;       /
-            ;; ( )  +
-    then:
-        move: 1 0
-        rot: 1
-        goto: crawl_step
-        delay: 2
-
-    if:
-        key: isdown f
-        coll: all yes
-            ;; ( )  + - +
-        coll: all no
-            ;;     \*/*
-            ;; (.)  .
-    then:
-        move: 1 0
-        goto: crawl_step
-        delay: 2
-
-    if:
-        key: isdown f
-        coll: all yes
-            ;; ( )  +
-            ;;       \
-            ;;        +
-        coll: all no
-            ;;     \*/*
-            ;; (.)  . -
-            ;;        *
-    then:
-        move: 1 0
-        rot: -1
-        goto: crawl_step
-        delay: 2
-
-    if:
-        key: isdown b
-    then:
-        move: 1 0
-        turn
-        goto: crawl_step
-        delay: 2
-
-crawl_step:
-    rgraph: "player_crawl_step"
-    if:
-    then:
-        goto: crawl
-
-dead:
-    rgraph: "player_dead"
-    if() then: die
-
-
-
-test:
-    rgraph: "player_stand"
-
-    if: key: isdown f
-    then:
-        move: 1 0
-        delay: 3
-
-    if: key: isdown b
-    then:
-        move: 1 0
-        turn
-        delay: 3
-
-    if: key: wasdown u
-    then:
-        move: 1 0
-        rot: 1
-        delay: 3
-
-    if: key: wasdown d
-    then:
-        rot: -1
-        move: -1 0
-        delay: 3
 
 stand:
     rgraph: "roller3"
