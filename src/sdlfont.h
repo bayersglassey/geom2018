@@ -7,10 +7,6 @@
 
 #include "font.h"
 
-/* SDLFONT_N_COLOR_VALUES: the color values are Uint8 SDL_Surface pixel
-values, the first of which is always the transparent color 0 */
-#define SDLFONT_N_COLOR_VALUES 4
-
 
 /**********
 * SDLFONT *

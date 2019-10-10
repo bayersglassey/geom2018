@@ -130,11 +130,16 @@ int font_parse(font_t *font, fus_lexer_t *lexer){
                 int value;
                 if(c == ' '){
                     value = 0;
-                }else if(c >= '0' && c <= '2'){
+                }else if(c >= '0' && c <= '9'){
                     value = c - '0' + 1;
                 }else{
                     return fus_lexer_unexpected(lexer,
-                        "'0', '1', '2', or ' '");
+                        "' ' or a digit");
+                }
+                if(value >= FONT_N_COLOR_VALUES){
+                    fprintf(stderr, "%s: pixel value >= %i: %i\n",
+                        __func__, FONT_N_COLOR_VALUES, value);
+                    return 2;
                 }
                 char_data[y * char_w + x] = value;
             }

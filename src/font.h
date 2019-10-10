@@ -5,6 +5,12 @@
 
 #include "lexer.h"
 
+/* FONT_N_COLOR_VALUES: the number of valid "pixel values" for
+font->char_data[i][j].
+These values can used treated as e.g. palette indices, so this
+could e.g. be used as the number of colours in such a paletter. */
+#define FONT_N_COLOR_VALUES 4
+
 
 /*******
 * FONT *

@@ -49,7 +49,7 @@ int sdlfont_init(sdlfont_t *sdlfont, font_t *font, SDL_Palette *pal){
 
     /* "palette" indexed by font's char_data "pixel values", 0 is
     actually transparent though */
-    Uint8 color_values[SDLFONT_N_COLOR_VALUES] = {0, 1+8, 1+7, 1+15};
+    Uint8 color_values[FONT_N_COLOR_VALUES] = {0, 1+8, 1+7, 1+15};
 
     for(int i = 0; i < FONT_N_CHARS; i++){
         unsigned char *char_data = font->char_data[i];
@@ -64,11 +64,6 @@ int sdlfont_init(sdlfont_t *sdlfont, font_t *font, SDL_Palette *pal){
                 char_y * char_h + y);
             for(int x = 0; x < char_w; x++){
                 int color_i = char_data[y * char_h + x];
-                if(color_i >= SDLFONT_N_COLOR_VALUES){
-                    fprintf(stderr, "Color index >= %i: %i\n",
-                        SDLFONT_N_COLOR_VALUES, color_i);
-                    return 2;
-                }
                 p[x] = color_values[color_i];
             }
         }
