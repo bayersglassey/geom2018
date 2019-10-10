@@ -5,8 +5,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include <SDL2/SDL.h>
-
 #include "font.h"
 
 
@@ -44,8 +42,7 @@ void console_input_backspace(console_t *console);
 void console_input_delete(console_t *console);
 void console_input_clear(console_t *console);
 
-void console_blit(console_t *console, font_t *font, SDL_Surface *render_surface,
-    int x0, int y0);
-
+int console_blit(console_t *console,
+    font_putc_callback_t *callback, void *callback_data);
 
 #endif

@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include <SDL2/SDL.h>
-
 #include "console.h"
 #include "font.h"
 
@@ -162,27 +160,26 @@ void console_input_clear(console_t *console){
 
 
 
-void console_blit(console_t *console, font_t *font, SDL_Surface *render_surface,
-    int x0, int y0
+int console_blit(console_t *console,
+    font_putc_callback_t *callback, void *callback_data
 ){
-    int char_w = font->char_w;
-    int char_h = font->char_h;
+    int err;
 
     int cols = console->cols;
     int rows = console->rows;
     char *text = console->text + (console->row + 1) * cols;
     char *text_end = console->text + cols * rows;
 
-    int y = y0;
     for(int row = 0; row < rows; row++){
-        int x = x0;
         if(text >= text_end)text = console->text;
         for(int col = 0; col < cols; col++){
-            font_blitchar(font, render_surface, x, y, *text);
+            err = callback(callback_data, *text);
+            if(err)return err;
             text++;
-            x += char_w;
         }
-        y += char_h;
+        err = callback(callback_data, '\n');
+        if(err)return err;
     }
+    return 0;
 }
 

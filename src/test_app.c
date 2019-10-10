@@ -9,6 +9,7 @@
 #include "array.h"
 #include "vec4.h"
 #include "font.h"
+#include "sdlfont.h"
 #include "console.h"
 #include "util.h"
 #include "anim.h"
@@ -25,6 +26,8 @@ void test_app_cleanup(test_app_t *app){
     SDL_FreePalette(app->sdl_palette);
     prismelrenderer_cleanup(&app->prend);
     hexgame_cleanup(&app->hexgame);
+    font_cleanup(&app->font);
+    sdlfont_cleanup(&app->sdlfont);
 }
 
 static void test_app_init_input(test_app_t *app){
@@ -69,9 +72,11 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         if(app->surface == NULL)return 1;
     }
 
-    font_t *font = &app->font;
-    err = font_load(font, "data/font.fus", sdl_palette);
+    err = font_load(&app->font, "data/font.fus");
     if(err)return err;
+    err = sdlfont_init(&app->sdlfont, &app->font, sdl_palette);
+    if(err)return err;
+    app->sdlfont.autoupper = true;
 
     console_t *console = &app->console;
     err = console_init(console, 80, 40, 20000);
@@ -415,7 +420,7 @@ int test_app_mainloop_step(test_app_t *app){
                     body_t *body = player->body;
                     if(!body)continue;
                     if(body->dead == BODY_MOSTLY_DEAD){
-                        font_blitmsg(&app->font, app->surface, 0, line_y,
+                        sdlfont_printf(&app->sdlfont, app->surface, 0, line_y,
                             "You ran into a wall! "
                             "Press jump to retry from where you jumped.\n");
                         line_y += app->font.char_h;
@@ -424,12 +429,12 @@ int test_app_mainloop_step(test_app_t *app){
                             "You were crushed! "
                             "Press X to retry from last save point.\n";
                         msg[24] = '0' + i + 1;
-                        font_blitmsg(&app->font, app->surface, 0, line_y, msg);
+                        sdlfont_printf(&app->sdlfont, app->surface, 0, line_y, msg);
                         line_y += app->font.char_h;
                     }
                 }
                 if(app->show_controls){
-                    font_blitmsg(&app->font, app->surface, 0, line_y,
+                    sdlfont_printf(&app->sdlfont, app->surface, 0, line_y,
                         "*Controls:\n"
                         "  Left/right  -> Walk\n"
                         "  Up          -> Jump\n"
@@ -485,7 +490,7 @@ int test_app_mainloop_step(test_app_t *app){
             * Render text
             */
 
-            font_blitmsg(&app->font, app->render_surface, 0, 0,
+            sdlfont_printf(&app->sdlfont, app->render_surface, 0, 0,
                 "Game running? %c\n"
                 "Frame rendered in: %i ms\n"
                 "  (Aiming for sub-%i ms)\n"
@@ -508,8 +513,12 @@ int test_app_mainloop_step(test_app_t *app){
                 app->frame_i, animated_frame_i,
                 rgraph->n_frames, rgraph->animation_type);
 
-            console_blit(&app->console, &app->font, app->render_surface,
-                0, 20 * app->font.char_h);
+            {
+                sdlfont_blitter_t blitter;
+                sdlfont_blitter_init(&blitter, &app->sdlfont,
+                    app->render_surface, 0, 20 * app->font.char_h);
+                console_blit(&app->console, &sdlfont_putc_callback, &blitter);
+            }
 
             /******************************************************************
             * Draw to renderer and present it

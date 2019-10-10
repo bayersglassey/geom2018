@@ -1,35 +1,41 @@
 #ifndef _FONT_H_
 #define _FONT_H_
 
-#include <SDL2/SDL.h>
+#include <stdarg.h>
 
 #include "lexer.h"
+
+
+/*******
+* FONT *
+*******/
+
+/* FONT_N_CHARS: number of characters in each font, hardcoded to
+ASCII for now because we use chars as array indices... for which
+we apologize. */
+#define FONT_N_CHARS 128
 
 typedef struct font {
     int char_w;
     int char_h;
-    SDL_Palette *pal;
-    SDL_Surface *surface;
+
+    /* Each char_data[c] is NULL or a char_w*char_h array of "pixel
+    values" representing the image of character c.
+    Each pixel value is a number in the range 0-255, with 0 being
+    transparent, and other values representing colours somehow (e.g.
+    indices into a palette). */
+    unsigned char *char_data[FONT_N_CHARS];
+
 } font_t;
 
-typedef struct font_blitter {
-    font_t *font;
-    SDL_Surface *render_surface;
-    int x0;
-    int y0;
-    int col;
-    int row;
-} font_blitter_t;
+typedef int font_putc_callback_t(void *data, char c);
 
-
-void font_get_char_coords(font_t *font, char c, int *char_x, int *char_y);
-
-int font_load(font_t *font, const char *filename, SDL_Palette *pal);
+void font_cleanup(font_t *font);
+int font_load(font_t *font, const char *filename);
 int font_parse(font_t *font, fus_lexer_t *lexer);
-void font_blitchar(font_t *font, SDL_Surface *render_surface,
-    int x, int y, char c);
-void font_blitter_blitchar(font_blitter_t *blitter, char c);
-void font_blitmsg(font_t *font, SDL_Surface *render_surface,
-    int x0, int y0, const char *msg, ...);
+int font_printf(font_putc_callback_t *callback, void *callback_data,
+    const char *msg, ...);
+int font_vprintf(font_putc_callback_t *callback, void *callback_data,
+    const char *msg, va_list vlist);
 
 #endif

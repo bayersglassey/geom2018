@@ -13,18 +13,15 @@
 
 
 
-void font_get_char_coords(font_t *font, char c, int *char_x, int *char_y){
-    int char_index = (unsigned)c;
-    *char_x = char_index % 16;
-    *char_y = char_index / 16;
+void font_cleanup(font_t *font){
+    for(int i = 0; i < FONT_N_CHARS; i++){
+        free(font->char_data[i]);
+    }
 }
 
-
-int font_load(font_t *font, const char *filename, SDL_Palette *pal){
+int font_load(font_t *font, const char *filename){
     font->char_w = 0;
     font->char_h = 0;
-    font->pal = pal;
-    font->surface = NULL;
 
     int err;
     fus_lexer_t lexer;
@@ -40,6 +37,12 @@ int font_load(font_t *font, const char *filename, SDL_Palette *pal){
 
     free(text);
     return 0;
+}
+
+static void font_clear_all_char_data(font_t *font){
+    for(int i = 0; i < FONT_N_CHARS; i++){
+        font->char_data[i] = NULL;
+    }
 }
 
 int font_parse(font_t *font, fus_lexer_t *lexer){
@@ -70,27 +73,15 @@ int font_parse(font_t *font, fus_lexer_t *lexer){
     err = fus_lexer_get(lexer, ")");
     if(err)return err;
 
-
-    /******************
-     * CREATE SURFACE *
-     ******************/
-
-    static const int n_chars_x = 16;
-    static const int n_chars_y = 16;
-
-    SDL_Surface *surface = surface8_create(
-        char_w * n_chars_x, char_h * n_chars_y, true, true, font->pal);
-    if(surface == NULL)return 2;
-
-    SDL_LockSurface(surface);
-    SDL_memset(surface->pixels, 0, surface->h * surface->pitch);
-
-    Uint8 color_values[3] = {1+8, 1+7, 1+15};
+    font->char_w = char_w;
+    font->char_h = char_h;
 
 
-    /************************
-     * PARSE & RENDER CHARS *
-     ************************/
+    /***************
+     * PARSE CHARS *
+     ***************/
+
+    font_clear_all_char_data(font);
 
     err = fus_lexer_get(lexer, "chars");
     if(err)return err;
@@ -104,8 +95,21 @@ int font_parse(font_t *font, fus_lexer_t *lexer){
         err = fus_lexer_get_chr(lexer, &char_c);
         if(err)return err;
 
-        int char_x, char_y;
-        font_get_char_coords(font, char_c, &char_x, &char_y);
+        if(char_c < 0){
+            fprintf(stderr, "Char < 0: %i (%c)\n",
+                char_c, char_c);
+            return 2;
+        }
+        if(char_c >= FONT_N_CHARS){
+            fprintf(stderr, "Char >= %i: %i (%c)\n",
+                FONT_N_CHARS, char_c, char_c);
+            return 2;
+        }
+        int char_i = char_c;
+
+        unsigned char *char_data = font->char_data[char_i] = calloc(
+            char_w * char_h, sizeof(*char_data));
+        if(!char_data)return 1;
 
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
@@ -121,20 +125,18 @@ int font_parse(font_t *font, fus_lexer_t *lexer){
                     line_w, char_w);
                 return 2;}
 
-            Uint8 *p = surface8_get_pixel_ptr(surface,
-                char_x * char_w,
-                char_y * char_h + y);
-
             for(int x = 0; x < char_w; x++){
                 char c = line[x];
-                if(c >= '0' && c <= '2'){
-                    p[x] = color_values[c - '0'];
-                }else if(c == ' '){
-                    /* ok */
+                int value;
+                if(c == ' '){
+                    value = 0;
+                }else if(c >= '0' && c <= '2'){
+                    value = c - '0' + 1;
                 }else{
-                    fus_lexer_unexpected(lexer, "'0', '1', '2', or ' '");
-                    return 2;
+                    return fus_lexer_unexpected(lexer,
+                        "'0', '1', '2', or ' '");
                 }
+                char_data[y * char_w + x] = value;
             }
 
             free(line);
@@ -146,75 +148,26 @@ int font_parse(font_t *font, fus_lexer_t *lexer){
     err = fus_lexer_next(lexer);
     if(err)return err;
 
-
-    /*************
-     * FINISH UP *
-     *************/
-
-    SDL_UnlockSurface(surface);
-
-    font->char_w = char_w;
-    font->char_h = char_h;
-    font->surface = surface;
     return 0;
 }
 
-void font_blitter_newline(font_blitter_t *blitter){
-    blitter->col = 0;
-    blitter->row++;
-}
-
-void font_blitter_move_right(font_blitter_t *blitter){
-    blitter->col++;
-}
-
-void font_blitchar(font_t *font, SDL_Surface *render_surface,
-    int x, int y, char c
+int font_printf(font_putc_callback_t *callback, void *callback_data,
+    const char *msg, ...
 ){
-    int char_w = font->char_w;
-    int char_h = font->char_h;
-
-    int char_x, char_y;
-    font_get_char_coords(font, toupper(c),
-        &char_x, &char_y);
-
-    SDL_Rect src_rect = {
-        char_x * char_w,
-        char_y * char_h,
-        char_w, char_h
-    };
-    SDL_Rect dst_rect = {
-        x, y,
-        char_w, char_h
-    };
-    SDL_BlitSurface(font->surface, &src_rect,
-        render_surface, &dst_rect);
+    int err = 0;
+    va_list vlist;
+    va_start(vlist, msg);
+    err = font_vprintf(callback, callback_data, msg, vlist);
+    if(err)goto done;
+done:
+    va_end(vlist);
+    return err;
 }
 
-void font_blitter_blitchar(font_blitter_t *blitter, char c){
-    font_t *font = blitter->font;
-
-    if(c == '\n'){
-        font_blitter_newline(blitter);
-        return;
-    }
-
-    font_blitchar(font, blitter->render_surface,
-        blitter->x0 + blitter->col * font->char_w,
-        blitter->y0 + blitter->row * font->char_h,
-        c);
-    font_blitter_move_right(blitter);
-}
-
-void font_blitmsg(font_t *font, SDL_Surface *render_surface,
-    int x0, int y0, const char *msg, ...
+int font_vprintf(font_putc_callback_t *callback, void *callback_data,
+    const char *msg, va_list vlist
 ){
-    int char_w = font->char_w;
-    int char_h = font->char_h;
-    font_blitter_t blitter = {font, render_surface, x0, y0, 0, 0};
-
-    va_list args;
-    va_start(args, msg);
+    int err;
 
     char c;
     while(c = *msg, c != '\0'){
@@ -223,7 +176,7 @@ void font_blitmsg(font_t *font, SDL_Surface *render_surface,
             c = *msg;
             if(c != '%'){
                 if(c == 'i'){
-                    int i = va_arg(args, int);
+                    int i = va_arg(vlist, int);
 
                     /* 2^64 has 20 digits in base 10 */
                     static const int max_digits = 20;
@@ -235,7 +188,8 @@ void font_blitmsg(font_t *font, SDL_Surface *render_surface,
 
                     if(i < 0){
                         i = -i;
-                        font_blitter_blitchar(&blitter, '-');
+                        err = callback(callback_data, '-');
+                        if(err)return err;
                     }
 
                     while(i > 0 && digit_i < max_digits){
@@ -247,33 +201,39 @@ void font_blitmsg(font_t *font, SDL_Surface *render_surface,
                     if(digit_i > 0)digit_i--;
                     while(digit_i >= 0){
                         char c = '0' + digits[digit_i];
-                        font_blitter_blitchar(&blitter, c);
+                        err = callback(callback_data, c);
+                        if(err)return err;
                         digit_i--;
                     }
                 }else if(c == 'c'){
-                    char c = va_arg(args, int);
-                    font_blitter_blitchar(&blitter, c);
+                    char c = va_arg(vlist, int);
+                    err = callback(callback_data, c);
+                    if(err)return err;
                 }else if(c == 's'){
-                    char *s = va_arg(args, char *);
+                    char *s = va_arg(vlist, char *);
                     char c;
                     while(c = *s, c != '\0'){
-                        font_blitter_blitchar(&blitter, c);
+                        err = callback(callback_data, c);
+                        if(err)return err;
                         s++;
                     }
                 }else{
-                    fprintf(stderr,
-                        "font_blitmsg: Unsupported format string: %%%c\n", c);
-                    goto done;
+                    /* Unsupported percent+character, so just output them
+                    back as-is */
+                    err = callback(callback_data, '%');
+                    if(err)return err;
+                    err = callback(callback_data, c);
+                    if(err)return err;
                 }
                 msg++;
                 continue;
             }
         }
 
-        font_blitter_blitchar(&blitter, c);
+        err = callback(callback_data, c);
+        if(err)return err;
         msg++;
     }
 
-done:
-    va_end(args);
+    return 0;
 }

@@ -9,6 +9,7 @@
 #include "prismelrenderer.h"
 #include "vec4.h"
 #include "font.h"
+#include "sdlfont.h"
 #include "console.h"
 #include "util.h"
 #include "anim.h"
@@ -34,6 +35,7 @@ typedef struct test_app {
     SDL_Palette *sdl_palette;
     prismelrenderer_t prend;
     font_t font;
+    sdlfont_t sdlfont;
     console_t console;
     int cur_rgraph_i;
 
