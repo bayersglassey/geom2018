@@ -477,6 +477,7 @@ crawl:
         delay: 2
 
     if:
+        key: not isdown f
         key: isdown x
     then:
         goto: crawl_look_up
