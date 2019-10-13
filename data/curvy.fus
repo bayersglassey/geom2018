@@ -132,6 +132,7 @@ mappers:
         unit: 2 4 0 -2
         entries:
             : "vert" -> "vert"
+            : "edge" -> "edge"
             : "sq"   -> "curvy_sq"
             : "tri"  -> "curvy_tri"
             : "dia"  -> "curvy_dia"
@@ -141,6 +142,7 @@ mappers:
         unit: 2 4 0 -2
         entries:
             : "vert" -> "vert"
+            : "edge" -> "edge"
             : "sq"   -> "curvy_sq"
             : "tri"  -> "curvy_tri"
             : "dia"  -> "curvy_dia"

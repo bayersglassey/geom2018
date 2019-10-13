@@ -68,6 +68,7 @@ mappers:
         unit: 2 0 0 0
         entries:
             : "vert" -> "vert"
+            : "edge" -> "edge"
             : "sq"   -> "double_sq"
             : "tri"  -> "double_tri"
             : "dia"  -> "double_dia"
@@ -77,6 +78,7 @@ mappers:
         unit: 3 0 0 0
         entries:
             : "vert" -> "vert"
+            : "edge" -> "edge"
             : "sq"   -> "triple_sq"
             : "tri"  -> "triple_tri"
             : "dia"  -> "triple_dia"
