@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdarg.h>
 
 #include <SDL2/SDL.h>
 
@@ -49,7 +50,7 @@ int sdlfont_init(sdlfont_t *sdlfont, font_t *font, SDL_Palette *pal){
 
     /* "palette" indexed by font's char_data "pixel values", 0 is
     actually transparent though */
-    Uint8 color_values[FONT_N_COLOR_VALUES] = {0, 1+8, 1+7, 1+15};
+    Uint8 colors[FONT_N_COLOR_VALUES] = {0, 1+8, 1+7, 1+15};
 
     for(int i = 0; i < FONT_N_CHARS; i++){
         unsigned char *char_data = font->char_data[i];
@@ -64,7 +65,7 @@ int sdlfont_init(sdlfont_t *sdlfont, font_t *font, SDL_Palette *pal){
                 char_y * char_h + y);
             for(int x = 0; x < char_w; x++){
                 int color_i = char_data[y * char_h + x];
-                p[x] = color_values[color_i];
+                p[x] = colors[color_i];
             }
         }
     }
@@ -75,24 +76,38 @@ int sdlfont_init(sdlfont_t *sdlfont, font_t *font, SDL_Palette *pal){
     return 0;
 }
 
-static void sdlfont_blitter_newline(sdlfont_blitter_t *blitter){
-    blitter->col = 0;
-    blitter->row++;
+int sdlfont_printf(sdlfont_t *sdlfont, SDL_Surface *render_surface,
+    int x0, int y0, const char *msg, ...
+){
+    int err = 0;
+    va_list vlist;
+    va_start(vlist, msg);
+
+    sdlfont_blitter_t blitter;
+    sdlfont_blitter_init(&blitter, sdlfont, render_surface, x0, y0);
+    err = font_vprintf(&sdlfont_blitter_putc_callback, &blitter,
+        msg, vlist);
+
+    va_end(vlist);
+    return err;
 }
 
-static void sdlfont_blitter_move_right(sdlfont_blitter_t *blitter){
-    blitter->col++;
-}
-
-void sdlfont_putc(sdlfont_t *sdlfont, SDL_Surface *render_surface,
+static int sdlfont_putc(sdlfont_t *sdlfont, SDL_Surface *render_surface,
     int x, int y, char c
 ){
+    int err;
+
     font_t *font = sdlfont->font;
     int char_w = font->char_w;
     int char_h = font->char_h;
 
     int char_x, char_y;
     if(sdlfont->autoupper)c = toupper(c);
+    if(c < 0 || c >= FONT_N_CHARS){
+        fprintf(stderr, "%s: Char outside 0..%i: %i (%c)\n",
+            __func__, FONT_N_CHARS - 1, c, c);
+        return 2;
+    }
     get_char_coords(c, &char_x, &char_y);
 
     SDL_Rect src_rect = {
@@ -104,22 +119,9 @@ void sdlfont_putc(sdlfont_t *sdlfont, SDL_Surface *render_surface,
         x, y,
         char_w, char_h
     };
-    SDL_BlitSurface(sdlfont->surface, &src_rect,
-        render_surface, &dst_rect);
-}
-
-int sdlfont_putc_callback(void *data, char c){
-    sdlfont_blitter_putc(data, c);
+    RET_IF_SDL_NZ(SDL_BlitSurface(sdlfont->surface, &src_rect,
+        render_surface, &dst_rect));
     return 0;
-}
-
-int sdlfont_printf(sdlfont_t *sdlfont, SDL_Surface *render_surface,
-    int x0, int y0, const char *msg, ...
-){
-    va_list vlist;
-    sdlfont_blitter_t blitter;
-    sdlfont_blitter_init(&blitter, sdlfont, render_surface, x0, y0);
-    return font_vprintf(&sdlfont_putc_callback, &blitter, msg, vlist);
 }
 
 
@@ -138,18 +140,37 @@ void sdlfont_blitter_init(sdlfont_blitter_t *blitter, sdlfont_t *sdlfont,
     blitter->col = 0;
 }
 
-void sdlfont_blitter_putc(sdlfont_blitter_t *blitter, char c){
+static void sdlfont_blitter_newline(sdlfont_blitter_t *blitter){
+    blitter->col = 0;
+    blitter->row++;
+}
+
+static void sdlfont_blitter_move_right(sdlfont_blitter_t *blitter){
+    blitter->col++;
+}
+
+int sdlfont_blitter_putc(sdlfont_blitter_t *blitter, char c){
+    int err;
+
     sdlfont_t *sdlfont = blitter->sdlfont;
     font_t *font = sdlfont->font;
 
     if(c == '\n'){
         sdlfont_blitter_newline(blitter);
-        return;
+        return 0;
     }
 
-    sdlfont_putc(sdlfont, blitter->render_surface,
+    err = sdlfont_putc(sdlfont, blitter->render_surface,
         blitter->x0 + blitter->col * font->char_w,
         blitter->y0 + blitter->row * font->char_h,
         c);
+    if(err)return err;
+
     sdlfont_blitter_move_right(blitter);
+    return 0;
+}
+
+int sdlfont_blitter_putc_callback(void *data, char c){
+    /* Callback for use with font_printf, console_blit, etc */
+    return sdlfont_blitter_putc(data, c);
 }

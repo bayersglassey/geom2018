@@ -72,16 +72,6 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         if(app->surface == NULL)return 1;
     }
 
-    err = font_load(&app->font, "data/font.fus");
-    if(err)return err;
-    err = sdlfont_init(&app->sdlfont, &app->font, sdl_palette);
-    if(err)return err;
-    app->sdlfont.autoupper = true;
-
-    console_t *console = &app->console;
-    err = console_init(console, 80, 40, 20000);
-    if(err)return err;
-
     prismelrenderer_t *prend = &app->prend;
     err = prismelrenderer_init(prend, &vec4);
     if(err)return err;
@@ -90,8 +80,17 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     if(prend->rendergraphs_len < 1){
         fprintf(stderr, "No rendergraphs in %s\n", app->prend_filename);
         return 2;}
-
     prend->cache_bitmaps = cache_bitmaps;
+
+    err = font_load(&app->font, "data/font.fus");
+    if(err)return err;
+
+    err = sdlfont_init(&app->sdlfont, &app->font, sdl_palette);
+    if(err)return err;
+    app->sdlfont.autoupper = true;
+
+    err = console_init(&app->console, 80, 40, 20000);
+    if(err)return err;
 
     hexgame_t *game = &app->hexgame;
     err = hexgame_init(game, prend, app->hexmap_filename);
@@ -517,7 +516,8 @@ int test_app_mainloop_step(test_app_t *app){
                 sdlfont_blitter_t blitter;
                 sdlfont_blitter_init(&blitter, &app->sdlfont,
                     app->render_surface, 0, 20 * app->font.char_h);
-                console_blit(&app->console, &sdlfont_putc_callback, &blitter);
+                console_blit(&app->console, &sdlfont_blitter_putc_callback,
+                    &blitter);
             }
 
             /******************************************************************
