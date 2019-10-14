@@ -442,16 +442,17 @@ int test_app_mainloop_step(test_app_t *app){
                     if(!body)continue;
                     if(body->dead == BODY_MOSTLY_DEAD){
                         FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y),
-                            "You ran into a wall! "
-                            "Press jump to retry from where you jumped.\n");
-                        line_y += app->font.char_h;
+                            "You ran into a wall!\n"
+                            "Press jump to retry from where you jumped.\n"
+                            "Press %i to retry from last save point.\n",
+                            i+1);
+                        line_y += app->font.char_h * 2;
                     }else if(body->dead == BODY_ALL_DEAD){
-                        static char msg[] =
-                            "You were crushed! "
-                            "Press X to retry from last save point.\n";
-                        msg[24] = '0' + i + 1;
-                        FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y), msg);
-                        line_y += app->font.char_h;
+                        FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y),
+                            "You were crushed!\n"
+                            "Press jump or %i to retry from last save point.\n",
+                            i+1);
+                        line_y += app->font.char_h * 3;
                     }
                 }
                 if(app->show_controls){
