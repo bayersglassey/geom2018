@@ -101,13 +101,15 @@ static int sdlfont_putc(sdlfont_t *sdlfont, SDL_Surface *render_surface,
     int char_w = font->char_w;
     int char_h = font->char_h;
 
-    int char_x, char_y;
     if(sdlfont->autoupper)c = toupper(c);
-    if(c < 0 || c >= FONT_N_CHARS){
+    int char_i = c;
+    if(char_i < 0 || char_i >= FONT_N_CHARS){
         fprintf(stderr, "%s: Char outside 0..%i: %i (%c)\n",
-            __func__, FONT_N_CHARS - 1, c, c);
+            __func__, FONT_N_CHARS - 1, char_i, c);
         return 2;
     }
+
+    int char_x, char_y;
     get_char_coords(c, &char_x, &char_y);
 
     SDL_Rect src_rect = {

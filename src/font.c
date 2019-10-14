@@ -95,17 +95,17 @@ int font_parse(font_t *font, fus_lexer_t *lexer){
         err = fus_lexer_get_chr(lexer, &char_c);
         if(err)return err;
 
-        if(char_c < 0){
-            fprintf(stderr, "Char < 0: %i (%c)\n",
-                char_c, char_c);
-            return 2;
-        }
-        if(char_c >= FONT_N_CHARS){
-            fprintf(stderr, "Char >= %i: %i (%c)\n",
-                FONT_N_CHARS, char_c, char_c);
-            return 2;
-        }
         int char_i = char_c;
+        if(char_i < 0){
+            fprintf(stderr, "Char < 0: %i (%c)\n",
+                char_i, char_c);
+            return 2;
+        }
+        if(char_i >= FONT_N_CHARS){
+            fprintf(stderr, "Char >= %i: %i (%c)\n",
+                FONT_N_CHARS, char_i, char_c);
+            return 2;
+        }
 
         unsigned char *char_data = font->char_data[char_i] = calloc(
             char_w * char_h, sizeof(*char_data));

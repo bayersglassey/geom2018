@@ -10,6 +10,7 @@
 #include "vec4.h"
 #include "font.h"
 #include "sdlfont.h"
+#include "geomfont.h"
 #include "console.h"
 #include "util.h"
 #include "anim.h"
@@ -20,6 +21,21 @@
 
 #define MAX_ZOOM 4
 
+#ifndef SDLFONT
+    #define FONT_BLITTER_T geomfont_blitter_t
+    #define FONT_BLITTER_INIT geomfont_blitter_init
+    #define FONT_BLITTER_PUTC_CALLBACK geomfont_blitter_putc_callback
+    #define FONT_PRINTF geomfont_printf
+    #define FONT_ARGS(SURFACE, X0, Y0) &app->geomfont, app->renderer, (SURFACE), \
+        app->sdl_palette, (X0), (Y0), app->zoom, NULL, NULL
+#else
+    #define FONT_BLITTER_T sdlfont_blitter_t
+    #define FONT_BLITTER_INIT sdlfont_blitter_init
+    #define FONT_BLITTER_PUTC_CALLBACK sdlfont_blitter_putc_callback
+    #define FONT_PRINTF sdlfont_printf
+    #define FONT_ARGS(SURFACE, X0, Y0) &app->sdlfont, (SURFACE), (X0), (Y0)
+#endif
+
 
 void test_app_cleanup(test_app_t *app){
     palette_cleanup(&app->palette);
@@ -28,6 +44,7 @@ void test_app_cleanup(test_app_t *app){
     hexgame_cleanup(&app->hexgame);
     font_cleanup(&app->font);
     sdlfont_cleanup(&app->sdlfont);
+    geomfont_cleanup(&app->geomfont);
 }
 
 static void test_app_init_input(test_app_t *app){
@@ -88,6 +105,11 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     err = sdlfont_init(&app->sdlfont, &app->font, sdl_palette);
     if(err)return err;
     app->sdlfont.autoupper = true;
+
+    err = geomfont_init(&app->geomfont, &app->font, prend, "sq",
+        (vec_t){1, 0, 0, 0}, (vec_t){0, 0, 0, 1});
+    if(err)return err;
+    app->geomfont.autoupper = true;
 
     err = console_init(&app->console, 80, 40, 20000);
     if(err)return err;
@@ -419,7 +441,7 @@ int test_app_mainloop_step(test_app_t *app){
                     body_t *body = player->body;
                     if(!body)continue;
                     if(body->dead == BODY_MOSTLY_DEAD){
-                        sdlfont_printf(&app->sdlfont, app->surface, 0, line_y,
+                        FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y),
                             "You ran into a wall! "
                             "Press jump to retry from where you jumped.\n");
                         line_y += app->font.char_h;
@@ -428,12 +450,12 @@ int test_app_mainloop_step(test_app_t *app){
                             "You were crushed! "
                             "Press X to retry from last save point.\n";
                         msg[24] = '0' + i + 1;
-                        sdlfont_printf(&app->sdlfont, app->surface, 0, line_y, msg);
+                        FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y), msg);
                         line_y += app->font.char_h;
                     }
                 }
                 if(app->show_controls){
-                    sdlfont_printf(&app->sdlfont, app->surface, 0, line_y,
+                    FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y),
                         "*Controls:\n"
                         "  Left/right  -> Walk\n"
                         "  Up          -> Jump\n"
@@ -489,7 +511,7 @@ int test_app_mainloop_step(test_app_t *app){
             * Render text
             */
 
-            sdlfont_printf(&app->sdlfont, app->render_surface, 0, 0,
+            FONT_PRINTF(FONT_ARGS(app->render_surface, 0, 0),
                 "Game running? %c\n"
                 "Frame rendered in: %i ms\n"
                 "  (Aiming for sub-%i ms)\n"
@@ -513,10 +535,10 @@ int test_app_mainloop_step(test_app_t *app){
                 rgraph->n_frames, rgraph->animation_type);
 
             {
-                sdlfont_blitter_t blitter;
-                sdlfont_blitter_init(&blitter, &app->sdlfont,
-                    app->render_surface, 0, 20 * app->font.char_h);
-                console_blit(&app->console, &sdlfont_blitter_putc_callback,
+                FONT_BLITTER_T blitter;
+                FONT_BLITTER_INIT(&blitter, FONT_ARGS(app->render_surface,
+                    0, 20 * app->font.char_h));
+                console_blit(&app->console, &FONT_BLITTER_PUTC_CALLBACK,
                     &blitter);
             }
 
