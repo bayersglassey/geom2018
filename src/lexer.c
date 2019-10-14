@@ -610,7 +610,14 @@ int fus_lexer_get_int_fancy(fus_lexer_t *lexer, int *i_ptr){
                 if(err)goto err;
                 err = fus_lexer_get(lexer, ")");
                 if(err)goto err;
-                add = rand() % hi + lo;
+                if(hi > lo){
+                    /* swap */
+                    int tmp = lo;
+                    lo = hi;
+                    hi = tmp;
+                }
+                int diff = hi - lo;
+                add = diff? rand() % (hi - lo) + lo: 0;
             }else{
                 err = fus_lexer_get_int(lexer, &add);
                 if(err)goto err;
