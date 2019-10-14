@@ -104,19 +104,8 @@ WHAT'S NEEDED FOR A PROPER DEMO:
 
     - Title screen. (Maybe allow setting controls, save/load game,
         character select, multiplayer, etc.)
-    - Detect player "death", auto respawn them somewhere useful.
-        - Bring back "die" state effect?..
-        - Can we abuse player->cooldown and have the "jump" state
-            trigger death after some amount of time?
-            -> I prefer allowing player to respawn whenever they like,
-                and also letting them fly off into space as far as they
-                "want".
-                So, once exploded, dead=true, and a message can show
-                at bottom of screen "you died, press 1 to respawn" or
-                whatever, but players are free to fly off into space
-                and wait for that message, to see if they'll actually
-                land on something.
-                -> We need a way to display messages in hexgame.
+    - Can we abuse player->cooldown and have the "jump" state
+        trigger death after some amount of time?
 
 
 
@@ -371,3 +360,36 @@ COINS ARE FUN
 Let's make different kinds of collectibles...
 Little flies, berries, that kind of thing.
 And place them on the maps.
+
+
+Oct 8, 2019:
+------------
+
+Title screen
+    * Controls
+    * Start
+    * Choose save file
+    * Demo (recording)
+    * Practise area
+    * Exit
+
+Pass our font through a mapper???
+So step one, turn text into a rendergraph full of "sq" prismels.
+(Possibly first turning it into a bitmap.)
+
+Figure out what's making it so slow having lots of bodies.
+Collision? Collmap collisions specifically? Etc.
+
+Add between-frames for (un)crouching?..
+
+
+Oct 13, 2019:
+-------------
+
+Add submap position randomness?.. for true Wilderness?
+(Just add a "rand" argument to fancy_int???)
+
+TEST_APP.C: INSTEAD OF USING FONT_PRINTF, USE A BLITTER.
+Our current approach with line_y is relying on a bug in geomfont_putc
+or whatever: x0, y0 are being multiplied by vectors.
+(So also TODO: fix that bug.)
