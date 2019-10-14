@@ -104,14 +104,7 @@ static int recording_parse(recording_t *rec,
     if(err)return err;
     err = fus_lexer_get(lexer, "(");
     if(err)return err;
-    if(fus_lexer_got(lexer, "yes")){
-        rec->turn0 = true;
-    }else if(fus_lexer_got(lexer, "no")){
-        rec->turn0 = false;
-    }else{
-        return fus_lexer_unexpected(lexer, "yes or no");
-    }
-    err = fus_lexer_next(lexer);
+    err = fus_lexer_get_yesno(lexer, &rec->turn0);
     if(err)return err;
     err = fus_lexer_get(lexer, ")");
     if(err)return err;
