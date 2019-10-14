@@ -158,6 +158,7 @@ mappers:
         unit: 2 0 0 0
         entries:
             : "vert" -> "vert"
+            : "edge" -> "edge"
             : "sq"   -> "double_sq"
             : "tri"  -> "double_tri"
             : "dia"  -> "double_dia"
@@ -167,6 +168,7 @@ mappers:
         unit: 3 0 0 0
         entries:
             : "vert" -> "vert"
+            : "edge" -> "edge"
             : "sq"   -> "triple_sq"
             : "tri"  -> "triple_tri"
             : "dia"  -> "triple_dia"
@@ -713,6 +715,7 @@ mappers:
         unit: 2 4 0 -2
         entries:
             : "vert" -> "vert"
+            : "edge" -> "edge"
             : "sq"   -> "curvy_sq"
             : "tri"  -> "curvy_tri"
             : "dia"  -> "curvy_dia"
@@ -722,6 +725,7 @@ mappers:
         unit: 2 4 0 -2
         entries:
             : "vert" -> "vert"
+            : "edge" -> "edge"
             : "sq"   -> "curvy_sq"
             : "tri"  -> "curvy_tri"
             : "dia"  -> "curvy_dia"
@@ -8353,6 +8357,7 @@ crawl:
         delay: 2
 
     if:
+        key: not isdown f
         key: isdown x
     then:
         goto: crawl_look_up
