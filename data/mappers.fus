@@ -1,6 +1,9 @@
 
 
 shapes:
+    "l.red_sq": shapes: : "sq" (0 0 0 0) 0 f "l.red"
+    "l.red_tri": shapes: : "tri" (0 0 0 0) 0 f "l.red"
+    "l.red_dia": shapes: : "dia" (0 0 0 0) 0 f "l.red"
     "red_curvy_sq": shapes: : "curvy_sq" (0 0 0 0) 0 f "red"
     "red_curvy_tri": shapes: : "curvy_tri" (0 0 0 0) 0 f "red"
     "red_curvy_dia": shapes: : "curvy_dia" (0 0 0 0) 0 f "red"
@@ -12,6 +15,13 @@ shapes:
     "l.blu_double_dia": shapes: : "double_dia" (0 0 0 0) 0 f "l.blu"
 
 mappers:
+
+    "l.red":
+        unit: 1 0 0 0
+        entries:
+            : "sq" -> "l.red_sq"
+            : "tri" -> "l.red_tri"
+            : "dia" -> "l.red_dia"
 
     "red_curvy":
         unit: 2 4 0 -2

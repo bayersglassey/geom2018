@@ -6,6 +6,8 @@ import "data/double.fus"
 import "data/curvy.fus"
 import "data/dodecas.fus"
 
+import "data/mappers.fus"
+
 import "data/maps/test/tiles.fus"
 import "data/maps/demo/tilesets/water_tiles.fus"
 import "data/maps/trees/tilesets/bark_tiles.fus"
@@ -13,5 +15,3 @@ import "data/player.fus"
 import "data/roller.fus"
 import "data/flier.fus"
 import "data/bird.fus"
-
-import "data/mappers.fus"

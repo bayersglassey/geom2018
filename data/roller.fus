@@ -78,6 +78,14 @@ shapes:
             : "roller_foot" (0 0 0  0) 0 f
 
 
+    ################
+    # DEATH ROLLER #
+    ################
+
+    "death_roller": map ("l.red") ("roller")
+    "death_roller_grab": map ("l.red") ("roller_grab")
+
+
     ##############
     # BIG ROLLER #
     ##############
