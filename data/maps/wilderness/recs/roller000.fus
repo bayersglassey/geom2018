@@ -1,0 +1,12 @@
+loop: no
+anim: "anim/death_roller.fus"
+state: "stand"
+pos: (0 0)
+rot: 0
+turn: no
+keys:
+    u:
+    d:
+    l: is was
+    r:
+data: "w1"

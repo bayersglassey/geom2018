@@ -5,6 +5,8 @@ parts:
     "L": "data/maps/wilderness/start_line3.fus"
     "m": "data/maps/wilderness/start_line4.fus"
     "M": "data/maps/wilderness/start_line5.fus"
+    "r": recording "data/maps/wilderness/recs/roller000.fus"
+    "r": "data/maps/demo/vert.fus"
 
 collmap:
     ;;
@@ -22,7 +24,7 @@ collmap:
     ;;                                              /     \
     ;; .   .   .   .   .   .   ?   .   .   .   .   +   .   +   .   .   .   .   ?   .   .   .   .   .   .   .   .   [l][L]
     ;;                                            /
-    ;;   .   .   .   .   .   .   .   ?   .   .   +   ?   .   .   .   + - +   .   .   .   .   .   .   .   .   .   [C][c]
+    ;;   .   .   .   .   .   .   .   ?   .   .   +   ?   .   .   .   ? - +   .   .   .   .   .   .   .   .   .   [C][c]  [r]
     ;;                                          /                   /     \
     ;; .   .   .   .   .   .   .   .   .   .   +   .   ?   .   .   +   .   +   .   .   .   .   .   .   .   .   .   [c]
     ;;                                        /                     \

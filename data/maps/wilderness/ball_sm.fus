@@ -1,7 +1,10 @@
+parts:
+    "r": recording "data/maps/wilderness/recs/roller000.fus"
+    "r": "data/maps/demo/vert.fus"
 
 collmap:
     ;;
-    ;;       + - +
+    ;;       ? - +    [r]
     ;;      /*\*/*\
     ;; .   + -(+)- +
     ;;      \*/*\*/
