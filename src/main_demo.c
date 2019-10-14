@@ -1,6 +1,8 @@
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
+#include <time.h>
 #include <SDL2/SDL.h>
 
 #include "test_app.h"
@@ -35,6 +37,9 @@ int main(int n_args, char *args[]){
     bool use_textures = false;
     bool cache_bitmaps = true;
     int n_players = 1;
+
+    /* The classic */
+    srand(time(0));
 
     for(int arg_i = 1; arg_i < n_args; arg_i++){
         char *arg = args[arg_i];

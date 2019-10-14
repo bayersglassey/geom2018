@@ -253,7 +253,7 @@ static int fus_lexer_get_vec_simple(fus_lexer_t *lexer,
     err = fus_lexer_get(lexer, "(");
     if(err)return err;
     for(int i = 0; i < space->dims; i++){
-        err = fus_lexer_get_int(lexer, &vec[i]);
+        err = fus_lexer_get_int_fancy(lexer, &vec[i]);
         if(err)return err;
     }
     err = fus_lexer_get(lexer, ")");

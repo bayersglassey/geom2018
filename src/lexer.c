@@ -596,8 +596,25 @@ int fus_lexer_get_int_fancy(fus_lexer_t *lexer, int *i_ptr){
             }
 
             int add;
-            err = fus_lexer_get_int(lexer, &add);
-            if(err)goto err;
+            if(fus_lexer_got(lexer, "rand")){
+                int lo, hi;
+                err = fus_lexer_next(lexer);
+                if(err)goto err;
+                err = fus_lexer_get(lexer, "(");
+                if(err)goto err;
+                err = fus_lexer_get_int(lexer, &lo);
+                if(err)goto err;
+                err = fus_lexer_get(lexer, ",");
+                if(err)goto err;
+                err = fus_lexer_get_int(lexer, &hi);
+                if(err)goto err;
+                err = fus_lexer_get(lexer, ")");
+                if(err)goto err;
+                add = rand() % hi + lo;
+            }else{
+                err = fus_lexer_get_int(lexer, &add);
+                if(err)goto err;
+            }
 
             if(fus_lexer_got(lexer, "*")){
                 err = fus_lexer_next(lexer);
