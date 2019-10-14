@@ -14,3 +14,4 @@ faces:
     "2": "map_face2"
     "o": "map_face0"
     "S": "map_savepoint"
+    "D": "map_door"

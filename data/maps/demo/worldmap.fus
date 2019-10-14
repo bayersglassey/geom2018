@@ -247,6 +247,11 @@ submaps:
                             : "data/maps/demo/recs/tunnels_002.fus"
                     :
                         file: "data/maps/demo/tunnels2.fus"
+                        door:
+                            map: "data/maps/wilderness/worldmap.fus"
+                            pos: (0 0)
+                            rot: 0
+                            turn: n
                         pos: eval: (13 1) + (18 8)
                         camera: (0 5)
                         mapper: ("triple")
@@ -309,6 +314,12 @@ submaps:
                         pos: eval: (8 2) *  0 + (-1 3) * -4
                         camera: (-1 -1)
                         mapper: ("solid_curvy")
+                        submaps:
+                            :
+                                file: "data/maps/test/map1x_exit.fus"
+                                pos: (2 -8)
+                                camera: (8 0)
+                                mapper: ("solid_curvy")
                     :
                         file: "data/maps/test/map1.fus"
                         pos: eval: (8 2) *  1 + (-1 3) *  0
