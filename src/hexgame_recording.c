@@ -64,6 +64,17 @@ static int recording_parse(recording_t *rec,
     hexmap_t *map = rec->body->map;
     vecspace_t *space = map->space;
 
+    if(fus_lexer_got(lexer, "loop")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_get_yesno(lexer, &rec->loop);
+        if(err)return err;
+        err = fus_lexer_get(lexer, ")");
+        if(err)return err;
+    }
+
     err = fus_lexer_get(lexer, "anim");
     if(err)return err;
     err = fus_lexer_get(lexer, "(");
