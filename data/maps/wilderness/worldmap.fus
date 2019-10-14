@@ -17,3 +17,23 @@ submaps:
                     pos: (72 29)
                     rot: 0
                     turn: y
+            :
+                file: "data/maps/wilderness/start2.fus"
+                pos: (eval(rand(10, 12)) eval(rand( 8,  9)))
+                camera: (0 0)
+            :
+                file: "data/maps/wilderness/start2.fus"
+                pos: (eval(rand( 4,  5)) eval(rand(-8, -9)))
+                camera: (0 0)
+            :
+                file: "data/maps/wilderness/start2.fus"
+                pos: (eval(rand(14, 16)) eval(rand(-2, -3)))
+                camera: (0 0)
+            :
+                file: "data/maps/wilderness/start2.fus"
+                pos: (eval(rand(-10, 10)) eval(rand(10, 20)))
+                camera: (0 0)
+            :
+                file: "data/maps/wilderness/start2.fus"
+                pos: (eval(rand(-30, -20)) eval(rand( 4,  6)))
+                camera: (0 0)
