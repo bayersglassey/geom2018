@@ -254,6 +254,7 @@ crawl_looking_up_spit:
 
 swim_spit:
     rgraph: "player_swim_spit"
+    unsafe
     hitbox:
         ;;   .   .
         ;;   *\*/*
@@ -524,6 +525,7 @@ crawl_step:
 
 swim_jump:
     rgraph: "player_swim_jump"
+    unsafe
     hitbox:
         ;;   .   .
         ;;   *\*/*
@@ -534,6 +536,7 @@ swim_jump:
 
 swim:
     rgraph: "player_swim"
+    unsafe
 
     hitbox:
         ;;   .   .
@@ -550,23 +553,32 @@ swim:
         delay: 9
 
     if:
-        key: isdown u
+        key: wentdown u
     then:
         move: 1 0
         rot: 1
         goto immediate: jump
 
     if:
-        key: isdown d
+        key: wentdown d
     then:
         move: 0 1
         rot: -1
         goto immediate: jump
 
+    if: key: isdown u
+    then: goto immediate: jump
+    if: key: isdown d
+    then: goto immediate: jump
+    if: key: isdown f
+    then: goto immediate: jump
+
     if:
-        key: isdown f
+        coll: all yes
+            ;; (+)- +
     then:
-        goto immediate: jump
+        goto: stand
+        delay: 2
 
     if:
         key: isdown b
