@@ -10,7 +10,10 @@ submaps:
         camera: (0 0)
         mapper: ("triple")
         submaps:
+
+            ### START ###
             :
+                # START
                 file: "data/maps/wilderness/start.fus"
                 door:
                     map: "data/maps/demo/worldmap.fus"
@@ -25,23 +28,29 @@ submaps:
                         file: "data/maps/wilderness/ball_sm.fus"
                         pos: (eval(rand(10, 12)) eval(rand(-10, 10)))
             :
+                # BALL BELOW START
                 file: "data/maps/wilderness/ball_md.fus"
                 pos: (eval(rand(-10, 10)) eval(rand(-10, -6)))
                 camera: (0 0)
             :
+                # BALL ABOVE START
                 file: "data/maps/wilderness/ball_md.fus"
                 pos: (eval(rand(-10, 10)) eval(rand(6, 10)))
                 camera: (0 0)
             :
+                # BALL LEFT OF START #1
                 file: "data/maps/wilderness/ball_lg.fus"
                 pos: (eval(rand(-14, -10)) eval(rand(-10, 10)))
                 camera: (0 0)
             :
+                # BALL LEFT OF START #2
                 file: "data/maps/wilderness/ball_sm.fus"
                 pos: (eval(rand(-14, -10)) eval(rand(-10, 10)))
                 camera: (0 0)
 
+            ### RIGHT OF START ###
             :
+                # TOP-RIGHT
                 file: "data/maps/wilderness/start2.fus"
                 pos: (eval(rand(8, 12)) eval(rand(12, 16)))
                 camera: (0 0)
@@ -50,14 +59,21 @@ submaps:
                         file: "data/maps/wilderness/ball_sm.fus"
                         pos: (eval(rand(-4, 4)) eval(rand(-4, 4)))
             :
-                file: "data/maps/wilderness/start2.fus"
+                # RIGHT
+                file: "data/maps/wilderness/start5.fus"
                 pos: (eval(rand(8, 12)) eval(rand(-2, 2)))
                 camera: (0 0)
                 submaps:
                     :
+                        # UP
+                        file: "data/maps/wilderness/ball_md.fus"
+                        pos: (eval(rand(-4, 4)) eval(rand(-10, -14)))
+                    :
+                        # RIGHT
                         file: "data/maps/wilderness/ball_sm.fus"
-                        pos: (eval(rand(-4, 4)) eval(rand(-4, 4)))
+                        pos: (eval(rand(10, 14)) eval(rand(-4, 4)))
             :
+                # BOTTOM-RIGHT
                 file: "data/maps/wilderness/start2.fus"
                 pos: (eval(rand(8, 12)) eval(rand(-12, -16)))
                 camera: (0 0)
@@ -66,11 +82,28 @@ submaps:
                         file: "data/maps/wilderness/ball_lg.fus"
                         pos: (eval(rand(-4, 4)) eval(rand(-4, 4)))
             :
+                # FAR RIGHT
+                file: "data/maps/wilderness/watercorridor.fus"
+                pos: (eval(rand(20, 24)) eval(rand(-4, 4)))
+                camera: (0 0)
+                submaps:
+                    :
+                        file: "data/maps/wilderness/ball_lg.fus"
+                        pos: (14 14)
+                        camera: (0 0)
+                    :
+                        file: "data/maps/wilderness/ball_md.fus"
+                        pos: (16 10)
+                        camera: (0 0)
+
+            ### LEFT OF START ###
+            :
+                # TOP
                 file: "data/maps/wilderness/start3.fus"
                 pos: (eval(rand(-4, 4)) eval(rand(16, 24)))
                 camera: (0 0)
-
             :
+                # TOP-LEFT
                 file: "data/maps/wilderness/start2.fus"
                 pos: (eval(rand(-8, -12)) eval(rand(14, 16)))
                 camera: (0 0)
@@ -82,15 +115,32 @@ submaps:
                         file: "data/maps/wilderness/ball_md.fus"
                         pos: (eval(rand(-4, 4)) eval(rand(-4, 4)))
             :
-                file: "data/maps/wilderness/start2.fus"
+                # LEFT
+                file: "data/maps/wilderness/start4.fus"
                 pos: (eval(rand(-16, -20)) eval(rand(-2, 2)))
                 camera: (0 0)
                 submaps:
             :
+                # BOTTOM-LEFT
                 file: "data/maps/wilderness/start3.fus"
-                pos: (eval(rand(-30, -20)) eval(rand(-16, -24)))
+                pos: (eval(rand(-30, -25)) eval(rand(-24, -28)))
                 camera: (0 0)
                 submaps:
                     :
                         file: "data/maps/wilderness/ball_md.fus"
                         pos: (eval(rand(-4, 4)) eval(rand(-4, 4)))
+                    :
+                        file: "data/maps/wilderness/ball_lg.fus"
+                        pos: (eval(rand(8, 12)) eval(rand(10, 14)))
+            :
+                # BOTTOM
+                file: "data/maps/wilderness/watercorridor.fus"
+                pos: (eval(rand(-12, -10)) eval(rand(-20, -24)))
+                camera: (0 0)
+                submaps:
+                    :
+                        file: "data/maps/wilderness/ball_sm.fus"
+                        pos: (eval(rand(-10, 10)) eval(rand(-10, 10)))
+                    :
+                        file: "data/maps/wilderness/ball_md.fus"
+                        pos: (eval(rand(-10, 10)) eval(rand(-10, 10)))
