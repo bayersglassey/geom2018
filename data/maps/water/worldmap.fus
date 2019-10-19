@@ -1,0 +1,20 @@
+
+unit: 3 2 0 -1
+spawn: "data/maps/water/start.fus"
+default_palette: "data/pal1.fus"
+default_tileset: "data/tileset1.fus"
+
+submaps:
+    :
+        pos: (0 0)
+        camera: (0 0)
+        mapper: ("triple")
+        submaps:
+            :
+                file: "data/maps/water/start.fus"
+                door:
+                    map: "data/maps/demo/worldmap.fus"
+                    pos: (72 29)
+                    rot: 0
+                    turn: y
+

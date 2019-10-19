@@ -248,7 +248,8 @@ submaps:
                     :
                         file: "data/maps/demo/tunnels2.fus"
                         door:
-                            map: "data/maps/wilderness/worldmap.fus"
+                            #map: "data/maps/wilderness/worldmap.fus"
+                            map: "data/maps/water/worldmap.fus"
                             pos: (0 0)
                             rot: 0
                             turn: n
