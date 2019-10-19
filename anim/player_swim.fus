@@ -11,15 +11,73 @@ swim_spit:
     if() then: goto: swim
 
 swim_jump:
+    # NOTE: the only "goto: swim_jump" is in "swim_jump", which checks
+    # whether we're in water, and does "goto: jump" or "goto: swim_jump"
+    # accordingly.
+    # Therefore, if we're in "swim_jump", then we can safely assume we're in
+    # water without checking.
+
     rgraph: "player_swim_jump"
     unsafe
+
     hitbox:
         ;;   .   .
         ;;   *\*/*
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto immediate: swim
+
+    if:
+        key: isdown f
+        any:
+            key: isdown u
+            coll: any yes
+                ;;       /
+                ;; ( )
+        coll: all no
+            ;;    *\*/*
+            ;;    - + -
+            ;;       \*
+            ;;    .
+            ;;
+            ;; ( )
+    then:
+        move: 2 1
+        rot: 1
+        goto immediate: start_jump
+
+    if:
+        key: isdown f
+        any:
+            key: isdown d
+            coll: any yes
+                ;;       \
+                ;;        .
+                ;;
+                ;; ( )
+        coll: all no
+            ;;
+            ;;       /*
+            ;; ( )- + -
+            ;;    */*\*
+    then:
+        move: 0 0
+        rot: -1
+        goto immediate: start_jump
+
+    if:
+        key: isdown f
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        move: 1 0
+        goto immediate: start_jump
+
+    if() then:
+        goto: swim
 
 swim:
     rgraph: "player_swim"
@@ -39,37 +97,66 @@ swim:
         goto: swim_spit
         delay: 9
 
+
     if:
-        key: wentdown u
+        key: isdown f
+        any:
+            key: isdown u
+            coll: any yes
+                ;;       /
+                ;; ( )
+        coll: all no
+            ;;    *\*/*
+            ;;    - + -
+            ;;       \*
+            ;;    .
+            ;;
+            ;; ( )
+    then:
+        move: 2 1
+        rot: 1
+        goto immediate: start_jump
+
+    if:
+        key: isdown f
+        any:
+            key: isdown d
+            coll: any yes
+                ;;       \
+                ;;        .
+                ;;
+                ;; ( )
+        coll: all no
+            ;;
+            ;;       /*
+            ;; ( )- + -
+            ;;    */*\*
+    then:
+        move: 0 0
+        rot: -1
+        goto immediate: start_jump
+
+    if:
+        key: isdown f
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
     then:
         move: 1 0
-        rot: 1
-        goto immediate: jump
-
-    if:
-        key: wentdown d
-    then:
-        move: 0 1
-        rot: -1
-        goto immediate: jump
-
-    if: key: isdown u
-    then: goto immediate: jump
-    if: key: isdown d
-    then: goto immediate: jump
-    if: key: isdown f
-    then: goto immediate: jump
-
-    if:
-        coll: all yes
-            ;; (+)- +
-    then:
-        goto: stand
-        delay: 2
+        goto immediate: start_jump
 
     if:
         key: isdown b
     then:
         move: 1 0
         turn
+        delay: 2
+
+    if:
+        coll: all yes
+            ;; (+)- +
+    then:
+        goto: stand
         delay: 2

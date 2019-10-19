@@ -222,6 +222,12 @@ start_jump:
         delay: 2
 
 jump:
+    # NOTE: the only "goto: jump" is in "start_jump", which checks whether
+    # we're in water, and does "goto: jump" or "goto: swim_jump"
+    # accordingly.
+    # Therefore, if we're in "jump", then we can safely assume we're not in
+    # water without checking.
+
     rgraph: "player_jump"
     unsafe
 
@@ -244,12 +250,6 @@ jump:
         delay: 2
 
     if:
-        coll: water all no
-            ;;   .   .
-            ;;   *\*/*
-            ;; . - + - .
-            ;;   */*\*
-            ;;  (.)  .
         coll: all yes
             ;; ( )  +
         coll: any yes
@@ -263,12 +263,6 @@ jump:
 
     if:
         key: not isdown u
-        coll: water all no
-            ;;   .   .
-            ;;   *\*/*
-            ;; . - + - .
-            ;;   */*\*
-            ;;  (.)  .
         coll: all no
             ;;       \*/*
             ;;        + -
@@ -290,17 +284,6 @@ jump:
     then:
         move: 1 0
         goto immediate: start_jump
-
-    if:
-        coll: water any yes
-            ;;   .   .
-            ;;   *\*/*
-            ;; . - + - .
-            ;;   */*\*
-            ;;  (.)  .
-    then:
-        goto: swim
-        delay: 11
 
     if() then:
         goto: mostly_dead
