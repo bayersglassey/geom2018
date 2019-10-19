@@ -28,12 +28,24 @@ swim_jump:
         ;;  (.)  .
 
     if:
+        key: not isdown u
         key: isdown f
-        any:
-            key: isdown u
-            coll: any yes
-                ;;       /
-                ;; ( )
+        coll: all yes
+            ;;        +
+            ;;       /
+            ;; ( )  +
+    then:
+        move: 1 0
+        rot: 1
+        goto: step
+        delay: 2
+
+    if:
+        key: isdown f
+        coll: any yes
+            ;;        +
+            ;;       /
+            ;; ( )
         coll: all no
             ;;    *\*/*
             ;;    - + -
@@ -48,13 +60,11 @@ swim_jump:
 
     if:
         key: isdown f
-        any:
-            key: isdown d
-            coll: any yes
-                ;;       \
-                ;;        .
-                ;;
-                ;; ( )
+        coll: any yes
+            ;;       \
+            ;;        +
+            ;;
+            ;; ( )
         coll: all no
             ;;
             ;;       /*
@@ -77,7 +87,7 @@ swim_jump:
         goto immediate: start_jump
 
     if() then:
-        goto: swim
+        goto immediate: swim
 
 swim:
     rgraph: "player_swim"
@@ -97,14 +107,25 @@ swim:
         goto: swim_spit
         delay: 9
 
+    if:
+        key: not isdown u
+        key: isdown f
+        coll: all yes
+            ;;        +
+            ;;       /
+            ;; ( )  +
+    then:
+        move: 1 0
+        rot: 1
+        goto: step
+        delay: 2
 
     if:
         key: isdown f
-        any:
-            key: isdown u
-            coll: any yes
-                ;;       /
-                ;; ( )
+        coll: any yes
+            ;;        +
+            ;;       /
+            ;; ( )
         coll: all no
             ;;    *\*/*
             ;;    - + -
@@ -119,13 +140,11 @@ swim:
 
     if:
         key: isdown f
-        any:
-            key: isdown d
-            coll: any yes
-                ;;       \
-                ;;        .
-                ;;
-                ;; ( )
+        coll: any yes
+            ;;       \
+            ;;        +
+            ;;
+            ;; ( )
         coll: all no
             ;;
             ;;       /*
