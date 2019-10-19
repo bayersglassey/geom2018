@@ -1,0 +1,75 @@
+
+swim_spit:
+    rgraph: "player_swim_spit"
+    unsafe
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: swim
+
+swim_jump:
+    rgraph: "player_swim_jump"
+    unsafe
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto immediate: swim
+
+swim:
+    rgraph: "player_swim"
+    unsafe
+
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+
+    if:
+        key: wentdown y
+    then:
+        spawn: "anim/spit.fus" "fly" (0 0) 0 f
+        goto: swim_spit
+        delay: 9
+
+    if:
+        key: wentdown u
+    then:
+        move: 1 0
+        rot: 1
+        goto immediate: jump
+
+    if:
+        key: wentdown d
+    then:
+        move: 0 1
+        rot: -1
+        goto immediate: jump
+
+    if: key: isdown u
+    then: goto immediate: jump
+    if: key: isdown d
+    then: goto immediate: jump
+    if: key: isdown f
+    then: goto immediate: jump
+
+    if:
+        coll: all yes
+            ;; (+)- +
+    then:
+        goto: stand
+        delay: 2
+
+    if:
+        key: isdown b
+    then:
+        move: 1 0
+        turn
+        delay: 2

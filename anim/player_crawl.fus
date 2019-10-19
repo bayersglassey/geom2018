@@ -1,0 +1,173 @@
+
+crawl_looking_up:
+    rgraph: "player_crawl_looking_up"
+    hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)  .
+
+    if:
+        key: wentdown y
+    then:
+        spawn: "anim/spit.fus" "crouch_fly" (1 0) 1 f
+        goto: crawl_looking_up_spit
+        delay: 9
+
+    if:
+        key: not isdown d
+        coll: all no
+            ;;  *\*/*
+            ;;  - + -
+            ;;  */ \*
+            ;; ( )
+    then:
+        goto: looking_up
+        delay: 3
+
+    if: key: isdown f
+    then: goto immediate: crawl
+
+    if: key: isdown b
+    then: goto immediate: crawl
+
+    if: key: not isdown x
+    then: goto: crawl
+
+crawl_spit:
+    rgraph: "player_crawl_spit"
+    hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)  .
+    if() then: goto: crawl
+
+crawl_looking_up_spit:
+    rgraph: "player_crawl_looking_up_spit"
+    hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)  .
+    if() then: goto: crawl_looking_up
+
+crawl:
+    rgraph: "player_crawl"
+
+    hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)  .
+
+    if:
+        key: wentdown y
+    then:
+        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
+        goto: crawl_spit
+        delay: 9
+
+    if:
+        key: not isdown d
+        coll: all no
+            ;;  *\*/*
+            ;;  - + -
+            ;;  */ \*
+            ;; ( )
+    then:
+        goto: stand
+        delay: 3
+
+    if:
+        key: isdown f
+        coll: all no
+            ;;     \*
+            ;; ( )
+        coll: all yes
+            ;;        +
+            ;;       /
+            ;; ( )  +
+    then:
+        move: 1 0
+        rot: 1
+        goto: crawl_step
+        delay: 2
+
+    if:
+        key: isdown f
+        coll: all yes
+            ;; ( )  + - +
+        coll: all no
+            ;;     \*/*
+            ;; (.)  .
+    then:
+        move: 1 0
+        goto: crawl_step
+        delay: 2
+
+    if:
+        key: isdown f
+        coll: all yes
+            ;; ( )  +
+            ;;       \
+            ;;        +
+        coll: all no
+            ;;     \*/*
+            ;; (.)  . -
+            ;;        *
+    then:
+        move: 1 0
+        rot: -1
+        goto: crawl_step_down
+        delay: 2
+
+    if:
+        key: isdown b
+    then:
+        move: 1 0
+        turn
+        goto: crawl_step
+        delay: 2
+
+    if:
+        key: not isdown f
+        key: isdown x
+    then:
+        goto: crawl_look_up
+
+crawl_look_up:
+    rgraph: "player_crawl_look_up"
+    hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)  .
+    if() then: goto: crawl_looking_up
+
+crawl_step_down:
+    rgraph: "player_crawl_step"
+    hitbox:
+        ;;    .   .
+        ;;    *\*/*
+        ;;  . -(.)  .
+
+    if:
+        key: wentdown y
+    then:
+        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
+        goto: crawl_spit
+        delay: 9
+
+    if() then: goto: crawl
+
+crawl_step:
+    rgraph: "player_crawl_step"
+    hitbox:
+        ;;    .   .
+        ;;      */*
+        ;;     (.)  .
+
+    if:
+        key: wentdown y
+    then:
+        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
+        goto: crawl_spit
+        delay: 9
+
+    if() then: goto: crawl

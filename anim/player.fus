@@ -1,4 +1,7 @@
 
+import "anim/player_crawl.fus"
+import "anim/player_swim.fus"
+
 stand:
     rgraph: "player_stand"
 
@@ -182,40 +185,6 @@ looking_up:
     if: key: not isdown x
     then: goto: stand
 
-crawl_looking_up:
-    rgraph: "player_crawl_looking_up"
-    hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)  .
-
-    if:
-        key: wentdown y
-    then:
-        spawn: "anim/spit.fus" "crouch_fly" (1 0) 1 f
-        goto: crawl_looking_up_spit
-        delay: 9
-
-    if:
-        key: not isdown d
-        coll: all no
-            ;;  *\*/*
-            ;;  - + -
-            ;;  */ \*
-            ;; ( )
-    then:
-        goto: looking_up
-        delay: 3
-
-    if: key: isdown f
-    then: goto immediate: crawl
-
-    if: key: isdown b
-    then: goto immediate: crawl
-
-    if: key: not isdown x
-    then: goto: crawl
-
 spit:
     rgraph: "player_spit"
     hitbox:
@@ -235,33 +204,6 @@ looking_up_spit:
         ;;   */*\*
         ;;  (.)  .
     if() then: goto: looking_up
-
-crawl_spit:
-    rgraph: "player_crawl_spit"
-    hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)  .
-    if() then: goto: crawl
-
-crawl_looking_up_spit:
-    rgraph: "player_crawl_looking_up_spit"
-    hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)  .
-    if() then: goto: crawl_looking_up
-
-swim_spit:
-    rgraph: "player_swim_spit"
-    unsafe
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
-    if() then: goto: swim
 
 start_jump:
     if:
@@ -400,194 +342,6 @@ step:
 
     if() then: goto: stand
 
-crawl:
-    rgraph: "player_crawl"
-
-    hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)  .
-
-    if:
-        key: wentdown y
-    then:
-        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
-        goto: crawl_spit
-        delay: 9
-
-    if:
-        key: not isdown d
-        coll: all no
-            ;;  *\*/*
-            ;;  - + -
-            ;;  */ \*
-            ;; ( )
-    then:
-        goto: stand
-        delay: 3
-
-    if:
-        key: isdown f
-        coll: all no
-            ;;     \*
-            ;; ( )
-        coll: all yes
-            ;;        +
-            ;;       /
-            ;; ( )  +
-    then:
-        move: 1 0
-        rot: 1
-        goto: crawl_step
-        delay: 2
-
-    if:
-        key: isdown f
-        coll: all yes
-            ;; ( )  + - +
-        coll: all no
-            ;;     \*/*
-            ;; (.)  .
-    then:
-        move: 1 0
-        goto: crawl_step
-        delay: 2
-
-    if:
-        key: isdown f
-        coll: all yes
-            ;; ( )  +
-            ;;       \
-            ;;        +
-        coll: all no
-            ;;     \*/*
-            ;; (.)  . -
-            ;;        *
-    then:
-        move: 1 0
-        rot: -1
-        goto: crawl_step_down
-        delay: 2
-
-    if:
-        key: isdown b
-    then:
-        move: 1 0
-        turn
-        goto: crawl_step
-        delay: 2
-
-    if:
-        key: not isdown f
-        key: isdown x
-    then:
-        goto: crawl_look_up
-
-crawl_look_up:
-    rgraph: "player_crawl_look_up"
-    hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)  .
-    if() then: goto: crawl_looking_up
-
-crawl_step_down:
-    rgraph: "player_crawl_step"
-    hitbox:
-        ;;    .   .
-        ;;    *\*/*
-        ;;  . -(.)  .
-
-    if:
-        key: wentdown y
-    then:
-        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
-        goto: crawl_spit
-        delay: 9
-
-    if() then: goto: crawl
-
-crawl_step:
-    rgraph: "player_crawl_step"
-    hitbox:
-        ;;    .   .
-        ;;      */*
-        ;;     (.)  .
-
-    if:
-        key: wentdown y
-    then:
-        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
-        goto: crawl_spit
-        delay: 9
-
-    if() then: goto: crawl
-
-swim_jump:
-    rgraph: "player_swim_jump"
-    unsafe
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
-    if() then: goto immediate: swim
-
-swim:
-    rgraph: "player_swim"
-    unsafe
-
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
-
-    if:
-        key: wentdown y
-    then:
-        spawn: "anim/spit.fus" "fly" (0 0) 0 f
-        goto: swim_spit
-        delay: 9
-
-    if:
-        key: wentdown u
-    then:
-        move: 1 0
-        rot: 1
-        goto immediate: jump
-
-    if:
-        key: wentdown d
-    then:
-        move: 0 1
-        rot: -1
-        goto immediate: jump
-
-    if: key: isdown u
-    then: goto immediate: jump
-    if: key: isdown d
-    then: goto immediate: jump
-    if: key: isdown f
-    then: goto immediate: jump
-
-    if:
-        coll: all yes
-            ;; (+)- +
-    then:
-        goto: stand
-        delay: 2
-
-    if:
-        key: isdown b
-    then:
-        move: 1 0
-        turn
-        delay: 2
-
-
 mostly_dead:
     rgraph: "player_dead"
     unsafe
@@ -598,30 +352,3 @@ dead:
     unsafe
     if() then: die
 
-
-
-test:
-    rgraph: "player_stand"
-
-    if: key: isdown f
-    then:
-        move: 1 0
-        delay: 3
-
-    if: key: isdown b
-    then:
-        move: 1 0
-        turn
-        delay: 3
-
-    if: key: wasdown x
-    then:
-        move: 1 0
-        rot: 1
-        delay: 3
-
-    if: key: wasdown d
-    then:
-        rot: -1
-        move: -1 0
-        delay: 3
