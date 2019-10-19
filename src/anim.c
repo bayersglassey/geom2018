@@ -146,16 +146,15 @@ static int _parse_cond(fus_lexer_t *lexer,
         GET(")")
         cond->type = state_cond_type_chance;
         cond->u.percent = percent;
-    }else if(GOT("any")){
+    }else if(GOT("any") || GOT("all")){
+        cond->type = GOT("any")? state_cond_type_any: state_cond_type_all;
+        ARRAY_INIT(cond->u.subconds.conds)
+
         NEXT
-
-        cond->type = state_cond_type_any;
-        ARRAY_INIT(cond->u.any.conds)
-
         GET("(")
         while(1){
             if(GOT(")"))break;
-            ARRAY_PUSH_NEW(state_cond_t*, cond->u.any.conds, subcond)
+            ARRAY_PUSH_NEW(state_cond_t*, cond->u.subconds.conds, subcond)
             err = _parse_cond(lexer, prend, space, subcond);
             if(err)return err;
         }
@@ -415,12 +414,14 @@ const char state_cond_type_key[] = "key";
 const char state_cond_type_coll[] = "coll";
 const char state_cond_type_chance[] = "chance";
 const char state_cond_type_any[] = "any";
+const char state_cond_type_all[] = "all";
 const char *state_cond_types[] = {
     state_cond_type_false,
     state_cond_type_key,
     state_cond_type_coll,
     state_cond_type_chance,
     state_cond_type_any,
+    state_cond_type_all,
     NULL
 };
 
@@ -478,8 +479,11 @@ static void state_cond_cleanup(state_cond_t *cond){
             hexcollmap_cleanup(collmap);
             free(collmap);
         }
-    }else if(cond->type == state_cond_type_any){
-        ARRAY_FREE_PTR(state_cond_t*, cond->u.any.conds, state_cond_cleanup)
+    }else if(
+        cond->type == state_cond_type_any ||
+        cond->type == state_cond_type_all
+    ){
+        ARRAY_FREE_PTR(state_cond_t*, cond->u.subconds.conds, state_cond_cleanup)
     }
 }
 

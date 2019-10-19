@@ -503,14 +503,18 @@ static int body_match_cond(body_t *body,
     }else if(cond->type == state_cond_type_chance){
         int n = rand() % 100;
         rule_matched = n <= cond->u.percent;
-    }else if(cond->type == state_cond_type_any){
-        rule_matched = false;
-        for(int i = 0; i < cond->u.any.conds_len; i++){
-            state_cond_t *subcond = cond->u.any.conds[i];
+    }else if(
+        cond->type == state_cond_type_any ||
+        cond->type == state_cond_type_all
+    ){
+        bool all = cond->type == state_cond_type_all;
+        rule_matched = all? true: false;
+        for(int i = 0; i < cond->u.subconds.conds_len; i++){
+            state_cond_t *subcond = cond->u.subconds.conds[i];
             err = body_match_cond(body, actor, game, rule, subcond,
                 &rule_matched);
             if(err)return err;
-            if(rule_matched)break;
+            if((all && !rule_matched) || (!all && rule_matched))break;
         }
     }else{
         fprintf(stderr, "Unrecognized state rule condition: %s",

@@ -72,7 +72,7 @@ typedef struct state_cond {
         int percent;
         struct {
             ARRAY_DECL(struct state_cond*, conds)
-        } any;
+        } subconds;
     } u;
 } state_cond_t;
 
@@ -81,6 +81,7 @@ extern const char state_cond_type_key[];
 extern const char state_cond_type_coll[];
 extern const char state_cond_type_chance[];
 extern const char state_cond_type_any[];
+extern const char state_cond_type_all[];
 extern const char *state_cond_types[];
 
 
