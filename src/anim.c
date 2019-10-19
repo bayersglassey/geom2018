@@ -53,23 +53,31 @@ int stateset_load(stateset_t *stateset, char *filename,
     return 0;
 }
 
-int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
+static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
     prismelrenderer_t *prend, vecspace_t *space
 ){
     INIT
-
-    if(GOT("projectile")){
-        NEXT
-        stateset->is_projectile = true;
-    }
-
-    if(GOT("collectible")){
-        NEXT
-        stateset->is_collectible = true;
-    }
-
     while(1){
         if(DONE)break;
+
+        if(GOT("import")){
+            NEXT
+            char *filename;
+            GET_STR(filename);
+
+            char *text = load_file(filename);
+            if(text == NULL)return 1;
+
+            fus_lexer_t lexer;
+            err = fus_lexer_init(&lexer, text, filename);
+            if(err)return err;
+
+            err = _stateset_parse(stateset, &lexer, prend, space);
+            if(err)return err;
+
+            free(filename);
+            continue;
+        }
 
         char *name;
         GET_NAME(name)
@@ -346,6 +354,24 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
     }
     NEXT
     return 0;
+}
+
+int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
+    prismelrenderer_t *prend, vecspace_t *space
+){
+    INIT
+
+    if(GOT("projectile")){
+        NEXT
+        stateset->is_projectile = true;
+    }
+
+    if(GOT("collectible")){
+        NEXT
+        stateset->is_collectible = true;
+    }
+
+    return _stateset_parse(stateset, lexer, prend, space);
 }
 
 state_t *stateset_get_state(stateset_t *stateset, const char *name){
