@@ -401,66 +401,59 @@ char body_get_key_c(body_t *body, int key_i, bool absolute){
  * BODY RULES *
  **************/
 
-static int body_match_rule(body_t *body,
+static int body_match_cond(body_t *body,
     actor_t *actor, hexgame_t *game,
-    state_rule_t *rule, bool *rule_matched_ptr
+    state_rule_t *rule, state_cond_t *cond,
+    bool *rule_matched_ptr
 ){
+    int err;
 
-    /* NOTE: body and/or actor may be NULL.
-    We are basically reusing the rule/cond/effect structure for bodys
-    and actors; most conds/effects naturally apply to one or the other.
-    E.g. keypress stuff is for the body; "play" is for actor.
-    However, actor may want to check some stuff about the body, so
-    it may make use of "body-oriented" rules. */
+    if(DEBUG_RULES)printf("  if: %s\n", cond->type);
 
-    bool rule_matched = true;
-    for(int i = 0; i < rule->conds_len; i++){
-        state_cond_t *cond = rule->conds[i];
-        if(DEBUG_RULES)printf("  if: %s\n", cond->type);
+    #define RULE_PERROR() \
+        fprintf(stderr, " (cond=%s, state=%s, stateset=%s)\n", \
+            cond->type, rule->state->name, \
+            rule->state->stateset->filename);
 
-        #define RULE_PERROR() \
-            fprintf(stderr, " (cond=%s, state=%s, stateset=%s)\n", \
-                cond->type, rule->state->name, \
-                rule->state->stateset->filename);
+    bool rule_matched = false;
 
-        if(cond->type == state_cond_type_false){
+    if(cond->type == state_cond_type_false){
+        rule_matched = false;
+    }else if(cond->type == state_cond_type_key){
+        if(body == NULL){
+            fprintf(stderr, "No body");
+            RULE_PERROR()
+            return 2;}
+
+        int kstate_i = cond->u.key.kstate;
+        bool *kstate =
+            kstate_i == 0? body->keyinfo.isdown:
+            kstate_i == 1? body->keyinfo.wasdown:
+            kstate_i == 2? body->keyinfo.wentdown:
+            NULL;
+        if(kstate == NULL){
+            fprintf(stderr, "kstate out of range: %i", kstate_i);
+            RULE_PERROR()
+            return 2;}
+
+        char c = cond->u.key.c;
+        int key_i = body_get_key_i(body, c, false);
+        if(key_i == -1){
+            fprintf(stderr, "Unrecognized key char: %c", c);
+            RULE_PERROR()
+            return 2;}
+
+        rule_matched = kstate[key_i];
+        if(!cond->u.key.yes)rule_matched = !rule_matched;
+    }else if(cond->type == state_cond_type_coll){
+        if(body == NULL){
+            fprintf(stderr, "No body");
+            RULE_PERROR()
+            return 2;}
+
+        if(body->state == NULL){
             rule_matched = false;
-        }else if(cond->type == state_cond_type_key){
-            if(body == NULL){
-                fprintf(stderr, "No body");
-                RULE_PERROR()
-                break;}
-
-            int kstate_i = cond->u.key.kstate;
-            bool *kstate =
-                kstate_i == 0? body->keyinfo.isdown:
-                kstate_i == 1? body->keyinfo.wasdown:
-                kstate_i == 2? body->keyinfo.wentdown:
-                NULL;
-            if(kstate == NULL){
-                fprintf(stderr, "kstate out of range: %i", kstate_i);
-                RULE_PERROR()
-                return 2;}
-
-            char c = cond->u.key.c;
-            int key_i = body_get_key_i(body, c, false);
-            if(key_i == -1){
-                fprintf(stderr, "Unrecognized key char: %c", c);
-                RULE_PERROR()
-                return 2;}
-
-            rule_matched = kstate[key_i];
-            if(!cond->u.key.yes)rule_matched = !rule_matched;
-        }else if(cond->type == state_cond_type_coll){
-            if(body == NULL){
-                fprintf(stderr, "No body");
-                RULE_PERROR()
-                break;}
-
-            if(body->state == NULL){
-                rule_matched = false;
-                break;}
-
+        }else{
             hexmap_t *map = body->map;
             vecspace_t *space = map->space;
 
@@ -506,14 +499,50 @@ static int body_match_rule(body_t *body,
                     hitbox, &hitbox_trf, yes? all: !all);
                 rule_matched = yes? collide: !collide;
             }
-        }else{
-            fprintf(stderr, "Unrecognized state rule condition: %s",
-                cond->type);
-            RULE_PERROR()
-            return 2;
         }
+    }else if(cond->type == state_cond_type_chance){
+        int n = rand() % 100;
+        rule_matched = n <= cond->u.percent;
+    }else if(cond->type == state_cond_type_any){
+        rule_matched = false;
+        for(int i = 0; i < cond->u.any.conds_len; i++){
+            state_cond_t *subcond = cond->u.any.conds[i];
+            err = body_match_cond(body, actor, game, rule, subcond,
+                &rule_matched);
+            if(err)return err;
+            if(rule_matched)break;
+        }
+    }else{
+        fprintf(stderr, "Unrecognized state rule condition: %s",
+            cond->type);
+        RULE_PERROR()
+        return 2;
+    }
+    #undef RULE_PERROR
+
+    *rule_matched_ptr = rule_matched;
+    return 0;
+}
+
+static int body_match_rule(body_t *body,
+    actor_t *actor, hexgame_t *game,
+    state_rule_t *rule, bool *rule_matched_ptr
+){
+    int err;
+
+    /* NOTE: body and/or actor may be NULL.
+    We are basically reusing the rule/cond/effect structure for bodys
+    and actors; most conds/effects naturally apply to one or the other.
+    E.g. keypress stuff is for the body; "play" is for actor.
+    However, actor may want to check some stuff about the body, so
+    it may make use of "body-oriented" rules. */
+
+    bool rule_matched = true;
+    for(int i = 0; i < rule->conds_len; i++){
+        state_cond_t *cond = rule->conds[i];
+        err = body_match_cond(body, actor, game, rule, cond, &rule_matched);
+        if(err)return err;
         if(!rule_matched)break;
-        #undef RULE_PERROR
     }
 
     if(DEBUG_RULES && !rule_matched)printf("    NO MATCH\n");
@@ -549,7 +578,7 @@ static int body_apply_rule(body_t *body,
             if(body == NULL){
                 fprintf(stderr, "No body");
                 RULE_PERROR()
-                break;}
+                return 2;}
 
             vecspace_t *space = body->map->space;
             vec_t vec;
@@ -562,7 +591,7 @@ static int body_apply_rule(body_t *body,
             if(body == NULL){
                 fprintf(stderr, "No body");
                 RULE_PERROR()
-                break;}
+                return 2;}
 
             vecspace_t *space = body->map->space;
             rot_t effect_rot = effect->u.rot;
@@ -572,7 +601,7 @@ static int body_apply_rule(body_t *body,
             if(body == NULL){
                 fprintf(stderr, "No body");
                 RULE_PERROR()
-                break;}
+                return 2;}
 
             vecspace_t *space = body->map->space;
             body->turn = !body->turn;
@@ -583,13 +612,13 @@ static int body_apply_rule(body_t *body,
             if(body == NULL){
                 fprintf(stderr, "No body");
                 RULE_PERROR()
-                break;}
+                return 2;}
             body->cooldown = effect->u.delay;
         }else if(effect->type == state_effect_type_spawn){
             if(body == NULL){
                 fprintf(stderr, "No body");
                 RULE_PERROR()
-                break;}
+                return 2;}
 
             state_effect_spawn_t *spawn = &effect->u.spawn;
 
@@ -606,7 +635,7 @@ static int body_apply_rule(body_t *body,
             if(actor == NULL){
                 fprintf(stderr, "No actor");
                 RULE_PERROR()
-                break;}
+                return 2;}
             const char *play_filename = effect->u.play_filename;
             err = body_load_recording(body, play_filename, false);
             if(err)return err;
@@ -616,7 +645,7 @@ static int body_apply_rule(body_t *body,
             if(body == NULL){
                 fprintf(stderr, "No body");
                 RULE_PERROR()
-                break;}
+                return 2;}
             body->dead = effect->u.dead;
         }else{
             fprintf(stderr, "Unrecognized state rule effect: %s\n",
