@@ -574,15 +574,23 @@ int prismelrenderer_push_prismel(prismelrenderer_t *renderer, char *name,
     return 0;
 }
 
-palettemapper_t *prismelrenderer_get_palmapper(prismelrenderer_t *prend,
-    const char *name
-){
-    for(int i = 0; i < prend->palmappers_len; i++){
-        palettemapper_t *palmapper = prend->palmappers[i];
-        if(strcmp(palmapper->name, name) == 0)return palmapper;
+
+#define DICT_IMPLEMENT(TYPE, THING, THINGS) \
+    TYPE##_t *prismelrenderer_get_##THING(prismelrenderer_t *prend, \
+        const char *name \
+    ){ \
+        for(int i = 0; i < prend->THINGS##_len; i++){ \
+            TYPE##_t *entry = prend->THINGS[i]; \
+            if(strcmp(entry->name, name) == 0)return entry; \
+        } \
+        return NULL; \
     }
-    return NULL;
-}
+
+DICT_IMPLEMENT(prismel, prismel, prismels)
+DICT_IMPLEMENT(rendergraph, rendergraph, rendergraphs)
+DICT_IMPLEMENT(prismelmapper, mapper, mappers)
+DICT_IMPLEMENT(palettemapper, palmapper, palmappers)
+
 
 int prismelrenderer_get_solid_palettemapper(prismelrenderer_t *prend,
     int color, palettemapper_t **palmapper_ptr
@@ -603,35 +611,6 @@ int prismelrenderer_get_solid_palettemapper(prismelrenderer_t *prend,
     return 0;
 }
 
-prismel_t *prismelrenderer_get_prismel(prismelrenderer_t *prend,
-    const char *name
-){
-    for(int i = 0; i < prend->prismels_len; i++){
-        prismel_t *prismel = prend->prismels[i];
-        if(strcmp(prismel->name, name) == 0)return prismel;
-    }
-    return NULL;
-}
-
-rendergraph_t *prismelrenderer_get_rendergraph(prismelrenderer_t *prend,
-    const char *name
-){
-    for(int i = 0; i < prend->rendergraphs_len; i++){
-        rendergraph_t *rgraph = prend->rendergraphs[i];
-        if(!strcmp(rgraph->name, name))return rgraph;
-    }
-    return NULL;
-}
-
-prismelmapper_t *prismelrenderer_get_mapper(prismelrenderer_t *prend,
-    const char *name
-){
-    for(int i = 0; i < prend->mappers_len; i++){
-        prismelmapper_t *mapper = prend->mappers[i];
-        if(!strcmp(mapper->name, name))return mapper;
-    }
-    return NULL;
-}
 
 int prismelrenderer_load(prismelrenderer_t *prend, const char *filename){
     int err;

@@ -113,14 +113,13 @@ void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
 void prismelrenderer_dump_stats(prismelrenderer_t *renderer, FILE *f);
 int prismelrenderer_push_prismel(prismelrenderer_t *renderer, char *name,
     prismel_t **prismel_ptr);
-struct prismel *prismelrenderer_get_prismel(prismelrenderer_t *prend,
-    const char *name);
-struct rendergraph *prismelrenderer_get_rendergraph(prismelrenderer_t *prend,
-    const char *name);
-struct prismelmapper *prismelrenderer_get_mapper(prismelrenderer_t *prend,
-    const char *name);
-struct palettemapper *prismelrenderer_get_palmapper(prismelrenderer_t *prend,
-    const char *name);
+#define DICT_DECL(TYPE, THING, THINGS) \
+    struct TYPE *prismelrenderer_get_##THING(prismelrenderer_t *prend, \
+        const char *name);
+DICT_DECL(prismel, prismel, prismels)
+DICT_DECL(rendergraph, rendergraph, rendergraphs)
+DICT_DECL(prismelmapper, mapper, mappers)
+DICT_DECL(palettemapper, palmapper, palmappers)
 struct palettemapper;
 int prismelrenderer_get_solid_palettemapper(prismelrenderer_t *prend,
     int color, struct palettemapper **palmapper_ptr);
