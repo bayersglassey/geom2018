@@ -27,7 +27,7 @@
     #define FONT_BLITTER_PUTC_CALLBACK geomfont_blitter_putc_callback
     #define FONT_PRINTF geomfont_printf
     #define FONT_ARGS(SURFACE, X0, Y0) &app->geomfont, app->renderer, (SURFACE), \
-        app->sdl_palette, (X0), (Y0), app->zoom, NULL, NULL
+        app->sdl_palette, (X0), (Y0), 1, NULL, NULL
 #else
     #define FONT_BLITTER_T sdlfont_blitter_t
     #define FONT_BLITTER_INIT sdlfont_blitter_init
@@ -531,9 +531,10 @@ int test_app_mainloop_step(test_app_t *app){
                 "  page up/down - cycle through available rendergraphs\n"
                 "  0 - reset rotation\n"
                 "Currently displaying rendergraphs from file: %s\n"
-                "Currently displaying rendergraph %i / %i: %s\n"
-                "  pan=(%i,%i), rot = %i, flip = %c, zoom = %i,"
-                    " frame_i = %i (%i) / %i (%s)",
+                "Currently displaying rendergraph %i / %i:\n"
+                "  %s\n"
+                "  pan=(%i,%i), rot = %i, flip = %c, zoom = %i\n"
+                "  frame_i = %i (%i) / %i (%s)",
                 app->hexgame_running? 'y': 'n', app->took, app->delay_goal,
                 app->prend.n_textures,
                 app->prend_filename, app->cur_rgraph_i,
