@@ -6,7 +6,9 @@
 #include <SDL2/SDL.h>
 
 #include "font.h"
-#include "prismelrenderer.h"
+#include "geom.h"
+
+struct prismelmapper;
 
 
 /**********
@@ -14,10 +16,11 @@
 **********/
 
 typedef struct geomfont {
+    char *name;
     font_t *font;
 
-    prismelrenderer_t *prend;
-    rendergraph_t *char_rgraphs[FONT_N_CHARS];
+    struct prismelrenderer *prend;
+    struct rendergraph *char_rgraphs[FONT_N_CHARS];
     vec_t vx;
     vec_t vy;
 
@@ -25,12 +28,12 @@ typedef struct geomfont {
 } geomfont_t;
 
 void geomfont_cleanup(geomfont_t *geomfont);
-int geomfont_init(geomfont_t *geomfont, font_t *font,
-    prismelrenderer_t *prend, const char *prismel_name,
+int geomfont_init(geomfont_t *geomfont, char *name, font_t *font,
+    struct prismelrenderer *prend, const char *prismel_name,
     vec_t vx, vec_t vy);
 int geomfont_printf(geomfont_t *geomfont,
     SDL_Renderer *renderer, SDL_Surface *surface, SDL_Palette *pal,
-    int x0, int y0, int zoom, trf_t *trf, prismelmapper_t *mapper,
+    int x0, int y0, int zoom, trf_t *trf, struct prismelmapper *mapper,
     const char *msg, ...);
 
 
@@ -48,7 +51,7 @@ typedef struct geomfont_blitter {
     int y0;
     int zoom;
     trf_t trf;
-    prismelmapper_t *mapper;
+    struct prismelmapper *mapper;
 
     int col;
     int row;
@@ -56,7 +59,7 @@ typedef struct geomfont_blitter {
 
 void geomfont_blitter_init(geomfont_blitter_t *blitter, geomfont_t *geomfont,
     SDL_Renderer *renderer, SDL_Surface *surface, SDL_Palette *pal,
-    int x0, int y0, int zoom, trf_t *trf, prismelmapper_t *mapper);
+    int x0, int y0, int zoom, trf_t *trf, struct prismelmapper *mapper);
 int geomfont_blitter_putc(geomfont_blitter_t *blitter, char c);
 int geomfont_blitter_putc_callback(void *data, char c);
 

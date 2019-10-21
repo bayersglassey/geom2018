@@ -99,15 +99,15 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         return 2;}
     prend->cache_bitmaps = cache_bitmaps;
 
-    err = font_load(&app->font, "data/font.fus");
+    err = font_load(&app->font, strdup("data/font.fus"));
     if(err)return err;
 
     err = sdlfont_init(&app->sdlfont, &app->font, sdl_palette);
     if(err)return err;
     app->sdlfont.autoupper = true;
 
-    err = geomfont_init(&app->geomfont, &app->font, prend, "sq",
-        (vec_t){1, 0, 0, 0}, (vec_t){0, 0, 0, 1});
+    err = geomfont_init(&app->geomfont, strdup("geomfont1"), &app->font,
+        prend, "sq", (vec_t){1, 0, 0, 0}, (vec_t){0, 0, 0, 1});
     if(err)return err;
     app->geomfont.autoupper = true;
 

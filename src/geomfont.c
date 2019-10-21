@@ -8,6 +8,8 @@
 
 #include "util.h"
 #include "font.h"
+#include "geom.h"
+#include "prismelrenderer.h"
 #include "geomfont.h"
 
 
@@ -32,16 +34,17 @@ static char *generate_char_name(const char *base_name, const char *suffix, int i
 **********/
 
 void geomfont_cleanup(geomfont_t *geomfont){
-    /* Nuthin' */
+    free(geomfont->name);
 }
 
-int geomfont_init(geomfont_t *geomfont, font_t *font,
+int geomfont_init(geomfont_t *geomfont, char *name, font_t *font,
     prismelrenderer_t *prend, const char *prismel_name,
     vec_t vx, vec_t vy
 ){
     int err = 0;
     vecspace_t *space = prend->space;
 
+    geomfont->name = name;
     geomfont->font = font;
     geomfont->prend = prend;
     geomfont->autoupper = false;

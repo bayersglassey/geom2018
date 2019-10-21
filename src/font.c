@@ -14,12 +14,14 @@
 
 
 void font_cleanup(font_t *font){
+    free(font->filename);
     for(int i = 0; i < FONT_N_CHARS; i++){
         free(font->char_data[i]);
     }
 }
 
-int font_load(font_t *font, const char *filename){
+int font_load(font_t *font, char *filename){
+    font->filename = filename;
     font->char_w = 0;
     font->char_h = 0;
 
