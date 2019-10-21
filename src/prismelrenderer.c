@@ -12,6 +12,8 @@
 #include "util.h"
 #include "array.h"
 #include "write.h"
+#include "font.h"
+#include "geomfont.h"
 
 
 /***********
@@ -444,21 +446,25 @@ int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space){
     renderer->n_textures = 0;
     renderer->cache_bitmaps = true;
     renderer->space = space;
-    ARRAY_INIT(renderer->palmappers)
+    ARRAY_INIT(renderer->fonts)
+    ARRAY_INIT(renderer->geomfonts)
     ARRAY_INIT(renderer->prismels)
     ARRAY_INIT(renderer->rendergraphs)
     ARRAY_INIT(renderer->mappers)
+    ARRAY_INIT(renderer->palmappers)
     return 0;
 }
 
 void prismelrenderer_cleanup(prismelrenderer_t *renderer){
-    ARRAY_FREE_PTR(palettemapper_t*, renderer->palmappers,
-        palettemapper_cleanup)
+    ARRAY_FREE_PTR(font_t*, renderer->fonts, font_cleanup)
+    ARRAY_FREE_PTR(geomfont_t*, renderer->geomfonts, geomfont_cleanup)
     ARRAY_FREE_PTR(prismel_t*, renderer->prismels, prismel_cleanup)
     ARRAY_FREE_PTR(rendergraph_t*, renderer->rendergraphs,
         rendergraph_cleanup)
     ARRAY_FREE_PTR(prismelmapper_t*, renderer->mappers,
         prismelmapper_cleanup)
+    ARRAY_FREE_PTR(palettemapper_t*, renderer->palmappers,
+        palettemapper_cleanup)
 }
 
 void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
@@ -467,21 +473,6 @@ void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
     fprintf(f, "prismelrenderer: %p\n", renderer);
     if(renderer == NULL)return;
     fprintf(f, "  space: %p\n", renderer->space);
-
-    fprintf(f, "  palmappers:\n");
-    for(int i = 0; i < renderer->palmappers_len; i++){
-        palettemapper_t *palmapper = renderer->palmappers[i];
-        fprintf(f, "    palmapper: %p\n", palmapper);
-        fprintf(f, "      name: %s\n", palmapper->name);
-        fprintf(f, "      table:\n");
-        for(int i = 0; i < 16; i++){
-            fprintf(f, "        ");
-            for(int j = 0; j < 16; j++){
-                fprintf(f, "%2X ", palmapper->table[i * 16 + j]);
-            }
-            fprintf(f, "\n");
-        }
-    }
 
     fprintf(f, "  prismels:\n");
     for(int i = 0; i < renderer->prismels_len; i++){
@@ -511,6 +502,21 @@ void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
     for(int i = 0; i < renderer->mappers_len; i++){
         prismelmapper_t *mapper = renderer->mappers[i];
         prismelmapper_dump(mapper, f, 4);
+    }
+
+    fprintf(f, "  palmappers:\n");
+    for(int i = 0; i < renderer->palmappers_len; i++){
+        palettemapper_t *palmapper = renderer->palmappers[i];
+        fprintf(f, "    palmapper: %p\n", palmapper);
+        fprintf(f, "      name: %s\n", palmapper->name);
+        fprintf(f, "      table:\n");
+        for(int i = 0; i < 16; i++){
+            fprintf(f, "        ");
+            for(int j = 0; j < 16; j++){
+                fprintf(f, "%2X ", palmapper->table[i * 16 + j]);
+            }
+            fprintf(f, "\n");
+        }
     }
 }
 
@@ -575,25 +581,44 @@ int prismelrenderer_push_prismel(prismelrenderer_t *renderer, char *name,
 }
 
 
-#define DICT_IMPLEMENT(TYPE, THING, THINGS) \
+#define DICT_IMPLEMENT(TYPE, THING, THINGS, NAME) \
     TYPE##_t *prismelrenderer_get_##THING(prismelrenderer_t *prend, \
-        const char *name \
+        const char *NAME \
     ){ \
         for(int i = 0; i < prend->THINGS##_len; i++){ \
             TYPE##_t *entry = prend->THINGS[i]; \
-            if(strcmp(entry->name, name) == 0)return entry; \
+            if(strcmp(entry->NAME, NAME) == 0)return entry; \
         } \
         return NULL; \
     }
 
-DICT_IMPLEMENT(prismel, prismel, prismels)
-DICT_IMPLEMENT(rendergraph, rendergraph, rendergraphs)
-DICT_IMPLEMENT(prismelmapper, mapper, mappers)
-DICT_IMPLEMENT(palettemapper, palmapper, palmappers)
+DICT_IMPLEMENT(font, font, fonts, filename)
+DICT_IMPLEMENT(geomfont, geomfont, geomfonts, name)
+DICT_IMPLEMENT(prismel, prismel, prismels, name)
+DICT_IMPLEMENT(rendergraph, rendergraph, rendergraphs, name)
+DICT_IMPLEMENT(prismelmapper, mapper, mappers, name)
+DICT_IMPLEMENT(palettemapper, palmapper, palmappers, name)
 
 
-int prismelrenderer_get_solid_palettemapper(prismelrenderer_t *prend,
-    int color, palettemapper_t **palmapper_ptr
+int prismelrenderer_get_or_create_font(
+    prismelrenderer_t *prend, const char *filename,
+    font_t **font_ptr
+){
+    int err;
+    font_t *font = prismelrenderer_get_font(prend, filename);
+    if(font == NULL){
+        ARRAY_PUSH_NEW(font_t*, prend->fonts, _font)
+        font = _font;
+        err = font_load(font, strdup(filename));
+        if(err)return err;
+    }
+    *font_ptr = font;
+    return 0;
+}
+
+int prismelrenderer_get_or_create_solid_palettemapper(
+    prismelrenderer_t *prend, int color,
+    palettemapper_t **palmapper_ptr
 ){
     int err;
     char *name = generate_indexed_name("solid", color);
@@ -914,7 +939,7 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
                 if(mapper->solid){
                     Uint8 color = prismel_trf->color;
                     if(table != NULL)color = table[color];
-                    err = prismelrenderer_get_solid_palettemapper(
+                    err = prismelrenderer_get_or_create_solid_palettemapper(
                         prend, color,
                         &new_rendergraph_trf->palmapper);
                     if(err)return err;

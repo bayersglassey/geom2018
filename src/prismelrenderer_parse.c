@@ -7,6 +7,8 @@
 #include "lexer_macros.h"
 #include "util.h"
 #include "array.h"
+#include "font.h"
+#include "geomfont.h"
 #include "prismelrenderer.h"
 
 
@@ -477,6 +479,31 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
         goto ok;
     }
 
+    if(GOT("text")){
+        NEXT
+        GET("(")
+
+        char *geomfont_name;
+        GET_STR(geomfont_name)
+
+        geomfont_t *geomfont = prismelrenderer_get_geomfont(prend, geomfont_name);
+        if(geomfont == NULL){
+            fprintf(stderr, "%s: Couldn't find geomfont: %s\n",
+                lexer->filename, geomfont_name);
+            return 2;
+        }
+        free(geomfont_name);
+
+        char *text;
+        GET_STR(text)
+
+        fprintf(stderr, "--- Parsed text: %s\n", text);
+        free(text);
+
+        GET(")")
+        goto ok;
+    }
+
     const char *animation_type = rendergraph_animation_type_cycle;
     int n_frames = 1;
 
@@ -659,8 +686,8 @@ ok:
 static int parse_mappers(prismelrenderer_t *prend, fus_lexer_t *lexer){
     INIT
     while(1){
-        char *name;
         if(GOT(")"))break;
+        char *name;
         GET_STR(name)
         if(prismelrenderer_get_mapper(prend, name) != NULL){
             fprintf(stderr, "Mapper %s already defined\n", name);
@@ -670,6 +697,53 @@ static int parse_mappers(prismelrenderer_t *prend, fus_lexer_t *lexer){
         prismelmapper_t *mapper;
         err = fus_lexer_get_mapper(lexer, prend, name, &mapper);
         if(err)return err;
+    }
+    NEXT
+    return 0;
+}
+
+static int parse_geomfonts(prismelrenderer_t *prend, fus_lexer_t *lexer){
+    INIT
+    while(1){
+        if(GOT(")"))break;
+
+        char *name;
+        GET_STR(name)
+        if(prismelrenderer_get_geomfont(prend, name) != NULL){
+            fprintf(stderr, "Geomfont %s already defined\n", name);
+            return 2;
+        }
+
+        GET("(")
+
+        char *font_filename;
+        GET_STR(font_filename)
+        font_t *font;
+        err = prismelrenderer_get_or_create_font(
+            prend, font_filename, &font);
+        if(err)return err;
+        free(font_filename);
+
+        GET("prismel")
+        GET("(")
+        {
+            char *prismel_name;
+            GET_STR(prismel_name)
+
+            vec_t vx, vy;
+            GET_VEC(prend->space, vx)
+            GET_VEC(prend->space, vy)
+
+            ARRAY_PUSH_NEW(geomfont_t*, prend->geomfonts, geomfont)
+            err = geomfont_init(geomfont, name, font,
+                prend, prismel_name, vx, vy);
+            if(err)return err;
+
+            free(prismel_name);
+        }
+        GET(")")
+
+        GET(")")
     }
     NEXT
     return 0;
@@ -706,6 +780,11 @@ int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer){
             NEXT
             GET("(")
             err = parse_mappers(prend, lexer);
+            if(err)return err;
+        }else if(GOT("geomfonts")){
+            NEXT
+            GET("(")
+            err = parse_geomfonts(prend, lexer);
             if(err)return err;
         }else if(GOT("import")){
             NEXT

@@ -11,6 +11,8 @@
 #include "bounds.h"
 #include "array.h"
 #include "rendergraph.h"
+#include "font.h"
+#include "geomfont.h"
 
 
 /***********
@@ -98,10 +100,12 @@ typedef struct prismelrenderer {
     int n_textures;
     bool cache_bitmaps;
     vecspace_t *space;
-    ARRAY_DECL(struct palettemapper*, palmappers)
+    ARRAY_DECL(struct font*, fonts)
+    ARRAY_DECL(struct geomfont*, geomfonts)
     ARRAY_DECL(struct prismel*, prismels)
     ARRAY_DECL(struct rendergraph*, rendergraphs)
     ARRAY_DECL(struct prismelmapper*, mappers)
+    ARRAY_DECL(struct palettemapper*, palmappers)
 } prismelrenderer_t;
 
 
@@ -113,16 +117,22 @@ void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
 void prismelrenderer_dump_stats(prismelrenderer_t *renderer, FILE *f);
 int prismelrenderer_push_prismel(prismelrenderer_t *renderer, char *name,
     prismel_t **prismel_ptr);
-#define DICT_DECL(TYPE, THING, THINGS) \
+#define DICT_DECL(TYPE, THING, THINGS, NAME) \
     struct TYPE *prismelrenderer_get_##THING(prismelrenderer_t *prend, \
-        const char *name);
-DICT_DECL(prismel, prismel, prismels)
-DICT_DECL(rendergraph, rendergraph, rendergraphs)
-DICT_DECL(prismelmapper, mapper, mappers)
-DICT_DECL(palettemapper, palmapper, palmappers)
+        const char *NAME);
+DICT_DECL(font, font, fonts, filename)
+DICT_DECL(geomfont, geomfont, geomfonts, name)
+DICT_DECL(prismel, prismel, prismels, name)
+DICT_DECL(rendergraph, rendergraph, rendergraphs, name)
+DICT_DECL(prismelmapper, mapper, mappers, name)
+DICT_DECL(palettemapper, palmapper, palmappers, name)
+int prismelrenderer_get_or_create_font(
+    prismelrenderer_t *prend, const char *filename,
+    font_t **font_ptr);
 struct palettemapper;
-int prismelrenderer_get_solid_palettemapper(prismelrenderer_t *prend,
-    int color, struct palettemapper **palmapper_ptr);
+int prismelrenderer_get_or_create_solid_palettemapper(
+    prismelrenderer_t *prend, int color,
+    struct palettemapper **palmapper_ptr);
 int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer);
 int prismelrenderer_load(prismelrenderer_t *prend, const char *filename);
 int prismelrenderer_save(prismelrenderer_t *prend, const char *filename);
