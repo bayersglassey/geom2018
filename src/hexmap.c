@@ -207,6 +207,25 @@ int hexmap_recording_init(hexmap_recording_t *recording, int type,
 }
 
 
+/**********************
+ * HEXMAP RENDERGRAPH *
+ **********************/
+
+void hexmap_rendergraph_cleanup(hexmap_rendergraph_t *rendergraph){
+    free(rendergraph->name);
+    free(rendergraph->palmapper_name);
+}
+
+int hexmap_rendergraph_init(hexmap_rendergraph_t *rendergraph,
+    char *name, char *palmapper_name
+){
+    rendergraph->name = name;
+    rendergraph->palmapper_name = palmapper_name;
+    trf_zero(&rendergraph->trf);
+    return 0;
+}
+
+
 
 /**********
  * HEXMAP *

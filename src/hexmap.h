@@ -80,6 +80,23 @@ int hexmap_recording_init(hexmap_recording_t *recording, int type,
     char *filename, char *palmapper_name);
 
 
+/**********************
+ * HEXMAP RENDERGRAPH *
+ **********************/
+
+/* ...that is, enough information to display a rendergraph at a given
+location on a hexmap... */
+
+typedef struct hexmap_rendergraph {
+    char *name;
+    char *palmapper_name;
+    trf_t trf;
+} hexmap_rendergraph_t;
+
+void hexmap_rendergraph_cleanup(hexmap_rendergraph_t *rendergraph);
+int hexmap_rendergraph_init(hexmap_rendergraph_t *rendergraph,
+    char *name, char *palmapper_name);
+
 
 /**************
  * HEXCOLLMAP *
@@ -108,6 +125,7 @@ typedef struct hexcollmap_tile {
 enum hexcollmap_part_type {
     HEXCOLLMAP_PART_TYPE_HEXCOLLMAP,
     HEXCOLLMAP_PART_TYPE_RECORDING,
+    HEXCOLLMAP_PART_TYPE_RENDERGRAPH,
 };
 
 typedef struct hexcollmap_part {
@@ -126,6 +144,7 @@ typedef struct hexcollmap {
     vecspace_t *space;
     hexcollmap_tile_t *tiles;
     ARRAY_DECL(hexmap_recording_t*, recordings)
+    ARRAY_DECL(hexmap_rendergraph_t*, rendergraphs)
 } hexcollmap_t;
 
 

@@ -41,6 +41,8 @@ void hexcollmap_cleanup(hexcollmap_t *collmap){
     free(collmap->tiles);
     ARRAY_FREE_PTR(hexmap_recording_t*, collmap->recordings,
         hexmap_recording_cleanup)
+    ARRAY_FREE_PTR(hexmap_rendergraph_t*, collmap->rendergraphs,
+        hexmap_rendergraph_cleanup)
 }
 
 int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
@@ -50,6 +52,7 @@ int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
     collmap->name = name;
     collmap->space = space;
     ARRAY_INIT(collmap->recordings);
+    ARRAY_INIT(collmap->rendergraphs);
     return 0;
 }
 
@@ -224,6 +227,24 @@ static int hexcollmap_draw(hexcollmap_t *collmap1, hexcollmap_t *collmap2,
         trf_apply(space, &recording1->trf, trf);
     }
 
+    /* "Draw" rendergraphs from collmap2 onto collmap1, in other words copy
+    them while adjusting rendergraph->trf appropriately */
+    for(int i = 0; i < collmap2->rendergraphs_len; i++){
+        hexmap_rendergraph_t *rendergraph2 = collmap2->rendergraphs[i];
+
+        char *name = rendergraph2->name?
+            strdup(rendergraph2->name): NULL;
+        char *palmapper_name = rendergraph2->palmapper_name?
+            strdup(rendergraph2->palmapper_name): NULL;
+
+        ARRAY_PUSH_NEW(hexmap_rendergraph_t*, collmap1->rendergraphs,
+            rendergraph1)
+        err = hexmap_rendergraph_init(rendergraph1,
+            name, palmapper_name);
+        if(err)return err;
+        trf_apply(space, &rendergraph1->trf, trf);
+    }
+
     return 0;
 }
 
@@ -259,7 +280,21 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
             HEXMAP_RECORDING_TYPE_RECORDING,
             filename, palmapper_name);
         if(err)return err;
+
+        /* hexmap_recording_init set up recording->trf already, and now
+        we modify it by applying trf to it */
         trf_apply(space, &recording->trf, trf);
+    }else if(part->type == HEXCOLLMAP_PART_TYPE_RENDERGRAPH){
+        char *filename = part->filename?
+            strdup(part->filename): NULL;
+        char *palmapper_name = part->palmapper_name?
+            strdup(part->palmapper_name): NULL;
+        ARRAY_PUSH_NEW(hexmap_rendergraph_t*, collmap->rendergraphs,
+            rendergraph)
+        err = hexmap_rendergraph_init(rendergraph,
+            filename, palmapper_name);
+        if(err)return err;
+        trf_cpy(space, &rendergraph->trf, trf);
     }else{
         fprintf(stderr, "Unrecognized part type: %i\n", part->type);
         return 2;
@@ -637,6 +672,10 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
                         err = fus_lexer_next(lexer);
                         if(err)return err;
                         type = HEXCOLLMAP_PART_TYPE_RECORDING;
+                    }else if(fus_lexer_got(lexer, "shape")){
+                        err = fus_lexer_next(lexer);
+                        if(err)return err;
+                        type = HEXCOLLMAP_PART_TYPE_RENDERGRAPH;
                     }
 
                     if(fus_lexer_got(lexer, "empty")){
