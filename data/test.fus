@@ -7,6 +7,7 @@ import "data/curvy.fus"
 import "data/dodecas.fus"
 
 import "data/mappers.fus"
+import "data/texts.fus"
 
 import "data/maps/test/tiles.fus"
 import "data/maps/demo/tilesets/water_tiles.fus"
