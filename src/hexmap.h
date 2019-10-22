@@ -181,11 +181,11 @@ bool hexcollmap_collide(
  **********/
 
 typedef struct hexmap_door {
-    vec_t pos;
-    rot_t rot;
-    bool turn;
-    char *map_filename;
-    char *anim_filename;
+    vec_t respawn_pos;
+    rot_t respawn_rot;
+    bool respawn_turn;
+    char *respawn_map_filename;
+    char *respawn_anim_filename;
 } hexmap_door_t;
 
 typedef struct hexmap_submap {

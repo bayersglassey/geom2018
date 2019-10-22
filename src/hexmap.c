@@ -498,14 +498,14 @@ static int hexmap_parse_door(hexmap_t *map, hexmap_submap_t *submap,
         if(err)return err;
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
-        err = fus_lexer_get_str(lexer, &door->map_filename);
+        err = fus_lexer_get_str(lexer, &door->respawn_map_filename);
         if(err)return err;
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
     }else{
-        /* Non-null door->map_filename indicates player should
-        "teleport" to door->pos, door->rot, door->turn */
-        door->map_filename = strdup(map->name);
+        /* Non-null door->respawn_map_filename indicates player should
+        "teleport" to door->respawn_pos, door->respawn_rot, door->respawn_turn */
+        door->respawn_map_filename = strdup(map->name);
     }
 
     if(fus_lexer_got(lexer, "anim")){
@@ -513,7 +513,7 @@ static int hexmap_parse_door(hexmap_t *map, hexmap_submap_t *submap,
         if(err)return err;
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
-        err = fus_lexer_get_str(lexer, &door->anim_filename);
+        err = fus_lexer_get_str(lexer, &door->respawn_anim_filename);
         if(err)return err;
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
@@ -523,7 +523,7 @@ static int hexmap_parse_door(hexmap_t *map, hexmap_submap_t *submap,
     if(err)return err;
     err = fus_lexer_get(lexer, "(");
     if(err)return err;
-    err = fus_lexer_get_vec(lexer, space, door->pos);
+    err = fus_lexer_get_vec(lexer, space, door->respawn_pos);
     if(err)return err;
     err = fus_lexer_get(lexer, ")");
     if(err)return err;
@@ -532,7 +532,7 @@ static int hexmap_parse_door(hexmap_t *map, hexmap_submap_t *submap,
     if(err)return err;
     err = fus_lexer_get(lexer, "(");
     if(err)return err;
-    err = fus_lexer_get_int(lexer, &door->rot);
+    err = fus_lexer_get_int(lexer, &door->respawn_rot);
     if(err)return err;
     err = fus_lexer_get(lexer, ")");
     if(err)return err;
@@ -541,7 +541,7 @@ static int hexmap_parse_door(hexmap_t *map, hexmap_submap_t *submap,
     if(err)return err;
     err = fus_lexer_get(lexer, "(");
     if(err)return err;
-    err = fus_lexer_get_yn(lexer, &door->turn);
+    err = fus_lexer_get_yn(lexer, &door->respawn_turn);
     if(err)return err;
     err = fus_lexer_get(lexer, ")");
     if(err)return err;
@@ -827,7 +827,10 @@ static int hexmap_collide_elem(hexmap_t *map, int all_type,
             hexcollmap_elem_t *elem = get_elem(collmap1, &subindex);
             if(elem != NULL){
                 if(elem->tile_c == 'S')*collide_savepoint_ptr = submap;
-                if(elem->tile_c == 'D')*collide_door_ptr = submap;
+                if(elem->tile_c == 'D'){
+                    /* TODO: find the door, and set a ptr to it */
+                    *collide_door_ptr = submap;
+                }
                 if(elem->tile_c == 'w')*collide_water_ptr = submap;
             }
             if(hexcollmap_elem_is_solid(elem)){
@@ -984,8 +987,8 @@ int hexmap_step(hexmap_t *map){
  *****************/
 
 void hexmap_door_cleanup(hexmap_door_t *door){
-    free(door->map_filename);
-    free(door->anim_filename);
+    free(door->respawn_map_filename);
+    free(door->respawn_anim_filename);
 }
 
 void hexmap_submap_cleanup(hexmap_submap_t *submap){

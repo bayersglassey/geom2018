@@ -294,30 +294,30 @@ int player_step(player_t *player, hexgame_t *game){
             hexmap_door_t *door = NULL;
             if(door_i < cur_submap->doors_len)door = cur_submap->doors[door_i];
 
-            if(door && (door->map_filename || door->anim_filename)){
+            if(door && (door->respawn_map_filename || door->respawn_anim_filename)){
                 hexmap_t *new_map = body->map;
-                if(door->map_filename != NULL){
+                if(door->respawn_map_filename != NULL){
                     /* Switch map */
                     err = hexgame_get_or_load_map(game,
-                        door->map_filename, &new_map);
+                        door->respawn_map_filename, &new_map);
                     if(err)return err;
                 }
 
                 /* Respawn body */
                 err = body_respawn(body,
-                    door->pos, door->rot, door->turn, new_map);
+                    door->respawn_pos, door->respawn_rot, door->respawn_turn, new_map);
                 if(err)return err;
 
-                if(door->anim_filename != NULL){
+                if(door->respawn_anim_filename != NULL){
                     /* Switch anim (stateset) */
 
                     /* HACK: If you've become something other than a spider,
                     anim-changing doors change you back into a spider. */
                     if(strcmp(body->stateset.filename, "anim/player.fus")){
-                        door->anim_filename = "anim/player.fus";
+                        door->respawn_anim_filename = "anim/player.fus";
                     }
 
-                    err = body_set_stateset(body, door->anim_filename, NULL);
+                    err = body_set_stateset(body, door->respawn_anim_filename, NULL);
                     if(err)return err;
                 }
 
