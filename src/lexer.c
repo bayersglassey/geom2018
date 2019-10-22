@@ -479,8 +479,10 @@ int fus_lexer_get_str(fus_lexer_t *lexer, char **s){
         const char *token = lexer->token;
         int token_len = lexer->token_len;
 
-        /* Length of s is length of token without the surrounding
-        '"' characters */
+        /* Maximum length of s is length of token without the surrounding
+        '"' characters.
+        (The actual length may be shorter if there are '\'-escaped
+        characters in the string.) */
         int s_len = token_len - 2;
 
         char *ss0 = malloc(s_len + 1);
@@ -492,6 +494,9 @@ int fus_lexer_get_str(fus_lexer_t *lexer, char **s){
             if(c == '\\'){
                 i++;
                 c = token[i];
+                if(c == 'n'){
+                    c = '\n';
+                }
             }
             *ss = c;
             ss++;
