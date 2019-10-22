@@ -1,9 +1,15 @@
 
 geomfonts:
     "geomfont1":
-        "data/font.fus"
+        "data/font.fus" autoupper
         prismel: "sq" (1 0 0 0) (0 0 0 1)
 
 shapes:
     "txt_title":
-        text: "geomfont1" "Depths of Uo"
+        text: "geomfont1" "Depths\n  of\n  Uo" (3 1)
+    "txt_new_game":
+        text: "geomfont1" "New"
+    "txt_continue":
+        text: "geomfont1" "Load"
+    "txt_exit":
+        text: "geomfont1" "Quit"
