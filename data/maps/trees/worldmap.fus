@@ -20,11 +20,12 @@ submaps:
                 tileset: "data/maps/trees/tilesets/trees_dark.fus"
             :
                 file: "data/maps/trees/start.fus"
-                door:
-                    map: "data/maps/demo/worldmap.fus"
-                    pos: (36 -71)
-                    rot: 0
-                    turn: y
+                doors:
+                    :
+                        map: "data/maps/demo/worldmap.fus"
+                        pos: (36 -71)
+                        rot: 0
+                        turn: y
     :
         pos: (32 10)
         camera: (0 0)

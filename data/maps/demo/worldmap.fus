@@ -201,11 +201,12 @@ submaps:
                                                 tileset: "data/tileset1_bg.fus"
                                             :
                                                 file: "data/maps/demo/big.fus"
-                                                door:
-                                                    map: "data/maps/trees/worldmap.fus"
-                                                    pos: (1 1)
-                                                    rot: 0
-                                                    turn: n
+                                                doors:
+                                                    :
+                                                        map: "data/maps/trees/worldmap.fus"
+                                                        pos: (1 1)
+                                                        rot: 0
+                                                        turn: n
                                     :
                                         file: "data/maps/demo/fisheye.fus"
                                         pos: (0 0)
@@ -220,13 +221,14 @@ submaps:
                                         camera: (0 0)
                                     :
                                         file: "data/maps/demo/fisheye4.fus"
-                                        door:
-                                            anim: "anim/roller.fus"
-                                            pos: (-11 -80)
-                                            rot: 0
-                                            turn: n
                                         pos: (-48 -28)
                                         camera: (0 0)
+                                        doors:
+                                            :
+                                                anim: "anim/roller.fus"
+                                                pos: (-11 -80)
+                                                rot: 0
+                                                turn: n
             :
                 file: "data/maps/demo/pebbles2.fus"
                 pos: (22 9)
@@ -247,16 +249,17 @@ submaps:
                             : "data/maps/demo/recs/tunnels_002.fus"
                     :
                         file: "data/maps/demo/tunnels2.fus"
-                        door:
-                            #map: "data/maps/wilderness/worldmap.fus"
-                            map: "data/maps/water/worldmap.fus"
-                            pos: (0 0)
-                            rot: 0
-                            turn: n
                         pos: eval: (13 1) + (18 8)
                         camera: (0 5)
                         mapper: ("triple")
                         tileset: "data/maps/demo/tilesets/shiny.fus"
+                        doors:
+                            :
+                                #map: "data/maps/wilderness/worldmap.fus"
+                                map: "data/maps/water/worldmap.fus"
+                                pos: (0 0)
+                                rot: 0
+                                turn: n
 
 
     :
@@ -272,14 +275,15 @@ submaps:
         submaps:
             :
                 file: "data/maps/test/map3.fus"
-                door:
-                    map: "data/maps/test/worldmap.fus"
-                    pos: (0 0)
-                    rot: 0
-                    turn: n
                 pos: (0 0)
                 camera: (0 4)
                 mapper: ("triple")
+                doors:
+                    :
+                        map: "data/maps/test/worldmap.fus"
+                        pos: (0 0)
+                        rot: 0
+                        turn: n
                 submaps:
                     :
                         file: "data/maps/test/map2.fus"
@@ -292,13 +296,14 @@ submaps:
                 submaps:
                     :
                         file: "data/maps/test/map3x.fus"
-                        door:
-                            map: "data/maps/demo/worldmap.fus"
-                            anim: "anim/roller.fus"
-                            pos: (62 85)
-                            rot: 0
-                            turn: y
                         pos: (1 10)
+                        doors:
+                            :
+                                map: "data/maps/demo/worldmap.fus"
+                                anim: "anim/roller.fus"
+                                pos: (62 85)
+                                rot: 0
+                                turn: y
             :
                 pos: (-1 -10)
                 camera: (4 0)

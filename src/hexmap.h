@@ -180,6 +180,14 @@ bool hexcollmap_collide(
  * HEXMAP *
  **********/
 
+typedef struct hexmap_door {
+    vec_t pos;
+    rot_t rot;
+    bool turn;
+    char *map_filename;
+    char *anim_filename;
+} hexmap_door_t;
+
 typedef struct hexmap_submap {
     bool solid;
     vec_t pos;
@@ -196,11 +204,7 @@ typedef struct hexmap_submap {
     palette_t palette;
     hexmap_tileset_t tileset;
 
-    vec_t door_pos;
-    rot_t door_rot;
-    bool door_turn;
-    char *door_map_filename;
-    char *door_anim_filename;
+    ARRAY_DECL(hexmap_door_t*, doors)
 } hexmap_submap_t;
 
 typedef struct hexmap {
@@ -239,6 +243,7 @@ void hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
     hexmap_submap_t **collide_water_ptr);
 int hexmap_step(hexmap_t *map);
 
+void hexmap_door_cleanup(hexmap_door_t *door);
 void hexmap_submap_cleanup(hexmap_submap_t *submap);
 int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
     char *filename, bool solid, vec_t pos, int camera_type, vec_t camera_pos,

@@ -248,12 +248,12 @@ int player_step(player_t *player, hexgame_t *game){
             }
 
             if(!standing_flat){
-                collide_savepoint = false;
-                collide_door = false;
+                collide_savepoint = NULL;
+                collide_door = NULL;
             }else{
                 /* HACK: Only spiders can use savepoints */
                 if(strcmp(body->stateset.filename, "anim/player.fus")){
-                    collide_savepoint = false;}
+                    collide_savepoint = NULL;}
             }
         }
 
@@ -289,33 +289,35 @@ int player_step(player_t *player, hexgame_t *game){
 
         if(collide_door){
             hexmap_submap_t *cur_submap = collide_door;
-            const char *door_map_filename = cur_submap->door_map_filename;
-            const char *door_anim_filename = cur_submap->door_anim_filename;
 
-            if(door_map_filename || door_anim_filename){
+            int door_i = 0; /* TODO, hardcoded for now */
+            hexmap_door_t *door = NULL;
+            if(door_i < cur_submap->doors_len)door = cur_submap->doors[door_i];
+
+            if(door && (door->map_filename || door->anim_filename)){
                 hexmap_t *new_map = body->map;
-                if(door_map_filename != NULL){
+                if(door->map_filename != NULL){
                     /* Switch map */
                     err = hexgame_get_or_load_map(game,
-                        cur_submap->door_map_filename, &new_map);
+                        door->map_filename, &new_map);
                     if(err)return err;
                 }
 
-                err = body_respawn(body, cur_submap->door_pos,
-                    cur_submap->door_rot, cur_submap->door_turn,
-                    new_map);
+                /* Respawn body */
+                err = body_respawn(body,
+                    door->pos, door->rot, door->turn, new_map);
                 if(err)return err;
 
-                if(door_anim_filename != NULL){
+                if(door->anim_filename != NULL){
                     /* Switch anim (stateset) */
 
                     /* HACK: If you've become something other than a spider,
                     anim-changing doors change you back into a spider. */
                     if(strcmp(body->stateset.filename, "anim/player.fus")){
-                        door_anim_filename = "anim/player.fus";
+                        door->anim_filename = "anim/player.fus";
                     }
 
-                    err = body_set_stateset(body, door_anim_filename, NULL);
+                    err = body_set_stateset(body, door->anim_filename, NULL);
                     if(err)return err;
                 }
 

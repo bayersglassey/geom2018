@@ -484,6 +484,71 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, char *name,
     return 0;
 }
 
+static int hexmap_parse_door(hexmap_t *map, hexmap_submap_t *submap,
+    hexmap_door_t *door, fus_lexer_t *lexer
+){
+    /* We assume door's memory starts off zero'd, e.g. it was calloc'd
+    by ARRAY_PUSH_NEW */
+    int err;
+
+    vecspace_t *space = map->space;
+
+    if(fus_lexer_got(lexer, "map")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_get_str(lexer, &door->map_filename);
+        if(err)return err;
+        err = fus_lexer_get(lexer, ")");
+        if(err)return err;
+    }else{
+        /* Non-null door->map_filename indicates player should
+        "teleport" to door->pos, door->rot, door->turn */
+        door->map_filename = strdup(map->name);
+    }
+
+    if(fus_lexer_got(lexer, "anim")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_get_str(lexer, &door->anim_filename);
+        if(err)return err;
+        err = fus_lexer_get(lexer, ")");
+        if(err)return err;
+    }
+
+    err = fus_lexer_get(lexer, "pos");
+    if(err)return err;
+    err = fus_lexer_get(lexer, "(");
+    if(err)return err;
+    err = fus_lexer_get_vec(lexer, space, door->pos);
+    if(err)return err;
+    err = fus_lexer_get(lexer, ")");
+    if(err)return err;
+
+    err = fus_lexer_get(lexer, "rot");
+    if(err)return err;
+    err = fus_lexer_get(lexer, "(");
+    if(err)return err;
+    err = fus_lexer_get_int(lexer, &door->rot);
+    if(err)return err;
+    err = fus_lexer_get(lexer, ")");
+    if(err)return err;
+
+    err = fus_lexer_get(lexer, "turn");
+    if(err)return err;
+    err = fus_lexer_get(lexer, "(");
+    if(err)return err;
+    err = fus_lexer_get_yn(lexer, &door->turn);
+    if(err)return err;
+    err = fus_lexer_get(lexer, ")");
+    if(err)return err;
+
+    return 0;
+}
+
 int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
     vec_t parent_pos, vec_t parent_camera_pos, int parent_camera_type,
     prismelmapper_t *parent_mapper, char *palette_filename,
@@ -515,75 +580,6 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
         if(err)return err;
         err = fus_lexer_get_str(lexer, &submap_filename);
         if(err)return err;
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
-    }
-
-    vec_t door_pos;
-    vec_zero(door_pos);
-    rot_t door_rot = 0;
-    bool door_turn = false;
-    char *door_map_filename = NULL;
-    char *door_anim_filename = NULL;
-    if(fus_lexer_got(lexer, "door")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
-        {
-            if(fus_lexer_got(lexer, "map")){
-                err = fus_lexer_next(lexer);
-                if(err)return err;
-                err = fus_lexer_get(lexer, "(");
-                if(err)return err;
-                err = fus_lexer_get_str(lexer, &door_map_filename);
-                if(err)return err;
-                err = fus_lexer_get(lexer, ")");
-                if(err)return err;
-            }else{
-                /* Non-null door_map_filename indicates player should
-                "teleport" to door_pos, door_rot, door_turn */
-                door_map_filename = strdup(map->name);
-            }
-
-            if(fus_lexer_got(lexer, "anim")){
-                err = fus_lexer_next(lexer);
-                if(err)return err;
-                err = fus_lexer_get(lexer, "(");
-                if(err)return err;
-                err = fus_lexer_get_str(lexer, &door_anim_filename);
-                if(err)return err;
-                err = fus_lexer_get(lexer, ")");
-                if(err)return err;
-            }
-
-            err = fus_lexer_get(lexer, "pos");
-            if(err)return err;
-            err = fus_lexer_get(lexer, "(");
-            if(err)return err;
-            err = fus_lexer_get_vec(lexer, space, door_pos);
-            if(err)return err;
-            err = fus_lexer_get(lexer, ")");
-            if(err)return err;
-
-            err = fus_lexer_get(lexer, "rot");
-            if(err)return err;
-            err = fus_lexer_get(lexer, "(");
-            if(err)return err;
-            err = fus_lexer_get_int(lexer, &door_rot);
-            if(err)return err;
-            err = fus_lexer_get(lexer, ")");
-            if(err)return err;
-
-            err = fus_lexer_get(lexer, "turn");
-            if(err)return err;
-            err = fus_lexer_get(lexer, "(");
-            if(err)return err;
-            err = fus_lexer_get_yn(lexer, &door_turn);
-            if(err)return err;
-            err = fus_lexer_get(lexer, ")");
-            if(err)return err;
-        }
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
     }
@@ -671,12 +667,29 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
         err = hexmap_submap_create_rgraph(map, submap);
         if(err)return err;
 
-        /* door stuff */
-        vec_cpy(space->dims, submap->door_pos, door_pos);
-        submap->door_rot = door_rot;
-        submap->door_turn = door_turn;
-        submap->door_map_filename = door_map_filename;
-        submap->door_anim_filename = door_anim_filename;
+        /* parse doors */
+        if(fus_lexer_got(lexer, "doors")){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            err = fus_lexer_get(lexer, "(");
+            if(err)return err;
+
+            while(1){
+                if(fus_lexer_got(lexer, ")"))break;
+
+                err = fus_lexer_get(lexer, "(");
+                if(err)return err;
+
+                ARRAY_PUSH_NEW(hexmap_door_t*, submap->doors, door)
+                err = hexmap_parse_door(map, submap, door, lexer);
+                if(err)return err;
+
+                err = fus_lexer_get(lexer, ")");
+                if(err)return err;
+            }
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+        }
     }
 
     if(fus_lexer_got(lexer, "recordings")){
@@ -970,13 +983,17 @@ int hexmap_step(hexmap_t *map){
  * HEXMAP SUBMAP *
  *****************/
 
+void hexmap_door_cleanup(hexmap_door_t *door){
+    free(door->map_filename);
+    free(door->anim_filename);
+}
+
 void hexmap_submap_cleanup(hexmap_submap_t *submap){
     free(submap->filename);
-    free(submap->door_map_filename);
-    free(submap->door_anim_filename);
     hexcollmap_cleanup(&submap->collmap);
     palette_cleanup(&submap->palette);
     hexmap_tileset_cleanup(&submap->tileset);
+    ARRAY_FREE_PTR(hexmap_door_t*, submap->doors, hexmap_door_cleanup)
 }
 
 int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
@@ -1006,11 +1023,7 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
         tileset_filename);
     if(err)return err;
 
-    vec_zero(submap->door_pos);
-    submap->door_rot = 0;
-    submap->door_turn = false;
-    submap->door_map_filename = NULL;
-    submap->door_anim_filename = NULL;
+    ARRAY_INIT(submap->doors)
 
     return 0;
 }

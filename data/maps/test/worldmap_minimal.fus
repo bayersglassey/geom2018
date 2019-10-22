@@ -7,14 +7,15 @@ default_tileset: "data/tileset1.fus"
 submaps:
     :
         file: "data/maps/test/map3.fus"
-        door:
-            map: "data/maps/test/worldmap.fus"
-            pos: (22 25)
-            rot: 0
-            turn: y
         pos: (0 0)
         camera: (0 4)
         mapper: ("triple")
+        doors:
+            :
+                map: "data/maps/test/worldmap.fus"
+                pos: (22 25)
+                rot: 0
+                turn: y
         recordings:
             : "data/maps/test/recs/worldmap_minimal_bird_000.fus"
             : "data/maps/test/recs/worldmap_minimal_bird_001.fus"

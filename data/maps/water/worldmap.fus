@@ -12,9 +12,10 @@ submaps:
         submaps:
             :
                 file: "data/maps/water/start.fus"
-                door:
-                    map: "data/maps/demo/worldmap.fus"
-                    pos: (72 29)
-                    rot: 0
-                    turn: y
+                doors:
+                    :
+                        map: "data/maps/demo/worldmap.fus"
+                        pos: (72 29)
+                        rot: 0
+                        turn: y
 
