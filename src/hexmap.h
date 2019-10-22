@@ -91,6 +91,8 @@ typedef struct hexmap_rendergraph {
     char *name;
     char *palmapper_name;
     trf_t trf;
+        /* NOTE: trf is in hexspace! It's up to you to convert to
+        prend->space once you actually have a prend and an rgraph! */
 } hexmap_rendergraph_t;
 
 void hexmap_rendergraph_cleanup(hexmap_rendergraph_t *rendergraph);
