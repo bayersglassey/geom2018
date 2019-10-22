@@ -479,31 +479,6 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
         goto ok;
     }
 
-    if(GOT("text")){
-        NEXT
-        GET("(")
-
-        char *geomfont_name;
-        GET_STR(geomfont_name)
-
-        geomfont_t *geomfont = prismelrenderer_get_geomfont(prend, geomfont_name);
-        if(geomfont == NULL){
-            fprintf(stderr, "%s: Couldn't find geomfont: %s\n",
-                lexer->filename, geomfont_name);
-            return 2;
-        }
-        free(geomfont_name);
-
-        char *text;
-        GET_STR(text)
-
-        fprintf(stderr, "--- Parsed text: %s\n", text);
-        free(text);
-
-        GET(")")
-        goto ok;
-    }
-
     const char *animation_type = rendergraph_animation_type_cycle;
     int n_frames = 1;
 
@@ -545,6 +520,39 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
             NEXT
             err = parse_shape_prismels(prend, lexer, rgraph);
             if(err)return err;
+        }else if(GOT("text")){
+            NEXT
+            GET("(")
+
+            char *geomfont_name;
+            GET_STR(geomfont_name)
+
+            geomfont_t *geomfont = prismelrenderer_get_geomfont(prend, geomfont_name);
+            if(geomfont == NULL){
+                fprintf(stderr, "%s: Couldn't find geomfont: %s\n",
+                    lexer->filename, geomfont_name);
+                return 2;
+            }
+            free(geomfont_name);
+
+            char *text;
+            GET_STR(text)
+
+            int cx = 0, cy = 0;
+            if(GOT("(")){
+                NEXT
+                GET_INT(cx)
+                GET_INT(cy)
+                GET(")")
+            }
+
+            err = geomfont_rgraph_printf(geomfont, rgraph, cx, cy,
+                NULL, "%s", text);
+            if(err)return err;
+            free(text);
+
+            GET(")")
+            goto ok;
         }else{
             err = UNEXPECTED("shapes or prismels");
             return err;
@@ -724,6 +732,12 @@ static int parse_geomfonts(prismelrenderer_t *prend, fus_lexer_t *lexer){
         if(err)return err;
         free(font_filename);
 
+        bool autoupper = false;
+        if(GOT("autoupper")){
+            NEXT;
+            autoupper = true;
+        }
+
         GET("prismel")
         GET("(")
         {
@@ -739,6 +753,7 @@ static int parse_geomfonts(prismelrenderer_t *prend, fus_lexer_t *lexer){
                 prend, prismel_name, vx, vy);
             if(err)return err;
 
+            geomfont->autoupper = autoupper;
             free(prismel_name);
         }
         GET(")")

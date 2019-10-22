@@ -23,9 +23,9 @@
 
 #ifndef SDLFONT
     #define FONT_BLITTER_T geomfont_blitter_t
-    #define FONT_BLITTER_INIT geomfont_blitter_init
+    #define FONT_BLITTER_INIT geomfont_blitter_render_init
     #define FONT_BLITTER_PUTC_CALLBACK geomfont_blitter_putc_callback
-    #define FONT_PRINTF geomfont_printf
+    #define FONT_PRINTF geomfont_render_printf
     #define FONT_ARGS(SURFACE, X0, Y0) &app->geomfont, app->renderer, (SURFACE), \
         app->sdl_palette, (X0), (Y0), 1, NULL, NULL
 #else
