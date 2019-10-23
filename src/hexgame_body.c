@@ -142,8 +142,12 @@ int body_respawn(body_t *body, vec_t pos, rot_t rot, bool turn,
     err = body_set_state(body, body->stateset.states[0]->name, true);
     if(err)return err;
 
+    hexmap_t *old_map = body->map;
+
     err = body_move_to_map(body, map);
     if(err)return err;
+
+    if(old_map != map)body_reset_cameras(body);
 
     keyinfo_reset(&body->keyinfo);
 

@@ -169,6 +169,37 @@ err:
 }
 
 
+int player_reload(player_t *player, bool *file_found_ptr){
+    int err;
+    vec_t respawn_pos;
+    rot_t respawn_rot;
+    bool respawn_turn;
+    char *respawn_map_filename;
+
+    /* Attempt to load file */
+    err = player_respawn_load(player->respawn_filename,
+        respawn_pos, &respawn_rot, &respawn_turn,
+        &respawn_map_filename);
+    bool file_found = err == 0;
+
+    /* If we couldn't load it, that's not an "error" per se, we'll just
+    report to caller that file wasn't found. */
+    *file_found_ptr = file_found;
+    if(!file_found)return 0;
+
+    hexmap_t *respawn_map;
+    err = hexgame_get_or_load_map(player->body->game, respawn_map_filename,
+        &respawn_map);
+    if(err)return err;
+
+    err = body_respawn(player->body,
+        respawn_pos, respawn_rot, respawn_turn, respawn_map);
+    if(err)return err;
+
+    return 0;
+}
+
+
 int player_process_event(player_t *player, SDL_Event *event){
     body_t *body = player->body;
     if(event->type == SDL_KEYDOWN || event->type == SDL_KEYUP){

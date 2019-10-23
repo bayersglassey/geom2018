@@ -208,6 +208,7 @@ int player_respawn_save(const char *filename, vec_t pos,
     rot_t rot, bool turn, const char *map_filename_ptr);
 int player_respawn_load(const char *filename, vec_t pos,
     rot_t *rot_ptr, bool *turn_ptr, char **map_filename_ptr);
+int player_reload(player_t *player, bool *file_found_ptr);
 
 int player_process_event(player_t *player, SDL_Event *event);
 int player_step(player_t *player, struct hexgame *game);

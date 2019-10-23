@@ -66,7 +66,17 @@ static int new_game_callback(hexgame_t *game, player_t *player,
 }
 
 static int continue_callback(hexgame_t *game, player_t *player){
-    test_app_t *app = game->app;
+    int err;
+    for(int i = 0; i < game->players_len; i++){
+        player_t *player = game->players[i];
+        bool file_found;
+        err = player_reload(player, &file_found);
+        if(err)return err;
+        if(!file_found){
+            err = hexgame_reset_player(game, player, RESET_SOFT, NULL);
+            if(err)return err;
+        }
+    }
     return 0;
 }
 
@@ -94,23 +104,6 @@ static char *generate_respawn_filename(const char *base_name, int i, const char 
     strcpy(filename + base_name_len + i_len, ext);
     filename[filename_len] = '\0';
     return filename;
-}
-
-static int load_player(player_t *player, int i, bool ignore_missing_file){
-    int err;
-    vec_t respawn_pos;
-    rot_t respawn_rot;
-    bool respawn_turn;
-    char *respawn_map_filename;
-    err = player_respawn_load(player->respawn_filename,
-        respawn_pos, &respawn_rot, &respawn_turn,
-        &respawn_map_filename);
-    if(err){
-        if(!ignore_missing_file)return err;
-    }else{
-        /* TODO: move player's body to the new map */
-    }
-    return 0;
 }
 
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
