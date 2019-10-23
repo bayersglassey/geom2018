@@ -149,6 +149,17 @@ typedef struct hexcollmap {
     ARRAY_DECL(hexmap_rendergraph_t*, rendergraphs)
 } hexcollmap_t;
 
+typedef struct hexmap_collision_elem {
+    struct hexmap_submap *submap;
+    hexcollmap_elem_t *elem;
+} hexmap_collision_elem_t;
+
+typedef struct hexmap_collision {
+    hexmap_collision_elem_t savepoint;
+    hexmap_collision_elem_t water;
+    hexmap_collision_elem_t door;
+} hexmap_collision_t;
+
 
 int hexcollmap_part_init(hexcollmap_part_t *part,
     char part_c, char *filename, char *palmapper_name, int type);
@@ -238,9 +249,7 @@ bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf, bool all);
 void hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf,
-    hexmap_submap_t **collide_savepoint_ptr,
-    hexmap_submap_t **collide_door_ptr,
-    hexmap_submap_t **collide_water_ptr);
+    hexmap_collision_t *collision);
 int hexmap_step(hexmap_t *map);
 
 void hexmap_door_cleanup(hexmap_door_t *door);

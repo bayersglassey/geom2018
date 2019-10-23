@@ -227,15 +227,16 @@ int player_step(player_t *player, hexgame_t *game){
         trf_t hitbox_trf;
         body_init_trf(body, &hitbox_trf);
 
-        hexmap_submap_t *collide_savepoint = NULL;
-        hexmap_submap_t *collide_door = NULL;
-        hexmap_submap_t *collide_water = NULL;
-        hexmap_collide_special(map, hitbox, &hitbox_trf,
-            &collide_savepoint, &collide_door, &collide_water);
+        hexmap_collision_t collision;
+        hexmap_collide_special(map, hitbox, &hitbox_trf, &collision);
+
+        hexmap_submap_t *savepoint_submap = collision.savepoint.submap;
+        hexmap_submap_t *door_submap = collision.door.submap;
+        hexmap_submap_t *water_submap = collision.water.submap;
 
         /* A SERIES OF WILD HACKS FOLLOW
         TODO: Replace them with The Real Thing, whatever that should be */
-        if(collide_savepoint || collide_door){
+        if(savepoint_submap || door_submap){
             bool standing_flat = body->rot == 0;
 
             /* HACK so you can use doors as a roller...
@@ -248,16 +249,16 @@ int player_step(player_t *player, hexgame_t *game){
             }
 
             if(!standing_flat){
-                collide_savepoint = NULL;
-                collide_door = NULL;
+                savepoint_submap = NULL;
+                door_submap = NULL;
             }else{
                 /* HACK: Only spiders can use savepoints */
                 if(strcmp(body->stateset.filename, "anim/player.fus")){
-                    collide_savepoint = NULL;}
+                    savepoint_submap = NULL;}
             }
         }
 
-        if(collide_savepoint){
+        if(savepoint_submap){
             /* Don't use the savepoint if it's already our respawn point!
             In particular, I want to avoid screen flashing white if e.g.
             player turns around in-place.
@@ -287,8 +288,8 @@ int player_step(player_t *player, hexgame_t *game){
             }
         }
 
-        if(collide_door){
-            hexmap_submap_t *cur_submap = collide_door;
+        if(door_submap){
+            hexmap_submap_t *cur_submap = door_submap;
 
             int door_i = 0; /* TODO, hardcoded for now */
             hexmap_door_t *door = NULL;

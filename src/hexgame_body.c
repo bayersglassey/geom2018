@@ -487,12 +487,9 @@ static int body_match_cond(body_t *body,
                 }
                 rule_matched = n_matches > 0;
             }else if(water){
-                hexmap_submap_t *collide_savepoint = NULL;
-                hexmap_submap_t *collide_door = NULL;
-                hexmap_submap_t *collide_water = NULL;
-                hexmap_collide_special(map, hitbox, &hitbox_trf,
-                    &collide_savepoint, &collide_door, &collide_water);
-                bool collide = collide_water != NULL;
+                hexmap_collision_t collision;
+                hexmap_collide_special(map, hitbox, &hitbox_trf, &collision);
+                bool collide = collision.water.submap != NULL;
                 rule_matched = yes? collide: !collide;
             }else{
                 bool collide = hexmap_collide(map,
@@ -736,13 +733,11 @@ void body_update_cur_submap(body_t *body){
             trf_t hitbox_trf;
             body_init_trf(body, &hitbox_trf);
 
-            hexmap_submap_t *collide_savepoint = NULL;
-            hexmap_submap_t *collide_door = NULL;
-            hexmap_submap_t *collide_water = NULL;
-            hexmap_collide_special(map, hitbox, &hitbox_trf,
-                &collide_savepoint, &collide_door, &collide_water);
+            hexmap_collision_t collision;
+            hexmap_collide_special(map, hitbox, &hitbox_trf, &collision);
 
-            if(collide_water)new_submap = collide_water;
+            hexmap_submap_t *water_submap = collision.water.submap;
+            if(water_submap)new_submap = water_submap;
         }
     }
 

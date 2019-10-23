@@ -932,8 +932,6 @@ bool hexcollmap_collide(
     int w2 = collmap2->w;
     int h2 = collmap2->h;
 
-    //return false;
-
     /* NOTE: for tile coords (ox, oy, x, y, w, h),
     Y is reversed (down is positive, up is negative) */
 
