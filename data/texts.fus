@@ -5,8 +5,26 @@ geomfonts:
         prismel: "sq" (1 0 0 0) (0 0 0 1)
 
 shapes:
-    "txt_title":
+    "_txt_title":
         text: "geomfont1" "Depths\n  of\n  Uo" (3 1)
+    "txt_title":
+        shapes:
+            : "_txt_title" (0 0 0 0)  0 f
+    "txt_title_rotate":
+        animation: cycle 24
+        shapes:
+            : "_txt_title" (0 0 0 0)  0 f 0 ( 0 2)
+            : "_txt_title" (0 0 0 0)  1 f 0 ( 2 2)
+            : "_txt_title" (0 0 0 0)  2 f 0 ( 4 2)
+            : "_txt_title" (0 0 0 0)  3 f 0 ( 6 2)
+            : "_txt_title" (0 0 0 0)  4 f 0 ( 8 2)
+            : "_txt_title" (0 0 0 0)  5 f 0 (10 2)
+            : "_txt_title" (0 0 0 0)  6 f 0 (12 2)
+            : "_txt_title" (0 0 0 0)  7 f 0 (14 2)
+            : "_txt_title" (0 0 0 0)  8 f 0 (16 2)
+            : "_txt_title" (0 0 0 0)  9 f 0 (18 2)
+            : "_txt_title" (0 0 0 0) 10 f 0 (20 2)
+            : "_txt_title" (0 0 0 0) 11 f 0 (22 2)
     "txt_new_game":
         text: "geomfont1" "New"
     "txt_continue":
