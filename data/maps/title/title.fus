@@ -1,11 +1,14 @@
 parts:
     "T": shape "txt_title"
-    "a": shape "txt_new_game"
-    "a": "data/maps/demo/vert.fus"
-    "b": shape "txt_continue"
-    "b": "data/maps/demo/vert.fus"
-    "c": shape "txt_exit"
-    "c": "data/maps/demo/vert.fus"
+    "X": shape "txt_new_game"
+    "X": "data/maps/demo/vert.fus"
+    "Y": shape "txt_continue"
+    "Y": "data/maps/demo/vert.fus"
+    "Z": shape "txt_exit"
+    "Z": "data/maps/demo/vert.fus"
+
+    "c": recording "data/maps/demo/recs/coin.fus"
+    "C": recording "data/maps/demo/recs/coin_crouch.fus"
 
 collmap:
     ;;
@@ -25,7 +28,7 @@ collmap:
     ;;
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                       D                                                       D
-    ;; .   .   .   ? - + - + - + - + - +   .   .   + -(+)- +   .   .   + - ? - + - + - + - + - + - +   .   .   .  [a]  [b]
+    ;; .   .   .   ? - + - + - + - + - +   .   .   + -(+)- +   .   .   + - ? - + - + - + - + - + - +   .   .   .  [X]  [Y]
     ;;            /                     \           \     /           /                             \
     ;;   .   .   +   .   .   .   .   .   +   .   .   + - +   .   .   + - +   .   .   .   .   .   .   +   .   .
     ;;            \                       \                               \                         /
@@ -35,13 +38,13 @@ collmap:
     ;;
     ;; .   .   .   .   .   .   .   .   .   .   +   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                                        / \      D      / \
-    ;;   .   .   .   .   .   .   .   + - ? - +   + - + - + - +   +   .   .   .   .   .   .   .   .   .   + - +       [c]
+    ;;   .   .   .   .   .   .   .   + - ? - +   + - + - + - +   +   .   .   .   .   .   .   .   .   .   + - +       [Z]
     ;;                                \                           \                                     /   /
     ;; .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   + - +   .
     ;;                                  \                             /
     ;;   .   .   .   .   .   .   .   .   + - + - + - + - + - + - + - +   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   .   .   .   ?   ?   ?   ?   ?   ?   ?   .   .   .   .   .   .   .   .   .   .   .  [c][c][c][c][c][c][c]
     ;;
     ;;   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;              /
