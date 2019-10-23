@@ -1,2 +1,5 @@
+parts:
+    "C": shape "red_curvy_dodeca_anim"
+
 collmap:
-    ;; %(+)  [C]
+    ;; (?)  [C]

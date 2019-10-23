@@ -2,8 +2,6 @@
 verts:
     "0": "map_vert0"
     "1": "map_vert1"
-    "B": "curvy_curvy_dodeca_anim"
-    "C": "red_curvy_dodeca_anim"
 edges:
     "0": "map_edge0"
     "1": "map_edge1"
