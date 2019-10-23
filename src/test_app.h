@@ -37,7 +37,7 @@ typedef struct test_app {
     prismelrenderer_t prend;
     font_t font;
     sdlfont_t sdlfont;
-    geomfont_t geomfont;
+    geomfont_t *geomfont;
     console_t console;
     int cur_rgraph_i;
 

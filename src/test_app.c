@@ -26,7 +26,7 @@
     #define FONT_BLITTER_INIT geomfont_blitter_render_init
     #define FONT_BLITTER_PUTC_CALLBACK geomfont_blitter_putc_callback
     #define FONT_PRINTF geomfont_render_printf
-    #define FONT_ARGS(SURFACE, X0, Y0) &app->geomfont, app->renderer, (SURFACE), \
+    #define FONT_ARGS(SURFACE, X0, Y0) app->geomfont, app->renderer, (SURFACE), \
         app->sdl_palette, (X0), (Y0), 1, NULL, NULL
 #else
     #define FONT_BLITTER_T sdlfont_blitter_t
@@ -44,7 +44,6 @@ void test_app_cleanup(test_app_t *app){
     hexgame_cleanup(&app->hexgame);
     font_cleanup(&app->font);
     sdlfont_cleanup(&app->sdlfont);
-    geomfont_cleanup(&app->geomfont);
 }
 
 static void test_app_init_input(test_app_t *app){
@@ -106,10 +105,12 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     if(err)return err;
     app->sdlfont.autoupper = true;
 
-    err = geomfont_init(&app->geomfont, strdup("geomfont1"), &app->font,
-        prend, "sq", (vec_t){1, 0, 0, 0}, (vec_t){0, 0, 0, 1});
-    if(err)return err;
-    app->geomfont.autoupper = true;
+    const char *geomfont_name = "geomfont1";
+    app->geomfont = prismelrenderer_get_geomfont(prend, geomfont_name);
+    if(app->geomfont == NULL){
+        fprintf(stderr, "Couldn't find geomfont: %s\n", geomfont_name);
+        return 2;
+    }
 
     err = console_init(&app->console, 80, 40, 20000);
     if(err)return err;
@@ -135,7 +136,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
             &respawn_map_filename);
         if(err){
             /* If there was an "err", don't panic -- just keep default
-            spawn location we got from map. */
+            spawn location we'll get from map. */
             respawn_map_filename = strdup(map->name);
         }
 
