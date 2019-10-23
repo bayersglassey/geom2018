@@ -810,7 +810,8 @@ int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer){
             free(filename);
         }else{
             return UNEXPECTED(
-                "palmappers or prismels or shapes or mappers or import");
+                "palmappers or prismels or shapes or mappers or geomfonts "
+                "or import");
         }
     }
     return 0;
