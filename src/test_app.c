@@ -55,6 +55,64 @@ static void test_app_init_input(test_app_t *app){
     app->keydown_r = 0;
 }
 
+static int new_game_callback(hexgame_t *game, player_t *player,
+    const char *map_filename
+){
+    int err;
+    hexmap_t *map;
+    err = hexgame_get_or_load_map(game, map_filename, &map);
+    if(err)return err;
+    return hexgame_reset_players(game, RESET_HARD, map);
+}
+
+static int continue_callback(hexgame_t *game, player_t *player){
+    test_app_t *app = game->app;
+    return 0;
+}
+
+static int exit_callback(hexgame_t *game, player_t *player){
+    test_app_t *app = game->app;
+    app->loop = false;
+    return 0;
+}
+
+static char *generate_respawn_filename(const char *base_name, int i, const char *ext){
+    /* Generate a name, e.g. "respawn_1.txt" */
+
+    /* Defaults */
+    if(base_name == NULL)base_name = "respawn_";
+    if(ext == NULL)ext = ".txt";
+
+    int base_name_len = strlen(base_name);
+    int i_len = strlen_of_int(i);
+    int ext_len = strlen(ext);
+    int filename_len = base_name_len + i_len + ext_len;
+    char *filename = malloc(sizeof(*filename) * (filename_len + 1));
+    if(filename == NULL)return NULL;
+    strcpy(filename, base_name);
+    strncpy_of_int(filename + base_name_len, i, i_len);
+    strcpy(filename + base_name_len + i_len, ext);
+    filename[filename_len] = '\0';
+    return filename;
+}
+
+static int load_player(player_t *player, int i, bool ignore_missing_file){
+    int err;
+    vec_t respawn_pos;
+    rot_t respawn_rot;
+    bool respawn_turn;
+    char *respawn_map_filename;
+    err = player_respawn_load(player->respawn_filename,
+        respawn_pos, &respawn_rot, &respawn_turn,
+        &respawn_map_filename);
+    if(err){
+        if(!ignore_missing_file)return err;
+    }else{
+        /* TODO: move player's body to the new map */
+    }
+    return 0;
+}
+
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
     const char *stateset_filename, const char *hexmap_filename,
@@ -116,29 +174,23 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     if(err)return err;
 
     hexgame_t *game = &app->hexgame;
-    err = hexgame_init(game, prend, app->hexmap_filename);
+    err = hexgame_init(game, prend, app->hexmap_filename, app,
+        &new_game_callback,
+        &continue_callback,
+        &exit_callback);
     if(err)return err;
 
     hexmap_t *map = game->maps[0];
     vecspace_t *space = map->space;
 
     for(int i = 0; i < n_players; i++){
-        static char respawn_filename[] = "respawn_N.txt";
-        respawn_filename[8] = '0' + i;
+        char *respawn_filename = generate_respawn_filename(
+            NULL, i, NULL);
+        if(respawn_filename == NULL)return 1;
 
-        vec_t respawn_pos;
-        rot_t respawn_rot = 0;
-        bool respawn_turn = false;
-        char *respawn_map_filename = NULL;
-        vec_cpy(space->dims, respawn_pos, map->spawn);
-        err = player_respawn_load(respawn_filename,
-            respawn_pos, &respawn_rot, &respawn_turn,
-            &respawn_map_filename);
-        if(err){
-            /* If there was an "err", don't panic -- just keep default
-            spawn location we'll get from map. */
-            respawn_map_filename = strdup(map->name);
-        }
+        /* Why the strdup, again?.. who ends up owning it?..
+        probably player */
+        char *respawn_map_filename = strdup(map->name);
 
         hexmap_t *respawn_map;
         err = hexgame_get_or_load_map(game, respawn_map_filename,
@@ -152,7 +204,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 
         ARRAY_PUSH_NEW(player_t*, game->players, player)
         err = player_init(player, body, i,
-            respawn_pos, respawn_rot, respawn_turn,
+            map->spawn, 0, false,
             respawn_map_filename, respawn_filename);
         if(err)return err;
     }

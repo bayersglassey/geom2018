@@ -281,12 +281,27 @@ int camera_render(camera_t *camera,
  * HEXGAME *
  ***********/
 
+struct hexgame;
+typedef int new_game_callback_t(struct hexgame *game, player_t *player,
+    const char *map_filename);
+typedef int continue_callback_t(struct hexgame *game, player_t *player);
+typedef int exit_callback_t(struct hexgame *game, player_t *player);
+
 typedef struct hexgame {
     int frame_i;
     prismelrenderer_t *prend;
     vecspace_t *space;
         /* should always be hexspace!
         NOT the same as prend->space! */
+
+    /* app: the application which is running this game.
+    The game isn't allowed to know anything about it, but it is
+    used in some callbacks. */
+    void *app;
+    new_game_callback_t *new_game_callback;
+    continue_callback_t *continue_callback;
+    exit_callback_t *exit_callback;
+
     ARRAY_DECL(hexmap_t*, maps)
     ARRAY_DECL(camera_t*, cameras)
     ARRAY_DECL(player_t*, players)
@@ -296,15 +311,25 @@ typedef struct hexgame {
 
 void hexgame_cleanup(hexgame_t *game);
 int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
-    const char *map_filename);
+    const char *map_filename, void *app,
+    new_game_callback_t *new_game_callback,
+    continue_callback_t *continue_callback,
+    exit_callback_t *exit_callback);
 int hexgame_load_map(hexgame_t *game, const char *map_filename,
     hexmap_t **map_ptr);
 int hexgame_get_or_load_map(hexgame_t *game, const char *map_filename,
     hexmap_t **map_ptr);
-int hexgame_reset_player(hexgame_t *game, player_t *player, int reset_level);
-int hexgame_reset_players_by_keymap(hexgame_t *game, int keymap, int reset_level);
+int hexgame_reset_player(hexgame_t *game, player_t *player,
+    int reset_level, hexmap_t *reset_map);
+int hexgame_reset_player_by_keymap(hexgame_t *game, int keymap,
+    int reset_level, hexmap_t *reset_map);
+int hexgame_reset_players(hexgame_t *game, int reset_level,
+    hexmap_t *reset_map);
 int hexgame_process_event(hexgame_t *game, SDL_Event *event);
 int hexgame_step(hexgame_t *game);
+int hexgame_new_game(hexgame_t *game, player_t *player, const char *map_filename);
+int hexgame_continue(hexgame_t *game, player_t *player);
+int hexgame_exit(hexgame_t *game, player_t *player);
 
 
 #endif

@@ -33,7 +33,7 @@ int main(int n_args, char *args[]){
     Uint32 window_flags = SDL_WINDOW_SHOWN;
     const char *prend_filename = "data/test.fus";
     const char *stateset_filename = "anim/player.fus";
-    const char *hexmap_filename = "data/maps/demo/worldmap.fus";
+    const char *hexmap_filename = "data/maps/title/worldmap.fus";
     bool use_textures = false;
     bool cache_bitmaps = true;
     int n_players = 1;

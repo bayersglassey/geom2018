@@ -12,3 +12,12 @@ submaps:
         submaps:
             :
                 file: "data/maps/title/title.fus"
+                doors:
+                    :
+                        new_game "data/maps/demo/worldmap.fus"
+                    :
+                        continue
+                    :
+                        exit
+                    :
+                        dud

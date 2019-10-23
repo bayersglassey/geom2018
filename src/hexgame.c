@@ -263,13 +263,20 @@ void hexgame_cleanup(hexgame_t *game){
 }
 
 int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
-    const char *map_filename
+    const char *map_filename, void *app,
+    new_game_callback_t *new_game_callback,
+    continue_callback_t *continue_callback,
+    exit_callback_t *exit_callback
 ){
     int err;
 
     game->frame_i = 0;
     game->prend = prend;
     game->space = &hexspace; /* NOT the same as prend->space! */
+    game->app = app;
+    game->new_game_callback = new_game_callback;
+    game->continue_callback = continue_callback;
+    game->exit_callback = exit_callback;
 
     ARRAY_INIT(game->maps)
     ARRAY_INIT(game->cameras)
@@ -310,7 +317,9 @@ int hexgame_get_or_load_map(hexgame_t *game, const char *map_filename,
     return hexgame_load_map(game, map_filename, map_ptr);
 }
 
-int hexgame_reset_player(hexgame_t *game, player_t *player, int reset_level){
+int hexgame_reset_player(hexgame_t *game, player_t *player,
+    int reset_level, hexmap_t *reset_map
+){
     /* reset_level:
     RESET_TO_SAFETY is to player->safe_location, RESET_SOFT is to
     player->respawn_location, RESET_HARD is to start of game. */
@@ -329,7 +338,7 @@ int hexgame_reset_player(hexgame_t *game, player_t *player, int reset_level){
     bool turn = false;
 
     if(reset_level == RESET_HARD){
-        map = game->maps[0];
+        map = reset_map? reset_map: game->maps[0];
         pos = map->spawn;
     }else{
         location_t *location = reset_level == RESET_SOFT?
@@ -359,12 +368,26 @@ static player_t *hexgame_get_player_by_keymap(hexgame_t *game, int keymap){
     return NULL;
 }
 
-int hexgame_reset_players_by_keymap(hexgame_t *game, int keymap, int reset_level){
+int hexgame_reset_player_by_keymap(hexgame_t *game, int keymap,
+    int reset_level, hexmap_t *reset_map
+){
     int err;
     player_t *player = hexgame_get_player_by_keymap(game, keymap);
     if(!player)return 2;
-    err = hexgame_reset_player(game, player, reset_level);
+    err = hexgame_reset_player(game, player, reset_level, reset_map);
     if(err)return err;
+    return 0;
+}
+
+int hexgame_reset_players(hexgame_t *game, int reset_level,
+    hexmap_t *reset_map
+){
+    int err;
+    for(int i = 0; i < game->players_len; i++){
+        player_t *player = game->players[i];
+        err = hexgame_reset_player(game, player, reset_level, reset_map);
+        if(err)return err;
+    }
     return 0;
 }
 
@@ -512,18 +535,16 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
                 if(err)return err;
             }
         }else if(!event->key.repeat){
-            bool shift = event->key.keysym.mod & KMOD_SHIFT;
-            bool ctrl = event->key.keysym.mod & KMOD_CTRL;
-            int reset_level = shift? RESET_HARD: RESET_SOFT;
             int keymap = -1;
             if(event->key.keysym.sym == SDLK_1)keymap = 0;
             if(event->key.keysym.sym == SDLK_2)keymap = 1;
             if(keymap > -1){
-                if(ctrl){
+                if(event->key.keysym.mod & KMOD_CTRL){
                     err = hexgame_add_random_coins_by_keymap(game, keymap);
                     if(err)return err;
                 }else{
-                    err = hexgame_reset_players_by_keymap(game, keymap, reset_level);
+                    err = hexgame_reset_player_by_keymap(game, keymap,
+                        RESET_SOFT, NULL);
                     if(err)return err;
                 }
             }
@@ -576,4 +597,21 @@ int hexgame_step(hexgame_t *game){
     }
 
     return 0;
+}
+
+int hexgame_new_game(hexgame_t *game, player_t *player,
+    const char *map_filename
+){
+    if(!game->new_game_callback)return 0;
+    return game->new_game_callback(game, player, map_filename);
+}
+
+int hexgame_continue(hexgame_t *game, player_t *player){
+    if(!game->continue_callback)return 0;
+    return game->continue_callback(game, player);
+}
+
+int hexgame_exit(hexgame_t *game, player_t *player){
+    if(!game->exit_callback)return 0;
+    return game->exit_callback(game, player);
 }

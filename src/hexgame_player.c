@@ -19,6 +19,7 @@
 void player_cleanup(player_t *player){
     location_cleanup(&player->respawn_location);
     location_cleanup(&player->safe_location);
+    free(player->respawn_filename);
 }
 
 int player_init(player_t *player, body_t *body, int keymap,
@@ -196,8 +197,14 @@ static int player_use_door(player_t *player, hexmap_door_t *door){
     hexgame_t *game = body->game;
 
     if(door->type == HEXMAP_DOOR_TYPE_NEW_GAME){
+        err = hexgame_new_game(game, player, door->respawn_map_filename);
+        if(err)return err;
     }else if(door->type == HEXMAP_DOOR_TYPE_CONTINUE){
+        err = hexgame_continue(game, player);
+        if(err)return err;
     }else if(door->type == HEXMAP_DOOR_TYPE_EXIT){
+        err = hexgame_exit(game, player);
+        if(err)return err;
     }else if(door->type == HEXMAP_DOOR_TYPE_RESPAWN){
         hexmap_t *new_map = body->map;
         if(door->respawn_map_filename != NULL){
@@ -244,7 +251,7 @@ int player_step(player_t *player, hexgame_t *game){
         /* Soft reset */
         int reset_level =
             body->dead == BODY_ALL_DEAD? RESET_SOFT: RESET_TO_SAFETY;
-        hexgame_reset_player(game, player, reset_level);
+        hexgame_reset_player(game, player, reset_level, NULL);
 
         /* Player may have gotten a new body object */
         body = player->body;
