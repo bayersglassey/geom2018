@@ -20,4 +20,7 @@ submaps:
                     :
                         exit
                     :
-                        dud
+                        map: "data/maps/title/worldmap_secret.fus"
+                        pos: (0 0)
+                        rot: 0
+                        turn: n
