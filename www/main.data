@@ -214,6 +214,8 @@ shapes:
         text: "geomfont1" "Load"
     "txt_exit":
         text: "geomfont1" "Quit"
+    "txt_secret":
+        text: "geomfont1" "Secret Room..."
 
 shapes:
 
@@ -7574,6 +7576,35 @@ keys:
     r:
 data: " w43+r w3-r w46+l w2-l w81+r w1-r w9+l w3-l w38"
 parts:
+    "T": shape "txt_secret"
+
+collmap:
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - + - + - + - +   .   .   .
+    ;;                                                                          /*\*/         \*/*\
+    ;; .   .   .   .   .   .   .   .   .   .   + - + - +   .   .   .   .   .   + - +   .   .   + - +   .   .   .
+    ;;                                        / \*/*\*/ \                     /                     \
+    ;;   .   .   .   .   .   .   + - +   .   +   + - +   +   .   .   .   .   +   .   .   .   +   .   +   .   .
+    ;;                          /     \     /             \                 /                 \  D  /
+    ;; .   .   .   .   .   .   +   .   + - +   .   .   .   + - +   .   + - +   .   .   .   .   + - +   .   .   .
+    ;;                                                      \*/*\     /*\*/
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   + -(+)- + - +   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   + - +   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  [T]
+    ;;                /*\*/*\
+    ;;   .   .   .   + - + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                \*/*\*/
+    ;; .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+parts:
     "T": shape "txt_title"
     "a": shape "txt_new_game"
     "a": "data/maps/demo/vert.fus"
@@ -7649,7 +7680,30 @@ submaps:
                     :
                         exit
                     :
-                        dud
+                        map: "data/maps/title/worldmap_secret.fus"
+                        pos: (0 0)
+                        rot: 0
+                        turn: n
+
+unit: 3 2 0 -1
+spawn: "data/maps/title/secret.fus"
+default_palette: "data/pal1.fus"
+default_tileset: "data/tileset1.fus"
+
+submaps:
+    :
+        pos: (0 0)
+        camera: follow
+        mapper: ("solid_curvy")
+        submaps:
+            :
+                file: "data/maps/title/secret.fus"
+                doors:
+                    :
+                        map: "data/maps/title/worldmap.fus"
+                        pos: (0 0)
+                        rot: 0
+                        turn: n
 parts:
     "t": "data/maps/trees/trunk.fus"
     "T": "data/maps/trees/trunkL.fus"
