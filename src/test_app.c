@@ -524,7 +524,6 @@ int test_app_mainloop_step(test_app_t *app){
                         "  Spacebar    -> Spit\n"
                         "  Shift       -> Look up\n"
                         "  1           -> Return to checkpoint\n"
-                        "  Shift + 1   -> Return to start of game\n"
                         "  Enter       -> Show/hide this message\n"
                         "  Escape      -> Quit\n"
                     );
