@@ -391,61 +391,6 @@ int hexgame_reset_players(hexgame_t *game, int reset_level,
     return 0;
 }
 
-static int hexgame_add_coin(hexgame_t *game, hexmap_t *map,
-    hexmap_submap_t *submap, int x, int y, const char *state_name
-){
-    int err;
-    vecspace_t *space = map->space;
-
-    ARRAY_PUSH_NEW(body_t*, map->bodies, new_body)
-    err = body_init(new_body, game, map,
-        "anim/coin.fus", state_name, NULL);
-    if(err)return err;
-
-    new_body->pos[0] = x;
-    new_body->pos[1] = y;
-
-    return 0;
-}
-
-static int hexgame_add_random_coins_by_keymap(hexgame_t *game, int keymap){
-    int err;
-    player_t *player = hexgame_get_player_by_keymap(game, keymap);
-    if(!player)return 0;
-    body_t *body = player->body;
-    if(!body)return 0;
-
-    hexmap_t *map = body->map;
-    hexmap_submap_t *submap = body->cur_submap;
-    hexcollmap_t *collmap = &submap->collmap;
-
-    /* cx, cy: origin of submap */
-    int cx = submap->pos[0] - collmap->ox;
-    int cy = submap->pos[1] + collmap->oy;
-
-    int i = 0;
-    int step = 7;
-    int step_crouch = 11;
-    for(int y = 0; y < collmap->h; y++){
-        for(int x = 0; x < collmap->w; x++){
-            /* px, py: coin's position */
-            int px = cx + x;
-            int py = cy - y;
-            if(i % step == 0){
-                err = hexgame_add_coin(game, map, submap, px, py, "stand");
-                if(err)return err;
-            }
-            if(i % step_crouch == 0){
-                err = hexgame_add_coin(game, map, submap, px, py, "crouch");
-                if(err)return err;
-            }
-            i++;
-        }
-    }
-
-    return 0;
-}
-
 int hexgame_process_event(hexgame_t *game, SDL_Event *event){
     int err;
 
@@ -539,14 +484,9 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
             if(event->key.keysym.sym == SDLK_1)keymap = 0;
             if(event->key.keysym.sym == SDLK_2)keymap = 1;
             if(keymap > -1){
-                if(event->key.keysym.mod & KMOD_CTRL){
-                    err = hexgame_add_random_coins_by_keymap(game, keymap);
-                    if(err)return err;
-                }else{
-                    err = hexgame_reset_player_by_keymap(game, keymap,
-                        RESET_SOFT, NULL);
-                    if(err)return err;
-                }
+                err = hexgame_reset_player_by_keymap(game, keymap,
+                    RESET_SOFT, NULL);
+                if(err)return err;
             }
         }
     }
