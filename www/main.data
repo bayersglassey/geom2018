@@ -188,8 +188,6 @@ mappers:
 verts:
     "0": "map_vert0"
     "1": "map_vert1"
-    "B": "curvy_curvy_dodeca_anim"
-    "C": "red_curvy_dodeca_anim"
 edges:
     "0": "map_edge0"
     "1": "map_edge1"
@@ -201,6 +199,21 @@ faces:
     "S": "map_savepoint"
     "D": "map_door"
     "w": frame_offset(1) "map_water"
+
+geomfonts:
+    "geomfont1":
+        "data/font.fus" autoupper
+        prismel: "sq" (1 0 0 0) (0 0 0 1)
+
+shapes:
+    "txt_title":
+        text: "geomfont1" "Depths\n  of\n  Uo" (3 1)
+    "txt_new_game":
+        text: "geomfont1" "New"
+    "txt_continue":
+        text: "geomfont1" "Load"
+    "txt_exit":
+        text: "geomfont1" "Quit"
 
 shapes:
 
@@ -993,6 +1006,7 @@ import "data/curvy.fus"
 import "data/dodecas.fus"
 
 import "data/mappers.fus"
+import "data/texts.fus"
 
 import "data/maps/test/tiles.fus"
 import "data/maps/demo/tilesets/water_tiles.fus"
@@ -3846,11 +3860,12 @@ submaps:
                                                 tileset: "data/tileset1_bg.fus"
                                             :
                                                 file: "data/maps/demo/big.fus"
-                                                door:
-                                                    map: "data/maps/trees/worldmap.fus"
-                                                    pos: (1 1)
-                                                    rot: 0
-                                                    turn: n
+                                                doors:
+                                                    :
+                                                        map: "data/maps/trees/worldmap.fus"
+                                                        pos: (1 1)
+                                                        rot: 0
+                                                        turn: n
                                     :
                                         file: "data/maps/demo/fisheye.fus"
                                         pos: (0 0)
@@ -3865,13 +3880,14 @@ submaps:
                                         camera: (0 0)
                                     :
                                         file: "data/maps/demo/fisheye4.fus"
-                                        door:
-                                            anim: "anim/roller.fus"
-                                            pos: (-11 -80)
-                                            rot: 0
-                                            turn: n
                                         pos: (-48 -28)
                                         camera: (0 0)
+                                        doors:
+                                            :
+                                                anim: "anim/roller.fus"
+                                                pos: (-11 -80)
+                                                rot: 0
+                                                turn: n
             :
                 file: "data/maps/demo/pebbles2.fus"
                 pos: (22 9)
@@ -3892,15 +3908,17 @@ submaps:
                             : "data/maps/demo/recs/tunnels_002.fus"
                     :
                         file: "data/maps/demo/tunnels2.fus"
-                        door:
-                            map: "data/maps/wilderness/worldmap.fus"
-                            pos: (0 0)
-                            rot: 0
-                            turn: n
                         pos: eval: (13 1) + (18 8)
                         camera: (0 5)
                         mapper: ("triple")
                         tileset: "data/maps/demo/tilesets/shiny.fus"
+                        doors:
+                            :
+                                #map: "data/maps/wilderness/worldmap.fus"
+                                map: "data/maps/water/worldmap.fus"
+                                pos: (0 0)
+                                rot: 0
+                                turn: n
 
 
     :
@@ -3916,14 +3934,15 @@ submaps:
         submaps:
             :
                 file: "data/maps/test/map3.fus"
-                door:
-                    map: "data/maps/test/worldmap.fus"
-                    pos: (0 0)
-                    rot: 0
-                    turn: n
                 pos: (0 0)
                 camera: (0 4)
                 mapper: ("triple")
+                doors:
+                    :
+                        map: "data/maps/test/worldmap.fus"
+                        pos: (0 0)
+                        rot: 0
+                        turn: n
                 submaps:
                     :
                         file: "data/maps/test/map2.fus"
@@ -3936,13 +3955,14 @@ submaps:
                 submaps:
                     :
                         file: "data/maps/test/map3x.fus"
-                        door:
-                            map: "data/maps/demo/worldmap.fus"
-                            anim: "anim/roller.fus"
-                            pos: (62 85)
-                            rot: 0
-                            turn: y
                         pos: (1 10)
+                        doors:
+                            :
+                                map: "data/maps/demo/worldmap.fus"
+                                anim: "anim/roller.fus"
+                                pos: (62 85)
+                                rot: 0
+                                turn: y
             :
                 pos: (-1 -10)
                 camera: (4 0)
@@ -4740,9 +4760,15 @@ collmap:
     ;;
     ;;  .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
+parts:
+    "C": shape "red_curvy_dodeca_anim"
+
 collmap:
-    ;; %(+)  [C]collmap:
-    ;; %(+)   [B]
+    ;; (?)  [C]parts:
+    "B": shape "curvy_curvy_dodeca_anim"
+
+collmap:
+    ;; (?)   [B]
 collmap:
     ;;                    %. - +     [11]
     ;;                         %\    [1]
@@ -5904,7 +5930,219 @@ collmap:
     ;;  xxxx
     ;;  x x x +
     ;;  xxxxx/
-    ;; (+)- +parts:
+    ;; (+)- +collmap:
+    ;;
+    ;;        .   .   .   .
+    ;;        x x x x x x x
+    ;;      .   .   .   .   .
+    ;;      x x x x x x x x x
+    ;;    .   .   .   .   .   .
+    ;;    x x x x x x x x x x x
+    ;;  .   .   .  (.)  .   .   .
+    ;;    x x x x x x x x x x x
+    ;;    .   .   .   .   .   .
+    ;;      x x x x x x x x x
+    ;;      .   .   .   .   .
+    ;;        x x x x x x x
+    ;;        .   .   .   .
+    ;;
+
+
+parts:
+    "c": recording "data/maps/demo/recs/coin.fus"
+    "C": recording "data/maps/demo/recs/coin_crouch.fus"
+    "l": "data/maps/wilderness/start_line2.fus"
+    "L": "data/maps/wilderness/start_line3.fus"
+    "m": "data/maps/wilderness/start_line4.fus"
+    "M": "data/maps/wilderness/start_line5.fus"
+
+collmap:
+    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - + - + - + - + - +   .   .
+    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w * * * w * w * w */
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   +   .   .
+    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w * w * w w w w * w *\ /*\
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   +   .
+    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w * * * w w w w * w *   */
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .
+    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w * * * * w w w w w w   * */
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .
+    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w */w
+    ;; .   .   .   .   .   .   .   .   + - .   .   .   .   . - + - + - +   .   .   .   .   .   .   +   .   .   .
+    ;; w w w w w w w w w w w w w w w w/w w w w w w w w w w w w w w w w w\w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   +   .   .
+    ;; w w w w w w w w w w w w w w w/w w w w w w w w w w w w w w w w w w w\w w w w w w w w w w w * */w
+    ;; .   .   .   .   .   .   .   +   .   .   .  (+)- +   .   .   .   .   + - +   .   .   .   .   +   .   .   .
+    ;; w w w w w w w w w w w w w w w w w w w w w w w * w w w w w w w\w w w w w w\w w w w w w w w w *\w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   +   .   .   .   .   +   .   .
+    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w\w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   + - + - +   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .
+    ;; w w w w w w w w w w w w w w w w w w w w w\w w w w w w w w w w w w w w\w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .
+    ;; w w w w w w w w w w w w       w w w w w w w w w w w w w w w w w w w w/w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   + - + - .   .   + - + - +   .   .   .   .   .   .   .   .   .
+    ;; w w w w w w w w w w w           w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; w w w w w w w w w w w           w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; w w w w w w w w w w w           w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; w w w w w w w w w w w w       w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+parts:
+    "c": recording "data/maps/demo/recs/coin.fus"
+    "C": recording "data/maps/demo/recs/coin_crouch.fus"
+    "l": "data/maps/wilderness/start_line2.fus"
+    "L": "data/maps/wilderness/start_line3.fus"
+    "m": "data/maps/wilderness/start_line4.fus"
+    "M": "data/maps/wilderness/start_line5.fus"
+
+collmap:
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .  (.)  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+unit: 3 2 0 -1
+spawn: "data/maps/water/start.fus"
+default_palette: "data/pal1.fus"
+default_tileset: "data/tileset1.fus"
+
+submaps:
+    :
+        pos: (0 0)
+        camera: (2 -6)
+        mapper: ("triple")
+        submaps:
+            :
+                file: "data/maps/water/start.fus"
+                doors:
+                    :
+                        map: "data/maps/demo/worldmap.fus"
+                        pos: (72 29)
+                        rot: 0
+                        turn: y
+
+collmap:
+    ;;
+    ;;        + - + - + - +
+    ;;       /*\*/*\*/*\*/*\
+    ;;      + - + - + - + - +
+    ;;     /*\*/*\*/*\*/*\*/*\
+    ;;    + - + - + - + - + - +
+    ;;   /*\*/*\*/*\*/*\*/*\*/*\
+    ;;  + - + - + -(+)- + - + - +
+    ;;   \*/*\*/*\*/*\*/*\*/*\*/
+    ;;    + - + - + - + - + - +
+    ;;     \*/*\*/*\*/*\*/*\*/
+    ;;      + - + - + - + - +
+    ;;       \*/*\*/*\*/*\*/
+    ;;        + - + - + - +
+    ;;
+
+
+parts:
+    "c": recording "data/maps/demo/recs/coin.fus"
+    "C": recording "data/maps/demo/recs/coin_crouch.fus"
+    "l": "data/maps/wilderness/start_line2.fus"
+    "L": "data/maps/wilderness/start_line3.fus"
+    "m": "data/maps/wilderness/start_line4.fus"
+    "M": "data/maps/wilderness/start_line5.fus"
+
+collmap:
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                       *
+    ;; .   .   .   .   .   .   . - . - .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     * *          \
+    ;;   .   .   .   .   .   .   .   .   . - .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     *     S            \
+    ;; .   .   .   .   . - + - + - + - +   .   . - . - . - .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                           * *    \w w w w w w w w w w\
+    ;;   .   .   .   .   .   .   .   .   +   .   .   .   .   . - .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                         * *   D   w w w w w w w w w w w w w\
+    ;; .   .   .   .   .   .   . - + - + - + -(+)- + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                        /w w w w w\w w w w w w\
+    ;;   .   .   .   .   .   .   .   .   .   +   . - .   + - + - +   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                      /w w/w w w w w w w w w\w w\
+    ;; .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                    /w w/w w w w w w w w w w/w w/
+    ;;   .   .   .   .   .   .   .   .   +   .   .   + - + - + - +   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                  /w w w\w w w w w w w w w w w/
+    ;; .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                /w w w w/*\w w w w w w w w w/
+    ;;   .   .   .   .   .   .   .   .   .   . - . - . - . - . - . - + - + - +   .   .   .   .   .   .   .   .
+    ;;                              /w w w w/w w w w w w w w w w w w w w w w w\
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - + - +   .   .   .   .   .   .
+    ;;                            /w w w w/w w w w w w w w w w w w w w w w w w w w w w w\
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .
+    ;;                            \w w w w w w w w w w w w w w w w w w w w w w w w w w w w\
+    ;; .   .   .   .   .   .   .   .   .   .   . - + - + - +   .   .   .   .   .   .   .   +   .   .   .   .   .
+    ;;                              \w w w w w/     \w w w w w w w w w w w w w w w w w w w w\
+    ;;   .   .   .   .   .   .   .   . - . - .   .   +   .   .   .   .   .   .   .   .   .   +   .   .   .   .
+    ;;                                                \w w w w w w w w w w w w w w w w w w w w\
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   +   .   .   .   .
+    ;;                                                      \w w w w w w w w w w w w w w w w w/
+    ;;   .   .   .   .   .   .   .   .   .   .   .   + - +   + - + - +   .   .   .   .   .   +   .   .   .   .
+    ;;                                              /w w w\         /w w w w w w w w w w w w/
+    ;; .   .   .   .   .   .   .   .   .   .   .   +   .   + - + - +   .   .   .   .   .   + - +   .   .   .   .
+    ;;                                              \w w w w w w w w w w w w w w w w w w w w w w\
+    ;;   .   .   .   .   .   .   .   .   .   .   .   + - + - +   .   .   .   .   .   + - +   .   +   .   .   .
+    ;;                                                      /w w w w w w w w w w w w/     \w w w/
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   +   .   + - +   .   .   .   .
+    ;;                                                      \w w w w w w w w w w w/
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   + - + - + - + - + - +   .   .   .   .   .   .   .
+parts:
     "r": recording "data/maps/wilderness/recs/roller000.fus"
     "r": "data/maps/demo/vert.fus"
 
@@ -5920,12 +6158,120 @@ collmap:
     ;;          \*/*\*/
     ;;           + - +
     ;;
+parts:
+    "c": recording "data/maps/demo/recs/coin.fus"
+    "C": recording "data/maps/demo/recs/coin_crouch.fus"
+
+    "d": recording "data/maps/demo/recs/coin.fus"
+    "D": recording "data/maps/demo/recs/coin_crouch.fus"
+    "d": "data/maps/demo/vert.fus"
+    "D": "data/maps/demo/vert.fus"
+
+    "l": "data/maps/wilderness/start_line2.fus"
+    "L": "data/maps/wilderness/start_line3.fus"
+    "m": "data/maps/wilderness/start_line4.fus"
+    "M": "data/maps/wilderness/start_line5.fus"
+
+collmap:
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .    [L]
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   [M]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                                      /     \
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   +   .   .   .   .   .   ?   .   .   .   .   .   [C]
+    ;;                                                    /
+    ;;   .   .   .   .   .   .   .   .   .   .   + - + - +   +   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                          /           / \
+    ;; .   .   .   .   .   .   .   .   .   .   +   .   .   + - +   .   .   .   .   ?   ?   .   .   .   .   .   .   [L][C]
+    ;;                                        /
+    ;;   .   .   .   .   .   .   .   .   .   +   .   .   .   .   + - + - + - +   .   .   .   .   .   .   .   .
+    ;;                                        \
+    ;; .   .   .   .   .   .   .   .   .   .  (+)  ?   ?   ?   ?   .   + - +   .   .   .   .   .   .   .   .   . [c][c][c][c]
+    ;;                                          \                           \
+    ;;   .   .   .   .   .   .   .   .   .   +   +   .   ?   ?   .   ?   ?   +   .   .   .   .   .   .   .   .        [c][c]  [D][C]
+    ;;                                        \                             /
+    ;; .   .   .   .   .   .   .   .   .   .   +   .   .   ?   .   .   ? - +   .   .   .   .   .   .   .   .   .       [c]      [D]
+    ;;                                          \                     /
+    ;;   .   .   .   .   .   .   .   .   .   .   + - +   +   +   + - +   .   .   .   .   .   .   .   .   .   .
+    ;;                                            \*/*           *\*/
+    ;; .   .   .   .   .   .   .   .   .   .   .   + - +   ?   ?   +   .   .   .   .   .   .   .   .   .   .   .     [c][c]
+    ;;                                                  \  *\*/*\*/
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   + - + - +   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   ?   .   ?   .   .   .   .   .      [L] [C]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .       [L]
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   [l]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
 collmap:
     ;;      +
     ;;     /
     ;;    +
     ;;   /
     ;; (+)
+parts:
+    "c": recording "data/maps/demo/recs/coin.fus"
+    "C": recording "data/maps/demo/recs/coin_crouch.fus"
+    "l": "data/maps/wilderness/start_line2.fus"
+    "L": "data/maps/wilderness/start_line3.fus"
+    "m": "data/maps/wilderness/start_line4.fus"
+    "M": "data/maps/wilderness/start_line5.fus"
+
+collmap:
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                                     w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                                   w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                                 w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .  [l]
+    ;;                                       w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                   w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   [M]
+    ;;                                 w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                 w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                   w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   +   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .    [M]
+    ;;                                 w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   ?   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .    [l]
+    ;;                               w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   ?   .   .  (.)  .   +   .   .   ?   .   .   .   .   .   .   .   .   .   .   .  [m]   [m]
+    ;;                             w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                               w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .    [l]
+    ;;                                   w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .    [l]
+    ;;                                 w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .    [L]
+    ;;                                       w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                         w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   [m]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
 parts:
     "r": recording "data/maps/wilderness/recs/roller000.fus"
     "r": "data/maps/demo/vert.fus"
@@ -5938,6 +6284,55 @@ collmap:
     ;;      \*/*\*/
     ;;       + - +
     ;;
+parts:
+    "c": recording "data/maps/demo/recs/coin.fus"
+    "C": recording "data/maps/demo/recs/coin_crouch.fus"
+    "l": "data/maps/wilderness/start_line2.fus"
+    "L": "data/maps/wilderness/start_line3.fus"
+    "m": "data/maps/wilderness/start_line4.fus"
+    "M": "data/maps/wilderness/start_line5.fus"
+
+collmap:
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .  [l]
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   [m]
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   +   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .    [M]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   ?   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .    [L]
+    ;;
+    ;; .   .   .   .   .   .   .   ?   .   .  (.)  .   +   .   .   ?   .   .   .   .   .   .   .   .   .   .   .  [m]   [m]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .    [l] [L]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .    [l]
+    ;;
+    ;; .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .    [L]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   [m]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
 parts:
     "r": recording "data/maps/wilderness/recs/roller000.fus"
     "r": "data/maps/demo/vert.fus"
@@ -5972,11 +6367,11 @@ collmap:
     ;;
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;;   .   .   .   .   .   .   .   .   .   .   .   . - .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   . - .   .   .   .   .   .   .   .   .   .
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
@@ -5986,13 +6381,13 @@ collmap:
     ;;
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;; .   .   .   .   .   .   .   .   .   .   .   . - .   .   .   .   .   . - .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   . - .   .   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   . - . - .   .   .   . - .   .   .   .   .   .   .   .
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
@@ -6035,13 +6430,13 @@ collmap:
     ;;                                        \
     ;; .   .   .   .   .   .   .   .   .   .  (?)- +   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .     [r]
     ;;                                          \*/                   /     \
-    ;;   .   .   .   .   .   .   .   .   .   .   +   .   .   ?   .   +   .   +   .   .   .   .   .   .   .   .         [c]
-    ;;                                          /                     \     /
+    ;;   .   .   .   .   .   .   .   .   .   +   +   .   .   ?   .   +   .   +   .   .   .   .   .   .   .   .         [c]
+    ;;                                        \                       \     /
     ;; .   .   .   .   .   .   .   .   .   .   +   .   ?   .   ?   ?   + - +   .   .   .   .   .   .   .   .   .    [c]  [c][c]
     ;;                                          \                     /
     ;;   .   .   .   .   .   ?   .   .   .   .   + - +   +   +   + - +   .   .   .   .   .   .   .   .   .   .    [c]
     ;;                                            \*/*           *\*/
-    ;; .   .   .   .   .   .   .   ?   .   .   .   + - +   .   .   +   .   .   .   .   .   .   .   .   .   .   .   [m]
+    ;; .   .   .   .   .   .   ?   .   .   .   .   + - +   .   .   +   .   .   .   .   .   .   .   .   .   .   .   [M]
     ;;                                                  \  *\*/*\*/
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   + - + - +   .   .   .   .   .   .   .   .   .   .   .
     ;;
@@ -6064,13 +6459,17 @@ submaps:
         camera: (0 0)
         mapper: ("triple")
         submaps:
+
+            ### START ###
             :
+                # START
                 file: "data/maps/wilderness/start.fus"
-                door:
-                    map: "data/maps/demo/worldmap.fus"
-                    pos: (72 29)
-                    rot: 0
-                    turn: y
+                doors:
+                    :
+                        map: "data/maps/demo/worldmap.fus"
+                        pos: (72 29)
+                        rot: 0
+                        turn: y
                 submaps:
                     :
                         file: "data/maps/wilderness/ball_sm.fus"
@@ -6079,23 +6478,29 @@ submaps:
                         file: "data/maps/wilderness/ball_sm.fus"
                         pos: (eval(rand(10, 12)) eval(rand(-10, 10)))
             :
+                # BALL BELOW START
                 file: "data/maps/wilderness/ball_md.fus"
                 pos: (eval(rand(-10, 10)) eval(rand(-10, -6)))
                 camera: (0 0)
             :
+                # BALL ABOVE START
                 file: "data/maps/wilderness/ball_md.fus"
                 pos: (eval(rand(-10, 10)) eval(rand(6, 10)))
                 camera: (0 0)
             :
+                # BALL LEFT OF START #1
                 file: "data/maps/wilderness/ball_lg.fus"
                 pos: (eval(rand(-14, -10)) eval(rand(-10, 10)))
                 camera: (0 0)
             :
+                # BALL LEFT OF START #2
                 file: "data/maps/wilderness/ball_sm.fus"
                 pos: (eval(rand(-14, -10)) eval(rand(-10, 10)))
                 camera: (0 0)
 
+            ### RIGHT OF START ###
             :
+                # TOP-RIGHT
                 file: "data/maps/wilderness/start2.fus"
                 pos: (eval(rand(8, 12)) eval(rand(12, 16)))
                 camera: (0 0)
@@ -6104,14 +6509,21 @@ submaps:
                         file: "data/maps/wilderness/ball_sm.fus"
                         pos: (eval(rand(-4, 4)) eval(rand(-4, 4)))
             :
-                file: "data/maps/wilderness/start2.fus"
+                # RIGHT
+                file: "data/maps/wilderness/start5.fus"
                 pos: (eval(rand(8, 12)) eval(rand(-2, 2)))
                 camera: (0 0)
                 submaps:
                     :
+                        # UP
+                        file: "data/maps/wilderness/ball_md.fus"
+                        pos: (eval(rand(-4, 4)) eval(rand(-10, -14)))
+                    :
+                        # RIGHT
                         file: "data/maps/wilderness/ball_sm.fus"
-                        pos: (eval(rand(-4, 4)) eval(rand(-4, 4)))
+                        pos: (eval(rand(10, 14)) eval(rand(-4, 4)))
             :
+                # BOTTOM-RIGHT
                 file: "data/maps/wilderness/start2.fus"
                 pos: (eval(rand(8, 12)) eval(rand(-12, -16)))
                 camera: (0 0)
@@ -6120,11 +6532,28 @@ submaps:
                         file: "data/maps/wilderness/ball_lg.fus"
                         pos: (eval(rand(-4, 4)) eval(rand(-4, 4)))
             :
+                # FAR RIGHT
+                file: "data/maps/wilderness/watercorridor.fus"
+                pos: (eval(rand(20, 24)) eval(rand(-4, 4)))
+                camera: (0 0)
+                submaps:
+                    :
+                        file: "data/maps/wilderness/ball_lg.fus"
+                        pos: (14 14)
+                        camera: (0 0)
+                    :
+                        file: "data/maps/wilderness/ball_md.fus"
+                        pos: (16 10)
+                        camera: (0 0)
+
+            ### LEFT OF START ###
+            :
+                # TOP
                 file: "data/maps/wilderness/start3.fus"
                 pos: (eval(rand(-4, 4)) eval(rand(16, 24)))
                 camera: (0 0)
-
             :
+                # TOP-LEFT
                 file: "data/maps/wilderness/start2.fus"
                 pos: (eval(rand(-8, -12)) eval(rand(14, 16)))
                 camera: (0 0)
@@ -6136,18 +6565,35 @@ submaps:
                         file: "data/maps/wilderness/ball_md.fus"
                         pos: (eval(rand(-4, 4)) eval(rand(-4, 4)))
             :
-                file: "data/maps/wilderness/start2.fus"
+                # LEFT
+                file: "data/maps/wilderness/start4.fus"
                 pos: (eval(rand(-16, -20)) eval(rand(-2, 2)))
                 camera: (0 0)
                 submaps:
             :
+                # BOTTOM-LEFT
                 file: "data/maps/wilderness/start3.fus"
-                pos: (eval(rand(-30, -20)) eval(rand(-16, -24)))
+                pos: (eval(rand(-30, -25)) eval(rand(-24, -28)))
                 camera: (0 0)
                 submaps:
                     :
                         file: "data/maps/wilderness/ball_md.fus"
                         pos: (eval(rand(-4, 4)) eval(rand(-4, 4)))
+                    :
+                        file: "data/maps/wilderness/ball_lg.fus"
+                        pos: (eval(rand(8, 12)) eval(rand(10, 14)))
+            :
+                # BOTTOM
+                file: "data/maps/wilderness/watercorridor.fus"
+                pos: (eval(rand(-12, -10)) eval(rand(-20, -24)))
+                camera: (0 0)
+                submaps:
+                    :
+                        file: "data/maps/wilderness/ball_sm.fus"
+                        pos: (eval(rand(-10, 10)) eval(rand(-10, 10)))
+                    :
+                        file: "data/maps/wilderness/ball_md.fus"
+                        pos: (eval(rand(-10, 10)) eval(rand(-10, 10)))
 collmap:
     ;;        +
     ;;       /
@@ -6170,15 +6616,15 @@ collmap:
     ;;
     ;; .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .
     ;;                                    /                       /
-    ;;   .   .   .   .   .   .   .   .   +   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .
+    ;;   .   .   .   .   .   .   .   .   +   .   .   .   .   .   +   +   .   .   .   .   .   .   .   .   .   .
     ;;                                  /                       /
-    ;; .   .   .   .   .   .   .   .   +   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   .   .   +   .   .   .   .   .   +   .   +   .   .   .   .   .   .   .   .   .   .
     ;;                                                        /
-    ;;   .   .   .   .   .   .   .   .   .   .   + - + - +   +   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;                                          /         \
-    ;; .   .   .   .   .   .   .   .   .   .   +   .   .   + - + - +   .   .   .   .   .   .   .   .   .   .   .
+    ;;   .   .   .   .   .   .   .   .   .   .   + - + - +   +   .   .   +   .   .   .   .   .   .   .   .   .
+    ;;                                          /     \*/*\
+    ;; .   .   .   .   .   .   .   .   .   .   +   .   + - + - + - +   .   +   .   .   .   .   .   .   .   .   .
     ;;                                        /
-    ;;   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .
     ;;                                        \
     ;; .   .   .   .   .   .   .   .   .   +  (+)- +   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .
     ;;                                    /     \*/                   /     \
@@ -6233,26 +6679,77 @@ collmap:
     ;;
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;;   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;                                              /     \
-    ;; .   .   .   .   .   .   ?   .   .   .   .   +   .   +   .   .   .   .   ?   .   .   .   .   .   .   .   .   [l][L]
-    ;;                                            /
-    ;;   .   .   .   .   .   .   .   ?   .   .   +   ?   .   .   .   ? - +   .   .   .   .   .   .   .   .   .   [C][c]  [r]
-    ;;                                          /                   /     \
-    ;; .   .   .   .   .   .   .   .   .   .   +   .   ?   .   .   +   .   +   .   .   .   .   .   .   .   .   .   [c]
-    ;;                                        /                     \
-    ;;   .   .   .   .   .   .   ?   .   .   +   .   .   .   ?   .   +   ?   +   .   .   .   .   .   .   .   .     [M]  [c] [C]
-    ;;                                        \                               \
-    ;; .   .   .   .   .   .   .   .   .   .  (+)  .   +   .   ?   .   .   .   +   .   .   ?   .   .   .   .   .         [c] [m]
-    ;;                                          \       \                       \
-    ;;   .   .   .   .   .   .   .   .   .   .   +   .   +   .   .   ?   +   .   +   .   .   .   .   .   .   .            [c]
-    ;;                                            \     /                 \     /
-    ;; .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .   ?   + - +   .   .   .   .   .   .   .   .           [c]
+    ;;   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .    [c]
     ;;
+    ;; .   .   .   .   .   .   .   ?   ?   .   .   .   .   .   ?   ?   .   .   .   .   .   .   .   .   .   .   .   [c][l][C][c]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   + - + - +   ?   .   .   .   .   .   .   .   .   .   .   .   .    [L]
+    ;;                                          /w w w w w\
+    ;; .   .   .   .   .   .   .   .   .   .   +   ?   ?   + - + - +   .   .   .   .   .   .   .   .   .   .   .     [c][c]
+    ;;                                        /w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   ?   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .      [c]
+    ;;                                        \w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .  (?)- +   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .     [r]
+    ;;                                         w\*/w w w w w w w w w w w w *\
+    ;;   .   .   .   .   .   .   .   .   .   +   +   .   .   ?   .   +   . - +   .   .   .   .   .   .   .   .         [c]
+    ;;                                        \w w w w w w w w w w w w w/*\*/
+    ;; .   .   .   .   .   .   .   .   .   .   +   .   ?   .   ?   ?   + - +   .   .   .   .   .   .   .   .   .    [c]  [c][c]
+    ;;                                          \w w w w w w w w w w w/
+    ;;   .   .   .   .   .   ?   .   .   .   .   + - +   +   +   + - +   .   .   .   .   .   .   .   .   .   .    [c]
+    ;;                                            \*/* w w w w w *\*/
+    ;; .   .   .   .   .   .   ?   .   .   .   .   + - +   .   .   +   .   .   .   .   .   .   .   .   .   .   .   [M]
+    ;;                                                  \w *\*/*\*/
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   + - + - +   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   ?   .   .   .   .   ?   ?   ?   .   .   .   .   .   .   .   .   .   .    [c][C][C][C]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .    [L]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+parts:
+    "c": recording "data/maps/demo/recs/coin.fus"
+    "C": recording "data/maps/demo/recs/coin_crouch.fus"
+    "l": "data/maps/wilderness/start_line2.fus"
+    "L": "data/maps/wilderness/start_line3.fus"
+    "m": "data/maps/wilderness/start_line4.fus"
+    "M": "data/maps/wilderness/start_line5.fus"
+    "r": recording "data/maps/wilderness/recs/roller000.fus"
+    "r": "data/maps/demo/vert.fus"
+
+collmap:
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                              /w w w\
+    ;; .   .   .   .   .   .   ?   .   .   .   .   +   .   +   .   .   .   .   ?   .   .   .   .   .   .   .   .   [l][L]
+    ;;                                            /w w w w w
+    ;;   .   .   .   .   .   .   .   ?   .   .   +   ?   .   .   .   ? - +   .   .   .   .   .   .   .   .   .   [C][c]  [r]
+    ;;                                          /w w w w w w        /w w w\
+    ;; .   .   .   .   .   .   .   .   .   .   +   .   ?   .   .   +   .   +   .   .   .   .   .   .   .   .   .   [c]
+    ;;                                        /w w w w w w w w w w w\w w w w
+    ;;   .   .   .   .   .   .   ?   .   .   +   .   .   .   ?   .   +   ?   +   .   .   .   .   .   .   .   .     [M]  [c] [C]
+    ;;                                        \w w w w w w w w w w w w w w w w\
+    ;; .   .   .   .   .   .   .   .   .   .  (+)  .   +   .   ?   .   .   .   +   .   .   ?   .   .   .   .   .         [c] [m]
+    ;;                                          \w w w w\w w w w w w w w w w w w\
+    ;;   .   .   .   .   .   .   .   .   .   .   +   .   +   .   .   ?   +   .   +   .   .   .   .   .   .   .            [c]
+    ;;                                            \w w w/w w w w          \w w w/
+    ;; .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .   ?   + - +   .   .   .   .   .   .   .   .           [c]
+    ;;                                               w w w w w w
     ;;   .   .   .   .   .   .   .   .   .   .   .   +   .   .   +   .   .   .   .   .   .   .   .   .   .   .
-    ;;                                                \           \
+    ;;                                                \w w w w w w\
     ;; .   .   .   .   .   .   .   .   ?   .   .   .   +   .   ?   +   .   .   + - +   .   .   .   .   .   .   .   [c][c]
-    ;;                                                  \         /           /   /
+    ;;                                                  \w w w w w/           /   /
     ;;   .   .   .   .   .   .   .   .   .   ?   .   .   + - + - +   .   .   + - +   ?   .   .   .   .   .   .        [C] [c]
     ;;
     ;; .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   [L]
@@ -6781,14 +7278,15 @@ default_tileset: "data/tileset1.fus"
 submaps:
     :
         file: "data/maps/test/map3.fus"
-        door:
-            map: "data/maps/demo/worldmap.fus"
-            pos: (40 60)
-            rot: 0
-            turn: n
         pos: (0 0)
         camera: (0 4)
         mapper: ("triple")
+        doors:
+            :
+                map: "data/maps/demo/worldmap.fus"
+                pos: (40 60)
+                rot: 0
+                turn: n
         submaps:
             :
                 file: "data/maps/test/map2.fus"
@@ -6801,12 +7299,13 @@ submaps:
         submaps:
             :
                 file: "data/maps/test/map3x.fus"
-                door:
-                    map: "data/maps/test/worldmap_minimal.fus"
-                    pos: (0 0)
-                    rot: 0
-                    turn: n
                 pos: (1 10)
+                doors:
+                    :
+                        map: "data/maps/test/worldmap_minimal.fus"
+                        pos: (0 0)
+                        rot: 0
+                        turn: n
     :
         pos: (-1 -10)
         camera: (4 0)
@@ -6895,14 +7394,15 @@ default_tileset: "data/tileset1.fus"
 submaps:
     :
         file: "data/maps/test/map3.fus"
-        door:
-            map: "data/maps/test/worldmap.fus"
-            pos: (22 25)
-            rot: 0
-            turn: y
         pos: (0 0)
         camera: (0 4)
         mapper: ("triple")
+        doors:
+            :
+                map: "data/maps/test/worldmap.fus"
+                pos: (22 25)
+                rot: 0
+                turn: y
         recordings:
             : "data/maps/test/recs/worldmap_minimal_bird_000.fus"
             : "data/maps/test/recs/worldmap_minimal_bird_001.fus"
@@ -7073,6 +7573,83 @@ keys:
     l:
     r:
 data: " w43+r w3-r w46+l w2-l w81+r w1-r w9+l w3-l w38"
+parts:
+    "T": shape "txt_title"
+    "a": shape "txt_new_game"
+    "a": "data/maps/demo/vert.fus"
+    "b": shape "txt_continue"
+    "b": "data/maps/demo/vert.fus"
+    "c": shape "txt_exit"
+    "c": "data/maps/demo/vert.fus"
+
+collmap:
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .  [T]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                       D                                                       D
+    ;; .   .   .   ? - + - + - + - + - +   .   .   + -(+)- +   .   .   + - ? - + - + - + - + - + - +   .   .   .  [a]  [b]
+    ;;            /                     \           \     /           /                             \
+    ;;   .   .   +   .   .   .   .   .   +   .   .   + - +   .   .   + - +   .   .   .   .   .   .   +   .   .
+    ;;            \                       \                               \                         /
+    ;; .   .   .   + - + - + - +   + - + - +   .   .   .   .   .   .   .   +   + - + - + - + - + - +   .   .   .
+    ;;                          \ /                                         \ /
+    ;;   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   +   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                        / \      D      / \
+    ;;   .   .   .   .   .   .   .   + - ? - +   + - + - + - +   +   .   .   .   .   .   .   .   .   .   .   .       [c]
+    ;;                                \                           \
+    ;; .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .
+    ;;                                  \                             /
+    ;;   .   .   .   .   .   .   .   .   + - + - + - + - + - + - + - +   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;              /
+    ;; .   + - + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;    /
+    ;;   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;    \  D
+    ;; .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+unit: 3 2 0 -1
+spawn: "data/maps/title/title.fus"
+default_palette: "data/pal1.fus"
+default_tileset: "data/tileset1.fus"
+
+submaps:
+    :
+        pos: (0 0)
+        camera: (0 0)
+        mapper: ("triple")
+        submaps:
+            :
+                file: "data/maps/title/title.fus"
+                doors:
+                    :
+                        new_game "data/maps/demo/worldmap.fus"
+                    :
+                        continue
+                    :
+                        exit
+                    :
+                        dud
 parts:
     "t": "data/maps/trees/trunk.fus"
     "T": "data/maps/trees/trunkL.fus"
@@ -7470,11 +8047,12 @@ submaps:
                 tileset: "data/maps/trees/tilesets/trees_dark.fus"
             :
                 file: "data/maps/trees/start.fus"
-                door:
-                    map: "data/maps/demo/worldmap.fus"
-                    pos: (36 -71)
-                    rot: 0
-                    turn: y
+                doors:
+                    :
+                        map: "data/maps/demo/worldmap.fus"
+                        pos: (36 -71)
+                        rot: 0
+                        turn: y
     :
         pos: (32 10)
         camera: (0 0)
@@ -8298,6 +8876,9 @@ crouch_fly_bouncy:
         rot: 3
         turn
 
+import "anim/player_crawl.fus"
+import "anim/player_swim.fus"
+
 stand:
     rgraph: "player_stand"
 
@@ -8481,40 +9062,6 @@ looking_up:
     if: key: not isdown x
     then: goto: stand
 
-crawl_looking_up:
-    rgraph: "player_crawl_looking_up"
-    hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)  .
-
-    if:
-        key: wentdown y
-    then:
-        spawn: "anim/spit.fus" "crouch_fly" (1 0) 1 f
-        goto: crawl_looking_up_spit
-        delay: 9
-
-    if:
-        key: not isdown d
-        coll: all no
-            ;;  *\*/*
-            ;;  - + -
-            ;;  */ \*
-            ;; ( )
-    then:
-        goto: looking_up
-        delay: 3
-
-    if: key: isdown f
-    then: goto immediate: crawl
-
-    if: key: isdown b
-    then: goto immediate: crawl
-
-    if: key: not isdown x
-    then: goto: crawl
-
 spit:
     rgraph: "player_spit"
     hitbox:
@@ -8535,32 +9082,6 @@ looking_up_spit:
         ;;  (.)  .
     if() then: goto: looking_up
 
-crawl_spit:
-    rgraph: "player_crawl_spit"
-    hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)  .
-    if() then: goto: crawl
-
-crawl_looking_up_spit:
-    rgraph: "player_crawl_looking_up_spit"
-    hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)  .
-    if() then: goto: crawl_looking_up
-
-swim_spit:
-    rgraph: "player_swim_spit"
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
-    if() then: goto: swim
-
 start_jump:
     if:
         coll: water any yes
@@ -8578,6 +9099,12 @@ start_jump:
         delay: 2
 
 jump:
+    # NOTE: the only "goto: jump" is in "start_jump", which checks whether
+    # we're in water, and does "goto: jump" or "goto: swim_jump"
+    # accordingly.
+    # Therefore, if we're in "jump", then we can safely assume we're not in
+    # water without checking.
+
     rgraph: "player_jump"
     unsafe
 
@@ -8600,12 +9127,6 @@ jump:
         delay: 2
 
     if:
-        coll: water all no
-            ;;   .   .
-            ;;   *\*/*
-            ;; . - + - .
-            ;;   */*\*
-            ;;  (.)  .
         coll: all yes
             ;; ( )  +
         coll: any yes
@@ -8619,12 +9140,6 @@ jump:
 
     if:
         key: not isdown u
-        coll: water all no
-            ;;   .   .
-            ;;   *\*/*
-            ;; . - + - .
-            ;;   */*\*
-            ;;  (.)  .
         coll: all no
             ;;       \*/*
             ;;        + -
@@ -8646,17 +9161,6 @@ jump:
     then:
         move: 1 0
         goto immediate: start_jump
-
-    if:
-        coll: water any yes
-            ;;   .   .
-            ;;   *\*/*
-            ;; . - + - .
-            ;;   */*\*
-            ;;  (.)  .
-    then:
-        goto: swim
-        delay: 11
 
     if() then:
         goto: mostly_dead
@@ -8698,183 +9202,6 @@ step:
 
     if() then: goto: stand
 
-crawl:
-    rgraph: "player_crawl"
-
-    hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)  .
-
-    if:
-        key: wentdown y
-    then:
-        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
-        goto: crawl_spit
-        delay: 9
-
-    if:
-        key: not isdown d
-        coll: all no
-            ;;  *\*/*
-            ;;  - + -
-            ;;  */ \*
-            ;; ( )
-    then:
-        goto: stand
-        delay: 3
-
-    if:
-        key: isdown f
-        coll: all no
-            ;;     \*
-            ;; ( )
-        coll: all yes
-            ;;        +
-            ;;       /
-            ;; ( )  +
-    then:
-        move: 1 0
-        rot: 1
-        goto: crawl_step
-        delay: 2
-
-    if:
-        key: isdown f
-        coll: all yes
-            ;; ( )  + - +
-        coll: all no
-            ;;     \*/*
-            ;; (.)  .
-    then:
-        move: 1 0
-        goto: crawl_step
-        delay: 2
-
-    if:
-        key: isdown f
-        coll: all yes
-            ;; ( )  +
-            ;;       \
-            ;;        +
-        coll: all no
-            ;;     \*/*
-            ;; (.)  . -
-            ;;        *
-    then:
-        move: 1 0
-        rot: -1
-        goto: crawl_step_down
-        delay: 2
-
-    if:
-        key: isdown b
-    then:
-        move: 1 0
-        turn
-        goto: crawl_step
-        delay: 2
-
-    if:
-        key: not isdown f
-        key: isdown x
-    then:
-        goto: crawl_look_up
-
-crawl_look_up:
-    rgraph: "player_crawl_look_up"
-    hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)  .
-    if() then: goto: crawl_looking_up
-
-crawl_step_down:
-    rgraph: "player_crawl_step"
-    hitbox:
-        ;;    .   .
-        ;;    *\*/*
-        ;;  . -(.)  .
-
-    if:
-        key: wentdown y
-    then:
-        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
-        goto: crawl_spit
-        delay: 9
-
-    if() then: goto: crawl
-
-crawl_step:
-    rgraph: "player_crawl_step"
-    hitbox:
-        ;;    .   .
-        ;;      */*
-        ;;     (.)  .
-
-    if:
-        key: wentdown y
-    then:
-        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
-        goto: crawl_spit
-        delay: 9
-
-    if() then: goto: crawl
-
-swim_jump:
-    rgraph: "player_swim_jump"
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
-    if() then: goto immediate: swim
-
-swim:
-    rgraph: "player_swim"
-
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
-
-    if:
-        key: wentdown y
-    then:
-        spawn: "anim/spit.fus" "fly" (0 0) 0 f
-        goto: swim_spit
-        delay: 9
-
-    if:
-        key: isdown u
-    then:
-        move: 1 0
-        rot: 1
-        goto immediate: jump
-
-    if:
-        key: isdown d
-    then:
-        move: 0 1
-        rot: -1
-        goto immediate: jump
-
-    if:
-        key: isdown f
-    then:
-        goto immediate: jump
-
-    if:
-        key: isdown b
-    then:
-        move: 1 0
-        turn
-        delay: 2
-
-
 mostly_dead:
     rgraph: "player_dead"
     unsafe
@@ -8885,33 +9212,6 @@ dead:
     unsafe
     if() then: die
 
-
-
-test:
-    rgraph: "player_stand"
-
-    if: key: isdown f
-    then:
-        move: 1 0
-        delay: 3
-
-    if: key: isdown b
-    then:
-        move: 1 0
-        turn
-        delay: 3
-
-    if: key: wasdown x
-    then:
-        move: 1 0
-        rot: 1
-        delay: 3
-
-    if: key: wasdown d
-    then:
-        rot: -1
-        move: -1 0
-        delay: 3
 
 stand:
     rgraph: "big_roller"
@@ -9033,6 +9333,187 @@ grab:
     then:
         goto: stand
         delay: 1
+
+swim_spit:
+    rgraph: "player_swim_spit"
+    unsafe
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: swim
+
+swim_jump:
+    # NOTE: the only "goto: swim_jump" is in "swim_jump", which checks
+    # whether we're in water, and does "goto: jump" or "goto: swim_jump"
+    # accordingly.
+    # Therefore, if we're in "swim_jump", then we can safely assume we're in
+    # water without checking.
+
+    rgraph: "player_swim_jump"
+    unsafe
+
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+
+    if:
+        key: not isdown u
+        key: isdown f
+        coll: all yes
+            ;;        +
+            ;;       /
+            ;; ( )  +
+    then:
+        move: 1 0
+        rot: 1
+        goto: step
+        delay: 2
+
+    if:
+        key: isdown f
+        coll: any yes
+            ;;        +
+            ;;       /
+            ;; ( )
+        coll: all no
+            ;;    *\*/*
+            ;;    - + -
+            ;;       \*
+            ;;    .
+            ;;
+            ;; ( )
+    then:
+        move: 2 1
+        rot: 1
+        goto immediate: start_jump
+
+    if:
+        key: isdown f
+        coll: any yes
+            ;;       \
+            ;;        +
+            ;;
+            ;; ( )
+        coll: all no
+            ;;
+            ;;       /*
+            ;; ( )- + -
+            ;;    */*\*
+    then:
+        move: 0 0
+        rot: -1
+        goto immediate: start_jump
+
+    if:
+        key: isdown f
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        move: 1 0
+        goto immediate: start_jump
+
+    if() then:
+        goto immediate: swim
+
+swim:
+    rgraph: "player_swim"
+    unsafe
+
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+
+    if:
+        key: wentdown y
+    then:
+        spawn: "anim/spit.fus" "fly" (0 0) 0 f
+        goto: swim_spit
+        delay: 9
+
+    if:
+        key: not isdown u
+        key: isdown f
+        coll: all yes
+            ;;        +
+            ;;       /
+            ;; ( )  +
+    then:
+        move: 1 0
+        rot: 1
+        goto: step
+        delay: 2
+
+    if:
+        key: isdown f
+        coll: any yes
+            ;;        +
+            ;;       /
+            ;; ( )
+        coll: all no
+            ;;    *\*/*
+            ;;    - + -
+            ;;       \*
+            ;;    .
+            ;;
+            ;; ( )
+    then:
+        move: 2 1
+        rot: 1
+        goto immediate: start_jump
+
+    if:
+        key: isdown f
+        coll: any yes
+            ;;       \
+            ;;        +
+            ;;
+            ;; ( )
+        coll: all no
+            ;;
+            ;;       /*
+            ;; ( )- + -
+            ;;    */*\*
+    then:
+        move: 0 0
+        rot: -1
+        goto immediate: start_jump
+
+    if:
+        key: isdown f
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        move: 1 0
+        goto immediate: start_jump
+
+    if:
+        key: isdown b
+    then:
+        move: 1 0
+        turn
+        delay: 2
+
+    if:
+        coll: all yes
+            ;; (+)- +
+    then:
+        goto: stand
+        delay: 2
 
 stand:
     rgraph: "roller2"
@@ -9836,6 +10317,179 @@ crawl:
 dead:
     rgraph: "player_dead"
     if() then: die
+
+crawl_looking_up:
+    rgraph: "player_crawl_looking_up"
+    hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)  .
+
+    if:
+        key: wentdown y
+    then:
+        spawn: "anim/spit.fus" "crouch_fly" (1 0) 1 f
+        goto: crawl_looking_up_spit
+        delay: 9
+
+    if:
+        key: not isdown d
+        coll: all no
+            ;;  *\*/*
+            ;;  - + -
+            ;;  */ \*
+            ;; ( )
+    then:
+        goto: looking_up
+        delay: 3
+
+    if: key: isdown f
+    then: goto immediate: crawl
+
+    if: key: isdown b
+    then: goto immediate: crawl
+
+    if: key: not isdown x
+    then: goto: crawl
+
+crawl_spit:
+    rgraph: "player_crawl_spit"
+    hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)  .
+    if() then: goto: crawl
+
+crawl_looking_up_spit:
+    rgraph: "player_crawl_looking_up_spit"
+    hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)  .
+    if() then: goto: crawl_looking_up
+
+crawl:
+    rgraph: "player_crawl"
+
+    hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)  .
+
+    if:
+        key: wentdown y
+    then:
+        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
+        goto: crawl_spit
+        delay: 9
+
+    if:
+        key: not isdown d
+        coll: all no
+            ;;  *\*/*
+            ;;  - + -
+            ;;  */ \*
+            ;; ( )
+    then:
+        goto: stand
+        delay: 3
+
+    if:
+        key: isdown f
+        coll: all no
+            ;;     \*
+            ;; ( )
+        coll: all yes
+            ;;        +
+            ;;       /
+            ;; ( )  +
+    then:
+        move: 1 0
+        rot: 1
+        goto: crawl_step
+        delay: 2
+
+    if:
+        key: isdown f
+        coll: all yes
+            ;; ( )  + - +
+        coll: all no
+            ;;     \*/*
+            ;; (.)  .
+    then:
+        move: 1 0
+        goto: crawl_step
+        delay: 2
+
+    if:
+        key: isdown f
+        coll: all yes
+            ;; ( )  +
+            ;;       \
+            ;;        +
+        coll: all no
+            ;;     \*/*
+            ;; (.)  . -
+            ;;        *
+    then:
+        move: 1 0
+        rot: -1
+        goto: crawl_step_down
+        delay: 2
+
+    if:
+        key: isdown b
+    then:
+        move: 1 0
+        turn
+        goto: crawl_step
+        delay: 2
+
+    if:
+        key: not isdown f
+        key: isdown x
+    then:
+        goto: crawl_look_up
+
+crawl_look_up:
+    rgraph: "player_crawl_look_up"
+    hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)  .
+    if() then: goto: crawl_looking_up
+
+crawl_step_down:
+    rgraph: "player_crawl_step"
+    hitbox:
+        ;;    .   .
+        ;;    *\*/*
+        ;;  . -(.)  .
+
+    if:
+        key: wentdown y
+    then:
+        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
+        goto: crawl_spit
+        delay: 9
+
+    if() then: goto: crawl
+
+crawl_step:
+    rgraph: "player_crawl_step"
+    hitbox:
+        ;;    .   .
+        ;;      */*
+        ;;     (.)  .
+
+    if:
+        key: wentdown y
+    then:
+        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
+        goto: crawl_spit
+        delay: 9
+
+    if() then: goto: crawl
 
 stand:
     rgraph: "roller3"
