@@ -67,5 +67,6 @@ fi
 
 if [ "$TARGET" = "emcc" -a "$RELEASE" = 1 ]
 then
-    cp main.{js,html,html.mem,data} www/
+    # cp main.html www/
+    cp main.{js,html.mem,data} www/
 fi
