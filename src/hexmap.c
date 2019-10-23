@@ -493,59 +493,118 @@ static int hexmap_parse_door(hexmap_t *map, hexmap_submap_t *submap,
 
     vecspace_t *space = map->space;
 
-    if(fus_lexer_got(lexer, "map")){
+    if(fus_lexer_got(lexer, "dud")){
         err = fus_lexer_next(lexer);
         if(err)return err;
-        err = fus_lexer_get(lexer, "(");
+        door->type = HEXMAP_DOOR_TYPE_DUD;
+    }else if(fus_lexer_got(lexer, "new_game")){
+        err = fus_lexer_next(lexer);
         if(err)return err;
-        err = fus_lexer_get_str(lexer, &door->respawn_map_filename);
+        door->type = HEXMAP_DOOR_TYPE_NEW_GAME;
+    }else if(fus_lexer_got(lexer, "continue")){
+        err = fus_lexer_next(lexer);
         if(err)return err;
-        err = fus_lexer_get(lexer, ")");
+        door->type = HEXMAP_DOOR_TYPE_CONTINUE;
+    }else if(fus_lexer_got(lexer, "exit")){
+        err = fus_lexer_next(lexer);
         if(err)return err;
+        door->type = HEXMAP_DOOR_TYPE_EXIT;
     }else{
-        /* Non-null door->respawn_map_filename indicates player should
-        "teleport" to door->respawn_pos, door->respawn_rot, door->respawn_turn */
-        door->respawn_map_filename = strdup(map->name);
-    }
+        door->type = HEXMAP_DOOR_TYPE_RESPAWN;
 
-    if(fus_lexer_got(lexer, "anim")){
-        err = fus_lexer_next(lexer);
+        if(fus_lexer_got(lexer, "map")){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            err = fus_lexer_get(lexer, "(");
+            if(err)return err;
+            err = fus_lexer_get_str(lexer, &door->respawn_map_filename);
+            if(err)return err;
+            err = fus_lexer_get(lexer, ")");
+            if(err)return err;
+        }else{
+            /* Non-null door->respawn_map_filename indicates player should
+            "teleport" to door->respawn_pos, door->respawn_rot, door->respawn_turn */
+            door->respawn_map_filename = strdup(map->name);
+        }
+
+        if(fus_lexer_got(lexer, "anim")){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            err = fus_lexer_get(lexer, "(");
+            if(err)return err;
+            err = fus_lexer_get_str(lexer, &door->respawn_anim_filename);
+            if(err)return err;
+            err = fus_lexer_get(lexer, ")");
+            if(err)return err;
+        }
+
+        err = fus_lexer_get(lexer, "pos");
         if(err)return err;
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
-        err = fus_lexer_get_str(lexer, &door->respawn_anim_filename);
+        err = fus_lexer_get_vec(lexer, space, door->respawn_pos);
+        if(err)return err;
+        err = fus_lexer_get(lexer, ")");
+        if(err)return err;
+
+        err = fus_lexer_get(lexer, "rot");
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_get_int(lexer, &door->respawn_rot);
+        if(err)return err;
+        err = fus_lexer_get(lexer, ")");
+        if(err)return err;
+
+        err = fus_lexer_get(lexer, "turn");
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_get_yn(lexer, &door->respawn_turn);
         if(err)return err;
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
     }
 
-    err = fus_lexer_get(lexer, "pos");
-    if(err)return err;
-    err = fus_lexer_get(lexer, "(");
-    if(err)return err;
-    err = fus_lexer_get_vec(lexer, space, door->respawn_pos);
-    if(err)return err;
-    err = fus_lexer_get(lexer, ")");
-    if(err)return err;
+    return 0;
+}
 
-    err = fus_lexer_get(lexer, "rot");
-    if(err)return err;
-    err = fus_lexer_get(lexer, "(");
-    if(err)return err;
-    err = fus_lexer_get_int(lexer, &door->respawn_rot);
-    if(err)return err;
-    err = fus_lexer_get(lexer, ")");
-    if(err)return err;
+static int hexmap_populate_submap_doors(hexmap_t *map,
+    hexmap_submap_t *submap
+){
+    /* Scan submap's collmap for door tiles, and link the corresponding
+    doors to them.
+    (The "corresponding" door is simply the next one found, as we iterate
+    through the tiles from top-left to bottom-right.) */
+    int err;
 
-    err = fus_lexer_get(lexer, "turn");
-    if(err)return err;
-    err = fus_lexer_get(lexer, "(");
-    if(err)return err;
-    err = fus_lexer_get_yn(lexer, &door->respawn_turn);
-    if(err)return err;
-    err = fus_lexer_get(lexer, ")");
-    if(err)return err;
+    int n_doors = 0;
+    hexcollmap_t *collmap = &submap->collmap;
+    int w = collmap->w;
+    int h = collmap->h;
+    for(int y = 0; y < h; y++){
+        for(int x = 0; x < w; x++){
+            hexcollmap_tile_t *tile = &collmap->tiles[y * w + x];
+            for(int i = 0; i < 2; i++){
+                hexcollmap_elem_t *elem = &tile->face[i];
+                if(elem->tile_c != 'D')continue;
+                if(n_doors < submap->doors_len){
+                    hexmap_door_t *door = submap->doors[n_doors];
+                    door->elem = elem;
+                }
+                n_doors++;
+            }
+        }
+    }
 
+    if(n_doors != submap->doors_len){
+        fprintf(stderr,
+            "Map (%s) and collmap (%s) disagree on number of doors: "
+            "%i != %i\n",
+            map->name, submap->filename,
+            submap->doors_len, n_doors);
+        return 2;
+    }
     return 0;
 }
 
@@ -688,6 +747,9 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
                 if(err)return err;
             }
             err = fus_lexer_next(lexer);
+            if(err)return err;
+
+            err = hexmap_populate_submap_doors(map, submap);
             if(err)return err;
         }
     }
@@ -1153,3 +1215,12 @@ int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap){
     return 0;
 }
 
+hexmap_door_t *hexmap_submap_get_door(hexmap_submap_t *submap,
+    hexcollmap_elem_t *elem
+){
+    for(int i = 0; i < submap->doors_len; i++){
+        hexmap_door_t *door = submap->doors[i];
+        if(door->elem == elem)return door;
+    }
+    return NULL;
+}

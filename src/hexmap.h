@@ -191,12 +191,28 @@ bool hexcollmap_collide(
  * HEXMAP *
  **********/
 
+enum hexmap_door_type {
+    HEXMAP_DOOR_TYPE_DUD,
+    HEXMAP_DOOR_TYPE_RESPAWN,
+    HEXMAP_DOOR_TYPE_NEW_GAME,
+    HEXMAP_DOOR_TYPE_CONTINUE,
+    HEXMAP_DOOR_TYPE_EXIT
+};
+
 typedef struct hexmap_door {
+    /* elem: we use this to mark door's position within its submap's
+    collmap, which is kind of silly but works well so long as
+    hexmap_collision_t also stores hexcollmap_elem_t* instead of
+    actual positions. */
+    hexcollmap_elem_t *elem;
+
     vec_t respawn_pos;
     rot_t respawn_rot;
     bool respawn_turn;
     char *respawn_map_filename;
     char *respawn_anim_filename;
+
+    int type; /* enum hexmap_door_type */
 } hexmap_door_t;
 
 typedef struct hexmap_submap {
@@ -258,6 +274,8 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
     char *filename, bool solid, vec_t pos, int camera_type, vec_t camera_pos,
     prismelmapper_t *mapper, char *palette_filename, char *tileset_filename);
 int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap);
+hexmap_door_t *hexmap_submap_get_door(hexmap_submap_t *submap,
+    hexcollmap_elem_t *elem);
 
 
 #endif
