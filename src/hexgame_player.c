@@ -22,15 +22,15 @@ void player_cleanup(player_t *player){
     free(player->respawn_filename);
 }
 
-int player_init(player_t *player, body_t *body, int keymap,
+int player_init(player_t *player, hexgame_t *game, int keymap,
     vec_t respawn_pos, rot_t respawn_rot, bool respawn_turn,
     char *respawn_map_filename, char *respawn_filename
 ){
     int err;
-    hexgame_t *game = body->game;
 
-    player->body = body;
+    player->game = game;
     player->keymap = keymap;
+    player->body = NULL;
 
     for(int i = 0; i < KEYINFO_KEYS; i++)player->key_code[i] = 0;
     if(keymap == 0){
@@ -68,17 +68,13 @@ int player_init(player_t *player, body_t *body, int keymap,
 
     player->respawn_filename = respawn_filename;
 
-    /* Move player's body to the respawn location */
-    err = body_respawn(body, respawn_pos, respawn_rot, respawn_turn, map);
-    if(err)return err;
-
     return 0;
 }
 
 static int _player_set_location(player_t *player, location_t *location,
     vec_ptr_t pos, rot_t rot, bool turn, const char *map_filename
 ){
-    hexgame_t *game = player->body->game;
+    hexgame_t *game = player->game;
     vecspace_t *space = game->space;
 
     /* Only assign new map_filename if it compares as different to
@@ -96,14 +92,14 @@ static int _player_set_location(player_t *player, location_t *location,
     return 0;
 }
 
-int player_set_respawn(player_t *player,
+static int player_set_respawn(player_t *player,
     vec_ptr_t pos, rot_t rot, bool turn, const char *map_filename
 ){
     return _player_set_location(player, &player->respawn_location,
         pos, rot, turn, map_filename);
 }
 
-int player_set_safe_location(player_t *player,
+static int player_set_safe_location(player_t *player,
     vec_ptr_t pos, rot_t rot, bool turn, const char *map_filename
 ){
     return _player_set_location(player, &player->safe_location,
@@ -188,13 +184,15 @@ int player_reload(player_t *player, bool *file_found_ptr){
     if(!file_found)return 0;
 
     hexmap_t *respawn_map;
-    err = hexgame_get_or_load_map(player->body->game, respawn_map_filename,
+    err = hexgame_get_or_load_map(player->game, respawn_map_filename,
         &respawn_map);
     if(err)return err;
 
-    err = body_respawn(player->body,
-        respawn_pos, respawn_rot, respawn_turn, respawn_map);
-    if(err)return err;
+    if(player->body){
+        err = body_respawn(player->body,
+            respawn_pos, respawn_rot, respawn_turn, respawn_map);
+        if(err)return err;
+    }
 
     return 0;
 }
@@ -202,6 +200,10 @@ int player_reload(player_t *player, bool *file_found_ptr){
 
 int player_process_event(player_t *player, SDL_Event *event){
     body_t *body = player->body;
+
+    /* If no body, do nothing! */
+    if(!body)return 0;
+
     if(event->type == SDL_KEYDOWN || event->type == SDL_KEYUP){
         if(!event->key.repeat){
             for(int i = 0; i < KEYINFO_KEYS; i++){
@@ -280,9 +282,13 @@ int player_step(player_t *player, hexgame_t *game){
 
     body_t *body = player->body;
 
+    /* If no body, do nothing */
+    if(!body)return 0;
+
     /* Respawn body if player hit the right key while dead */
-    if(body && (body->dead || body->out_of_bounds)
-        && body->keyinfo.wasdown[KEYINFO_KEY_U]
+    if(
+        (body->dead || body->out_of_bounds) &&
+        body->keyinfo.wasdown[KEYINFO_KEY_U]
     ){
         /* Soft reset */
         int reset_level =

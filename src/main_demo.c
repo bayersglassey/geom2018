@@ -36,7 +36,7 @@ int main(int n_args, char *args[]){
     const char *hexmap_filename = "data/maps/title/worldmap.fus";
     bool use_textures = false;
     bool cache_bitmaps = true;
-    int n_players = 1;
+    int n_players = 2;
 
     /* The classic */
     srand(time(0));

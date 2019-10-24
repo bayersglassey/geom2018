@@ -186,6 +186,7 @@ int body_maybe_record_wait(body_t *body);
  **********/
 
 typedef struct player {
+    struct hexgame *game;
     body_t *body;
 
     location_t respawn_location;
@@ -197,13 +198,9 @@ typedef struct player {
 } player_t;
 
 void player_cleanup(player_t *player);
-int player_init(player_t *player, body_t *body, int keymap,
+int player_init(player_t *player, struct hexgame *game, int keymap,
     vec_t respawn_pos, rot_t respawn_rot, bool respawn_turn,
     char *respawn_map_filename, char *respawn_filename);
-int player_set_respawn(player_t *player, vec_ptr_t pos, rot_t rot, bool turn,
-    const char *map_filename);
-int player_set_safe_location(player_t *player, vec_ptr_t pos, rot_t rot, bool turn,
-    const char *map_filename);
 
 int player_respawn_save(const char *filename, vec_t pos,
     rot_t rot, bool turn, const char *map_filename_ptr);

@@ -332,8 +332,12 @@ int hexgame_reset_player(hexgame_t *game, player_t *player,
     the behaviour of that loop is probably gonna be super wrong. */
 
     int err;
-    vecspace_t *space = game->space;
     body_t *body = player->body;
+
+    /* If no body, do nothing */
+    if(!body)return 0;
+
+    vecspace_t *space = game->space;
     hexmap_t *map = NULL;
     vec_ptr_t pos = NULL;
     rot_t rot = 0;
@@ -404,7 +408,10 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
                 if(player->keymap != 0)continue;
 
                 body_t *body = player->body;
-                if(body->recording.action != 2){
+                if(!body){
+                    fprintf(stderr,
+                        "Can't stop recording without a body!\n");
+                }else if(body->recording.action != 2){
                     fprintf(stderr,
                         "Can't stop recording without starting first! "
                         "(Try pressing 'R' before 'F9')\n");
@@ -429,8 +436,11 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
                     player_t *player = game->players[i];
                     if(player->keymap != 0)continue;
 
-                    if(shift){
-                        body_t *body = player->body;
+                    body_t *body = player->body;
+                    if(!body){
+                        fprintf(stderr,
+                            "Can't play back recording without a body!\n");
+                    }else if(shift){
                         err = body_load_recording(body, recording_filename,
                             true);
                         if(err)return err;
@@ -440,7 +450,6 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
                         /* TODO: Recordings need to state which map they
                         expect! The following is a hack: you must play
                         recordings belonging to your correct map... */
-                        body_t *body = player->body;
                         err = hexmap_load_recording(body->map,
                             recording_filename, NULL, true, NULL);
                         if(err)return err;
@@ -456,9 +465,15 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
                 player_t *player = game->players[i];
                 if(player->keymap < 0)continue;
 
-                body_t *body = player->body;
-                hexmap_submap_t *submap = body->cur_submap;
                 fprintf(stderr, "Player %i:\n", player->keymap);
+
+                body_t *body = player->body;
+                if(!body){
+                    fprintf(stderr, "  no body!\n");
+                    continue;
+                }
+
+                hexmap_submap_t *submap = body->cur_submap;
                 fprintf(stderr, "  map: %s\n", body->map->name);
                 fprintf(stderr, "  submap: %s\n",
                     body->cur_submap->filename);
@@ -474,12 +489,17 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
                 if(player->keymap != 0)continue;
 
                 body_t *body = player->body;
-                const char *recording_filename = get_next_recording_filename();
-                fprintf(stderr, "Recording to file: %s "
-                    " (When finished, press F9 to save!)\n",
-                    recording_filename);
-                err = body_start_recording(body, strdup(recording_filename));
-                if(err)return err;
+                if(!body){
+                    fprintf(stderr,
+                        "Can't record without a body!\n");
+                }else{
+                    const char *recording_filename = get_next_recording_filename();
+                    fprintf(stderr, "Recording to file: %s "
+                        " (When finished, press F9 to save!)\n",
+                        recording_filename);
+                    err = body_start_recording(body, strdup(recording_filename));
+                    if(err)return err;
+                }
             }
         }else if(!event->key.repeat){
             int keymap = -1;

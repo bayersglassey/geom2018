@@ -37,14 +37,9 @@
 #endif
 
 
-void test_app_cleanup(test_app_t *app){
-    palette_cleanup(&app->palette);
-    SDL_FreePalette(app->sdl_palette);
-    prismelrenderer_cleanup(&app->prend);
-    hexgame_cleanup(&app->hexgame);
-    font_cleanup(&app->font);
-    sdlfont_cleanup(&app->sdlfont);
-}
+/*******************
+* STATIC UTILITIES *
+*******************/
 
 static void test_app_init_input(test_app_t *app){
     app->keydown_shift = false;
@@ -84,7 +79,7 @@ static int set_players_callback(hexgame_t *game, player_t *player,
     int n_players
 ){
     test_app_t *app = game->app;
-    return 0;
+    return test_app_set_players(app, n_players);
 }
 
 static int exit_callback(hexgame_t *game, player_t *player){
@@ -111,6 +106,20 @@ static char *generate_respawn_filename(const char *base_name, int i, const char 
     strcpy(filename + base_name_len + i_len, ext);
     filename[filename_len] = '\0';
     return filename;
+}
+
+
+/***********
+* TEST_APP *
+***********/
+
+void test_app_cleanup(test_app_t *app){
+    palette_cleanup(&app->palette);
+    SDL_FreePalette(app->sdl_palette);
+    prismelrenderer_cleanup(&app->prend);
+    hexgame_cleanup(&app->hexgame);
+    font_cleanup(&app->font);
+    sdlfont_cleanup(&app->sdlfont);
 }
 
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
@@ -193,39 +202,12 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         probably player */
         char *respawn_map_filename = strdup(map->name);
 
-        hexmap_t *respawn_map;
-        err = hexgame_get_or_load_map(game, respawn_map_filename,
-            &respawn_map);
-        if(err)return err;
-
-        ARRAY_PUSH_NEW(body_t*, respawn_map->bodies, body)
-        err = body_init(body, game, respawn_map,
-            strdup(app->stateset_filename), NULL, NULL);
-        if(err)return err;
-
         ARRAY_PUSH_NEW(player_t*, game->players, player)
-        err = player_init(player, body, i,
+
+        err = player_init(player, game, i,
             map->spawn, 0, false,
             respawn_map_filename, respawn_filename);
         if(err)return err;
-    }
-
-    {
-        /* Find first body for player 0 (going to point camera at it) */
-        body_t *body = NULL;
-        for(int i = 0; i < game->players_len; i++){
-            player_t *player = game->players[i];
-            if(player->keymap != 0)continue;
-            body = player->body;
-            break;
-        }
-
-        /* Create camera */
-        ARRAY_PUSH_NEW(camera_t*, game->cameras, camera)
-        err = camera_init(camera, game, map, body);
-        if(err)return err;
-
-        app->camera = camera;
     }
 
     app->cur_rgraph_i = 0;
@@ -245,6 +227,68 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         false, true);
     if(app->render_surface == NULL)return 2;
 
+    /* Player 0 gets a body right off the bat, everyone else has to
+    wait for him to choose multiplayer mode.
+    (See set_players_callback) */
+    err = test_app_set_players(app, 1);
+    if(err)return err;
+
+    {
+        /* Find first body for player 0 (going to point camera at it) */
+        body_t *body = NULL;
+        for(int i = 0; i < game->players_len; i++){
+            player_t *player = game->players[i];
+            if(player->keymap != 0)continue;
+            body = player->body;
+            break;
+        }
+
+        /* Create camera */
+        ARRAY_PUSH_NEW(camera_t*, game->cameras, camera)
+        err = camera_init(camera, game, map, body);
+        if(err)return err;
+
+        app->camera = camera;
+    }
+
+    return 0;
+}
+
+
+int test_app_set_players(test_app_t *app, int n_players){
+    /* Specifically, sets up n_players players with bodies */
+    int err;
+    hexgame_t *game = &app->hexgame;
+    for(int i = 0; i < n_players; i++){
+        player_t *player = game->players[i];
+        if(player->body != NULL)continue;
+
+        hexmap_t *respawn_map;
+        err = hexgame_get_or_load_map(player->game,
+            player->respawn_location.map_filename, &respawn_map);
+        if(err)return err;
+
+        ARRAY_PUSH_NEW(body_t*, respawn_map->bodies, body)
+        err = body_init(body, player->game, respawn_map,
+            strdup(app->stateset_filename), NULL, NULL);
+        if(err)return err;
+
+        /* Attach body to player */
+        player->body = body;
+
+        /* Move body to the respawn location */
+        err = body_respawn(body,
+            player->respawn_location.pos, player->respawn_location.rot,
+            player->respawn_location.turn, respawn_map);
+        if(err)return err;
+    }
+    for(int i = n_players; i < game->players_len; i++){
+        player_t *player = game->players[i];
+        if(player->body == NULL)continue;
+        err = body_remove(player->body);
+        if(err)return err;
+        player->body = NULL;
+    }
     return 0;
 }
 
@@ -321,9 +365,16 @@ int test_app_process_console_input(test_app_t *app){
         if(err)return err;
 
         ARRAY_PUSH_NEW(player_t*, game->players, player)
-        err = player_init(player, body, keymap,
+        err = player_init(player, game, keymap,
             respawn_pos, respawn_rot, respawn_turn, respawn_map_filename,
             NULL);
+        if(err)return err;
+
+        /* Attach body to player */
+        player->body = body;
+
+        /* Move body to the respawn location */
+        err = body_respawn(body, respawn_pos, respawn_rot, respawn_turn, map);
         if(err)return err;
     }else if(fus_lexer_got(lexer, "save")){
         err = fus_lexer_next(lexer);
