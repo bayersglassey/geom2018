@@ -239,6 +239,26 @@ void body_reset_cameras(body_t *body){
     }
 }
 
+int body_remove(body_t *body){
+    /* WARNING: this function modifies map->bodies for body->map.
+    So if caller is trying to loop over map->bodies in the usual way,
+    the behaviour of that loop is probably gonna be super wrong. */
+    int err;
+    hexgame_t *game = body->game;
+    hexmap_t *map = body->map;
+
+    ARRAY_UNHOOK(map->bodies, body)
+
+    /* Update any cameras following this body */
+    for(int i = 0; i < game->cameras_len; i++){
+        camera_t *camera = game->cameras[i];
+        if(camera->body == body){
+            camera->body = NULL;
+        }
+    }
+    return 0;
+}
+
 int body_move_to_map(body_t *body, hexmap_t *map){
     /* WARNING: this function modifies map->bodies for two maps.
     So if caller is trying to loop over map->bodies in the usual way,
