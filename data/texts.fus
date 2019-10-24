@@ -32,6 +32,6 @@ shapes:
     "txt_exit":
         text: "geomfont1" "Quit"
     "txt_players":
-        text: "geomfont1" "Friend?"
+        text: "geomfont1" "Players"
     "txt_secret":
         text: "geomfont1" "Secret Room..."

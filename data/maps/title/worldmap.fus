@@ -18,16 +18,21 @@ submaps:
                     :
                         continue
                     :
-                        map: "data/maps/wilderness/worldmap.fus"
-                        pos: (0 0)
-                        rot: 0
-                        turn: n
-                    :
                         players 1
                     :
                         players 2
                     :
-                        map: "data/maps/title/worldmap_secret.fus"
+                        map: "data/maps/wilderness/worldmap.fus"
                         pos: (0 0)
+                        rot: 0
+                        turn: n
+            :
+                file: "data/maps/title/secret.fus"
+                pos: (20 -14)
+                camera: follow
+                mapper: ("solid_curvy")
+                doors:
+                    :
+                        pos: (-19 -12)
                         rot: 0
                         turn: n
