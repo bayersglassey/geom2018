@@ -18,7 +18,9 @@ submaps:
                     :
                         continue
                     :
-                        exit
+                        players 1
+                    :
+                        players 2
                     :
                         map: "data/maps/title/worldmap_secret.fus"
                         pos: (0 0)
