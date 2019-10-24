@@ -233,7 +233,7 @@ shapes:
     "txt_exit":
         text: "geomfont1" "Quit"
     "txt_players":
-        text: "geomfont1" "Friend?"
+        text: "geomfont1" "Players"
     "txt_secret":
         text: "geomfont1" "Secret Room..."
 
@@ -6489,7 +6489,7 @@ submaps:
                 doors:
                     :
                         map: "data/maps/title/worldmap.fus"
-                        pos: (11 -5)
+                        pos: (-19 -12)
                         rot: 0
                         turn: n
                 submaps:
@@ -7596,11 +7596,16 @@ keys:
     r:
 data: " w43+r w3-r w46+l w2-l w81+r w1-r w9+l w3-l w38"
 parts:
-    "T": shape "txt_secret"
+    "T": shape "txt_title_rotate"
+    "t": shape "txt_secret"
     "c": recording "data/maps/demo/recs/coin.fus"
     "C": recording "data/maps/demo/recs/coin_crouch.fus"
 
 collmap:
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .    [T]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   ?   ?   .   .   .   .   .   [c][c]
     ;;
@@ -7618,7 +7623,7 @@ collmap:
     ;;                                                      \*/*\     /*\*/
     ;;   .   .   .   .   .   .   .   .   ?   ?   ?   ?   .   + -(+)- + - +   .   .   .   .   .   .   .   .   .  [c][c][c][c]
     ;;
-    ;; .   .   .   .   + - +   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   [T]
+    ;; .   .   .   .   + - +   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   [t]
     ;;                /*\*/*\
     ;;   .   .   ?   + - + - +   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .    [c]   [c]
     ;;                \*/*\*/
@@ -7642,7 +7647,7 @@ collmap:
     ;;
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;;   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   [C]       [C]
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .      [T]
     ;;
@@ -7650,17 +7655,17 @@ collmap:
     ;;
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;;   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   [c]       [c]
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;                           D                                                               D                               D
-    ;; .   .   .   .   ? - + - + - + - + - +   .   .   + - + -(+)- + - +   .   .   .   ? - + - + - + - + - + - +   .   .   .   + - +   [X] [Y]
-    ;;                /                     \           \             /               /                         \             /     \
-    ;;   .   .   .   +   .   .   .   .   .   +   .   .   + - + - + - +   .   .   .   +   .   .   .   .   .   .   +   .   .   +       +
-    ;;                \                       \                                     /                           /             \     /
-    ;; .   .   .   .   + - + - +   + - + - + - +   .   .   .   .   .   .   .   .   + - + - +   + - + - + - + - +   .   .   .   + - +
+    ;;                           D                                                               D
+    ;; .   .   .   .   ? - + - + - + - + - +   .   .   + - + -(+)- + - +   .   .   .   ? - + - + - + - + - + - +   .   .   .   [X] [Y]
+    ;;                /                     \           \             /               /                         \
+    ;;   .   .   .   +   .   .   .   .   .   +   .   .   + - + - + - +   .   .   .   +   .   .   .   .   .   .   +   .   .
+    ;;                \                       \                                     /                           /
+    ;; .   .   .   .   + - + - +   + - + - + - +   .   .   .   .   .   .   .   .   + - + - +   + - + - + - + - +   .   .   .
     ;;                          \ /                                                         \ /
     ;;   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .
     ;;
@@ -7675,14 +7680,16 @@ collmap:
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
     ;;   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;              /
+    ;;       D      /
     ;; .   + - + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;    /
     ;;   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;    \  D
+    ;;    \
     ;; .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
 
 unit: 3 2 0 -1
 spawn: "data/maps/title/title.fus"
@@ -7703,37 +7710,22 @@ submaps:
                     :
                         continue
                     :
-                        map: "data/maps/wilderness/worldmap.fus"
-                        pos: (0 0)
-                        rot: 0
-                        turn: n
-                    :
                         players 1
                     :
                         players 2
                     :
-                        map: "data/maps/title/worldmap_secret.fus"
+                        map: "data/maps/wilderness/worldmap.fus"
                         pos: (0 0)
                         rot: 0
                         turn: n
-
-unit: 3 2 0 -1
-spawn: "data/maps/title/secret.fus"
-default_palette: "data/pal1.fus"
-default_tileset: "data/tileset1.fus"
-
-submaps:
-    :
-        pos: (0 0)
-        camera: follow
-        mapper: ("solid_curvy")
-        submaps:
             :
                 file: "data/maps/title/secret.fus"
+                pos: (20 -14)
+                camera: follow
+                mapper: ("solid_curvy")
                 doors:
                     :
-                        map: "data/maps/title/worldmap.fus"
-                        pos: (0 0)
+                        pos: (-19 -12)
                         rot: 0
                         turn: n
 parts:
