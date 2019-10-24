@@ -1,6 +1,5 @@
-
-import "anim/player_crawl.fus"
-import "anim/player_swim.fus"
+# NOTE: make sure "stand" is the first anim, so any imports
+# should go below it
 
 stand:
     rgraph: "player_stand"
@@ -335,3 +334,5 @@ dead:
     unsafe
     if() then: die
 
+import "anim/player_crawl.fus"
+import "anim/player_swim.fus"
