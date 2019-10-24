@@ -5,6 +5,8 @@
 
 A game in development, a kind of puzzly arcadey look at the triangular grid.
 
+It [has a website](http://depths.bayersglassey.com) which may or may not be up at the moment.
+
 
 ## What is "geom2018"?
 
@@ -21,8 +23,6 @@ Once the game is running, use the arrow keys to move, Escape to quit.
 
 If you die or get stuck, press '1' to respawn at the last save point you touched.
 (Save points are the glowing rotating green things.)
-
-Hold shift while pressing '1' to return to the very start of the game.
 
 Press Spacebar to spit harmless balls.
 Their only use is to look cool, and help you judge your jumps.
