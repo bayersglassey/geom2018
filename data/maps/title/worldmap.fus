@@ -7,7 +7,7 @@ default_tileset: "data/tileset1.fus"
 submaps:
     :
         pos: (0 0)
-        camera: (0 0)
+        camera: (2 0)
         mapper: ("triple")
         submaps:
             :
@@ -17,6 +17,11 @@ submaps:
                         new_game "data/maps/demo/worldmap.fus"
                     :
                         continue
+                    :
+                        map: "data/maps/wilderness/worldmap.fus"
+                        pos: (0 0)
+                        rot: 0
+                        turn: n
                     :
                         players 1
                     :
