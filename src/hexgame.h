@@ -286,6 +286,8 @@ struct hexgame;
 typedef int new_game_callback_t(struct hexgame *game, player_t *player,
     const char *map_filename);
 typedef int continue_callback_t(struct hexgame *game, player_t *player);
+typedef int set_players_callback_t(struct hexgame *game, player_t *player,
+    int n_players);
 typedef int exit_callback_t(struct hexgame *game, player_t *player);
 
 typedef struct hexgame {
@@ -301,6 +303,7 @@ typedef struct hexgame {
     void *app;
     new_game_callback_t *new_game_callback;
     continue_callback_t *continue_callback;
+    set_players_callback_t *set_players_callback;
     exit_callback_t *exit_callback;
 
     ARRAY_DECL(hexmap_t*, maps)
@@ -315,6 +318,7 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     const char *map_filename, void *app,
     new_game_callback_t *new_game_callback,
     continue_callback_t *continue_callback,
+    set_players_callback_t *set_players_callback,
     exit_callback_t *exit_callback);
 int hexgame_load_map(hexgame_t *game, const char *map_filename,
     hexmap_t **map_ptr);
@@ -328,9 +332,6 @@ int hexgame_reset_players(hexgame_t *game, int reset_level,
     hexmap_t *reset_map);
 int hexgame_process_event(hexgame_t *game, SDL_Event *event);
 int hexgame_step(hexgame_t *game);
-int hexgame_new_game(hexgame_t *game, player_t *player, const char *map_filename);
-int hexgame_continue(hexgame_t *game, player_t *player);
-int hexgame_exit(hexgame_t *game, player_t *player);
 
 
 #endif

@@ -196,10 +196,13 @@ enum hexmap_door_type {
     HEXMAP_DOOR_TYPE_RESPAWN,
     HEXMAP_DOOR_TYPE_NEW_GAME,
     HEXMAP_DOOR_TYPE_CONTINUE,
+    HEXMAP_DOOR_TYPE_PLAYERS,
     HEXMAP_DOOR_TYPE_EXIT
 };
 
 typedef struct hexmap_door {
+    int type; /* enum hexmap_door_type */
+
     /* elem: we use this to mark door's position within its submap's
     collmap, which is kind of silly but works well so long as
     hexmap_collision_t also stores hexcollmap_elem_t* instead of
@@ -212,7 +215,7 @@ typedef struct hexmap_door {
     char *respawn_map_filename;
     char *respawn_anim_filename;
 
-    int type; /* enum hexmap_door_type */
+    int n_players;
 } hexmap_door_t;
 
 typedef struct hexmap_submap {

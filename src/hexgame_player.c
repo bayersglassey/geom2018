@@ -228,13 +228,18 @@ static int player_use_door(player_t *player, hexmap_door_t *door){
     hexgame_t *game = body->game;
 
     if(door->type == HEXMAP_DOOR_TYPE_NEW_GAME){
-        err = hexgame_new_game(game, player, door->respawn_map_filename);
+        err = game->new_game_callback(game, player,
+            door->respawn_map_filename);
         if(err)return err;
     }else if(door->type == HEXMAP_DOOR_TYPE_CONTINUE){
-        err = hexgame_continue(game, player);
+        err = game->continue_callback(game, player);
+        if(err)return err;
+    }else if(door->type == HEXMAP_DOOR_TYPE_PLAYERS){
+        err = game->set_players_callback(game, player,
+            door->n_players);
         if(err)return err;
     }else if(door->type == HEXMAP_DOOR_TYPE_EXIT){
-        err = hexgame_exit(game, player);
+        err = game->exit_callback(game, player);
         if(err)return err;
     }else if(door->type == HEXMAP_DOOR_TYPE_RESPAWN){
         hexmap_t *new_map = body->map;

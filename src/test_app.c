@@ -80,6 +80,13 @@ static int continue_callback(hexgame_t *game, player_t *player){
     return 0;
 }
 
+static int set_players_callback(hexgame_t *game, player_t *player,
+    int n_players
+){
+    test_app_t *app = game->app;
+    return 0;
+}
+
 static int exit_callback(hexgame_t *game, player_t *player){
     test_app_t *app = game->app;
     app->loop = false;
@@ -170,6 +177,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     err = hexgame_init(game, prend, app->hexmap_filename, app,
         &new_game_callback,
         &continue_callback,
+        &set_players_callback,
         &exit_callback);
     if(err)return err;
 

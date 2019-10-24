@@ -507,6 +507,12 @@ static int hexmap_parse_door(hexmap_t *map, hexmap_submap_t *submap,
         err = fus_lexer_next(lexer);
         if(err)return err;
         door->type = HEXMAP_DOOR_TYPE_CONTINUE;
+    }else if(fus_lexer_got(lexer, "players")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        door->type = HEXMAP_DOOR_TYPE_PLAYERS;
+        err = fus_lexer_get_int(lexer, &door->n_players);
+        if(err)return err;
     }else if(fus_lexer_got(lexer, "exit")){
         err = fus_lexer_next(lexer);
         if(err)return err;

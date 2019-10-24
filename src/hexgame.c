@@ -266,6 +266,7 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     const char *map_filename, void *app,
     new_game_callback_t *new_game_callback,
     continue_callback_t *continue_callback,
+    set_players_callback_t *set_players_callback,
     exit_callback_t *exit_callback
 ){
     int err;
@@ -276,6 +277,7 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     game->app = app;
     game->new_game_callback = new_game_callback;
     game->continue_callback = continue_callback;
+    game->set_players_callback = set_players_callback;
     game->exit_callback = exit_callback;
 
     ARRAY_INIT(game->maps)
@@ -537,21 +539,4 @@ int hexgame_step(hexgame_t *game){
     }
 
     return 0;
-}
-
-int hexgame_new_game(hexgame_t *game, player_t *player,
-    const char *map_filename
-){
-    if(!game->new_game_callback)return 0;
-    return game->new_game_callback(game, player, map_filename);
-}
-
-int hexgame_continue(hexgame_t *game, player_t *player){
-    if(!game->continue_callback)return 0;
-    return game->continue_callback(game, player);
-}
-
-int hexgame_exit(hexgame_t *game, player_t *player){
-    if(!game->exit_callback)return 0;
-    return game->exit_callback(game, player);
 }
