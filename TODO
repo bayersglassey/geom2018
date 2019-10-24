@@ -8,17 +8,6 @@ Jun 3, 2018:
     ...nope, it's happening in SDL dynamic lib somewhere...
 
 
-Jun 14, 2018:
--------------
-
-- prismelrenderer_parse.c:
-    fus_lexer_get_{prismel,rendergraph,mapper} shouldn't take a "name" param?
-    Maybe reintroduce the *_map objects?
-    No: introduce "variable" objects.
-    They don't own their shape/prismel/mapper, and the latter don't have names.
-    ^... YES THIS
-
-
 Jun 23, 2018:
 -------------
 
@@ -119,12 +108,7 @@ July 12, 2018:
 
 hexcollmap "parts":
     - need to realloc collmap1 as necessary for collmap2 to fit. (in hexcollmap_draw)
-    - maybe below "parts" and "collmap" we can have a "draw" section where
-        we specify collmap filenames and coordinates.
-        It can reuse existing hexcollmap_draw.
-        The coordinates can use int_fancy.
-        We can add a "randint" thing to int_fancy.
-        And then we will have Wilderness.
+
 
 July 24, 2018:
 --------------
@@ -179,13 +163,6 @@ Dec 11, 2018:
 
 Current objectives:
 
-    * Display text on screen
-        * Ok, we can do this now - so where all do we use it?
-            * "press '1' to go back..."
-                OK, more or less done
-            * Controls at start of game?
-                Is current approach (Enter to hide/show) ok for now?
-            * Talk to other players? Or everybody's silent?
     * Improve "actors"...
         * better recording tools
             * play/pause, step forward/back
@@ -219,8 +196,7 @@ dead_anim_name, and if NULL, body can't die.
 Improve roller's "grab" so it can get around easier, particularly
 the pebbles area
 
-Currently spider -> roller transformation is kinda hacky as far as
-map design goes; in particular, there's no way to turn back.
+Currently spider -> roller transformation is kinda hacky
 
     * Can we make doors which are only visible to rollers? Too hacky!
 
@@ -303,44 +279,9 @@ vars:
 Sep 28, 2019:
 -------------
 
-The text format for editing is cute, but really it's like a slightly worse
-version of a keyboard-based in-game editor.
-So let's make a keyboard-based in-game editor instead!
-We would want to be able to modify the hexmaps and submaps (e.g. worldmap.fus)
-and hexmapcolls (e.g. start.fus).
-So presumably 2 different modes.
-We could do this by using cobj and then blablabla, but then we'd need to
-serialize and deserialize between obj_t and other stuff.
-So might as well just do what we're currently doing - serialize and deserialize
-between text and other stuff (with the halp of lexer_t).
-So: no fus, not even any cobj?.. only shitty thing is we'll lose comments
-and indentation/formatting/etc if saving your edits involves reserializing
-straight to text.
-...but I guess the point is you're never supposed to see the text.
-So actually, comments etc *should* be removed.
-If we want them, they should be added at the C level.
-
-Should we replace almost all lexer_get_str with lexer_get_sym?..
-Is it even feasible to update all the .fus files?..
-We could just make lexer_get_sym and lexer_get_str be one function
-which actually accepts either syntax!..
-    -> This doesn't really matter if we're moving to keyboard-based
-        editor which writes the fus files for us
-
 MAPPERS: These should be generic. Mapped and mappee should both be void*...
 And then have mapped_type and mappee_type, with some kind of enum whose
 values are PALETTE, RGRAPH, MAPPER, etc.
-
-DICTS: Can we make a dict.h, similar to array.h and llist.h?..
-This would avoid:
-    struct prismel *prismelrenderer_get_prismel(prismelrenderer_t *prend,
-        const char *name);
-    struct rendergraph *prismelrenderer_get_rendergraph(prismelrenderer_t *prend,
-        const char *name);
-    struct prismelmapper *prismelrenderer_get_mapper(prismelrenderer_t *prend,
-        const char *name);
-    struct palettemapper *prismelrenderer_get_palmapper(prismelrenderer_t *prend,
-        const char *name);
 
 
 Sep 29, 2019:
@@ -365,18 +306,6 @@ And place them on the maps.
 Oct 8, 2019:
 ------------
 
-Title screen
-    * Controls
-    * Start
-    * Choose save file
-    * Demo (recording)
-    * Practise area
-    * Exit
-
-Pass our font through a mapper???
-So step one, turn text into a rendergraph full of "sq" prismels.
-(Possibly first turning it into a bitmap.)
-
 Figure out what's making it so slow having lots of bodies.
 Collision? Collmap collisions specifically? Etc.
 
@@ -386,10 +315,17 @@ Add between-frames for (un)crouching?..
 Oct 13, 2019:
 -------------
 
-Add submap position randomness?.. for true Wilderness?
-(Just add a "rand" argument to fancy_int???)
-
 TEST_APP.C: INSTEAD OF USING FONT_PRINTF, USE A BLITTER.
 Our current approach with line_y is relying on a bug in geomfont_putc
 or whatever: x0, y0 are being multiplied by vectors.
 (So also TODO: fix that bug.)
+
+
+Area full of big rollers.
+Basic theme is big triangles like this:
+     +
+    / \
+   + - +
+  / \ / \
+ + - + - +
+
