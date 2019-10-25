@@ -477,6 +477,10 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
                 fprintf(stderr, "  map: %s\n", body->map->name);
                 fprintf(stderr, "  submap: %s\n",
                     body->cur_submap->filename);
+                fprintf(stderr, "  stateset: %s\n",
+                    body->stateset.filename);
+                fprintf(stderr, "  state: %s\n",
+                    body->state->name);
                 fprintf(stderr, "  pos: %i %i\n",
                     body->pos[0], body->pos[1]);
                 fprintf(stderr, "  rot: %i\n", body->rot);
