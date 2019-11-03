@@ -3,6 +3,8 @@ parts:
     "c": "data/maps/test/bighex_corner.fus"
 
 collmap:
+    ;;                         .                           .
+    ;;
     ;;                           + - + - +       .   . - .
     ;;                          /         \         /* * *\
     ;;                         +           +   .   .   ?   .            [c]
@@ -29,3 +31,4 @@ collmap:
     ;;                          \         /
     ;;                           + - + - +       .   .   .
     ;;
+    ;;                         .                           .
