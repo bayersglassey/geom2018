@@ -15,7 +15,7 @@ submaps:
                 doors:
                     :
                         map: "data/maps/demo/worldmap.fus"
-                        pos: (72 29)
-                        rot: 0
+                        pos: (-77 5)
+                        rot: 3
                         turn: y
 

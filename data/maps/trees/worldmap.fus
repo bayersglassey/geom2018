@@ -22,10 +22,10 @@ submaps:
                 file: "data/maps/trees/start.fus"
                 doors:
                     :
-                        map: "data/maps/demo/worldmap.fus"
-                        pos: (36 -71)
+                        map: "data/maps/spidertown/worldmap.fus"
+                        pos: (15 16)
                         rot: 0
-                        turn: y
+                        turn: n
     :
         pos: (32 10)
         camera: (0 0)

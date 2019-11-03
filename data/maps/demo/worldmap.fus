@@ -101,6 +101,12 @@ submaps:
                                                 tileset: "data/tileset1_bg.fus"
                                             :
                                                 file: "data/maps/demo/jungle2.fus"
+                                                doors:
+                                                    :
+                                                        map: "data/maps/water/worldmap.fus"
+                                                        pos: (0 0)
+                                                        rot: 0
+                                                        turn: n
                                     :
                                         file: "data/maps/demo/jungle3.fus"
                                         pos: eval: (-40 4) + (-6 -18) + (15 -8)
@@ -255,8 +261,7 @@ submaps:
                         tileset: "data/maps/demo/tilesets/shiny.fus"
                         doors:
                             :
-                                #map: "data/maps/wilderness/worldmap.fus"
-                                map: "data/maps/water/worldmap.fus"
+                                map: "data/maps/wilderness/worldmap.fus"
                                 pos: (0 0)
                                 rot: 0
                                 turn: n
@@ -280,7 +285,7 @@ submaps:
                 mapper: ("triple")
                 doors:
                     :
-                        map: "data/maps/test/worldmap.fus"
+                        map: "data/maps/spidertown/worldmap.fus"
                         pos: (0 0)
                         rot: 0
                         turn: n
@@ -299,11 +304,10 @@ submaps:
                         pos: (1 10)
                         doors:
                             :
-                                map: "data/maps/demo/worldmap.fus"
-                                anim: "anim/roller.fus"
-                                pos: (62 85)
+                                map: "data/maps/test/worldmap.fus"
+                                pos: (0 0)
                                 rot: 0
-                                turn: y
+                                turn: n
             :
                 pos: (-1 -10)
                 camera: (4 0)
