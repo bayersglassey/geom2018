@@ -775,6 +775,186 @@ mappers:
             : "tri"  -> "curvy_tri"
             : "dia"  -> "curvy_dia"
 
+shapes:
+
+    #                 + - +
+    #                /     \
+    #           + - +   .   + - +
+    #          /     \     /     \
+    #     + - +   .   + - +   .   + - +
+    #    /     \     /     \     /     \
+    #   +   .   + - +   .   + - +   .   +
+    #    \     /                 \     /
+    #     + - +   .   .   .   .   + - +
+    #    /     \                 /     \
+    #   +   .   +   .  (.)  .   +   .   +
+    #    \     /                 \     /
+    #     + - +   .   .   .   .   + - +
+    #    /     \                 /     \
+    #   +   .   + - +   .   + - +   .   +
+    #    \     /     \     /     \     /
+    #     + - +   .   + - +   .   + - +
+    #          \     /     \     /
+    #           + - +   .   + - +
+    #                \     /
+    #                 + - +
+    #                           Moving towards the upper-right!
+
+    #  UNIT VECTORS:
+    #
+    #   Y
+    #    +
+    #     \
+    #      + - + X
+    #
+    # Where:
+    #   X = ( 3  2  0 -1)
+    #   Y = (-3 -1  3  2)
+
+    "hexroller_hex0_sixth":
+        shapes:
+            : "map_edge0" ( 0  0  0  0)  0 f
+
+            : "map_vert0" ( 3  2  0 -1)  0 f
+            : "map_edge0" ( 3  2  0 -1)  4 f
+
+    "hexroller_hex1_sixth":
+        shapes:
+            : "map_edge0" ( 0  0  0  0)  0 f
+            : "map_face0" ( 0  0  0  0)  0 f
+
+            #: "map_vert0" ( 3  2  0 -1)  0 f
+            #: "map_edge0" ( 3  2  0 -1)  4 f
+
+    "hexroller_hex2_sixth":
+        shapes:
+            : "map_edge1" ( 0  0  0  0)  0 f
+            : "map_face1" ( 0  0  0  0)  0 f
+
+            : "map_vert1" ( 3  2  0 -1)  0 f
+            : "map_edge1" ( 3  2  0 -1)  4 f
+
+    "hexroller_hex0":
+        shapes:
+            : "map_vert0" ( 0  0  0  0)  0 f
+            : "hexroller_hex0_sixth" ( 0  0  0  0)  0 f
+            : "hexroller_hex0_sixth" ( 0  0  0  0)  2 f
+            : "hexroller_hex0_sixth" ( 0  0  0  0)  4 f
+            : "hexroller_hex0_sixth" ( 0  0  0  0)  6 f
+            : "hexroller_hex0_sixth" ( 0  0  0  0)  8 f
+            : "hexroller_hex0_sixth" ( 0  0  0  0) 10 f
+
+    "hexroller_hex1":
+        shapes:
+            : "map_vert0" ( 0  0  0  0)  0 f
+            : "hexroller_hex1_sixth" ( 0  0  0  0)  0 f
+            : "hexroller_hex1_sixth" ( 0  0  0  0)  2 f
+            : "hexroller_hex1_sixth" ( 0  0  0  0)  4 f
+            : "hexroller_hex1_sixth" ( 0  0  0  0)  6 f
+            : "hexroller_hex1_sixth" ( 0  0  0  0)  8 f
+            : "hexroller_hex1_sixth" ( 0  0  0  0) 10 f
+
+    "hexroller_hex2":
+        shapes:
+            : "map_vert1" ( 0  0  0  0)  0 f
+            : "hexroller_hex2_sixth" ( 0  0  0  0)  0 f
+            : "hexroller_hex2_sixth" ( 0  0  0  0)  2 f
+            : "hexroller_hex2_sixth" ( 0  0  0  0)  4 f
+            : "hexroller_hex2_sixth" ( 0  0  0  0)  6 f
+            : "hexroller_hex2_sixth" ( 0  0  0  0)  8 f
+            : "hexroller_hex2_sixth" ( 0  0  0  0) 10 f
+
+    "hexroller_sixth0":
+        shapes:
+            : "hexroller_hex0"
+                eval: ( 3  2  0 -1) * -2 + (-3 -1  3  2) * -4
+                0 f
+    "hexroller_sixth0b":
+        shapes:
+            : "hexroller_hex0"
+                eval: ( 3  2  0 -1) *  0 + (-3 -1  3  2) * -3
+                0 f
+
+    "hexroller_sixth1":
+        shapes:
+            : "hexroller_hex0"
+                eval: ( 3  2  0 -1) * -2 + (-3 -1  3  2) * -4
+                0 f
+    "hexroller_sixth1b":
+        shapes:
+            : "hexroller_hex1"
+                eval: ( 3  2  0 -1) * -2 + (-3 -1  3  2) * -4
+                0 f
+            : "hexroller_hex0"
+                eval: ( 3  2  0 -1) *  0 + (-3 -1  3  2) * -3
+                0 f
+
+    "hexroller_sixth2":
+        shapes:
+            : "hexroller_hex2"
+                eval: ( 3  2  0 -1) * -2 + (-3 -1  3  2) * -4
+                0 f
+            : "hexroller_hex1"
+                eval: ( 3  2  0 -1) *  0 + (-3 -1  3  2) * -3
+                0 f
+    "hexroller_sixth2b":
+        shapes:
+            : "hexroller_hex2"
+                eval: ( 3  2  0 -1) *  0 + (-3 -1  3  2) * -3
+                0 f
+
+    "hexroller_r0":
+        shapes:
+            : "hexroller_sixth2"  (0 0 0 0)  0 f
+            : "hexroller_sixth1"  (0 0 0 0)  2 f
+            : "hexroller_sixth2"  (0 0 0 0)  4 f
+            : "hexroller_sixth1"  (0 0 0 0)  6 f
+            : "hexroller_sixth2"  (0 0 0 0)  8 f
+            : "hexroller_sixth1"  (0 0 0 0) 10 f
+
+            : "player_stand"
+                eval: ( 3  2  0 -1) *  0 + (-3 -1  3  2) * -2
+                0 f
+
+    "hexroller_r1":
+        shapes:
+            : "hexroller_sixth2b" (0 0 0 0)  0 f
+            : "hexroller_sixth1b" (0 0 0 0)  2 f
+            : "hexroller_sixth2b" (0 0 0 0)  4 f
+            : "hexroller_sixth1b" (0 0 0 0)  6 f
+            : "hexroller_sixth2b" (0 0 0 0)  8 f
+            : "hexroller_sixth1b" (0 0 0 0) 10 f
+
+            : "player_stand"
+                eval: ( 3  2  0 -1) *  0 + (-3 -1  3  2) * -2
+                0 f
+
+    "hexroller_r2":
+        shapes:
+            : "hexroller_sixth1"  (0 0 0 0)  0 f
+            : "hexroller_sixth2"  (0 0 0 0)  2 f
+            : "hexroller_sixth1"  (0 0 0 0)  4 f
+            : "hexroller_sixth2"  (0 0 0 0)  6 f
+            : "hexroller_sixth1"  (0 0 0 0)  8 f
+            : "hexroller_sixth2"  (0 0 0 0) 10 f
+
+            : "player_stand"
+                eval: ( 3  2  0 -1) *  0 + (-3 -1  3  2) * -2
+                0 f
+
+    "hexroller_r3":
+        shapes:
+            : "hexroller_sixth1b" (0 0 0 0)  0 f
+            : "hexroller_sixth2b" (0 0 0 0)  2 f
+            : "hexroller_sixth1b" (0 0 0 0)  4 f
+            : "hexroller_sixth2b" (0 0 0 0)  6 f
+            : "hexroller_sixth1b" (0 0 0 0)  8 f
+            : "hexroller_sixth2b" (0 0 0 0) 10 f
+
+            : "player_stand"
+                eval: ( 3  2  0 -1) *  0 + (-3 -1  3  2) * -2
+                0 f
+
 collmap:
     ;;
     ;; .       .       .       .       .       .       .       .       .       .       .       .       .       .
@@ -1035,6 +1215,7 @@ import "data/maps/demo/tilesets/water_tiles.fus"
 import "data/maps/trees/tilesets/bark_tiles.fus"
 import "data/player.fus"
 import "data/roller.fus"
+import "data/hexroller.fus"
 import "data/flier.fus"
 import "data/bird.fus"
 
@@ -3537,6 +3718,53 @@ collmap:
     ;; .   .   +   + - .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;           * * *
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+parts:
+    "c": recording "data/maps/demo/recs/coin.fus"
+    "C": recording "data/maps/demo/recs/coin_crouch.fus"
+
+    "b": "data/maps/demo/hexroller_ball.fus"
+
+collmap:
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                         w
+    ;; .   .   .   .   .   .   .   .   .   .  (.)  .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .           [b]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .           [b]
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .       [b]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   ?   .   .   .   .   .   .   .   .       [b] [b]
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   ?   .   .   .   .   .   .   .   .   .   .   [b] [b]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   [b]
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
 
 parts:
     "D": "data/maps/demo/tiles/hex_vec4/dodecas.fus"
@@ -3631,7 +3859,52 @@ collmap:
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .  (.)  .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-collmap: "(+)"
+collmap: "(+)"parts:
+    "c": recording "data/maps/demo/recs/coin.fus"
+    "C": recording "data/maps/demo/recs/coin_crouch.fus"
+
+collmap:
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .  (.)  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
 collmap:
     ;;
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
@@ -3782,6 +4055,12 @@ submaps:
                                                 tileset: "data/tileset1_bg.fus"
                                             :
                                                 file: "data/maps/demo/jungle2.fus"
+                                                doors:
+                                                    :
+                                                        map: "data/maps/water/worldmap.fus"
+                                                        pos: (0 0)
+                                                        rot: 0
+                                                        turn: n
                                     :
                                         file: "data/maps/demo/jungle3.fus"
                                         pos: eval: (-40 4) + (-6 -18) + (15 -8)
@@ -3936,8 +4215,7 @@ submaps:
                         tileset: "data/maps/demo/tilesets/shiny.fus"
                         doors:
                             :
-                                #map: "data/maps/wilderness/worldmap.fus"
-                                map: "data/maps/water/worldmap.fus"
+                                map: "data/maps/wilderness/worldmap.fus"
                                 pos: (0 0)
                                 rot: 0
                                 turn: n
@@ -3961,7 +4239,7 @@ submaps:
                 mapper: ("triple")
                 doors:
                     :
-                        map: "data/maps/test/worldmap.fus"
+                        map: "data/maps/spidertown/worldmap.fus"
                         pos: (0 0)
                         rot: 0
                         turn: n
@@ -3980,11 +4258,10 @@ submaps:
                         pos: (1 10)
                         doors:
                             :
-                                map: "data/maps/demo/worldmap.fus"
-                                anim: "anim/roller.fus"
-                                pos: (62 85)
+                                map: "data/maps/test/worldmap.fus"
+                                pos: (0 0)
                                 rot: 0
-                                turn: y
+                                turn: n
             :
                 pos: (-1 -10)
                 camera: (4 0)
@@ -4437,6 +4714,14 @@ collmap:
     ;;                                                                                       +               +           +
     ;;                                                                                      /                           /
     ;;                                                                                     +   .   + - + - + - + - + - +
+collmap:
+    ;;
+    ;;   + - +
+    ;;  /     \
+    ;; +  (.)  +
+    ;;  \     /
+    ;;   + - +
+    ;;
 
 parts:
     "D": "data/maps/demo/tiles/hex_vec4/dodecas.fus"
@@ -6089,8 +6374,8 @@ submaps:
                 doors:
                     :
                         map: "data/maps/demo/worldmap.fus"
-                        pos: (72 29)
-                        rot: 0
+                        pos: (-77 5)
+                        rot: 3
                         turn: y
 
 collmap:
@@ -7173,6 +7458,10 @@ collmap:
     ;;                        + - +
     ;;                          *
 collmap:
+    ;;                       .                               .
+    ;;
+    ;;                         .                           .
+    ;;
     ;;                           + - + - +   .   + - + - +
     ;;                          /       /       /         \
     ;;                         +   + - +       +           +
@@ -7185,7 +7474,7 @@ collmap:
     ;;                  / \                  S              /   / \       \       \             / \
     ;;                 +   + - +   .   + -(+)- +   .       +     - +       +       + - +   + - +   +
     ;;                /   /   /         \       \           \     / \       \     /     \   \ /
-    ;;               +   +   +           +       +           +     - +       + - +       +   +
+    ;;   .   .   .   +   +   +           +       +           +     - +       + - +       +   +
     ;;                \   \   \           \     /           /*    \ /                     \
     ;;                 +       +           + - +           + - +   +                       + - + - + - +
     ;;                  \     /                                 \*/                                     \
@@ -7199,8 +7488,12 @@ collmap:
     ;;                          \    */*\*/       /       /
     ;;                           + - + - +   .   + - + - +
     ;;
+    ;;                         .                           .
+    ;;
 
 collmap:
+    ;;                         .                           .
+    ;;
     ;;                           + - + - +   .   + - + - +
     ;;                          /       /       /         \
     ;;                         +       +       +           +
@@ -7213,7 +7506,7 @@ collmap:
     ;;                  / \                                 /     \
     ;;                 +   + - +   .   .  (+)- +   .       +       +
     ;;                /       /           /     \           \       \
-    ;;               +       +           +       +           +       +
+    ;;       .   .   +       +           +       +           +       +   .   .
     ;;                \       \           \     /           /       /
     ;;                 +       +           + - +           + - +   +
     ;;                  \     /                                 \ /
@@ -7227,70 +7520,75 @@ collmap:
     ;;                          \         /       /       /
     ;;                           + - + - +   .   + - + - +
     ;;
+    ;;                         .                           .
 
 collmap:
-    ;;                 */*
-    ;;                 + - +                                   + - +
-    ;;                                                              \
-    ;;               .                                               +
     ;;
-    ;;             +                                                   .
-    ;;           */
-    ;;           +               + - + - +   .   + - + - +               .
-    ;;                          /         \     /         \
-    ;;             .           +           +   +           +               .
-    ;;                        /           /     \         /
-    ;;               .       +       + - +       + - + - +   +               .
-    ;;                        \     /   /*\
-    ;;                 .   .   + - +   + - +   +       +       +               .
-    ;;                                  \*/*\   \
-    ;;                   +               + - +   +       + - + - +               .
-    ;;                  / \             /*\*/   /*\     /         \
-    ;; +               +   + - +   +   + - +   + - +   +   +       +               +
-    ;; *\             /       /     \ /*\*/     \*/*\   \   \       \               \
-    ;; - + - +       +       +       + - +   .   + - +   +   +       +               +
-    ;; */*\*          \       \                   \*/   /   /       /               /
-    ;;                 +       + - + - + - + - +   +   +   + - +   +               +
-    ;; *\*/*            \     /         \*/*\*/*\     /         \ /
-    ;; - + - +           + - +           + - + - + - +           +               .
-    ;; */                                         \*/
-    ;; +                   .                       +   +                       .
-    ;;  \                                             /
-    ;;   + - +   .   .   .   + - + - + - +   + - + - +                       .
-    ;;                        \           \       \*/*\
-    ;;                         +           +       + - + - +           + - +
-    ;;                          \         /       /*\*/*\*/
-    ;;                           + - + - +   .   + - + - +
     ;;
-    ;;                                 .       .
     ;;
-    ;;                          (+)- +               + - +
-    ;;                          /   /                     \
-    ;;                         +   +       + - +           +
-    ;;                          \   \     /     \
-    ;;                           +   + - +       +       + - +
-    ;;                          /       /         \     /     \
-    ;;                         +       +           + - +   + - +
-    ;;                          \     /                 \ /
-    ;;                       .   + - +                   +       .
+    ;;                                                    + - +                                           + - +
+    ;;                                                   /     \                                         /     \
+    ;;                                                  +   + - +                                   + - +       + - +
+    ;;                               \                 /   /                                             \           \
+    ;;                                                +   +                                               +           +
+    ;;                                *\*              \ /
+    ;;                                  .           .   +                                   +               .
+    ;;                                  *\ /*                                              /
+    ;;                                + - +       .   .                   + - +   .   + - +       .           .
+    ;;                                     \*                                  \     /     \
+    ;;      +                               +   .       .           +   +   +   +   +       + - +               .
+    ;;       \  S                          /                       /           /     \           \
+    ;;        + - +   + - +   .   .       +   .           .       +   +   + - +       + - + - + - +               .           +
+    ;;               /                                             \     /   / \     /                                        *\
+    ;;          + - +           .       .   .               .   .   + - +   + - +   +       +                       .           +
+    ;;         /                                                                     \       \                                */
+    ;;        +               +       .   .                   +               .   .   +       + - + - +               .       +
+    ;;         \             /                               / \                     / \               \  D
+    ;;          + - +       +       +   .   +               +   + - +   .   + - +   +   +               + - +           +   .
+    ;;               \       \     /       /*\             /       /       /   /     \ /*\               \   \           \
+    ;;                +       +   +       + - + - +       +       +       + - +   .   + - +               + - +           +
+    ;;               /       / \         /  */*\*          \       \                   \*/                               /
+    ;;              +           + - + - +                   +       + - + - + - + - +   +   + - + - + - +               +   .
+    ;;             /           /   /  *     *\*/*            \     /         \     /*\     /         \   \
+    ;;            +                         - + - +           + - +           + - + - +   +           + - +           .       .
+    ;;                                      */                                         \
+    ;;                                      +                   .                       +   +                       .           .
+    ;;                                       \                                             /
+    ;;                                        + - +   .   .   .   + - + - +   .   + - + - +                       .   +           .
+    ;;                                                             \       \           \*/*\                           \*/*
+    ;;                                                              +       +   .       + - + - +           + - +       + -         .       +
+    ;;                                                               \       \         /*\*/*\*/             \   \     /*\* *              /*
+    ;;                                                                + - + - +   .   + - + - +               + - + - + - + -         .   +
+    ;;                                                                                                          */*\*/*\*                /* *
+    ;;                                                                      .       .                               +                   +
+    ;;                                                                                                               \*                /    * *
+    ;;                                                + - +   .   .   + - +               + - +                                       + - + -
+    ;;                                                 \ /           /   /                 \*/*\                                     / \  *\*
+    ;;                                                  +           +   +       + - +       + - +                                   +
+    ;;                                                               \   \     /     \
+    ;;                                                                +   + - +       +       + - +                               .
+    ;;                                                               /       /         \     /     \
+    ;;                                                              +       +           + - +   + - +                           .
+    ;;                                                               \     /                 \ /
+    ;;                                                            .   + - +                   +       .                       .
     ;;
-    ;;                     +                          .        + - +
-    ;;                    / \                                 /     \
-    ;;                   +   + - +   .   .   + - +   .       +       +
-    ;;                  /       /           /     \           \       \
-    ;;                 +       +           +       +           +       +
-    ;;                  \       \           \     /           /       /
-    ;;                   +       +           + - +           + - +   +
-    ;;                    \     /                                 \ /
-    ;;                     + - +               .                   +
-    ;;
-    ;;                       .       +           .       + - +   .
-    ;;                              / \                 /     \
-    ;;                         + - +   + - +       + - +       +
-    ;;                          \           \       \         /
-    ;;                           +           +       +       +
-    ;;                            \         /       /       /
-    ;;                             + - + - +   .   + - + - +
+    ;;                                                          +                           .       + - +                   .
+    ;;                                                         / \                                 /     \
+    ;;                                                        +  (+)- +   .   .   + - +   .       +       +               .
+    ;;                                                       /       /           /     \           \     /*\
+    ;;                                                      +       +           +       +           +   + - +   .   .   .
+    ;;                                                       \       \           \     /           /   /*\*/
+    ;;                                                        +       +           + - +           + - + - +           +
+    ;;                                                         \     /                                 \*/           /*
+    ;;                                                          + - +               .                   +           + -
+    ;;                                                                                                             /*
+    ;;                                                            .       +           .       + - +   .           + -
+    ;;                                                                   / \              D  /     \             /*\*
+    ;;                                                              + - +   + - +       + - +       +           +
+    ;;                                                               \           \       \         /
+    ;;                                                                +           +       +       +
+    ;;                                                                 \         /       /       /
+    ;;                                                                  + - + - +   .   + - + - +
 
 unit: 3 2 0 -1
 spawn: (0 0)
@@ -7306,7 +7604,7 @@ submaps:
         doors:
             :
                 map: "data/maps/demo/worldmap.fus"
-                pos: (40 60)
+                pos: (61 85)
                 rot: 0
                 turn: n
         submaps:
@@ -7437,6 +7735,8 @@ parts:
     "c": "data/maps/test/bighex_corner.fus"
 
 collmap:
+    ;;                         .                           .
+    ;;
     ;;                           + - + - +       .   . - .
     ;;                          /         \         /* * *\
     ;;                         +           +   .   .   ?   .            [c]
@@ -7463,6 +7763,7 @@ collmap:
     ;;                          \         /
     ;;                           + - + - +       .   .   .
     ;;
+    ;;                         .                           .
 anim: "anim/player.fus"
 state: "crawl"
 pos: ( 3 -26)
@@ -7693,6 +7994,7 @@ collmap:
 
 unit: 3 2 0 -1
 spawn: "data/maps/title/title.fus"
+#spawn: "data/maps/demo/hexroller_test.fus"
 default_palette: "data/pal1.fus"
 default_tileset: "data/tileset1.fus"
 
@@ -7728,6 +8030,10 @@ submaps:
                         pos: (-19 -12)
                         rot: 0
                         turn: n
+            :
+                file: "data/maps/demo/hexroller_test.fus"
+                pos: (50 50)
+                camera: (0 0)
 parts:
     "t": "data/maps/trees/trunk.fus"
     "T": "data/maps/trees/trunkL.fus"
@@ -7845,6 +8151,12 @@ parts:
     "r": "data/maps/trees/trunk2.fus"
     "R": "data/maps/trees/trunk2L.fus"
 collmap:
+    ;;
+    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
@@ -8127,10 +8439,10 @@ submaps:
                 file: "data/maps/trees/start.fus"
                 doors:
                     :
-                        map: "data/maps/demo/worldmap.fus"
-                        pos: (36 -71)
+                        map: "data/maps/spidertown/worldmap.fus"
+                        pos: (15 16)
                         rot: 0
-                        turn: y
+                        turn: n
     :
         pos: (32 10)
         camera: (0 0)
@@ -8707,6 +9019,45 @@ edges:
     "0": "map_edge0_dark"
 faces:
     "0": "map_face0_dark"
+
+unit: 3 2 0 -1
+spawn: (0 0)
+default_palette: "data/maps/trees/pals/realistic.fus"
+default_tileset: "data/maps/trees/tilesets/trees.fus"
+
+submaps:
+    :
+        bg
+        file: "data/maps/trees/start_bg.fus"
+        pos: (-21 -21)
+        tileset: "data/maps/trees/tilesets/trees_dark.fus"
+    :
+        bg
+        file: "data/maps/trees/start_bg.fus"
+        pos: (0 0)
+        tileset: "data/maps/trees/tilesets/trees_dark.fus"
+    :
+        bg
+        file: "data/maps/trees/start_bg.fus"
+        pos: ( 21  21)
+        tileset: "data/maps/trees/tilesets/trees_dark.fus"
+    :
+        file: "data/maps/test/map3xx.fus"
+        pos: (0 0)
+        camera: (0 4)
+        mapper: ("double")
+        doors:
+            :
+                map: "data/maps/trees/worldmap.fus"
+                pos: (1 1)
+                rot: 0
+                turn: n
+            :
+                map: "data/maps/demo/worldmap.fus"
+                pos: (40 60)
+                rot: 0
+                turn: n
+
 
 start:
     if:
@@ -9731,6 +10082,386 @@ crouch:
 
 dead:
     rgraph: "coin_dead"
+
+stand_r0:
+    rgraph: "hexroller_r0"
+    crushes
+    hitbox:
+        ;;                 .   .
+        ;;                 *\*/*
+        ;;           .   . - + - .   .
+        ;;           *\*/*\*/*\*/*\*/*
+        ;;     .   . - + - + - + - + - .   .
+        ;;     *\*/*\*/*\*/*\*/*\*/*\*/*\*/*
+        ;;   . - + - + - + - + - + - + - + - .
+        ;;     */*\*/*\*/*\*/*\*/*\*/*\*/*\*
+        ;;     . - + - + - + - + - + - + - .
+        ;;     *\*/*\*/*\*/*\*/*\*/*\*/*\*/*
+        ;;   . - + - + - + -(+)- + - + - + - .
+        ;;     */*\*/*\*/*\*/*\*/*\*/*\*/*\*
+        ;;     . - + - + - + - + - + - + - .
+        ;;     *\*/*\*/*\*/*\*/*\*/*\*/*\*/*
+        ;;   . - + - + - + - + - + - + - + - .
+        ;;     */*\*/*\*/*\*/*\*/*\*/*\*/*\*
+        ;;     .   . - + - + - + - + - .   .
+        ;;           */*\*/*\*/*\*/*\*
+        ;;           .   . - + - .   .
+        ;;                 */*\*
+        ;;                 .   .
+        #                           Moving towards the upper-right!
+
+    if:
+        key: wasdown b
+    then:
+        turn
+        rot: -1
+        goto: stand_r2
+        delay: 4
+
+    if:
+        key: wasdown f
+        coll: any yes
+            ;;                 .   .
+            ;;
+            ;;           .   .   .   .   .
+            ;;
+            ;;     .   .   .   .   .   .   .   .
+            ;;
+            ;;   .   .   .   .   .   .   .   .   .
+            ;;
+            ;;     .   .   .   .   .   .   .   .
+            ;;
+            ;;   .   .   .   .  (.)  .   .   .   .
+            ;;
+            ;;     .   .   .   .   .   .   .   .       +
+            ;;                                        /
+            ;;   .   .   .   .   .   .   .   .   + - +
+            ;;                                  /
+            ;;     .   .   .   .   .   .   + - +
+            ;;                            /
+            ;;           .   .   .   + - +
+            ;;
+            ;;                 .   .
+        coll: all no
+            ;;                       .   .
+            ;;                       *\*/*
+            ;;                 .   . - + - .   .
+            ;;                      \*/*\*/*\*/*
+            ;;           .   .   .   + - + - + - .   .
+            ;;                            \*/*\*/*\*/
+            ;;     .   .   .   .   .   .   + - + - + - .
+            ;;                                  \*/*\*
+            ;;   .   .   .   .   .   .   .   .   + - .
+            ;;                                  /*\*/*
+            ;;     .   .   .   .   .   .   .   + - + - .
+            ;;                                  \*/*\*
+            ;;   .   .   .   .  (.)  .   .   .   + - .
+            ;;                                  /*\*/*
+            ;;     .   .   .   .   .   .   .   + - + - .
+            ;;                                  \*/*\*
+            ;;   .   .   .   .   .   .   .   .   .   .
+            ;;
+            ;;     .   .   .   .   .   .   .   .
+            ;;
+            ;;           .   .   .   .   .
+            ;;
+            ;;                 .   .
+    then:
+        move: 2 1
+        goto: stand_r3
+        delay: 4
+
+    if:
+        key: wasdown f
+    then:
+        rot: -1
+        goto: stand_r2
+        delay: 4
+
+stand_r1:
+    rgraph: "hexroller_r1"
+    crushes
+    hitbox:
+        ;;                 .   .
+        ;;                 *\*/*
+        ;;           .   . - + - .   .
+        ;;           *\*/*\*/*\*/*\*/*
+        ;;     .   . - + - + - + - + - .   .
+        ;;     *\*/*\*/*\*/*\*/*\*/*\*/*\*/*
+        ;;   . - + - + - + - + - + - + - + - .
+        ;;     */*\*/*\*/*\*/*\*/*\*/*\*/*\*
+        ;;     . - + - + - + - + - + - + - .
+        ;;     *\*/*\*/*\*/*\*/*\*/*\*/*\*/*
+        ;;   . - + - + - + -(+)- + - + - + - .
+        ;;     */*\*/*\*/*\*/*\*/*\*/*\*/*\*
+        ;;     . - + - + - + - + - + - + - .
+        ;;     *\*/*\*/*\*/*\*/*\*/*\*/*\*/*
+        ;;   . - + - + - + - + - + - + - + - .
+        ;;     */*\*/*\*/*\*/*\*/*\*/*\*/*\*
+        ;;     .   . - + - + - + - + - .   .
+        ;;           */*\*/*\*/*\*/*\*
+        ;;           .   . - + - .   .
+        ;;                 */*\*
+        ;;                 .   .
+        #                           Moving towards the upper-right!
+
+    if:
+        key: wasdown b
+    then:
+        turn
+        rot: -1
+        goto: stand_r1
+        delay: 4
+
+    if:
+        key: wasdown f
+        coll: any yes
+            ;;                 .   .
+            ;;
+            ;;           .   .   .   .   .
+            ;;
+            ;;     .   .   .   .   .   .   .   .
+            ;;
+            ;;   .   .   .   .   .   .   .   .   .
+            ;;
+            ;;     .   .   .   .   .   .   .   .
+            ;;
+            ;;   .   .   .   .  (.)  .   .   .   .
+            ;;
+            ;;     .   .   .   .   .   .   .   .       +
+            ;;                                        /
+            ;;   .   .   .   .   .   .   .   .   + - +
+            ;;                                  /
+            ;;     .   .   .   .   .   .   + - +
+            ;;                            /
+            ;;           .   .   .   + - +
+            ;;
+            ;;                 .   .
+        coll: all no
+            ;;                       .   .
+            ;;                       *\*/*
+            ;;                 .   . - + - .   .
+            ;;                      \*/*\*/*\*/*
+            ;;           .   .   .   + - + - + - .   .
+            ;;                            \*/*\*/*\*/
+            ;;     .   .   .   .   .   .   + - + - + - .
+            ;;                                  \*/*\*
+            ;;   .   .   .   .   .   .   .   .   + - .
+            ;;                                  /*\*/*
+            ;;     .   .   .   .   .   .   .   + - + - .
+            ;;                                  \*/*\*
+            ;;   .   .   .   .  (.)  .   .   .   + - .
+            ;;                                  /*\*/*
+            ;;     .   .   .   .   .   .   .   + - + - .
+            ;;                                  \*/*\*
+            ;;   .   .   .   .   .   .   .   .   .   .
+            ;;
+            ;;     .   .   .   .   .   .   .   .
+            ;;
+            ;;           .   .   .   .   .
+            ;;
+            ;;                 .   .
+    then:
+        move: 2 1
+        goto: stand_r0
+        delay: 4
+
+    if:
+        key: wasdown f
+    then:
+        rot: -1
+        goto: stand_r3
+        delay: 4
+
+stand_r2:
+    rgraph: "hexroller_r2"
+    crushes
+    hitbox:
+        ;;                 .   .
+        ;;                 *\*/*
+        ;;           .   . - + - .   .
+        ;;           *\*/*\*/*\*/*\*/*
+        ;;     .   . - + - + - + - + - .   .
+        ;;     *\*/*\*/*\*/*\*/*\*/*\*/*\*/*
+        ;;   . - + - + - + - + - + - + - + - .
+        ;;     */*\*/*\*/*\*/*\*/*\*/*\*/*\*
+        ;;     . - + - + - + - + - + - + - .
+        ;;     *\*/*\*/*\*/*\*/*\*/*\*/*\*/*
+        ;;   . - + - + - + -(+)- + - + - + - .
+        ;;     */*\*/*\*/*\*/*\*/*\*/*\*/*\*
+        ;;     . - + - + - + - + - + - + - .
+        ;;     *\*/*\*/*\*/*\*/*\*/*\*/*\*/*
+        ;;   . - + - + - + - + - + - + - + - .
+        ;;     */*\*/*\*/*\*/*\*/*\*/*\*/*\*
+        ;;     .   . - + - + - + - + - .   .
+        ;;           */*\*/*\*/*\*/*\*
+        ;;           .   . - + - .   .
+        ;;                 */*\*
+        ;;                 .   .
+        #                           Moving towards the upper-right!
+
+    if:
+        key: wasdown b
+    then:
+        turn
+        rot: -1
+        goto: stand_r0
+        delay: 4
+
+    if:
+        key: wasdown f
+        coll: any yes
+            ;;                 .   .
+            ;;
+            ;;           .   .   .   .   .
+            ;;
+            ;;     .   .   .   .   .   .   .   .
+            ;;
+            ;;   .   .   .   .   .   .   .   .   .
+            ;;
+            ;;     .   .   .   .   .   .   .   .
+            ;;
+            ;;   .   .   .   .  (.)  .   .   .   .
+            ;;
+            ;;     .   .   .   .   .   .   .   .       +
+            ;;                                        /
+            ;;   .   .   .   .   .   .   .   .   + - +
+            ;;                                  /
+            ;;     .   .   .   .   .   .   + - +
+            ;;                            /
+            ;;           .   .   .   + - +
+            ;;
+            ;;                 .   .
+        coll: all no
+            ;;                       .   .
+            ;;                       *\*/*
+            ;;                 .   . - + - .   .
+            ;;                      \*/*\*/*\*/*
+            ;;           .   .   .   + - + - + - .   .
+            ;;                            \*/*\*/*\*/
+            ;;     .   .   .   .   .   .   + - + - + - .
+            ;;                                  \*/*\*
+            ;;   .   .   .   .   .   .   .   .   + - .
+            ;;                                  /*\*/*
+            ;;     .   .   .   .   .   .   .   + - + - .
+            ;;                                  \*/*\*
+            ;;   .   .   .   .  (.)  .   .   .   + - .
+            ;;                                  /*\*/*
+            ;;     .   .   .   .   .   .   .   + - + - .
+            ;;                                  \*/*\*
+            ;;   .   .   .   .   .   .   .   .   .   .
+            ;;
+            ;;     .   .   .   .   .   .   .   .
+            ;;
+            ;;           .   .   .   .   .
+            ;;
+            ;;                 .   .
+    then:
+        move: 2 1
+        goto: stand_r1
+        delay: 4
+
+    if:
+        key: wasdown f
+    then:
+        rot: -1
+        goto: stand_r0
+        delay: 4
+
+stand_r3:
+    rgraph: "hexroller_r3"
+    crushes
+    hitbox:
+        ;;                 .   .
+        ;;                 *\*/*
+        ;;           .   . - + - .   .
+        ;;           *\*/*\*/*\*/*\*/*
+        ;;     .   . - + - + - + - + - .   .
+        ;;     *\*/*\*/*\*/*\*/*\*/*\*/*\*/*
+        ;;   . - + - + - + - + - + - + - + - .
+        ;;     */*\*/*\*/*\*/*\*/*\*/*\*/*\*
+        ;;     . - + - + - + - + - + - + - .
+        ;;     *\*/*\*/*\*/*\*/*\*/*\*/*\*/*
+        ;;   . - + - + - + -(+)- + - + - + - .
+        ;;     */*\*/*\*/*\*/*\*/*\*/*\*/*\*
+        ;;     . - + - + - + - + - + - + - .
+        ;;     *\*/*\*/*\*/*\*/*\*/*\*/*\*/*
+        ;;   . - + - + - + - + - + - + - + - .
+        ;;     */*\*/*\*/*\*/*\*/*\*/*\*/*\*
+        ;;     .   . - + - + - + - + - .   .
+        ;;           */*\*/*\*/*\*/*\*
+        ;;           .   . - + - .   .
+        ;;                 */*\*
+        ;;                 .   .
+        #                           Moving towards the upper-right!
+
+    if:
+        key: wasdown b
+    then:
+        turn
+        rot: -1
+        goto: stand_r3
+        delay: 4
+
+    if:
+        key: wasdown f
+        coll: any yes
+            ;;                 .   .
+            ;;
+            ;;           .   .   .   .   .
+            ;;
+            ;;     .   .   .   .   .   .   .   .
+            ;;
+            ;;   .   .   .   .   .   .   .   .   .
+            ;;
+            ;;     .   .   .   .   .   .   .   .
+            ;;
+            ;;   .   .   .   .  (.)  .   .   .   .
+            ;;
+            ;;     .   .   .   .   .   .   .   .       +
+            ;;                                        /
+            ;;   .   .   .   .   .   .   .   .   + - +
+            ;;                                  /
+            ;;     .   .   .   .   .   .   + - +
+            ;;                            /
+            ;;           .   .   .   + - +
+            ;;
+            ;;                 .   .
+        coll: all no
+            ;;                       .   .
+            ;;                       *\*/*
+            ;;                 .   . - + - .   .
+            ;;                      \*/*\*/*\*/*
+            ;;           .   .   .   + - + - + - .   .
+            ;;                            \*/*\*/*\*/
+            ;;     .   .   .   .   .   .   + - + - + - .
+            ;;                                  \*/*\*
+            ;;   .   .   .   .   .   .   .   .   + - .
+            ;;                                  /*\*/*
+            ;;     .   .   .   .   .   .   .   + - + - .
+            ;;                                  \*/*\*
+            ;;   .   .   .   .  (.)  .   .   .   + - .
+            ;;                                  /*\*/*
+            ;;     .   .   .   .   .   .   .   + - + - .
+            ;;                                  \*/*\*
+            ;;   .   .   .   .   .   .   .   .   .   .
+            ;;
+            ;;     .   .   .   .   .   .   .   .
+            ;;
+            ;;           .   .   .   .   .
+            ;;
+            ;;                 .   .
+    then:
+        move: 2 1
+        goto: stand_r2
+        delay: 4
+
+    if:
+        key: wasdown f
+    then:
+        rot: -1
+        goto: stand_r1
+        delay: 4
 
 stand:
     rgraph: "water_roller"
