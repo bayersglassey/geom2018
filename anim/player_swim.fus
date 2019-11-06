@@ -11,7 +11,7 @@ swim_spit:
     if() then: goto: swim
 
 swim_jump:
-    # NOTE: the only "goto: swim_jump" is in "swim_jump", which checks
+    # NOTE: the only "goto: swim_jump" is in "start_jump", which checks
     # whether we're in water, and does "goto: jump" or "goto: swim_jump"
     # accordingly.
     # Therefore, if we're in "swim_jump", then we can safely assume we're in
@@ -28,8 +28,10 @@ swim_jump:
         ;;  (.)  .
 
     if:
-        key: not isdown u
-        key: isdown f
+        any:
+            key: isdown f
+            key: isdown u
+            key: isdown d
         coll: all yes
             ;;        +
             ;;       /
@@ -41,7 +43,10 @@ swim_jump:
         delay: 2
 
     if:
-        key: isdown f
+        any:
+            key: isdown f
+            key: isdown u
+            key: isdown d
         coll: any yes
             ;;        +
             ;;       /
@@ -59,7 +64,10 @@ swim_jump:
         goto immediate: start_jump
 
     if:
-        key: isdown f
+        any:
+            key: isdown f
+            key: isdown u
+            key: isdown d
         coll: any yes
             ;;       \
             ;;        +
@@ -76,7 +84,10 @@ swim_jump:
         goto immediate: start_jump
 
     if:
-        key: isdown f
+        any:
+            key: isdown f
+            key: isdown u
+            key: isdown d
         coll: all no
             ;;       \*/*
             ;;        + -
@@ -108,24 +119,10 @@ swim:
         delay: 9
 
     if:
-        key: wentdown f
         any:
-            key: isdown x
+            key: isdown f
             key: isdown u
-    then:
-        move: 1 0
-        rot: 1
-
-    if:
-        key: wentdown f
-        key: isdown d
-    then:
-        rot: -1
-        move: -1 0
-
-    if:
-        key: not isdown u
-        key: isdown f
+            key: isdown d
         coll: all yes
             ;;        +
             ;;       /
@@ -137,11 +134,16 @@ swim:
         delay: 2
 
     if:
-        key: isdown f
-        coll: any yes
-            ;;        +
-            ;;       /
-            ;; ( )
+        any:
+            key: isdown f
+            key: isdown u
+            key: isdown d
+        any:
+            key: isdown u
+            coll: any yes
+                ;;        +
+                ;;       /
+                ;; ( )
         coll: all no
             ;;    *\*/*
             ;;    - + -
@@ -155,12 +157,17 @@ swim:
         goto immediate: start_jump
 
     if:
-        key: isdown f
-        coll: any yes
-            ;;       \
-            ;;        +
-            ;;
-            ;; ( )
+        any:
+            key: isdown f
+            key: isdown u
+            key: isdown d
+        any:
+            key: isdown d
+            coll: any yes
+                ;;       \
+                ;;        +
+                ;;
+                ;; ( )
         coll: all no
             ;;
             ;;       /*
@@ -172,7 +179,10 @@ swim:
         goto immediate: start_jump
 
     if:
-        key: isdown f
+        any:
+            key: isdown f
+            key: isdown u
+            key: isdown d
         coll: all no
             ;;       \*/*
             ;;        + -
