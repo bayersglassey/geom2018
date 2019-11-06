@@ -108,6 +108,22 @@ swim:
         delay: 9
 
     if:
+        key: wentdown f
+        any:
+            key: isdown x
+            key: isdown u
+    then:
+        move: 1 0
+        rot: 1
+
+    if:
+        key: wentdown f
+        key: isdown d
+    then:
+        rot: -1
+        move: -1 0
+
+    if:
         key: not isdown u
         key: isdown f
         coll: all yes
