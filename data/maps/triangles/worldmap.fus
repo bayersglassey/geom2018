@@ -1,0 +1,17 @@
+
+unit: 3 2 0 -1
+spawn: (0 0)
+default_palette: "data/maps/demo/pals/tunnels.fus"
+default_tileset: "data/tileset1.fus"
+
+submaps:
+    :
+        file: "data/maps/triangles/start.fus"
+        pos: (0 0)
+        mapper: ("triple")
+        doors:
+            :
+                map: "data/maps/demo/worldmap.fus"
+                pos: (38 -80)
+                rot: 1
+                turn: n
