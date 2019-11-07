@@ -24,10 +24,19 @@ shapes:
             : "tri" (  0  0  0 -1)  3 f eval: 1 + 8 + 5
 
     "_player_head_sixth":
+        #      _ +
+        #    +    \
+        #   / \  _ +
+        # (+)- + _ |
+        #          +
         prismels:
             : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 4
             : "tri" (1 0 0 0) 11 f eval: 1 + 8 + 2
             : "sq"  (1 0 0 0)  1 f eval: 1 + 8 + 1
+
+    "_player_head_spike":
+        prismels:
+            : "tri" (0 1 1 0) 10 f eval: 1 + 8 + 5
 
     "_player_head":
         shapes:
@@ -37,6 +46,11 @@ shapes:
             : "_player_head_sixth" (0 0 0 0)  6 f
             : "_player_head_sixth" (0 0 0 0)  8 f
             : "_player_head_sixth" (0 0 0 0) 10 f
+
+            #: "_player_head_spike" (0 0 0 0)  0 f
+            #: "_player_head_spike" (0 0 0 0)  2 f
+            #: "_player_head_spike" (0 0 0 0)  4 f
+            #: "_player_head_spike" (0 0 0 0)  6 f
 
     "player_head":
         shapes:
