@@ -20,7 +20,7 @@ collmap:
     ;;                           * *    \w w w w w w w w w w\
     ;;   .   .   .   .   .   .   .   .   +   .   .   .   .   . - .   .   .   .   .   .   .   .   .   .   .   .
     ;;                         * *   D   w w w w w w w w w w w w w\
-    ;; .   .   .   .   .   .   . - + - + - + -(+)- + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   . - + - + - + - + - + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                                        /w w w w w\w w w w w w\
     ;;   .   .   .   .   .   .   .   .   .   +   . - .   + - + - +   .   .   .   .   .   .   .   .   .   .   .
     ;;                                      /w w/w w w w w w w w w\w w\
@@ -36,7 +36,7 @@ collmap:
     ;;                            /w w w w/w w w w w w w w w w w w w w w w w w w w w w w\
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .
     ;;                            \w w w w w w w w w w w w w w w w w w w w w w w w w w w w\
-    ;; .   .   .   .   .   .   .   .   .   .   . - + - + - +   .   .   .   .   .   .   .   +   .   .   .   .   .
+    ;; .   .   .   .   .   .   .   .   .   .   . - + -(+)- +   .   .   .   .   .   .   .   +   .   .   .   .   .
     ;;                              \w w w w w/     \w w w w w w w w w w w w w w w w w w w w\
     ;;   .   .   .   .   .   .   .   . - . - .   .   +   .   .   .   .   .   .   .   .   .   +   .   .   .   .
     ;;                                                \w w w w w w w w w w w w w w w w w w w w\

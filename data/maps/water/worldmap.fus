@@ -7,7 +7,7 @@ default_tileset: "data/tileset1.fus"
 submaps:
     :
         pos: (0 0)
-        camera: (2 -6)
+        camera: (3 2)
         mapper: ("triple")
         submaps:
             :
