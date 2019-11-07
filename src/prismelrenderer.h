@@ -8,6 +8,7 @@
 
 #include "geom.h"
 #include "lexer.h"
+#include "stringstore.h"
 #include "bounds.h"
 #include "array.h"
 #include "rendergraph.h"
@@ -100,6 +101,7 @@ typedef struct prismelrenderer {
     int n_textures;
     bool cache_bitmaps;
     vecspace_t *space;
+    stringstore_t stringstore;
     ARRAY_DECL(struct font*, fonts)
     ARRAY_DECL(struct geomfont*, geomfonts)
     ARRAY_DECL(struct prismel*, prismels)

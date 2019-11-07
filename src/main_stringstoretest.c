@@ -32,6 +32,7 @@ int stringstore_tests(){
     const char *y1 = stringstore_get(store, "y");
     ASSERT(store->entries_len == 2)
 
+    stringstore_dump(store);
     stringstore_cleanup(store);
 
     if(n_fails > 0){

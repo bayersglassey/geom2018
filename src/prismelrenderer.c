@@ -446,6 +446,7 @@ int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space){
     renderer->n_textures = 0;
     renderer->cache_bitmaps = true;
     renderer->space = space;
+    stringstore_init(&renderer->stringstore);
     ARRAY_INIT(renderer->fonts)
     ARRAY_INIT(renderer->geomfonts)
     ARRAY_INIT(renderer->prismels)
@@ -456,6 +457,7 @@ int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space){
 }
 
 void prismelrenderer_cleanup(prismelrenderer_t *renderer){
+    stringstore_cleanup(&renderer->stringstore);
     ARRAY_FREE_PTR(font_t*, renderer->fonts, font_cleanup)
     ARRAY_FREE_PTR(geomfont_t*, renderer->geomfonts, geomfont_cleanup)
     ARRAY_FREE_PTR(prismel_t*, renderer->prismels, prismel_cleanup)

@@ -1,5 +1,6 @@
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "array.h"
@@ -11,6 +12,16 @@ void stringstore_entry_cleanup(stringstore_entry_t *entry){
 
 void stringstore_cleanup(stringstore_t *store){
     ARRAY_FREE_PTR(entry_t*, store->entries, stringstore_entry_cleanup)
+}
+
+void stringstore_dump(stringstore_t *store){
+    fprintf(stderr, "STRING STORE (%p) (%i ENTRIES):\n", store,
+        store->entries_len);
+    for(int i = 0; i < store->entries_len; i++){
+        stringstore_entry_t *entry = store->entries[i];
+        fprintf(stderr, "  ENTRY %i (%p): (%p) %s\n",
+            i, entry, entry->data, entry->data);
+    }
 }
 
 void stringstore_init(stringstore_t *store){
