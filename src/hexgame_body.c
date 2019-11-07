@@ -113,8 +113,7 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
     body->map = map;
     body->cur_submap = NULL;
 
-    err = vars_init(&body->vars);
-    if(err)return err;
+    vars_init(&body->vars);
 
     if(stateset_filename != NULL){
         err = body_init_stateset(body, stateset_filename, state_name);

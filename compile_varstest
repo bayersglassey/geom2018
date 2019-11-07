@@ -1,0 +1,6 @@
+
+gcc -g -std=c99 \
+    -Wall -Werror -Wno-unused \
+    -o main \
+    src/vars.c src/main_varstest.c \
+    $@

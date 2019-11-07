@@ -16,35 +16,64 @@ void var_cleanup(var_t *var){
     var_unset(var);
 }
 
-int var_init(var_t *var, char *key){
+void var_init(var_t *var, char *key){
     var->key = key;
     var->type = 'n';
-    return 0;
+}
+
+void var_fprintf(var_t *var, FILE *file){
+    switch(var->type){
+        case VAR_TYPE_NULL: fputs("null", file); break;
+        case VAR_TYPE_BOOL: putc(var->value.b? 'T': 'F', file); break;
+        case VAR_TYPE_INT: fprintf(file, "%i", var->value.i); break;
+        case VAR_TYPE_STR: fputs(var->value.s, file); break;
+        case VAR_TYPE_CONST_STR: fputs(var->value.cs, file); break;
+        case VAR_TYPE_PTR: fprintf(file, "%p", var->value.p); break;
+        default: fputs("???", file); break;
+    }
+}
+
+const char *var_type_name(int type){
+    static const char *names[VAR_TYPES] = {
+        "null", "bool", "int", "str", "str", "ptr"
+    };
+    if(type < 0 || type >= VAR_TYPES)return "unknown";
+    return names[type];
 }
 
 
 void var_unset(var_t *var){
-    if(var->type == 's')free(var->value.s);
+    if(var->type == VAR_TYPE_STR)free(var->value.s);
 }
 
 void var_set_null(var_t *var){
     var_unset(var);
-    var->type = 'n';
+    var->type = VAR_TYPE_NULL;
 }
 void var_set_bool(var_t *var, bool b){
     var_unset(var);
-    var->type = 'b';
+    var->type = VAR_TYPE_BOOL;
     var->value.b = b;
 }
 void var_set_int(var_t *var, int i){
     var_unset(var);
-    var->type = 'i';
+    var->type = VAR_TYPE_INT;
     var->value.i = i;
 }
 void var_set_str(var_t *var, char *s){
     var_unset(var);
-    var->type = 's';
+    var->type = VAR_TYPE_STR;
     var->value.s = s;
+}
+void var_set_const_str(var_t *var, const char *cs){
+    var_unset(var);
+    var->type = VAR_TYPE_CONST_STR;
+    var->value.cs = cs;
+}
+void var_set_ptr(var_t *var, void *p){
+    var_unset(var);
+    var->type = VAR_TYPE_PTR;
+    var->value.p = p;
 }
 
 
@@ -56,13 +85,24 @@ void vars_cleanup(vars_t *vars){
     ARRAY_FREE_PTR(var_t*, vars->vars, var_cleanup)
 }
 
-int vars_init(vars_t *vars){
+void vars_init(vars_t *vars){
     ARRAY_INIT(vars->vars)
-    return 0;
+}
+
+void vars_dump(vars_t *vars){
+    fprintf(stderr, "VARS (%p):\n", vars);
+    for(int i = 0; i < vars->vars_len; i++){
+        var_t *var = vars->vars[i];
+        fprintf(stderr, "  %s (%s): ", var->key,
+            var_type_name(var->type));
+        var_fprintf(var, stderr);
+        putc('\n', stderr);
+    }
 }
 
 int vars_add(vars_t *vars, char *key, var_t **var_ptr){
     ARRAY_PUSH_NEW(var_t*, vars->vars, var)
+    var->key = key;
     *var_ptr = var;
     return 0;
 }
@@ -92,23 +132,25 @@ var_t *vars_get_or_add(vars_t *vars, const char *key){
 
 bool vars_get_bool(vars_t *vars, const char *key){
     var_t *var = vars_get(vars, key);
-    if(var == NULL)return false;
+    if(var == NULL || var->type != VAR_TYPE_BOOL)return false;
     return var->value.b;
 }
 int vars_get_int(vars_t *vars, const char *key){
     var_t *var = vars_get(vars, key);
-    if(var == NULL)return 0;
+    if(var == NULL || var->type != VAR_TYPE_INT)return 0;
     return var->value.i;
 }
 const char *vars_get_str(vars_t *vars, const char *key){
     var_t *var = vars_get(vars, key);
-
-    /* Do we want to be accurate (there is no string) or safe
-    (empty string)?.. */
-    //if(var == NULL)return NULL;
-    if(var == NULL)return "";
-
-    return var->value.s;
+    if(var == NULL)return NULL;
+    if(var->type == VAR_TYPE_STR)return var->value.s;
+    if(var->type == VAR_TYPE_CONST_STR)return var->value.cs;
+    return NULL;
+}
+void *vars_get_ptr(vars_t *vars, const char *key){
+    var_t *var = vars_get(vars, key);
+    if(var == NULL || var->type != VAR_TYPE_PTR)return NULL;
+    return var->value.p;
 }
 
 int vars_set_null(vars_t *vars, const char *key){
@@ -133,6 +175,18 @@ int vars_set_str(vars_t *vars, const char *key, char *s){
     var_t *var = vars_get_or_add(vars, key);
     if(var == NULL)return 1;
     var_set_str(var, s);
+    return 0;
+}
+int vars_set_const_str(vars_t *vars, const char *key, const char *cs){
+    var_t *var = vars_get_or_add(vars, key);
+    if(var == NULL)return 1;
+    var_set_const_str(var, cs);
+    return 0;
+}
+int vars_set_ptr(vars_t *vars, const char *key, void *p){
+    var_t *var = vars_get_or_add(vars, key);
+    if(var == NULL)return 1;
+    var_set_ptr(var, p);
     return 0;
 }
 
