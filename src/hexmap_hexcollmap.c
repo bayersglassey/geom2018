@@ -303,13 +303,10 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
     return 0;
 }
 
-static int hexcollmap_parse_lines(hexcollmap_t *collmap,
-    char **lines, int lines_len, hexcollmap_part_t **parts, int parts_len,
-    char default_vert_c, char default_edge_c, char default_face_c
+static int _hexcollmap_parse_lines_origin(
+    char **lines, int lines_len, int *ox_ptr, int *oy_ptr
 ){
     int err;
-
-    /* Iteration 1: Find origin */
     int ox = -1;
     int oy = -1;
     for(int y = 0; y < lines_len; y++){
@@ -344,8 +341,16 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
             }
         }
     }
+    *ox_ptr = ox;
+    *oy_ptr = oy;
+    return 0;
+}
 
-    /* Iteration 2: Find map bounds */
+static int _hexcollmap_parse_lines_bounds(
+    char **lines, int lines_len, int ox, int oy,
+    int *map_t_ptr, int *map_b_ptr, int *map_l_ptr, int *map_r_ptr
+){
+    int err;
     int map_t = 0;
     int map_b = 0;
     int map_l = 0;
@@ -385,34 +390,30 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
             }
         }
     }
+    *map_t_ptr = map_t;
+    *map_b_ptr = map_b;
+    *map_l_ptr = map_l;
+    *map_r_ptr = map_r;
+    return 0;
+}
 
-    /* Intermission: initialize collmap with empty tile data */
-    /* ...Allocate map data */
-    int map_w = map_r - map_l + 1;
-    int map_h = map_b - map_t + 1;
-    int map_size = map_w * map_h;
-    hexcollmap_tile_t *tiles = calloc(map_size, sizeof(*tiles));
-    if(tiles == NULL)return 1;
-    /* ...Initialize tile elements */
-    for(int i = 0; i < map_size; i++){
-        for(int j = 0; j < 1; j++)tiles[i].vert[j].tile_c = ' ';
-        for(int j = 0; j < 3; j++)tiles[i].edge[j].tile_c = ' ';
-        for(int j = 0; j < 2; j++)tiles[i].face[j].tile_c = ' ';
-    }
-    /* ...Assign attributes */
-    collmap->ox = -map_l;
-    collmap->oy = -map_t;
-    collmap->w = map_w;
-    collmap->h = map_h;
-    collmap->tiles = tiles;
+static int _hexcollmap_parse_lines_tiles(hexcollmap_t *collmap,
+    char **lines, int lines_len, hexcollmap_part_t **parts, int parts_len,
+    char default_vert_c, char default_edge_c, char default_face_c,
+    int ox, int oy, bool parsing_part_references
+){
+    /* If !parsing_part_references, we parse regular tile data.
+    If parsing_part_references, we parse "part references", that is,
+    the '?' character, which loads & draws other collmaps over the
+    tile data we parsed while !parsing_part_references. */
+    int err;
 
-    /* Iterations 3 & 4: The meat of it all - parse tile data */
-    for(int iter_i = 0; iter_i < 2; iter_i++){
-        /* While iter_i == 0, we parse regular tile data.
-        While iter_i == 1, we parse "part references", that is, the '?'
-        character, which loads & draws other collmaps over the tile data
-        we parsed while iter_i == 0. */
-        bool parsing_part_references = iter_i == 1;
+    int map_w = collmap->w;
+    int map_h = collmap->h;
+    int map_l = -collmap->ox;
+    int map_t = -collmap->oy;
+    hexcollmap_tile_t *tiles = collmap->tiles;
+
     for(int y = 0; y < lines_len; y++){
         char *line = lines[y];
         int line_len = strlen(line);
@@ -630,6 +631,54 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
             }
         }
     }
+    return 0;
+}
+
+static int hexcollmap_parse_lines(hexcollmap_t *collmap,
+    char **lines, int lines_len, hexcollmap_part_t **parts, int parts_len,
+    char default_vert_c, char default_edge_c, char default_face_c
+){
+    int err;
+
+    /* Iteration 1: Find origin */
+    int ox, oy;
+    err = _hexcollmap_parse_lines_origin(lines, lines_len, &ox, &oy);
+    if(err)return err;
+
+    /* Iteration 2: Find map bounds */
+    int map_t, map_b, map_l, map_r;
+    err = _hexcollmap_parse_lines_bounds(lines, lines_len,
+        ox, oy, &map_t, &map_b, &map_l, &map_r);
+    if(err)return err;
+
+    /* Intermission: initialize collmap with empty tile data */
+    /* ...Allocate map data */
+    int map_w = map_r - map_l + 1;
+    int map_h = map_b - map_t + 1;
+    int map_size = map_w * map_h;
+    hexcollmap_tile_t *tiles = calloc(map_size, sizeof(*tiles));
+    if(tiles == NULL)return 1;
+    /* ...Initialize tile elements */
+    for(int i = 0; i < map_size; i++){
+        for(int j = 0; j < 1; j++)tiles[i].vert[j].tile_c = ' ';
+        for(int j = 0; j < 3; j++)tiles[i].edge[j].tile_c = ' ';
+        for(int j = 0; j < 2; j++)tiles[i].face[j].tile_c = ' ';
+    }
+    /* ...Assign attributes */
+    collmap->ox = -map_l;
+    collmap->oy = -map_t;
+    collmap->w = map_w;
+    collmap->h = map_h;
+    collmap->tiles = tiles;
+
+    /* Iterations 3 & 4: The meat of it all - parse tile data */
+    for(int iter_i = 0; iter_i < 2; iter_i++){
+        bool parsing_part_references = iter_i == 1;
+        err = _hexcollmap_parse_lines_tiles(
+            collmap, lines, lines_len, parts, parts_len,
+            default_vert_c, default_edge_c, default_face_c,
+            ox, oy, parsing_part_references);
+        if(err)return err;
     }
 
     /* OKAY */
