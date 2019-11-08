@@ -1,0 +1,49 @@
+parts:
+    "b": "data/maps/water/bubble_sm.fus"
+
+collmap:
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   [b]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .
+    ;;                    /     \w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w/     \
+    ;;   .   .   .   .   +   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   +   .   .   .
+    ;;                    \     /w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w\     /
+    ;; .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .  (.)  .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w S w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .
+    ;;                    /     \w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w/     \
+    ;;   .   .   .   .   +   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   +   .   .   .
+    ;;                    \     /w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w\     /
+    ;; .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .
+    ;;

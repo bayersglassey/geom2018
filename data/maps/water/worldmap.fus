@@ -1,7 +1,8 @@
 
 unit: 3 2 0 -1
 spawn: "data/maps/water/start.fus"
-default_palette: "data/pal1.fus"
+#default_palette: "data/pal1.fus"
+default_palette: "data/maps/water/pals/deeps.fus"
 default_tileset: "data/tileset1.fus"
 
 submaps:
@@ -22,24 +23,51 @@ submaps:
                 file: "data/maps/water/bubble_sm.fus"
                 pos: (16 -7)
                 camera: (0 0)
+                submaps:
+                    :
+                        file: "data/maps/water/rubble.fus"
+                        pos: (5 -2)
             :
                 file: "data/maps/water/bubble_sm.fus"
-                pos: (16 7)
+                pos: (16 6)
                 camera: (0 0)
             :
                 file: "data/maps/water/bubble_sm.fus"
-                pos: (26 7)
-                camera: (0 0)
+                pos: (26 6)
+                camera: (0 -5)
             :
-                file: "data/maps/water/room_sm_bubble.fus"
+                file: "data/maps/water/room_sm_bubble1.fus"
                 pos: (42 0)
                 camera: (0 0)
+                mapper: ("double")
             :
                 file: "data/maps/water/air_bubble_walled_sm.fus"
                 pos: eval: (42 0) + (10 -9)
                 camera: (0 0)
             :
-                file: "data/maps/water/room_sm.fus"
+                file: "data/maps/water/air_bubbles_walled1.fus"
+                pos: eval: (42 0) + (29 10)
+                camera: (-1 -4)
+                submaps:
+                    :
+                        file: "data/maps/water/bubble_sm.fus"
+                        pos: (14 -6)
+                        camera: (0 0)
+                        mapper: ("double")
+                    :
+                        file: "data/maps/water/air_bubbles_walled1_tunnel.fus"
+                        pos: (24 7)
+                        camera: (0 0)
+                        mapper: ("quadruple")
+            :
+                file: "data/maps/water/room_sm_bubble2.fus"
                 pos: eval: (42 0) + (20 -19)
-                camera: (0 0)
-
+                camera: (0 5)
+            :
+                file: "data/maps/water/water_hex8_bite.fus"
+                pos: eval: (42 0) + (20 -19) + (16 2)
+                camera: (8 8)
+            :
+                file: "data/maps/water/water_tri16_bite.fus"
+                pos: eval: (42 0) + (20 -19) + (25 4)
+                camera: (10 10)
