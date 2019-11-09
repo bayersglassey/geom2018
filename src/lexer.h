@@ -7,6 +7,9 @@
 #include <ctype.h>
 #include <string.h>
 
+#include "array.h"
+#include "vars.h"
+
 /*
     Lexer usage example:
 
@@ -25,8 +28,14 @@
 
 */
 
+typedef struct fus_lexer_block {
+    int indent;
+} fus_lexer_block_t;
+
 typedef struct fus_lexer {
     bool debug;
+
+    vars_t _vars, *vars;
 
     const char *filename;
 
@@ -51,9 +60,7 @@ typedef struct fus_lexer {
     int row;
     int col;
     int indent;
-    int indents_size;
-    int n_indents;
-    int *indents;
+    ARRAY_DECL(fus_lexer_block_t*, blocks)
 
     /* If positive, represents a series of "(" tokens being returned.
     If negative, represents a series of ")" tokens being returned. */
@@ -64,6 +71,8 @@ typedef struct fus_lexer {
 void fus_lexer_cleanup(fus_lexer_t *lexer);
 int fus_lexer_init(fus_lexer_t *lexer, const char *text,
     const char *filename);
+int fus_lexer_init_with_vars(fus_lexer_t *lexer, const char *text,
+    const char *filename, vars_t *vars);
 int fus_lexer_copy(fus_lexer_t *lexer, fus_lexer_t *lexer2);
 void fus_lexer_dump(fus_lexer_t *lexer, FILE *f);
 void fus_lexer_info(fus_lexer_t *lexer, FILE *f);

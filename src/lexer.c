@@ -1,6 +1,8 @@
 
 
 #include "lexer.h"
+#include "array.h"
+#include "vars.h"
 
 
 static size_t fus_strnlen(const char *s, size_t maxlen){
@@ -20,12 +22,11 @@ static char *fus_strndup(const char *s1, size_t len){
 
 
 
-const int INITIAL_INDENTS_SIZE = 32;
-
 static int fus_lexer_get_indent(fus_lexer_t *lexer);
 
 void fus_lexer_cleanup(fus_lexer_t *lexer){
-    free(lexer->indents);
+    vars_cleanup(&lexer->_vars);
+    ARRAY_FREE_PTR(fus_lexer_block_t*, lexer->blocks, (void))
 }
 
 int fus_lexer_init(fus_lexer_t *lexer, const char *text,
@@ -34,10 +35,11 @@ int fus_lexer_init(fus_lexer_t *lexer, const char *text,
     int err;
 
     lexer->debug = false;
+    lexer->vars = NULL;
 
-    int indents_size = INITIAL_INDENTS_SIZE;
-    int *indents = calloc(indents_size, sizeof(indents));
-    if(indents == NULL)return 1;
+    vars_init(&lexer->_vars);
+
+    ARRAY_INIT(lexer->blocks)
 
     lexer->filename = filename;
     lexer->text = text;
@@ -49,9 +51,6 @@ int fus_lexer_init(fus_lexer_t *lexer, const char *text,
     lexer->row = 0;
     lexer->col = 0;
     lexer->indent = 0;
-    lexer->indents_size = indents_size;
-    lexer->n_indents = 0;
-    lexer->indents = indents;
     lexer->returning_indents = 0;
 
     err = fus_lexer_get_indent(lexer);
@@ -61,8 +60,18 @@ int fus_lexer_init(fus_lexer_t *lexer, const char *text,
     return 0;
 }
 
+int fus_lexer_init_with_vars(fus_lexer_t *lexer, const char *text,
+    const char *filename, vars_t *vars
+){
+    int err = fus_lexer_init(lexer, text, filename);
+    if(err)return err;
+    lexer->vars = vars? vars: &lexer->_vars;
+    return 0;
+}
+
 int fus_lexer_copy(fus_lexer_t *lexer, fus_lexer_t *lexer2){
     lexer->debug = lexer2->debug;
+    lexer->vars = lexer2->vars;
     lexer->filename = lexer2->filename;
     lexer->text = lexer2->text;
     lexer->text_len = lexer2->text_len;
@@ -73,16 +82,9 @@ int fus_lexer_copy(fus_lexer_t *lexer, fus_lexer_t *lexer2){
     lexer->row = lexer2->row;
     lexer->col = lexer2->col;
 
-    int indents_size = lexer2->indents_size;
-    int *new_indents = malloc(sizeof(*new_indents) * indents_size);
-    if(new_indents == NULL)return 1;
-    for(int i = 0; i < indents_size; i++){
-        new_indents[i] = lexer2->indents[i];}
+    ARRAY_CLONE(fus_lexer_block_t*, lexer->blocks, lexer2->blocks)
 
     lexer->indent = lexer2->indent;
-    lexer->indents_size = lexer2->indents_size;
-    lexer->n_indents = lexer2->n_indents;
-    lexer->indents = new_indents;
     lexer->returning_indents = lexer2->returning_indents;
 
     return 0;
@@ -96,11 +98,12 @@ void fus_lexer_dump(fus_lexer_t *lexer, FILE *f){
     fprintf(f, "  row = %i\n", lexer->row);
     fprintf(f, "  col = %i\n", lexer->col);
     fprintf(f, "  indent = %i\n", lexer->indent);
-    fprintf(f, "  indents_size = %i\n", lexer->indents_size);
-    fprintf(f, "  n_indents = %i\n", lexer->n_indents);
-    fprintf(f, "  indents:\n");
-    for(int i = 0; i < lexer->n_indents; i++){
-        fprintf(f, "    %i\n", lexer->indents[i]);
+    fprintf(f, "  blocks_size = %i\n", lexer->blocks_size);
+    fprintf(f, "  blocks_len = %i\n", lexer->blocks_len);
+    fprintf(f, "  blocks:\n");
+    for(int i = 0; i < lexer->blocks_len; i++){
+        fus_lexer_block_t *block = lexer->blocks[i];
+        fprintf(f, "    %i\n", block->indent);
     }
     fprintf(f, "  returning_indents = %i\n", lexer->returning_indents);
 }
@@ -137,41 +140,24 @@ static void fus_lexer_end_token(fus_lexer_t *lexer){
     lexer->token_len = lexer->pos - token_startpos;
 }
 
-static void fus_lexer_set_token(
-    fus_lexer_t *lexer,
-    const char *token
-){
+static void fus_lexer_set_token(fus_lexer_t *lexer, const char *token){
     lexer->token = token;
     lexer->token_len = strlen(token);
 }
 
-static int fus_lexer_push_indent(
-    fus_lexer_t *lexer,
-    int indent
-){
-    if(lexer->n_indents >= lexer->indents_size){
-        int indents_size = lexer->indents_size;
-        int new_indents_size = indents_size * 2;
-        int *new_indents = realloc(lexer->indents,
-            new_indents_size * sizeof(new_indents));
-        if(new_indents == NULL)return 1;
-        memset(new_indents + indents_size, 0, indents_size);
-        lexer->indents = new_indents;
-        lexer->indents_size = new_indents_size;
-    }
-
-    lexer->n_indents++;
-    lexer->indents[lexer->n_indents-1] = indent;
+static int fus_lexer_push_block(fus_lexer_t *lexer, int indent){
+    ARRAY_PUSH_NEW(fus_lexer_block_t*, lexer->blocks, block)
+    block->indent = indent;
     return 0;
 }
 
-static int fus_lexer_pop_indent(fus_lexer_t *lexer){
-    if(lexer->n_indents == 0){
+static int fus_lexer_pop_block(fus_lexer_t *lexer){
+    if(lexer->blocks_len == 0){
         fus_lexer_err_info(lexer); fprintf(stderr,
-            "Tried to pop an indent, but indents stack is empty\n");
+            "Tried to pop a block, but block stack is empty\n");
         return 2;
     }
-    lexer->n_indents--;
+    ARRAY_POP_PTR(lexer->blocks, (void))
     return 0;
 }
 
@@ -329,7 +315,7 @@ static int fus_lexer_parse_blockstr(fus_lexer_t *lexer){
     return 0;
 }
 
-int fus_lexer_next(fus_lexer_t *lexer){
+static int _fus_lexer_next(fus_lexer_t *lexer){
     int err;
     while(1){
         /* return "(" or ")" token based on indents? */
@@ -342,10 +328,12 @@ int fus_lexer_next(fus_lexer_t *lexer){
             err = fus_lexer_get_indent(lexer);
             if(err)return err;
             int new_indent = lexer->indent;
-            while(lexer->n_indents > 0){
-                int indent = lexer->indents[lexer->n_indents-1];
+            while(lexer->blocks_len > 0){
+                fus_lexer_block_t *block =
+                    lexer->blocks[lexer->blocks_len-1];
+                int indent = block->indent;
                 if(new_indent <= indent){
-                    err = fus_lexer_pop_indent(lexer);
+                    err = fus_lexer_pop_block(lexer);
                     if(err)return err;
                     lexer->returning_indents--;
                 }else{
@@ -365,13 +353,14 @@ int fus_lexer_next(fus_lexer_t *lexer){
         }else if(c == ':'){
             fus_lexer_eat(lexer);
             lexer->returning_indents++;
-            fus_lexer_push_indent(lexer, lexer->indent);
+            fus_lexer_push_block(lexer, lexer->indent);
             break;
         }else if(c == '(' || c == ')'){
             fus_lexer_start_token(lexer);
             fus_lexer_eat(lexer);
             fus_lexer_end_token(lexer);
-            lexer->token_type = c == '('? FUS_LEXER_TOKEN_OPEN: FUS_LEXER_TOKEN_CLOSE;
+            lexer->token_type = c == '('?
+                FUS_LEXER_TOKEN_OPEN: FUS_LEXER_TOKEN_CLOSE;
             break;
         }else if(c == '_' || isalpha(c)){
             fus_lexer_parse_sym(lexer);
@@ -413,6 +402,68 @@ int fus_lexer_next(fus_lexer_t *lexer){
         lexer->returning_indents++;
     }
 
+    return 0;
+}
+
+int fus_lexer_next(fus_lexer_t *lexer){
+    int err;
+    while(1){
+        err = _fus_lexer_next(lexer);
+        if(err)return err;
+
+        if(lexer->vars && fus_lexer_got(lexer, "$")){
+            err = _fus_lexer_next(lexer);
+            if(err)return err;
+            if(fus_lexer_got(lexer, "SET_BOOL")){
+                err = _fus_lexer_next(lexer);
+                if(err)return err;
+
+                char *name;
+                err = fus_lexer_get_name(lexer, &name);
+                if(err)return err;
+
+                err = vars_set_bool(lexer->vars, name, true);
+                if(err)return err;
+
+                free(name);
+            }else if(fus_lexer_got(lexer, "IF")){
+                err = _fus_lexer_next(lexer);
+                if(err)return err;
+
+                bool not = false;
+                if(fus_lexer_got(lexer, "!")){
+                    err = _fus_lexer_next(lexer);
+                    if(err)return err;
+                    not = true;
+                }
+
+                char *name;
+                err = fus_lexer_get_name(lexer, &name);
+                if(err)return err;
+                err = fus_lexer_get(lexer, "(");
+                if(err)return err;
+
+                bool cond = vars_get_bool(lexer->vars, name) ^ not;
+
+                if(!cond){
+                    err = fus_lexer_parse_silent(lexer);
+                    if(err)return err;
+                }else{
+                    /* TODO: mark this level of indentation as belonging
+                    to a macro, so we don't emit ")" on leaving it.
+                    FOR THAT TO HAPPEN, I think we need to get fus2019's
+                    lexer in here, with its fixes, like how it *always*
+                    pushes an indent onto the stack. I think. */
+                }
+
+                free(name);
+            }else{
+                return fus_lexer_unexpected(lexer, NULL);
+            }
+            continue;
+        }
+        break;
+    }
     return 0;
 }
 
@@ -760,24 +811,26 @@ int fus_lexer_unexpected(fus_lexer_t *lexer, const char *expected){
 }
 
 int fus_lexer_parse_silent(fus_lexer_t *lexer){
+    /* Expected to be called immediately following a "(" token */
+    /* NOTE: we use _fus_lexer_next in here so all macros are skipped */
     int depth = 1;
     while(1){
         int err;
 
         if(fus_lexer_got(lexer, "(")){
-            err = fus_lexer_next(lexer);
+            err = _fus_lexer_next(lexer);
             if(err)return err;
             depth++;
         }else if(fus_lexer_got(lexer, ")")){
             depth--;
             if(depth == 0)break;
-            err = fus_lexer_next(lexer);
+            err = _fus_lexer_next(lexer);
             if(err)return err;
         }else if(fus_lexer_done(lexer)){
             return fus_lexer_unexpected(lexer, NULL);
         }else{
             /* eat atoms silently */
-            err = fus_lexer_next(lexer);
+            err = _fus_lexer_next(lexer);
             if(err)return err;
         }
     }
