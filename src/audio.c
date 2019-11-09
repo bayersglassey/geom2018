@@ -65,6 +65,8 @@ int audio_buffer_load(audio_buffer_t *buf, const char *filename){
     err = audio_parser_parse(&parser, &lexer);
     if(err)return err;
 
+    fus_lexer_cleanup(&lexer);
+
     audio_parser_cleanup(&parser);
     free(text);
     return 0;

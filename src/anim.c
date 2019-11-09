@@ -40,7 +40,7 @@ int stateset_load(stateset_t *stateset, char *filename,
     char *text = load_file(filename);
     if(text == NULL)return 1;
 
-    err = fus_lexer_init(&lexer, text, filename);
+    err = fus_lexer_init_with_vars(&lexer, text, filename, NULL);
     if(err)return err;
 
     err = stateset_init(stateset, filename);
@@ -48,6 +48,8 @@ int stateset_load(stateset_t *stateset, char *filename,
 
     err = stateset_parse(stateset, &lexer, prend, space);
     if(err)return err;
+
+    fus_lexer_cleanup(&lexer);
 
     free(text);
     return 0;
@@ -284,12 +286,15 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             char *text = load_file(filename);
             if(text == NULL)return 1;
 
-            fus_lexer_t lexer;
-            err = fus_lexer_init(&lexer, text, filename);
+            fus_lexer_t sublexer;
+            err = fus_lexer_init_with_vars(&sublexer, text, filename,
+                lexer->vars);
             if(err)return err;
 
-            err = _stateset_parse(stateset, &lexer, prend, space);
+            err = _stateset_parse(stateset, &sublexer, prend, space);
             if(err)return err;
+
+            fus_lexer_cleanup(&sublexer);
 
             free(filename);
             continue;

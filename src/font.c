@@ -31,11 +31,13 @@ int font_load(font_t *font, char *filename){
     char *text = load_file(filename);
     if(text == NULL)return 1;
 
-    err = fus_lexer_init(&lexer, text, filename);
+    err = fus_lexer_init_with_vars(&lexer, text, filename, NULL);
     if(err)return err;
 
     err = font_parse(font, &lexer);
     if(err)return err;
+
+    fus_lexer_cleanup(&lexer);
 
     free(text);
     return 0;

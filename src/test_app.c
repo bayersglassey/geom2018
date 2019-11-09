@@ -293,16 +293,11 @@ int test_app_set_players(test_app_t *app, int n_players){
 }
 
 
-int test_app_process_console_input(test_app_t *app){
+static int _test_app_process_console_input(test_app_t *app, fus_lexer_t *lexer){
     int err;
 
     rendergraph_t *rgraph =
         app->prend.rendergraphs[app->cur_rgraph_i];
-
-    fus_lexer_t _lexer;
-    fus_lexer_t *lexer = &_lexer;
-    err = fus_lexer_init(lexer, app->console.input, "<console input>");
-    if(err)goto lexer_err;
 
     if(fus_lexer_got(lexer, "exit")){
         err = fus_lexer_next(lexer);
@@ -490,6 +485,21 @@ int test_app_process_console_input(test_app_t *app){
     return 0;
 lexer_err:
     console_write_msg(&app->console, "That didn't work\n");
+    return 0;
+}
+
+
+int test_app_process_console_input(test_app_t *app){
+    int err;
+    fus_lexer_t lexer;
+
+    err = fus_lexer_init(&lexer, app->console.input, "<console input>");
+    if(err)return err;
+
+    err = _test_app_process_console_input(app, &lexer);
+    if(err)return err;
+
+    fus_lexer_cleanup(&lexer);
     return 0;
 }
 

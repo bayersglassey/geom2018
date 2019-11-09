@@ -357,7 +357,7 @@ int palette_load(palette_t *pal, const char *filename){
     char *text = load_file(filename);
     if(text == NULL)return 1;
 
-    err = fus_lexer_init(&lexer, text, filename);
+    err = fus_lexer_init_with_vars(&lexer, text, filename, NULL);
     if(err)return err;
 
     err = palette_init(pal, strdup(filename));
@@ -368,6 +368,8 @@ int palette_load(palette_t *pal, const char *filename){
 
     err = palette_reset(pal);
     if(err)return err;
+
+    fus_lexer_cleanup(&lexer);
 
     free(text);
     return 0;
@@ -646,11 +648,13 @@ int prismelrenderer_load(prismelrenderer_t *prend, const char *filename){
     char *text = load_file(filename);
     if(text == NULL)return 1;
 
-    err = fus_lexer_init(&lexer, text, filename);
+    err = fus_lexer_init_with_vars(&lexer, text, filename, NULL);
     if(err)return err;
 
     err = prismelrenderer_parse(prend, &lexer);
     if(err)return err;
+
+    fus_lexer_cleanup(&lexer);
 
     free(text);
     return 0;
