@@ -12,11 +12,27 @@
     array##_size = 0;
 
 /* WARNING: ARRAY_COPY doesn't actually copy the array, it copies a
-reference to it. Is that really what we want? Should we rename this? */
+reference to it.
+If you want to allocate a new array of the same size & copy over the
+data, then you're looking for ARRAY_CLONE. */
 #define ARRAY_COPY(array, array2) \
     array = array2; \
     array##_len = array2##_len; \
     array##_size = array##_size;
+
+#define ARRAY_CLONE(T, array, array2) \
+{ \
+    int len = array2##_len; \
+    int size = array2##_size; \
+    T *new_array = calloc(size, sizeof(T)); \
+    if(new_array == NULL)return 1; \
+    for(int i = 0; i < len; i++){ \
+        array[i] = array2[i]; \
+    } \
+    array##_len = len; \
+    array##_size = size; \
+    array = new_array; \
+}
 
 #define ARRAY_UNHOOK(array, elem) \
 { \
@@ -100,5 +116,16 @@ T new_elem = NULL; \
     array##_len = 0; \
     array##_size = 0; \
 }
+
+#define ARRAY_POP(array, elem_cleanup) \
+    if(array##_len <= 0)return 2; \
+    array##_len--; \
+    elem_cleanup(array[array##_len]);
+
+#define ARRAY_POP_PTR(array, elem_cleanup) \
+    if(array##_len <= 0)return 2; \
+    array##_len--; \
+    elem_cleanup(array[array##_len]); \
+    free(array[array##_len]);
 
 #endif
