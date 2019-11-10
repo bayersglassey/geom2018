@@ -110,23 +110,6 @@ hexcollmap "parts":
     - need to realloc collmap1 as necessary for collmap2 to fit. (in hexcollmap_draw)
 
 
-July 24, 2018:
---------------
-
-* Add fus_lexer_cleanup()... need to go add it everywhere T___T
-
-* audiotest REPL: recover from syntax errors plz
-
-* audiotest REPL: push user input onto an array of strings so they can @def
-
-* audiotest REPL: @triangle's "addinc" param needs to avoid the pop!..
-    e.g. @triangle: 7500 1000 15000 addinc1(-1)
-
-    -> ok we fixed the pop, but add it back as an operation somehow...
-        Like @pop(...) - because sometimes it sounds good! Like a bass kick.
-        What are its parameters?..
-
-
 Dec 9, 2018:
 ------------
 
@@ -329,3 +312,57 @@ Basic theme is big triangles like this:
   / \ / \
  + - + - +
 
+
+Nov 2, 2019:
+------------
+
+    * Slightly extend "big roller" section at bottom-right of dodecas,
+      then point one of its doors at a new "gauntlet" worldmap
+    * Extend spidertown, many "layers" connected by doors, eventually
+      wilderness, on other side is another spider settlement (with houses
+      like the broken ones found in wilderness)
+    * Wilderness: actually non-random, please.
+      Or anyway, non-random version.
+    * Roller follows you if you're a roller.
+        * Use this to collect the rollers in dodecas, getting them
+          to... open a door?.. sacrifice them to the dodecas spiders?..
+        * If you go all the way up to spidertown as a roller, you can
+          collect rollers up there, for some use or other.
+          So we can hide rollers in various little out-of-the-way places
+          which are currently unused.
+            * If you're a spider and you go near these rollers, they could
+              switch hiding-spots.
+              Also we could stick some coins in some of these hiding spots.
+    * Collecting coins does what?
+      Make some nice "plants" with "berries", and make little "flies"...
+    * Getting past the scary bird... gets you a powerup?.. frees the hermit?..
+
+
+Nov 3, 2019:
+------------
+
+Spikey spiders???
+Can't aim up, giving people a reason to figure out how to traverse maps
+without angled-up jumps!
+Maybe can't even spit?.. but on the other hand is invincible and maybe
+even crushes other stuff?..
+
+Trees: we have right-slanting trees... now also have left-slanting ones!..
+E.g. one at bottom-right of current map.
+Need to go through the water area at top to come around down other side of
+the left-slanting tree.
+
+Trees: the tiny trangles at top should be leaves, so get them appropriate rgraphs.
+And maybe branches in a background layer.
+And also... decide why they exist, where they lead etc.
+
+
+Nov 7, 2019:
+------------
+
+water map: walled-in bubbles full of water, connected by tunnels?..
+Giant rooms with suspended wall-less water bubbles?..
+Inverted rooms filled with water but with suspended wall-less air bubbles?..
+An enemy who swims faster than you, but you walk faster.
+So you need to "land" to escape, and "landing" often involves tricky sequences
+of jumping, doing some kind of turn while swimming, then landing again.
