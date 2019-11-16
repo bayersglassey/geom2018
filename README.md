@@ -6,6 +6,8 @@
 A game in development, a kind of puzzly arcadey look at the triangular grid.
 
 It [has a website](http://depths.bayersglassey.com) which may or may not be up at the moment.
+If it's up, you should be able to play it online, thanks to the wonders of
+[Emscripten](https://emscripten.org/).
 
 
 ## What is "geom2018"?
