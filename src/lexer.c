@@ -1,7 +1,6 @@
 
 
 #include "lexer.h"
-#include "array.h"
 #include "vars.h"
 
 
@@ -24,22 +23,27 @@ static char *fus_strndup(const char *s1, size_t len){
 
 static int fus_lexer_get_indent(fus_lexer_t *lexer);
 
-void fus_lexer_cleanup(fus_lexer_t *lexer){
-    vars_cleanup(&lexer->_vars);
-    ARRAY_FREE_PTR(fus_lexer_block_t*, lexer->blocks, (void))
+static void fus_lexer_free_frame_list(fus_lexer_frame_t *frame_list){
+    while(frame_list){
+        fus_lexer_frame_t *next = frame_list->next;
+        free(frame_list);
+        frame_list = next;
+    }
 }
 
-int fus_lexer_init(fus_lexer_t *lexer, const char *text,
-    const char *filename
+void fus_lexer_cleanup(fus_lexer_t *lexer){
+    vars_cleanup(&lexer->_vars);
+    fus_lexer_free_frame_list(lexer->frame_list);
+    fus_lexer_free_frame_list(lexer->free_frame_list);
+}
+
+static int _fus_lexer_init(fus_lexer_t *lexer, const char *text,
+    const char *filename, vars_t *vars
 ){
     int err;
 
-    lexer->debug = false;
-    lexer->vars = NULL;
-
     vars_init(&lexer->_vars);
-
-    ARRAY_INIT(lexer->blocks)
+    lexer->vars = vars;
 
     lexer->filename = filename;
     lexer->text = text;
@@ -51,68 +55,58 @@ int fus_lexer_init(fus_lexer_t *lexer, const char *text,
     lexer->row = 0;
     lexer->col = 0;
     lexer->indent = 0;
+
     lexer->returning_indents = 0;
+
+    lexer->frame_list = NULL;
+    lexer->free_frame_list = NULL;
 
     err = fus_lexer_get_indent(lexer);
     if(err)return err;
+
     err = fus_lexer_next(lexer);
     if(err)return err;
     return 0;
 }
 
+int fus_lexer_init(fus_lexer_t *lexer, const char *text,
+    const char *filename
+){
+    return _fus_lexer_init(lexer, text, filename, NULL);
+}
+
 int fus_lexer_init_with_vars(fus_lexer_t *lexer, const char *text,
     const char *filename, vars_t *vars
 ){
-    int err = fus_lexer_init(lexer, text, filename);
-    if(err)return err;
-    lexer->vars = vars? vars: &lexer->_vars;
-    return 0;
+    return _fus_lexer_init(lexer, text, filename,
+        vars? vars: &lexer->_vars);
 }
 
-int fus_lexer_copy(fus_lexer_t *lexer, fus_lexer_t *lexer2){
-    lexer->debug = lexer2->debug;
-    lexer->vars = lexer2->vars;
-    lexer->filename = lexer2->filename;
-    lexer->text = lexer2->text;
-    lexer->text_len = lexer2->text_len;
-    lexer->token = lexer2->token;
-    lexer->token_len = lexer2->token_len;
-    lexer->token_type = lexer2->token_type;
-    lexer->pos = lexer2->pos;
-    lexer->row = lexer2->row;
-    lexer->col = lexer2->col;
-
-    ARRAY_CLONE(fus_lexer_block_t*, lexer->blocks, lexer2->blocks)
-
-    lexer->indent = lexer2->indent;
-    lexer->returning_indents = lexer2->returning_indents;
-
-    return 0;
-}
-
-void fus_lexer_dump(fus_lexer_t *lexer, FILE *f){
-    fprintf(f, "lexer: %p\n", lexer);
-    if(lexer == NULL)return;
-    fprintf(f, "  text = ...\n");
-    fprintf(f, "  pos = %i\n", lexer->pos);
-    fprintf(f, "  row = %i\n", lexer->row);
-    fprintf(f, "  col = %i\n", lexer->col);
-    fprintf(f, "  indent = %i\n", lexer->indent);
-    fprintf(f, "  blocks_size = %i\n", lexer->blocks_size);
-    fprintf(f, "  blocks_len = %i\n", lexer->blocks_len);
-    fprintf(f, "  blocks:\n");
-    for(int i = 0; i < lexer->blocks_len; i++){
-        fus_lexer_block_t *block = lexer->blocks[i];
-        fprintf(f, "    %i\n", block->indent);
+const char *fus_lexer_token_type_msg(fus_lexer_token_type_t token_type){
+    static const char *msgs[FUS_LEXER_TOKEN_TYPES] = {
+        FUS_LEXER_TOKEN_TYPE_MSGS
+    };
+    if(token_type < 0 || token_type >= FUS_LEXER_TOKEN_TYPES){
+        return "unknown";
     }
-    fprintf(f, "  returning_indents = %i\n", lexer->returning_indents);
+    return msgs[token_type];
+}
+
+static int fus_lexer_depth(fus_lexer_t *lexer){
+    int depth = 0;
+    for(
+        fus_lexer_frame_t *frame = lexer->frame_list;
+        frame; frame = frame->next
+    )depth++;
+    return depth;
 }
 
 void fus_lexer_info(fus_lexer_t *lexer, FILE *f){
-    fprintf(f, "%s: row %i: col %i: ",
+    fprintf(f, "[%s: row=%i col=%i pos=%i] ",
         lexer->filename,
         lexer->row + 1,
-        lexer->col - lexer->token_len + 1);
+        lexer->col - lexer->token_len + 1,
+        lexer->pos + 1);
 }
 
 void fus_lexer_err_info(fus_lexer_t *lexer){
@@ -145,19 +139,61 @@ static void fus_lexer_set_token(fus_lexer_t *lexer, const char *token){
     lexer->token_len = strlen(token);
 }
 
-static int fus_lexer_push_block(fus_lexer_t *lexer, int indent){
-    ARRAY_PUSH_NEW(fus_lexer_block_t*, lexer->blocks, block)
-    block->indent = indent;
+static int fus_lexer_push_frame(fus_lexer_t *lexer,
+    fus_lexer_frame_type_t type, bool is_block
+){
+
+    /* Get frame (from free_frame_list if available, else malloc) */
+    fus_lexer_frame_t *frame = NULL;
+    if(lexer->free_frame_list){
+        frame = lexer->free_frame_list;
+        lexer->free_frame_list = frame->next;
+    }else{
+        frame = calloc(1, sizeof(*frame));
+        if(!frame)return 1;
+    }
+
+    /* Move frame onto frame_list */
+    frame->next = lexer->frame_list;
+    lexer->frame_list = frame;
+
+    /* Set up frame fields */
+    frame->type = type;
+    frame->is_block = is_block;
+    frame->indent = lexer->indent;
     return 0;
 }
 
-static int fus_lexer_pop_block(fus_lexer_t *lexer){
-    if(lexer->blocks_len == 0){
+static void fus_lexer_fprint_frames(FILE *file, fus_lexer_t *lexer){
+    /* For debugging */
+    fprintf(file, "FRAMES:");
+    for(
+        fus_lexer_frame_t *frame = lexer->frame_list;
+        frame; frame = frame->next
+    )fprintf(file, " %p", frame);
+    putc('\n', file);
+}
+
+static int fus_lexer_pop_frame(fus_lexer_t *lexer,
+    fus_lexer_frame_t **frame_ptr
+){
+    /* Can't pop from empty list */
+    if(!lexer->frame_list){
         fus_lexer_err_info(lexer); fprintf(stderr,
-            "Tried to pop a block, but block stack is empty\n");
+            "Tried to pop a frame, but frame stack is empty\n");
         return 2;
     }
-    ARRAY_POP_PTR(lexer->blocks, (void))
+
+    /* Get frame */
+    fus_lexer_frame_t *frame = lexer->frame_list;
+
+    /* Move frame from frame_list to free_frame_list */
+    lexer->frame_list = frame->next;
+    frame->next = lexer->free_frame_list;
+    lexer->free_frame_list = frame;
+
+    /* Return the frame */
+    *frame_ptr = frame;
     return 0;
 }
 
@@ -178,7 +214,46 @@ static char fus_lexer_eat(fus_lexer_t *lexer){
     return c;
 }
 
+static int fus_lexer_eat_comment(fus_lexer_t *lexer){
+    /* Eat a comment, including leading '#' */
+    fus_lexer_eat(lexer);
+    while(lexer->pos < lexer->text_len){
+        char c = lexer->text[lexer->pos];
+        if(c == '\n')break;
+        fus_lexer_eat(lexer);
+    }
+    return 0;
+}
+
+static int fus_lexer_eat_whitespace(fus_lexer_t *lexer){
+    /* Eat all whitespace (including comments) up to next non-whitespace
+    character or newline or end-of-file */
+    int err;
+    while(lexer->pos < lexer->text_len){
+        char c = lexer->text[lexer->pos];
+        if(c == '#'){
+            err = fus_lexer_eat_comment(lexer);
+            if(err)return err;
+            break;
+        }
+        if(c == '\n' || c == '\0' || isgraph(c))break;
+        if(c != ' '){
+            fus_lexer_err_info(lexer); fprintf(stderr,
+                "Indented with whitespace other than ' ' "
+                "(#32): #%i\n", (int)c);
+            return 2;
+        }
+        fus_lexer_eat(lexer);
+    }
+    return 0;
+}
+
 static int fus_lexer_get_indent(fus_lexer_t *lexer){
+    /* Assumes lexer is at start of line. Eats whitespace until it
+    finds non-whitespace, then sets lexer->indent.
+    Lines consisting entirely of whitespace are simply consumed.
+    On successful return, next char is NUL or non-whitespace. */
+    int err;
     int indent = 0;
     while(lexer->pos < lexer->text_len){
         char c = lexer->text[lexer->pos];
@@ -190,7 +265,11 @@ static int fus_lexer_get_indent(fus_lexer_t *lexer){
             just reset the indentation and restart on next line */
             indent = 0;
             fus_lexer_eat(lexer);
-        }else if(c != '\0' && isspace(c)){
+        }else if(c == '#'){
+            /* eat comment */
+            err = fus_lexer_eat_comment(lexer);
+            if(err)return err;
+        }else if(isspace(c)){
             fus_lexer_err_info(lexer); fprintf(stderr,
                 "Indented with whitespace other than ' ' "
                 "(#32): #%i\n", (int)c);
@@ -201,25 +280,6 @@ static int fus_lexer_get_indent(fus_lexer_t *lexer){
     }
     lexer->indent = indent;
     return 0;
-}
-
-static void fus_lexer_eat_whitespace(fus_lexer_t *lexer){
-    while(lexer->pos < lexer->text_len){
-        char c = lexer->text[lexer->pos];
-        if(c == '\0' || isgraph(c))break;
-        fus_lexer_eat(lexer);
-    }
-}
-
-static void fus_lexer_eat_comment(fus_lexer_t *lexer){
-    /* eat leading '#' */
-    fus_lexer_eat(lexer);
-
-    while(lexer->pos < lexer->text_len){
-        char c = lexer->text[lexer->pos];
-        if(c == '\n')break;
-        fus_lexer_eat(lexer);
-    }
 }
 
 static void fus_lexer_parse_sym(fus_lexer_t *lexer){
@@ -315,97 +375,156 @@ static int fus_lexer_parse_blockstr(fus_lexer_t *lexer){
     return 0;
 }
 
-static int _fus_lexer_next(fus_lexer_t *lexer){
+static int fus_lexer_handle_whitespace(fus_lexer_t *lexer){
     int err;
-    while(1){
-        /* return "(" or ")" token based on indents? */
-        if(lexer->returning_indents != 0)break;
 
-        char c = lexer->text[lexer->pos];
-        if(c == '\0' || c == '\n'){
-            if(c == '\n')fus_lexer_eat(lexer);
+    /* Eat whitespace up to first non-whitespace character or newline
+    or end-of-file */
+    err = fus_lexer_eat_whitespace(lexer);
+    if(err)return err;
 
-            err = fus_lexer_get_indent(lexer);
-            if(err)return err;
-            int new_indent = lexer->indent;
-            while(lexer->blocks_len > 0){
-                fus_lexer_block_t *block =
-                    lexer->blocks[lexer->blocks_len-1];
-                int indent = block->indent;
-                if(new_indent <= indent){
-                    err = fus_lexer_pop_block(lexer);
-                    if(err)return err;
-                    lexer->returning_indents--;
-                }else{
-                    break;
-                }
+    char c = lexer->text[lexer->pos];
+    if(c == '\0' || c == '\n'){
+        /* Eat newline */
+        if(c == '\n')fus_lexer_eat(lexer);
+
+        /* Eat whitespace and set lexer->indent, will be 0 if c
+        was '\0'. */
+        err = fus_lexer_get_indent(lexer);
+        if(err)return err;
+
+        /* Pop all block frames whose indentation is higher than ours */
+        while(1){
+            /* Each time around the loop, a frame is popped, so
+            lexer->frame_list will be the next frame */
+            fus_lexer_frame_t *frame = lexer->frame_list;
+            if(!frame)break;
+
+            /* Validate */
+            if(!frame->is_block){
+                fus_lexer_err_info(lexer); fprintf(stderr,
+                    "Parentheses must start & end on same line\n");
+                return 2;
             }
 
-            if(c == '\0'){
-                /* Reached end of file; report with NULL token */
-                lexer->token = NULL;
-                lexer->token_len = 0;
-                lexer->token_type = FUS_LEXER_TOKEN_DONE;
-                break;
+            /* If frame is below current indent level, stop popping frames */
+            if(frame->indent < lexer->indent)break;
+
+            /* Pop frame */
+            fus_lexer_frame_t *_frame;
+            err = fus_lexer_pop_frame(lexer, &_frame);
+            if(err)return err;
+
+            /* Sanity check */
+            if(frame != _frame){
+                fprintf(stderr, "Failed sanity check: "
+                    "frame != _frame (%p != %p)\n", frame, _frame);
+                return 2;
             }
-        }else if(isspace(c)){
-            fus_lexer_eat_whitespace(lexer);
-        }else if(c == ':'){
-            fus_lexer_eat(lexer);
-            lexer->returning_indents++;
-            fus_lexer_push_block(lexer, lexer->indent);
-            break;
-        }else if(c == '(' || c == ')'){
-            fus_lexer_start_token(lexer);
-            fus_lexer_eat(lexer);
-            fus_lexer_end_token(lexer);
-            lexer->token_type = c == '('?
-                FUS_LEXER_TOKEN_OPEN: FUS_LEXER_TOKEN_CLOSE;
-            break;
-        }else if(c == '_' || isalpha(c)){
-            fus_lexer_parse_sym(lexer);
-            lexer->token_type = FUS_LEXER_TOKEN_SYM;
-            break;
-        }else if(isdigit(c) || (
-            c == '-' && isdigit(fus_lexer_peek(lexer))
-        )){
-            fus_lexer_parse_int(lexer);
-            lexer->token_type = FUS_LEXER_TOKEN_INT;
-            break;
-        }else if(c == '#'){
-            fus_lexer_eat_comment(lexer);
-        }else if(c == '"'){
-            err = fus_lexer_parse_str(lexer);
-            if(err)return err;
-            lexer->token_type = FUS_LEXER_TOKEN_STR;
-            break;
-        }else if(c == ';' && fus_lexer_peek(lexer) == ';'){
-            err = fus_lexer_parse_blockstr(lexer);
-            if(err)return err;
-            lexer->token_type = FUS_LEXER_TOKEN_BLOCKSTR;
-            break;
-        }else{
-            fus_lexer_parse_op(lexer);
-            lexer->token_type = FUS_LEXER_TOKEN_OP;
-            break;
+
+            /* Remember to output a close paren */
+            lexer->returning_indents--;
         }
     }
+    return 0;
+}
 
+static int _fus_lexer_next(fus_lexer_t *lexer){
+    /* Gets a single token. */
+    int err;
+
+    /* Handle whitespace (unless we already know we need to
+    return some open/close parens) */
+    if(!lexer->returning_indents){
+        err = fus_lexer_handle_whitespace(lexer);
+        if(err)return err;
+    }
+
+    /* Maybe output open/close parens */
     if(lexer->returning_indents > 0){
         lexer->token_type = FUS_LEXER_TOKEN_OPEN;
         fus_lexer_set_token(lexer, "(");
         lexer->returning_indents--;
-    }
-    if(lexer->returning_indents < 0){
+        return 0;
+    }else if(lexer->returning_indents < 0){
         lexer->token_type = FUS_LEXER_TOKEN_CLOSE;
         fus_lexer_set_token(lexer, ")");
         lexer->returning_indents++;
+        return 0;
+    }
+
+    /* Decide what type of token we got based on next character */
+    char c = lexer->text[lexer->pos];
+    if(c == '\0'){
+        /* Reached end of file; report with NULL token */
+        lexer->token = NULL;
+        lexer->token_len = 0;
+        lexer->token_type = FUS_LEXER_TOKEN_DONE;
+    }else if(c == ':'){
+        if(lexer->frame_list && !lexer->frame_list->is_block){
+            fus_lexer_err_info(lexer); fprintf(stderr,
+                "Can't have a colon inside parentheses!\n");
+            return 2;
+        }
+        fus_lexer_eat(lexer);
+        fus_lexer_set_token(lexer, "(");
+        lexer->token_type = FUS_LEXER_TOKEN_OPEN;
+        err = fus_lexer_push_frame(lexer, FUS_LEXER_FRAME_NORMAL, true);
+        if(err)return err;
+    }else if(c == '('){
+        fus_lexer_start_token(lexer);
+        fus_lexer_eat(lexer);
+        fus_lexer_end_token(lexer);
+        lexer->token_type = FUS_LEXER_TOKEN_OPEN;
+        err = fus_lexer_push_frame(lexer, FUS_LEXER_FRAME_NORMAL, false);
+        if(err)return err;
+    }else if(c == ')'){
+        fus_lexer_start_token(lexer);
+        fus_lexer_eat(lexer);
+        fus_lexer_end_token(lexer);
+        lexer->token_type = FUS_LEXER_TOKEN_CLOSE;
+
+        fus_lexer_frame_t *frame;
+        err = fus_lexer_pop_frame(lexer, &frame);
+        if(err)return err;
+
+        /* Given "(x: y: z)", when we hit the ')', we should pop 3 frames
+        in total: that for the '(', *and* those for the 2 ':'. */
+        while(frame->is_block){
+            err = fus_lexer_pop_frame(lexer, &frame);
+            if(err)return err;
+
+            /* Remember to output an extra close paren */
+            lexer->returning_indents--;
+        }
+    }else if(c == '_' || isalpha(c)){
+        fus_lexer_parse_sym(lexer);
+        lexer->token_type = FUS_LEXER_TOKEN_SYM;
+    }else if(isdigit(c) || (
+        c == '-' && isdigit(fus_lexer_peek(lexer))
+    )){
+        fus_lexer_parse_int(lexer);
+        lexer->token_type = FUS_LEXER_TOKEN_INT;
+    }else if(c == '"'){
+        err = fus_lexer_parse_str(lexer);
+        if(err)return err;
+        lexer->token_type = FUS_LEXER_TOKEN_STR;
+    }else if(c == ';' && fus_lexer_peek(lexer) == ';'){
+        err = fus_lexer_parse_blockstr(lexer);
+        if(err)return err;
+        lexer->token_type = FUS_LEXER_TOKEN_BLOCKSTR;
+    }else{
+        fus_lexer_parse_op(lexer);
+        lexer->token_type = FUS_LEXER_TOKEN_OP;
     }
 
     return 0;
 }
 
 int fus_lexer_next(fus_lexer_t *lexer){
+    /* Gets a single token. Wrapper around _fus_lexer_next, which does
+    the real work; this function implements a fancy "precompiler" syntax
+    if lexer->vars != NULL */
     int err;
     while(1){
         err = _fus_lexer_next(lexer);
