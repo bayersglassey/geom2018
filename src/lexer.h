@@ -7,7 +7,6 @@
 #include <ctype.h>
 #include <string.h>
 
-#include "array.h"
 #include "vars.h"
 
 /*
@@ -28,14 +27,37 @@
 
 */
 
-typedef struct fus_lexer_block {
+typedef enum fus_lexer_token_type {
+    FUS_LEXER_TOKEN_DONE,
+    FUS_LEXER_TOKEN_INT,
+    FUS_LEXER_TOKEN_SYM,
+    FUS_LEXER_TOKEN_OP,
+    FUS_LEXER_TOKEN_STR,
+    FUS_LEXER_TOKEN_BLOCKSTR,
+    FUS_LEXER_TOKEN_OPEN,
+    FUS_LEXER_TOKEN_CLOSE,
+    FUS_LEXER_TOKEN_TYPES
+} fus_lexer_token_type_t;
+
+#define FUS_LEXER_TOKEN_TYPE_MSGS \
+    "done", "int", "sym", "op", "str", "blockstr", \
+    "open", "close" \
+
+typedef enum fus_lexer_frame_type {
+    FUS_LEXER_FRAME_NORMAL,
+    FUS_LEXER_FRAME_IF,
+} fus_lexer_frame_type_t;
+
+typedef struct fus_lexer_frame {
+    fus_lexer_frame_type_t type;
     int indent;
-} fus_lexer_block_t;
+    bool is_block;
+    struct fus_lexer_frame *next;
+} fus_lexer_frame_t;
 
 typedef struct fus_lexer {
-    bool debug;
-
-    vars_t _vars, *vars;
+    vars_t _vars;
+    vars_t *vars;
 
     const char *filename;
 
@@ -44,27 +66,17 @@ typedef struct fus_lexer {
 
     int token_len;
     const char *token;
-    enum {
-        FUS_LEXER_TOKEN_DONE,
-        FUS_LEXER_TOKEN_INT,
-        FUS_LEXER_TOKEN_SYM,
-        FUS_LEXER_TOKEN_OP,
-        FUS_LEXER_TOKEN_STR,
-        FUS_LEXER_TOKEN_BLOCKSTR,
-        FUS_LEXER_TOKEN_OPEN,
-        FUS_LEXER_TOKEN_CLOSE,
-        FUS_LEXER_TOKEN_TYPES
-    } token_type;
+    fus_lexer_token_type_t token_type;
 
     int pos;
     int row;
     int col;
     int indent;
-    ARRAY_DECL(fus_lexer_block_t*, blocks)
 
-    /* If positive, represents a series of "(" tokens being returned.
-    If negative, represents a series of ")" tokens being returned. */
     int returning_indents;
+
+    fus_lexer_frame_t *frame_list;
+    fus_lexer_frame_t *free_frame_list;
 } fus_lexer_t;
 
 
@@ -73,8 +85,7 @@ int fus_lexer_init(fus_lexer_t *lexer, const char *text,
     const char *filename);
 int fus_lexer_init_with_vars(fus_lexer_t *lexer, const char *text,
     const char *filename, vars_t *vars);
-int fus_lexer_copy(fus_lexer_t *lexer, fus_lexer_t *lexer2);
-void fus_lexer_dump(fus_lexer_t *lexer, FILE *f);
+const char *fus_lexer_token_type_msg(fus_lexer_token_type_t token_type);
 void fus_lexer_info(fus_lexer_t *lexer, FILE *f);
 void fus_lexer_err_info(fus_lexer_t *lexer);
 int fus_lexer_get_pos(fus_lexer_t *lexer);
