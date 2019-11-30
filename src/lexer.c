@@ -105,7 +105,7 @@ void fus_lexer_info(fus_lexer_t *lexer, FILE *f){
     fprintf(f, "[%s: row=%i col=%i pos=%i] ",
         lexer->filename,
         lexer->row + 1,
-        lexer->col - lexer->token_len + 1,
+        lexer->col + 1,
         lexer->pos + 1);
 }
 
@@ -490,20 +490,25 @@ static int _fus_lexer_next(fus_lexer_t *lexer){
         err = fus_lexer_push_frame(lexer, FUS_LEXER_FRAME_NORMAL, false);
         if(err)return err;
     }else if(c == ')'){
-        fus_lexer_start_token(lexer);
-        fus_lexer_eat(lexer);
-        fus_lexer_end_token(lexer);
-        lexer->token_type = FUS_LEXER_TOKEN_CLOSE;
-
-        fus_lexer_frame_t *frame;
-        err = fus_lexer_pop_frame(lexer, &frame);
-        if(err)return err;
-
-        /* Given "(x: y: z)", when we hit the ')', we should pop 3 frames
+        /* Pop frames up to and including the first non-block one, that is,
+        the one corresponding to "(".
+        So given "(x: y: z)", when we hit the ')', we should pop 3 frames
         in total: that for the '(', *and* those for the 2 ':'. */
-        while(frame->is_block){
+        while(1){
+            fus_lexer_frame_t *frame;
             err = fus_lexer_pop_frame(lexer, &frame);
             if(err)return err;
+            if(frame && !frame->is_block)break;
+            /* If frame is NULL, we allow loop to wrap around so pop_frame
+            raises the error about popping from an empty stack. */
+        }
+
+        /* We may be returning "the same" ')' we just parsed... or it
+        might be from an earlier ':'. */
+        if(lexer->returning_indents < 0){
+            lexer->token_type = FUS_LEXER_TOKEN_CLOSE;
+            fus_lexer_set_token(lexer, ")");
+            lexer->returning_indents++;
         }
     }else if(c == '_' || isalpha(c)){
         fus_lexer_parse_sym(lexer);
