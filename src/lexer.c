@@ -192,6 +192,12 @@ static int fus_lexer_pop_frame(fus_lexer_t *lexer,
     frame->next = lexer->free_frame_list;
     lexer->free_frame_list = frame;
 
+    /* Remember to output a close paren... but only if this
+    frame wasn't part of an $IF block! */
+    if(frame->type != FUS_LEXER_FRAME_IF){
+        lexer->returning_indents--;
+    }
+
     /* Return the frame */
     *frame_ptr = frame;
     return 0;
@@ -421,9 +427,6 @@ static int fus_lexer_handle_whitespace(fus_lexer_t *lexer){
                     "frame != _frame (%p != %p)\n", frame, _frame);
                 return 2;
             }
-
-            /* Remember to output a close paren */
-            lexer->returning_indents--;
         }
     }
     return 0;
@@ -442,10 +445,18 @@ static int _fus_lexer_next(fus_lexer_t *lexer){
 
     /* Maybe output open/close parens */
     if(lexer->returning_indents > 0){
+        fprintf(stderr,
+            "Returning open parens this way isn't supported, "
+            "because our implementation of $IF currently assumes "
+            "that when an \"(\" is emitted, lexer->frame_list is "
+            "a corresponding frame.\n");
+        return 2;
+        /*
         lexer->token_type = FUS_LEXER_TOKEN_OPEN;
         fus_lexer_set_token(lexer, "(");
         lexer->returning_indents--;
         return 0;
+        */
     }else if(lexer->returning_indents < 0){
         lexer->token_type = FUS_LEXER_TOKEN_CLOSE;
         fus_lexer_set_token(lexer, ")");
@@ -493,9 +504,6 @@ static int _fus_lexer_next(fus_lexer_t *lexer){
         while(frame->is_block){
             err = fus_lexer_pop_frame(lexer, &frame);
             if(err)return err;
-
-            /* Remember to output an extra close paren */
-            lexer->returning_indents--;
         }
     }else if(c == '_' || isalpha(c)){
         fus_lexer_parse_sym(lexer);
@@ -565,14 +573,13 @@ int fus_lexer_next(fus_lexer_t *lexer){
                 bool cond = vars_get_bool(lexer->vars, name) ^ not;
 
                 if(!cond){
+                    /* Eat everything up to & including closing ")" */
                     err = fus_lexer_parse_silent(lexer);
                     if(err)return err;
                 }else{
-                    /* TODO: mark this level of indentation as belonging
-                    to a macro, so we don't emit ")" on leaving it.
-                    FOR THAT TO HAPPEN, I think we need to get fus2019's
-                    lexer in here, with its fixes, like how it *always*
-                    pushes an indent onto the stack. I think. */
+                    /* Mark this frame as belonging to an $IF,
+                    so we don't emit ")" on leaving it. */
+                    lexer->frame_list->type = FUS_LEXER_FRAME_IF;
                 }
 
                 free(name);
@@ -930,8 +937,9 @@ int fus_lexer_unexpected(fus_lexer_t *lexer, const char *expected){
 }
 
 int fus_lexer_parse_silent(fus_lexer_t *lexer){
-    /* Expected to be called immediately following a "(" token */
-    /* NOTE: we use _fus_lexer_next in here so all macros are skipped */
+    /* Expected to be called immediately following a "(" token.
+    We eat everything up to and including the corresponding ")" token.
+    NOTE: we use _fus_lexer_next so that all macros are skipped */
     int depth = 1;
     while(1){
         int err;

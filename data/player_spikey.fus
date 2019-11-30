@@ -1,0 +1,3 @@
+
+$SET_BOOL PLAYER_SPIKEY
+import "data/player.fus"

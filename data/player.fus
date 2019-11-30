@@ -47,10 +47,11 @@ shapes:
             : "_player_head_sixth" (0 0 0 0)  8 f
             : "_player_head_sixth" (0 0 0 0) 10 f
 
-            #: "_player_head_spike" (0 0 0 0)  0 f
-            #: "_player_head_spike" (0 0 0 0)  2 f
-            #: "_player_head_spike" (0 0 0 0)  4 f
-            #: "_player_head_spike" (0 0 0 0)  6 f
+            $IF PLAYER_SPIKEY:
+                : "_player_head_spike" (0 0 0 0)  0 f
+                : "_player_head_spike" (0 0 0 0)  2 f
+                : "_player_head_spike" (0 0 0 0)  4 f
+                : "_player_head_spike" (0 0 0 0)  6 f
 
     "player_head":
         shapes:
