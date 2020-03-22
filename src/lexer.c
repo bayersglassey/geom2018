@@ -114,6 +114,17 @@ void fus_lexer_err_info(fus_lexer_t *lexer){
     fus_lexer_info(lexer, stderr);
 }
 
+static void fus_lexer_fprint_frames(FILE *file, fus_lexer_t *lexer){
+    /* For debugging */
+    fprintf(file, "FRAMES:");
+    for(
+        fus_lexer_frame_t *frame = lexer->frame_list;
+        frame; frame = frame->next
+    )fprintf(file, " %p[%c](%i)", frame, frame->is_block? 'b': ' ',
+        frame->indent);
+    putc('\n', file);
+}
+
 int fus_lexer_get_pos(fus_lexer_t *lexer){
     /* "public getter" */
     return lexer->pos;
@@ -161,17 +172,8 @@ static int fus_lexer_push_frame(fus_lexer_t *lexer,
     frame->type = type;
     frame->is_block = is_block;
     frame->indent = lexer->indent;
-    return 0;
-}
 
-static void fus_lexer_fprint_frames(FILE *file, fus_lexer_t *lexer){
-    /* For debugging */
-    fprintf(file, "FRAMES:");
-    for(
-        fus_lexer_frame_t *frame = lexer->frame_list;
-        frame; frame = frame->next
-    )fprintf(file, " %p", frame);
-    putc('\n', file);
+    return 0;
 }
 
 static int fus_lexer_pop_frame(fus_lexer_t *lexer,
@@ -492,23 +494,43 @@ static int _fus_lexer_next(fus_lexer_t *lexer){
     }else if(c == ')'){
         /* Pop frames up to and including the first non-block one, that is,
         the one corresponding to "(".
+        For each popped frame, lexer->returning_indents is decremented.
         So given "(x: y: z)", when we hit the ')', we should pop 3 frames
         in total: that for the '(', *and* those for the 2 ':'. */
         while(1){
             fus_lexer_frame_t *frame;
             err = fus_lexer_pop_frame(lexer, &frame);
             if(err)return err;
-            if(frame && !frame->is_block)break;
-            /* If frame is NULL, we allow loop to wrap around so pop_frame
-            raises the error about popping from an empty stack. */
+            if(!frame){
+                /* If frame is NULL, we allow loop to wrap around so pop_frame
+                raises the error about popping from an empty stack. */
+                continue;
+            }
+            if(frame->is_block){
+                /* Block frame, that is, frame defined by ':' and indentation */
+                continue;
+            }
+            /* If we make it here, frame is not a block, that is, it was defined
+            by a '('. */
+            break;
         }
 
         /* We may be returning "the same" ')' we just parsed... or it
         might be from an earlier ':'. */
         if(lexer->returning_indents < 0){
+            fus_lexer_start_token(lexer);
+            fus_lexer_eat(lexer);
+            fus_lexer_end_token(lexer);
             lexer->token_type = FUS_LEXER_TOKEN_CLOSE;
-            fus_lexer_set_token(lexer, ")");
             lexer->returning_indents++;
+            return 0;
+        }else{
+            /* This should never happen, since that would mean we didn't pop
+            any frames, which should have caused fus_lexer_pop_frame to complain
+            about an empty stack */
+            fus_lexer_err_info(lexer); fprintf(stderr,
+                "Failed sanity check: no matching '('\n");
+            return 2;
         }
     }else if(c == '_' || isalpha(c)){
         fus_lexer_parse_sym(lexer);
