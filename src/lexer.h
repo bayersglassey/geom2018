@@ -100,6 +100,7 @@ void fus_lexer_show(fus_lexer_t *lexer, FILE *f);
 int fus_lexer_get(fus_lexer_t *lexer, const char *text);
 int fus_lexer_get_name(fus_lexer_t *lexer, char **name);
 int fus_lexer_get_str(fus_lexer_t *lexer, char **s);
+int fus_lexer_get_name_or_str(fus_lexer_t *lexer, char **s);
 int fus_lexer_get_chr(fus_lexer_t *lexer, char *c);
 int fus_lexer_get_int(fus_lexer_t *lexer, int *i);
 int fus_lexer_get_bool(fus_lexer_t *lexer, bool *b);

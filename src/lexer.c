@@ -666,66 +666,95 @@ int fus_lexer_get(fus_lexer_t *lexer, const char *text){
     return fus_lexer_next(lexer);
 }
 
-int fus_lexer_get_name(fus_lexer_t *lexer, char **name){
-    if(!fus_lexer_got_name(lexer)){
-        fus_lexer_err_info(lexer); fprintf(stderr,
-            "Expected name, but got: ");
-        fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
-        return 2;
-    }
+static int _fus_lexer_get_name(fus_lexer_t *lexer, char **name){
     *name = fus_strndup(lexer->token, lexer->token_len);
     if(*name == NULL)return 1;
     return fus_lexer_next(lexer);
 }
 
+static int _fus_lexer_get_str(fus_lexer_t *lexer, char **s){
+    const char *token = lexer->token;
+    int token_len = lexer->token_len;
+
+    /* Maximum length of s is length of token without the surrounding
+    '"' characters.
+    (The actual length may be shorter if there are '\'-escaped
+    characters in the string.) */
+    int s_len = token_len - 2;
+
+    char *ss0 = malloc(s_len + 1);
+    if(ss0 == NULL)return 1;
+    char *ss = ss0;
+
+    for(int i = 1; i < token_len - 1; i++){
+        char c = token[i];
+        if(c == '\\'){
+            i++;
+            c = token[i];
+            if(c == 'n'){
+                c = '\n';
+            }
+        }
+        *ss = c;
+        ss++;
+    }
+
+    *ss = '\0';
+    *s = ss0;
+    return fus_lexer_next(lexer);
+}
+
+static int _fus_lexer_get_blockstr(fus_lexer_t *lexer, char **s){
+    const char *token = lexer->token;
+    int token_len = lexer->token_len;
+
+    /* Length of s is length of token without the leading ";;" */
+    int s_len = token_len - 2;
+
+    char *ss = fus_strndup(token+2, s_len);
+    if(ss == NULL)return 1;
+
+    *s = ss;
+    return fus_lexer_next(lexer);
+}
+
+int fus_lexer_get_name(fus_lexer_t *lexer, char **name){
+    if(lexer->token_type == FUS_LEXER_TOKEN_SYM){
+        return _fus_lexer_get_name(lexer, name);
+    }else{
+        fus_lexer_err_info(lexer); fprintf(stderr,
+            "Expected name, but got: ");
+        fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
+        return 2;
+    }
+}
+
 int fus_lexer_get_str(fus_lexer_t *lexer, char **s){
     if(lexer->token_type == FUS_LEXER_TOKEN_STR){
-        const char *token = lexer->token;
-        int token_len = lexer->token_len;
-
-        /* Maximum length of s is length of token without the surrounding
-        '"' characters.
-        (The actual length may be shorter if there are '\'-escaped
-        characters in the string.) */
-        int s_len = token_len - 2;
-
-        char *ss0 = malloc(s_len + 1);
-        if(ss0 == NULL)return 1;
-        char *ss = ss0;
-
-        for(int i = 1; i < token_len - 1; i++){
-            char c = token[i];
-            if(c == '\\'){
-                i++;
-                c = token[i];
-                if(c == 'n'){
-                    c = '\n';
-                }
-            }
-            *ss = c;
-            ss++;
-        }
-
-        *ss = '\0';
-        *s = ss0;
+        return _fus_lexer_get_str(lexer, s);
     }else if(lexer->token_type == FUS_LEXER_TOKEN_BLOCKSTR){
-        const char *token = lexer->token;
-        int token_len = lexer->token_len;
-
-        /* Length of s is length of token without the leading ";;" */
-        int s_len = token_len - 2;
-
-        char *ss = fus_strndup(token+2, s_len);
-        if(ss == NULL)return 1;
-
-        *s = ss;
+        return _fus_lexer_get_blockstr(lexer, s);
     }else{
         fus_lexer_err_info(lexer); fprintf(stderr,
             "Expected str, but got: ");
         fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
         return 2;
     }
-    return fus_lexer_next(lexer);
+}
+
+int fus_lexer_get_name_or_str(fus_lexer_t *lexer, char **s){
+    if(lexer->token_type == FUS_LEXER_TOKEN_SYM){
+        return _fus_lexer_get_name(lexer, s);
+    }else if(lexer->token_type == FUS_LEXER_TOKEN_STR){
+        return _fus_lexer_get_str(lexer, s);
+    }else if(lexer->token_type == FUS_LEXER_TOKEN_BLOCKSTR){
+        return _fus_lexer_get_blockstr(lexer, s);
+    }else{
+        fus_lexer_err_info(lexer); fprintf(stderr,
+            "Expected name or str, but got: ");
+        fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
+        return 2;
+    }
 }
 
 int fus_lexer_get_chr(fus_lexer_t *lexer, char *c){
