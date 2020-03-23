@@ -104,6 +104,14 @@ char *strdup(const char *s1){
     return s2;
 }
 
+char *strdupcat(const char *s1, const char *s2){
+    char *s3 = malloc(strlen(s1) + strlen(s2) + 1);
+    if(s3 == NULL)return NULL;
+    strcpy(s3, s1);
+    strcat(s3, s2);
+    return s3;
+}
+
 void get_spaces(char *spaces, int max_spaces, int n_spaces){
     if(n_spaces > max_spaces){
         fprintf(stderr, "Can't handle %i spaces - max %i\n",
