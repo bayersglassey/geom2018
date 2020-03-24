@@ -803,10 +803,22 @@ int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer){
             if(err)return err;
         }else if(GOT("import")){
             NEXT
+
+            /* We use _fus_lexer_get_str to avoid calling fus_lexer_next until after
+            the call to prismelrenderer_load is done, to make sure we don't modify
+            lexer->vars first */
             char *filename;
-            GET_STR(filename)
+            err = _fus_lexer_get_str(lexer, &filename);
+            if(err)return err;
+
             err = prismelrenderer_load(prend, filename, lexer->vars);
             if(err)return err;
+
+            /* We now call fus_lexer_next manually, see call to _fus_lexer_get_str
+            above */
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+
             free(filename);
         }else{
             return UNEXPECTED(

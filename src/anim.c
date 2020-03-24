@@ -280,8 +280,13 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
 
         if(GOT("import")){
             NEXT
+
+            /* We use _fus_lexer_get_str to avoid calling fus_lexer_next until after
+            the call to fus_lexer_init_with_vars is done, to make sure we don't modify
+            lexer->vars first */
             char *filename;
-            GET_STR(filename);
+            err = _fus_lexer_get_str(lexer, &filename);
+            if(err)return err;
 
             char *text = load_file(filename);
             if(text == NULL)return 1;
@@ -291,11 +296,15 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                 lexer->vars);
             if(err)return err;
 
+            /* We now call fus_lexer_next manually, see call to _fus_lexer_get_str
+            above */
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+
             err = _stateset_parse(stateset, &sublexer, prend, space);
             if(err)return err;
 
             fus_lexer_cleanup(&sublexer);
-
             free(filename);
             continue;
         }
