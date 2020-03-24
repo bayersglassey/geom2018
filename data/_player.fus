@@ -1,5 +1,7 @@
 
-# Expected vars: NS (str), e.g. "player_"
+# Expected vars:
+# NS (str), e.g. "player_"
+# PLAYER_SPIKEY (bool)
 
 shapes:
 
@@ -40,6 +42,11 @@ shapes:
         prismels:
             : "tri" (0 1 1 0) 10 f eval: 1 + 8 + 5
 
+    $PREFIX NS "_head_spike_long":
+        prismels:
+            : "sq"  (0 1 1 0) 10 f eval: 1 + 0 + 5
+            : "tri" (0 2 1 0) 10 f eval: 1 + 8 + 5
+
     $PREFIX NS "_head":
         shapes:
             : $PREFIX NS "_head_sixth" (0 0 0 0)  0 f
@@ -49,15 +56,29 @@ shapes:
             : $PREFIX NS "_head_sixth" (0 0 0 0)  8 f
             : $PREFIX NS "_head_sixth" (0 0 0 0) 10 f
 
+    $PREFIX NS "head":
+        shapes:
+            : $PREFIX NS "_head" (0 0 0 0) 0 f
             $IF PLAYER_SPIKEY:
                 : $PREFIX NS "_head_spike" (0 0 0 0)  0 f
                 : $PREFIX NS "_head_spike" (0 0 0 0)  2 f
                 : $PREFIX NS "_head_spike" (0 0 0 0)  4 f
                 : $PREFIX NS "_head_spike" (0 0 0 0)  6 f
+        prismels:
+            : "sq"  (1 1 0 -1) 0 f eval: 1 + 8 + 1
+            : "tri" (2 1 0 -1) 1 f eval: 1 + 8 + 2
 
-    $PREFIX NS "head":
+    $PREFIX NS "crawl_head":
         shapes:
             : $PREFIX NS "_head" (0 0 0 0) 0 f
+            $IF PLAYER_SPIKEY:
+                : $PREFIX NS "_head_spike_long" (0 0 0 0)  0 f
+                : $PREFIX NS "_head_spike"      (0 0 0 0)  1 f
+                : $PREFIX NS "_head_spike_long" (0 0 0 0)  2 f
+                : $PREFIX NS "_head_spike"      (0 0 0 0)  3 f
+                : $PREFIX NS "_head_spike_long" (0 0 0 0)  4 f
+                : $PREFIX NS "_head_spike"      (0 0 0 0)  5 f
+                : $PREFIX NS "_head_spike_long" (0 0 0 0)  6 f
         prismels:
             : "sq"  (1 1 0 -1) 0 f eval: 1 + 8 + 1
             : "tri" (2 1 0 -1) 1 f eval: 1 + 8 + 2
@@ -148,16 +169,16 @@ shapes:
         animation: cycle 10
         shapes:
             # Player crawl:
-            #: $PREFIX NS "head" ( 0  1  2  0)  0 f
+            #: $PREFIX NS "crawl_head" ( 0  1  2  0)  0 f
             #: $PREFIX NS "leg"  (-1  1  1  1)  0 f
             #: $PREFIX NS "leg"  ( 2  1  1  1)  6 t
 
             # Head
-            : $PREFIX NS "head" (-2  1  2  0)  0 f  0 (0 1)
-            : $PREFIX NS "head" (-2  0  2  0)  0 f  0 (1 4)
-            : $PREFIX NS "head" (-2  1  2  0)  0 f  0 (5 1)
-            : $PREFIX NS "head" (-1  1  2  0)  0 f  0 (6 1)
-            : $PREFIX NS "head" ( 0  1  2  0)  0 f  0 (7 3)
+            : $PREFIX NS "crawl_head" (-2  1  2  0)  0 f  0 (0 1)
+            : $PREFIX NS "crawl_head" (-2  0  2  0)  0 f  0 (1 4)
+            : $PREFIX NS "crawl_head" (-2  1  2  0)  0 f  0 (5 1)
+            : $PREFIX NS "crawl_head" (-1  1  2  0)  0 f  0 (6 1)
+            : $PREFIX NS "crawl_head" ( 0  1  2  0)  0 f  0 (7 3)
 
             # Back leg
             : $PREFIX NS "leg"  (-2  1  1  1)  0 f  0 (0 1)
@@ -175,16 +196,16 @@ shapes:
         animation: cycle 10
         shapes:
             # player_crawl_looking_up:
-            #: $PREFIX NS "head" ( 3  1  1  1)  2 f
+            #: $PREFIX NS "crawl_head" ( 3  1  1  1)  2 f
             #: $PREFIX NS "leg"  ( 1  1  1  1)  0 f
             #: $PREFIX NS "leg"  ( 4  2  0  0)  5 t
 
             # Head
-            : $PREFIX NS "head" ( 1  1  1  1)  2 f  0 (0 1)
-            : $PREFIX NS "head" ( 1  0  1  1)  2 f  0 (1 4)
-            : $PREFIX NS "head" ( 1  1  1  1)  2 f  0 (5 1)
-            : $PREFIX NS "head" ( 2  1  1  1)  2 f  0 (6 1)
-            : $PREFIX NS "head" ( 3  1  1  1)  2 f  0 (7 3)
+            : $PREFIX NS "crawl_head" ( 1  1  1  1)  2 f  0 (0 1)
+            : $PREFIX NS "crawl_head" ( 1  0  1  1)  2 f  0 (1 4)
+            : $PREFIX NS "crawl_head" ( 1  1  1  1)  2 f  0 (5 1)
+            : $PREFIX NS "crawl_head" ( 2  1  1  1)  2 f  0 (6 1)
+            : $PREFIX NS "crawl_head" ( 3  1  1  1)  2 f  0 (7 3)
 
             # Back leg
             : $PREFIX NS "leg"  ( 0  1  1  1)  0 f  0 (0 1)
@@ -261,19 +282,19 @@ shapes:
 
     $PREFIX NS "crawl":
         shapes:
-            : $PREFIX NS "head" ( 0  1  2  0)  0 f
+            : $PREFIX NS "crawl_head" ( 0  1  2  0)  0 f
             : $PREFIX NS "leg"  (-1  1  1  1)  0 f
             : $PREFIX NS "leg"  ( 2  1  1  1)  6 t
 
     $PREFIX NS "crawl_look_up":
         shapes:
-            : $PREFIX NS "head" ( 1  1  2  0)  1 f
+            : $PREFIX NS "crawl_head" ( 1  1  2  0)  1 f
             : $PREFIX NS "leg"  ( 1  0  2  1) 11 f
             : $PREFIX NS "leg"  ( 3  1  1  1)  5 t
 
     $PREFIX NS "crawl_looking_up":
         shapes:
-            : $PREFIX NS "head" ( 3  1  1  1)  2 f
+            : $PREFIX NS "crawl_head" ( 3  1  1  1)  2 f
             : $PREFIX NS "leg"  ( 1  1  1  1)  0 f
             : $PREFIX NS "leg"  ( 4  2  0  0)  5 t
 
@@ -281,9 +302,9 @@ shapes:
     $PREFIX NS "crawl_step":
         animation: cycle 3
         shapes:
-            : $PREFIX NS "head" (-1  0  2  1)  1 f  0 (0 1)
-            : $PREFIX NS "head" ( 0  0  2  1)  1 f  0 (1 1)
-            : $PREFIX NS "head" ( 0  1  2  0)  1 f  0 (2 1)
+            : $PREFIX NS "crawl_head" (-1  0  2  1)  1 f  0 (0 1)
+            : $PREFIX NS "crawl_head" ( 0  0  2  1)  1 f  0 (1 1)
+            : $PREFIX NS "crawl_head" ( 0  1  2  0)  1 f  0 (2 1)
             : $PREFIX NS "leg"  (-1  1  1  1)  0 f
             : $PREFIX NS "leg"  ( 2  1  1  2)  7 t  0 (0 1)
             : $PREFIX NS "leg"  ( 3  1  1  2)  6 t  0 (1 1)

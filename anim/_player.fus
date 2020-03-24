@@ -1,5 +1,7 @@
 
-# Expected vars: NS (str), e.g. "player_"
+# Expected vars:
+# NS (str), e.g. "player_"
+# PLAYER_SPIKEY (bool)
 
 # NOTE: make sure "stand" is the first anim, so any imports
 # should go below it
@@ -127,10 +129,11 @@ stand:
         goto: step
         delay: 2
 
-    if:
-        key: isdown x
-    then:
-        goto: look_up
+    $IF !PLAYER_SPIKEY:
+        if:
+            key: isdown x
+        then:
+            goto: look_up
 
 look_up:
     rgraph: $PREFIX NS "look_up"

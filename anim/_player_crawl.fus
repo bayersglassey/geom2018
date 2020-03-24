@@ -1,9 +1,13 @@
 
-# Expected vars: NS (str), e.g. "player_"
+# Expected to be imported by "anim/_player.fus"
+
+# Expected vars:
+# NS (str), e.g. "player_"
+# PLAYER_SPIKEY (bool)
 
 crawl_looking_up:
     rgraph: $PREFIX NS "crawl_looking_up"
-    hitbox:
+    $IF !PLAYER_SPIKEY: hitbox:
         ;;     .
         ;;     *
         ;;  (.)  .
@@ -37,7 +41,7 @@ crawl_looking_up:
 
 crawl_spit:
     rgraph: $PREFIX NS "crawl_spit"
-    hitbox:
+    $IF !PLAYER_SPIKEY: hitbox:
         ;;     .
         ;;     *
         ;;  (.)  .
@@ -45,7 +49,7 @@ crawl_spit:
 
 crawl_looking_up_spit:
     rgraph: $PREFIX NS "crawl_looking_up_spit"
-    hitbox:
+    $IF !PLAYER_SPIKEY: hitbox:
         ;;     .
         ;;     *
         ;;  (.)  .
@@ -54,7 +58,7 @@ crawl_looking_up_spit:
 crawl:
     rgraph: $PREFIX NS "crawl"
 
-    hitbox:
+    $IF !PLAYER_SPIKEY: hitbox:
         ;;     .
         ;;     *
         ;;  (.)  .
@@ -128,15 +132,16 @@ crawl:
         goto: crawl_step
         delay: 2
 
-    if:
-        key: not isdown f
-        key: isdown x
-    then:
-        goto: crawl_look_up
+    $IF !PLAYER_SPIKEY:
+        if:
+            key: not isdown f
+            key: isdown x
+        then:
+            goto: crawl_look_up
 
 crawl_look_up:
     rgraph: $PREFIX NS "crawl_look_up"
-    hitbox:
+    $IF !PLAYER_SPIKEY: hitbox:
         ;;     .
         ;;     *
         ;;  (.)  .
@@ -144,7 +149,7 @@ crawl_look_up:
 
 crawl_step_down:
     rgraph: $PREFIX NS "crawl_step"
-    hitbox:
+    $IF !PLAYER_SPIKEY: hitbox:
         ;;    .   .
         ;;    *\*/*
         ;;  . -(.)  .
@@ -160,7 +165,7 @@ crawl_step_down:
 
 crawl_step:
     rgraph: $PREFIX NS "crawl_step"
-    hitbox:
+    $IF !PLAYER_SPIKEY: hitbox:
         ;;    .   .
         ;;      */*
         ;;     (.)  .
