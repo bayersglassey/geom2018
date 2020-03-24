@@ -50,6 +50,7 @@ void var_set_ptr(var_t *var, void *p);
 void vars_cleanup(vars_t *vars);
 void vars_init(vars_t *vars);
 void vars_dump(vars_t *vars);
+void vars_dumpvar(vars_t *vars, const char *key);
 int vars_add(vars_t *vars, char *key, var_t **var_ptr);
 var_t *vars_get(vars_t *vars, const char *key);
 var_t *vars_get_or_add(vars_t *vars, const char *key);

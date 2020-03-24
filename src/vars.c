@@ -89,15 +89,30 @@ void vars_init(vars_t *vars){
     ARRAY_INIT(vars->vars)
 }
 
+static void _vars_dumpvar(vars_t *vars, var_t *var){
+    fprintf(stderr, "%s (%s): ", var->key,
+        var_type_name(var->type));
+    var_fprintf(var, stderr);
+    putc('\n', stderr);
+}
+
 void vars_dump(vars_t *vars){
     fprintf(stderr, "VARS (%p):\n", vars);
     for(int i = 0; i < vars->vars_len; i++){
         var_t *var = vars->vars[i];
-        fprintf(stderr, "  %s (%s): ", var->key,
-            var_type_name(var->type));
-        var_fprintf(var, stderr);
-        putc('\n', stderr);
+        fprintf(stderr, "  ");
+        _vars_dumpvar(vars, var);
     }
+}
+
+void vars_dumpvar(vars_t *vars, const char *key){
+    fprintf(stderr, "VAR ");
+    var_t *var = vars_get(vars, key);
+    if(!var){
+        fprintf(stderr, "%s (null)\n", key);
+        return;
+    }
+    _vars_dumpvar(vars, var);
 }
 
 int vars_add(vars_t *vars, char *key, var_t **var_ptr){

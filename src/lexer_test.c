@@ -106,6 +106,18 @@ static int _run_tests(){
         "$SET_STR X \"xx\" 1 2 $PREFIX X \"lala\" 5 6",
         "1 2 \"xxlala\" 5 6");
     if(err)return err;
+    err = run_test(
+        "$SET_STR A aa $PRINTVAR A $SET_STR A aaaa",
+        "");
+    if(err)return err;
+    err = run_test(
+        "1 $SET_STR A aa 2 $PRINTVAR A 3 $SET_STR A aaaa 4",
+        "1 2 3 4");
+    if(err)return err;
+    err = run_test(
+        "$PRINTVARS $SET_STR A aa $PRINTVARS $PRINTVAR A $PRINTVARS $SET_STR A aaaa $PRINTVARS",
+        "");
+    if(err)return err;
 
     return 0;
 }

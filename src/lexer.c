@@ -1067,6 +1067,8 @@ static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
     int err;
 
     int macro_start_pos = lexer->pos - lexer->token_len;
+
+    /* Consume the "$" token */
     err = _fus_lexer_next(lexer);
     if(err)return err;
 
@@ -1121,6 +1123,28 @@ static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
 
         err = vars_set_int(lexer->vars, name, val);
         if(err)return err;
+        free(name);
+    }else if(fus_lexer_got(lexer, "PRINT")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+
+        char *s;
+        err = _fus_lexer_get_str(lexer, &s);
+        if(err)return err;
+
+        fprintf(stderr, "PRINT: %s\n", s);
+        free(s);
+    }else if(fus_lexer_got(lexer, "PRINTVARS")){
+        vars_dump(lexer->vars);
+    }else if(fus_lexer_got(lexer, "PRINTVAR")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+
+        char *name;
+        err = _fus_lexer_get_name(lexer, &name);
+        if(err)return err;
+
+        vars_dumpvar(lexer->vars, name);
         free(name);
     }else if(fus_lexer_got(lexer, "IF")){
         bool not = false;
