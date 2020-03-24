@@ -257,21 +257,26 @@ static int player_use_door(player_t *player, hexmap_door_t *door){
             door->respawn_pos, door->respawn_rot, door->respawn_turn, new_map);
         if(err)return err;
 
+        /* Colour to flash screen (default: cyan) */
+        int flash_r = 0;
+        int flash_g = 255;
+        int flash_b = 255;
+
         if(door->respawn_anim_filename != NULL){
-            /* Switch anim (stateset) */
+            if(strcmp(body->stateset.filename, door->respawn_anim_filename)){
+                /* Switch anim (stateset) */
+                err = body_set_stateset(body, door->respawn_anim_filename, NULL);
+                if(err)return err;
 
-            /* HACK: If you've become something other than a spider,
-            anim-changing doors change you back into a spider. */
-            if(strcmp(body->stateset.filename, "anim/player.fus")){
-                door->respawn_anim_filename = "anim/player.fus";
+                /* Pink flash indicates your body was changed, not just teleported */
+                flash_r = 255;
+                flash_g = 200;
+                flash_b = 200;
             }
-
-            err = body_set_stateset(body, door->respawn_anim_filename, NULL);
-            if(err)return err;
         }
 
-        /* Flash screen cyan so player knows something happened */
-        body_flash_cameras(body, 0, 255, 255, 60);
+        /* Flash screen so player knows something happened */
+        body_flash_cameras(body, flash_r, flash_g, flash_b, 60);
         body_reset_cameras(body);
     }
     return 0;
