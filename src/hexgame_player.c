@@ -345,9 +345,7 @@ int player_step(player_t *player, hexgame_t *game){
                 savepoint_submap = NULL;
                 door_submap = NULL;
             }else{
-                /* HACK: Only spiders can use savepoints */
-                if(strcmp(body->stateset.filename, "anim/player.fus")){
-                    savepoint_submap = NULL;}
+                if(!body->stateset.can_save)savepoint_submap = NULL;
             }
         }
 

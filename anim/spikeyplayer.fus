@@ -1,3 +1,5 @@
 
+can_save
+
 $SET_STR NS spikeyplayer_
 import "anim/_player.fus"

@@ -29,6 +29,7 @@ typedef struct stateset {
 
     bool is_projectile;
     bool is_collectible;
+    bool can_save;
 } stateset_t;
 
 typedef struct state_rule {
