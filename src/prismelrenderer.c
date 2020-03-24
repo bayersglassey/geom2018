@@ -613,7 +613,7 @@ int prismelrenderer_get_or_create_font(
     if(font == NULL){
         ARRAY_PUSH_NEW(font_t*, prend->fonts, _font)
         font = _font;
-        err = font_load(font, strdup(filename));
+        err = font_load(font, strdup(filename), NULL);
         if(err)return err;
     }
     *font_ptr = font;

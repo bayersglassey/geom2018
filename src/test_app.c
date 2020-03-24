@@ -144,7 +144,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     RET_IF_SDL_NULL(sdl_palette);
 
     palette_t *palette = &app->palette;
-    err = palette_load(palette, "data/pal1.fus");
+    err = palette_load(palette, "data/pal1.fus", NULL);
     if(err)return err;
 
     if(use_textures){
@@ -158,14 +158,14 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     prismelrenderer_t *prend = &app->prend;
     err = prismelrenderer_init(prend, &vec4);
     if(err)return err;
-    err = prismelrenderer_load(prend, app->prend_filename);
+    err = prismelrenderer_load(prend, app->prend_filename, NULL);
     if(err)return err;
     if(prend->rendergraphs_len < 1){
         fprintf(stderr, "No rendergraphs in %s\n", app->prend_filename);
         return 2;}
     prend->cache_bitmaps = cache_bitmaps;
 
-    err = font_load(&app->font, strdup("data/font.fus"));
+    err = font_load(&app->font, strdup("data/font.fus"), NULL);
     if(err)return err;
 
     err = sdlfont_init(&app->sdlfont, &app->font, sdl_palette);

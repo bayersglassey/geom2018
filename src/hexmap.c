@@ -733,7 +733,8 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
         if(err)return err;
 
         /* load collmap */
-        err = hexcollmap_load(&submap->collmap, submap_filename);
+        err = hexcollmap_load(&submap->collmap, submap_filename,
+            lexer->vars);
         if(err)return err;
 
         /* render submap->rgraph_map */
@@ -836,7 +837,7 @@ int hexmap_load_recording(hexmap_t *map, const char *filename,
     err = body_init(body, game, map, NULL, NULL, palmapper);
     if(err)return err;
 
-    err = recording_load(&body->recording, filename, body, loop);
+    err = recording_load(&body->recording, filename, NULL, body, loop);
     if(err)return err;
 
     if(trf){
@@ -1096,11 +1097,11 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
     submap->rgraph_map = NULL;
     submap->mapper = mapper;
 
-    err = palette_load(&submap->palette, palette_filename);
+    err = palette_load(&submap->palette, palette_filename, NULL);
     if(err)return err;
 
     err = hexmap_tileset_load(&submap->tileset, map->prend,
-        tileset_filename);
+        tileset_filename, NULL);
     if(err)return err;
 
     ARRAY_INIT(submap->doors)

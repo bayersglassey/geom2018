@@ -302,7 +302,7 @@ int body_init_stateset(body_t *body, const char *stateset_filename,
     hexmap_t *map = body->map;
 
     err = stateset_load(&body->stateset, strdup(stateset_filename),
-        map->prend, map->space);
+        NULL, map->prend, map->space);
     if(err)return err;
 
     if(state_name == NULL){

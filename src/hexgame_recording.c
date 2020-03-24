@@ -220,7 +220,7 @@ int body_load_recording(body_t *body, const char *filename, bool loop){
     recording_t *rec = &body->recording;
 
     recording_reset(rec);
-    err = recording_load(rec, filename, body, loop);
+    err = recording_load(rec, filename, NULL, body, loop);
     if(err)return err;
     return 0;
 }

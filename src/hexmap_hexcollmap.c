@@ -263,7 +263,7 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
             collmap->space, strdup(part->filename));
         if(err)return err;
         err = hexcollmap_load(&part_collmap,
-            part->filename);
+            part->filename, NULL);
         if(err)return err;
         err = hexcollmap_draw(collmap, &part_collmap,
             trf, draw_z);

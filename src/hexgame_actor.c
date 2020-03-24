@@ -38,7 +38,7 @@ int actor_init_stateset(actor_t *actor, const char *stateset_filename,
     int err;
 
     err = stateset_load(&actor->stateset, strdup(stateset_filename),
-        map->prend, map->space);
+        NULL, map->prend, map->space);
     if(err)return err;
 
     if(state_name == NULL){

@@ -805,7 +805,7 @@ int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer){
             NEXT
             char *filename;
             GET_STR(filename)
-            err = prismelrenderer_load(prend, filename);
+            err = prismelrenderer_load(prend, filename, lexer->vars);
             if(err)return err;
             free(filename);
         }else{
