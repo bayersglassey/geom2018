@@ -52,7 +52,7 @@ typedef struct hexmap_tileset {
 void hexmap_tileset_cleanup(hexmap_tileset_t *tileset);
 int hexmap_tileset_init(hexmap_tileset_t *tileset, char *name);
 int hexmap_tileset_load(hexmap_tileset_t *tileset,
-    prismelrenderer_t *prend, const char *filename);
+    prismelrenderer_t *prend, const char *filename, vars_t *vars);
 
 
 
@@ -171,7 +171,8 @@ int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
 void hexcollmap_dump(hexcollmap_t *collmap, FILE *f, int n_spaces);
 int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
     bool just_coll);
-int hexcollmap_load(hexcollmap_t *collmap, const char *filename);
+int hexcollmap_load(hexcollmap_t *collmap, const char *filename,
+    vars_t *vars);
 void hexcollmap_normalize_vert(trf_t *index);
 void hexcollmap_normalize_edge(trf_t *index);
 void hexcollmap_normalize_face(trf_t *index);
@@ -255,7 +256,8 @@ typedef struct hexmap {
 void hexmap_cleanup(hexmap_t *map);
 int hexmap_init(hexmap_t *map, struct hexgame *game, char *name,
     vec_t unit);
-int hexmap_load(hexmap_t *map, struct hexgame *game, const char *filename);
+int hexmap_load(hexmap_t *map, struct hexgame *game, const char *filename,
+    vars_t *vars);
 int hexmap_parse(hexmap_t *map, struct hexgame *game, char *name,
     fus_lexer_t *lexer);
 int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,

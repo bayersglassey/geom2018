@@ -130,7 +130,7 @@ extern const char *state_effect_types[];
 
 void stateset_cleanup(stateset_t *stateset);
 int stateset_init(stateset_t *stateset, char *filename);
-int stateset_load(stateset_t *stateset, char *filename,
+int stateset_load(stateset_t *stateset, char *filename, vars_t *vars,
     prismelrenderer_t *prend, vecspace_t *space);
 int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
     prismelrenderer_t *prend, vecspace_t *space);

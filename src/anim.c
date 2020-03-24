@@ -31,7 +31,7 @@ int stateset_init(stateset_t *stateset, char *filename){
     return 0;
 }
 
-int stateset_load(stateset_t *stateset, char *filename,
+int stateset_load(stateset_t *stateset, char *filename, vars_t *vars,
     prismelrenderer_t *prend, vecspace_t *space
 ){
     int err;
@@ -40,7 +40,7 @@ int stateset_load(stateset_t *stateset, char *filename,
     char *text = load_file(filename);
     if(text == NULL)return 1;
 
-    err = fus_lexer_init_with_vars(&lexer, text, filename, NULL);
+    err = fus_lexer_init_with_vars(&lexer, text, filename, vars);
     if(err)return err;
 
     err = stateset_init(stateset, filename);

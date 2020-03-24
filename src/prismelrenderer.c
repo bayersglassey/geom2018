@@ -350,14 +350,14 @@ static int palette_parse(palette_t *pal, fus_lexer_t *lexer){
     return 0;
 }
 
-int palette_load(palette_t *pal, const char *filename){
+int palette_load(palette_t *pal, const char *filename, vars_t *vars){
     int err;
     fus_lexer_t lexer;
 
     char *text = load_file(filename);
     if(text == NULL)return 1;
 
-    err = fus_lexer_init_with_vars(&lexer, text, filename, NULL);
+    err = fus_lexer_init_with_vars(&lexer, text, filename, vars);
     if(err)return err;
 
     err = palette_init(pal, strdup(filename));
@@ -641,14 +641,16 @@ int prismelrenderer_get_or_create_solid_palettemapper(
 }
 
 
-int prismelrenderer_load(prismelrenderer_t *prend, const char *filename){
+int prismelrenderer_load(prismelrenderer_t *prend, const char *filename,
+    vars_t *vars
+){
     int err;
     fus_lexer_t lexer;
 
     char *text = load_file(filename);
     if(text == NULL)return 1;
 
-    err = fus_lexer_init_with_vars(&lexer, text, filename, NULL);
+    err = fus_lexer_init_with_vars(&lexer, text, filename, vars);
     if(err)return err;
 
     err = prismelrenderer_parse(prend, &lexer);

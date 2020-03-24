@@ -20,7 +20,7 @@ void font_cleanup(font_t *font){
     }
 }
 
-int font_load(font_t *font, char *filename){
+int font_load(font_t *font, char *filename, vars_t *vars){
     font->filename = filename;
     font->char_w = 0;
     font->char_h = 0;
@@ -31,7 +31,7 @@ int font_load(font_t *font, char *filename){
     char *text = load_file(filename);
     if(text == NULL)return 1;
 
-    err = fus_lexer_init_with_vars(&lexer, text, filename, NULL);
+    err = fus_lexer_init_with_vars(&lexer, text, filename, vars);
     if(err)return err;
 
     err = font_parse(font, &lexer);

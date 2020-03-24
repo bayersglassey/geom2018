@@ -151,7 +151,7 @@ static int recording_parse(recording_t *rec,
 }
 
 int recording_load(recording_t *rec, const char *filename,
-    body_t *body, bool loop
+    vars_t *vars, body_t *body, bool loop
 ){
     int err;
     fus_lexer_t lexer;
@@ -159,7 +159,7 @@ int recording_load(recording_t *rec, const char *filename,
     char *text = load_file(filename);
     if(text == NULL)return 1;
 
-    err = fus_lexer_init_with_vars(&lexer, text, filename, NULL);
+    err = fus_lexer_init_with_vars(&lexer, text, filename, vars);
     if(err)return err;
 
     recording_init(rec, body, loop);

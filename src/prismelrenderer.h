@@ -61,7 +61,7 @@ int palette_update_colors(palette_t *pal, SDL_Color *colors,
     int t, int t_max);
 int update_sdl_palette(SDL_Palette *sdl_pal, SDL_Color *colors);
 int palette_update_sdl_palette(palette_t *pal, SDL_Palette *sdl_pal);
-int palette_load(palette_t *pal, const char *filename);
+int palette_load(palette_t *pal, const char *filename, vars_t *vars);
 
 
 /***********
@@ -136,7 +136,8 @@ int prismelrenderer_get_or_create_solid_palettemapper(
     prismelrenderer_t *prend, int color,
     struct palettemapper **palmapper_ptr);
 int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer);
-int prismelrenderer_load(prismelrenderer_t *prend, const char *filename);
+int prismelrenderer_load(prismelrenderer_t *prend, const char *filename,
+    vars_t *vars);
 int prismelrenderer_save(prismelrenderer_t *prend, const char *filename);
 int prismelrenderer_write(prismelrenderer_t *prend, FILE *f);
 int prismelrenderer_render_all_bitmaps(prismelrenderer_t *prend,

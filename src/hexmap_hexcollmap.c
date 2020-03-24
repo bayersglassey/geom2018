@@ -848,14 +848,16 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
     return 0;
 }
 
-int hexcollmap_load(hexcollmap_t *collmap, const char *filename){
+int hexcollmap_load(hexcollmap_t *collmap, const char *filename,
+    vars_t *vars
+){
     int err;
     fus_lexer_t lexer;
 
     char *text = load_file(filename);
     if(text == NULL)return 1;
 
-    err = fus_lexer_init_with_vars(&lexer, text, filename, NULL);
+    err = fus_lexer_init_with_vars(&lexer, text, filename, vars);
     if(err)return err;
 
     err = hexcollmap_parse(collmap, &lexer, false);

@@ -135,7 +135,7 @@ static int hexmap_tileset_parse(hexmap_tileset_t *tileset,
 }
 
 int hexmap_tileset_load(hexmap_tileset_t *tileset,
-    prismelrenderer_t *prend, const char *filename
+    prismelrenderer_t *prend, const char *filename, vars_t *vars
 ){
     int err;
     fus_lexer_t lexer;
@@ -143,7 +143,7 @@ int hexmap_tileset_load(hexmap_tileset_t *tileset,
     char *text = load_file(filename);
     if(text == NULL)return 1;
 
-    err = fus_lexer_init_with_vars(&lexer, text, filename, NULL);
+    err = fus_lexer_init_with_vars(&lexer, text, filename, vars);
     if(err)return err;
 
     err = hexmap_tileset_parse(tileset, prend, strdup(filename),
@@ -316,14 +316,16 @@ static int hexmap_load_hexmap_recording(
     return 0;
 }
 
-int hexmap_load(hexmap_t *map, hexgame_t *game, const char *filename){
+int hexmap_load(hexmap_t *map, hexgame_t *game, const char *filename,
+    vars_t *vars
+){
     int err;
     fus_lexer_t lexer;
 
     char *text = load_file(filename);
     if(text == NULL)return 1;
 
-    err = fus_lexer_init_with_vars(&lexer, text, filename, NULL);
+    err = fus_lexer_init_with_vars(&lexer, text, filename, vars);
     if(err)return err;
 
     err = hexmap_parse(map, game, strdup(filename), &lexer);
