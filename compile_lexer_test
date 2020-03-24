@@ -1,0 +1,1 @@
+gcc -o main src/lexer_test.c src/lexer.c src/vars.c

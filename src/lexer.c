@@ -19,6 +19,37 @@ static char *fus_strndup(const char *s1, size_t len){
     return s2;
 }
 
+static char *fus_strdupcat(const char *s1, const char *s2){
+    size_t s1_len = strlen(s1);
+    size_t s2_len = strlen(s2);
+    size_t s3_len = s1_len + s2_len;
+    char *s3 = malloc(s3_len + 1);
+    if(s3 == NULL)return NULL;
+
+    strcpy(s3, s1);
+    strcpy(s3+s1_len, s2);
+
+    s3[s3_len] = '\0';
+    return s3;
+}
+
+static char *fus_strdupcat_quoted(const char *s1, const char *s2){
+    size_t s1_len = strlen(s1);
+    size_t s2_len = strlen(s2);
+    size_t s3_len = 1 + s1_len + s2_len + 1;
+    char *s3 = malloc(s3_len + 1);
+    if(s3 == NULL)return NULL;
+
+    s3[0] = '"';
+    strcpy(s3+1, s1);
+    strcpy(s3+1+s1_len, s2);
+    s3[1+s1_len+s2_len] = '"';
+
+    s3[s3_len] = '\0';
+    return s3;
+}
+
+
 
 
 static int fus_lexer_get_indent(fus_lexer_t *lexer);
@@ -32,6 +63,7 @@ static void fus_lexer_free_frame_list(fus_lexer_frame_t *frame_list){
 }
 
 void fus_lexer_cleanup(fus_lexer_t *lexer){
+    free(lexer->mem_managed_token);
     vars_cleanup(&lexer->_vars);
     fus_lexer_free_frame_list(lexer->frame_list);
     fus_lexer_free_frame_list(lexer->free_frame_list);
@@ -50,11 +82,14 @@ static int _fus_lexer_init(fus_lexer_t *lexer, const char *text,
     lexer->text_len = strlen(text);
     lexer->token = NULL;
     lexer->token_len = 0;
+    lexer->_token_len = 0;
     lexer->token_type = FUS_LEXER_TOKEN_DONE;
     lexer->pos = 0;
     lexer->row = 0;
     lexer->col = 0;
     lexer->indent = 0;
+
+    lexer->mem_managed_token = NULL;
 
     lexer->returning_indents = 0;
 
@@ -105,8 +140,8 @@ void fus_lexer_info(fus_lexer_t *lexer, FILE *f){
     fprintf(f, "[%s: row=%i col=%i pos=%i] ",
         lexer->filename,
         lexer->row + 1,
-        lexer->col + 1,
-        lexer->pos + 1);
+        lexer->col - lexer->_token_len + 1,
+        lexer->pos - lexer->_token_len + 1);
 }
 
 void fus_lexer_err_info(fus_lexer_t *lexer){
@@ -138,16 +173,30 @@ void fus_lexer_set_pos(fus_lexer_t *lexer, int pos){
 static void fus_lexer_start_token(fus_lexer_t *lexer){
     lexer->token = lexer->text + lexer->pos;
     lexer->token_len = 0;
+    lexer->_token_len = lexer->token_len;
 }
 
 static void fus_lexer_end_token(fus_lexer_t *lexer){
     int token_startpos = lexer->token - lexer->text;
     lexer->token_len = lexer->pos - token_startpos;
+    lexer->_token_len = lexer->token_len;
+}
+
+static void _fus_lexer_clear_mem_managed_token(fus_lexer_t *lexer){
+    free(lexer->mem_managed_token);
+    lexer->mem_managed_token = NULL;
 }
 
 static void fus_lexer_set_token(fus_lexer_t *lexer, const char *token){
+    _fus_lexer_clear_mem_managed_token(lexer);
     lexer->token = token;
-    lexer->token_len = strlen(token);
+    lexer->token_len = token? strlen(token): 0;
+    lexer->_token_len = lexer->token_len;
+}
+
+static void fus_lexer_set_mem_managed_token(fus_lexer_t *lexer, char *token){
+    fus_lexer_set_token(lexer, token);
+    lexer->mem_managed_token = token;
 }
 
 static int fus_lexer_push_frame(fus_lexer_t *lexer,
@@ -434,192 +483,6 @@ static int fus_lexer_handle_whitespace(fus_lexer_t *lexer){
     return 0;
 }
 
-static int _fus_lexer_next(fus_lexer_t *lexer){
-    /* Gets a single token. */
-    int err;
-
-    /* Handle whitespace (unless we already know we need to
-    return some open/close parens) */
-    if(!lexer->returning_indents){
-        err = fus_lexer_handle_whitespace(lexer);
-        if(err)return err;
-    }
-
-    /* Maybe output open/close parens */
-    if(lexer->returning_indents > 0){
-        fprintf(stderr,
-            "Returning open parens this way isn't supported, "
-            "because our implementation of $IF currently assumes "
-            "that when an \"(\" is emitted, lexer->frame_list is "
-            "a corresponding frame.\n");
-        return 2;
-        /*
-        lexer->token_type = FUS_LEXER_TOKEN_OPEN;
-        fus_lexer_set_token(lexer, "(");
-        lexer->returning_indents--;
-        return 0;
-        */
-    }else if(lexer->returning_indents < 0){
-        lexer->token_type = FUS_LEXER_TOKEN_CLOSE;
-        fus_lexer_set_token(lexer, ")");
-        lexer->returning_indents++;
-        return 0;
-    }
-
-    /* Decide what type of token we got based on next character */
-    char c = lexer->text[lexer->pos];
-    if(c == '\0'){
-        /* Reached end of file; report with NULL token */
-        lexer->token = NULL;
-        lexer->token_len = 0;
-        lexer->token_type = FUS_LEXER_TOKEN_DONE;
-    }else if(c == ':'){
-        if(lexer->frame_list && !lexer->frame_list->is_block){
-            fus_lexer_err_info(lexer); fprintf(stderr,
-                "Can't have a colon inside parentheses!\n");
-            return 2;
-        }
-        fus_lexer_eat(lexer);
-        fus_lexer_set_token(lexer, "(");
-        lexer->token_type = FUS_LEXER_TOKEN_OPEN;
-        err = fus_lexer_push_frame(lexer, FUS_LEXER_FRAME_NORMAL, true);
-        if(err)return err;
-    }else if(c == '('){
-        fus_lexer_start_token(lexer);
-        fus_lexer_eat(lexer);
-        fus_lexer_end_token(lexer);
-        lexer->token_type = FUS_LEXER_TOKEN_OPEN;
-        err = fus_lexer_push_frame(lexer, FUS_LEXER_FRAME_NORMAL, false);
-        if(err)return err;
-    }else if(c == ')'){
-        /* Pop frames up to and including the first non-block one, that is,
-        the one corresponding to "(".
-        For each popped frame, lexer->returning_indents is decremented.
-        So given "(x: y: z)", when we hit the ')', we should pop 3 frames
-        in total: that for the '(', *and* those for the 2 ':'. */
-        while(1){
-            fus_lexer_frame_t *frame;
-            err = fus_lexer_pop_frame(lexer, &frame);
-            if(err)return err;
-            if(!frame){
-                /* If frame is NULL, we allow loop to wrap around so pop_frame
-                raises the error about popping from an empty stack. */
-                continue;
-            }
-            if(frame->is_block){
-                /* Block frame, that is, frame defined by ':' and indentation */
-                continue;
-            }
-            /* If we make it here, frame is not a block, that is, it was defined
-            by a '('. */
-            break;
-        }
-
-        /* We may be returning "the same" ')' we just parsed... or it
-        might be from an earlier ':'. */
-        if(lexer->returning_indents < 0){
-            fus_lexer_start_token(lexer);
-            fus_lexer_eat(lexer);
-            fus_lexer_end_token(lexer);
-            lexer->token_type = FUS_LEXER_TOKEN_CLOSE;
-            lexer->returning_indents++;
-            return 0;
-        }else{
-            /* This should never happen, since that would mean we didn't pop
-            any frames, which should have caused fus_lexer_pop_frame to complain
-            about an empty stack */
-            fus_lexer_err_info(lexer); fprintf(stderr,
-                "Failed sanity check: no matching '('\n");
-            return 2;
-        }
-    }else if(c == '_' || isalpha(c)){
-        fus_lexer_parse_sym(lexer);
-        lexer->token_type = FUS_LEXER_TOKEN_SYM;
-    }else if(isdigit(c) || (
-        c == '-' && isdigit(fus_lexer_peek(lexer))
-    )){
-        fus_lexer_parse_int(lexer);
-        lexer->token_type = FUS_LEXER_TOKEN_INT;
-    }else if(c == '"'){
-        err = fus_lexer_parse_str(lexer);
-        if(err)return err;
-        lexer->token_type = FUS_LEXER_TOKEN_STR;
-    }else if(c == ';' && fus_lexer_peek(lexer) == ';'){
-        err = fus_lexer_parse_blockstr(lexer);
-        if(err)return err;
-        lexer->token_type = FUS_LEXER_TOKEN_BLOCKSTR;
-    }else{
-        fus_lexer_parse_op(lexer);
-        lexer->token_type = FUS_LEXER_TOKEN_OP;
-    }
-
-    return 0;
-}
-
-int fus_lexer_next(fus_lexer_t *lexer){
-    /* Gets a single token. Wrapper around _fus_lexer_next, which does
-    the real work; this function implements a fancy "precompiler" syntax
-    if lexer->vars != NULL */
-    int err;
-    while(1){
-        err = _fus_lexer_next(lexer);
-        if(err)return err;
-
-        if(lexer->vars && fus_lexer_got(lexer, "$")){
-            err = _fus_lexer_next(lexer);
-            if(err)return err;
-            if(fus_lexer_got(lexer, "SET_BOOL")){
-                err = _fus_lexer_next(lexer);
-                if(err)return err;
-
-                char *name;
-                err = fus_lexer_get_name(lexer, &name);
-                if(err)return err;
-
-                err = vars_set_bool(lexer->vars, name, true);
-                if(err)return err;
-
-                free(name);
-            }else if(fus_lexer_got(lexer, "IF")){
-                err = _fus_lexer_next(lexer);
-                if(err)return err;
-
-                bool not = false;
-                if(fus_lexer_got(lexer, "!")){
-                    err = _fus_lexer_next(lexer);
-                    if(err)return err;
-                    not = true;
-                }
-
-                char *name;
-                err = fus_lexer_get_name(lexer, &name);
-                if(err)return err;
-                err = fus_lexer_get(lexer, "(");
-                if(err)return err;
-
-                bool cond = vars_get_bool(lexer->vars, name) ^ not;
-
-                if(!cond){
-                    /* Eat everything up to & including closing ")" */
-                    err = fus_lexer_parse_silent(lexer);
-                    if(err)return err;
-                }else{
-                    /* Mark this frame as belonging to an $IF,
-                    so we don't emit ")" on leaving it. */
-                    lexer->frame_list->type = FUS_LEXER_FRAME_IF;
-                }
-
-                free(name);
-            }else{
-                return fus_lexer_unexpected(lexer, NULL);
-            }
-            continue;
-        }
-        break;
-    }
-    return 0;
-}
-
 bool fus_lexer_done(fus_lexer_t *lexer){
     return lexer->token == NULL;
 }
@@ -656,23 +519,37 @@ void fus_lexer_show(fus_lexer_t *lexer, FILE *f){
     }
 }
 
-int fus_lexer_get(fus_lexer_t *lexer, const char *text){
+void fus_lexer_show_line(fus_lexer_t *lexer, FILE *f, bool newline){
+    for(int i = 0; i < lexer->indent; i++){
+        putc(' ', f);
+    }
+    fus_lexer_show(lexer, f);
+    if(newline)putc('\n', f);
+}
+
+static int _fus_lexer_get(fus_lexer_t *lexer, const char *text){
     if(!fus_lexer_got(lexer, text)){
         fus_lexer_err_info(lexer); fprintf(stderr,
             "Expected \"%s\", but got: ", text);
         fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
         return 2;
     }
+    return 0;
+}
+
+int fus_lexer_get(fus_lexer_t *lexer, const char *text){
+    int err = _fus_lexer_get(lexer, text);
+    if(err)return err;
     return fus_lexer_next(lexer);
 }
 
-static int _fus_lexer_get_name(fus_lexer_t *lexer, char **name){
+static int _fus_lexer_extract_name(fus_lexer_t *lexer, char **name){
     *name = fus_strndup(lexer->token, lexer->token_len);
     if(*name == NULL)return 1;
-    return fus_lexer_next(lexer);
+    return 0;
 }
 
-static int _fus_lexer_get_str(fus_lexer_t *lexer, char **s){
+static int _fus_lexer_extract_str(fus_lexer_t *lexer, char **s){
     const char *token = lexer->token;
     int token_len = lexer->token_len;
 
@@ -701,10 +578,10 @@ static int _fus_lexer_get_str(fus_lexer_t *lexer, char **s){
 
     *ss = '\0';
     *s = ss0;
-    return fus_lexer_next(lexer);
+    return 0;
 }
 
-static int _fus_lexer_get_blockstr(fus_lexer_t *lexer, char **s){
+static int _fus_lexer_extract_blockstr(fus_lexer_t *lexer, char **s){
     const char *token = lexer->token;
     int token_len = lexer->token_len;
 
@@ -715,46 +592,66 @@ static int _fus_lexer_get_blockstr(fus_lexer_t *lexer, char **s){
     if(ss == NULL)return 1;
 
     *s = ss;
-    return fus_lexer_next(lexer);
+    return 0;
 }
 
-int fus_lexer_get_name(fus_lexer_t *lexer, char **name){
+static int _fus_lexer_get_name(fus_lexer_t *lexer, char **name){
     if(lexer->token_type == FUS_LEXER_TOKEN_SYM){
-        return _fus_lexer_get_name(lexer, name);
+        return _fus_lexer_extract_name(lexer, name);
     }else{
         fus_lexer_err_info(lexer); fprintf(stderr,
             "Expected name, but got: ");
         fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
         return 2;
     }
+    return 0;
+}
+
+int fus_lexer_get_name(fus_lexer_t *lexer, char **name){
+    int err = _fus_lexer_get_name(lexer, name);
+    if(err)return err;
+    return fus_lexer_next(lexer);
+}
+
+static int _fus_lexer_get_str(fus_lexer_t *lexer, char **s){
+    if(lexer->token_type == FUS_LEXER_TOKEN_STR){
+        return _fus_lexer_extract_str(lexer, s);
+    }else if(lexer->token_type == FUS_LEXER_TOKEN_BLOCKSTR){
+        return _fus_lexer_extract_blockstr(lexer, s);
+    }
+
+    fus_lexer_err_info(lexer); fprintf(stderr,
+        "Expected str, but got: ");
+    fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
+    return 2;
 }
 
 int fus_lexer_get_str(fus_lexer_t *lexer, char **s){
-    if(lexer->token_type == FUS_LEXER_TOKEN_STR){
-        return _fus_lexer_get_str(lexer, s);
+    int err = _fus_lexer_get_str(lexer, s);
+    if(err)return err;
+    return fus_lexer_next(lexer);
+}
+
+static int _fus_lexer_get_name_or_str(fus_lexer_t *lexer, char **s){
+    if(lexer->token_type == FUS_LEXER_TOKEN_SYM){
+        return _fus_lexer_extract_name(lexer, s);
+    }else if(lexer->token_type == FUS_LEXER_TOKEN_STR){
+        return _fus_lexer_extract_str(lexer, s);
     }else if(lexer->token_type == FUS_LEXER_TOKEN_BLOCKSTR){
-        return _fus_lexer_get_blockstr(lexer, s);
-    }else{
-        fus_lexer_err_info(lexer); fprintf(stderr,
-            "Expected str, but got: ");
-        fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
-        return 2;
+        return _fus_lexer_extract_blockstr(lexer, s);
     }
+
+    fus_lexer_err_info(lexer); fprintf(stderr,
+        "Expected name or str, but got: ");
+    fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
+    return 2;
 }
 
 int fus_lexer_get_name_or_str(fus_lexer_t *lexer, char **s){
-    if(lexer->token_type == FUS_LEXER_TOKEN_SYM){
-        return _fus_lexer_get_name(lexer, s);
-    }else if(lexer->token_type == FUS_LEXER_TOKEN_STR){
-        return _fus_lexer_get_str(lexer, s);
-    }else if(lexer->token_type == FUS_LEXER_TOKEN_BLOCKSTR){
-        return _fus_lexer_get_blockstr(lexer, s);
-    }else{
-        fus_lexer_err_info(lexer); fprintf(stderr,
-            "Expected name or str, but got: ");
-        fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
-        return 2;
-    }
+    int err;
+    err = _fus_lexer_get_name_or_str(lexer, s);
+    if(err)return err;
+    return fus_lexer_next(lexer);
 }
 
 int fus_lexer_get_chr(fus_lexer_t *lexer, char *c){
@@ -773,7 +670,7 @@ int fus_lexer_get_chr(fus_lexer_t *lexer, char *c){
     return 0;
 }
 
-int fus_lexer_get_int(fus_lexer_t *lexer, int *i){
+static int _fus_lexer_get_int(fus_lexer_t *lexer, int *i){
     if(!fus_lexer_got_int(lexer)){
         fus_lexer_err_info(lexer); fprintf(stderr,
             "Expected int, but got: ");
@@ -781,6 +678,12 @@ int fus_lexer_get_int(fus_lexer_t *lexer, int *i){
         return 2;
     }
     *i = atoi(lexer->token);
+    return 0;
+}
+
+int fus_lexer_get_int(fus_lexer_t *lexer, int *i){
+    int err = _fus_lexer_get_int(lexer, i);
+    if(err)return err;
     return fus_lexer_next(lexer);
 }
 
@@ -992,6 +895,130 @@ int fus_lexer_unexpected(fus_lexer_t *lexer, const char *expected){
     return 2;
 }
 
+static int _fus_lexer_next(fus_lexer_t *lexer){
+    /* Gets a single token. */
+    int err;
+restart:
+
+    /* Handle whitespace (unless we already know we need to
+    return some open/close parens) */
+    if(!lexer->returning_indents){
+        err = fus_lexer_handle_whitespace(lexer);
+        if(err)return err;
+    }
+
+    /* Maybe output open/close parens */
+    if(lexer->returning_indents > 0){
+        fprintf(stderr,
+            "Returning open parens this way isn't supported, "
+            "because our implementation of $IF currently assumes "
+            "that when an \"(\" is emitted, lexer->frame_list is "
+            "a corresponding frame.\n");
+        return 2;
+        /*
+        lexer->token_type = FUS_LEXER_TOKEN_OPEN;
+        fus_lexer_set_token(lexer, "(");
+        lexer->returning_indents--;
+        return 0;
+        */
+    }else if(lexer->returning_indents < 0){
+        lexer->token_type = FUS_LEXER_TOKEN_CLOSE;
+        fus_lexer_set_token(lexer, ")");
+        lexer->returning_indents++;
+        return 0;
+    }
+
+    /* Decide what type of token we got based on next character */
+    char c = lexer->text[lexer->pos];
+    if(c == '\0'){
+        /* Reached end of file; report with NULL token */
+        fus_lexer_set_token(lexer, NULL);
+        lexer->token_type = FUS_LEXER_TOKEN_DONE;
+    }else if(c == ':'){
+        if(lexer->frame_list && !lexer->frame_list->is_block){
+            fus_lexer_err_info(lexer); fprintf(stderr,
+                "Can't have a colon inside parentheses!\n");
+            return 2;
+        }
+        fus_lexer_eat(lexer);
+        fus_lexer_set_token(lexer, "(");
+        lexer->token_type = FUS_LEXER_TOKEN_OPEN;
+        err = fus_lexer_push_frame(lexer, FUS_LEXER_FRAME_NORMAL, true);
+        if(err)return err;
+    }else if(c == '('){
+        fus_lexer_start_token(lexer);
+        fus_lexer_eat(lexer);
+        fus_lexer_end_token(lexer);
+        lexer->token_type = FUS_LEXER_TOKEN_OPEN;
+        err = fus_lexer_push_frame(lexer, FUS_LEXER_FRAME_NORMAL, false);
+        if(err)return err;
+    }else if(c == ')'){
+        /* Pop frames up to and including the first non-block one, that is,
+        the one corresponding to "(".
+        For each popped frame, lexer->returning_indents is decremented.
+        So given "(x: y: z)", when we hit the ')', we should pop 3 frames
+        in total: that for the '(', *and* those for the 2 ':'. */
+        while(1){
+            fus_lexer_frame_t *frame;
+            err = fus_lexer_pop_frame(lexer, &frame);
+            if(err)return err;
+            if(!frame){
+                /* If frame is NULL, we allow loop to wrap around so pop_frame
+                raises the error about popping from an empty stack. */
+                continue;
+            }
+            if(frame->is_block){
+                /* Block frame, that is, frame defined by ':' and indentation */
+                continue;
+            }
+            /* If we make it here, frame is not a block, that is, it was defined
+            by a '('. */
+            break;
+        }
+
+        /* We may be returning "the same" ')' we just parsed... or it
+        might be from an earlier ':'. */
+        if(lexer->returning_indents < 0){
+            fus_lexer_start_token(lexer);
+            fus_lexer_eat(lexer);
+            fus_lexer_end_token(lexer);
+            lexer->token_type = FUS_LEXER_TOKEN_CLOSE;
+            lexer->returning_indents++;
+            return 0;
+        }else{
+            /* This can happen e.g. if popped frame's type was
+            FUS_LEXER_FRAME_IF.
+            We restart _fus_lexer_next instead of calling it recursively
+            and hoping compiler is smart enough to generate a tail call. */
+            fus_lexer_start_token(lexer);
+            fus_lexer_eat(lexer);
+            fus_lexer_end_token(lexer);
+            goto restart;
+        }
+    }else if(c == '_' || isalpha(c)){
+        fus_lexer_parse_sym(lexer);
+        lexer->token_type = FUS_LEXER_TOKEN_SYM;
+    }else if(isdigit(c) || (
+        c == '-' && isdigit(fus_lexer_peek(lexer))
+    )){
+        fus_lexer_parse_int(lexer);
+        lexer->token_type = FUS_LEXER_TOKEN_INT;
+    }else if(c == '"'){
+        err = fus_lexer_parse_str(lexer);
+        if(err)return err;
+        lexer->token_type = FUS_LEXER_TOKEN_STR;
+    }else if(c == ';' && fus_lexer_peek(lexer) == ';'){
+        err = fus_lexer_parse_blockstr(lexer);
+        if(err)return err;
+        lexer->token_type = FUS_LEXER_TOKEN_BLOCKSTR;
+    }else{
+        fus_lexer_parse_op(lexer);
+        lexer->token_type = FUS_LEXER_TOKEN_OP;
+    }
+
+    return 0;
+}
+
 int fus_lexer_parse_silent(fus_lexer_t *lexer){
     /* Expected to be called immediately following a "(" token.
     We eat everything up to and including the corresponding ")" token.
@@ -1017,5 +1044,170 @@ int fus_lexer_parse_silent(fus_lexer_t *lexer){
             if(err)return err;
         }
     }
+    return 0;
+}
+
+static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
+    /* NOTE: lexer->token is expected to be "$". We will eat this ourselves,
+    which allows us to save lexer->pos first, for more accurate calculation
+    of lexer->_token_len. */
+
+    /* NOTE: macros may either "find" a token or not.
+    If a macro does not find a token, then its purpose was presumably some
+    side effect, such as setting a variable in lexer->vars.
+    If a macro does find a token, the token should be in lexer->token
+    and the macro should set *found_token_ptr = true and return 0.
+
+    If a macro does not intend to set lexer->token, then it must be careful
+    about when it "eats" lexer->text.
+    For instance, helper functions like fus_lexer_get_str call fus_lexer_next
+    before they return, consuming a token.
+    You can get around this by using the '_'-prefixed versions of helper functions,
+    e.g. _fus_lexer_get_str, which do not call fus_lexer_next before returning. */
+    int err;
+
+    int macro_start_pos = lexer->pos - lexer->token_len;
+    err = _fus_lexer_next(lexer);
+    if(err)return err;
+
+    if(fus_lexer_got(lexer, "SET_BOOL")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+
+        char *name;
+        err = _fus_lexer_get_name(lexer, &name);
+        if(err)return err;
+
+        err = vars_set_bool(lexer->vars, name, true);
+        if(err)return err;
+        free(name);
+    }else if(fus_lexer_got(lexer, "UNSET_BOOL")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+
+        char *name;
+        err = _fus_lexer_get_name(lexer, &name);
+        if(err)return err;
+
+        err = vars_set_bool(lexer->vars, name, false);
+        if(err)return err;
+        free(name);
+    }else if(fus_lexer_got(lexer, "SET_STR")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+
+        char *name;
+        err = fus_lexer_get_name(lexer, &name);
+        if(err)return err;
+
+        char *val;
+        err = _fus_lexer_get_name_or_str(lexer, &val);
+        if(err)return err;
+
+        err = vars_set_str(lexer->vars, name, val);
+        if(err)return err;
+        free(name);
+    }else if(fus_lexer_got(lexer, "SET_INT")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+
+        char *name;
+        err = fus_lexer_get_name(lexer, &name);
+        if(err)return err;
+
+        int val;
+        err = _fus_lexer_get_int(lexer, &val);
+        if(err)return err;
+
+        err = vars_set_int(lexer->vars, name, val);
+        if(err)return err;
+        free(name);
+    }else if(fus_lexer_got(lexer, "IF")){
+        bool not = false;
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        if(fus_lexer_got(lexer, "!")){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            not = true;
+        }
+
+        char *name;
+        err = fus_lexer_get_name(lexer, &name);
+        if(err)return err;
+        err = _fus_lexer_get(lexer, "(");
+        if(err)return err;
+
+        bool cond = vars_get_bool(lexer->vars, name) ^ not;
+        free(name);
+
+        if(!cond){
+            /* Eat everything up to & including closing ")" */
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            err = fus_lexer_parse_silent(lexer);
+            if(err)return err;
+        }else{
+            /* Mark this frame as belonging to an $IF,
+            so we don't emit ")" on leaving it. */
+            lexer->frame_list->type = FUS_LEXER_FRAME_IF;
+        }
+    }else if(fus_lexer_got(lexer, "PREFIX")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+
+        char *name;
+        err = fus_lexer_get_name(lexer, &name);
+        if(err)return err;
+
+        const char *val = vars_get_str(lexer->vars, name);
+        if(!val){
+            return fus_lexer_unexpected(lexer, "name of a string variable");
+        }
+
+        char *s0;
+        /* NOTE: use underscored _fus_lexer_get_name_or_str, regular one calls
+        fus_lexer_next before returning, but we want to keep the current lexer->token
+        and just update its mem_managed_token */
+        err = _fus_lexer_get_name_or_str(lexer, &s0);
+        if(err)return err;
+
+        /* NOTE: need to quote the dupcatted string because lexer->token
+        is expected to be something which e.g. fus_lexer_get_str will parse */
+        char *s1 = lexer->token_type == FUS_LEXER_TOKEN_SYM?
+            fus_strdupcat(val, s0):
+            fus_strdupcat_quoted(val, s0);
+        free(s0);
+        if(!s1)return 1;
+
+        fus_lexer_set_mem_managed_token(lexer, s1);
+        lexer->_token_len = lexer->pos - macro_start_pos;
+        *found_token_ptr = true;
+    }else{
+        return fus_lexer_unexpected(lexer, NULL);
+    }
+    return 0;
+}
+
+int fus_lexer_next(fus_lexer_t *lexer){
+    /* Gets a single token. Wrapper around _fus_lexer_next, which does
+    the real work; this function implements a fancy "precompiler" syntax
+    if lexer->vars != NULL */
+    int err;
+
+    while(1){
+        err = _fus_lexer_next(lexer);
+        if(err)return err;
+
+        if(lexer->vars && fus_lexer_got(lexer, "$")){
+            bool found_token = false;
+            err = _fus_lexer_parse_macro(lexer, &found_token);
+            if(err)return err;
+            if(!found_token)continue;
+        }
+
+        break;
+    }
+
     return 0;
 }
