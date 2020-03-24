@@ -1,6 +1,8 @@
 
+# Expected vars: NS (str), e.g. "player_"
+
 crawl_looking_up:
-    rgraph: "player_crawl_looking_up"
+    rgraph: $PREFIX NS "crawl_looking_up"
     hitbox:
         ;;     .
         ;;     *
@@ -34,7 +36,7 @@ crawl_looking_up:
     then: goto: crawl
 
 crawl_spit:
-    rgraph: "player_crawl_spit"
+    rgraph: $PREFIX NS "crawl_spit"
     hitbox:
         ;;     .
         ;;     *
@@ -42,7 +44,7 @@ crawl_spit:
     if() then: goto: crawl
 
 crawl_looking_up_spit:
-    rgraph: "player_crawl_looking_up_spit"
+    rgraph: $PREFIX NS "crawl_looking_up_spit"
     hitbox:
         ;;     .
         ;;     *
@@ -50,7 +52,7 @@ crawl_looking_up_spit:
     if() then: goto: crawl_looking_up
 
 crawl:
-    rgraph: "player_crawl"
+    rgraph: $PREFIX NS "crawl"
 
     hitbox:
         ;;     .
@@ -133,7 +135,7 @@ crawl:
         goto: crawl_look_up
 
 crawl_look_up:
-    rgraph: "player_crawl_look_up"
+    rgraph: $PREFIX NS "crawl_look_up"
     hitbox:
         ;;     .
         ;;     *
@@ -141,7 +143,7 @@ crawl_look_up:
     if() then: goto: crawl_looking_up
 
 crawl_step_down:
-    rgraph: "player_crawl_step"
+    rgraph: $PREFIX NS "crawl_step"
     hitbox:
         ;;    .   .
         ;;    *\*/*
@@ -157,7 +159,7 @@ crawl_step_down:
     if() then: goto: crawl
 
 crawl_step:
-    rgraph: "player_crawl_step"
+    rgraph: $PREFIX NS "crawl_step"
     hitbox:
         ;;    .   .
         ;;      */*

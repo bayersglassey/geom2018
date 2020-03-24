@@ -1,0 +1,341 @@
+
+# Expected vars: NS (str), e.g. "player_"
+
+# NOTE: make sure "stand" is the first anim, so any imports
+# should go below it
+
+stand:
+    rgraph: $PREFIX NS "stand"
+
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+
+    if:
+        key: wentdown y
+    then:
+        spawn: "anim/spit.fus" "fly" (0 0) 0 f
+        goto: spit
+        delay: 9
+
+    if:
+        key: isdown d
+    then:
+        goto: crawl
+        delay: 2
+
+    if:
+        key: isdown f
+        coll: all yes
+            ;;        +
+            ;;       /
+            ;; ( )  +
+    then:
+        move: 1 0
+        rot: 1
+        goto: step
+        delay: 2
+
+    if:
+        key: wasdown x
+        key: wasdown u
+        coll: all no
+            ;;    *\*/*
+            ;;    - + -
+            ;;       \*
+            ;;
+            ;;
+            ;; ( )
+    then:
+        move: 1 0
+        rot: 1
+        goto immediate: start_jump
+
+    if:
+        key: wasdown u
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        move: 1 0
+        goto immediate: start_jump
+
+    if:
+        key: isdown f
+        coll: all yes
+            ;; ( )  + - +
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        move: 1 0
+        goto: step
+        delay: 2
+
+    if:
+        key: isdown f
+        coll: all yes
+            ;; ( )  +
+            ;;       \
+            ;;        +
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*/*
+            ;; ( )    - + -
+            ;;        */*\*
+    then:
+        move: 1 0
+        rot: -1
+        goto: step_down
+        delay: 2
+
+    if:
+        key: isdown f
+        coll: any yes
+            ;;        +
+            ;;       /
+            ;; ( )
+    then:
+        move: 1 0
+        rot: 1
+        goto immediate: start_jump
+
+    if:
+        key: isdown f
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        move: 1 0
+        goto immediate: start_jump
+
+    if:
+        key: isdown b
+    then:
+        move: 1 0
+        turn
+        goto: step
+        delay: 2
+
+    if:
+        key: isdown x
+    then:
+        goto: look_up
+
+look_up:
+    rgraph: $PREFIX NS "look_up"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: looking_up
+
+looking_up:
+    rgraph: $PREFIX NS "looking_up"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+
+    if:
+        key: wentdown y
+    then:
+        spawn: "anim/spit.fus" "fly" (1 0) 1 f
+        goto: looking_up_spit
+        delay: 9
+
+    if:
+        key: wasdown u
+        coll: all no
+            ;;    *\*/*
+            ;;    - + -
+            ;;       \*
+            ;;
+            ;;
+            ;; ( )
+    then:
+        move: 1 0
+        rot: 1
+        goto immediate: start_jump
+
+    if: key: isdown f
+    then: goto immediate: stand
+
+    if: key: isdown b
+    then: goto immediate: stand
+
+    if:
+        key: isdown d
+    then:
+        goto: crawl_looking_up
+        delay: 2
+
+    if: key: not isdown x
+    then: goto: stand
+
+spit:
+    rgraph: $PREFIX NS "spit"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: stand
+
+looking_up_spit:
+    rgraph: $PREFIX NS "looking_up_spit"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: looking_up
+
+start_jump:
+    if:
+        coll: water any yes
+            ;;   .   .
+            ;;   *\*/*
+            ;; . - + - .
+            ;;   */*\*
+            ;;  (.)  .
+    then:
+        goto: swim_jump
+        delay: 4
+
+    if() then:
+        goto: jump
+        delay: 2
+
+jump:
+    # NOTE: the only "goto: jump" is in "start_jump", which checks whether
+    # we're in water, and does "goto: jump" or "goto: swim_jump"
+    # accordingly.
+    # Therefore, if we're in "jump", then we can safely assume we're not in
+    # water without checking.
+
+    rgraph: $PREFIX NS "jump"
+    unsafe
+
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+
+    if:
+        coll: all yes
+            ;;        +
+            ;;       /
+            ;; ( )  +
+    then:
+        move: 1 0
+        rot: 1
+        goto: step
+        delay: 2
+
+    if:
+        coll: all yes
+            ;; ( )  +
+        coll: any yes
+            ;;        +
+            ;;       /
+            ;; ( )
+    then:
+        move: 1 0
+        rot: 1
+        goto immediate: start_jump
+
+    if:
+        key: not isdown u
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+        coll: all yes
+            ;; ( )  + - +
+    then:
+        move: 1 0
+        goto: step
+        delay: 2
+
+    if:
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        move: 1 0
+        goto immediate: start_jump
+
+    if() then:
+        goto: mostly_dead
+        delay: 11
+
+step_down:
+    rgraph: $PREFIX NS "step"
+    hitbox:
+        ;;   .   .   .
+        ;;   *\*/*\*/*
+        ;; . - + - + - .
+        ;;   */*\*/*\*
+        ;;   .  (.)  .
+
+    if:
+        key: wentdown y
+    then:
+        spawn: "anim/spit.fus" "fly" (0 0) 0 f
+        goto: spit
+        delay: 9
+
+    if() then: goto: stand
+
+step:
+    rgraph: $PREFIX NS "step"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+
+    if:
+        key: wentdown y
+    then:
+        spawn: "anim/spit.fus" "fly" (0 0) 0 f
+        goto: spit
+        delay: 9
+
+    if() then: goto: stand
+
+mostly_dead:
+    rgraph: $PREFIX NS "dead"
+    unsafe
+    if() then: die mostly
+
+dead:
+    rgraph: $PREFIX NS "dead"
+    unsafe
+    if() then: die
+
+import "anim/_player_crawl.fus"
+import "anim/_player_swim.fus"

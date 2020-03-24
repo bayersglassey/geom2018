@@ -1,6 +1,8 @@
 
+# Expected vars: NS (str), e.g. "player_"
+
 swim_spit:
-    rgraph: "player_swim_spit"
+    rgraph: $PREFIX NS "swim_spit"
     unsafe
     hitbox:
         ;;   .   .
@@ -17,7 +19,7 @@ swim_jump:
     # Therefore, if we're in "swim_jump", then we can safely assume we're in
     # water without checking.
 
-    rgraph: "player_swim_jump"
+    rgraph: $PREFIX NS "swim_jump"
     unsafe
 
     hitbox:
@@ -101,7 +103,7 @@ swim_jump:
         goto immediate: swim
 
 swim:
-    rgraph: "player_swim"
+    rgraph: $PREFIX NS "swim"
     unsafe
 
     hitbox:

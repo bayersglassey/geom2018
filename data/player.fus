@@ -1,5 +1,10 @@
 
 $SET_STR NS player_
+$UNSET_BOOL PLAYER_SPIKEY
+import "data/_player.fus"
+
+$SET_STR NS spikeyplayer_
+$SET_BOOL PLAYER_SPIKEY
 import "data/_player.fus"
 
 shapes:
