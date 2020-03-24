@@ -17,10 +17,10 @@ submaps:
                 file: "data/maps/wilderness/start.fus"
                 doors:
                     :
-                        map: "data/maps/title/worldmap.fus"
-                        pos: (0 0)
+                        map: "data/maps/demo/worldmap.fus"
+                        pos: (72 29)
                         rot: 0
-                        turn: n
+                        turn: y
                 submaps:
                     :
                         file: "data/maps/wilderness/ball_sm.fus"
