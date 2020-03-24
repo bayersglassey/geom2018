@@ -297,12 +297,12 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                 lexer->vars);
             if(err)return err;
 
+            err = _stateset_parse(stateset, &sublexer, prend, space);
+            if(err)return err;
+
             /* We now call fus_lexer_next manually, see call to _fus_lexer_get_str
             above */
             err = fus_lexer_next(lexer);
-            if(err)return err;
-
-            err = _stateset_parse(stateset, &sublexer, prend, space);
             if(err)return err;
 
             fus_lexer_cleanup(&sublexer);
