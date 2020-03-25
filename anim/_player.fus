@@ -1,7 +1,6 @@
 
 # Expected vars:
 # NS (str), e.g. "player_"
-# PLAYER_SPIKEY (bool)
 
 # NOTE: make sure "stand" is the first anim, so any imports
 # should go below it
@@ -129,7 +128,7 @@ stand:
         goto: step
         delay: 2
 
-    $IF !PLAYER_SPIKEY:
+    $IF PLAYER_CAN_LOOK_UP:
         if:
             key: isdown x
         then:

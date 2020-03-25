@@ -3,7 +3,6 @@
 
 # Expected vars:
 # NS (str), e.g. "player_"
-# PLAYER_SPIKEY (bool)
 
 swim_spit:
     rgraph: $PREFIX NS "swim_spit"

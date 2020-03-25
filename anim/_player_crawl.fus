@@ -3,7 +3,6 @@
 
 # Expected vars:
 # NS (str), e.g. "player_"
-# PLAYER_SPIKEY (bool)
 
 crawl_looking_up:
     rgraph: $PREFIX NS "crawl_looking_up"
@@ -132,7 +131,7 @@ crawl:
         goto: crawl_step
         delay: 2
 
-    $IF !PLAYER_SPIKEY:
+    $IF PLAYER_CAN_LOOK_UP:
         if:
             key: not isdown f
             key: isdown x
