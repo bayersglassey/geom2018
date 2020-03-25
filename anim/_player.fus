@@ -331,12 +331,12 @@ step:
     if() then: goto: stand
 
 mostly_dead:
-    rgraph: $PREFIX NS "dead"
+    rgraph: "dead"
     unsafe
     if() then: die mostly
 
 dead:
-    rgraph: $PREFIX NS "dead"
+    rgraph: "dead"
     unsafe
     if() then: die
 

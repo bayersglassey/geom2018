@@ -231,7 +231,7 @@ crawl_step:
         goto: crawl
 
 dead:
-    rgraph: "player_dead"
+    rgraph: "dead"
 
 
 

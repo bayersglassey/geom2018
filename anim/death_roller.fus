@@ -106,5 +106,5 @@ grab:
         delay: 1
 
 dead:
-    rgraph: "player_dead"
+    rgraph: "dead"
     if() then: die
