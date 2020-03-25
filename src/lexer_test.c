@@ -107,6 +107,14 @@ static int _run_tests(){
         "1 2 \"xxlala\" 5 6");
     if(err)return err;
     err = run_test(
+        "$SET_INT X 10 1 2 $GET_INT X 3 4",
+        "1 2 10 3 4");
+    if(err)return err;
+    err = run_test(
+        "1 2 $SET_INT X 10 $GET_INT X 3 4",
+        "1 2 10 3 4");
+    if(err)return err;
+    err = run_test(
         "$SET_STR A aa $PRINTVAR A $SET_STR A aaaa",
         "");
     if(err)return err;

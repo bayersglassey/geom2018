@@ -1,39 +1,11 @@
 
 
-#include "lexer.h"
+#include "str_utils.h"
 #include "vars.h"
+#include "lexer.h"
 
 
-static size_t fus_strnlen(const char *s, size_t maxlen){
-    size_t len = 0;
-    while(len < maxlen && s[len] != '\0')len++;
-    return len;
-}
-
-static char *fus_strndup(const char *s1, size_t len){
-    size_t s_len = fus_strnlen(s1, len);
-    char *s2 = malloc(s_len + 1);
-    if(s2 == NULL)return NULL;
-    strncpy(s2, s1, len);
-    s2[s_len] = '\0';
-    return s2;
-}
-
-static char *fus_strdupcat(const char *s1, const char *s2){
-    size_t s1_len = strlen(s1);
-    size_t s2_len = strlen(s2);
-    size_t s3_len = s1_len + s2_len;
-    char *s3 = malloc(s3_len + 1);
-    if(s3 == NULL)return NULL;
-
-    strcpy(s3, s1);
-    strcpy(s3+s1_len, s2);
-
-    s3[s3_len] = '\0';
-    return s3;
-}
-
-static char *fus_strdupcat_quoted(const char *s1, const char *s2){
+static char *strdupcat_quoted(const char *s1, const char *s2){
     size_t s1_len = strlen(s1);
     size_t s2_len = strlen(s2);
     size_t s3_len = 1 + s1_len + s2_len + 1;
@@ -544,7 +516,7 @@ int fus_lexer_get(fus_lexer_t *lexer, const char *text){
 }
 
 static int _fus_lexer_extract_name(fus_lexer_t *lexer, char **name){
-    *name = fus_strndup(lexer->token, lexer->token_len);
+    *name = strndup(lexer->token, lexer->token_len);
     if(*name == NULL)return 1;
     return 0;
 }
@@ -588,7 +560,7 @@ static int _fus_lexer_extract_blockstr(fus_lexer_t *lexer, char **s){
     /* Length of s is length of token without the leading ";;" */
     int s_len = token_len - 2;
 
-    char *ss = fus_strndup(token+2, s_len);
+    char *ss = strndup(token+2, s_len);
     if(ss == NULL)return 1;
 
     *s = ss;
@@ -1176,6 +1148,24 @@ static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
             so we don't emit ")" on leaving it. */
             lexer->frame_list->type = FUS_LEXER_FRAME_IF;
         }
+    }else if(fus_lexer_got(lexer, "GET_INT")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+
+        char *name;
+        err = _fus_lexer_get_name(lexer, &name);
+        if(err)return err;
+
+        int val = vars_get_int(lexer->vars, name);
+        char *s = strdup_of_int(val);
+        if(!s)return 1;
+
+        fus_lexer_set_mem_managed_token(lexer, s);
+        lexer->_token_len = lexer->pos - macro_start_pos;
+        lexer->token_type = FUS_LEXER_TOKEN_INT;
+        *found_token_ptr = true;
+
+        free(name);
     }else if(fus_lexer_got(lexer, "PREFIX")){
         err = fus_lexer_next(lexer);
         if(err)return err;
@@ -1199,14 +1189,16 @@ static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
         /* NOTE: need to quote the dupcatted string because lexer->token
         is expected to be something which e.g. fus_lexer_get_str will parse */
         char *s1 = lexer->token_type == FUS_LEXER_TOKEN_SYM?
-            fus_strdupcat(val, s0):
-            fus_strdupcat_quoted(val, s0);
-        free(s0);
+            strdupcat(val, s0):
+            strdupcat_quoted(val, s0);
         if(!s1)return 1;
 
         fus_lexer_set_mem_managed_token(lexer, s1);
         lexer->_token_len = lexer->pos - macro_start_pos;
         *found_token_ptr = true;
+
+        free(name);
+        free(s0);
     }else{
         return fus_lexer_unexpected(lexer, NULL);
     }

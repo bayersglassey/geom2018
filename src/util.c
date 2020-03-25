@@ -29,35 +29,6 @@ void interpolate_color(SDL_Color *c, Uint8 r, Uint8 g, Uint8 b,
     c->b = linear_interpolation(c->b, b, t, t_max);
 }
 
-int strlen_of_int(int i){
-    /* Basically log(i), except that strlen of "0" is 1, and strlen of a
-    negative number includes a space for the '-' */
-    if(i == 0)return 1;
-    if(i < 0)return strlen_of_int(-i) + 1;
-    int len = 0;
-    while(i != 0){
-        len++;
-    i /= 10;
-    }
-    return len;
-}
-
-void strncpy_of_int(char *s, int i, int i_len){
-    /* i_len should be strlen_of_int(i) */
-    if(i == 0){
-        *s = '0';
-        return;}
-    if(i < 0){
-        *s = '-';
-        strncpy_of_int(s+1, -i, i_len-1);
-        return;}
-    while(i_len > 0){
-        s[i_len - 1] = '0' + i % 10;
-        i /= 10;
-        i_len--;
-    }
-}
-
 int getln(char buf[], int buf_len){
     if(!fgets(buf, buf_len, stdin)){
         perror("fgets failed");
@@ -90,26 +61,6 @@ char *load_file(const char *filename){
     n_read_bytes = fread(f_buffer, 1, f_size, f);
     fclose(f);
     return f_buffer;
-}
-
-bool streq(const char *s1, const char *s2){
-    if(s1 == NULL || s2 == NULL)return s1 == s2;
-    return strcmp(s1, s2) == 0;
-}
-
-char *strdup(const char *s1){
-    char *s2 = malloc(strlen(s1) + 1);
-    if(s2 == NULL)return NULL;
-    strcpy(s2, s1);
-    return s2;
-}
-
-char *strdupcat(const char *s1, const char *s2){
-    char *s3 = malloc(strlen(s1) + strlen(s2) + 1);
-    if(s3 == NULL)return NULL;
-    strcpy(s3, s1);
-    strcat(s3, s2);
-    return s3;
 }
 
 void get_spaces(char *spaces, int max_spaces, int n_spaces){

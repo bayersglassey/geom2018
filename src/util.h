@@ -6,6 +6,8 @@
 #include <stdbool.h>
 #include <SDL2/SDL.h>
 
+#include "str_utils.h"
+
 #ifndef NO_EXECINFO
 #   include <execinfo.h> /* backtrace_symbols_fd */
 #   define BACKTRACE(N) { \
@@ -46,13 +48,8 @@ int int_max(int x, int y);
 int linear_interpolation(int x0, int x1, int t, int t_max);
 void interpolate_color(SDL_Color *c, Uint8 r, Uint8 g, Uint8 b,
     int t, int t_max);
-int strlen_of_int(int i);
-void strncpy_of_int(char *s, int i, int i_len);
 int getln(char buf[], int buf_len);
 char *load_file(const char *filename);
-bool streq(const char *s1, const char *s2);
-char *strdup(const char *s1);
-char *strdupcat(const char *s1, const char *s2);
 void get_spaces(char *spaces, int max_spaces, int n_spaces);
 void palette_printf(SDL_Palette *pal);
 SDL_Surface *surface8_create(int w, int h,
