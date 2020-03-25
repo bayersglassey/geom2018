@@ -1,10 +1,17 @@
 
 $SET_STR NS player_
 $UNSET_BOOL PLAYER_SPIKEY
+$UNSET_BOOL PLAYER_ROLLER
 import "data/_player.fus"
 
 $SET_STR NS spikeyplayer_
 $SET_BOOL PLAYER_SPIKEY
+$UNSET_BOOL PLAYER_ROLLER
+import "data/_player.fus"
+
+$SET_STR NS rollerplayer_
+$UNSET_BOOL PLAYER_SPIKEY
+$SET_BOOL PLAYER_ROLLER
 import "data/_player.fus"
 
 shapes:

@@ -48,13 +48,25 @@ shapes:
             : "tri" (0 2 1 0) 10 f eval: 1 + 8 + 5
 
     $PREFIX NS "_head":
-        shapes:
-            : $PREFIX NS "_head_sixth" (0 0 0 0)  0 f
-            : $PREFIX NS "_head_sixth" (0 0 0 0)  2 f
-            : $PREFIX NS "_head_sixth" (0 0 0 0)  4 f
-            : $PREFIX NS "_head_sixth" (0 0 0 0)  6 f
-            : $PREFIX NS "_head_sixth" (0 0 0 0)  8 f
-            : $PREFIX NS "_head_sixth" (0 0 0 0) 10 f
+        $IF PLAYER_ROLLER:
+            shapes:
+                : "_roller_body_hollow" (0 0 0 0)  0 f
+            prismels:
+                # Got to add the eye by hand, as it were
+                : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 4
+                : "tri" (0 0 0 0)  2 f eval: 1 + 8 + 4
+                : "tri" (0 0 0 0)  4 f eval: 1 + 8 + 4
+                : "tri" (0 0 0 0)  6 f eval: 1 + 8 + 4
+                : "tri" (0 0 0 0)  8 f eval: 1 + 8 + 4
+                : "tri" (0 0 0 0) 10 f eval: 1 + 8 + 4
+        $IF !PLAYER_ROLLER:
+            shapes:
+                : $PREFIX NS "_head_sixth" (0 0 0 0)  0 f
+                : $PREFIX NS "_head_sixth" (0 0 0 0)  2 f
+                : $PREFIX NS "_head_sixth" (0 0 0 0)  4 f
+                : $PREFIX NS "_head_sixth" (0 0 0 0)  6 f
+                : $PREFIX NS "_head_sixth" (0 0 0 0)  8 f
+                : $PREFIX NS "_head_sixth" (0 0 0 0) 10 f
 
     $PREFIX NS "head":
         shapes:

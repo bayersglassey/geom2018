@@ -1,0 +1,5 @@
+
+can_save
+
+$SET_STR NS rollerplayer_
+import "anim/_player.fus"
