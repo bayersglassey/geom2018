@@ -22,6 +22,13 @@ stand:
         goto: spit
         delay: 9
 
+    $IF PLAYER_ROLLER:
+        if:
+            key: wentdown x
+        then:
+            goto: rollerplayer_stand
+            delay: 1
+
     if:
         key: isdown d
     then:
@@ -309,6 +316,13 @@ step_down:
         goto: spit
         delay: 9
 
+    $IF PLAYER_ROLLER:
+        if:
+            key: wentdown x
+        then:
+            goto: rollerplayer_stand
+            delay: 1
+
     if() then: goto: stand
 
 step:
@@ -326,6 +340,13 @@ step:
         spawn: "anim/spit.fus" "fly" (0 0) 0 f
         goto: spit
         delay: 9
+
+    $IF PLAYER_ROLLER:
+        if:
+            key: wentdown x
+        then:
+            goto: rollerplayer_stand
+            delay: 1
 
     if() then: goto: stand
 

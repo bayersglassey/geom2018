@@ -2,4 +2,8 @@
 can_save
 
 $SET_STR NS rollerplayer_
+$SET_BOOL PLAYER_ROLLER
 import "anim/_player.fus"
+
+$SET_STR NS rollerplayer_
+import "anim/_roller.fus"

@@ -69,6 +69,13 @@ crawl:
         goto: crawl_spit
         delay: 9
 
+    $IF PLAYER_ROLLER:
+        if:
+            key: wentdown x
+        then:
+            goto: rollerplayer_stand
+            delay: 1
+
     if:
         key: not isdown d
         coll: all no
@@ -160,6 +167,13 @@ crawl_step_down:
         goto: crawl_spit
         delay: 9
 
+    $IF PLAYER_ROLLER:
+        if:
+            key: wentdown x
+        then:
+            goto: rollerplayer_stand
+            delay: 1
+
     if() then: goto: crawl
 
 crawl_step:
@@ -175,5 +189,12 @@ crawl_step:
         spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
         goto: crawl_spit
         delay: 9
+
+    $IF PLAYER_ROLLER:
+        if:
+            key: wentdown x
+        then:
+            goto: rollerplayer_stand
+            delay: 1
 
     if() then: goto: crawl

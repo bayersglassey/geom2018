@@ -1,0 +1,85 @@
+
+# Expected vars:
+# NS (str), e.g. "player_", ""
+
+shapes:
+
+    $PREFIX NS "_roller_body_hollow_third":
+
+        prismels:
+
+            #   +
+            #   |
+            #  / \
+            # |   |
+            # +---+-
+            # |   | \
+            # |   |  -+
+            # |   | / |
+            # +---+-   \
+            #     |     |
+            #      \   -+
+            #       | / |
+            #   0   +-  |
+            #         \ |
+            #          -+
+
+            : "sq"  (-1 0 1 0)  0 f eval: 1 + 8 + 1
+            : "tri" (-1 0 1 1)  0 f eval: 1 + 1
+
+            : "tri" ( 0 0 1 0)  1 f eval: 1 + 1
+            : "sq"  ( 1 0 0 0)  1 f eval: 1 + 8 + 1
+            : "tri" ( 1 0 0 0) 11 f eval: 1 + 1
+
+    $PREFIX NS "_roller_body_third":
+        shapes:
+            : $PREFIX NS "_roller_body_hollow_third" (0 0 0 0) 0 f
+        prismels:
+            $IF PLAYER_ROLLER:
+                : "tri" ( 0 0 0 0)  0 f eval: 1 + 8 + 4
+                : "tri" ( 0 0 0 0)  2 f eval: 1 + 8 + 4
+            $IF !PLAYER_ROLLER:
+                : "tri" ( 0 0 0 0)  0 f eval: 1 + 8 + 3
+                : "tri" ( 0 0 0 0)  2 f eval: 1 + 8 + 3
+
+    $PREFIX NS "_roller_body":
+        shapes:
+            : $PREFIX NS "_roller_body_third" (0 0 0 0)  0 f
+            : $PREFIX NS "_roller_body_third" (0 0 0 0)  4 f
+            : $PREFIX NS "_roller_body_third" (0 0 0 0)  8 f
+
+    $PREFIX NS "_roller_body_hollow":
+        shapes:
+            : $PREFIX NS "_roller_body_hollow_third" (0 0 0 0)  0 f
+            : $PREFIX NS "_roller_body_hollow_third" (0 0 0 0)  4 f
+            : $PREFIX NS "_roller_body_hollow_third" (0 0 0 0)  8 f
+
+    $PREFIX NS "roller_body":
+        shapes:
+            : $PREFIX NS "_roller_body" (1 1 1 0) 0 f
+
+    $PREFIX NS "roller_body_hollow":
+        shapes:
+            : $PREFIX NS "_roller_body_hollow" (1 1 1 0) 0 f
+
+    $PREFIX NS "roller_foot":
+        prismels:
+            : "sq" (0 0 0 0)  0 f eval: 1 + 8 + 3
+            : "sq" (0 0 0 0)  3 f eval: 1 + 8 + 3
+            : "sq" (0 0 0 0)  6 f eval: 1 + 8 + 3
+            : "sq" (0 0 0 0)  9 f eval: 1 + 8 + 3
+
+    $PREFIX NS "roller":
+        shapes:
+            : $PREFIX NS "roller_body" (0 0 0 0) 0 f
+            : $PREFIX NS "roller_foot" (0 0 0 0) 0 f
+        $IF PLAYER_ROLLER:
+            prismels:
+                # Player's "nose"
+                : "tri" (2 2 1 0) 2 f eval: 1 + 8 + 2
+
+    $PREFIX NS "roller_grab":
+        shapes:
+            : $PREFIX NS "roller_body" (0 0 0  0) 0 f
+            : $PREFIX NS "roller_body_hollow" (3 2 0 -1) 2 f
+            : $PREFIX NS "roller_foot" (0 0 0  0) 0 f
