@@ -260,6 +260,12 @@ submaps:
                             : "data/maps/demo/recs/tunnels_001.fus"
                             : "data/maps/demo/recs/tunnels_002.fus"
                     :
+                        file: "data/maps/demo/tunnels3.fus"
+                        pos: eval: (13 1) + (30 -5)
+                        camera: (0 0)
+                        mapper: ("triple")
+                        palette: "data/maps/demo/pals/tunnels.fus"
+                    :
                         file: "data/maps/demo/tunnels2.fus"
                         pos: eval: (13 1) + (18 8)
                         camera: (0 5)
