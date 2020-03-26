@@ -47,20 +47,21 @@ stand:
         goto: step
         delay: 2
 
-    if:
-        key: wasdown x
-        key: wasdown u
-        coll: all no
-            ;;    *\*/*
-            ;;    - + -
-            ;;       \*
-            ;;
-            ;;
-            ;; ( )
-    then:
-        move: 1 0
-        rot: 1
-        goto immediate: start_jump
+    $IF PLAYER_CAN_LOOK_UP:
+        if:
+            key: wasdown x
+            key: wasdown u
+            coll: all no
+                ;;    *\*/*
+                ;;    - + -
+                ;;       \*
+                ;;
+                ;;
+                ;; ( )
+        then:
+            move: 1 0
+            rot: 1
+            goto immediate: start_jump
 
     if:
         key: wasdown u
