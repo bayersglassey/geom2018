@@ -4,6 +4,18 @@
 # RGRAPH_NS (str), e.g. "rollerplayer_", ""
 
 
+#$SET_BOOL FLIPPY_GRAB
+
+#$SET_BOOL STICKY_GRAB
+
+$SET_BOOL STICKY_GRAB
+$SET_BOOL FLIPPY_GRAB
+
+#$SET_BOOL STICKY_GRAB
+#$SET_BOOL GOTO_GRABBED
+#$SET_BOOL FLIPPY_GRAB
+
+
 $PREFIX ANIM_NS stand:
     rgraph: $PREFIX RGRAPH_NS "roller"
     hitbox:
@@ -43,7 +55,10 @@ $PREFIX ANIM_NS stand:
     then:
         move: 2 1
         rot: 3
-        goto: $PREFIX ANIM_NS grabbed
+        $IF GOTO_GRABBED:
+            goto: $PREFIX ANIM_NS grabbed
+        $IF !GOTO_GRABBED:
+            goto: $PREFIX ANIM_NS grab
         delay: 1
 
     if:
@@ -138,40 +153,75 @@ $PREFIX ANIM_NS grab:
         goto: $PREFIX ANIM_NS stand
         delay: 1
 
+    $IF FLIPPY_GRAB:
+        if:
+            key: isdown f
+            key: not isdown b
+            coll: all yes
+                ;; ( )  +
+        then:
+            move: 1 0
+            rot: 1
+            goto: $PREFIX ANIM_NS grab_flipped
+            delay: 1
+
+    $IF STICKY_GRAB:
+        if:
+            key: isdown f
+            key: not isdown b
+            coll: all yes
+                ;; ( )  .   +
+            coll: all no
+                ;;    *\*/*
+                ;; ( )
+        then:
+            move: 2 0
+            rot: 2
+            $IF GOTO_GRABBED:
+                goto: $PREFIX ANIM_NS grabbed
+            delay: 1
+
+    $IF FLIPPY_GRAB:
+        if:
+            key: isdown f
+            key: not isdown b
+            coll: all yes
+                ;;        .
+                ;;
+                ;; ( )  .   .
+                ;;
+                ;;    +   .
+            coll: all no
+                ;;        .
+                ;;       /*
+                ;; ( )- + - .
+                ;;    */*\*
+                ;;    .   .
+        then:
+            move: 0 -1
+            goto: $PREFIX ANIM_NS grab_flipped
+            delay: 1
+
     if:
+        key: isdown f
+        key: not isdown b
         coll: all yes
-            ;;        +
+            ;;        .
             ;;
-            ;; ( )
-    then:
-        move: 2 1
-        rot: 3
-        goto: $PREFIX ANIM_NS grabbed
-        delay: 1
-
-    if:
-        key: isdown f
-        key: not isdown b
-        coll: all yes
-            ;; ( )  +
-    then:
-        move: 1 0
-        rot: 1
-        goto: $PREFIX ANIM_NS grab_flipped
-        delay: 1
-
-    if:
-        key: isdown f
-        key: not isdown b
-        coll: all yes
-            ;; ( )  .   +
+            ;; ( )  .   .
+            ;;
+            ;;    .   +
         coll: all no
-            ;;    *\*/*
-            ;; ( )
+            ;;        .
+            ;;       /*
+            ;; ( )- + - .
+            ;;    */*\*
+            ;;    .   .
     then:
-        move: 2 0
+        move: 1 -1
         rot: 2
-        goto: $PREFIX ANIM_NS grabbed
+        $IF GOTO_GRABBED:
+            goto: $PREFIX ANIM_NS grabbed
         delay: 1
 
     if:
@@ -184,6 +234,27 @@ $PREFIX ANIM_NS grab:
     then:
         rot: -1
         delay: 1
+
+    $IF GRAB_WHEN_TURNING:
+        if:
+            key: isdown b
+            key: not isdown f
+            coll: all yes
+                ;;    .   +
+                ;;
+                ;; ( )  .
+            coll: all no
+                ;;    .
+                ;;     \*
+                ;; ( )  .
+        then:
+            move: 2 1
+            rot: 3
+            turn
+            rot: 2
+            $IF GOTO_GRABBED:
+                goto: $PREFIX ANIM_NS grabbed
+            delay: 1
 
     if:
         key: isdown b
@@ -214,7 +285,7 @@ $PREFIX ANIM_NS grab_flipped:
     then:
         goto: $PREFIX ANIM_NS stand
         turn
-        rot: -1
+        rot: 1
         delay: 1
 
     if:
