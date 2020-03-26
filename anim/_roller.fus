@@ -2,6 +2,7 @@
 # Expected vars:
 # NS (str), e.g. "player_", ""
 
+
 $PREFIX NS stand:
     rgraph: $PREFIX NS "roller"
     hitbox:
@@ -41,6 +42,16 @@ $PREFIX NS stand:
     then:
         move: 2 1
         rot: 3
+        goto: $PREFIX NS grabbed
+        delay: 1
+
+    if:
+        key: wasdown u
+        coll: all no
+            ;;    .
+            ;;     \*
+            ;; ( )  .
+    then:
         goto: $PREFIX NS grab
         delay: 1
 
@@ -112,7 +123,141 @@ $PREFIX NS stand:
         turn
         delay: 1
 
+
 $PREFIX NS grab:
+    rgraph: $PREFIX NS "roller_grab"
+    hitbox:
+        ;;    .   .
+        ;;    *\*
+        ;; (.)  .
+
+    if:
+        key: not isdown u
+    then:
+        goto: $PREFIX NS stand
+        delay: 1
+
+    if:
+        coll: all yes
+            ;;        +
+            ;;
+            ;; ( )
+    then:
+        move: 2 1
+        rot: 3
+        goto: $PREFIX NS grabbed
+        delay: 1
+
+    if:
+        key: isdown f
+        key: not isdown b
+        coll: all yes
+            ;; ( )  +
+    then:
+        move: 1 0
+        rot: 1
+        goto: $PREFIX NS grab_flipped
+        delay: 1
+
+    if:
+        key: isdown f
+        key: not isdown b
+        coll: all yes
+            ;; ( )  .   +
+        coll: all no
+            ;;    *\*/*
+            ;; ( )
+    then:
+        move: 2 0
+        rot: 2
+        goto: $PREFIX NS grabbed
+        delay: 1
+
+    if:
+        key: isdown f
+        key: not isdown b
+        coll: all no
+            ;;       /*
+            ;; ( )- + -
+            ;;    */*\*
+    then:
+        rot: -1
+        delay: 1
+
+    if:
+        key: isdown b
+        key: not isdown f
+    then:
+        turn
+        rot: 2
+        delay: 1
+
+
+$PREFIX NS grab_flipped:
+    rgraph: $PREFIX NS "roller_grab_flipped"
+    hitbox:
+        ;; .   .
+        ;;   */*
+        ;;  (.)  .
+
+    if:
+        key: not isdown u
+        key: isdown f
+    then:
+        goto: $PREFIX NS stand
+        delay: 1
+
+    if:
+        key: not isdown u
+        key: isdown b
+    then:
+        goto: $PREFIX NS stand
+        turn
+        rot: -1
+        delay: 1
+
+    if:
+        key: isdown d
+        key: isdown f
+        key: not isdown b
+        coll: all no
+            ;; ( )-
+            ;;    *
+    then:
+        rot: -1
+        delay: 1
+
+    if:
+        key: isdown f
+        key: not isdown b
+        coll: all yes
+            ;; ( )  +
+    then:
+        move: 1 0
+        rot: 2
+        goto: $PREFIX NS grab
+        delay: 1
+
+    if:
+        key: isdown f
+        key: not isdown b
+        coll: all no
+            ;; ( )-
+            ;;    *
+    then:
+        rot: -1
+        delay: 1
+
+    if:
+        key: isdown b
+        key: not isdown f
+    then:
+        turn
+        rot: 1
+        delay: 1
+
+
+$PREFIX NS grabbed:
     rgraph: $PREFIX NS "roller_grab"
     hitbox:
         ;;    .   .

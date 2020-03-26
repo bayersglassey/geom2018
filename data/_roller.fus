@@ -69,6 +69,9 @@ shapes:
             : "sq" (0 0 0 0)  6 f eval: 1 + 8 + 3
             : "sq" (0 0 0 0)  9 f eval: 1 + 8 + 3
 
+
+shapes:
+
     $PREFIX NS "roller":
         shapes:
             : $PREFIX NS "roller_body" (0 0 0 0) 0 f
@@ -82,4 +85,10 @@ shapes:
         shapes:
             : $PREFIX NS "roller_body" (0 0 0  0) 0 f
             : $PREFIX NS "roller_body_hollow" (3 2 0 -1) 2 f
+            : $PREFIX NS "roller_foot" (0 0 0  0) 0 f
+
+    $PREFIX NS "roller_grab_flipped":
+        shapes:
+            : $PREFIX NS "roller_body" (0 0 0  0) 0 f
+            : $PREFIX NS "roller_body_hollow" (0 0 0  0) 2 f
             : $PREFIX NS "roller_foot" (0 0 0  0) 0 f
