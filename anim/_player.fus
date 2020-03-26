@@ -26,7 +26,7 @@ stand:
         if:
             key: wentdown x
         then:
-            goto: rollerplayer_stand
+            goto: roller_stand
             delay: 1
 
     if:
@@ -320,7 +320,7 @@ step_down:
         if:
             key: wentdown x
         then:
-            goto: rollerplayer_stand
+            goto: roller_stand
             delay: 1
 
     if() then: goto: stand
@@ -345,7 +345,7 @@ step:
         if:
             key: wentdown x
         then:
-            goto: rollerplayer_stand
+            goto: roller_stand
             delay: 1
 
     if() then: goto: stand

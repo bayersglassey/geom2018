@@ -1,5 +1,6 @@
 
-$SET_STR NS ""
+$SET_STR ANIM_NS ""
+$SET_STR RGRAPH_NS ""
 import "anim/_roller.fus"
 
 dead:

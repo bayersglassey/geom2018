@@ -73,7 +73,7 @@ crawl:
         if:
             key: wentdown x
         then:
-            goto: rollerplayer_stand
+            goto: roller_stand
             delay: 1
 
     if:
@@ -171,7 +171,7 @@ crawl_step_down:
         if:
             key: wentdown x
         then:
-            goto: rollerplayer_stand
+            goto: roller_stand
             delay: 1
 
     if() then: goto: crawl
@@ -194,7 +194,7 @@ crawl_step:
         if:
             key: wentdown x
         then:
-            goto: rollerplayer_stand
+            goto: roller_stand
             delay: 1
 
     if() then: goto: crawl

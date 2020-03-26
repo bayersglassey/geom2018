@@ -1,10 +1,11 @@
 
 # Expected vars:
-# NS (str), e.g. "player_", ""
+# ANIM_NS (str), e.g. "roller_", ""
+# RGRAPH_NS (str), e.g. "rollerplayer_", ""
 
 
-$PREFIX NS stand:
-    rgraph: $PREFIX NS "roller"
+$PREFIX ANIM_NS stand:
+    rgraph: $PREFIX RGRAPH_NS "roller"
     hitbox:
         ;;    .
         ;;    *
@@ -42,7 +43,7 @@ $PREFIX NS stand:
     then:
         move: 2 1
         rot: 3
-        goto: $PREFIX NS grabbed
+        goto: $PREFIX ANIM_NS grabbed
         delay: 1
 
     if:
@@ -52,7 +53,7 @@ $PREFIX NS stand:
             ;;     \*
             ;; ( )  .
     then:
-        goto: $PREFIX NS grab
+        goto: $PREFIX ANIM_NS grab
         delay: 1
 
     if:
@@ -124,8 +125,8 @@ $PREFIX NS stand:
         delay: 1
 
 
-$PREFIX NS grab:
-    rgraph: $PREFIX NS "roller_grab"
+$PREFIX ANIM_NS grab:
+    rgraph: $PREFIX RGRAPH_NS "roller_grab"
     hitbox:
         ;;    .   .
         ;;    *\*
@@ -134,7 +135,7 @@ $PREFIX NS grab:
     if:
         key: not isdown u
     then:
-        goto: $PREFIX NS stand
+        goto: $PREFIX ANIM_NS stand
         delay: 1
 
     if:
@@ -145,7 +146,7 @@ $PREFIX NS grab:
     then:
         move: 2 1
         rot: 3
-        goto: $PREFIX NS grabbed
+        goto: $PREFIX ANIM_NS grabbed
         delay: 1
 
     if:
@@ -156,7 +157,7 @@ $PREFIX NS grab:
     then:
         move: 1 0
         rot: 1
-        goto: $PREFIX NS grab_flipped
+        goto: $PREFIX ANIM_NS grab_flipped
         delay: 1
 
     if:
@@ -170,7 +171,7 @@ $PREFIX NS grab:
     then:
         move: 2 0
         rot: 2
-        goto: $PREFIX NS grabbed
+        goto: $PREFIX ANIM_NS grabbed
         delay: 1
 
     if:
@@ -193,8 +194,8 @@ $PREFIX NS grab:
         delay: 1
 
 
-$PREFIX NS grab_flipped:
-    rgraph: $PREFIX NS "roller_grab_flipped"
+$PREFIX ANIM_NS grab_flipped:
+    rgraph: $PREFIX RGRAPH_NS "roller_grab_flipped"
     hitbox:
         ;; .   .
         ;;   */*
@@ -204,14 +205,14 @@ $PREFIX NS grab_flipped:
         key: not isdown u
         key: isdown f
     then:
-        goto: $PREFIX NS stand
+        goto: $PREFIX ANIM_NS stand
         delay: 1
 
     if:
         key: not isdown u
         key: isdown b
     then:
-        goto: $PREFIX NS stand
+        goto: $PREFIX ANIM_NS stand
         turn
         rot: -1
         delay: 1
@@ -235,7 +236,7 @@ $PREFIX NS grab_flipped:
     then:
         move: 1 0
         rot: 2
-        goto: $PREFIX NS grab
+        goto: $PREFIX ANIM_NS grab
         delay: 1
 
     if:
@@ -257,8 +258,8 @@ $PREFIX NS grab_flipped:
         delay: 1
 
 
-$PREFIX NS grabbed:
-    rgraph: $PREFIX NS "roller_grab"
+$PREFIX ANIM_NS grabbed:
+    rgraph: $PREFIX RGRAPH_NS "roller_grab"
     hitbox:
         ;;    .   .
         ;;    *\*
@@ -267,5 +268,5 @@ $PREFIX NS grabbed:
     if:
         key: not isdown u
     then:
-        goto: $PREFIX NS stand
+        goto: $PREFIX ANIM_NS stand
         delay: 1
