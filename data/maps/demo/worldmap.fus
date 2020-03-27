@@ -265,6 +265,12 @@ submaps:
                         camera: (0 0)
                         mapper: ("triple")
                         palette: "data/maps/demo/pals/tunnels.fus"
+                        doors:
+                            :
+                                anim: "anim/rollerplayer.fus"
+                                pos: (70 10)
+                                rot: 0
+                                turn: n
                     :
                         file: "data/maps/demo/tunnels2.fus"
                         pos: eval: (13 1) + (18 8)
