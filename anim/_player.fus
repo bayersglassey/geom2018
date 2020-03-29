@@ -218,6 +218,20 @@ looking_up_spit:
     if() then: goto: looking_up
 
 start_jump:
+
+    $IF PLAYER_FLIER:
+        if:
+            key: wasdown x
+            coll: all no
+                ;;       \*/*
+                ;;        + -
+                ;;       /*\*
+                ;; ( )
+        then:
+            goto: flier_fly
+            move: 2 1
+            delay: 2
+
     if:
         coll: water any yes
             ;;   .   .
@@ -249,19 +263,6 @@ jump:
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-
-    $IF PLAYER_FLIER:
-        if:
-            key: wasdown x
-            coll: all no
-                ;;       \*/*
-                ;;        + -
-                ;;       /*\*
-                ;; ( )
-        then:
-            goto: flier_fly
-            move: 2 1
-            delay: 1
 
     if:
         coll: all yes
