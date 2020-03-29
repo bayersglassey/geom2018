@@ -1,0 +1,24 @@
+
+# Expected vars:
+# PLAYER_HEAD (str), e.g. "player_head"
+# NS (str), e.g. "player_", ""
+
+shapes:
+
+    $PREFIX NS "flier_head":
+        shapes:
+            : $GET_STR PLAYER_HEAD (0 0 0 0) 0 f
+            $IF PLAYER_FLIER:
+                : $PREFIX NS "bleg"  ( 0  0 -2  0) -2 f 0
+                : $PREFIX NS "bleg"  ( 2  0 -2  0) -1 f 0
+
+    $PREFIX NS "flier":
+        shapes:
+            : $PREFIX NS "flier_head" (0 0 0 0) 0 f
+
+    $PREFIX NS "flier_fly":
+        animation: cycle 3
+        shapes:
+            : $PREFIX NS "flier_head" (-2 0 0 0) 0 f  0 (0 1)
+            : $PREFIX NS "flier_head" (-1 0 0 0) 0 f  0 (1 1)
+            : $PREFIX NS "flier_head" ( 0 0 0 0) 0 f  0 (2 1)

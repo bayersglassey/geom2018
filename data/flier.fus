@@ -19,17 +19,13 @@ shapes:
             : "flier_born_sixth" (0 0 0 0)  8 f
             : "flier_born_sixth" (0 0 0 0) 10 f
 
-    "flier_head":
-        shapes:
-            : "player_head" (0 0 0 0) 0 f
 
-    "flier":
-        shapes:
-            : "flier_head" (0 0 0 0) 0 f
+$SET_STR PLAYER_HEAD "player_head"
+$SET_STR NS ""
+$UNSET_BOOL PLAYER_FLIER
+import "data/_flier.fus"
 
-    "flier_fly":
-        animation: cycle 3
-        shapes:
-            : "flier_head" (-2 0 0 0) 0 f  0 (0 1)
-            : "flier_head" (-1 0 0 0) 0 f  0 (1 1)
-            : "flier_head" ( 0 0 0 0) 0 f  0 (2 1)
+$SET_STR PLAYER_HEAD "flierplayer_head"
+$SET_STR NS "flierplayer_"
+$SET_BOOL PLAYER_FLIER
+import "data/_flier.fus"

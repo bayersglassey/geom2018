@@ -1,0 +1,120 @@
+
+# Expected vars:
+# ANIM_NS (str), e.g. "flier_", ""
+# RGRAPH_NS (str), e.g. "flierplayer_", ""
+
+
+$PREFIX ANIM_NS hover:
+    rgraph: $PREFIX RGRAPH_NS "flier"
+    unsafe
+    flying
+    hitbox:
+        ;;   *\*/*
+        ;;   -(+)-
+        ;;   */*\*
+
+    $IF PLAYER_FLIER:
+        if:
+            key: not isdown x
+            coll: all no
+                ;;     \*/*
+                ;; ( )  + -
+                ;;     /*\*
+        then:
+            move: -1 -1
+            goto immediate: start_jump
+
+    if:
+        key: wasdown b
+        key: not wasdown f
+        coll: all no
+            ;;  *\*/*
+            ;;  - + -
+            ;;     \*
+            ;; ( )
+    then:
+        rot: 1
+        move: 1 0
+        goto: $PREFIX ANIM_NS fly
+        delay: 1
+
+    if:
+        key: wasdown b
+        key: not wasdown f
+        coll: all no
+            ;;     \*/*
+            ;; ( )  + -
+            ;;     /*\*
+    then:
+        move: 1 0
+        rot: 1
+        goto: $PREFIX ANIM_NS fly
+        delay: 1
+
+    if:
+        key: wasdown b
+        key: not wasdown f
+    then:
+        rot: 1
+        goto: $PREFIX ANIM_NS fly
+        delay: 1
+
+    if:
+        key: wasdown f
+        key: not wasdown b
+        coll: all no
+            ;; ( )
+            ;;     /*
+            ;;  - + -
+            ;;  */*\*
+    then:
+        rot: -1
+        move: 1 0
+        goto: $PREFIX ANIM_NS fly
+        delay: 1
+
+    if:
+        key: wasdown f
+        key: not wasdown b
+        coll: all no
+            ;;     \*/*
+            ;; ( )  + -
+            ;;     /*\*
+    then:
+        move: 1 0
+        rot: -1
+        goto: $PREFIX ANIM_NS fly
+        delay: 1
+
+    if:
+        key: wasdown f
+        key: not wasdown b
+    then:
+        rot: -1
+        goto: $PREFIX ANIM_NS fly
+        delay: 1
+
+    if:
+        key: wasdown u
+        coll: all no
+            ;;     \*/*
+            ;; ( )  + -
+            ;;     /*\*
+    then:
+        move: 1 0
+        goto: $PREFIX ANIM_NS fly
+        delay: 0
+
+
+$PREFIX ANIM_NS fly:
+    rgraph: $PREFIX RGRAPH_NS "flier_fly"
+    unsafe
+    flying
+    hitbox:
+        ;;   *\*/*
+        ;;   -(+)-
+        ;;   */*\*
+
+    if:
+    then:
+        goto: $PREFIX ANIM_NS hover

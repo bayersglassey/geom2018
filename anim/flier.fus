@@ -32,93 +32,11 @@ born:
         move: 1 0
         delay: 1
 
-hover:
-    rgraph: "flier"
 
-    if:
-        key: wasdown b
-        key: not wasdown f
-        coll: all no
-            ;;  *\*/*
-            ;;  - + -
-            ;;     \*
-            ;; ( )
-    then:
-        rot: 1
-        move: 1 0
-        goto: fly
-        delay: 1
+$SET_STR ANIM_NS ""
+$SET_STR RGRAPH_NS ""
+import "anim/_flier.fus"
 
-    if:
-        key: wasdown b
-        key: not wasdown f
-        coll: all no
-            ;;     \*/*
-            ;; ( )  + -
-            ;;     /*\*
-    then:
-        move: 1 0
-        rot: 1
-        goto: fly
-        delay: 1
-
-    if:
-        key: wasdown b
-        key: not wasdown f
-    then:
-        rot: 1
-        goto: fly
-        delay: 1
-
-    if:
-        key: wasdown f
-        key: not wasdown b
-        coll: all no
-            ;; ( )
-            ;;     /*
-            ;;  - + -
-            ;;  */*\*
-    then:
-        rot: -1
-        move: 1 0
-        goto: fly
-        delay: 1
-
-    if:
-        key: wasdown f
-        key: not wasdown b
-        coll: all no
-            ;;     \*/*
-            ;; ( )  + -
-            ;;     /*\*
-    then:
-        move: 1 0
-        rot: -1
-        goto: fly
-        delay: 1
-
-    if:
-        key: wasdown f
-        key: not wasdown b
-    then:
-        rot: -1
-        goto: fly
-        delay: 1
-
-    if:
-        key: wasdown u
-        coll: all no
-            ;;     \*/*
-            ;; ( )  + -
-            ;;     /*\*
-    then:
-        move: 1 0
-        goto: fly
-        delay: 0
-
-fly:
-    rgraph: "flier_fly"
-    if:
-    then:
-        goto: hover
-
+dead:
+    rgraph: "dead"
+    if() then: die

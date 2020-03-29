@@ -17,7 +17,7 @@ submaps:
                 rot: 0
                 turn: y
             :
-                anim: "anim/rollerplayer.fus"
+                anim: "anim/flierplayer.fus"
                 pos: (0 0)
                 rot: 0
                 turn: n

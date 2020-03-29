@@ -250,6 +250,19 @@ jump:
         ;;   */*\*
         ;;  (.)  .
 
+    $IF PLAYER_FLIER:
+        if:
+            key: wasdown x
+            coll: all no
+                ;;       \*/*
+                ;;        + -
+                ;;       /*\*
+                ;; ( )
+        then:
+            goto: flier_fly
+            move: 2 1
+            delay: 1
+
     if:
         coll: all yes
             ;;        +
