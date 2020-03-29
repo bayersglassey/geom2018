@@ -20,6 +20,7 @@ typedef struct state {
     hexcollmap_t *hitbox;
     bool crushes;
     bool safe;
+    bool flying;
     ARRAY_DECL(struct state_rule*, rules)
 } state_t;
 

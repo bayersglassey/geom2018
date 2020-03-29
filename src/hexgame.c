@@ -130,14 +130,19 @@ int camera_step(camera_t *camera){
 
     /* Set camera */
     int camera_type = -1;
-    if(camera->follow)camera_type = 1;
+    if(
+        camera->follow ||
+        (body && body->state && body->state->flying)
+    )camera_type = 1;
     else if(camera->cur_submap != NULL){
         camera_type = camera->cur_submap->camera_type;}
     if(camera_type == 0){
+        /* camera determined by submap */
         vec_cpy(space->dims, camera->pos,
             camera->cur_submap->camera_pos);
         camera->rot = 0;
     }else if(camera_type == 1){
+        /* body-following camera */
         if(body != NULL){
             vec_cpy(space->dims, camera->pos,
                 body->pos);

@@ -568,7 +568,7 @@ int test_app_mainloop_step(test_app_t *app){
                             "Press jump or %i to retry from last save point.\n",
                             i+1);
                         line_y += app->font.char_h * 3;
-                    }else if(body->out_of_bounds){
+                    }else if(body->out_of_bounds && !body->state->flying){
                         FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y),
                             "You jumped off the map!\n"
                             "Press jump to retry from where you jumped.\n"

@@ -292,7 +292,7 @@ int player_step(player_t *player, hexgame_t *game){
 
     /* Respawn body if player hit the right key while dead */
     if(
-        (body->dead || body->out_of_bounds) &&
+        (body->dead || (body->out_of_bounds && !body->state->flying)) &&
         body->keyinfo.wasdown[KEYINFO_KEY_U]
     ){
         /* Soft reset */
@@ -346,7 +346,7 @@ int player_step(player_t *player, hexgame_t *game){
                 standing_flat = body->rot == 0 || body->rot == 2;
             }
 
-            if(!standing_flat){
+            if(!standing_flat || !body->state->safe){
                 savepoint_submap = NULL;
                 door_submap = NULL;
             }else{

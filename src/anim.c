@@ -337,6 +337,10 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             NEXT
             state->safe = false;
         }
+        if(GOT("flying")){
+            NEXT
+            state->flying = true;
+        }
         if(GOT("crushes")){
             NEXT
             state->crushes = true;
@@ -486,6 +490,7 @@ int state_init(state_t *state, stateset_t *stateset, char *name,
     state->rgraph = rgraph;
     state->hitbox = NULL;
     state->safe = true;
+    state->flying = false;
     state->crushes = false;
     ARRAY_INIT(state->rules)
     return 0;
