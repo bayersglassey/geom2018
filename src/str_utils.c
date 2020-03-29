@@ -33,12 +33,15 @@ char *strdupcat(const char *s1, const char *s2){
     return s3;
 }
 
+#ifdef _WANT_STRNLEN
 size_t strnlen(const char *s, size_t maxlen){
     size_t len = 0;
     while(len < maxlen && s[len] != '\0')len++;
     return len;
 }
+#endif
 
+#ifdef _WANT_STRNDUP
 char *strndup(const char *s1, size_t len){
     size_t s_len = strnlen(s1, len);
     char *s2 = malloc(s_len + 1);
@@ -47,6 +50,7 @@ char *strndup(const char *s1, size_t len){
     s2[s_len] = '\0';
     return s2;
 }
+#endif
 
 int strlen_of_int(int i){
     /* Basically log(i), except that strlen of "0" is 1, and strlen of a

@@ -16,7 +16,7 @@ fi
 MAIN_C="src/main_demo.c"
 
 CFLAGS=""
-CFLAGS+=" -std=c99 -Wall -Werror -Wno-unused -Wno-missing-braces"
+CFLAGS+=" -std=c99 -Wall -Werror -Wno-unused -Wno-missing-braces -Wno-tautological-compare"
 
 SOURCES=""
 SOURCES+=" src/anim.c src/hexmap.c src/hexmap_hexcollmap.c"
@@ -34,7 +34,7 @@ then
     CC="gcc"
     OUTFILE="main"
     CFLAGS+=" `sdl2-config --libs --cflags`"
-    CFLAGS+=" -DGEOM_HEXGAME_DEBUG_FRAMERATE"
+    CFLAGS+=" -DGEOM_HEXGAME_DEBUG_FRAMERATE -D_WANT_STRNLEN -D_WANT_STRNDUP"
     if [ "$RELEASE" = 1 ]
     then
         CFLAGS+=" -O2"
