@@ -1,4 +1,28 @@
 
+# Expected vars:
+# PLAYER_HEAD (str), e.g. "player_head"
+# NS (str), e.g. "player_", ""
+
+shapes:
+
+    $PREFIX NS "flier_head":
+        shapes:
+            : $GET_STR PLAYER_HEAD (0 0 0 0) 0 f
+            #$IF PLAYER_FLIER:
+            #    : $PREFIX NS "bleg"  ( 0  0 -2  0) -2 f 0
+            #    : $PREFIX NS "bleg"  ( 2  0 -2  0) -1 f 0
+
+    $PREFIX NS "flier":
+        shapes:
+            : $PREFIX NS "flier_head" (0 0 0 0) 0 f
+
+    $PREFIX NS "flier_fly":
+        animation: cycle 3
+        shapes:
+            : $PREFIX NS "flier_head" (-2 0 0 0) 0 f  0 (0 1)
+            : $PREFIX NS "flier_head" (-1 0 0 0) 0 f  0 (1 1)
+            : $PREFIX NS "flier_head" ( 0 0 0 0) 0 f  0 (2 1)
+
 
 shapes:
     "l.red_sq": shapes: : "sq" (0 0 0 0) 0 f "l.red"
@@ -237,307 +261,33 @@ shapes:
     "txt_secret":
         text: "geomfont1" "Secret Room..."
 
+$SET_STR NS player_
+$UNSET_BOOL PLAYER_SPIKEY
+$UNSET_BOOL PLAYER_ROLLER
+$UNSET_BOOL PLAYER_FLIER
+import "data/_player.fus"
+
+$SET_STR NS spikeyplayer_
+$SET_BOOL PLAYER_SPIKEY
+$UNSET_BOOL PLAYER_ROLLER
+$UNSET_BOOL PLAYER_FLIER
+import "data/_player.fus"
+
+$SET_STR NS rollerplayer_
+$UNSET_BOOL PLAYER_SPIKEY
+$SET_BOOL PLAYER_ROLLER
+$UNSET_BOOL PLAYER_FLIER
+import "data/_player.fus"
+
+$SET_STR NS flierplayer_
+$UNSET_BOOL PLAYER_SPIKEY
+$UNSET_BOOL PLAYER_ROLLER
+$SET_BOOL PLAYER_FLIER
+import "data/_player.fus"
+
 shapes:
 
-    ##########
-    # PLAYER #
-    ##########
-
-    #      -+   .   +-
-    #     / |       | \
-    #   +-  |       |  -+
-    #   | \ |       | / |
-    #  /   -+   .   +-   \
-    # |     |       |     |
-    # +-   /         \   -+
-    # | \ |           | / |
-    # |  -+   .   .   +-  |
-    # | /               \ |
-    # 0-                 -+
-
-    "player_leg":
-        prismels:
-            : "tri" (  0 -1 -1 -1)  1 f eval: 1 + 8 + 3
-            : "sq"  (  0  0 -1 -1)  2 f eval: 1 + 8 + 3
-            : "tri" (  0  0  0 -1)  3 f eval: 1 + 8 + 5
-
-    "_player_head_sixth":
-        prismels:
-            : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 4
-            : "tri" (1 0 0 0) 11 f eval: 1 + 8 + 2
-            : "sq"  (1 0 0 0)  1 f eval: 1 + 8 + 1
-
-    "_player_head":
-        shapes:
-            : "_player_head_sixth" (0 0 0 0)  0 f
-            : "_player_head_sixth" (0 0 0 0)  2 f
-            : "_player_head_sixth" (0 0 0 0)  4 f
-            : "_player_head_sixth" (0 0 0 0)  6 f
-            : "_player_head_sixth" (0 0 0 0)  8 f
-            : "_player_head_sixth" (0 0 0 0) 10 f
-
-    "player_head":
-        shapes:
-            : "_player_head" (0 0 0 0) 0 f
-        prismels:
-            : "sq"  (1 1 0 -1) 0 f eval: 1 + 8 + 1
-            : "tri" (2 1 0 -1) 1 f eval: 1 + 8 + 2
-
-    "player_stand":
-        shapes:
-            : "player_head" ( 0  1  3  1)  0 f
-            : "player_leg"  ( 0  1  1  1)  0 f
-            : "player_leg"  ( 2  1  1  1)  6 t
-
-    "player_look_up":
-        shapes:
-            : "player_head" ( 0  1  3  1)  1 f
-            : "player_leg"  ( 0  1  1  1)  0 f
-            : "player_leg"  ( 2  1  1  1)  6 t
-
-    "player_looking_up":
-        shapes:
-            : "player_head" ( 0  1  3  1)  2 f
-            : "player_leg"  ( 0  1  1  1)  0 f
-            : "player_leg"  ( 2  1  1  1)  6 t
-
-    "player_step":
-        animation: cycle 4
-        shapes:
-            : "player_head" (-1  0  3  1)  0 f  0 (0 1)
-            : "player_head" ( 0  0  3  1)  0 f  0 (1 1)
-            : "player_head" ( 0  1  3  1)  0 f  0 (2 1)
-            : "player_head" ( 0  1  3  1)  0 f  0 (3 1)
-            : "player_leg"  (-1  1  1  1)  0 f
-            : "player_leg"  ( 2  1  1  1)  6 t
-
-    "player_spit":
-        animation: cycle 10
-        shapes:
-            # Player stand:
-            #: "player_head" ( 0  1  3  1)  0 f  0 (6 1)
-            #: "player_leg"  ( 0  1  1  1)  0 f  0 (6 1)
-            #: "player_leg"  ( 2  1  1  1)  6 t  0 (6 1)
-
-            # Head
-            : "player_head" (-2  1  3  1)  0 f  0 (0 1)
-            : "player_head" (-2  0  3  1)  0 f  0 (1 4)
-            : "player_head" (-2  1  3  1)  0 f  0 (5 1)
-            : "player_head" (-1  1  3  1)  0 f  0 (6 1)
-            : "player_head" ( 0  1  3  1)  0 f  0 (7 3)
-
-            # Back leg
-            : "player_leg"  (-1  1  1  1)  0 f  0 (0 1)
-            : "player_leg"  (-2  1  1  1)  1 f  0 (1 5)
-            : "player_leg"  (-1  1  1  1)  0 f  0 (6 1)
-            : "player_leg"  ( 0  1  1  1)  0 f  0 (7 3)
-
-            # Front leg
-            : "player_leg"  ( 1  1  1  1)  7 t  0 (0 1)
-            : "player_leg"  ( 0  1  1  1)  7 t  0 (1 1)
-            : "player_leg"  ( 0  1  1  1)  6 t  0 (2 7)
-            : "player_leg"  ( 1  1  1  1)  6 t  0 (9 1)
-
-    "player_looking_up_spit":
-        animation: cycle 10
-        shapes:
-            # Player stand:
-            #: "player_head" ( 0  1  3  1)  0 f  0 (6 1)
-            #: "player_leg"  ( 0  1  1  1)  0 f  0 (6 1)
-            #: "player_leg"  ( 2  1  1  1)  6 t  0 (6 1)
-
-            # Head
-            : "player_head" (-2  1  3  1)  2 f  0 (0 1)
-            : "player_head" (-2  0  3  1)  2 f  0 (1 4)
-            : "player_head" (-2  1  3  1)  2 f  0 (5 1)
-            : "player_head" (-1  1  3  1)  2 f  0 (6 1)
-            : "player_head" ( 0  1  3  1)  2 f  0 (7 3)
-
-            # Back leg
-            : "player_leg"  (-1  1  1  1)  0 f  0 (0 1)
-            : "player_leg"  (-2  1  1  1)  1 f  0 (1 5)
-            : "player_leg"  (-1  1  1  1)  0 f  0 (6 1)
-            : "player_leg"  ( 0  1  1  1)  0 f  0 (7 3)
-
-            # Front leg
-            : "player_leg"  ( 1  1  1  1)  7 t  0 (0 1)
-            : "player_leg"  ( 0  1  1  1)  7 t  0 (1 1)
-            : "player_leg"  ( 0  1  1  1)  6 t  0 (2 7)
-            : "player_leg"  ( 1  1  1  1)  6 t  0 (9 1)
-
-    "player_crawl_spit":
-        animation: cycle 10
-        shapes:
-            # Player crawl:
-            #: "player_head" ( 0  1  2  0)  0 f
-            #: "player_leg"  (-1  1  1  1)  0 f
-            #: "player_leg"  ( 2  1  1  1)  6 t
-
-            # Head
-            : "player_head" (-2  1  2  0)  0 f  0 (0 1)
-            : "player_head" (-2  0  2  0)  0 f  0 (1 4)
-            : "player_head" (-2  1  2  0)  0 f  0 (5 1)
-            : "player_head" (-1  1  2  0)  0 f  0 (6 1)
-            : "player_head" ( 0  1  2  0)  0 f  0 (7 3)
-
-            # Back leg
-            : "player_leg"  (-2  1  1  1)  0 f  0 (0 1)
-            : "player_leg"  (-3  1  1  1)  1 f  0 (1 5)
-            : "player_leg"  (-2  1  1  1)  0 f  0 (6 1)
-            : "player_leg"  (-1  1  1  1)  0 f  0 (7 3)
-
-            # Front leg
-            : "player_leg"  ( 1  1  1  1)  7 t  0 (0 1)
-            : "player_leg"  ( 0  1  1  1)  7 t  0 (1 1)
-            : "player_leg"  ( 0  1  1  1)  6 t  0 (2 7)
-            : "player_leg"  ( 1  1  1  1)  6 t  0 (9 1)
-
-    "player_crawl_looking_up_spit":
-        animation: cycle 10
-        shapes:
-            # player_crawl_looking_up:
-            #: "player_head" ( 3  1  1  1)  2 f
-            #: "player_leg"  ( 1  1  1  1)  0 f
-            #: "player_leg"  ( 4  2  0  0)  5 t
-
-            # Head
-            : "player_head" ( 1  1  1  1)  2 f  0 (0 1)
-            : "player_head" ( 1  0  1  1)  2 f  0 (1 4)
-            : "player_head" ( 1  1  1  1)  2 f  0 (5 1)
-            : "player_head" ( 2  1  1  1)  2 f  0 (6 1)
-            : "player_head" ( 3  1  1  1)  2 f  0 (7 3)
-
-            # Back leg
-            : "player_leg"  ( 0  1  1  1)  0 f  0 (0 1)
-            : "player_leg"  (-1  1  1  1)  1 f  0 (1 5)
-            : "player_leg"  ( 0  1  1  1)  0 f  0 (6 1)
-            : "player_leg"  ( 1  1  1  1)  0 f  0 (7 3)
-
-            # Front leg
-            : "player_leg"  ( 2  2  1  0)  7 t  0 (0 1)
-            : "player_leg"  ( 1  2  1  0)  7 t  0 (1 1)
-            : "player_leg"  ( 1  2  1  0)  6 t  0 (2 7)
-            : "player_leg"  ( 2  2  1  0)  6 t  0 (9 1)
-
-    "_player_swim_spit_leg":
-        animation: cycle 10
-        shapes:
-            # Front leg
-            : "player_leg"  ( 0  2  1  0)  7 t  0 (0 1)
-            : "player_leg"  ( 0  1  1  0)  8 t  0 (1 1)
-            : "player_leg"  ( 0  0  1  0)  8 t  0 (2 1)
-            : "player_leg"  ( 0  0  1  0)  7 t  0 (3 1)
-            : "player_leg"  ( 0  0  1  0)  6 t  0 (4 1)
-            : "player_leg"  ( 0  0  1  0)  5 t  0 (5 1)
-            : "player_leg"  ( 1  0  1  0)  4 t  0 (6 1)
-            : "player_leg"  ( 1  1  1  0)  4 t  0 (7 1)
-            : "player_leg"  ( 1  2  1  0)  4 t  0 (8 1)
-            : "player_leg"  ( 1  3  1  0)  5 t  0 (9 1)
-
-    "player_swim_spit":
-        animation: cycle 10
-        shapes:
-            # Head
-            : "player_head" (-2  1  3  0)  1 f  0 (0 1)
-            : "player_head" (-2  0  3  0)  1 f  0 (1 1)
-            : "player_head" (-2 -1  3  0)  1 f  0 (2 2)
-            : "player_head" (-1 -1  3  0)  1 f  0 (4 1)
-            : "player_head" ( 0 -1  3  0)  0 f  0 (5 1)
-            : "player_head" ( 0  0  3  0)  0 f  0 (6 1)
-            : "player_head" ( 0  1  3  0)  0 f  0 (7 1)
-            : "player_head" ( 0  1  4  0)  0 f  0 (8 1)
-            : "player_head" ( 0  2  3  1)  0 f  0 (9 1)
-
-            # Back leg
-            : "_player_swim_spit_leg" (-1 -1 0 1) 0 f
-
-            # Front leg
-            : "_player_swim_spit_leg" ( 0  0 0 0) 0 f
-
-    "_player_jump":
-        shapes:
-            : "player_head" ( 0  1  3  1)  0 f
-            : "player_leg"  ( 0  1  1  1) 10 f
-            : "player_leg"  ( 2  1  1  1)  7 t
-
-    "player_jump":
-        animation: cycle 3
-        shapes:
-            # The following is very "smooth", but somehow ends up looking
-            # strange compared to the version below which pauses on the
-            # first frame. *shrug*
-            #: "_player_jump" (-2 0 0  0) 0 f  0 (0 1)
-            #: "_player_jump" (-1 0 0  0) 0 f  0 (1 1)
-            #: "_player_jump" ( 0 0 0  0) 0 f  0 (2 1)
-
-            : "_player_jump" (-1 0 0  0) 0 f  0 (0 2)
-            : "_player_jump" ( 0 0 0  0) 0 f  0 (2 1)
-
-    "player_swim_jump":
-        animation: cycle 5
-        shapes:
-            : "_player_jump" (-2 0 0  0) 0 f  0 (0 1)
-            : "_player_jump" (-1 0 0  0) 0 f  0 (1 2)
-            : "_player_jump" ( 0 0 0  0) 0 f  0 (3 2)
-
-    "player_crawl":
-        shapes:
-            : "player_head" ( 0  1  2  0)  0 f
-            : "player_leg"  (-1  1  1  1)  0 f
-            : "player_leg"  ( 2  1  1  1)  6 t
-
-    "player_crawl_look_up":
-        shapes:
-            : "player_head" ( 1  1  2  0)  1 f
-            : "player_leg"  ( 1  0  2  1) 11 f
-            : "player_leg"  ( 3  1  1  1)  5 t
-
-    "player_crawl_looking_up":
-        shapes:
-            : "player_head" ( 3  1  1  1)  2 f
-            : "player_leg"  ( 1  1  1  1)  0 f
-            : "player_leg"  ( 4  2  0  0)  5 t
-
-
-    "player_crawl_step":
-        animation: cycle 3
-        shapes:
-            : "player_head" (-1  0  2  1)  1 f  0 (0 1)
-            : "player_head" ( 0  0  2  1)  1 f  0 (1 1)
-            : "player_head" ( 0  1  2  0)  1 f  0 (2 1)
-            : "player_leg"  (-1  1  1  1)  0 f
-            : "player_leg"  ( 2  1  1  2)  7 t  0 (0 1)
-            : "player_leg"  ( 3  1  1  2)  6 t  0 (1 1)
-            : "player_leg"  ( 3  1  1  1)  6 t  0 (2 1)
-
-    "player_swim":
-        animation: cycle 12
-        shapes:
-            : "player_head" ( 0  1  3  2)  0 f 0 ( 0 2)
-            : "player_leg"  ( 0  1  1  2)  1 f 0 ( 0 2)
-            : "player_leg"  ( 2  1  1  2)  5 t 0 ( 0 2)
-
-            : "player_head" ( 0  1  3  3)  0 f 0 ( 2 2)
-            : "player_leg"  ( 0  1  1  3)  1 f 0 ( 2 2)
-            : "player_leg"  ( 2  1  1  3)  5 t 0 ( 2 2)
-
-            : "player_head" ( 0  1  3  3)  0 f 0 ( 4 2)
-            : "player_leg"  ( 0  1  1  3)  0 f 0 ( 4 2)
-            : "player_leg"  ( 2  1  1  3)  6 t 0 ( 4 2)
-
-            : "player_head" ( 0  1  3  2)  0 f 0 ( 6 2)
-            : "player_leg"  ( 0  1  1  2)  0 f 0 ( 6 2)
-            : "player_leg"  ( 2  1  1  2)  6 t 0 ( 6 2)
-
-            : "player_head" ( 0  1  3  1)  0 f 0 ( 8 2)
-            : "player_leg"  ( 0  1  1  1) -1 f 0 ( 8 2)
-            : "player_leg"  ( 2  1  1  1)  7 t 0 ( 8 2)
-
-            : "player_head" ( 0  1  3  0)  0 f 0 (10 2)
-            : "player_leg"  ( 0  1  1  0) -2 f 0 (10 2)
-            : "player_leg"  ( 2  1  1  0)  8 t 0 (10 2)
-
-    "player_dead_particle":
+    "dead_particle":
         animation: cycle 6
         prismels:
             : "tri" (1 0 0 0)  0 f eval(1 + 8 + 3)  (0 1)
@@ -547,13 +297,13 @@ shapes:
             : "tri" (5 0 0 0)  8 f eval(1 + 8 + 4)  (4 1)
             : "tri" (6 0 0 0) 10 f eval(1 + 8 + 5)  (5 1)
 
-    "player_dead":
+    "dead":
         animation: cycle 6
         shapes:
-            : "player_dead_particle" (0 1 3 1) 1 f  0+
-            : "player_dead_particle" (0 1 3 1) 3 f  2+
-            : "player_dead_particle" (0 1 3 1) 6 f  3+
-            : "player_dead_particle" (0 1 3 1) 9 f  5+
+            : "dead_particle" (0 1 3 1) 1 f  0+
+            : "dead_particle" (0 1 3 1) 3 f  2+
+            : "dead_particle" (0 1 3 1) 6 f  3+
+            : "dead_particle" (0 1 3 1) 9 f  5+
 
     "_spit":
         prismels:
@@ -572,10 +322,10 @@ shapes:
     "spit_dead":
         animation: once 12
         shapes:
-            : "player_dead_particle" (0 1 3 1) 1 f  0+ (0 6)
-            : "player_dead_particle" (0 1 3 1) 3 f -2+ (2 6)
-            : "player_dead_particle" (0 1 3 1) 6 f -3+ (3 6)
-            : "player_dead_particle" (0 1 3 1) 9 f -5+ (5 6)
+            : "dead_particle" (0 1 3 1) 1 f  0+ (0 6)
+            : "dead_particle" (0 1 3 1) 3 f -2+ (2 6)
+            : "dead_particle" (0 1 3 1) 6 f -3+ (3 6)
+            : "dead_particle" (0 1 3 1) 9 f -5+ (5 6)
 
     "spit_crouch_fly":
         shapes:
@@ -590,10 +340,10 @@ shapes:
     "spit_crouch_dead":
         animation: once 12
         shapes:
-            : "player_dead_particle" (1 1 2 0) 1 f  0+ (0 6)
-            : "player_dead_particle" (1 1 2 0) 3 f -2+ (2 6)
-            : "player_dead_particle" (1 1 2 0) 6 f -3+ (3 6)
-            : "player_dead_particle" (1 1 2 0) 9 f -5+ (5 6)
+            : "dead_particle" (1 1 2 0) 1 f  0+ (0 6)
+            : "dead_particle" (1 1 2 0) 3 f -2+ (2 6)
+            : "dead_particle" (1 1 2 0) 6 f -3+ (3 6)
+            : "dead_particle" (1 1 2 0) 9 f -5+ (5 6)
 
     "_coin":
         prismels:
@@ -626,6 +376,7 @@ shapes:
             : "coin" (1 1 1 0)  0 f
 
     "coin_dead":
+        # Empty!.. when you pick up a coin, it "disappears"...
 
 shapes:
 
@@ -1039,6 +790,100 @@ collmap:
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
 
+# Expected vars:
+# NS (str), e.g. "player_", ""
+
+shapes:
+
+    $PREFIX NS "_roller_body_hollow_third":
+
+        prismels:
+
+            #   +
+            #   |
+            #  / \
+            # |   |
+            # +---+-
+            # |   | \
+            # |   |  -+
+            # |   | / |
+            # +---+-   \
+            #     |     |
+            #      \   -+
+            #       | / |
+            #   0   +-  |
+            #         \ |
+            #          -+
+
+            : "sq"  (-1 0 1 0)  0 f eval: 1 + 8 + 1
+            : "tri" (-1 0 1 1)  0 f eval: 1 + 1
+
+            : "tri" ( 0 0 1 0)  1 f eval: 1 + 1
+            : "sq"  ( 1 0 0 0)  1 f eval: 1 + 8 + 1
+            : "tri" ( 1 0 0 0) 11 f eval: 1 + 1
+
+    $PREFIX NS "_roller_body_third":
+        shapes:
+            : $PREFIX NS "_roller_body_hollow_third" (0 0 0 0) 0 f
+        prismels:
+            $IF PLAYER_ROLLER:
+                : "tri" ( 0 0 0 0)  0 f eval: 1 + 8 + 4
+                : "tri" ( 0 0 0 0)  2 f eval: 1 + 8 + 4
+            $IF !PLAYER_ROLLER:
+                : "tri" ( 0 0 0 0)  0 f eval: 1 + 8 + 3
+                : "tri" ( 0 0 0 0)  2 f eval: 1 + 8 + 3
+
+    $PREFIX NS "_roller_body":
+        shapes:
+            : $PREFIX NS "_roller_body_third" (0 0 0 0)  0 f
+            : $PREFIX NS "_roller_body_third" (0 0 0 0)  4 f
+            : $PREFIX NS "_roller_body_third" (0 0 0 0)  8 f
+
+    $PREFIX NS "_roller_body_hollow":
+        shapes:
+            : $PREFIX NS "_roller_body_hollow_third" (0 0 0 0)  0 f
+            : $PREFIX NS "_roller_body_hollow_third" (0 0 0 0)  4 f
+            : $PREFIX NS "_roller_body_hollow_third" (0 0 0 0)  8 f
+
+    $PREFIX NS "roller_body":
+        shapes:
+            : $PREFIX NS "_roller_body" (1 1 1 0) 0 f
+
+    $PREFIX NS "roller_body_hollow":
+        shapes:
+            : $PREFIX NS "_roller_body_hollow" (1 1 1 0) 0 f
+
+    $PREFIX NS "roller_foot":
+        prismels:
+            : "sq" (0 0 0 0)  0 f eval: 1 + 8 + 3
+            : "sq" (0 0 0 0)  3 f eval: 1 + 8 + 3
+            : "sq" (0 0 0 0)  6 f eval: 1 + 8 + 3
+            : "sq" (0 0 0 0)  9 f eval: 1 + 8 + 3
+
+
+shapes:
+
+    $PREFIX NS "roller":
+        shapes:
+            : $PREFIX NS "roller_body" (0 0 0 0) 0 f
+            : $PREFIX NS "roller_foot" (0 0 0 0) 0 f
+        $IF PLAYER_ROLLER:
+            prismels:
+                # Player's "nose"
+                : "tri" (2 2 1 0) 2 f eval: 1 + 8 + 2
+
+    $PREFIX NS "roller_grab":
+        shapes:
+            : $PREFIX NS "roller_body" (0 0 0  0) 0 f
+            : $PREFIX NS "roller_body_hollow" (3 2 0 -1) 2 f
+            : $PREFIX NS "roller_foot" (0 0 0  0) 0 f
+
+    $PREFIX NS "roller_grab_flipped":
+        shapes:
+            : $PREFIX NS "roller_body" (0 0 0  0) 0 f
+            : $PREFIX NS "roller_body_hollow" (0 0 0  0) 2 f
+            : $PREFIX NS "roller_foot" (0 0 0  0) 0 f
+
 prismels:
 
     "vert":
@@ -1213,11 +1058,11 @@ import "data/texts.fus"
 import "data/maps/test/tiles.fus"
 import "data/maps/demo/tilesets/water_tiles.fus"
 import "data/maps/trees/tilesets/bark_tiles.fus"
-import "data/player.fus"
 import "data/roller.fus"
-import "data/hexroller.fus"
-import "data/flier.fus"
 import "data/bird.fus"
+import "data/player.fus"
+import "data/flier.fus"
+import "data/hexroller.fus"
 
 collmap:
     ;;
@@ -1277,20 +1122,396 @@ shapes:
             : "flier_born_sixth" (0 0 0 0)  8 f
             : "flier_born_sixth" (0 0 0 0) 10 f
 
-    "flier_head":
-        shapes:
-            : "player_head" (0 0 0 0) 0 f
 
-    "flier":
-        shapes:
-            : "flier_head" (0 0 0 0) 0 f
+$SET_STR PLAYER_HEAD "player_head"
+$SET_STR NS ""
+$UNSET_BOOL PLAYER_FLIER
+import "data/_flier.fus"
 
-    "flier_fly":
+$SET_STR PLAYER_HEAD "flierplayer_head"
+$SET_STR NS "flierplayer_"
+$SET_BOOL PLAYER_FLIER
+import "data/_flier.fus"
+
+# Expected vars:
+# NS (str), e.g. "player_"
+
+shapes:
+
+    ##########
+    # PLAYER #
+    ##########
+
+    # Both legs shown with origin of player:
+    #
+    #      -+   .   +-
+    #     / |       | \
+    #   +-  |       |  -+
+    #   | \ |       | / |
+    #  /   -+   .   +-   \
+    # |     |       |     |
+    # +-   /         \   -+
+    # | \ |           | / |
+    # |  -+   .   .   +-  |
+    # | /               \ |
+    # 0-                 -+
+
+    # One leg shown with its origin:
+    #
+    #      -0
+    #     / |
+    #   +-  |
+    #   | \ |
+    #  /   -+
+    # |     |
+    # +-   /
+    # | \ |
+    # |  -+
+    # | /
+    # +-
+
+    $PREFIX NS "bleg":
+        prismels:
+            : "tri" (  0 -1  0  0) 11 f eval: 1 + 8 + 5
+            : "sq"  (  0 -1 -1  0) 11 f eval: 1 + 8 + 3
+            : "tri" (  0 -1 -1 -1)  1 f eval: 1 + 8 + 3
+
+    $PREFIX NS "fleg":
+        shapes:
+            # For historical reasons, "bleg" and "fleg" look exactly the same,
+            # just "fleg" is usually rotated 180 degrees wherever its used...
+            # However, they're separate in case we ever want to tweak one.
+            : $PREFIX NS "bleg" (0 0 0 0) 0 f
+
+    $PREFIX NS "_head_sixth":
+        #      _ +
+        #    +    \
+        #   / \  _ +
+        # (+)- + _ |
+        #          +
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 4
+            : "tri" (1 0 0 0) 11 f eval: 1 + 8 + 2
+            : "sq"  (1 0 0 0)  1 f eval: 1 + 8 + 1
+
+    $PREFIX NS "_head_spike":
+        prismels:
+            : "tri" (0 1 1 0) 10 f eval: 1 + 8 + 5
+
+    $PREFIX NS "_head_spike_long":
+        prismels:
+            : "sq"  (0 1 1 0) 10 f eval: 1 + 0 + 5
+            : "tri" (0 2 1 0) 10 f eval: 1 + 8 + 5
+
+    $PREFIX NS "_head":
+        $IF PLAYER_ROLLER:
+            shapes:
+                : "_roller_body_hollow" (0 0 0 0)  0 f
+            prismels:
+                # Got to add the eye by hand, as it were
+                : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 4
+                : "tri" (0 0 0 0)  2 f eval: 1 + 8 + 4
+                : "tri" (0 0 0 0)  4 f eval: 1 + 8 + 4
+                : "tri" (0 0 0 0)  6 f eval: 1 + 8 + 4
+                : "tri" (0 0 0 0)  8 f eval: 1 + 8 + 4
+                : "tri" (0 0 0 0) 10 f eval: 1 + 8 + 4
+        $IF !PLAYER_ROLLER:
+            shapes:
+                : $PREFIX NS "_head_sixth" (0 0 0 0)  0 f
+                : $PREFIX NS "_head_sixth" (0 0 0 0)  2 f
+                : $PREFIX NS "_head_sixth" (0 0 0 0)  4 f
+                : $PREFIX NS "_head_sixth" (0 0 0 0)  6 f
+                : $PREFIX NS "_head_sixth" (0 0 0 0)  8 f
+                : $PREFIX NS "_head_sixth" (0 0 0 0) 10 f
+            $IF PLAYER_FLIER:
+                prismels:
+                    : "dia" (-1  0  1  1)  6 f eval: 1 + 8 + 1
+                    : "tri" (-1 -1  0  0)  3 f eval: 1 + 8 + 1
+                    : "dia" ( 0  0 -1 -1)  5 f eval: 1 + 8 + 1
+
+    $PREFIX NS "nose":
+        prismels:
+            : "sq"  (0 0 0 0) 0 f eval: 1 + 8 + 1
+            : "tri" (1 0 0 0) 1 f eval: 1 + 8 + 2
+
+    $PREFIX NS "head":
+        shapes:
+            : $PREFIX NS "_head" (0 0 0 0) 0 f
+            : $PREFIX NS "nose" (1 1 0 -1) 0 f
+            $IF PLAYER_SPIKEY:
+                : $PREFIX NS "_head_spike" (0 0 0 0)  0 f
+                : $PREFIX NS "_head_spike" (0 0 0 0)  2 f
+                : $PREFIX NS "_head_spike" (0 0 0 0)  4 f
+                : $PREFIX NS "_head_spike" (0 0 0 0)  6 f
+
+    $PREFIX NS "crawl_head":
+        shapes:
+            : $PREFIX NS "_head" (0 0 0 0) 0 f
+            $IF PLAYER_SPIKEY:
+                : $PREFIX NS "_head_spike_long" (0 0 0 0)  0 f
+                : $PREFIX NS "_head_spike"      (0 0 0 0)  1 f
+                : $PREFIX NS "_head_spike_long" (0 0 0 0)  2 f
+                : $PREFIX NS "_head_spike"      (0 0 0 0)  3 f
+                : $PREFIX NS "_head_spike_long" (0 0 0 0)  4 f
+                : $PREFIX NS "_head_spike"      (0 0 0 0)  5 f
+                : $PREFIX NS "_head_spike_long" (0 0 0 0)  6 f
+        prismels:
+            : "sq"  (1 1 0 -1) 0 f eval: 1 + 8 + 1
+            : "tri" (2 1 0 -1) 1 f eval: 1 + 8 + 2
+
+    $PREFIX NS "stand":
+        shapes:
+            : $PREFIX NS "head" ( 0  1  3  1)  0 f
+            : $PREFIX NS "bleg"  ( 0  1  1  1)  0 f
+            : $PREFIX NS "fleg"  ( 2  1  1  1)  6 t
+
+    $PREFIX NS "look_up":
+        shapes:
+            : $PREFIX NS "head" ( 0  1  3  1)  1 f
+            : $PREFIX NS "bleg"  ( 0  1  1  1)  0 f
+            : $PREFIX NS "fleg"  ( 2  1  1  1)  6 t
+
+    $PREFIX NS "looking_up":
+        shapes:
+            : $PREFIX NS "head" ( 0  1  3  1)  2 f
+            : $PREFIX NS "bleg"  ( 0  1  1  1)  0 f
+            : $PREFIX NS "fleg"  ( 2  1  1  1)  6 t
+
+    $PREFIX NS "step":
+        animation: cycle 4
+        shapes:
+            : $PREFIX NS "head" (-1  0  3  1)  0 f  0 (0 1)
+            : $PREFIX NS "head" ( 0  0  3  1)  0 f  0 (1 1)
+            : $PREFIX NS "head" ( 0  1  3  1)  0 f  0 (2 1)
+            : $PREFIX NS "head" ( 0  1  3  1)  0 f  0 (3 1)
+            : $PREFIX NS "bleg"  (-1  1  1  1)  0 f
+            : $PREFIX NS "fleg"  ( 2  1  1  1)  6 t
+
+    $PREFIX NS "spit":
+        animation: cycle 10
+        shapes:
+            # Player stand:
+            #: $PREFIX NS "head" ( 0  1  3  1)  0 f  0 (6 1)
+            #: $PREFIX NS "bleg"  ( 0  1  1  1)  0 f  0 (6 1)
+            #: $PREFIX NS "fleg"  ( 2  1  1  1)  6 t  0 (6 1)
+
+            # Head
+            : $PREFIX NS "head" (-2  1  3  1)  0 f  0 (0 1)
+            : $PREFIX NS "head" (-2  0  3  1)  0 f  0 (1 4)
+            : $PREFIX NS "head" (-2  1  3  1)  0 f  0 (5 1)
+            : $PREFIX NS "head" (-1  1  3  1)  0 f  0 (6 1)
+            : $PREFIX NS "head" ( 0  1  3  1)  0 f  0 (7 3)
+
+            # Back leg
+            : $PREFIX NS "bleg"  (-1  1  1  1)  0 f  0 (0 1)
+            : $PREFIX NS "bleg"  (-2  1  1  1)  1 f  0 (1 5)
+            : $PREFIX NS "bleg"  (-1  1  1  1)  0 f  0 (6 1)
+            : $PREFIX NS "bleg"  ( 0  1  1  1)  0 f  0 (7 3)
+
+            # Front leg
+            : $PREFIX NS "fleg"  ( 1  1  1  1)  7 t  0 (0 1)
+            : $PREFIX NS "fleg"  ( 0  1  1  1)  7 t  0 (1 1)
+            : $PREFIX NS "fleg"  ( 0  1  1  1)  6 t  0 (2 7)
+            : $PREFIX NS "fleg"  ( 1  1  1  1)  6 t  0 (9 1)
+
+    $PREFIX NS "looking_up_spit":
+        animation: cycle 10
+        shapes:
+            # Player stand:
+            #: $PREFIX NS "head" ( 0  1  3  1)  0 f  0 (6 1)
+            #: $PREFIX NS "bleg"  ( 0  1  1  1)  0 f  0 (6 1)
+            #: $PREFIX NS "fleg"  ( 2  1  1  1)  6 t  0 (6 1)
+
+            # Head
+            : $PREFIX NS "head" (-2  1  3  1)  2 f  0 (0 1)
+            : $PREFIX NS "head" (-2  0  3  1)  2 f  0 (1 4)
+            : $PREFIX NS "head" (-2  1  3  1)  2 f  0 (5 1)
+            : $PREFIX NS "head" (-1  1  3  1)  2 f  0 (6 1)
+            : $PREFIX NS "head" ( 0  1  3  1)  2 f  0 (7 3)
+
+            # Back leg
+            : $PREFIX NS "bleg"  (-1  1  1  1)  0 f  0 (0 1)
+            : $PREFIX NS "bleg"  (-2  1  1  1)  1 f  0 (1 5)
+            : $PREFIX NS "bleg"  (-1  1  1  1)  0 f  0 (6 1)
+            : $PREFIX NS "bleg"  ( 0  1  1  1)  0 f  0 (7 3)
+
+            # Front leg
+            : $PREFIX NS "fleg"  ( 1  1  1  1)  7 t  0 (0 1)
+            : $PREFIX NS "fleg"  ( 0  1  1  1)  7 t  0 (1 1)
+            : $PREFIX NS "fleg"  ( 0  1  1  1)  6 t  0 (2 7)
+            : $PREFIX NS "fleg"  ( 1  1  1  1)  6 t  0 (9 1)
+
+    $PREFIX NS "crawl_spit":
+        animation: cycle 10
+        shapes:
+            # Player crawl:
+            #: $PREFIX NS "crawl_head" ( 0  1  2  0)  0 f
+            #: $PREFIX NS "bleg"  (-1  1  1  1)  0 f
+            #: $PREFIX NS "fleg"  ( 2  1  1  1)  6 t
+
+            # Head
+            : $PREFIX NS "crawl_head" (-2  1  2  0)  0 f  0 (0 1)
+            : $PREFIX NS "crawl_head" (-2  0  2  0)  0 f  0 (1 4)
+            : $PREFIX NS "crawl_head" (-2  1  2  0)  0 f  0 (5 1)
+            : $PREFIX NS "crawl_head" (-1  1  2  0)  0 f  0 (6 1)
+            : $PREFIX NS "crawl_head" ( 0  1  2  0)  0 f  0 (7 3)
+
+            # Back leg
+            : $PREFIX NS "bleg"  (-2  1  1  1)  0 f  0 (0 1)
+            : $PREFIX NS "bleg"  (-3  1  1  1)  1 f  0 (1 5)
+            : $PREFIX NS "bleg"  (-2  1  1  1)  0 f  0 (6 1)
+            : $PREFIX NS "bleg"  (-1  1  1  1)  0 f  0 (7 3)
+
+            # Front leg
+            : $PREFIX NS "fleg"  ( 1  1  1  1)  7 t  0 (0 1)
+            : $PREFIX NS "fleg"  ( 0  1  1  1)  7 t  0 (1 1)
+            : $PREFIX NS "fleg"  ( 0  1  1  1)  6 t  0 (2 7)
+            : $PREFIX NS "fleg"  ( 1  1  1  1)  6 t  0 (9 1)
+
+    $PREFIX NS "crawl_looking_up_spit":
+        animation: cycle 10
+        shapes:
+            # player_crawl_looking_up:
+            #: $PREFIX NS "crawl_head" ( 3  1  1  1)  2 f
+            #: $PREFIX NS "bleg"  ( 1  1  1  1)  0 f
+            #: $PREFIX NS "fleg"  ( 4  2  0  0)  5 t
+
+            # Head
+            : $PREFIX NS "crawl_head" ( 1  1  1  1)  2 f  0 (0 1)
+            : $PREFIX NS "crawl_head" ( 1  0  1  1)  2 f  0 (1 4)
+            : $PREFIX NS "crawl_head" ( 1  1  1  1)  2 f  0 (5 1)
+            : $PREFIX NS "crawl_head" ( 2  1  1  1)  2 f  0 (6 1)
+            : $PREFIX NS "crawl_head" ( 3  1  1  1)  2 f  0 (7 3)
+
+            # Back leg
+            : $PREFIX NS "bleg"  ( 0  1  1  1)  0 f  0 (0 1)
+            : $PREFIX NS "bleg"  (-1  1  1  1)  1 f  0 (1 5)
+            : $PREFIX NS "bleg"  ( 0  1  1  1)  0 f  0 (6 1)
+            : $PREFIX NS "bleg"  ( 1  1  1  1)  0 f  0 (7 3)
+
+            # Front leg
+            : $PREFIX NS "fleg"  ( 2  2  1  0)  7 t  0 (0 1)
+            : $PREFIX NS "fleg"  ( 1  2  1  0)  7 t  0 (1 1)
+            : $PREFIX NS "fleg"  ( 1  2  1  0)  6 t  0 (2 7)
+            : $PREFIX NS "fleg"  ( 2  2  1  0)  6 t  0 (9 1)
+
+    $PREFIX NS "_swim_spit_leg":
+        animation: cycle 10
+        shapes:
+            # Used for back *and* front leg
+            : $PREFIX NS "fleg"  ( 0  2  1  0)  7 t  0 (0 1)
+            : $PREFIX NS "fleg"  ( 0  1  1  0)  8 t  0 (1 1)
+            : $PREFIX NS "fleg"  ( 0  0  1  0)  8 t  0 (2 1)
+            : $PREFIX NS "fleg"  ( 0  0  1  0)  7 t  0 (3 1)
+            : $PREFIX NS "fleg"  ( 0  0  1  0)  6 t  0 (4 1)
+            : $PREFIX NS "fleg"  ( 0  0  1  0)  5 t  0 (5 1)
+            : $PREFIX NS "fleg"  ( 1  0  1  0)  4 t  0 (6 1)
+            : $PREFIX NS "fleg"  ( 1  1  1  0)  4 t  0 (7 1)
+            : $PREFIX NS "fleg"  ( 1  2  1  0)  4 t  0 (8 1)
+            : $PREFIX NS "fleg"  ( 1  3  1  0)  5 t  0 (9 1)
+
+    $PREFIX NS "swim_spit":
+        animation: cycle 10
+        shapes:
+            # Head
+            : $PREFIX NS "head" (-2  1  3  0)  1 f  0 (0 1)
+            : $PREFIX NS "head" (-2  0  3  0)  1 f  0 (1 1)
+            : $PREFIX NS "head" (-2 -1  3  0)  1 f  0 (2 2)
+            : $PREFIX NS "head" (-1 -1  3  0)  1 f  0 (4 1)
+            : $PREFIX NS "head" ( 0 -1  3  0)  0 f  0 (5 1)
+            : $PREFIX NS "head" ( 0  0  3  0)  0 f  0 (6 1)
+            : $PREFIX NS "head" ( 0  1  3  0)  0 f  0 (7 1)
+            : $PREFIX NS "head" ( 0  1  4  0)  0 f  0 (8 1)
+            : $PREFIX NS "head" ( 0  2  3  1)  0 f  0 (9 1)
+
+            # Back leg
+            : $PREFIX NS "_swim_spit_leg" (-1 -1 0 1) 0 f
+
+            # Front leg
+            : $PREFIX NS "_swim_spit_leg" ( 0  0 0 0) 0 f
+
+    $PREFIX NS "_jump":
+        shapes:
+            : $PREFIX NS "head" ( 0  1  3  1)  0 f
+            : $PREFIX NS "bleg"  ( 0  1  1  1) 10 f
+            : $PREFIX NS "fleg"  ( 2  1  1  1)  7 t
+
+    $PREFIX NS "jump":
         animation: cycle 3
         shapes:
-            : "flier_head" (-2 0 0 0) 0 f  0 (0 1)
-            : "flier_head" (-1 0 0 0) 0 f  0 (1 1)
-            : "flier_head" ( 0 0 0 0) 0 f  0 (2 1)
+            # The following is very "smooth", but somehow ends up looking
+            # strange compared to the version below which pauses on the
+            # first frame. *shrug*
+            #: $PREFIX NS "_jump" (-2 0 0  0) 0 f  0 (0 1)
+            #: $PREFIX NS "_jump" (-1 0 0  0) 0 f  0 (1 1)
+            #: $PREFIX NS "_jump" ( 0 0 0  0) 0 f  0 (2 1)
+
+            : $PREFIX NS "_jump" (-1 0 0  0) 0 f  0 (0 2)
+            : $PREFIX NS "_jump" ( 0 0 0  0) 0 f  0 (2 1)
+
+    $PREFIX NS "swim_jump":
+        animation: cycle 5
+        shapes:
+            : $PREFIX NS "_jump" (-2 0 0  0) 0 f  0 (0 1)
+            : $PREFIX NS "_jump" (-1 0 0  0) 0 f  0 (1 2)
+            : $PREFIX NS "_jump" ( 0 0 0  0) 0 f  0 (3 2)
+
+    $PREFIX NS "crawl":
+        shapes:
+            : $PREFIX NS "crawl_head" ( 0  1  2  0)  0 f
+            : $PREFIX NS "bleg"  (-1  1  1  1)  0 f
+            : $PREFIX NS "fleg"  ( 2  1  1  1)  6 t
+
+    $PREFIX NS "crawl_look_up":
+        shapes:
+            : $PREFIX NS "crawl_head" ( 1  1  2  0)  1 f
+            : $PREFIX NS "bleg"  ( 1  0  2  1) 11 f
+            : $PREFIX NS "fleg"  ( 3  1  1  1)  5 t
+
+    $PREFIX NS "crawl_looking_up":
+        shapes:
+            : $PREFIX NS "crawl_head" ( 3  1  1  1)  2 f
+            : $PREFIX NS "bleg"  ( 1  1  1  1)  0 f
+            : $PREFIX NS "fleg"  ( 4  2  0  0)  5 t
+
+
+    $PREFIX NS "crawl_step":
+        animation: cycle 3
+        shapes:
+            : $PREFIX NS "crawl_head" (-1  0  2  1)  1 f  0 (0 1)
+            : $PREFIX NS "crawl_head" ( 0  0  2  1)  1 f  0 (1 1)
+            : $PREFIX NS "crawl_head" ( 0  1  2  0)  1 f  0 (2 1)
+            : $PREFIX NS "bleg"  (-1  1  1  1)  0 f
+            : $PREFIX NS "fleg"  ( 2  1  1  2)  7 t  0 (0 1)
+            : $PREFIX NS "fleg"  ( 3  1  1  2)  6 t  0 (1 1)
+            : $PREFIX NS "fleg"  ( 3  1  1  1)  6 t  0 (2 1)
+
+    $PREFIX NS "swim":
+        animation: cycle 12
+        shapes:
+            : $PREFIX NS "head" ( 0  1  3  2)  0 f 0 ( 0 2)
+            : $PREFIX NS "bleg"  ( 0  1  1  2)  1 f 0 ( 0 2)
+            : $PREFIX NS "fleg"  ( 2  1  1  2)  5 t 0 ( 0 2)
+
+            : $PREFIX NS "head" ( 0  1  3  3)  0 f 0 ( 2 2)
+            : $PREFIX NS "bleg"  ( 0  1  1  3)  1 f 0 ( 2 2)
+            : $PREFIX NS "fleg"  ( 2  1  1  3)  5 t 0 ( 2 2)
+
+            : $PREFIX NS "head" ( 0  1  3  3)  0 f 0 ( 4 2)
+            : $PREFIX NS "bleg"  ( 0  1  1  3)  0 f 0 ( 4 2)
+            : $PREFIX NS "fleg"  ( 2  1  1  3)  6 t 0 ( 4 2)
+
+            : $PREFIX NS "head" ( 0  1  3  2)  0 f 0 ( 6 2)
+            : $PREFIX NS "bleg"  ( 0  1  1  2)  0 f 0 ( 6 2)
+            : $PREFIX NS "fleg"  ( 2  1  1  2)  6 t 0 ( 6 2)
+
+            : $PREFIX NS "head" ( 0  1  3  1)  0 f 0 ( 8 2)
+            : $PREFIX NS "bleg"  ( 0  1  1  1) -1 f 0 ( 8 2)
+            : $PREFIX NS "fleg"  ( 2  1  1  1)  7 t 0 ( 8 2)
+
+            : $PREFIX NS "head" ( 0  1  3  0)  0 f 0 (10 2)
+            : $PREFIX NS "bleg"  ( 0  1  1  0) -2 f 0 (10 2)
+            : $PREFIX NS "fleg"  ( 2  1  1  0)  8 t 0 (10 2)
 
 shapes:
 
@@ -2437,84 +2658,15 @@ colors:
 
     255: 30 50 80
 
+$SET_STR NS ""
+$UNSET_BOOL PLAYER_ROLLER
+import "data/_roller.fus"
+
+$SET_STR NS "rollerplayer_"
+$SET_BOOL PLAYER_ROLLER
+import "data/_roller.fus"
+
 shapes:
-
-    ##########
-    # ROLLER #
-    ##########
-
-    "_roller_body_hollow_third":
-
-        prismels:
-
-            #   +
-            #   |
-            #  / \
-            # |   |
-            # +---+-
-            # |   | \
-            # |   |  -+
-            # |   | / |
-            # +---+-   \
-            #     |     |
-            #      \   -+
-            #       | / |
-            #   0   +-  |
-            #         \ |
-            #          -+
-
-            : "sq"  (-1 0 1 0)  0 f eval: 1 + 8 + 1
-            : "tri" (-1 0 1 1)  0 f eval: 1 + 1
-
-            : "tri" ( 0 0 1 0)  1 f eval: 1 + 1
-            : "sq"  ( 1 0 0 0)  1 f eval: 1 + 8 + 1
-            : "tri" ( 1 0 0 0) 11 f eval: 1 + 1
-
-    "_roller_body_third":
-        shapes:
-            : "_roller_body_hollow_third" (0 0 0 0) 0 f
-        prismels:
-            : "tri" ( 0 0 0 0)  0 f eval: 1 + 8 + 3
-            : "tri" ( 0 0 0 0)  2 f eval: 1 + 8 + 3
-
-    "_roller_body":
-        shapes:
-            : "_roller_body_third" (0 0 0 0)  0 f
-            : "_roller_body_third" (0 0 0 0)  4 f
-            : "_roller_body_third" (0 0 0 0)  8 f
-
-    "_roller_body_hollow":
-        shapes:
-            : "_roller_body_hollow_third" (0 0 0 0)  0 f
-            : "_roller_body_hollow_third" (0 0 0 0)  4 f
-            : "_roller_body_hollow_third" (0 0 0 0)  8 f
-
-    "roller_body":
-        shapes:
-            : "_roller_body" (1 1 1 0) 0 f
-
-    "roller_body_hollow":
-        shapes:
-            : "_roller_body_hollow" (1 1 1 0) 0 f
-
-    "roller_foot":
-        prismels:
-            : "sq" (0 0 0 0)  0 f eval: 1 + 8 + 3
-            : "sq" (0 0 0 0)  3 f eval: 1 + 8 + 3
-            : "sq" (0 0 0 0)  6 f eval: 1 + 8 + 3
-            : "sq" (0 0 0 0)  9 f eval: 1 + 8 + 3
-
-    "roller":
-        shapes:
-            : "roller_body" (0 0 0 0) 0 f
-            : "roller_foot" (0 0 0 0) 0 f
-
-    "roller_grab":
-        shapes:
-            : "roller_body" (0 0 0  0) 0 f
-            : "roller_body_hollow" (3 2 0 -1) 2 f
-            : "roller_foot" (0 0 0  0) 0 f
-
 
     ################
     # DEATH ROLLER #
@@ -2710,407 +2862,6 @@ palmappers:
         :
         1,  8: eval: 1 + 8 + 7
         10, 8: eval: 1 + 8 + 7
-
-@beat: 250
-
-@def bass_a: @triangle: 1000 400  9000 addinc1(1)
-@def bass_b: @triangle: 2000 400 11000
-@def bass_c: @triangle: 1000 1200  9000
-@def bass:
-    : bass_a,, bass_b,, bass_c
-@def bass_e:
-    @triangle: 500 2200  9000
-    : + 500 @triangle: 1000 2200  9000  limit(-1000)
-
-@def tenor_a:
-    @square: 5000 40  1  6000  volinc(-5) freq2inc(10)
-    @square: 3000 20  1  6000  offset(10) volinc(-5) freq2inc(10)
-@def tenor_b: @square: 500  15 1  6000  volinc(-5)
-@def tenor_c: @square: 500  12 1  6000  volinc(-5)
-@def tenor_d: @square: 500   9 1  6000  volinc(-5)
-@def tenor:
-    : tenor_a, tenor_b, tenor_c,, tenor_d
-
-@def zoop:
-    @square: 2000 40 20  6000  volinc(-5) freq2inc(10)
-    @square: 1000 20 10  6000  volinc(-5) freq2inc(50)
-    @triangle: 1000 2200  9000  limit(-1000)
-
-@def measure: ,, ,, ,,
-
-@def song:
-    @loop 4:
-        bass measure
-        tenor measure
-        zoop measure
-        bass_e
-
-@print: "Primary song is in variable \"song\""
-@beat: 250
-
-# I'm gonna call this a "jazz scale" for now...
-# ...until we can fix it
-
-@def a0: @square: 500  29 1  6000  volinc(-5)
-@def b0: @square: 500  28 1  6000  volinc(-5)
-@def c0: @square: 500  27 1  6000  volinc(-5)
-@def d0: @square: 500  26 1  6000  volinc(-5)
-@def e0: @square: 500  25 1  6000  volinc(-5)
-@def f0: @square: 500  24 1  6000  volinc(-5)
-@def g0: @square: 500  23 1  6000  volinc(-5)
-
-@def a1: @square: 500  22 1  6000  volinc(-5)
-@def b1: @square: 500  21 1  6000  volinc(-5)
-@def c1: @square: 500  20 1  6000  volinc(-5)
-@def d1: @square: 500  19 1  6000  volinc(-5)
-@def e1: @square: 500  18 1  6000  volinc(-5)
-@def f1: @square: 500  17 1  6000  volinc(-5)
-@def g1: @square: 500  16 1  6000  volinc(-5)
-
-@def a2: @square: 500  15 1  6000  volinc(-5)
-@def b2: @square: 500  14 1  6000  volinc(-5)
-@def c2: @square: 500  13 1  6000  volinc(-5)
-@def d2: @square: 500  12 1  6000  volinc(-5)
-@def e2: @square: 500  11 1  6000  volinc(-5)
-@def f2: @square: 500  10 1  6000  volinc(-5)
-@def g2: @square: 500   9 1  6000  volinc(-5)
-
-@def a3: @square: 500   8 1  6000  volinc(-5)
-@def b3: @square: 500   7 1  6000  volinc(-5)
-@def c3: @square: 500   6 1  6000  volinc(-5)
-@def d3: @square: 500   5 1  6000  volinc(-5)
-@def e3: @square: 500   4 1  6000  volinc(-5)
-@def f3: @square: 500   3 1  6000  volinc(-5)
-@def g3: @square: 500   2 1  6000  volinc(-5)
-
-@def drum1: @noise:  500 10000 volinc(-10) limit(5000) step(1)
-@def drum2: @noise:  500 10000 volinc(-10) limit(5000) step(2)
-@def drum3: @noise:  500 10000 volinc(-10) limit(5000) step(3)
-@def cymb1: @noise: 1500 10000 volinc(-10) limit(1000)
-@def drums1:
-    drum1,, drum2,, drum3,,
-    drum1,, drum2,, drum3,,
-    cymb1,,      ,, drum1,,
-    cymb1,, cymb1,, drum2,,
-@def drums2:
-    drum1,, drum2,, drum3,,
-    cymb1,,      ,,      ,,
-    drum1,,      ,,      ,,
-    cymb1,,      ,, drum1,,
-
-@def bass1: @triangle:  500  500 10000 limit(1000)
-@def bass2: @triangle:  500 1000  9000 limit(0)
-@def bass3: @triangle:  500  750  9000 addinc1(1)
-@def bass4: @triangle: 7500 1000 15000 addinc1(-1)
-@def bass:
-    bass1 ,, ,, ,,
-    bass2 ,, ,, ,,
-    bass1 ,, ,, ,,
-    bass3 ,, ,, ,,
-
-    bass1 ,, ,, ,,
-    bass2 ,, ,, ,,
-    bass1 ,, ,, ,,
-    bass4 ,, ,, ,,
-
-
-@def verse: @loop 4: @loop 4: ,, ,, ,,
-
-
-@def v1a: a0
-@def v1b: a1
-@def v1c: d1
-@def v1d: e1
-@def v1e: a2
-@def melody1:
-    v1e,,    ,, v1e,,
-       ,,    ,, v1e,,
-    v1b,, v1c,, v1d,,
-    v1e,,    ,, v1e,,
-
-       ,,    ,,    ,,
-       ,,    ,,    ,,
-       ,,    ,,    ,,
-       ,,    ,,    ,,
-
-    v1e,,    ,, v1e,,
-       ,,    ,, v1e,,
-    v1b,, v1c,, v1d,,
-    v1a,,    ,, v1a,,
-
-       ,,    ,,    ,,
-       ,,    ,,    ,,
-       ,,    ,,    ,,
-       ,,    ,,    ,,
-
-@def v2a: a2
-@def v2b: b2
-@def v2c: c2
-@def v2d: e2
-@def v2e: f2
-@def v2f: g2
-@def v2g: a3
-@def melody2:
-    v2g,, v2f,, v2e,,
-    v2f,, v2e,, v2d,,
-    v2e,, v2d,, v2c,,
-    v2c,, v2d,, v2e,,
-
-    v2g,, v2f,, v2e,,
-    v2f,, v2e,, v2d,,
-    v2e,,    ,, v2e,,
-    v2d,, v2e,, v2f,,
-
-    v2g,, v2f,, v2e,,
-    v2f,, v2e,, v2d,,
-    v2e,, v2d,, v2c,,
-    v2c,, v2d,, v2e,,
-
-    v2f,, v2d,, v2c,,
-    v2b,, v2a,, v2a,,
-       ,,    ,,    ,,
-       ,,    ,,    ,,
-
-
-@def intro:
-    drums1
-    drums1
-
-    (bass)
-    drums1
-    drums1
-
-@def verse1:
-    : @loop 4: drums1
-    : @loop 2: bass
-    melody1
-
-@def verse2:
-    : @loop 4: drums2
-    melody2
-
-@def verse3:
-    : @loop 4: drums1
-    : @loop 2: bass
-
-    # maybe the melodies harmonize?..
-    (melody1) melody2
-
-
-@def song:
-    intro
-    @loop 2: verse1
-    @loop 2: verse2
-    @loop 2: verse3
-
-@print: "Primary song is in variable \"song\""
-@beat: 250
-
-# I'm gonna call this a "jazz scale" for now...
-# ...until we can fix it
-
-@def a0: @square: 500  29 1  6000  volinc(-5)
-@def b0: @square: 500  28 1  6000  volinc(-5)
-@def c0: @square: 500  27 1  6000  volinc(-5)
-@def d0: @square: 500  26 1  6000  volinc(-5)
-@def e0: @square: 500  25 1  6000  volinc(-5)
-@def f0: @square: 500  24 1  6000  volinc(-5)
-@def g0: @square: 500  23 1  6000  volinc(-5)
-
-@def a1: @square: 500  22 1  6000  volinc(-5)
-@def b1: @square: 500  21 1  6000  volinc(-5)
-@def c1: @square: 500  20 1  6000  volinc(-5)
-@def d1: @square: 500  19 1  6000  volinc(-5)
-@def e1: @square: 500  18 1  6000  volinc(-5)
-@def f1: @square: 500  17 1  6000  volinc(-5)
-@def g1: @square: 500  16 1  6000  volinc(-5)
-
-@def a2: @square: 500  15 1  6000  volinc(-5)
-@def b2: @square: 500  14 1  6000  volinc(-5)
-@def c2: @square: 500  13 1  6000  volinc(-5)
-@def d2: @square: 500  12 1  6000  volinc(-5)
-@def e2: @square: 500  11 1  6000  volinc(-5)
-@def f2: @square: 500  10 1  6000  volinc(-5)
-@def g2: @square: 500   9 1  6000  volinc(-5)
-
-@def a3: @square: 500   8 1  6000  volinc(-5)
-@def b3: @square: 500   7 1  6000  volinc(-5)
-@def c3: @square: 500   6 1  6000  volinc(-5)
-@def d3: @square: 500   5 1  6000  volinc(-5)
-@def e3: @square: 500   4 1  6000  volinc(-5)
-@def f3: @square: 500   3 1  6000  volinc(-5)
-@def g3: @square: 500   2 1  6000  volinc(-5)
-
-@def drum1: @noise:  500 10000 volinc(-10) limit(5000) step(1) wacky(y)
-@def drum2: @noise:  500 10000 volinc(-10) limit(5000) step(2) wacky(y)
-@def drum3: @noise:  500 10000 volinc(-10) limit(5000) step(3) wacky(y)
-@def cymb1: @noise: 1500 10000 volinc(-10) limit(1000) wacky(y)
-@def drums1:
-    drum1,, drum2,, drum3,,
-    drum1,, drum2,, drum3,,
-    cymb1,,      ,, drum1,,
-    cymb1,, cymb1,, drum2,,
-@def drums2:
-    drum1,, drum2,, drum3,,
-    cymb1,,      ,,      ,,
-    drum1,,      ,,      ,,
-    cymb1,,      ,, drum1,,
-
-@def bass1: @triangle:  500  500 10000 limit(1000) wacky(y)
-@def bass2: @triangle:  500 1000  9000 limit(0) wacky(y)
-@def bass3: @triangle:  500  750  9000 addinc1(1) wacky(y)
-@def bass4: @triangle: 7500 1000 15000 addinc1(-1) wacky(y)
-@def bass:
-    bass1 ,, ,, ,,
-    bass2 ,, ,, ,,
-    bass1 ,, ,, ,,
-    bass3 ,, ,, ,,
-
-    bass1 ,, ,, ,,
-    bass2 ,, ,, ,,
-    bass1 ,, ,, ,,
-    bass4 ,, ,, ,,
-
-
-@def verse: @loop 4: @loop 4: ,, ,, ,,
-
-
-@def v1a: a0
-@def v1b: a1
-@def v1c: d1
-@def v1d: e1
-@def v1e: a2
-@def melody1:
-    v1e,,    ,, v1e,,
-       ,,    ,, v1e,,
-    v1b,, v1c,, v1d,,
-    v1e,,    ,, v1e,,
-
-       ,,    ,,    ,,
-       ,,    ,,    ,,
-       ,,    ,,    ,,
-       ,,    ,,    ,,
-
-    v1e,,    ,, v1e,,
-       ,,    ,, v1e,,
-    v1b,, v1c,, v1d,,
-    v1a,,    ,, v1a,,
-
-       ,,    ,,    ,,
-       ,,    ,,    ,,
-       ,,    ,,    ,,
-       ,,    ,,    ,,
-
-@def v2a: a2
-@def v2b: b2
-@def v2c: c2
-@def v2d: e2
-@def v2e: f2
-@def v2f: g2
-@def v2g: a3
-@def melody2:
-    v2g,, v2f,, v2e,,
-    v2f,, v2e,, v2d,,
-    v2e,, v2d,, v2c,,
-    v2c,, v2d,, v2e,,
-
-    v2g,, v2f,, v2e,,
-    v2f,, v2e,, v2d,,
-    v2e,,    ,, v2e,,
-    v2d,, v2e,, v2f,,
-
-    v2g,, v2f,, v2e,,
-    v2f,, v2e,, v2d,,
-    v2e,, v2d,, v2c,,
-    v2c,, v2d,, v2e,,
-
-    v2f,, v2d,, v2c,,
-    v2b,, v2a,, v2a,,
-       ,,    ,,    ,,
-       ,,    ,,    ,,
-
-
-@def intro:
-    drums1
-    drums1
-
-    (bass)
-    drums1
-    drums1
-
-@def verse1:
-    : @loop 4: drums1
-    : @loop 2: bass
-    melody1
-
-@def verse2:
-    : @loop 4: drums2
-    melody2
-
-@def verse3:
-    : @loop 4: drums1
-    : @loop 2: bass
-
-    # maybe the melodies harmonize?..
-    (melody1) melody2
-
-
-@def song:
-    intro
-    @loop 2: verse1
-    @loop 2: verse2
-    @loop 2: verse3
-
-@print: "Primary song is in variable \"song\""
-@beat: 250
-
-@def a0: @square: 500  29 1  6000  volinc(-5)
-@def b0: @square: 500  28 1  6000  volinc(-5)
-@def c0: @square: 500  27 1  6000  volinc(-5)
-@def d0: @square: 500  26 1  6000  volinc(-5)
-@def e0: @square: 500  25 1  6000  volinc(-5)
-@def f0: @square: 500  24 1  6000  volinc(-5)
-@def g0: @square: 500  23 1  6000  volinc(-5)
-
-@def a1: @square: 500  22 1  6000  volinc(-5)
-@def b1: @square: 500  21 1  6000  volinc(-5)
-@def c1: @square: 500  20 1  6000  volinc(-5)
-@def d1: @square: 500  19 1  6000  volinc(-5)
-@def e1: @square: 500  18 1  6000  volinc(-5)
-@def f1: @square: 500  17 1  6000  volinc(-5)
-@def g1: @square: 500  16 1  6000  volinc(-5)
-
-@def a2: @square: 500  15 1  6000  volinc(-5)
-@def b2: @square: 500  14 1  6000  volinc(-5)
-@def c2: @square: 500  13 1  6000  volinc(-5)
-@def d2: @square: 500  12 1  6000  volinc(-5)
-@def e2: @square: 500  11 1  6000  volinc(-5)
-@def f2: @square: 500  10 1  6000  volinc(-5)
-@def g2: @square: 500   9 1  6000  volinc(-5)
-
-@def scale0: a0, b0, c0, d0, e0, f0, g0,
-@def scale1: a1, b1, c1, d1, e1, f1, g1,
-@def scale2: a2, b2, c2, d2, e2, f2, g2,
-
-@def scale01: (scale0) scale1
-@def scale02: (scale0) scale2
-@def scale12: (scale1) scale2
-@def scale012: (scale0) (scale1) scale2
-
-@def do(c1) @def re(d1) @def mi(e1) @def fa(f1)
-@def so(g1) @def la(a2) @def ti(b2) @def doo(c2)
-@def doremi: do,, re,, mi,, fa,, so,, la,, ti,, doo, doo, doo, doo,
-
-@def scales:
-    # glorious music!
-    scale1 scale02 scale1 scale0 scale12 scale01 scale2 scale012
-    a0, a0, a0, a1, a1, a1, a2, a2, a2,
-    ,, ,,
-    f0 f1 f2,,
-    d0 d1 d2,, d0 d1 d2,, d0 d1 d2,,
-
-@print: "Track 1 is in variable \"scales\""
-@print: "Track 2 is in variable \"doremi\""
 
 parts:
     "D": "data/maps/demo/tiles/hex_vec4/dodecas2.fus"
@@ -3354,10 +3105,10 @@ collmap:
     ;; .   .   .   .   .   .   .   .   .   .  %+ - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .    [111]
     ;;                                       %/* * *\                                          * *                 [11111]
     ;;   .   .   .   .   .   .   .   .   .  %+ - + - +   .   .   .   .   .   .   .   .   .   .   +   .   .   .     [11111]
-    ;;                                               %\                                                * *             [1]
-    ;; .   .   .   .   .   .   .   .   .   .   .   .  %+   .   .   .   .   .   .   .   .   .   .   .   .   .   .       [1]
-    ;;                                                                                                   *
-    ;;   .   .   .   .   +   .   .   .   .   .   .   .%- + - + - + - +   .   .   .   .   .   .   .   +   .   .     [11111111]
+    ;;                                               %\                                   \            * *             [1]
+    ;; .   .   .   .   .   .   .   .   .   .   .   .  %+   .   .   .   .   .   .   .   .   +   .   .   .   .   .       [1]
+    ;;                                                                                 D  /              *
+    ;;   .   .   .   .   +   .   .   .   .   .   .   .%- + - + - + - +   .   .   + - + - +   .   .   +   .   .     [11111111]
     ;;                  /                                            %\                                  * * *              [1]
     ;; .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .  %+   .   .   .   .   .   .   .   .   .   .              [1]
     ;;                  \                                              %\                                *                      [1]
@@ -4058,7 +3809,7 @@ submaps:
                                                 doors:
                                                     :
                                                         map: "data/maps/water/worldmap.fus"
-                                                        pos: (0 0)
+                                                        pos: (1 8)
                                                         rot: 0
                                                         turn: n
                                     :
@@ -4097,6 +3848,12 @@ submaps:
                                                 tileset: "data/tileset1_bg.fus"
                                             :
                                                 file: "data/maps/demo/jungle5.fus"
+                                                doors:
+                                                    :
+                                                        anim: "anim/spikeyplayer.fus"
+                                                        pos: (-14 8)
+                                                        rot: 0
+                                                        turn: y
             :
                 file: "data/maps/demo/pebbles.fus"
                 pos: (15 -2)
@@ -4163,8 +3920,8 @@ submaps:
                                                 file: "data/maps/demo/big.fus"
                                                 doors:
                                                     :
-                                                        map: "data/maps/trees/worldmap.fus"
-                                                        pos: (1 1)
+                                                        map: "data/maps/triangles/worldmap.fus"
+                                                        pos: (0 0)
                                                         rot: 0
                                                         turn: n
                                     :
@@ -4207,6 +3964,18 @@ submaps:
                             : "data/maps/demo/recs/tunnels_000b.fus"
                             : "data/maps/demo/recs/tunnels_001.fus"
                             : "data/maps/demo/recs/tunnels_002.fus"
+                    :
+                        file: "data/maps/demo/tunnels3.fus"
+                        pos: eval: (13 1) + (30 -5)
+                        camera: (0 0)
+                        mapper: ("triple")
+                        palette: "data/maps/demo/pals/tunnels.fus"
+                        doors:
+                            :
+                                anim: "anim/rollerplayer.fus"
+                                pos: (70 10)
+                                rot: 0
+                                turn: n
                     :
                         file: "data/maps/demo/tunnels2.fus"
                         pos: eval: (13 1) + (18 8)
@@ -4342,6 +4111,36 @@ collmap:
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+collmap:
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   +   +   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   +   +   +   +   .   +   .   +   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   +   +   .   +   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   +   .   .   .   .   .   +   .   .  %+   .   +   .   .   .   .   .   .   .   .   .   .          [1]
+    ;;                                            /*\
+    ;;   +   .   .   +   .   .   .   +   . %(+)-%+  %+   .   .   +   .   .   .   .   .   .   .   .   .  [1][1][1]
+    ;;                                        \* * */*
+    ;; .   .   .   .   .   +   .   +   .   .  %+ -%+   .   .   .   +   .   .   .   .   .   .   .   .    [1][1]
+    ;;                                           *
+    ;;   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   +   +   .   .   +   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   +   .   .   .   +   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                         D
+    ;;   .   .   .   .   .   .   .   .   +  %+ -%+ -%+   +   .   .   .   .   .   .   .   .   .   .   .  [1][1][1]
+    ;;                                        \*   */
+    ;; .   .   .   .   .   .   .   .   .   +  %+  %+   +   .   .   .   .   .   .   .   .   .   .   .      [1][1]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .
 
 parts:
     "D": "data/maps/demo/tiles/hex_vec4/dodecas.fus"
@@ -4522,16 +4321,16 @@ collmap:
 
 collmap:
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;                            / \ / \ / \ / \                             /       /
-    ;;   .   .   + - +   .   + - +   +   +   +   +   .   .   .   .   .   .   +   .   +   .   .   .   .   .   .
-    ;;                \     /* * * * * * * * * * *\ / \ / \ / \ / \         /       /
-    ;; .   .   .   .   + - + - + - + - + - + - + - +   +   +   +   +   .   +   .   +   .   .   .   .   .   .   .
-    ;;                                              \* * * * * * * *\ / \ /
-    ;;   .   .   .  (+)- +   .   .   .   .   .   .   +   .   .   .   +   +   .   + - + - +   .   + - +   .   .
+    ;;                            / \ / \ / \ / \                            %/       /                               [11]
+    ;;   .   .   + - +   .   + - +   +   +   +   +   .   .   .   .   .   .  %+   .   +   .   .   .   .   .   .        [11]
+    ;;                \     /* * * * * * * * * * *\ / \ / \ / \ / \        %/       /                                 [11]
+    ;; .   .   .   .   + - + - + - + - + - + - + - +   +   +   +   +   .  %+   .   +   .   .   .   .   .   .   .      [11]
+    ;;                                              \* * * * * * * *\ / \%/                                           [1]
+    ;;   .   .   .  (+)- +   .   .   .   .   .   .   +   .   .   .   +  %+   .   + - + - +   .   + - +   .   .        [1]
     ;;              /  */*\                           \* * * * * * * * * *\     /* * * * *\  S  /* * *\
     ;; .   .   + - +   +   + - + - + - + - + - + - +   +   .   . - . - .   + - +   .   +   + - +   +   +   .   .
-    ;;                /* * *  /                       /* * * */* * * * *\* * * * * * * * * * * * */ \* *\
-    ;;   .   .   .   +   .   +   .   .   + - +   .   +   .   .   +   +   .   .   .   .   .   .   + - +   + - +
+    ;;        /       /* * *  /                       /* * * */* * * * *\* * * * * * * * * * * * */ \* *\
+    ;;   .   +   .   +   .   +   .   .   + - +   .   +   .   .   +   +   .   .   .   .   .   .   + - +   + - +
     ;;              /*\* * */           /     \     /* * * * *\* * * * */* * * * * * * * * * * * * * * * * * *\
     ;; .   .   .   +   .   +   .   + - + - + - + - +   + - +   . - . - .   .   + - + - +   .   .   .   .   .   +
     ;;              \* *\* *\           \* * * * * * */     \* * * * * * * * * *\ /   /* * * * * * * * * * * */
@@ -6210,6 +6009,7 @@ faces:
     "2": "map_face0"
     "S": "map_savepoint"
     "D": "map_door"
+    "w": frame_offset(1) "map_water"
 
 verts:
     "0": "map_vert1"
@@ -6227,6 +6027,7 @@ faces:
     "o": "map_face0"
     "S": "map_savepoint"
     "D": "map_door"
+    "w": frame_offset(1) "map_water"
 collmap:
     ;;  + - + - +
     ;;  xxxxxxxxx
@@ -6237,7 +6038,160 @@ collmap:
     ;;  xxxx
     ;;  x x x +
     ;;  xxxxx/
-    ;; (+)- +collmap:
+    ;; (+)- +
+unit: 3 2 0 -1
+spawn: (0 0)
+default_palette: "data/maps/demo/pals/tunnels.fus"
+default_tileset: "data/tileset1.fus"
+
+submaps:
+    :
+        file: "data/maps/triangles/start.fus"
+        pos: (0 0)
+        mapper: ("triple")
+        doors:
+            :
+                map: "data/maps/demo/worldmap.fus"
+                pos: (38 -80)
+                rot: 1
+                turn: n
+collmap:
+    ;;
+    ;;     D               S
+    ;;   + - + -(+)- + - + - +
+    ;;collmap:
+    ;;
+    ;;     + - +               + - +
+    ;;    /* * *\             /* */
+    ;;   +       + - +%- + - +   +   [1]
+    ;;    \* * * * * *\   \* * * *\
+    ;;     +       + - +   +   + - +
+    ;;    /* * * */         \*/
+    ;;  (+)- + - +           +
+    ;;
+parts:
+    "t": "data/maps/water/water_tri4.fus"
+
+collmap:
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   ?   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   [t]  [t^3]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .  (?)  .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   [t]   [t]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+
+collmap:
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                               x x x x x x x
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                         x x x x x x x x x x x x x
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                       x x x x x x x x x x x x x x x
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                     x x x x x x x x x x x x x x x x x
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                     x x x x x x x x x x x x x x x x x
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .  (.)  .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                     x x x x x x x x x x x x x x x x x
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                     x x x x x x x x x x x x x x x x x
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                       x x x x x x x x x x x x x x x
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                         x x x x x x x x x x x x x
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                               x x x x x x x
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+parts:
+    "a": "data/maps/water/air_bubble_walled_sm.fus"
+    "b": "data/maps/water/bubble_sm.fus"
+    "s": "data/maps/water/save.fus"
+
+collmap:
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .      [a]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .           [b]
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .  (.)  .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   ?   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   . [s|1][a]
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .         [a]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .
+    ;;                                                                                            /* */
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - + - +   +   .   .   .   .
+    ;;                                                                                    \* * * * * *\
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - + - +   .   .   +   .   .   .
+    ;;                                                                            /* * * * * * * * * * *\
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   + - + - +   +   .   .   .
+    ;;                                                                            \* * * * */         \*/
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - + - +   .   .   +   .   .   .
+    ;;
+collmap:
     ;;
     ;;        .   .   .   .
     ;;        x x x x x x x
@@ -6255,118 +6209,304 @@ collmap:
     ;;
 
 
-parts:
-    "c": recording "data/maps/demo/recs/coin.fus"
-    "C": recording "data/maps/demo/recs/coin_crouch.fus"
-    "l": "data/maps/wilderness/start_line2.fus"
-    "L": "data/maps/wilderness/start_line3.fus"
-    "m": "data/maps/wilderness/start_line4.fus"
-    "M": "data/maps/wilderness/start_line5.fus"
-
-collmap:
-    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - + - + - + - + - +   .   .
-    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w * * * w * w * w */
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   +   .   .
-    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w * w * w w w w * w *\ /*\
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   +   .
-    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w * * * w w w w * w *   */
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .
-    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w * * * * w w w w w w   * */
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .
-    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w */w
-    ;; .   .   .   .   .   .   .   .   + - .   .   .   .   . - + - + - +   .   .   .   .   .   .   +   .   .   .
-    ;; w w w w w w w w w w w w w w w w/w w w w w w w w w w w w w w w w w\w w w w w w w w w w w w w w w
-    ;;   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   +   .   .
-    ;; w w w w w w w w w w w w w w w/w w w w w w w w w w w w w w w w w w w\w w w w w w w w w w w * */w
-    ;; .   .   .   .   .   .   .   +   .   .   .  (+)- +   .   .   .   .   + - +   .   .   .   .   +   .   .   .
-    ;; w w w w w w w w w w w w w w w w w w w w w w w * w w w w w w w\w w w w w w\w w w w w w w w w *\w
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   +   .   .   .   .   +   .   .
-    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w\w w w w w w w w w w w w w w
-    ;; .   .   .   .   .   .   .   .   + - + - +   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .
-    ;; w w w w w w w w w w w w w w w w w w w w w\w w w w w w w w w w w w w w\w w w w w w w w w w w w w
-    ;;   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .
-    ;; w w w w w w w w w w w w       w w w w w w w w w w w w w w w w w w w w/w w w w w w w w w w w w w
-    ;; .   .   .   .   .   .   .   .   .   .   .   + - + - .   .   + - + - +   .   .   .   .   .   .   .   .   .
-    ;; w w w w w w w w w w w           w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;; w w w w w w w w w w w           w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;; w w w w w w w w w w w           w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;; w w w w w w w w w w w w       w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;; w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-parts:
-    "c": recording "data/maps/demo/recs/coin.fus"
-    "C": recording "data/maps/demo/recs/coin_crouch.fus"
-    "l": "data/maps/wilderness/start_line2.fus"
-    "L": "data/maps/wilderness/start_line3.fus"
-    "m": "data/maps/wilderness/start_line4.fus"
-    "M": "data/maps/wilderness/start_line5.fus"
-
 collmap:
     ;;
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;     S
+    ;;  (+)- +
+    ;;parts:
+    "T": "data/maps/water/water_tri8.fus"
+    "a": "data/maps/water/air_bubble_sm.fus"
+
+collmap:
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .       []  [T^3]
     ;;
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;; .   .   .   .   .   .   .   .   .   .  (.)  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;   .   .   .   .   .   ?   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   ?   .   .   .   .   .   .    [T] [T T^3] [T^3]
     ;;
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .        [a|1]
     ;;
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;   .   .   .   .   .   .   .   .   .  (?)  .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .        [T]  []
     ;;
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+parts:
+    "T": "data/maps/water/water_tri8.fus"
+    "a": "data/maps/water/air_bubble_sm.fus"
+
+collmap:
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .       []
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   ?   .   .   ?   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   . [T][a|1][T^3]
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .  (?)  .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   [T]  [T]  []
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+parts:
+    "T": "data/maps/water/water_tri8.fus"
+
+collmap:
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .       []
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   ?   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .    [T] [T^3]
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .  (?)  .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   [T]  [T]  []
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+
+
+collmap:
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   + - + - + - +   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                               x x x x x x x\
+    ;; .   .   .   .   .   .   .   .   .   .   + - +   .   .   .   +   +   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                        /x x x\x x x x x x x/x x x\
+    ;;   .   .   .   .   .   .   .   .   .   +   .   +   .   .   +   .   +   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                      /x x x x x x x x x x x x x x x\
+    ;; .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .
+    ;;                                    /x x x x x x x x x x x x x x x x x\
+    ;;   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .
+    ;;                                     x x x x x x x x x x x x x x x x x/
+    ;; .   .   .   .   .   .   .   .   .   + - +   .   .  (.)  .   .   + - +   .   .   .   .   .   .   .   .   .   .
+    ;;                                    /x x x x x x x x x x x x x x x x x
+    ;;   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .
+    ;;                                    \x x x x x x x x x x x x x x x x x/
+    ;; .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .
+    ;;                                      \x x x x x x x x x x x x x x x/
+    ;;   .   .   .   .   .   .   .   .   .   +   .   +   .   .   +   .   +   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                        \x x x/x x x x x x x\x x x/
+    ;; .   .   .   .   .   .   .   .   .   .   +   +   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                              \x x x x x x x
+    ;;   .   .   .   .   .   .   .   .   .   .   .   + - + - + - +   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+parts:
+    "T": "data/maps/water/water_tri8.fus"
+
+collmap:
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .       []  [T^3]
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   ?   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   ?   .   .   .   .   .   .    [T] [T T^3] [T^3]
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .  (?)  .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .        [T]  []
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+
+
+collmap:
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .  (.)  .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+
+
+collmap:
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   +   +   +   +   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                               w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                         w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                       w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .
+    ;;                                     w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .
+    ;;                                     w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .  (.)  .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                     w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .
+    ;;                                     w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .
+    ;;                                       w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                         w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                               w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   +   +   +   +   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
 
 unit: 3 2 0 -1
 spawn: "data/maps/water/start.fus"
-default_palette: "data/pal1.fus"
+#default_palette: "data/pal1.fus"
+default_palette: "data/maps/water/pals/deeps.fus"
 default_tileset: "data/tileset1.fus"
 
 submaps:
     :
         pos: (0 0)
-        camera: (2 -6)
+        camera: (3 2)
         mapper: ("triple")
         submaps:
             :
@@ -6377,7 +6517,142 @@ submaps:
                         pos: (-77 5)
                         rot: 3
                         turn: y
+            :
+                file: "data/maps/water/bubble_sm.fus"
+                pos: (16 -7)
+                camera: (0 0)
+                submaps:
+                    :
+                        file: "data/maps/water/rubble.fus"
+                        pos: (5 -2)
+            :
+                file: "data/maps/water/bubble_sm.fus"
+                pos: (16 6)
+                camera: (0 0)
+            :
+                file: "data/maps/water/bubble_sm.fus"
+                pos: (26 6)
+                camera: (0 -5)
+            :
+                file: "data/maps/water/room_sm_bubble1.fus"
+                pos: (42 0)
+                camera: (0 0)
+                mapper: ("double")
+            :
+                file: "data/maps/water/air_bubble_walled_sm.fus"
+                pos: eval: (42 0) + (10 -9)
+                camera: (0 0)
+            :
+                file: "data/maps/water/air_bubbles_walled1.fus"
+                pos: eval: (42 0) + (29 10)
+                camera: (-1 -4)
+                submaps:
+                    :
+                        file: "data/maps/water/bubble_sm.fus"
+                        pos: (14 -6)
+                        camera: (0 0)
+                        mapper: ("double")
+                    :
+                        file: "data/maps/water/air_bubbles_walled1_tunnel.fus"
+                        pos: (24 7)
+                        camera: (0 0)
+                        mapper: ("quadruple")
+            :
+                file: "data/maps/water/room_sm_bubble2.fus"
+                pos: eval: (42 0) + (20 -19)
+                camera: (0 5)
+            :
+                file: "data/maps/water/water_hex8_bite.fus"
+                pos: eval: (42 0) + (20 -19) + (16 2)
+                camera: (8 8)
+            :
+                file: "data/maps/water/water_tri16_bite.fus"
+                pos: eval: (42 0) + (20 -19) + (25 4)
+                camera: (10 10)
 
+
+collmap:
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   +   .   +   .   +   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                              /*\     /*\     /*\
+    ;; .   .   .   .   .   .   .   .   .   .   .   + - +   + - +   + - +   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .  (+)- +   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                                    /* * *\
+    ;;   .   .   .   .   .   .   + - + - +   .   .   + - + - + - +   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                            \* * */
+    ;; .   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                            /
+    ;;   .   .   .   .   .   .   +   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                          /*\
+    ;; .   .   .   .   .   .   .   .   .   + - +   +   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .
+    ;;                                    /* * * * *\                             /*\
+    ;;   .   .   .   .   .   .   .   .   + - + - +   +   .   .   .   .   .   + - +   +   .   .   .   .   .   .   .   .
+    ;;                                            \*/                         \* * */
+    ;; .   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+parts:
+    "b": "data/maps/water/bubble_sm.fus"
+
+collmap:
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   [b]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .
+    ;;                    /     \w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w/     \
+    ;;   .   .   .   .   +   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   +   .   .   .
+    ;;                    \     /w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w\     /
+    ;; .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .  (.)  .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w S w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .
+    ;;                    /     \w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w/     \
+    ;;   .   .   .   .   +   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   +   .   .   .
+    ;;                    \     /w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w\     /
+    ;; .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .
+    ;;
 collmap:
     ;;
     ;;        + - + - + - +
@@ -6396,6 +6671,139 @@ collmap:
     ;;
 
 
+
+collmap:
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .
+    ;;                    /     \w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w/     \
+    ;;   .   .   .   .   +   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   +   .   .   .
+    ;;                    \     /w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w\     /
+    ;; .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .  (.)  .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w S w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .
+    ;;                    /     \w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w/     \
+    ;;   .   .   .   .   +   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   +   .   .   .
+    ;;                    \     /w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w\     /
+    ;; .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .
+    ;;
+parts:
+    "b": "data/maps/water/air_bubble_sm.fus"
+    "B": "data/maps/water/air_bubble_walled_sm.fus"
+
+collmap:
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .
+    ;;                    /     \w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w/     \
+    ;;   .   .   .   .   +   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   +   .   .   .
+    ;;                    \     /w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w\     /
+    ;; .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   [b]
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .  (.)  .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                     w S w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    ;; .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .
+    ;;                    /     \w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w/     \
+    ;;   .   .   .   .   +   .   +   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   +   .   +   .   .   .    [B]
+    ;;                    \     /w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w w\     /
+    ;; .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+
+
+collmap:
+    ;; .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .
+    ;;               w
+    ;; .   .   .   .   .   .   .   .
+    ;;             w w w
+    ;;   .   .   .   .   .   .   .   .
+    ;;           w w w w w
+    ;; .   .   .   .   .   .   .   .
+    ;;         w w w w w w w
+    ;;   .  (.)  .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .
+    ;;
+parts:
+    "t": "data/maps/water/water_tri4.fus"
+
+collmap:
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   ?   .   .   .   ?   .   .   .   .   .   .   .   .      []   [t^3]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   ?   .   .   .   ?   .   .   .   ?   .   .   .   .   .   .   [t]  [t t^3] [t^3]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .  (?)  .   .   .   ?   .   .   .   .   .   .   .   .        [t]   []
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
 parts:
     "c": recording "data/maps/demo/recs/coin.fus"
     "C": recording "data/maps/demo/recs/coin_crouch.fus"
@@ -6406,49 +6814,79 @@ parts:
 
 collmap:
     ;;
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                       *
-    ;; .   .   .   .   .   .   . - . - .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   . - . - .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                     * *          \
-    ;;   .   .   .   .   .   .   .   .   . - .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;   .   .   .   .   .   .   .   .   . - .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                     *     S            \
-    ;; .   .   .   .   . - + - + - + - +   .   . - . - . - .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   . - + - + - + - +   .   . - . - . - .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                           * *    \w w w w w w w w w w\
-    ;;   .   .   .   .   .   .   .   .   +   .   .   .   .   . - .   .   .   .   .   .   .   .   .   .   .   .
+    ;;   .   .   .   .   .   .   .   .   +   .   .   .   .   . - .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                         * *   D   w w w w w w w w w w w w w\
-    ;; .   .   .   .   .   .   . - + - + - + -(+)- + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   . - + - + - + - + - + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                                        /w w w w w\w w w w w w\
-    ;;   .   .   .   .   .   .   .   .   .   +   . - .   + - + - +   .   .   .   .   .   .   .   .   .   .   .
+    ;;   .   .   .   .   .   .   .   .   .   +   . - .   + - + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                                      /w w/w w w w w w w w w\w w\
-    ;; .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                                    /w w/w w w w w w w w w w/w w/
-    ;;   .   .   .   .   .   .   .   .   +   .   .   + - + - + - +   .   .   .   .   .   .   .   .   .   .   .
+    ;;   .   .   .   .   .   .   .   .   +   .   .   + - + - + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                                  /w w w\w w w w w w w w w w w/
-    ;; .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                                /w w w w/*\w w w w w w w w w/
-    ;;   .   .   .   .   .   .   .   .   .   . - . - . - . - . - . - + - + - +   .   .   .   .   .   .   .   .
+    ;;   .   .   .   .   .   .   .   .   .   . - . - . - . - . - . - + - + - +   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                              /w w w w/w w w w w w w w w w w w w w w w w\
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - + - +   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - + - +   .   .   .   .   .   .   .   .   .   .   .
     ;;                            /w w w w/w w w w w w w w w w w w w w w w w w w w w w w\
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .
     ;;                            \w w w w w w w w w w w w w w w w w w w w w w w w w w w w\
-    ;; .   .   .   .   .   .   .   .   .   .   . - + - + - +   .   .   .   .   .   .   .   +   .   .   .   .   .
+    ;; .   .   .   .   .   .   .   .   .   .   . - + -(+)- +   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .
     ;;                              \w w w w w/     \w w w w w w w w w w w w w w w w w w w w\
-    ;;   .   .   .   .   .   .   .   . - . - .   .   +   .   .   .   .   .   .   .   .   .   +   .   .   .   .
+    ;;   .   .   .   .   .   .   .   . - . - .   .   +   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .
     ;;                                                \w w w w w w w w w w w w w w w w w w w w\
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   +   .   .   .   .
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .
     ;;                                                      \w w w w w w w w w w w w w w w w w/
-    ;;   .   .   .   .   .   .   .   .   .   .   .   + - +   + - + - +   .   .   .   .   .   +   .   .   .   .
+    ;;   .   .   .   .   .   .   .   .   .   .   .   + - +   + - + - +   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .
     ;;                                              /w w w\         /w w w w w w w w w w w w/
-    ;; .   .   .   .   .   .   .   .   .   .   .   +   .   + - + - +   .   .   .   .   .   + - +   .   .   .   .
+    ;; .   .   .   .   .   .   .   .   .   .   .   +   .   + - + - +   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .
     ;;                                              \w w w w w w w w w w w w w w w w w w w w w w\
-    ;;   .   .   .   .   .   .   .   .   .   .   .   + - + - +   .   .   .   .   .   + - +   .   +   .   .   .
-    ;;                                                      /w w w w w w w w w w w w/     \w w w/
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   +   .   + - +   .   .   .   .
-    ;;                                                      \w w w w w w w w w w w/
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   + - + - + - + - + - +   .   .   .   .   .   .   .
+    ;;   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .   .   .   + - + - +   .   +   .   .   .   .   .   .   .   .
+    ;;                                                    \w w w w w w w w w w w w        \w w w/
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .
+    ;;                                                      \w w w w w w w w w w w
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   + - + - + - + - + - +   .   .   .   .   .   .   .   .   .   .   .   .
+
+colors:
+
+    :   0   0   0
+    :   0   0 127
+    :  80 127 127
+    :   0  80 127
+    : 127  80  80
+    :   0 127  80
+    :  80   0 127
+    :   0  80 127
+
+    : 100 100 100
+    :  60  80 100
+    :  60 255 120
+    :  20 120 255
+    : animate:
+        : (200  30  90) 30
+        : (200  60  60) 30
+    :   0 220  20
+    :  20 110  40
+    : 100 200 100
+
+    255: animate:
+        : (  0  20   0) 30
+        : (  0  20  40) 90
+        : (  0   0  30) 30
+        : (  0  30  45) 90
+        : ( 10   0  20) 30
+        : ( 10  10  35) 60
 parts:
     "r": recording "data/maps/wilderness/recs/roller000.fus"
     "r": "data/maps/demo/vert.fus"
@@ -6773,10 +7211,10 @@ submaps:
                 file: "data/maps/wilderness/start.fus"
                 doors:
                     :
-                        map: "data/maps/title/worldmap.fus"
-                        pos: (-19 -12)
+                        map: "data/maps/demo/worldmap.fus"
+                        pos: (72 29)
                         rot: 0
-                        turn: n
+                        turn: y
                 submaps:
                     :
                         file: "data/maps/wilderness/ball_sm.fus"
@@ -7491,6 +7929,49 @@ collmap:
     ;;                         .                           .
     ;;
 
+parts:
+    "c": "data/maps/test/bighex_corner.fus"
+
+collmap:
+    ;;                         .                           .
+    ;;
+    ;;                           + - + - +       .   . - .
+    ;;                          /         \         /* * *\
+    ;;                         +           +   .   .   ?   .            [c]
+    ;;                        /           /         \* * */
+    ;;                       +       + - +       .   . - .   .
+    ;;                        \     /   /*\
+    ;;                         + - +   + - +   +       .
+    ;;                                  \*/*\   \
+    ;;                   .               + - +   +       + - + - +
+    ;;                                  /*\*/   /*\     /         \
+    ;;                 .   .   .   +   + - +   + - +   +   +       +
+    ;;                              \ /*\*/     \*/*\   \   \       \
+    ;;               .   ?   .       + - +   .   + - +   +   +       +    [c^2]
+    ;;                           D                \*/   /   /       /
+    ;;                 .       + - + - + -(+)- +   +   +   + - +   +
+    ;; *\*/*                            \*/*\*/*\     /         \ /
+    ;; - + - +           .   .           + - + - + - +           +
+    ;; */                                         \*/
+    ;; +                                           +   .   .
+    ;;  \
+    ;;   + - +   .   .   .   + - + - + - +   + - +   .       .
+    ;;                        \           \
+    ;;                         +           +       .   ?   .             [c^4]
+    ;;                          \         /
+    ;;                           + - + - +       .   .   .
+    ;;
+    ;;                         .       .       .           .
+    ;;
+    ;;                       .       .       .
+    ;;
+    ;;                     .       +       .
+    ;;                            /
+    ;;                           +       +
+    ;;                           *\  D  /*
+    ;;                             + - +
+    ;;                               *
+
 collmap:
     ;;                         .                           .
     ;;
@@ -7549,8 +8030,8 @@ collmap:
     ;;                +       +   +       + - + - +       +       +       + - +   .   + - +               + - +           +
     ;;               /       / \         /  */*\*          \       \                   \*/                               /
     ;;              +           + - + - +                   +       + - + - + - + - +   +   + - + - + - +               +   .
-    ;;             /           /   /  *     *\*/*            \     /         \     /*\     /         \   \
-    ;;            +                         - + - +           + - +           + - + - +   +           + - +           .       .
+    ;;             /           /   /  *     *\*/*            \     /         \     /*\     /*\ /     \   \
+    ;;            +                         - + - +           + - +           + - + - +   + - +       + - +           .       .
     ;;                                      */                                         \
     ;;                                      +                   .                       +   +                       .           .
     ;;                                       \                                             /
@@ -7713,7 +8194,7 @@ default_tileset: "data/tileset1.fus"
 
 submaps:
     :
-        file: "data/maps/test/map3.fus"
+        file: "data/maps/test/map3_end.fus"
         pos: (0 0)
         camera: (0 4)
         mapper: ("triple")
@@ -7723,6 +8204,11 @@ submaps:
                 pos: (22 25)
                 rot: 0
                 turn: y
+            :
+                anim: "anim/flierplayer.fus"
+                pos: (0 0)
+                rot: 0
+                turn: n
         recordings:
             : "data/maps/test/recs/worldmap_minimal_bird_000.fus"
             : "data/maps/test/recs/worldmap_minimal_bird_001.fus"
@@ -8035,6 +8521,38 @@ submaps:
                 pos: (50 50)
                 camera: (0 0)
 parts:
+    "t": "data/maps/trees/trunkr2.fus"
+collmap:
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   [t]
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   . [t]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   [t]
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .  (?)  .   .   .   .   .   .   .   .   . [t]
+    ;;
+parts:
     "t": "data/maps/trees/trunk.fus"
     "T": "data/maps/trees/trunkL.fus"
     "r": "data/maps/trees/trunk2.fus"
@@ -8291,6 +8809,60 @@ collmap:
     ;;                  /*\*/*\*/*\*/*\*
     ;; .   .   .   .  (+)- + - + - + - +   .   .   .   .   .
     ;;
+
+collmap:
+    ;;
+    ;;   .   .   .   +   .   .   .   +   .   .   .   .   .
+    ;;                \* * * * * * * *\
+    ;; .   .   .   .   +   .   .   .   +   .   .   .   .   .
+    ;;                  \* * * * * * * *\
+    ;;   .   .   .   .   +   .   .   .   +   .   .   .   .
+    ;;                    \* * * * * * * *\
+    ;; .   .   .   .   .  (+)  .   .   .   +   .   .   .   .
+    ;;
+
+collmap:
+    ;;
+    ;;   .   .   .   +   .   .   .   .   .   +   .   .   .   .   .
+    ;;                \* * * * * * * * * * * *\
+    ;; .   .   .   .   +   .   .   .   .   .   +   .   .   .   .   .
+    ;;                  \* * * * * * * * * * * *\
+    ;;   .   .   .   .   +   .   .   .   .   .   +   .   .   .   .
+    ;;                    \* * * * * * * * * * * *\
+    ;; .   .   .   .   .  (+)  .   .   .   .   .   +   .   .   .   .
+    ;;
+parts:
+    "t": "data/maps/trees/trunkr.fus"
+collmap:
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   [t]
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   . [t]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   [t]
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .  (?)  .   .   .   .   .   .   .   .   . [t]
+    ;;
 parts:
     "t": "data/maps/trees/trunk_bark.fus"
 collmap:
@@ -8394,27 +8966,27 @@ collmap:
 
 collmap:
     ;;
-    ;;            .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;                                                        *\*/*
-    ;;          .   .   .   + - +   .   .   .   .   .   + - + - + - .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;                     /* */                               /*\*
-    ;;            .   + - + - +   .   .   .   .   .   .   .   + - .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;               /   /                                   /*\*
-    ;;          .   +   +   .   .   + - + - + - +   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;             /   /           /* * * * * */
-    ;;            +   +   + - + - +   + - + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;           /   /   /* * * * * */
-    ;;          +   +   + - + - + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;         /   /
-    ;;        +   +   .   .  (+)- +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;       /   /           /* */
-    ;;      + - +   .   .   +   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;              S      /* */
-    ;;        + - + - +   +   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;       /* * * */   /* */
-    ;;      + - + - +   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;
-    ;;            .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;          .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                                                              *\*/*
+    ;;        .   .   .   .   .   .   .   .   .   + - +   .   .   .   .   .   + - + - + - .   .   .   .
+    ;;        * * * * *                          /* */                               /*\*
+    ;;          + - +   .   .   .   .   .   + - + - +   .   .   .   .   .   .   .   + - .   .   .   .
+    ;;        */* * *\*                    /   /                                   /*\*
+    ;;    . - + - +   +   .   .   .   .   +   +   .   .   + - + - + - +   .   + - +   .   .   .   .   .
+    ;;      *   */*\*/*                  /   /           /* * * * * */
+    ;;          +   +   .   .   .   .   +   +   + - + - +   + - + - +   .   .   .   .   .   .   .   .
+    ;;        */*   *\*                /   /   /* * * * * */
+    ;;        .   .   .   .   .   .   +   +   + - + - + - +   .   .   .   .   .   .   .   .   .   .   .
+    ;;                               /   /
+    ;;      .   .   .   .   .   .   +   +   .   .  (+)- +   .   .   .   .   .   .   .   .   .   .   .
+    ;;                             /   /           /* */
+    ;;    .   .   .   .   .   .   + - +   .   .   +   +   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                    S      /* */
+    ;;      .   .   .   .   .   .   + - + - +   +   +   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                             /* * * */   /* */
+    ;;    .   .   .   .   .   .   + - + - +   +   +   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                                       /* */
+    ;;          .   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .
 
 unit: 3 2 0 -1
 spawn: (-1 0)
@@ -8470,6 +9042,11 @@ submaps:
                 file: "data/maps/trees/start6.fus"
                 pos: eval: (5 5) + (11 14) + (10 16)
                 camera: (9 6)
+            :
+                bg
+                file: "data/maps/trees/start7_bg.fus"
+                pos: eval: (5 5) + (12 5) + (22 3)
+                tileset: "data/maps/trees/tilesets/trees_dark.fus"
             :
                 file: "data/maps/trees/start7.fus"
                 pos: eval: (5 5) + (12 5) + (22 3)
@@ -8555,25 +9132,25 @@ collmap:
     ;;
     ;; .   .   .   .   .   .   .   .   .   .   .   .   + - + - +   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                                                /w w w w w\
-    ;;   .   .   .   .   .   .   .   .   .   .   .   +   .   .   +   .   .   .   .   .   .   .   .   .   .   .
-    ;;                                               w\w w w w w w\
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   +   .   .   .   .   .   .   .   .   .   .   .
-    ;;                                               w w w w w w w/
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .
-    ;;                                             w w w w w w w/
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;                                             w w w w/
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   +   .   + - + - + - +   .   .   .   .   .   .   .   .
-    ;;                                               w w w\     /w w w w w w w\
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .   +   .   .   .   .   .   .   .   .
-    ;;                                             w w w w w w w w w w w w w w w\
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .
-    ;;                                           w w w w w w w w w w w w w w/
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   + - + - +   .   +   .   .   .   .   .   .   .   .   .
-    ;;                                         w w w w w w/         \w w w w\
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   +   .   + - + - +   .   .   .   .   .   .
-    ;;                                       w w w w w w w\         /w w w w w w w w w\
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   +   .   .   .   .   +   .   .   .   .   .   .
+    ;;   .   .   .   .   +   .   .   .   .   .   .   +   .   .   +   .   .   .   .   .   .   .   .   .   .   .
+    ;;                  /                            w\w w w w w w\
+    ;; .   .   .   .   +   .   .   .   .   .   .   .   +   .   .   +   .   .   .   .   .   .   .   .   .   .   .
+    ;;                /                              w w w w w w w/
+    ;;   .   .   .   +   .   .   + - +   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .
+    ;;              /           /* */              w w w w w w w/
+    ;; .   .   .   + - +   + - + - +   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;            /* */   /* */                    w w w w/
+    ;;   .   + - +   +   + - +   + - +   .   .   .   .   +   .   + - + - + - +   .   .   .   .   .   .   .   .
+    ;;            \*/           /* */                w w w\     /w w w w w w w\
+    ;; .   .   .   +   + - + - +   +   .   .   .   .   .   + - +   .   .   .   +   .   .   .   .   .   .   .   .
+    ;;                /* * * * * */                w w w w w w w w w w w w w w w\
+    ;;   .   .   .   + - +   + - +   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .
+    ;;              /   /* */                    w w w w w w w w w w w w w w/
+    ;; .   .   .   +   + - +   .   .   .   .   .   .   .   + - + - +   .   +   .   .   .   .   .   .   .   .   .
+    ;;            /                            w w w w w w/         \w w w w\
+    ;;   .   .   +   .   .   .   .   .   .   .   .   .   +   .   .   +   .   + - + - +   .   .   .   .   .   .
+    ;;          /                            w w w w w w w\         /w w w w w w w w w\
+    ;; .   .   +   .   .   .   .   .   .   .   .   .   .   +   .   +   .   .   .   .   +   .   .   .   .   .   .
     ;;                                     w w w w w w w w/       /w w w w w w w w w w w\
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   + - + - +   .   .   .   .   .   +   .   .   .   .   .
     ;;                                   w w w w w w w w w w w w w w w w w w w w w w w w w\
@@ -8581,13 +9158,92 @@ collmap:
     ;;             S                   w w w w w w w w w w w w w w w w w w w w w w w w w w/
     ;;   .   .  (+)- + - +   .   .   .   +   .   .   .   .   .   .   .   .   .   + - + - +   .   .   .   .   .
     ;;          /       /              w/w w w w w w w w w w w w w w w w w w w w/
-    ;; .   .   + - + - +   .   .   .   +   .   .   .   .   .   .   .   +   .   +   .   .   .   .   .   .   .   .
-    ;;                                  \w w w w w w w w w w w w w w w w w w w w\
-    ;;   .   .   .   .   .   .   .   .   +   .   .   .   + - + - +   .   .   .   +   .   .   .   .   .   .   .
+    ;; .   .   + - + - + - +   .   .   +   .   .   .   .   .   .   .   +   .   +   .   .   .   .   .   .   .   .
+    ;;                /   /             \w w w w w w w w w w w w w w w w w w w w\
+    ;;   .   .   .   + - +   .   .   .   +   .   .   .   + - + - +   .   .   .   +   .   .   .   .   .   .   .
     ;;                                    \w w w w w w w/         \w w w w w w w/
     ;; .   .   .   .   .   .   .   .   .   + - + - + - +   .   .   +   .   .   +   .   .   .   .   .   .   .   .
     ;;                                                              \w w w w w/
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - + - +   .   .   .   .   .   .   .   .
+parts:
+    "t": "data/maps/trees/trunk.fus"
+    "T": "data/maps/trees/trunkL.fus"
+    "r": "data/maps/trees/trunk2.fus"
+    "R": "data/maps/trees/trunk2L.fus"
+collmap:
+    ;;
+    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .
+    ;;                                                                                            /*\
+    ;;       .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - + - + - +   .   .
+    ;;                                                                                            \*/*\*/*\*/
+    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - + - +   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   [t]
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   . [t]
+    ;;
+    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   . [T]
+    ;;
+    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;     .   .   .   .   .   .   .   .   .   .  (.)  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   ?   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   . [T]
+    ;;                      /* * * * * * * */
+    ;;     .   .   .   .   + - + - +   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                              \* * */
+    ;;   .   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
 
 collmap:
     ;;
@@ -8599,17 +9255,17 @@ collmap:
     ;;
     ;;     .   .   .   .   .   .   .   .   .   .   .   + - + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                                                /       /
-    ;;   .   + - +   .   .   .   .   .   .   .   + - + - + - +   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .
-    ;;      /   /                               /* */                           /     \
-    ;;     + - + - +   .   .   .   .   .   + - +   +   .   .   .   .   .   .   +   .   +   .   .   .   .   .   .   .   .   .   .
+    ;;   .   + - +   .   .   .   .   .   .   .   + - + - + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;      /   /                               /* */
+    ;;     + - + - +   .   .   .   .   .   + - +   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;        /   /                       /* * * */
     ;;   .   + - + - +   .   .   .   + - +   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;          /   /               /* * * * * */
-    ;;     .   + - + - +   .   .   + - + - + - + - + - +   .   .   .   .   .   .   .   .   .   .   + - + - +   .   .   .   .
-    ;;            /   /                       /       /                                           /       /
-    ;;   .   .   + - +   .   .   .   .   .   + - + - +   .   .   .   .   .   .   + - +   .   + - +   .   +   .   .   .   .
-    ;;                                                                          /* */       /           /
-    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   +   .   + - + - +   +   .   .   .   .
+    ;;     .   + - + - +   .   .   + - + - + - + - + - +   .   .   .   .   .   .   .   .   .   + - +   +   + - +   .   .   .
+    ;;            /   /                       /       /                                       /   /   /   /   /
+    ;;   .   .   + - +   .   .   .   .   .   + - + - +   .   .   .   .   .   .   + - +   .   +   + - + - +   +   .   .   .
+    ;;                                                                          /* */       /               /
+    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   +   .   + - + - +   + - +   .   .   .
     ;;                                                                        /* */               /   /
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   + - + - +   .   +   +   .   .   .   + - +   .   .   .   .
     ;;       S                                              /* * * */       /* */
@@ -8792,37 +9448,37 @@ collmap:
 
 collmap:
     ;;
-    ;;          .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;      .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;;            .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;        .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;;          .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .
-    ;;                                                         /* */
-    ;;            .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .
+    ;;      .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .
+    ;;                                                                     /* */
+    ;;        .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .
     ;;
-    ;;          .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;      .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;;            .   .   .   .   .   .   .   .   .   .   .   + - +   .   .
-    ;;                                                       /* */
-    ;;          .   .   .   .   .   .   .   + - +   .   + - +   +   .   .
-    ;;                                     /* */       /* * * */
-    ;;            .   .   .   .   .   .   +   +   .   + - + - +   .   .   .
-    ;;                                   /* */
-    ;;          .   + - +   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;          *\*/
-    ;;          - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;        *\*/
-    ;;        - + - + - +   .   .   + - + - +   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;        */*\*                /* * * */   /* */
-    ;;            .   .   .   .   + - + - +   + - +   .   .   .   .   .   .   + - .   .   .   .   .   .   .   .   .   .
-    ;;                                                                    *\*/
-    ;;          .   .   .   .   .   .   .   + - +   .   .   .   .   .   . - +   .   .   .   .   .   .   .   .   .
-    ;;                                     /* */                        *\*/
-    ;;            .   .   .   .   .   .   +   +   .   .   .   .   .   . - +   .   .   .   .   .   .   .   .   .   .
-    ;;                                   /* */                          */*\         /
-    ;;          .   .   .   .   .   .  (+)- +   .   .   .   .   .   .   . - + - + - +   .   .   .   .   .   .   .   .
-    ;;                                                                    */*\*/*\*
-    ;;            .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;        .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   + - +   .   .
+    ;;                                                   /* */           /* */
+    ;;      .   .   .   .   .   .   .   .   .   .   .   + - +   .   + - +   +   .   .
+    ;;                                                     /       /* * * */
+    ;;        .   .   .   .   .   .   .   .   .   .   + - +   .   + - + - +   .   .   .
+    ;;                                               /* */
+    ;;      .   .   .   .   .   + - +   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                      *\*/
+    ;;        .   .   .   . - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                    *\*/
+    ;;      .   .   .   . - + - + - +   .   .   + - + - +   + - +   .   .   .   .   .   .   .   .   .   .   .
+    ;;                    */*\*                /* * * */   /* */
+    ;;        .   .   .   .   .   .   .   .   + - + - +   + - +   .   .   .   .   .   .   + - .   .   .   .
+    ;;                                                                                *\*/
+    ;;      .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .   .   .   . - +   .   .   .   .   .
+    ;;                                                 /* */                        *\*/
+    ;;        .   .   .   .   .   .   .   .   .   .   +   +   .   .   .   .   .   . - +   .   .   .   .   .
+    ;;                                               /* */                          */*\         /
+    ;;      .   .   .   .   .   .   .   .   .   .  (+)- +   .   .   .   .   .   .   . - + - + - +   .   .   .
+    ;;                                                                                */*\*/*\*
+    ;;        .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
 
 collmap:
@@ -9193,6 +9849,213 @@ keys:
     r:
 data: " w11"
 
+# Expected vars:
+# ANIM_NS (str), e.g. "flier_", ""
+# RGRAPH_NS (str), e.g. "flierplayer_", ""
+
+
+#$SET_BOOL ONLY_STICK_IF_NOT_SHIFT
+
+
+$PREFIX ANIM_NS hover:
+    rgraph: $PREFIX RGRAPH_NS "flier"
+    unsafe
+    flying
+    hitbox:
+        ;;   *\*/*
+        ;;   -(+)-
+        ;;   */*\*
+
+
+    ############
+    # ROTATE B #
+    ############
+
+    $IF PLAYER_FLIER:
+        if:
+            key: wasdown b
+            key: not wasdown f
+            $IF ONLY_STICK_IF_NOT_SHIFT:
+                key: not isdown x
+            coll: all yes
+                ;;  . - .
+                ;;
+                ;;   ( )
+        then:
+            move: 0 1
+            turn
+            rot: 3
+            goto: crawl
+            delay: 2
+
+    if:
+        key: wasdown b
+        key: not wasdown f
+        coll: all no
+            ;;  *\*/*
+            ;;  - + -
+            ;;     \*
+            ;; ( )
+    then:
+        rot: 1
+        move: 1 0
+        goto: $PREFIX ANIM_NS fly
+        delay: 1
+
+    if:
+        key: wasdown b
+        key: not wasdown f
+        coll: all no
+            ;;     \*/*
+            ;; ( )  + -
+            ;;     /*\*
+    then:
+        move: 1 0
+        rot: 1
+        goto: $PREFIX ANIM_NS fly
+        delay: 1
+
+    if:
+        key: wasdown b
+        key: not wasdown f
+    then:
+        rot: 1
+        goto: $PREFIX ANIM_NS fly
+        delay: 1
+
+
+    ############
+    # ROTATE F #
+    ############
+
+    $IF PLAYER_FLIER:
+        if:
+            key: wasdown f
+            key: not wasdown b
+            $IF ONLY_STICK_IF_NOT_SHIFT:
+                key: not isdown x
+            coll: all yes
+                ;;   ( )
+                ;;
+                ;;  . - .
+        then:
+            move: -1 -1
+            goto: crawl
+            delay: 2
+
+    if:
+        key: wasdown f
+        key: not wasdown b
+        coll: all no
+            ;; ( )
+            ;;     /*
+            ;;  - + -
+            ;;  */*\*
+    then:
+        rot: -1
+        move: 1 0
+        goto: $PREFIX ANIM_NS fly
+        delay: 1
+
+    if:
+        key: wasdown f
+        key: not wasdown b
+        coll: all no
+            ;;     \*/*
+            ;; ( )  + -
+            ;;     /*\*
+    then:
+        move: 1 0
+        rot: -1
+        goto: $PREFIX ANIM_NS fly
+        delay: 1
+
+    if:
+        key: wasdown f
+        key: not wasdown b
+    then:
+        rot: -1
+        goto: $PREFIX ANIM_NS fly
+        delay: 1
+
+
+    ############
+    # STRAIGHT #
+    ############
+
+    $IF PLAYER_FLIER:
+        if:
+            key: wasdown u
+            $IF ONLY_STICK_IF_NOT_SHIFT:
+                key: not isdown x
+            coll: all yes
+                ;;   ( )  .
+                ;;       /
+            coll: all no
+                ;;       \
+                ;;   ( )  .
+        then:
+            move: 0 -1
+            rot: 1
+            goto: crawl
+            delay: 2
+
+        if:
+            key: wasdown u
+            $IF ONLY_STICK_IF_NOT_SHIFT:
+                key: not isdown x
+            coll: all yes
+                ;;       \
+                ;;   ( )  .
+            coll: all no
+                ;;   ( )  .
+                ;;       /
+        then:
+            move: 1 1
+            rot: 2
+            turn
+            goto: crawl
+            delay: 2
+
+    if:
+        key: wasdown u
+        coll: all no
+            ;;     \*/*
+            ;; ( )  + -
+            ;;     /*\*
+    then:
+        move: 1 0
+        goto: $PREFIX ANIM_NS fly
+        delay: 0
+
+
+$PREFIX ANIM_NS fly:
+    rgraph: $PREFIX RGRAPH_NS "flier_fly"
+    unsafe
+    flying
+    hitbox:
+        ;;   *\*/*
+        ;;   -(+)-
+        ;;   */*\*
+
+    # DOESN'T WORK BECAUSE NO WAY TO KNOW WHETHER WE SHOULD TURN OR NOT:
+    #$IF PLAYER_FLIER:
+    #    if:
+    #        coll: water any yes
+    #            ;;   .   .
+    #            ;;   *\*/*
+    #            ;; . -(+)- .
+    #            ;;   */*\*
+    #            ;;   .   .
+    #    then:
+    #        move: -1 -1
+    #        goto: swim_jump
+    #        delay: 4
+
+    if:
+    then:
+        goto: $PREFIX ANIM_NS hover
+
 projectile
 
 fly:
@@ -9304,34 +10167,106 @@ crouch_fly_bouncy:
         move: 1 1
         rot: 3
         turn
-# NOTE: make sure "stand" is the first anim, so any imports
-# should go below it
 
-stand:
-    rgraph: "player_stand"
+can_save
 
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
+$SET_BOOL PLAYER_CAN_LOOK_UP
+$SET_STR NS player_
+import "anim/_player.fus"
+
+# Expected to be imported by "anim/_player.fus"
+
+# Expected vars:
+# NS (str), e.g. "player_"
+
+crawl_looking_up:
+    rgraph: $PREFIX NS "crawl_looking_up"
+    $IF !PLAYER_SPIKEY: hitbox:
+        ;;     .
+        ;;     *
         ;;  (.)  .
 
     if:
         key: wentdown y
     then:
-        spawn: "anim/spit.fus" "fly" (0 0) 0 f
-        goto: spit
+        spawn: "anim/spit.fus" "crouch_fly" (1 0) 1 f
+        goto: crawl_looking_up_spit
         delay: 9
 
     if:
-        key: isdown d
+        key: not isdown d
+        coll: all no
+            ;;  *\*/*
+            ;;  - + -
+            ;;  */ \*
+            ;; ( )
     then:
-        goto: crawl
-        delay: 2
+        goto: looking_up
+        delay: 3
+
+    if: key: isdown f
+    then: goto immediate: crawl
+
+    if: key: isdown b
+    then: goto immediate: crawl
+
+    if: key: not isdown x
+    then: goto: crawl
+
+crawl_spit:
+    rgraph: $PREFIX NS "crawl_spit"
+    $IF !PLAYER_SPIKEY: hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)  .
+    if() then: goto: crawl
+
+crawl_looking_up_spit:
+    rgraph: $PREFIX NS "crawl_looking_up_spit"
+    $IF !PLAYER_SPIKEY: hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)  .
+    if() then: goto: crawl_looking_up
+
+crawl:
+    rgraph: $PREFIX NS "crawl"
+
+    $IF !PLAYER_SPIKEY: hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)  .
+
+    if:
+        key: wentdown y
+    then:
+        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
+        goto: crawl_spit
+        delay: 9
+
+    $IF PLAYER_ROLLER:
+        if:
+            key: wentdown x
+        then:
+            goto: roller_stand
+            delay: 1
+
+    if:
+        key: not isdown d
+        coll: all no
+            ;;  *\*/*
+            ;;  - + -
+            ;;  */ \*
+            ;; ( )
+    then:
+        goto: stand
+        delay: 3
 
     if:
         key: isdown f
+        coll: all no
+            ;;     \*
+            ;; ( )
         coll: all yes
             ;;        +
             ;;       /
@@ -9339,47 +10274,19 @@ stand:
     then:
         move: 1 0
         rot: 1
-        goto: step
+        goto: crawl_step
         delay: 2
-
-    if:
-        key: wasdown x
-        key: wasdown u
-        coll: all no
-            ;;    *\*/*
-            ;;    - + -
-            ;;       \*
-            ;;
-            ;;
-            ;; ( )
-    then:
-        move: 1 0
-        rot: 1
-        goto immediate: start_jump
-
-    if:
-        key: wasdown u
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*
-            ;; ( )
-    then:
-        move: 1 0
-        goto immediate: start_jump
 
     if:
         key: isdown f
         coll: all yes
             ;; ( )  + - +
         coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*
-            ;; ( )
+            ;;     \*/*
+            ;; (.)  .
     then:
         move: 1 0
-        goto: step
+        goto: crawl_step
         delay: 2
 
     if:
@@ -9389,259 +10296,94 @@ stand:
             ;;       \
             ;;        +
         coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*/*
-            ;; ( )    - + -
-            ;;        */*\*
+            ;;     \*/*
+            ;; (.)  . -
+            ;;        *
     then:
         move: 1 0
         rot: -1
-        goto: step_down
+        goto: crawl_step_down
         delay: 2
-
-    if:
-        key: isdown f
-        coll: any yes
-            ;;        +
-            ;;       /
-            ;; ( )
-    then:
-        move: 1 0
-        rot: 1
-        goto immediate: start_jump
-
-    if:
-        key: isdown f
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*
-            ;; ( )
-    then:
-        move: 1 0
-        goto immediate: start_jump
 
     if:
         key: isdown b
     then:
         move: 1 0
         turn
-        goto: step
+        goto: crawl_step
         delay: 2
 
-    if:
-        key: isdown x
-    then:
-        goto: look_up
+    $IF PLAYER_CAN_LOOK_UP:
+        if:
+            key: not isdown f
+            key: isdown x
+        then:
+            goto: crawl_look_up
 
-look_up:
-    rgraph: "player_look_up"
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
+crawl_look_up:
+    rgraph: $PREFIX NS "crawl_look_up"
+    $IF !PLAYER_SPIKEY: hitbox:
+        ;;     .
+        ;;     *
         ;;  (.)  .
-    if() then: goto: looking_up
+    if() then: goto: crawl_looking_up
 
-looking_up:
-    rgraph: "player_looking_up"
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
+crawl_step_down:
+    rgraph: $PREFIX NS "crawl_step"
+    $IF !PLAYER_SPIKEY: hitbox:
+        ;;    .   .
+        ;;    *\*/*
+        ;;  . -(.)  .
 
     if:
         key: wentdown y
     then:
-        spawn: "anim/spit.fus" "fly" (1 0) 1 f
-        goto: looking_up_spit
+        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
+        goto: crawl_spit
         delay: 9
 
-    if:
-        key: wasdown u
-        coll: all no
-            ;;    *\*/*
-            ;;    - + -
-            ;;       \*
-            ;;
-            ;;
-            ;; ( )
-    then:
-        move: 1 0
-        rot: 1
-        goto immediate: start_jump
+    $IF PLAYER_ROLLER:
+        if:
+            key: wentdown x
+        then:
+            goto: roller_stand
+            delay: 1
 
-    if: key: isdown f
-    then: goto immediate: stand
+    if() then: goto: crawl
 
-    if: key: isdown b
-    then: goto immediate: stand
-
-    if:
-        key: isdown d
-    then:
-        goto: crawl_looking_up
-        delay: 2
-
-    if: key: not isdown x
-    then: goto: stand
-
-spit:
-    rgraph: "player_spit"
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
-    if() then: goto: stand
-
-looking_up_spit:
-    rgraph: "player_looking_up_spit"
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
-    if() then: goto: looking_up
-
-start_jump:
-    if:
-        coll: water any yes
-            ;;   .   .
-            ;;   *\*/*
-            ;; . - + - .
-            ;;   */*\*
-            ;;  (.)  .
-    then:
-        goto: swim_jump
-        delay: 4
-
-    if() then:
-        goto: jump
-        delay: 2
-
-jump:
-    # NOTE: the only "goto: jump" is in "start_jump", which checks whether
-    # we're in water, and does "goto: jump" or "goto: swim_jump"
-    # accordingly.
-    # Therefore, if we're in "jump", then we can safely assume we're not in
-    # water without checking.
-
-    rgraph: "player_jump"
-    unsafe
-
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
-
-    if:
-        coll: all yes
-            ;;        +
-            ;;       /
-            ;; ( )  +
-    then:
-        move: 1 0
-        rot: 1
-        goto: step
-        delay: 2
-
-    if:
-        coll: all yes
-            ;; ( )  +
-        coll: any yes
-            ;;        +
-            ;;       /
-            ;; ( )
-    then:
-        move: 1 0
-        rot: 1
-        goto immediate: start_jump
-
-    if:
-        key: not isdown u
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*
-            ;; ( )
-        coll: all yes
-            ;; ( )  + - +
-    then:
-        move: 1 0
-        goto: step
-        delay: 2
-
-    if:
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*
-            ;; ( )
-    then:
-        move: 1 0
-        goto immediate: start_jump
-
-    if() then:
-        goto: mostly_dead
-        delay: 11
-
-step_down:
-    rgraph: "player_step"
-    hitbox:
-        ;;   .   .   .
-        ;;   *\*/*\*/*
-        ;; . - + - + - .
-        ;;   */*\*/*\*
-        ;;   .  (.)  .
+crawl_step:
+    rgraph: $PREFIX NS "crawl_step"
+    $IF !PLAYER_SPIKEY: hitbox:
+        ;;    .   .
+        ;;      */*
+        ;;     (.)  .
 
     if:
         key: wentdown y
     then:
-        spawn: "anim/spit.fus" "fly" (0 0) 0 f
-        goto: spit
+        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
+        goto: crawl_spit
         delay: 9
 
-    if() then: goto: stand
+    $IF PLAYER_ROLLER:
+        if:
+            key: wentdown x
+        then:
+            goto: roller_stand
+            delay: 1
 
-step:
-    rgraph: "player_step"
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
+    if() then: goto: crawl
 
-    if:
-        key: wentdown y
-    then:
-        spawn: "anim/spit.fus" "fly" (0 0) 0 f
-        goto: spit
-        delay: 9
+can_save
 
-    if() then: goto: stand
+$SET_STR NS rollerplayer_
+$SET_BOOL PLAYER_ROLLER
+import "anim/_player.fus"
 
-mostly_dead:
-    rgraph: "player_dead"
-    unsafe
-    if() then: die mostly
-
-dead:
-    rgraph: "player_dead"
-    unsafe
-    if() then: die
-
-import "anim/player_crawl.fus"
-import "anim/player_swim.fus"
+$SET_STR ANIM_NS roller_
+$SET_STR RGRAPH_NS rollerplayer_
+$SET_BOOL PLAYER_ROLLER
+import "anim/_roller.fus"
 
 stand:
     rgraph: "big_roller"
@@ -9763,187 +10505,6 @@ grab:
     then:
         goto: stand
         delay: 1
-
-swim_spit:
-    rgraph: "player_swim_spit"
-    unsafe
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
-    if() then: goto: swim
-
-swim_jump:
-    # NOTE: the only "goto: swim_jump" is in "swim_jump", which checks
-    # whether we're in water, and does "goto: jump" or "goto: swim_jump"
-    # accordingly.
-    # Therefore, if we're in "swim_jump", then we can safely assume we're in
-    # water without checking.
-
-    rgraph: "player_swim_jump"
-    unsafe
-
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
-
-    if:
-        key: not isdown u
-        key: isdown f
-        coll: all yes
-            ;;        +
-            ;;       /
-            ;; ( )  +
-    then:
-        move: 1 0
-        rot: 1
-        goto: step
-        delay: 2
-
-    if:
-        key: isdown f
-        coll: any yes
-            ;;        +
-            ;;       /
-            ;; ( )
-        coll: all no
-            ;;    *\*/*
-            ;;    - + -
-            ;;       \*
-            ;;    .
-            ;;
-            ;; ( )
-    then:
-        move: 2 1
-        rot: 1
-        goto immediate: start_jump
-
-    if:
-        key: isdown f
-        coll: any yes
-            ;;       \
-            ;;        +
-            ;;
-            ;; ( )
-        coll: all no
-            ;;
-            ;;       /*
-            ;; ( )- + -
-            ;;    */*\*
-    then:
-        move: 0 0
-        rot: -1
-        goto immediate: start_jump
-
-    if:
-        key: isdown f
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*
-            ;; ( )
-    then:
-        move: 1 0
-        goto immediate: start_jump
-
-    if() then:
-        goto immediate: swim
-
-swim:
-    rgraph: "player_swim"
-    unsafe
-
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
-
-    if:
-        key: wentdown y
-    then:
-        spawn: "anim/spit.fus" "fly" (0 0) 0 f
-        goto: swim_spit
-        delay: 9
-
-    if:
-        key: not isdown u
-        key: isdown f
-        coll: all yes
-            ;;        +
-            ;;       /
-            ;; ( )  +
-    then:
-        move: 1 0
-        rot: 1
-        goto: step
-        delay: 2
-
-    if:
-        key: isdown f
-        coll: any yes
-            ;;        +
-            ;;       /
-            ;; ( )
-        coll: all no
-            ;;    *\*/*
-            ;;    - + -
-            ;;       \*
-            ;;    .
-            ;;
-            ;; ( )
-    then:
-        move: 2 1
-        rot: 1
-        goto immediate: start_jump
-
-    if:
-        key: isdown f
-        coll: any yes
-            ;;       \
-            ;;        +
-            ;;
-            ;; ( )
-        coll: all no
-            ;;
-            ;;       /*
-            ;; ( )- + -
-            ;;    */*\*
-    then:
-        move: 0 0
-        rot: -1
-        goto immediate: start_jump
-
-    if:
-        key: isdown f
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*
-            ;; ( )
-    then:
-        move: 1 0
-        goto immediate: start_jump
-
-    if:
-        key: isdown b
-    then:
-        move: 1 0
-        turn
-        delay: 2
-
-    if:
-        coll: all yes
-            ;; (+)- +
-    then:
-        goto: stand
-        delay: 2
 
 stand:
     rgraph: "roller2"
@@ -10561,6 +11122,349 @@ grab:
         goto: stand
         delay: 1
 
+# Expected vars:
+# ANIM_NS (str), e.g. "roller_", ""
+# RGRAPH_NS (str), e.g. "rollerplayer_", ""
+
+
+#$SET_BOOL FLIPPY_GRAB
+
+#$SET_BOOL STICKY_GRAB
+
+$SET_BOOL STICKY_GRAB
+$SET_BOOL FLIPPY_GRAB
+
+#$SET_BOOL STICKY_GRAB
+#$SET_BOOL GOTO_GRABBED
+#$SET_BOOL FLIPPY_GRAB
+
+
+$PREFIX ANIM_NS stand:
+    rgraph: $PREFIX RGRAPH_NS "roller"
+    hitbox:
+        ;;    .
+        ;;    *
+        ;; (.)  .
+
+    $IF PLAYER_ROLLER:
+        if:
+            key: not isdown x
+            coll: all yes
+                ;; ( )- .
+        then:
+            goto: crawl
+
+        if:
+            key: not isdown x
+            coll: all yes
+                ;;    .
+                ;;   /
+                ;; ( )  .
+        then:
+            goto: crawl
+            rot: -2
+            turn
+
+    if:
+        key: wasdown u
+        coll: all yes
+            ;;    .   +
+            ;;
+            ;; ( )  .
+        coll: all no
+            ;;    .
+            ;;     \*
+            ;; ( )  .
+    then:
+        move: 2 1
+        rot: 3
+        $IF GOTO_GRABBED:
+            goto: $PREFIX ANIM_NS grabbed
+        $IF !GOTO_GRABBED:
+            goto: $PREFIX ANIM_NS grab
+        delay: 1
+
+    if:
+        key: wasdown u
+        coll: all no
+            ;;    .
+            ;;     \*
+            ;; ( )  .
+    then:
+        goto: $PREFIX ANIM_NS grab
+        delay: 1
+
+    if:
+        key: not isdown d
+        key: not isdown b
+        key: isdown f
+        coll: all yes
+            ;; ( )  +
+    then:
+        move: 1 0
+        turn
+        delay: 1
+
+    if:
+        key: not isdown b
+        key: isdown f
+        coll: all no
+            ;; ( )-
+            ;;    *
+    then:
+        rot: -1
+        delay: 1
+
+    if:
+        key: not isdown b
+        key: isdown f
+        coll: all yes
+            ;; ( )  +
+    then:
+        move: 1 0
+        turn
+        delay: 1
+
+    if:
+        key: not isdown d
+        key: not isdown f
+        key: isdown b
+        coll: all yes
+            ;;    +
+            ;;
+            ;; ( )
+    then:
+        move: 1 1
+        rot: 2
+        turn
+        delay: 1
+
+    if:
+        key: not isdown f
+        key: isdown b
+        coll: all no
+            ;;  */
+            ;; ( )
+    then:
+        rot: 1
+        delay: 1
+
+    if:
+        key: not isdown f
+        key: isdown b
+        coll: all yes
+            ;;    +
+            ;;
+            ;; ( )
+    then:
+        move: 1 1
+        rot: 2
+        turn
+        delay: 1
+
+
+$PREFIX ANIM_NS grab:
+    rgraph: $PREFIX RGRAPH_NS "roller_grab"
+    hitbox:
+        ;;    .   .
+        ;;    *\*
+        ;; (.)  .
+
+    if:
+        key: not isdown u
+    then:
+        goto: $PREFIX ANIM_NS stand
+        delay: 1
+
+    $IF FLIPPY_GRAB:
+        if:
+            key: isdown f
+            key: not isdown b
+            coll: all yes
+                ;; ( )  +
+        then:
+            move: 1 0
+            rot: 1
+            goto: $PREFIX ANIM_NS grab_flipped
+            delay: 1
+
+    $IF STICKY_GRAB:
+        if:
+            key: isdown f
+            key: not isdown b
+            coll: all yes
+                ;; ( )  .   +
+            coll: all no
+                ;;    *\*/*
+                ;; ( )
+        then:
+            move: 2 0
+            rot: 2
+            $IF GOTO_GRABBED:
+                goto: $PREFIX ANIM_NS grabbed
+            delay: 1
+
+    $IF FLIPPY_GRAB:
+        if:
+            key: isdown f
+            key: not isdown b
+            coll: all yes
+                ;;        .
+                ;;
+                ;; ( )  .   .
+                ;;
+                ;;    +   .
+            coll: all no
+                ;;        .
+                ;;       /*
+                ;; ( )- + - .
+                ;;    */*\*
+                ;;    .   .
+        then:
+            move: 0 -1
+            goto: $PREFIX ANIM_NS grab_flipped
+            delay: 1
+
+    if:
+        key: isdown f
+        key: not isdown b
+        coll: all yes
+            ;;        .
+            ;;
+            ;; ( )  .   .
+            ;;
+            ;;    .   +
+        coll: all no
+            ;;        .
+            ;;       /*
+            ;; ( )- + - .
+            ;;    */*\*
+            ;;    .   .
+    then:
+        move: 1 -1
+        rot: 2
+        $IF GOTO_GRABBED:
+            goto: $PREFIX ANIM_NS grabbed
+        delay: 1
+
+    if:
+        key: isdown f
+        key: not isdown b
+        coll: all no
+            ;;       /*
+            ;; ( )- + -
+            ;;    */*\*
+    then:
+        rot: -1
+        delay: 1
+
+    $IF GRAB_WHEN_TURNING:
+        if:
+            key: isdown b
+            key: not isdown f
+            coll: all yes
+                ;;    .   +
+                ;;
+                ;; ( )  .
+            coll: all no
+                ;;    .
+                ;;     \*
+                ;; ( )  .
+        then:
+            move: 2 1
+            rot: 3
+            turn
+            rot: 2
+            $IF GOTO_GRABBED:
+                goto: $PREFIX ANIM_NS grabbed
+            delay: 1
+
+    if:
+        key: isdown b
+        key: not isdown f
+    then:
+        turn
+        rot: 2
+        delay: 1
+
+
+$PREFIX ANIM_NS grab_flipped:
+    rgraph: $PREFIX RGRAPH_NS "roller_grab_flipped"
+    hitbox:
+        ;; .   .
+        ;;   */*
+        ;;  (.)  .
+
+    if:
+        key: not isdown u
+        key: isdown f
+    then:
+        goto: $PREFIX ANIM_NS stand
+        delay: 1
+
+    if:
+        key: not isdown u
+        key: isdown b
+    then:
+        goto: $PREFIX ANIM_NS stand
+        turn
+        rot: 1
+        delay: 1
+
+    if:
+        key: isdown d
+        key: isdown f
+        key: not isdown b
+        coll: all no
+            ;; ( )-
+            ;;    *
+    then:
+        rot: -1
+        delay: 1
+
+    if:
+        key: isdown f
+        key: not isdown b
+        coll: all yes
+            ;; ( )  +
+    then:
+        move: 1 0
+        rot: 2
+        goto: $PREFIX ANIM_NS grab
+        delay: 1
+
+    if:
+        key: isdown f
+        key: not isdown b
+        coll: all no
+            ;; ( )-
+            ;;    *
+    then:
+        rot: -1
+        delay: 1
+
+    if:
+        key: isdown b
+        key: not isdown f
+    then:
+        turn
+        rot: 1
+        delay: 1
+
+
+$PREFIX ANIM_NS grabbed:
+    rgraph: $PREFIX RGRAPH_NS "roller_grab"
+    hitbox:
+        ;;    .   .
+        ;;    *\*
+        ;; (.)  .
+
+    if:
+        key: not isdown u
+    then:
+        goto: $PREFIX ANIM_NS stand
+        delay: 1
+
 stand:
     rgraph: "death_roller"
     crushes
@@ -10668,7 +11572,7 @@ grab:
         delay: 1
 
 dead:
-    rgraph: "player_dead"
+    rgraph: "dead"
     if() then: die
 
 born:
@@ -10704,96 +11608,14 @@ born:
         move: 1 0
         delay: 1
 
-hover:
-    rgraph: "flier"
 
-    if:
-        key: wasdown b
-        key: not wasdown f
-        coll: all no
-            ;;  *\*/*
-            ;;  - + -
-            ;;     \*
-            ;; ( )
-    then:
-        rot: 1
-        move: 1 0
-        goto: fly
-        delay: 1
+$SET_STR ANIM_NS ""
+$SET_STR RGRAPH_NS ""
+import "anim/_flier.fus"
 
-    if:
-        key: wasdown b
-        key: not wasdown f
-        coll: all no
-            ;;     \*/*
-            ;; ( )  + -
-            ;;     /*\*
-    then:
-        move: 1 0
-        rot: 1
-        goto: fly
-        delay: 1
-
-    if:
-        key: wasdown b
-        key: not wasdown f
-    then:
-        rot: 1
-        goto: fly
-        delay: 1
-
-    if:
-        key: wasdown f
-        key: not wasdown b
-        coll: all no
-            ;; ( )
-            ;;     /*
-            ;;  - + -
-            ;;  */*\*
-    then:
-        rot: -1
-        move: 1 0
-        goto: fly
-        delay: 1
-
-    if:
-        key: wasdown f
-        key: not wasdown b
-        coll: all no
-            ;;     \*/*
-            ;; ( )  + -
-            ;;     /*\*
-    then:
-        move: 1 0
-        rot: -1
-        goto: fly
-        delay: 1
-
-    if:
-        key: wasdown f
-        key: not wasdown b
-    then:
-        rot: -1
-        goto: fly
-        delay: 1
-
-    if:
-        key: wasdown u
-        coll: all no
-            ;;     \*/*
-            ;; ( )  + -
-            ;;     /*\*
-    then:
-        move: 1 0
-        goto: fly
-        delay: 0
-
-fly:
-    rgraph: "flier_fly"
-    if:
-    then:
-        goto: hover
-
+dead:
+    rgraph: "dead"
+    if() then: die
 
 # Version of the bird which can step over single edges, but whose
 # legs are blocked by faces.
@@ -11125,181 +11947,8 @@ crawl:
 
 
 dead:
-    rgraph: "player_dead"
+    rgraph: "dead"
     if() then: die
-
-crawl_looking_up:
-    rgraph: "player_crawl_looking_up"
-    hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)  .
-
-    if:
-        key: wentdown y
-    then:
-        spawn: "anim/spit.fus" "crouch_fly" (1 0) 1 f
-        goto: crawl_looking_up_spit
-        delay: 9
-
-    if:
-        key: not isdown d
-        coll: all no
-            ;;  *\*/*
-            ;;  - + -
-            ;;  */ \*
-            ;; ( )
-    then:
-        goto: looking_up
-        delay: 3
-
-    if: key: isdown f
-    then: goto immediate: crawl
-
-    if: key: isdown b
-    then: goto immediate: crawl
-
-    if: key: not isdown x
-    then: goto: crawl
-
-crawl_spit:
-    rgraph: "player_crawl_spit"
-    hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)  .
-    if() then: goto: crawl
-
-crawl_looking_up_spit:
-    rgraph: "player_crawl_looking_up_spit"
-    hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)  .
-    if() then: goto: crawl_looking_up
-
-crawl:
-    rgraph: "player_crawl"
-
-    hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)  .
-
-    if:
-        key: wentdown y
-    then:
-        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
-        goto: crawl_spit
-        delay: 9
-
-    if:
-        key: not isdown d
-        coll: all no
-            ;;  *\*/*
-            ;;  - + -
-            ;;  */ \*
-            ;; ( )
-    then:
-        goto: stand
-        delay: 3
-
-    if:
-        key: isdown f
-        coll: all no
-            ;;     \*
-            ;; ( )
-        coll: all yes
-            ;;        +
-            ;;       /
-            ;; ( )  +
-    then:
-        move: 1 0
-        rot: 1
-        goto: crawl_step
-        delay: 2
-
-    if:
-        key: isdown f
-        coll: all yes
-            ;; ( )  + - +
-        coll: all no
-            ;;     \*/*
-            ;; (.)  .
-    then:
-        move: 1 0
-        goto: crawl_step
-        delay: 2
-
-    if:
-        key: isdown f
-        coll: all yes
-            ;; ( )  +
-            ;;       \
-            ;;        +
-        coll: all no
-            ;;     \*/*
-            ;; (.)  . -
-            ;;        *
-    then:
-        move: 1 0
-        rot: -1
-        goto: crawl_step_down
-        delay: 2
-
-    if:
-        key: isdown b
-    then:
-        move: 1 0
-        turn
-        goto: crawl_step
-        delay: 2
-
-    if:
-        key: not isdown f
-        key: isdown x
-    then:
-        goto: crawl_look_up
-
-crawl_look_up:
-    rgraph: "player_crawl_look_up"
-    hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)  .
-    if() then: goto: crawl_looking_up
-
-crawl_step_down:
-    rgraph: "player_crawl_step"
-    hitbox:
-        ;;    .   .
-        ;;    *\*/*
-        ;;  . -(.)  .
-
-    if:
-        key: wentdown y
-    then:
-        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
-        goto: crawl_spit
-        delay: 9
-
-    if() then: goto: crawl
-
-crawl_step:
-    rgraph: "player_crawl_step"
-    hitbox:
-        ;;    .   .
-        ;;      */*
-        ;;     (.)  .
-
-    if:
-        key: wentdown y
-    then:
-        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
-        goto: crawl_spit
-        delay: 9
-
-    if() then: goto: crawl
 
 stand:
     rgraph: "roller3"
@@ -11533,7 +12182,7 @@ crawl_step:
         goto: crawl
 
 dead:
-    rgraph: "player_dead"
+    rgraph: "dead"
 
 
 
@@ -11562,6 +12211,391 @@ test:
         rot: -1
         move: -1 0
         delay: 2
+
+# Expected vars:
+# NS (str), e.g. "player_"
+
+# NOTE: make sure "stand" is the first anim, so any imports
+# should go below it
+
+stand:
+    rgraph: $PREFIX NS "stand"
+
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+
+    if:
+        key: wentdown y
+    then:
+        spawn: "anim/spit.fus" "fly" (0 0) 0 f
+        goto: spit
+        delay: 9
+
+    $IF PLAYER_ROLLER:
+        if:
+            key: wentdown x
+        then:
+            goto: roller_stand
+            delay: 1
+
+    if:
+        key: isdown d
+    then:
+        goto: crawl
+        delay: 2
+
+    if:
+        key: isdown f
+        coll: all yes
+            ;;        +
+            ;;       /
+            ;; ( )  +
+    then:
+        move: 1 0
+        rot: 1
+        goto: step
+        delay: 2
+
+    $IF PLAYER_CAN_LOOK_UP:
+        if:
+            key: wasdown x
+            key: wasdown u
+            coll: all no
+                ;;    *\*/*
+                ;;    - + -
+                ;;       \*
+                ;;
+                ;;
+                ;; ( )
+        then:
+            move: 1 0
+            rot: 1
+            goto immediate: start_jump
+
+    if:
+        key: wasdown u
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        move: 1 0
+        goto immediate: start_jump
+
+    if:
+        key: isdown f
+        coll: all yes
+            ;; ( )  + - +
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        move: 1 0
+        goto: step
+        delay: 2
+
+    if:
+        key: isdown f
+        coll: all yes
+            ;; ( )  +
+            ;;       \
+            ;;        +
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*/*
+            ;; ( )    - + -
+            ;;        */*\*
+    then:
+        move: 1 0
+        rot: -1
+        goto: step_down
+        delay: 2
+
+    if:
+        key: isdown f
+        coll: any yes
+            ;;        +
+            ;;       /
+            ;; ( )
+    then:
+        move: 1 0
+        rot: 1
+        goto immediate: start_jump
+
+    if:
+        key: isdown f
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        move: 1 0
+        goto immediate: start_jump
+
+    if:
+        key: isdown b
+    then:
+        move: 1 0
+        turn
+        goto: step
+        delay: 2
+
+    $IF PLAYER_CAN_LOOK_UP:
+        if:
+            key: isdown x
+        then:
+            goto: look_up
+
+look_up:
+    rgraph: $PREFIX NS "look_up"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: looking_up
+
+looking_up:
+    rgraph: $PREFIX NS "looking_up"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+
+    if:
+        key: wentdown y
+    then:
+        spawn: "anim/spit.fus" "fly" (1 0) 1 f
+        goto: looking_up_spit
+        delay: 9
+
+    if:
+        key: wasdown u
+        coll: all no
+            ;;    *\*/*
+            ;;    - + -
+            ;;       \*
+            ;;
+            ;;
+            ;; ( )
+    then:
+        move: 1 0
+        rot: 1
+        goto immediate: start_jump
+
+    if: key: isdown f
+    then: goto immediate: stand
+
+    if: key: isdown b
+    then: goto immediate: stand
+
+    if:
+        key: isdown d
+    then:
+        goto: crawl_looking_up
+        delay: 2
+
+    if: key: not isdown x
+    then: goto: stand
+
+spit:
+    rgraph: $PREFIX NS "spit"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: stand
+
+looking_up_spit:
+    rgraph: $PREFIX NS "looking_up_spit"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: looking_up
+
+start_jump:
+
+    $IF PLAYER_FLIER:
+        if:
+            key: wasdown x
+            coll: all no
+                ;;       \*/*
+                ;;        + -
+                ;;       /*\*
+                ;; ( )
+        then:
+            goto: flier_fly
+            move: 2 1
+            delay: 2
+
+    if:
+        coll: water any yes
+            ;;   .   .
+            ;;   *\*/*
+            ;; . - + - .
+            ;;   */*\*
+            ;;  (.)  .
+    then:
+        goto: swim_jump
+        delay: 4
+
+    if() then:
+        goto: jump
+        delay: 2
+
+jump:
+    # NOTE: the only "goto: jump" is in "start_jump", which checks whether
+    # we're in water, and does "goto: jump" or "goto: swim_jump"
+    # accordingly.
+    # Therefore, if we're in "jump", then we can safely assume we're not in
+    # water without checking.
+
+    rgraph: $PREFIX NS "jump"
+    unsafe
+
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+
+    if:
+        coll: all yes
+            ;;        +
+            ;;       /
+            ;; ( )  +
+    then:
+        move: 1 0
+        rot: 1
+        goto: step
+        delay: 2
+
+    if:
+        coll: all yes
+            ;; ( )  +
+        coll: any yes
+            ;;        +
+            ;;       /
+            ;; ( )
+    then:
+        move: 1 0
+        rot: 1
+        goto immediate: start_jump
+
+    if:
+        key: not isdown u
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+        coll: all yes
+            ;; ( )  + - +
+    then:
+        move: 1 0
+        goto: step
+        delay: 2
+
+    if:
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        move: 1 0
+        goto immediate: start_jump
+
+    if() then:
+        goto: mostly_dead
+        delay: 11
+
+step_down:
+    rgraph: $PREFIX NS "step"
+    hitbox:
+        ;;   .   .   .
+        ;;   *\*/*\*/*
+        ;; . - + - + - .
+        ;;   */*\*/*\*
+        ;;   .  (.)  .
+
+    if:
+        key: wentdown y
+    then:
+        spawn: "anim/spit.fus" "fly" (0 0) 0 f
+        goto: spit
+        delay: 9
+
+    $IF PLAYER_ROLLER:
+        if:
+            key: wentdown x
+        then:
+            goto: roller_stand
+            delay: 1
+
+    if() then: goto: stand
+
+step:
+    rgraph: $PREFIX NS "step"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+
+    if:
+        key: wentdown y
+    then:
+        spawn: "anim/spit.fus" "fly" (0 0) 0 f
+        goto: spit
+        delay: 9
+
+    $IF PLAYER_ROLLER:
+        if:
+            key: wentdown x
+        then:
+            goto: roller_stand
+            delay: 1
+
+    if() then: goto: stand
+
+mostly_dead:
+    rgraph: "dead"
+    unsafe
+    if() then: die mostly
+
+dead:
+    rgraph: "dead"
+    unsafe
+    if() then: die
+
+import "anim/_player_crawl.fus"
+import "anim/_player_swim.fus"
+
+can_save
+
+$SET_STR NS spikeyplayer_
+$SET_BOOL PLAYER_SPIKEY
+import "anim/_player.fus"
 
 stand:
     rgraph: "bird_stand"
@@ -11886,113 +12920,236 @@ crawl:
 
 
 dead:
-    rgraph: "player_dead"
+    rgraph: "dead"
     if() then: die
 
-stand:
-    rgraph: "roller"
+# Expected to be imported by "anim/_player.fus"
+
+# Expected vars:
+# NS (str), e.g. "player_"
+
+swim_spit:
+    rgraph: $PREFIX NS "swim_spit"
+    unsafe
     hitbox:
-        ;;    .
-        ;;    *
-        ;; (.)  .
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: swim
+
+swim_jump:
+    # NOTE: the only "goto: swim_jump" is in "start_jump", which checks
+    # whether we're in water, and does "goto: jump" or "goto: swim_jump"
+    # accordingly.
+    # Therefore, if we're in "swim_jump", then we can safely assume we're in
+    # water without checking.
+
+    rgraph: $PREFIX NS "swim_jump"
+    unsafe
+
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
 
     if:
-        key: wasdown u
+        any:
+            key: isdown f
+            key: isdown u
+            key: isdown d
         coll: all yes
-            ;;    .   +
-            ;;
-            ;; ( )  .
+            ;;        +
+            ;;       /
+            ;; ( )  +
+    then:
+        move: 1 0
+        rot: 1
+        goto: step
+        delay: 2
+
+    if:
+        any:
+            key: isdown f
+            key: isdown u
+            key: isdown d
+        coll: any yes
+            ;;        +
+            ;;       /
+            ;; ( )
         coll: all no
+            ;;    *\*/*
+            ;;    - + -
+            ;;       \*
             ;;    .
-            ;;     \*
-            ;; ( )  .
+            ;;
+            ;; ( )
     then:
         move: 2 1
-        rot: 3
-        goto: grab
-        delay: 1
-
-    if:
-        key: not isdown d
-        key: not isdown b
-        key: isdown f
-        coll: all yes
-            ;; ( )  +
-    then:
-        move: 1 0
-        turn
-        delay: 1
-
-    if:
-        key: not isdown b
-        key: isdown f
-        coll: all no
-            ;; ( )-
-            ;;    *
-    then:
-        rot: -1
-        delay: 1
-
-    if:
-        key: not isdown b
-        key: isdown f
-        coll: all yes
-            ;; ( )  +
-    then:
-        move: 1 0
-        turn
-        delay: 1
-
-    if:
-        key: not isdown d
-        key: not isdown f
-        key: isdown b
-        coll: all yes
-            ;;    +
-            ;;
-            ;; ( )
-    then:
-        move: 1 1
-        rot: 2
-        turn
-        delay: 1
-
-    if:
-        key: not isdown f
-        key: isdown b
-        coll: all no
-            ;;  */
-            ;; ( )
-    then:
         rot: 1
-        delay: 1
+        goto immediate: start_jump
 
     if:
-        key: not isdown f
-        key: isdown b
+        any:
+            key: isdown f
+            key: isdown u
+            key: isdown d
+        coll: any yes
+            ;;       \
+            ;;        +
+            ;;
+            ;; ( )
+        coll: all no
+            ;;
+            ;;       /*
+            ;; ( )- + -
+            ;;    */*\*
+    then:
+        move: 0 0
+        rot: -1
+        goto immediate: start_jump
+
+    if:
+        any:
+            key: isdown f
+            key: isdown u
+            key: isdown d
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        move: 1 0
+        goto immediate: start_jump
+
+    if() then:
+        goto immediate: swim
+
+swim:
+    rgraph: $PREFIX NS "swim"
+    unsafe
+
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+
+    if:
+        key: wentdown y
+    then:
+        spawn: "anim/spit.fus" "fly" (0 0) 0 f
+        goto: swim_spit
+        delay: 9
+
+    if:
+        any:
+            key: isdown f
+            key: isdown u
+            key: isdown d
         coll: all yes
-            ;;    +
+            ;;        +
+            ;;       /
+            ;; ( )  +
+    then:
+        move: 1 0
+        rot: 1
+        goto: step
+        delay: 2
+
+    if:
+        any:
+            key: isdown f
+            key: isdown u
+            key: isdown d
+        any:
+            key: isdown u
+            coll: any yes
+                ;;        +
+                ;;       /
+                ;; ( )
+        coll: all no
+            ;;    *\*/*
+            ;;    - + -
+            ;;       \*
+            ;;    .
             ;;
             ;; ( )
     then:
-        move: 1 1
-        rot: 2
-        turn
-        delay: 1
-
-grab:
-    rgraph: "roller_grab"
-    hitbox:
-        ;;    .   .
-        ;;    *\*
-        ;; (.)  .
+        move: 2 1
+        rot: 1
+        goto immediate: start_jump
 
     if:
-        key: not isdown u
+        any:
+            key: isdown f
+            key: isdown u
+            key: isdown d
+        any:
+            key: isdown d
+            coll: any yes
+                ;;       \
+                ;;        +
+                ;;
+                ;; ( )
+        coll: all no
+            ;;
+            ;;       /*
+            ;; ( )- + -
+            ;;    */*\*
+    then:
+        move: 0 0
+        rot: -1
+        goto immediate: start_jump
+
+    if:
+        any:
+            key: isdown f
+            key: isdown u
+            key: isdown d
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        move: 1 0
+        goto immediate: start_jump
+
+    if:
+        key: isdown b
+    then:
+        move: 1 0
+        turn
+        delay: 2
+
+    if:
+        coll: all yes
+            ;; (+)- +
     then:
         goto: stand
-        delay: 1
+        delay: 2
+
+$SET_STR ANIM_NS ""
+$SET_STR RGRAPH_NS ""
+import "anim/_roller.fus"
 
 dead:
-    rgraph: "player_dead"
+    rgraph: "dead"
     if() then: die
+
+can_save
+
+$SET_STR NS flierplayer_
+$SET_BOOL PLAYER_FLIER
+import "anim/_player.fus"
+
+$SET_STR ANIM_NS flier_
+$SET_STR RGRAPH_NS flierplayer_
+$SET_BOOL PLAYER_FLIER
+import "anim/_flier.fus"
