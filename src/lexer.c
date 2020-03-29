@@ -5,6 +5,20 @@
 #include "lexer.h"
 
 
+static char *strdup_quoted(const char *s1){
+    size_t s1_len = strlen(s1);
+    size_t s2_len = 1 + s1_len + 1;
+    char *s2 = malloc(s2_len + 1);
+    if(s2 == NULL)return NULL;
+
+    s2[0] = '"';
+    strcpy(s2+1, s1);
+    s2[1+s1_len] = '"';
+
+    s2[s2_len] = '\0';
+    return s2;
+}
+
 static char *strdupcat_quoted(const char *s1, const char *s2){
     size_t s1_len = strlen(s1);
     size_t s2_len = strlen(s2);
@@ -1148,7 +1162,18 @@ static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
             so we don't emit ")" on leaving it. */
             lexer->frame_list->type = FUS_LEXER_FRAME_IF;
         }
-    }else if(fus_lexer_got(lexer, "GET_INT")){
+    }else if(
+        fus_lexer_got(lexer, "GET_INT") ||
+        fus_lexer_got(lexer, "GET_STR") ||
+        fus_lexer_got(lexer, "GET_SYM")
+    ){
+        char c = lexer->token[5];
+        /* This char c thing is a hack. Look ye:
+            lexer->token == "GET_INT" -> c = 'N'
+            lexer->token == "GET_STR" -> c = 'T'
+            lexer->token == "GET_SYM" -> c = 'Y'
+        Welcome to C, I guess. */
+
         err = fus_lexer_next(lexer);
         if(err)return err;
 
@@ -1156,13 +1181,35 @@ static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
         err = _fus_lexer_get_name(lexer, &name);
         if(err)return err;
 
-        int val = vars_get_int(lexer->vars, name);
-        char *s = strdup_of_int(val);
-        if(!s)return 1;
+        /* token, token_type: these are set depending on value of c */
+        char *token;
+        fus_lexer_token_type_t token_type;
+        if(c == 'N'){
+            /* lexer->token == "GET_INT" */
+            int val = vars_get_int(lexer->vars, name);
+            token = strdup_of_int(val);
+            if(!token)return 1;
+            token_type = FUS_LEXER_TOKEN_INT;
+        }else{
+            /* lexer->token == "GET_STR" or "GET_SYM" */
+            const char *val = vars_get_str(lexer->vars, name);
+            if(!val){
+                return fus_lexer_unexpected(lexer, "name of a string variable");
+            }
+            if(c == 'T'){
+                /* lexer->token == "GET_STR" */
+                token = strdup_quoted(val);
+                token_type = FUS_LEXER_TOKEN_STR;
+            }else{
+                /* lexer->token == "GET_SYM" */
+                token = strdup(val);
+                token_type = FUS_LEXER_TOKEN_SYM;
+            }
+        }
 
-        fus_lexer_set_mem_managed_token(lexer, s);
+        fus_lexer_set_mem_managed_token(lexer, token);
         lexer->_token_len = lexer->pos - macro_start_pos;
-        lexer->token_type = FUS_LEXER_TOKEN_INT;
+        lexer->token_type = token_type;
         *found_token_ptr = true;
 
         free(name);

@@ -99,6 +99,18 @@ static int _run_tests(){
         "1 2 3 4 5 6");
     if(err)return err;
     err = run_test(
+        "$SET_STR X xx 1 2 $GET_STR X 3 4",
+        "1 2 \"xx\" 3 4");
+    if(err)return err;
+    err = run_test(
+        "1 2 $SET_STR X xx $GET_STR X 3 4",
+        "1 2 \"xx\" 3 4");
+    if(err)return err;
+    err = run_test(
+        "1 2 $SET_STR X xx $GET_SYM X 3 4",
+        "1 2 xx 3 4");
+    if(err)return err;
+    err = run_test(
         "$SET_STR X xx 1 2 $PREFIX X lala 5 6",
         "1 2 xxlala 5 6");
     if(err)return err;
