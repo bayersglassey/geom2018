@@ -352,6 +352,25 @@ shapes:
             : $PREFIX NS "fleg"  ( 3  1  1  2)  6 t  0 (1 1)
             : $PREFIX NS "fleg"  ( 3  1  1  1)  6 t  0 (2 1)
 
+    $IF PLAYER_SPIKEY: $PREFIX NS "crawl_shielding":
+        animation: cycle 5
+        shapes:
+            : $PREFIX NS "crawl_head" ( 2  1  2  0)  0 f 0 (0 1)
+            : $PREFIX NS "bleg"  ( 1  1  1  1)  0 f 0 (0 1)
+            : $PREFIX NS "fleg"  ( 4  1  1  1)  6 t 0 (0 1)
+
+            : $PREFIX NS "crawl_head" (-1  1  2  0)  0 f 0 (1 1)
+            : $PREFIX NS "bleg"  (-2  1  1  1)  0 f 0 (1 1)
+            : $PREFIX NS "fleg"  ( 1  1  1  1)  6 t 0 (1 1)
+
+            : $PREFIX NS "crawl_head" ( 1  1  2  0)  0 f 0 (2 1)
+            : $PREFIX NS "bleg"  ( 0  1  1  1)  0 f 0 (2 1)
+            : $PREFIX NS "fleg"  ( 3  1  1  1)  6 t 0 (2 1)
+
+            : $PREFIX NS "crawl_head" ( 0  1  2  0)  0 f 0 (3 2)
+            : $PREFIX NS "bleg"  (-1  1  1  1)  0 f 0 (3 2)
+            : $PREFIX NS "fleg"  ( 2  1  1  1)  6 t 0 (3 2)
+
     $PREFIX NS "swim":
         animation: cycle 12
         shapes:

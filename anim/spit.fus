@@ -11,6 +11,8 @@ fly:
         ;;
         ;;  ( )  .
 
+    on_collided: dead
+
     if:
         coll: any yes
             ;;   .   .
@@ -43,6 +45,8 @@ crouch_fly:
         ;;    .
         ;;  */*\
         ;; ( )  .
+
+    on_collided: crouch_dead
 
     if:
         coll: any yes

@@ -1,4 +1,6 @@
 
+on_collided: dead
+
 stand:
     rgraph: "roller3"
 

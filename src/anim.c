@@ -29,6 +29,7 @@ int stateset_init(stateset_t *stateset, char *filename){
     stateset->is_projectile = false;
     stateset->is_collectible = false;
     stateset->can_save = false;
+    stateset->collided_state_name = NULL;
     return 0;
 }
 
@@ -345,7 +346,6 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             NEXT
             state->crushes = true;
         }
-
         if(GOT("hitbox")){
             NEXT
             GET("(")
@@ -359,6 +359,14 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             if(err)return err;
             state->hitbox = collmap;
 
+            GET(")")
+        }
+        if(GOT("on_collided")){
+            NEXT
+            GET("(")
+            char *collided_state_name;
+            GET_NAME(collided_state_name)
+            state->collided_state_name = collided_state_name;
             GET(")")
         }
 
@@ -413,6 +421,15 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
     if(GOT("can_save")){
         NEXT
         stateset->can_save = true;
+    }
+
+    if(GOT("on_collided")){
+        NEXT
+        GET("(")
+        char *collided_state_name;
+        GET_NAME(collided_state_name)
+        stateset->collided_state_name = collided_state_name;
+        GET(")")
     }
 
     return _stateset_parse(stateset, lexer, prend, space);
@@ -492,6 +509,7 @@ int state_init(state_t *state, stateset_t *stateset, char *name,
     state->safe = true;
     state->flying = false;
     state->crushes = false;
+    state->collided_state_name = NULL;
     ARRAY_INIT(state->rules)
     return 0;
 }

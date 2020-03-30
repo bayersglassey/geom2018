@@ -855,11 +855,15 @@ int body_collide_against_body(body_t *body, body_t *body_other){
         recording should restart after a brief pause?
         Maybe we can reuse body->cooldown for the pause. */
 
-        /* Hardcoded "dead" state name... I suppose we could
-        have a char* body->dead_anim_name or something, but whatever.
-        We more or less expect this "dead" state to, for instance,
-        cause the body to die. Maybe after exploding or whatever. */
-        err = body_set_state(body, "dead", true);
+        /* collided_state: e.g. "dead", "collected" */
+        state_t *state = body->state;
+        const char *collided_state_name = state->collided_state_name?
+            state->collided_state_name:
+            state->stateset->collided_state_name;
+
+        if(!collided_state_name)return 0;
+
+        err = body_set_state(body, collided_state_name, true);
         if(err)return err;
 
         /* Stop playing the recording (so coins stay "dead" after you

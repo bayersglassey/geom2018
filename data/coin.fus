@@ -31,5 +31,5 @@ shapes:
         shapes:
             : "coin" (1 1 1 0)  0 f
 
-    "coin_dead":
+    "coin_collected":
         # Empty!.. when you pick up a coin, it "disappears"...

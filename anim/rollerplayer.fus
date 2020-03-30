@@ -1,5 +1,6 @@
 
 can_save
+on_collided: dead
 
 $SET_STR NS rollerplayer_
 $SET_BOOL PLAYER_ROLLER

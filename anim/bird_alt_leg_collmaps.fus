@@ -2,6 +2,8 @@
 # Version of the bird which can step over single edges, but whose
 # legs are blocked by faces.
 
+on_collided: dead
+
 stand:
     rgraph: "bird_stand"
 

@@ -1,4 +1,6 @@
 
+on_collided: dead
+
 stand:
     rgraph: "water_roller"
 
@@ -96,3 +98,7 @@ grab:
     then:
         goto: stand
         delay: 1
+
+dead:
+    rgraph: "dead"
+    if() then: die

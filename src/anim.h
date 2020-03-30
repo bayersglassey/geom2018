@@ -21,6 +21,7 @@ typedef struct state {
     bool crushes;
     bool safe;
     bool flying;
+    char *collided_state_name;
     ARRAY_DECL(struct state_rule*, rules)
 } state_t;
 
@@ -31,6 +32,7 @@ typedef struct stateset {
     bool is_projectile;
     bool is_collectible;
     bool can_save;
+    char *collided_state_name;
 } stateset_t;
 
 typedef struct state_rule {

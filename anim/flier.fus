@@ -1,4 +1,6 @@
 
+on_collided: dead
+
 born:
     rgraph: "flier_born"
 

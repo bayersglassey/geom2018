@@ -1,5 +1,6 @@
 
 collectible
+on_collided: collected
 
 stand:
     rgraph: "coin"
@@ -13,5 +14,5 @@ crouch:
         ;;     *
         ;;  (.)  .
 
-dead:
-    rgraph: "coin_dead"
+collected:
+    rgraph: "coin_collected"

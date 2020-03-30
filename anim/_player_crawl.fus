@@ -6,10 +6,11 @@
 
 crawl_looking_up:
     rgraph: $PREFIX NS "crawl_looking_up"
-    $IF !PLAYER_SPIKEY: hitbox:
+    hitbox:
         ;;     .
         ;;     *
         ;;  (.)  .
+    $IF PLAYER_SPIKEY: on_collided: crawl_shielding
 
     if:
         key: wentdown y
@@ -40,27 +41,31 @@ crawl_looking_up:
 
 crawl_spit:
     rgraph: $PREFIX NS "crawl_spit"
-    $IF !PLAYER_SPIKEY: hitbox:
+    hitbox:
         ;;     .
         ;;     *
         ;;  (.)  .
+    $IF PLAYER_SPIKEY: on_collided: crawl_shielding
     if() then: goto: crawl
 
 crawl_looking_up_spit:
     rgraph: $PREFIX NS "crawl_looking_up_spit"
-    $IF !PLAYER_SPIKEY: hitbox:
+    hitbox:
         ;;     .
         ;;     *
         ;;  (.)  .
+    $IF PLAYER_SPIKEY: on_collided: crawl_shielding
     if() then: goto: crawl_looking_up
 
 crawl:
     rgraph: $PREFIX NS "crawl"
 
-    $IF !PLAYER_SPIKEY: hitbox:
+    hitbox:
         ;;     .
         ;;     *
         ;;  (.)  .
+
+    $IF PLAYER_SPIKEY: on_collided: crawl_shielding
 
     if:
         key: wentdown y
@@ -147,18 +152,20 @@ crawl:
 
 crawl_look_up:
     rgraph: $PREFIX NS "crawl_look_up"
-    $IF !PLAYER_SPIKEY: hitbox:
+    hitbox:
         ;;     .
         ;;     *
         ;;  (.)  .
+    $IF PLAYER_SPIKEY: on_collided: crawl_shielding
     if() then: goto: crawl_looking_up
 
 crawl_step_down:
     rgraph: $PREFIX NS "crawl_step"
-    $IF !PLAYER_SPIKEY: hitbox:
+    hitbox:
         ;;    .   .
         ;;    *\*/*
         ;;  . -(.)  .
+    $IF PLAYER_SPIKEY: on_collided: crawl_shielding
 
     if:
         key: wentdown y
@@ -178,10 +185,11 @@ crawl_step_down:
 
 crawl_step:
     rgraph: $PREFIX NS "crawl_step"
-    $IF !PLAYER_SPIKEY: hitbox:
+    hitbox:
         ;;    .   .
         ;;      */*
         ;;     (.)  .
+    $IF PLAYER_SPIKEY: on_collided: crawl_shielding
 
     if:
         key: wentdown y
@@ -198,3 +206,17 @@ crawl_step:
             delay: 1
 
     if() then: goto: crawl
+
+$IF PLAYER_SPIKEY: crawl_shielding:
+    #rgraph: $PREFIX NS "crawl_shielding"
+    #rgraph: "dead"
+    if:
+    then:
+        delay: 4
+        goto: _crawl_shielding
+
+$IF PLAYER_SPIKEY: _crawl_shielding:
+    rgraph: $PREFIX NS "crawl_shielding"
+    # No hitbox!..
+    if:
+    then: goto: crawl
