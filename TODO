@@ -366,3 +366,31 @@ Inverted rooms filled with water but with suspended wall-less air bubbles?..
 An enemy who swims faster than you, but you walk faster.
 So you need to "land" to escape, and "landing" often involves tricky sequences
 of jumping, doing some kind of turn while swimming, then landing again.
+
+
+Mar 29, 2020:
+-------------
+
+* I want to be able to apply a transformation to collmaps (expanding them into... larger collmaps?..)
+
+    * Basically turning this:
+              *
+             / \
+            + - +
+        ...into this:
+              ?
+        ...where that ? refers to an arbitrarily large trianglular tile...
+
+    * And then use this for new "triangles" area
+
+* Un-hardcode everything
+    * The "series of wild hacks" in player_step
+    * The hardcoded "dead" state name in body_collide_against_body
+        -> Make customizeable at stateset and state levels, spikeyplayer overrides it in crawl so he reacts against hits
+        -> DONE, NICE!
+    * The whole "collected" concept in body_collide_against_body?..
+        -> body->stateset.is_collectible etc
+
+* Frame-by-frame mode
+    * Pause/unpause button + frame-forward button
+    * Use to make sure e.g. spikeyplayer's crawl_shielding is showing all frames of the animation
