@@ -132,22 +132,26 @@ int body_respawn(body_t *body, vec_t pos, rot_t rot, bool turn,
 ){
     /* Respawn body at given map and location */
     int err;
+
     hexgame_t *game = body->game;
     vecspace_t *space = game->space;
 
+    /* Set body pos, rot, turn */
     vec_cpy(space->dims, body->pos, pos);
     body->rot = rot;
     body->turn = turn;
+
+    /* Set body state */
     err = body_set_state(body, body->stateset.states[0]->name, true);
     if(err)return err;
 
+    /* Set body map */
     hexmap_t *old_map = body->map;
-
     err = body_move_to_map(body, map);
     if(err)return err;
-
     if(old_map != map)body_reset_cameras(body);
 
+    /* Reset body keyinfo */
     keyinfo_reset(&body->keyinfo);
 
     return 0;
@@ -298,10 +302,15 @@ int body_move_to_map(body_t *body, hexmap_t *map){
 int body_init_stateset(body_t *body, const char *stateset_filename,
     const char *state_name
 ){
+    /* body->stateset is expected to have been cleaned up already;
+    basically this function is a hack, only ever called (?) by body_init
+    or body_set_stateset */
     int err;
     hexmap_t *map = body->map;
 
-    err = stateset_load(&body->stateset, strdup(stateset_filename),
+    char *stateset_filename_dup = strdup(stateset_filename);
+    if(!stateset_filename_dup)return 1;
+    err = stateset_load(&body->stateset, stateset_filename_dup,
         NULL, map->prend, map->space);
     if(err)return err;
 
@@ -326,6 +335,8 @@ int body_set_state(body_t *body, const char *state_name,
     bool reset_cooldown
 ){
     if(state_name == NULL){
+        /* Is this ever used other than by body_init, which expects you
+        to set a proper state ASAP?.. */
         body->state = NULL;
     }else{
         body->state = stateset_get_state(&body->stateset, state_name);

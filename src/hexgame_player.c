@@ -126,7 +126,15 @@ static int player_set_safe_location(player_t *player){
 }
 
 int player_reload(player_t *player, bool *file_found_ptr){
+    /* Reload player's location from file */
     int err;
+
+    if(!player->body){
+        /* Could this ever happen?.. maybe. Should we... create a body
+        for player in this case?.. maybe. */
+        fprintf(stderr, "%s: no body\n", __func__);
+        return 0;
+    }
 
     location_t *location = &player->respawn_location;
 
@@ -139,23 +147,23 @@ int player_reload(player_t *player, bool *file_found_ptr){
     *file_found_ptr = file_found;
     if(!file_found)return 0;
 
+    /* NOTE: everything below this point should probably be moved into body_respawn! */
+
     hexmap_t *respawn_map;
     err = hexgame_get_or_load_map(player->game,
         location->map_filename, &respawn_map);
     if(err)return err;
 
-    if(player->body){
-        err = body_respawn(player->body,
-            location->pos, location->rot, location->turn, respawn_map);
-        if(err)return err;
+    err = body_respawn(player->body,
+        location->pos, location->rot, location->turn, respawn_map);
+    if(err)return err;
 
-        if(location->anim_filename){
-            /* NOTE: location->state_name may be NULL, in which case
-            body_set_stateset uses the stateset's default state. */
-            err = body_set_stateset(player->body,
-                location->anim_filename, location->state_name);
-            if(err)return err;
-        }
+    if(location->anim_filename){
+        /* NOTE: location->state_name may be NULL, in which case
+        body_set_stateset uses the stateset's default state. */
+        err = body_set_stateset(player->body,
+            location->anim_filename, location->state_name);
+        if(err)return err;
     }
 
     return 0;
