@@ -1,5 +1,4 @@
 
-can_save
 on_collided: dead
 
 $SET_STR NS flierplayer_

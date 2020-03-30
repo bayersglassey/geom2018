@@ -1,5 +1,4 @@
 
-can_save
 on_collided: dead
 
 $SET_BOOL PLAYER_CAN_LOOK_UP

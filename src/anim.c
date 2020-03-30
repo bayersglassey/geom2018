@@ -28,7 +28,6 @@ int stateset_init(stateset_t *stateset, char *filename){
     ARRAY_INIT(stateset->states)
     stateset->is_projectile = false;
     stateset->is_collectible = false;
-    stateset->can_save = false;
     stateset->collided_state_name = NULL;
     return 0;
 }
@@ -416,11 +415,6 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
     if(GOT("collectible")){
         NEXT
         stateset->is_collectible = true;
-    }
-
-    if(GOT("can_save")){
-        NEXT
-        stateset->can_save = true;
     }
 
     if(GOT("on_collided")){

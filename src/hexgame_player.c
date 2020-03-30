@@ -295,54 +295,36 @@ int player_step(player_t *player, hexgame_t *game){
         hexmap_submap_t *door_submap = collision.door.submap;
         hexmap_submap_t *water_submap = collision.water.submap;
 
-        /* A SERIES OF WILD HACKS FOLLOW
-        TODO: Replace them with The Real Thing, whatever that should be */
-        if(savepoint_submap || door_submap){
-            bool standing_flat = body->rot == 0;
-
-            /* HACK so you can use doors as a roller...
-            Often it looks like you have rot == 0 when it's really 2.
-            NOTE: If you save with rot == 2 as a roller, and then respawn
-            as a spider, you'll probably be in some weird position.
-            TODO: Fix whatever needs to be fixed so we don't need this hack */
-            if(!strcmp(body->stateset.filename, "anim/roller.fus")){
-                standing_flat = body->rot == 0 || body->rot == 2;
-            }
-
-            if(!standing_flat || !body->state->safe){
-                savepoint_submap = NULL;
-                door_submap = NULL;
-            }else{
-                if(!body->stateset.can_save)savepoint_submap = NULL;
-            }
+        if(!body->state->safe){
+            /* Don't save in an unsafe position, like flying through the air */
+            savepoint_submap = NULL;
         }
 
         if(savepoint_submap){
             /* Don't use the savepoint if it's already our respawn point!
             In particular, I want to avoid screen flashing white if e.g.
             player turns around in-place.
-            HACK: we check distance of body->pos and player->respawn_location.pos <= 1...
-            The reason we can't just check equality of body->pos and
-            player->respawn_location.pos is that turning around actually affects
-            body's pos (moves it by 1). */
+            HACK: we check distance between body's current position and
+            player's respawn position. */
             int dist = hexspace_dist(body->pos, player->respawn_location.pos);
-            bool at_respawn = dist <= 1;
+            bool at_respawn = dist <= 5;
+            if(at_respawn)savepoint_submap = NULL;
+        }
 
-            if(!at_respawn){
-                /* We're not at previous respawn location, so update it */
-                err = player_set_respawn(player);
+        if(savepoint_submap){
+            /* Update respawn location */
+            err = player_set_respawn(player);
+            if(err)return err;
+
+            /* Save player's new respawn location */
+            if(player->respawn_filename != NULL){
+                err = location_save(player->respawn_filename,
+                    &player->respawn_location);
                 if(err)return err;
-
-                /* Save player's new respawn location */
-                if(player->respawn_filename != NULL){
-                    err = location_save(player->respawn_filename,
-                        &player->respawn_location);
-                    if(err)return err;
-                }
-
-                /* Flash screen white so player knows something happened */
-                body_flash_cameras(body, 255, 255, 255, 30);
             }
+
+            /* Flash screen white so player knows something happened */
+            body_flash_cameras(body, 255, 255, 255, 30);
         }
 
         if(door_submap){

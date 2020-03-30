@@ -31,7 +31,6 @@ typedef struct stateset {
 
     bool is_projectile;
     bool is_collectible;
-    bool can_save;
     char *collided_state_name;
 } stateset_t;
 
