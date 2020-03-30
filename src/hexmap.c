@@ -16,34 +16,6 @@
 #include "prismelrenderer.h"
 
 
-/************
- * LOCATION *
- ************/
-
-void location_init(location_t *location){
-    vec_zero(location->pos);
-    location->rot = 0;
-    location->turn = false;
-    location->map_filename = NULL;
-}
-
-void location_cleanup(location_t *location){
-    free(location->map_filename);
-}
-
-void location_set(location_t *location, vecspace_t *space,
-    vec_t pos, rot_t rot, bool turn, char *map_filename
-){
-    vec_cpy(space->dims, location->pos, pos);
-    location->rot = rot;
-    location->turn = turn;
-    if(location->map_filename != map_filename){
-        free(location->map_filename);
-        location->map_filename = map_filename;
-    }
-}
-
-
 /******************
  * HEXMAP TILESET *
  ******************/

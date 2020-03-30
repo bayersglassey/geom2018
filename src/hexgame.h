@@ -32,6 +32,23 @@ enum reset_level {
 
 
 /************
+ * LOCATION *
+ ************/
+
+typedef struct location {
+    vec_t pos;
+    rot_t rot;
+    bool turn;
+    char *map_filename;
+} location_t;
+
+void location_init(location_t *location);
+void location_cleanup(location_t *location);
+void location_set(location_t *location, vecspace_t *space,
+    vec_t pos, rot_t rot, bool turn, char *map_filename);
+
+
+/************
  * KEY INFO *
  ************/
 
