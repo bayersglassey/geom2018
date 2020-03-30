@@ -28,22 +28,32 @@ void location_init(location_t *location){
     location->rot = 0;
     location->turn = false;
     location->map_filename = NULL;
+    location->anim_filename = NULL;
+    location->state_name = NULL;
 }
 
 void location_cleanup(location_t *location){
     free(location->map_filename);
+    free(location->anim_filename);
+    free(location->state_name);
 }
 
 void location_set(location_t *location, vecspace_t *space,
-    vec_t pos, rot_t rot, bool turn, char *map_filename
+    vec_t pos, rot_t rot, bool turn, char *map_filename,
+    char *anim_filename, char *state_name
 ){
     vec_cpy(space->dims, location->pos, pos);
     location->rot = rot;
     location->turn = turn;
-    if(location->map_filename != map_filename){
-        free(location->map_filename);
-        location->map_filename = map_filename;
+
+    #define SET_A_THING(THING) if(location->THING != THING){ \
+        free(location->THING); \
+        location->THING = THING; \
     }
+    SET_A_THING(map_filename)
+    SET_A_THING(anim_filename)
+    SET_A_THING(state_name)
+    #undef SET_A_THING
 }
 
 

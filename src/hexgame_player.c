@@ -57,14 +57,16 @@ int player_init(player_t *player, hexgame_t *game, int keymap,
 
     location_init(&player->respawn_location);
     location_set(&player->respawn_location, space,
-        respawn_pos, respawn_rot, respawn_turn, respawn_map_filename);
+        respawn_pos, respawn_rot, respawn_turn, respawn_map_filename,
+        NULL, NULL);
 
     /* Locations own their map filenames, so need to strdup */
     char *jump_map_filename = strdup(respawn_map_filename);
 
     location_init(&player->safe_location);
     location_set(&player->safe_location, space,
-        respawn_pos, respawn_rot, respawn_turn, jump_map_filename);
+        respawn_pos, respawn_rot, respawn_turn, jump_map_filename,
+        NULL, NULL);
 
     player->respawn_filename = respawn_filename;
 
@@ -72,38 +74,55 @@ int player_init(player_t *player, hexgame_t *game, int keymap,
 }
 
 static int _player_set_location(player_t *player, location_t *location,
-    vec_ptr_t pos, rot_t rot, bool turn, const char *map_filename
+    vec_ptr_t pos, rot_t rot, bool turn, const char *map_filename,
+    const char *anim_filename, const char *state_name
 ){
     hexgame_t *game = player->game;
     vecspace_t *space = game->space;
 
-    /* Only assign new map_filename if it compares as different to
-    the old one */
-    char *new_map_filename = location->map_filename;
-    if(strcmp(location->map_filename, map_filename)){
-        new_map_filename = strdup(map_filename);
-        if(!new_map_filename){
-            perror("strdup");
-            return 1;
-        }
+    char *new_map_filename;
+    char *new_anim_filename;
+    char *new_state_name;
+    #define ASSIGN_A_THING(THING) { \
+        if(THING == NULL){ \
+            location->THING = NULL; \
+        }else{ \
+            /* Only assign new location->THING if new string is */ \
+            /* different from the old one */ \
+            new_##THING = location->THING; \
+            if(!location->THING || strcmp(location->THING, THING)){ \
+                /* NOTE: no need to free old location->THING, location_set */ \
+                /* will handle that for us */ \
+                new_##THING = strdup(THING); \
+                if(!new_##THING){ \
+                    perror("strdup"); \
+                    return 1; \
+                } \
+            } \
+        } \
     }
+    ASSIGN_A_THING(map_filename)
+    ASSIGN_A_THING(anim_filename)
+    ASSIGN_A_THING(state_name)
+    #undef ASSIGN_A_THING
 
-    location_set(location, space, pos, rot, turn, new_map_filename);
+    location_set(location, space, pos, rot, turn, new_map_filename,
+        new_anim_filename, new_state_name);
     return 0;
 }
 
-static int player_set_respawn(player_t *player,
-    vec_ptr_t pos, rot_t rot, bool turn, const char *map_filename
-){
+static int player_set_respawn(player_t *player){
+    body_t *body = player->body;
     return _player_set_location(player, &player->respawn_location,
-        pos, rot, turn, map_filename);
+        body->pos, body->rot, body->turn, body->map->name,
+        body->stateset.filename, body->state->name);
 }
 
-static int player_set_safe_location(player_t *player,
-    vec_ptr_t pos, rot_t rot, bool turn, const char *map_filename
-){
+static int player_set_safe_location(player_t *player){
+    body_t *body = player->body;
     return _player_set_location(player, &player->safe_location,
-        pos, rot, turn, map_filename);
+        body->pos, body->rot, body->turn, body->map->name,
+        body->stateset.filename, body->state->name);
 }
 
 int player_respawn_save(const char *filename, vec_t pos,
@@ -313,8 +332,7 @@ int player_step(player_t *player, hexgame_t *game){
     if(body->state->safe){
         /* We're safe (e.g. not jumping), so update our jump location
         (where we'll be respawned if we do jump and hit something) */
-        err = player_set_safe_location(player, body->pos, body->rot,
-            body->turn, map->name);
+        err = player_set_safe_location(player);
         if(err)return err;
     }
 
@@ -366,8 +384,7 @@ int player_step(player_t *player, hexgame_t *game){
 
             if(!at_respawn){
                 /* We're not at previous respawn location, so update it */
-                err = player_set_respawn(player, body->pos, body->rot,
-                    body->turn, map->name);
+                err = player_set_respawn(player);
                 if(err)return err;
 
                 /* Save player's new respawn location */

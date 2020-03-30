@@ -40,12 +40,15 @@ typedef struct location {
     rot_t rot;
     bool turn;
     char *map_filename;
+    char *anim_filename;
+    char *state_name;
 } location_t;
 
 void location_init(location_t *location);
 void location_cleanup(location_t *location);
 void location_set(location_t *location, vecspace_t *space,
-    vec_t pos, rot_t rot, bool turn, char *map_filename);
+    vec_t pos, rot_t rot, bool turn, char *map_filename,
+    char *anim_filename, char *state_name);
 
 
 /************
