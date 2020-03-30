@@ -56,6 +56,86 @@ void location_set(location_t *location, vecspace_t *space,
     #undef SET_A_THING
 }
 
+int location_save(const char *filename, location_t *location){
+    FILE *f = fopen(filename, "w");
+    if(f == NULL){
+        fprintf(stderr, "Couldn't save player to %s: ", filename);
+        perror(NULL);
+        return 2;
+    }
+    fprintf(f, "%i %i %i %c ", location->pos[0], location->pos[1],
+        location->rot, location->turn? 'y': 'n');
+    fus_write_str(f, location->map_filename);
+    if(location->anim_filename){
+        putc(' ', f);
+        fus_write_str(f, location->anim_filename);
+        if(location->state_name){
+            putc(' ', f);
+            fus_write_str(f, location->state_name);
+        }
+    }
+    fclose(f);
+    return 0;
+}
+
+int location_load(const char *filename, location_t *location){
+    int err = 0;
+
+    char *text = load_file(filename);
+    if(text == NULL){
+        fprintf(stderr, "Couldn't load location from %s: ", filename);
+        return 2;
+    }
+
+    fus_lexer_t lexer;
+    err = fus_lexer_init(&lexer, text, filename);
+    if(err)return err;
+
+    int x, y;
+    rot_t rot;
+    bool turn;
+    char *map_filename = NULL;
+    char *anim_filename = NULL;
+    char *state_name = NULL;
+
+    err = fus_lexer_get_int(&lexer, &x);
+    if(err)goto err;
+    err = fus_lexer_get_int(&lexer, &y);
+    if(err)goto err;
+    err = fus_lexer_get_int(&lexer, &rot);
+    if(err)goto err;
+    err = fus_lexer_get_yn(&lexer, &turn);
+    if(err)goto err;
+    err = fus_lexer_get_str(&lexer, &map_filename);
+    if(err)goto err;
+    if(!fus_lexer_done(&lexer)){
+        err = fus_lexer_get_str(&lexer, &anim_filename);
+        if(err)goto err;
+        if(!fus_lexer_done(&lexer)){
+            err = fus_lexer_get_str(&lexer, &state_name);
+            if(err)goto err;
+        }
+    }
+
+    location->pos[0] = x;
+    location->pos[1] = y;
+    location->rot = rot;
+    location->turn = turn;
+    location->map_filename = map_filename;
+    location->anim_filename = anim_filename;
+    location->state_name = state_name;
+    goto done;
+
+err:
+    free(map_filename);
+    free(anim_filename);
+    free(state_name);
+done:
+    fus_lexer_cleanup(&lexer);
+    free(text);
+    return err;
+}
+
 
 /**********
  * CAMERA *
@@ -393,6 +473,9 @@ int hexgame_reset_player(hexgame_t *game, player_t *player,
         location_t *location = reset_level == RESET_SOFT?
             &player->respawn_location:
             &player->safe_location;
+
+        /* Don't we have a function which wraps the following these days?
+        player_reload -- does it differ from this at all? */
         err = hexgame_get_or_load_map(game, location->map_filename,
             &map);
         if(err)return err;

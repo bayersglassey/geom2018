@@ -73,6 +73,8 @@ void keyinfo_reset(keyinfo_t *info);
 void keyinfo_copy(keyinfo_t *info1, keyinfo_t *info2);
 int fus_lexer_get_keyinfo(fus_lexer_t *lexer,
     keyinfo_t *info);
+int location_save(const char *filename, location_t *location);
+int location_load(const char *filename, location_t *location);
 
 
 /*************
@@ -222,10 +224,6 @@ int player_init(player_t *player, struct hexgame *game, int keymap,
     vec_t respawn_pos, rot_t respawn_rot, bool respawn_turn,
     char *respawn_map_filename, char *respawn_filename);
 
-int player_respawn_save(const char *filename, vec_t pos,
-    rot_t rot, bool turn, const char *map_filename_ptr);
-int player_respawn_load(const char *filename, vec_t pos,
-    rot_t *rot_ptr, bool *turn_ptr, char **map_filename_ptr);
 int player_reload(player_t *player, bool *file_found_ptr);
 
 int player_process_event(player_t *player, SDL_Event *event);
