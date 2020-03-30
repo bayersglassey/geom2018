@@ -374,23 +374,36 @@ Mar 29, 2020:
 * I want to be able to apply a transformation to collmaps (expanding them into... larger collmaps?..)
 
     * Basically turning this:
+
               *
              / \
             + - +
+
         ...into this:
+
               ?
+
         ...where that ? refers to an arbitrarily large trianglular tile...
 
     * And then use this for new "triangles" area
 
+* Save/load stateset + state
+    -> player_reload vs hexgame_reset_player (factor out common stuff)
+        -> so can test_app_set_players maybe?..
+            -> e.g. app->stateset_filename, begging to be app->location->stateset_filename
+        -> probably so can case "add_player" in _test_app_process_console_input
+        -> what about player_init?..
+            -> currently doesn't get passed a stateset_filename and state_name, maybe should
+
 * Un-hardcode everything
-    * The "series of wild hacks" in player_step
-    * The hardcoded "dead" state name in body_collide_against_body
-        -> Make customizeable at stateset and state levels, spikeyplayer overrides it in crawl so he reacts against hits
-        -> DONE, NICE!
     * The whole "collected" concept in body_collide_against_body?..
         -> body->stateset.is_collectible etc
 
 * Frame-by-frame mode
     * Pause/unpause button + frame-forward button
     * Use to make sure e.g. spikeyplayer's crawl_shielding is showing all frames of the animation
+
+* Beef up actors
+
+* Better tools for recordings
+
