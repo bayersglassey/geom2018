@@ -83,9 +83,40 @@ void hexcollmap_dump(hexcollmap_t *collmap, FILE *f, int n_spaces){
     }
 }
 
-static bool represents_vert(char c){return c == '+';}
-static bool represents_edge(char c){return strchr("-/\\", c) != NULL;}
-static bool represents_face(char c){return c == '*';}
+static char get_elem_type(char c){
+    switch(c){
+        case '.':
+        case '+':
+        case '?':
+        case '!':
+            return '+';
+        case '-':
+        case '/':
+        case '\\':
+            return c;
+        case '*':
+        case 'S':
+        case 'D':
+        case 'w':
+            return '*';
+        case ' ':
+        case '(':
+        case ')':
+        case '%':
+        case 'x':
+            /* Valid, but unknown whether vert, edge, or face, or none */
+            return ' ';
+        default:
+            /* Invalid */
+            return '\0';
+    }
+}
+static bool elem_is_visible(char c){
+    return strchr("+!-/\\*SDw", c);
+}
+static bool represents_vert(char c){return get_elem_type(c) == '+';}
+static bool represents_edge(char c){return strchr("-/\\", get_elem_type(c)) != NULL;}
+static bool represents_face(char c){return get_elem_type(c) == '*';}
 
 static char get_map_elem_type(int x, int y){
     /* A poorly-named function which figures out whether a vert, edge, or
@@ -115,7 +146,7 @@ static char get_map_elem_type(int x, int y){
     return ' ';
 }
 
-static void get_map_coords(int x, int y, char c,
+static void get_map_coords(int x, int y, char elem_type,
     int *mx_ptr, int *my_ptr, bool *is_face1_ptr
 ){
     bool is_face1 = false;
@@ -126,17 +157,19 @@ static void get_map_coords(int x, int y, char c,
     //   "   (+)- +  "
     /* ...where ( ) indicates the origin (x=0, y=0) */
 
+    /* NOTE: I think it's undefined behaviour to pass elem_type ' ' */
+
     /* Step 1: find x, y of vertex */
-    if(c == '+'){
-    }else if(c == '-'){
+    if(elem_type == '+'){
+    }else if(elem_type == '-'){
         x -= 1;
-    }else if(c == '/'){
+    }else if(elem_type == '/'){
         x -= 1;
         y += 1;
-    }else if(c == '\\'){
+    }else if(elem_type == '\\'){
         x += 1;
         y += 1;
-    }else if(c == '*'){
+    }else if(elem_type == '*'){
         /* assume we're the right-hand triangle */
         x -= 2;
         y += 1;
@@ -314,6 +347,7 @@ static int _hexcollmap_parse_lines_origin(
         int line_len = strlen(line);
         for(int x = 0; x < line_len; x++){
             char c = line[x];
+            char elem_type = get_elem_type(c);
             if(c == '('){
                 if(x+2 >= line_len || line[x+2] != ')'){
                     fprintf(stderr, "Line %i, char %i: '(' without "
@@ -329,14 +363,12 @@ static int _hexcollmap_parse_lines_origin(
                 ox = x + 1;
                 oy = y;
                 x += 2;
-            }else if(strchr(" x.+/-\\*SDw%?", c) != NULL){
-                /* these are all fine */
             }else if(c == '['){
                 /* next line plz, "tilebuckets" don't affect the origin */
                 break;
-            }else{
-                fprintf(stderr, "Line %i, char %i: unexpected character."
-                    " Line: %s\n", y, x, line);
+            }else if(!elem_type){
+                fprintf(stderr, "Line %i, char %i: unexpected character (%c)."
+                    " Line: %s\n", y, x, isgraph(c)? c: ' ', line);
                 return 2;
             }
         }
@@ -360,30 +392,23 @@ static int _hexcollmap_parse_lines_bounds(
         int line_len = strlen(line);
         for(int x = 0; x < line_len; x++){
             char c = line[x];
-            if(strchr(".+/-\\*SDw?", c) != NULL){
-                int mx, my; bool is_face1;
-
-                /* savepoints, doors are just faces */
-                if(c == 'S' || c == 'D' || c == 'w')c = '*';
-
-                /* dots & part references are just verts */
-                if(c == '.' || c == '?')c = '+';
-
-                char elem_type = get_map_elem_type(x-ox, y-oy);
-                if(elem_type != c){
+            char elem_type = get_elem_type(c);
+            if(elem_type && elem_type != ' '){
+                char map_elem_type = get_map_elem_type(x-ox, y-oy);
+                if(elem_type != map_elem_type){
                     fprintf(stderr, "Line %i, char %i: character doesn't "
-                        "belong at these coordinates: got %c, expected %c\n",
-                        y, x, c, elem_type);
+                        "belong at these coordinates: got %c (type %c), expected type %c\n",
+                        y, x, c, elem_type, map_elem_type);
                     return 2;}
 
-                get_map_coords(x-ox, y-oy, c,
+                int mx, my; bool is_face1;
+                get_map_coords(x-ox, y-oy, elem_type,
                     &mx, &my, &is_face1);
+
                 map_t = _min(map_t, my);
                 map_b = _max(map_b, my);
                 map_l = _min(map_l, mx);
                 map_r = _max(map_r, mx);
-            }else if(strchr(" x.+/-\\*SDw%?()", c) != NULL){
-                /* these are all fine */
             }else if(c == '['){
                 /* next line plz, "tilebuckets" don't affect bounds */
                 break;
@@ -431,20 +456,21 @@ static int _hexcollmap_parse_lines_tiles(hexcollmap_t *collmap,
             that instead of modifying tile_c, it loads and draws other
             collmaps over this one, according to the "parts" indicated
             at the top of the file.
-            TODO: Clarify this comment... */
+            Also, '!' is like a combination of '+' and '?'.
+
+            TODO: Clarify this whole comment... */
 
         for(int x = 0; x < line_len; x++){
             char c = line[x];
-            if(strchr("x+/-\\*SDw", c) != NULL){
-                int mx, my; bool is_face1;
+            if(elem_is_visible(c) || c == 'x'){
+                char elem_type = c == 'x'?
+                    get_map_elem_type(x-ox, y-oy):
+                    get_elem_type(c);
 
                 bool is_savepoint = c == 'S';
                 bool is_door = c == 'D';
                 bool is_water = c == 'w';
-                if(is_savepoint || is_door || is_water)c = '*';
-
                 bool is_hard_transparent = c == 'x';
-                if(is_hard_transparent)c = get_map_elem_type(x-ox, y-oy);
 
                 char tile_c =
                     is_savepoint? 'S':
@@ -491,22 +517,23 @@ static int _hexcollmap_parse_lines_tiles(hexcollmap_t *collmap,
                 }
 
                 if(!parsing_part_references){
-                    get_map_coords(x-ox, y-oy, c,
+                    int mx, my; bool is_face1;
+                    get_map_coords(x-ox, y-oy, elem_type,
                         &mx, &my, &is_face1);
                     mx -= map_l;
                     my -= map_t;
                     hexcollmap_tile_t *tile = &tiles[my * map_w + mx];
 
                     hexcollmap_elem_t *elem = NULL;
-                    if(c == '+'){
+                    if(elem_type == '+'){
                         elem = &tile->vert[0];
-                    }else if(c == '-'){
+                    }else if(elem_type == '-'){
                         elem = &tile->edge[0];
-                    }else if(c == '/'){
+                    }else if(elem_type == '/'){
                         elem = &tile->edge[1];
-                    }else if(c == '\\'){
+                    }else if(elem_type == '\\'){
                         elem = &tile->edge[2];
-                    }else if(c == '*'){
+                    }else if(elem_type == '*'){
                         elem = &tile->face[is_face1? 1: 0];
                     }
                     if(elem != NULL){
@@ -516,7 +543,9 @@ static int _hexcollmap_parse_lines_tiles(hexcollmap_t *collmap,
                         elem->z = draw_z;
                     }
                 }
-            }else if(c == '%' || c == '?'){
+            }
+
+            if(c == '%' || c == '?' || c == '!'){
 
                 /* Find next tile bucket. */
                 char c2;
@@ -552,7 +581,7 @@ static int _hexcollmap_parse_lines_tiles(hexcollmap_t *collmap,
                 if(c == '%'){
                     /* Activate the bucket we found. */
                     tilebucket_active = true;
-                }else if(c == '?'){
+                }else if(c == '?' || c == '!'){
                     /* Load collmaps from the bucket we found and draw them
                     onto current collmap. */
 
