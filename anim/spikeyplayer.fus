@@ -1,5 +1,6 @@
 
-on_collided: dead
+collmsgs: "collect"
+on "crush": dead
 
 $SET_STR NS spikeyplayer_
 $SET_BOOL PLAYER_SPIKEY

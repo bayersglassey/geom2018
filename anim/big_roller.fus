@@ -1,7 +1,7 @@
 
 stand:
     rgraph: "big_roller"
-    crushes
+    collmsgs: "crush"
     hitbox:
         ;;      .
         ;;      *
@@ -106,7 +106,7 @@ stand:
 
 grab:
     rgraph: "big_roller_grab"
-    crushes
+    collmsgs: "crush"
     hitbox:
         ;;      .   .   .
         ;;      *\*/*\*

@@ -1,5 +1,5 @@
 
-on_collided: dead
+on "crush": dead
 
 born:
     rgraph: "flier_born"

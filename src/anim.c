@@ -14,21 +14,50 @@
 
 
 
+void collmsg_handler_cleanup(collmsg_handler_t *handler){
+    free(handler->msg);
+    free(handler->state_name);
+}
+
+static int _parse_collmsg_handler(fus_lexer_t *lexer, char **msg_ptr, char **state_name_ptr){
+    INIT
+    char *msg;
+    char *state_name;
+
+    NEXT
+    GET_STR(msg)
+    GET("(")
+    if(GOT(")")){
+        state_name = NULL;
+    }else{
+        GET_NAME(state_name)
+    }
+    GET(")")
+
+    *msg_ptr = msg;
+    *state_name_ptr = state_name;
+    return 0;
+}
+
+
+
 /************
  * STATESET *
  ************/
 
 void stateset_cleanup(stateset_t *stateset){
     free(stateset->filename);
+    ARRAY_FREE_PTR(char*, stateset->collmsgs, (void))
+    ARRAY_FREE(collmsg_handler_t, stateset->collmsg_handlers,
+        collmsg_handler_cleanup)
     ARRAY_FREE_PTR(state_t*, stateset->states, state_cleanup)
 }
 
 int stateset_init(stateset_t *stateset, char *filename){
     stateset->filename = filename;
+    ARRAY_INIT(stateset->collmsgs)
+    ARRAY_INIT(stateset->collmsg_handlers)
     ARRAY_INIT(stateset->states)
-    stateset->is_projectile = false;
-    stateset->is_collectible = false;
-    stateset->collided_state_name = NULL;
     return 0;
 }
 
@@ -341,9 +370,15 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             NEXT
             state->flying = true;
         }
-        if(GOT("crushes")){
+        if(GOT("collmsgs")){
             NEXT
-            state->crushes = true;
+            GET("(")
+            while(!GOT(")")){
+                char *msg;
+                GET_STR(msg)
+                ARRAY_PUSH(char*, state->collmsgs, msg)
+            }
+            NEXT
         }
         if(GOT("hitbox")){
             NEXT
@@ -360,13 +395,11 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
 
             GET(")")
         }
-        if(GOT("on_collided")){
-            NEXT
-            GET("(")
-            char *collided_state_name;
-            GET_NAME(collided_state_name)
-            state->collided_state_name = collided_state_name;
-            GET(")")
+        if(GOT("on")){
+            collmsg_handler_t handler;
+            err = _parse_collmsg_handler(lexer, &handler.msg, &handler.state_name);
+            if(err)return err;
+            ARRAY_PUSH(collmsg_handler_t, state->collmsg_handlers, handler)
         }
 
         while(1){
@@ -407,23 +440,21 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
 ){
     INIT
 
-    if(GOT("projectile")){
-        NEXT
-        stateset->is_projectile = true;
-    }
-
-    if(GOT("collectible")){
-        NEXT
-        stateset->is_collectible = true;
-    }
-
-    if(GOT("on_collided")){
+    if(GOT("collmsgs")){
         NEXT
         GET("(")
-        char *collided_state_name;
-        GET_NAME(collided_state_name)
-        stateset->collided_state_name = collided_state_name;
-        GET(")")
+        while(!GOT(")")){
+            char *msg;
+            GET_STR(msg)
+            ARRAY_PUSH(char*, stateset->collmsgs, msg)
+        }
+        NEXT
+    }
+    if(GOT("on")){
+        collmsg_handler_t handler;
+        err = _parse_collmsg_handler(lexer, &handler.msg, &handler.state_name);
+        if(err)return err;
+        ARRAY_PUSH(collmsg_handler_t, stateset->collmsg_handlers, handler)
     }
 
     return _stateset_parse(stateset, lexer, prend, space);
@@ -490,6 +521,8 @@ void state_cleanup(state_t *state){
         hexcollmap_cleanup(state->hitbox);
         free(state->hitbox);
     }
+    ARRAY_FREE_PTR(char*, state->collmsgs, (void))
+    ARRAY_FREE(collmsg_handler_t, state->collmsg_handlers, collmsg_handler_cleanup)
     ARRAY_FREE_PTR(state_rule_t*, state->rules, state_rule_cleanup)
 }
 
@@ -502,8 +535,8 @@ int state_init(state_t *state, stateset_t *stateset, char *name,
     state->hitbox = NULL;
     state->safe = true;
     state->flying = false;
-    state->crushes = false;
-    state->collided_state_name = NULL;
+    ARRAY_INIT(state->collmsgs)
+    ARRAY_INIT(state->collmsg_handlers)
     ARRAY_INIT(state->rules)
     return 0;
 }

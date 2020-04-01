@@ -1,7 +1,7 @@
 
 stand_r0:
     rgraph: "hexroller_r0"
-    crushes
+    collmsgs: "crush"
     hitbox:
         ;;                 .   .
         ;;                 *\*/*
@@ -96,7 +96,7 @@ stand_r0:
 
 stand_r1:
     rgraph: "hexroller_r1"
-    crushes
+    collmsgs: "crush"
     hitbox:
         ;;                 .   .
         ;;                 *\*/*
@@ -191,7 +191,7 @@ stand_r1:
 
 stand_r2:
     rgraph: "hexroller_r2"
-    crushes
+    collmsgs: "crush"
     hitbox:
         ;;                 .   .
         ;;                 *\*/*
@@ -286,7 +286,7 @@ stand_r2:
 
 stand_r3:
     rgraph: "hexroller_r3"
-    crushes
+    collmsgs: "crush"
     hitbox:
         ;;                 .   .
         ;;                 *\*/*

@@ -988,6 +988,14 @@ int hexmap_step(hexmap_t *map){
     /* Collide bodies with each other */
     for(int i = 0; i < map->bodies_len; i++){
         body_t *body = map->bodies[i];
+        if(body->recording.action == 1){
+            /* Bodies playing a recording don't react to collisions.
+            In particular, they cannot be "killed" by other bodies.
+            MAYBE TODO: These bodies should die too, but then their
+            recording should restart after a brief pause?
+            Maybe we can reuse body->cooldown for the pause. */
+            continue;
+        }
         if(body->state == NULL)continue;
         hexcollmap_t *hitbox = body->state->hitbox;
         if(hitbox == NULL)continue;

@@ -1,5 +1,6 @@
 
-on_collided: dead
+collmsgs: "collect"
+on "crush": dead
 
 $SET_BOOL PLAYER_CAN_LOOK_UP
 $SET_STR NS player_

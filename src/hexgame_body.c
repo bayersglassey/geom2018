@@ -791,10 +791,8 @@ int body_step(body_t *body, hexgame_t *game){
     int rec_action = body->recording.action;
     if(rec_action == 1){
         /* play */
-        if(body->recording.data != NULL){
-            err = recording_step(&body->recording);
-            if(err)return err;
-        }
+        err = recording_step(&body->recording);
+        if(err)return err;
     }else if(rec_action == 2){
         /* record */
         body->recording.wait++;
@@ -851,36 +849,53 @@ int body_step(body_t *body, hexgame_t *game){
     return 0;
 }
 
+static const char *_body_handle_collmsg(body_t *body, const char *msg){
+    state_t *state = body->state;
+    for(int j = 0; j < state->collmsg_handlers_len; j++){
+        collmsg_handler_t *handler = &state->collmsg_handlers[j];
+        if(!strcmp(msg, handler->msg)){
+            return handler->state_name;
+        }
+    }
+    stateset_t *stateset = &body->stateset;
+    for(int j = 0; j < stateset->collmsg_handlers_len; j++){
+        collmsg_handler_t *handler = &stateset->collmsg_handlers[j];
+        if(!strcmp(msg, handler->msg)){
+            return handler->state_name;
+        }
+    }
+    return NULL;
+}
+
+static const char *_body_handle_other_bodys_collmsgs(body_t *body, body_t *body_other){
+    const char *state_name = NULL;
+    state_t *state = body_other->state;
+    for(int i = 0; i < state->collmsgs_len; i++){
+        const char *msg = state->collmsgs[i];
+        state_name = _body_handle_collmsg(body, msg);
+        if(state_name)return state_name;
+    }
+    stateset_t *stateset = &body_other->stateset;
+    for(int i = 0; i < stateset->collmsgs_len; i++){
+        const char *msg = stateset->collmsgs[i];
+        state_name = _body_handle_collmsg(body, msg);
+        if(state_name)return state_name;
+    }
+    return NULL;
+}
+
 int body_collide_against_body(body_t *body, body_t *body_other){
     /* Do whatever happens when two bodies collide */
     int err;
-    bool crushed = body_other->state->crushes;
-    bool collected =
-        body->stateset.is_collectible &&
-        !body_other->stateset.is_collectible;
-    bool playing_recording = body->recording.action == 1;
-    if((crushed && !playing_recording) || collected){
-        /* Bodies whose recording is playing cannot be "killed" by
-        other bodies.
-        MAYBE TODO: These bodies should die too, but then their
-        recording should restart after a brief pause?
-        Maybe we can reuse body->cooldown for the pause. */
 
-        /* collided_state: e.g. "dead", "collected" */
-        state_t *state = body->state;
-        const char *collided_state_name = state->collided_state_name?
-            state->collided_state_name:
-            state->stateset->collided_state_name;
+    /* Find first (if any) collmsg of body_other which is handled by body */
+    const char *state_name = _body_handle_other_bodys_collmsgs(body, body_other);
+    if(!state_name)return 0;
 
-        if(!collided_state_name)return 0;
+    /* Body "handles" the collmsg by changing its state */
+    err = body_set_state(body, state_name, true);
+    if(err)return err;
 
-        err = body_set_state(body, collided_state_name, true);
-        if(err)return err;
-
-        /* Stop playing the recording (so coins stay "dead" after you
-        collect them, etc) */
-        if(collected)body->recording.action = 0;
-    }
     return 0;
 }
 

@@ -13,25 +13,34 @@
 #define ANIM_KEY_CS "xyudlrfb"
 
 
+typedef struct collmsg_handler {
+    /* When colliding with another body who is "sending" the given collmsg,
+    goto the associated state */
+    char *msg;
+    char *state_name;
+} collmsg_handler_t;
+
+void collmsg_handler_cleanup(collmsg_handler_t *handler);
+
+
+
 typedef struct state {
     struct stateset *stateset;
     char *name;
     rendergraph_t *rgraph;
     hexcollmap_t *hitbox;
-    bool crushes;
     bool safe;
     bool flying;
-    char *collided_state_name;
+    ARRAY_DECL(char*, collmsgs)
+    ARRAY_DECL(struct collmsg_handler, collmsg_handlers)
     ARRAY_DECL(struct state_rule*, rules)
 } state_t;
 
 typedef struct stateset {
     char *filename;
+    ARRAY_DECL(char*, collmsgs)
+    ARRAY_DECL(struct collmsg_handler, collmsg_handlers)
     ARRAY_DECL(struct state*, states)
-
-    bool is_projectile;
-    bool is_collectible;
-    char *collided_state_name;
 } stateset_t;
 
 typedef struct state_rule {

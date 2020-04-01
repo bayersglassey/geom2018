@@ -10,7 +10,7 @@ crawl_looking_up:
         ;;     .
         ;;     *
         ;;  (.)  .
-    $IF PLAYER_SPIKEY: on_collided: crawl_shielding
+    $IF PLAYER_SPIKEY: on "crush": crawl_shielding
 
     if:
         key: wentdown y
@@ -45,7 +45,7 @@ crawl_spit:
         ;;     .
         ;;     *
         ;;  (.)  .
-    $IF PLAYER_SPIKEY: on_collided: crawl_shielding
+    $IF PLAYER_SPIKEY: on "crush": crawl_shielding
     if() then: goto: crawl
 
 crawl_looking_up_spit:
@@ -54,7 +54,7 @@ crawl_looking_up_spit:
         ;;     .
         ;;     *
         ;;  (.)  .
-    $IF PLAYER_SPIKEY: on_collided: crawl_shielding
+    $IF PLAYER_SPIKEY: on "crush": crawl_shielding
     if() then: goto: crawl_looking_up
 
 crawl:
@@ -65,7 +65,7 @@ crawl:
         ;;     *
         ;;  (.)  .
 
-    $IF PLAYER_SPIKEY: on_collided: crawl_shielding
+    $IF PLAYER_SPIKEY: on "crush": crawl_shielding
 
     if:
         key: wentdown y
@@ -156,7 +156,7 @@ crawl_look_up:
         ;;     .
         ;;     *
         ;;  (.)  .
-    $IF PLAYER_SPIKEY: on_collided: crawl_shielding
+    $IF PLAYER_SPIKEY: on "crush": crawl_shielding
     if() then: goto: crawl_looking_up
 
 crawl_step_down:
@@ -165,7 +165,7 @@ crawl_step_down:
         ;;    .   .
         ;;    *\*/*
         ;;  . -(.)  .
-    $IF PLAYER_SPIKEY: on_collided: crawl_shielding
+    $IF PLAYER_SPIKEY: on "crush": crawl_shielding
 
     if:
         key: wentdown y
@@ -189,7 +189,7 @@ crawl_step:
         ;;    .   .
         ;;      */*
         ;;     (.)  .
-    $IF PLAYER_SPIKEY: on_collided: crawl_shielding
+    $IF PLAYER_SPIKEY: on "crush": crawl_shielding
 
     if:
         key: wentdown y

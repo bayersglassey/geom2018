@@ -1,6 +1,5 @@
 
-collectible
-on_collided: collected
+on "collect": collected
 
 stand:
     rgraph: "coin"

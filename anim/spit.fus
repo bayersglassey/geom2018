@@ -1,5 +1,5 @@
 
-projectile
+collmsgs: "collect"
 
 fly:
     rgraph: "spit_fly"
@@ -11,7 +11,7 @@ fly:
         ;;
         ;;  ( )  .
 
-    on_collided: dead
+    on "crush": dead
 
     if:
         coll: any yes
@@ -46,7 +46,7 @@ crouch_fly:
         ;;  */*\
         ;; ( )  .
 
-    on_collided: crouch_dead
+    on "crush": crouch_dead
 
     if:
         coll: any yes

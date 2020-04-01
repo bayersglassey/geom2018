@@ -138,14 +138,20 @@ static int recording_parse(recording_t *rec,
         if(err)return err;
     }
 
-    err = fus_lexer_get(lexer, "data");
-    if(err)return err;
-    err = fus_lexer_get(lexer, "(");
-    if(err)return err;
-    err = fus_lexer_get_str(lexer, &rec->data);
-    if(err)return err;
-    err = fus_lexer_get(lexer, ")");
-    if(err)return err;
+    if(fus_lexer_got(lexer, "data")){
+        err = fus_lexer_get(lexer, "data");
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_get_str(lexer, &rec->data);
+        if(err)return err;
+        err = fus_lexer_get(lexer, ")");
+        if(err)return err;
+    }else{
+        err = fus_lexer_get(lexer, "nodata");
+        if(err)return err;
+        rec->data = NULL;
+    }
 
     return 0;
 }
@@ -232,7 +238,11 @@ int body_play_recording(body_t *body){
     err = body_init_stateset(body, rec->stateset_name, rec->state_name);
     if(err)return err;
 
-    body->recording.action = 1; /* play */
+    if(body->recording.data){
+        /* NOTE: data is allowed to be NULL, in which case "playing"
+        the recording just sets body's position/anim/state */
+        body->recording.action = 1; /* play */
+    }
     return body_restart_recording(body, false);
 }
 
@@ -250,9 +260,15 @@ int body_restart_recording(body_t *body, bool hard){
     body->rot = rec->rot0;
     body->turn = rec->turn0;
 
-    if(!hard){
+    if(!hard && rec->data){
+        /* The following is pretty ganky; we're assuming that body won't
+        have any "side effects" on the game during each step.
+        Like, for instance, killing a player.
+        Hmmm...
+        Should we add a bool no_side_effects parameter to body_step??? */
         for(int i = 0; i < rec->offset; i++){
-            body_step(body, body->game);
+            err = body_step(body, body->game);
+            if(err)return err;
         }
     }
 

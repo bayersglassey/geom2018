@@ -62,7 +62,7 @@ data, then you're looking for ARRAY_CLONE. */
     } \
     if(new_array == NULL)return 1; \
     for(int i = array##_size; i < new_size; i++){ \
-        new_array[i] = 0;} \
+        new_array[i] = (T){0};} \
     array = new_array; \
     array##_size = new_size; \
 }
@@ -101,7 +101,7 @@ T new_elem = NULL; \
 #define ARRAY_FREE(T, array, elem_cleanup) \
 { \
     for(int i = 0; i < array##_len; i++){ \
-        elem_cleanup(array[i]);} \
+        elem_cleanup(&array[i]);} \
     free(array); \
     array##_len = 0; \
     array##_size = 0; \

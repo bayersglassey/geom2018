@@ -2,12 +2,10 @@
 # Version of the bird which can step over single edges, but whose
 # legs are blocked by faces.
 
-on_collided: dead
-
 stand:
     rgraph: "bird_stand"
 
-    crushes
+    collmsgs: "crush"
     hitbox:
         ;;   .   .
         ;;   *\*/*
@@ -39,7 +37,7 @@ stand:
 
 turn:
     rgraph: "bird_turn"
-    crushes
+    collmsgs: "crush"
     hitbox:
         ;;   .   .
         ;;   *\*/*
@@ -59,7 +57,7 @@ turn:
 step:
     rgraph: "bird_step"
 
-    crushes
+    collmsgs: "crush"
     hitbox:
         ;;   .   .
         ;;   *\*/*
@@ -167,7 +165,7 @@ step:
 
 turn_arrive:
     rgraph: "bird_turn_arrive"
-    crushes
+    collmsgs: "crush"
     hitbox:
         ;;   .   .
         ;;   *\*/*
@@ -182,7 +180,7 @@ turn_arrive:
 
 step_rev:
     rgraph: "bird_step_rev"
-    crushes
+    collmsgs: "crush"
     hitbox:
         ;;   .   .
         ;;   *\*/*
@@ -197,7 +195,7 @@ step_rev:
 
 step_rot_up_arrive:
     rgraph: "bird_step_rot_up_arrive"
-    crushes
+    collmsgs: "crush"
     hitbox:
         ;;   .   .
         ;;   *\*/*
@@ -212,7 +210,7 @@ step_rot_up_arrive:
 
 step_down_arrive:
     rgraph: "bird_step_down_arrive"
-    crushes
+    collmsgs: "crush"
     hitbox:
         ;;   .   .
         ;;   *\*/*
@@ -227,7 +225,7 @@ step_down_arrive:
 
 step_up_arrive:
     rgraph: "bird_step_up_arrive"
-    crushes
+    collmsgs: "crush"
     hitbox:
         ;;   .   .
         ;;   *\*/*
@@ -242,7 +240,7 @@ step_up_arrive:
 
 step_rot_down_arrive:
     rgraph: "bird_step_rot_down_arrive"
-    crushes
+    collmsgs: "crush"
     hitbox:
         ;;   .   .
         ;;   *\*/*
@@ -327,9 +325,3 @@ crawl:
         move: 1 0
         turn
         delay: 2
-
-
-
-dead:
-    rgraph: "dead"
-    if() then: die

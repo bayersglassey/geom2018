@@ -1,9 +1,7 @@
 
-on_collided: dead
-
 stand:
     rgraph: "death_roller"
-    crushes
+    collmsgs: "crush"
     hitbox:
         ;;    .
         ;;    *
@@ -95,7 +93,7 @@ stand:
 
 grab:
     rgraph: "death_roller_grab"
-    crushes
+    collmsgs: "crush"
     hitbox:
         ;;    .   .
         ;;    *\*
@@ -106,7 +104,3 @@ grab:
     then:
         goto: stand
         delay: 1
-
-dead:
-    rgraph: "dead"
-    if() then: die
