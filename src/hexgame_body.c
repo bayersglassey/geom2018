@@ -566,7 +566,7 @@ static int body_match_rule(body_t *body,
     int err;
 
     /* NOTE: body and/or actor may be NULL.
-    We are basically reusing the rule/cond/effect structure for bodys
+    We are basically reusing the rule/cond/effect structure for bodies
     and actors; most conds/effects naturally apply to one or the other.
     E.g. keypress stuff is for the body; "play" is for actor.
     However, actor may want to check some stuff about the body, so
@@ -867,7 +867,7 @@ static const char *_body_handle_collmsg(body_t *body, const char *msg){
     return NULL;
 }
 
-static const char *_body_handle_other_bodys_collmsgs(body_t *body, body_t *body_other){
+static const char *_body_handle_other_bodies_collmsgs(body_t *body, body_t *body_other){
     const char *state_name = NULL;
     state_t *state = body_other->state;
     for(int i = 0; i < state->collmsgs_len; i++){
@@ -888,8 +888,17 @@ int body_collide_against_body(body_t *body, body_t *body_other){
     /* Do whatever happens when two bodies collide */
     int err;
 
+    if(body->recording.action == 1){
+        /* Bodies playing a recording don't react to collisions.
+        In particular, they cannot be "killed" by other bodies.
+        MAYBE TODO: These bodies should die too, but then their
+        recording should restart after a brief pause?
+        Maybe we can reuse body->cooldown for the pause. */
+        return 0;
+    }
+
     /* Find first (if any) collmsg of body_other which is handled by body */
-    const char *state_name = _body_handle_other_bodys_collmsgs(body, body_other);
+    const char *state_name = _body_handle_other_bodies_collmsgs(body, body_other);
     if(!state_name)return 0;
 
     /* Body "handles" the collmsg by changing its state */
