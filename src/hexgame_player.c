@@ -85,7 +85,7 @@ static int _player_set_location(player_t *player, location_t *location,
     char *new_state_name;
     #define ASSIGN_A_THING(THING) { \
         if(THING == NULL){ \
-            location->THING = NULL; \
+            new_##THING = NULL; \
         }else{ \
             /* Only assign new location->THING if new string is */ \
             /* different from the old one */ \

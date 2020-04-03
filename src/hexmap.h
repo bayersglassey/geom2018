@@ -200,6 +200,7 @@ typedef struct hexmap_door {
     char *respawn_anim_filename;
 
     int n_players;
+        /* For use when type == HEXMAP_DOOR_TYPE_PLAYERS */
 } hexmap_door_t;
 
 typedef struct hexmap_submap {
