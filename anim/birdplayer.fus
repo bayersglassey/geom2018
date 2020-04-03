@@ -1,0 +1,4 @@
+
+$SET_STR RGRAPH_NS "player_"
+$SET_BOOL PLAYER_BIRD
+import "anim/_bird.fus"
