@@ -284,6 +284,8 @@ COINS ARE FUN
 Let's make different kinds of collectibles...
 Little flies, berries, that kind of thing.
 And place them on the maps.
+-> need to add body->recording.react, a bool saying body should still
+    react to collisions even if body->recording.action == 1.
 
 
 Oct 8, 2019:
@@ -371,37 +373,6 @@ of jumping, doing some kind of turn while swimming, then landing again.
 Mar 29, 2020:
 -------------
 
-* I want to be able to apply a transformation to collmaps (expanding them into... larger collmaps?..)
-
-    * Basically turning this:
-
-              *
-             / \
-            + - +
-
-        ...into this:
-
-              ?
-
-        ...where that ? refers to an arbitrarily large trianglular tile...
-
-    * And then use this for new "triangles" area
-
-* Save/load stateset + state
-    -> player_reload vs hexgame_reset_player (factor out common stuff -> so basically, body_respawn augmented with stuff currently in player_reload?)
-        -> so can test_app_set_players maybe?..
-            -> e.g. app->stateset_filename, begging to be app->location->stateset_filename
-        -> probably so can case "add_player" in _test_app_process_console_input
-        -> what about player_init?..
-            -> currently doesn't get passed a stateset_filename and state_name, maybe should
-        -> *** body_respawn should take a location_t instead of its current mess of params ***
-
-* Un-hardcode everything, generally remove gankiness
-    * The whole "collected" concept in body_collide_against_body?..
-        -> body->stateset.is_collectible etc
-    * Remove body_init_stateset?.. should just need body_set_stateset
-        * body_init_stateset is only ever used by body_init and body_play_recording (a hack) I think
-
 * Frame-by-frame mode
     * Pause/unpause button + frame-forward button
     * Use to make sure e.g. spikeyplayer's crawl_shielding is showing all frames of the animation
@@ -410,3 +381,4 @@ Mar 29, 2020:
 
 * Better tools for recordings
 
+* Auto resize map if .fus file's collmap data requires it
