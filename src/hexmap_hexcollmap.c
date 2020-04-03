@@ -27,6 +27,10 @@ int hexcollmap_part_init(hexcollmap_part_t *part,
     part->filename = filename;
     part->palmapper_name = palmapper_name;
     part->type = type;
+
+    vec_zero(part->trf.add);
+    part->trf.rot = 0;
+    part->trf.flip = false;
     return 0;
 }
 
@@ -286,6 +290,12 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
 ){
     int err;
     vecspace_t *space = collmap->space;
+
+    trf_t trf2;
+    trf_cpy(collmap->space, &trf2, &part->trf);
+    trf_apply(collmap->space, &trf2, trf);
+    draw_z += part->draw_z;
+
     if(part->type == HEXCOLLMAP_PART_TYPE_HEXCOLLMAP){
         /* If "empty" was specified for this part, then filename will
         be NULL and we shouldn't do anything. */
@@ -299,7 +309,7 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
             part->filename, NULL);
         if(err)return err;
         err = hexcollmap_draw(collmap, &part_collmap,
-            trf, draw_z);
+            &trf2, draw_z);
         if(err)return err;
         hexcollmap_cleanup(&part_collmap);
     }else if(part->type == HEXCOLLMAP_PART_TYPE_RECORDING){
@@ -315,8 +325,8 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
         if(err)return err;
 
         /* hexmap_recording_init set up recording->trf already, and now
-        we modify it by applying trf to it */
-        trf_apply(space, &recording->trf, trf);
+        we modify it by applying trf2 to it */
+        trf_apply(space, &recording->trf, &trf2);
     }else if(part->type == HEXCOLLMAP_PART_TYPE_RENDERGRAPH){
         char *filename = part->filename?
             strdup(part->filename): NULL;
@@ -327,7 +337,7 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
         err = hexmap_rendergraph_init(rendergraph,
             filename, palmapper_name);
         if(err)return err;
-        trf_cpy(space, &rendergraph->trf, trf);
+        trf_cpy(space, &rendergraph->trf, &trf2);
     }else{
         fprintf(stderr, "Unrecognized part type: %i\n", part->type);
         return 2;
@@ -372,6 +382,11 @@ static int _hexcollmap_parse_lines_origin(
                 return 2;
             }
         }
+    }
+    if(ox == -1){
+        fprintf(stderr, "Missing origin (indicate it with \"( )\" "
+            "around a vertex).\n");
+        return 2;
     }
     *ox_ptr = ox;
     *oy_ptr = oy;
@@ -743,6 +758,9 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
                 int type = HEXCOLLMAP_PART_TYPE_HEXCOLLMAP;
                 char *filename = NULL;
                 char *palmapper_name = NULL;
+                trf_t trf = {0};
+                int draw_z = 0;
+
                 err = fus_lexer_get(lexer, "(");
                 if(err)return err;
                 {
@@ -762,6 +780,21 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
                     }else{
                         err = fus_lexer_get_str(lexer, &filename);
                         if(err)return err;
+                        while(1){
+                            if(fus_lexer_got(lexer, "^")){
+                                err = fus_lexer_next(lexer);
+                                if(err)return err;
+                                err = fus_lexer_get_int(lexer, &trf.rot);
+                                if(err)return err;
+                            }else if(fus_lexer_got(lexer, "~")){
+                                trf.flip = !trf.flip;
+                            }else if(fus_lexer_got(lexer, "|")){
+                                err = fus_lexer_next(lexer);
+                                if(err)return err;
+                                err = fus_lexer_get_int(lexer, &draw_z);
+                                if(err)return err;
+                            }else break;
+                        }
                     }
 
                     if(!fus_lexer_got(lexer, ")")){
@@ -776,6 +809,8 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
                 err = hexcollmap_part_init(part, part_c,
                     filename, palmapper_name, type);
                 if(err)return err;
+                trf_cpy(collmap->space, &part->trf, &trf);
+                part->draw_z = draw_z;
             }
             err = fus_lexer_next(lexer);
             if(err)return err;

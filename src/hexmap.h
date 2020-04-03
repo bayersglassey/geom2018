@@ -118,6 +118,9 @@ typedef struct hexcollmap_part {
     char *filename;
     char *palmapper_name;
     int type; /* enum hexcollmap_part_type */
+
+    trf_t trf;
+    int draw_z;
 } hexcollmap_part_t;
 
 typedef struct hexcollmap {
