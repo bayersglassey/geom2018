@@ -8,6 +8,7 @@ submaps:
     :
         file: "data/maps/triangles/start.fus"
         pos: (0 0)
+        camera: (0 0)
         mapper: ("triple")
         doors:
             :
@@ -15,3 +16,13 @@ submaps:
                 pos: (38 -80)
                 rot: 1
                 turn: n
+    :
+        file: "data/maps/triangles/start2.fus"
+        pos: eval: (14 12)
+        camera: (16 6)
+        mapper: ("triple")
+    :
+        file: "data/maps/triangles/start3.fus"
+        pos: eval: (14 12) + (22 14)
+        camera: (8 8)
+        mapper: ("triple")
