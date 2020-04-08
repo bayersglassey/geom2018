@@ -6,7 +6,6 @@
 #include <stdbool.h>
 
 #include "anim.h"
-#include "body_dead.h"
 #include "vars.h"
 #include "hexmap.h"
 #include "prismelrenderer.h"
