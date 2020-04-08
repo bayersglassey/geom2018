@@ -16,6 +16,10 @@ submaps:
                 pos: (38 -80)
                 rot: 1
                 turn: n
+        recordings:
+            : "data/maps/triangles/recs/bigroller000.fus"
+            : "data/maps/triangles/recs/bigroller000.fus" empty 150
+            : "data/maps/triangles/recs/bigroller000.fus" empty 650
     :
         file: "data/maps/triangles/start2.fus"
         pos: eval: (14 12)
@@ -23,6 +27,6 @@ submaps:
         mapper: ("triple")
     :
         file: "data/maps/triangles/start3.fus"
-        pos: eval: (14 12) + (22 14)
+        pos: eval: (14 12) + (22 15)
         camera: (8 8)
         mapper: ("triple")
