@@ -577,7 +577,7 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
                         expect! The following is a hack: you must play
                         recordings belonging to your correct map... */
                         err = hexmap_load_recording(body->map,
-                            recording_filename, NULL, true, NULL);
+                            recording_filename, NULL, true, 0, NULL);
                         if(err)return err;
                     }
                 }

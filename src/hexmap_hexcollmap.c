@@ -20,13 +20,14 @@
  * HEXCOLLMAP *
  **************/
 
-int hexcollmap_part_init(hexcollmap_part_t *part,
-    char part_c, char *filename, char *palmapper_name, int type
+int hexcollmap_part_init(hexcollmap_part_t *part, int type,
+    char part_c, char *filename, char *palmapper_name, int frame_offset
 ){
+    part->type = type;
     part->part_c = part_c;
     part->filename = filename;
     part->palmapper_name = palmapper_name;
-    part->type = type;
+    part->frame_offset = frame_offset;
 
     vec_zero(part->trf.add);
     part->trf.rot = 0;
@@ -259,7 +260,7 @@ static int hexcollmap_draw(hexcollmap_t *collmap1, hexcollmap_t *collmap2,
         ARRAY_PUSH_NEW(hexmap_recording_t*, collmap1->recordings,
             recording1)
         err = hexmap_recording_init(recording1, recording2->type,
-            filename, palmapper_name);
+            filename, palmapper_name, recording2->frame_offset);
         if(err)return err;
         trf_apply(space, &recording1->trf, trf);
     }
@@ -321,7 +322,7 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
             recording)
         err = hexmap_recording_init(recording,
             HEXMAP_RECORDING_TYPE_RECORDING,
-            filename, palmapper_name);
+            filename, palmapper_name, part->frame_offset);
         if(err)return err;
 
         /* hexmap_recording_init set up recording->trf already, and now
@@ -758,6 +759,7 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
                 int type = HEXCOLLMAP_PART_TYPE_HEXCOLLMAP;
                 char *filename = NULL;
                 char *palmapper_name = NULL;
+                int frame_offset = 0;
                 trf_t trf = {0};
                 int draw_z = 0;
 
@@ -798,16 +800,25 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
                     }
 
                     if(!fus_lexer_got(lexer, ")")){
-                        err = fus_lexer_get_str(lexer, &palmapper_name);
-                        if(err)return err;
+                        if(fus_lexer_got(lexer, "empty")){
+                            err = fus_lexer_next(lexer);
+                            if(err)return err;
+                        }else{
+                            err = fus_lexer_get_str(lexer, &palmapper_name);
+                            if(err)return err;
+                        }
+                        if(fus_lexer_got_int(lexer)){
+                            err = fus_lexer_get_int(lexer, &frame_offset);
+                            if(err)return err;
+                        }
                     }
                 }
                 err = fus_lexer_get(lexer, ")");
                 if(err)return err;
 
                 ARRAY_PUSH_NEW(hexcollmap_part_t*, parts, part)
-                err = hexcollmap_part_init(part, part_c,
-                    filename, palmapper_name, type);
+                err = hexcollmap_part_init(part, type, part_c,
+                    filename, palmapper_name, frame_offset);
                 if(err)return err;
                 trf_cpy(collmap->space, &part->trf, &trf);
                 part->draw_z = draw_z;

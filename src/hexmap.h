@@ -56,11 +56,12 @@ typedef struct hexmap_recording {
     char *filename;
     char *palmapper_name;
     trf_t trf;
+    int frame_offset;
 } hexmap_recording_t;
 
 void hexmap_recording_cleanup(hexmap_recording_t *recording);
 int hexmap_recording_init(hexmap_recording_t *recording, int type,
-    char *filename, char *palmapper_name);
+    char *filename, char *palmapper_name, int frame_offset);
 
 
 /**********************
@@ -114,10 +115,11 @@ enum hexcollmap_part_type {
 };
 
 typedef struct hexcollmap_part {
+    int type; /* enum hexcollmap_part_type */
     char part_c;
     char *filename;
     char *palmapper_name;
-    int type; /* enum hexcollmap_part_type */
+    int frame_offset;
 
     trf_t trf;
     int draw_z;
@@ -147,8 +149,8 @@ typedef struct hexmap_collision {
 } hexmap_collision_t;
 
 
-int hexcollmap_part_init(hexcollmap_part_t *part,
-    char part_c, char *filename, char *palmapper_name, int type);
+int hexcollmap_part_init(hexcollmap_part_t *part, int type,
+    char part_c, char *filename, char *palmapper_name, int frame_offset);
 void hexcollmap_part_cleanup(hexcollmap_part_t *part);
 
 void hexcollmap_cleanup(hexcollmap_t *collmap);
@@ -252,7 +254,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
     prismelmapper_t *parent_mapper, char *palette_filename,
     char *tileset_filename);
 int hexmap_load_recording(hexmap_t *map, const char *filename,
-    palettemapper_t *palmapper, bool loop, trf_t *trf);
+    palettemapper_t *palmapper, bool loop, int offset, trf_t *trf);
 bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf, bool all);
 void hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
