@@ -125,7 +125,8 @@ void test_app_cleanup(test_app_t *app){
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
     const char *stateset_filename, const char *hexmap_filename,
-    bool use_textures, bool cache_bitmaps, int n_players
+    const char *submap_filename, bool use_textures,
+    bool cache_bitmaps, int n_players
 ){
     int err;
 
@@ -138,6 +139,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->prend_filename = prend_filename;
     app->stateset_filename = stateset_filename;
     app->hexmap_filename = hexmap_filename;
+    app->submap_filename = submap_filename;
 
     SDL_Palette *sdl_palette = SDL_AllocPalette(256);
     app->sdl_palette = sdl_palette;
@@ -183,7 +185,8 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     if(err)return err;
 
     hexgame_t *game = &app->hexgame;
-    err = hexgame_init(game, prend, app->hexmap_filename, app,
+    err = hexgame_init(game, prend,
+        app->hexmap_filename, app,
         &new_game_callback,
         &continue_callback,
         &set_players_callback,
@@ -204,8 +207,26 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 
         ARRAY_PUSH_NEW(player_t*, game->players, player)
 
+        vec_t *respawn_pos = &map->spawn;
+
+        /* Maybe get respawn_pos from a submap */
+        const char *submap_filename = app->submap_filename;
+        if(submap_filename != NULL){
+            hexmap_submap_t *spawn_submap = NULL;
+            for(int i = 0; i < map->submaps_len; i++){
+                hexmap_submap_t *submap = map->submaps[i];
+                if(strcmp(submap->filename, submap_filename) == 0){
+                    spawn_submap = submap; break;}
+            }
+            if(spawn_submap == NULL){
+            fprintf(stderr, "Couldn't find submap with filename: %s\n",
+                    submap_filename);
+                return 2;}
+            respawn_pos = &spawn_submap->pos;
+        }
+
         err = player_init(player, game, i,
-            map->spawn, 0, false,
+            *respawn_pos, 0, false,
             respawn_map_filename, respawn_filename);
         if(err)return err;
     }

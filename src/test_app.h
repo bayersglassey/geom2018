@@ -31,6 +31,7 @@ typedef struct test_app {
     const char *prend_filename;
     const char *stateset_filename;
     const char *hexmap_filename;
+    const char *submap_filename;
 
     palette_t palette;
     SDL_Palette *sdl_palette;
@@ -71,7 +72,8 @@ int test_app_load_rendergraphs(test_app_t *app);
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
     const char *stateset_filename, const char *hexmap_filename,
-    bool use_textures, bool cache_bitmaps, int n_players);
+    const char *submap_filename, bool use_textures,
+    bool cache_bitmaps, int n_players);
 int test_app_set_players(test_app_t *app, int n_players);
 int test_app_process_console_input(test_app_t *app);
 int test_app_mainloop(test_app_t *app);
