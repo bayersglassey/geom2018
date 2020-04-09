@@ -17,16 +17,32 @@ submaps:
                 rot: 1
                 turn: n
         recordings:
-            : "data/maps/triangles/recs/bigroller000.fus"
-            : "data/maps/triangles/recs/bigroller000.fus" empty 150
-            : "data/maps/triangles/recs/bigroller000.fus" empty 650
+            : "data/maps/triangles/recs/bigroller000.fus" "cya"
+            : "data/maps/triangles/recs/bigroller000.fus" "grn" 150
+            : "data/maps/triangles/recs/bigroller000.fus" "prp" 650
     :
-        file: "data/maps/triangles/start2.fus"
-        pos: eval: (14 12)
-        camera: (16 6)
-        mapper: ("triple")
+        submaps:
+            :
+                bg
+                file: "data/maps/triangles/start2_bg.fus"
+                pos: eval: (14 12)
+                tileset: "data/tileset1_bg.fus"
+            :
+                bg
+                file: "data/maps/triangles/start3_bg.fus"
+                pos: eval: (14 12) + (22 15)
+                tileset: "data/tileset1_bg.fus"
     :
-        file: "data/maps/triangles/start3.fus"
-        pos: eval: (14 12) + (22 15)
-        camera: (8 8)
-        mapper: ("triple")
+        submaps:
+            :
+                file: "data/maps/triangles/start2.fus"
+                pos: eval: (14 12)
+                camera: (16 6)
+                mapper: ("triple")
+                doors:
+                    : zoomout
+            :
+                file: "data/maps/triangles/start3.fus"
+                pos: eval: (14 12) + (22 15)
+                camera: (8 8)
+                mapper: ("triple")
