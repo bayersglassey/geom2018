@@ -203,30 +203,34 @@ static int player_use_door(player_t *player, hexmap_door_t *door){
 
     if(door->type == HEXMAP_DOOR_TYPE_NEW_GAME){
         err = game->new_game_callback(game, player,
-            door->respawn_map_filename);
+            door->u.location.map_filename);
         if(err)return err;
     }else if(door->type == HEXMAP_DOOR_TYPE_CONTINUE){
         err = game->continue_callback(game, player);
         if(err)return err;
     }else if(door->type == HEXMAP_DOOR_TYPE_PLAYERS){
         err = game->set_players_callback(game, player,
-            door->n_players);
+            door->u.n_players);
         if(err)return err;
     }else if(door->type == HEXMAP_DOOR_TYPE_EXIT){
         err = game->exit_callback(game, player);
         if(err)return err;
+    }else if(door->type == HEXMAP_DOOR_TYPE_ZOOMOUT){
+        FOREACH_BODY_CAMERA(body, camera, {
+            camera->zoomout = true;
+        })
     }else if(door->type == HEXMAP_DOOR_TYPE_RESPAWN){
         hexmap_t *new_map = body->map;
-        if(door->respawn_map_filename != NULL){
+        if(door->u.location.map_filename != NULL){
             /* Switch map */
             err = hexgame_get_or_load_map(game,
-                door->respawn_map_filename, &new_map);
+                door->u.location.map_filename, &new_map);
             if(err)return err;
         }
 
         /* Respawn body */
         err = body_respawn(body,
-            door->respawn_pos, door->respawn_rot, door->respawn_turn, new_map);
+            door->u.location.pos, door->u.location.rot, door->u.location.turn, new_map);
         if(err)return err;
 
         /* Colour to flash screen (default: cyan) */
@@ -234,10 +238,10 @@ static int player_use_door(player_t *player, hexmap_door_t *door){
         int flash_g = 255;
         int flash_b = 255;
 
-        if(door->respawn_anim_filename != NULL){
-            if(strcmp(body->stateset.filename, door->respawn_anim_filename)){
+        if(door->u.location.anim_filename != NULL){
+            if(strcmp(body->stateset.filename, door->u.location.anim_filename)){
                 /* Switch anim (stateset) */
-                err = body_set_stateset(body, door->respawn_anim_filename, NULL);
+                err = body_set_stateset(body, door->u.location.anim_filename, NULL);
                 if(err)return err;
 
                 /* Pink flash indicates your body was changed, not just teleported */

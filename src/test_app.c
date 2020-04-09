@@ -565,10 +565,15 @@ int test_app_mainloop_step(test_app_t *app){
                 RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
             }
 
+            if(app->zoomout){
+                /* camera->zoomout is set to false at start of each step, it's up
+                to app to set it to true if desired before calling camera_render */
+                app->camera->zoomout = true;
+            }
             err = camera_render(app->camera,
                 app->renderer, app->surface,
                 app->sdl_palette, app->scw/2 + app->x0, app->sch/2 + app->y0,
-                1 /* app->zoom */, app->zoomout);
+                1 /* app->zoom */);
             if(err)return err;
 
             if(app->surface != NULL){

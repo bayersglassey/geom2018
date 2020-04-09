@@ -6,6 +6,7 @@
 #include "array.h"
 #include "lexer.h"
 #include "geom.h"
+#include "location.h"
 #include "prismelrenderer.h"
 
 
@@ -186,7 +187,9 @@ enum hexmap_door_type {
     HEXMAP_DOOR_TYPE_NEW_GAME,
     HEXMAP_DOOR_TYPE_CONTINUE,
     HEXMAP_DOOR_TYPE_PLAYERS,
-    HEXMAP_DOOR_TYPE_EXIT
+    HEXMAP_DOOR_TYPE_EXIT,
+    HEXMAP_DOOR_TYPE_ZOOMOUT,
+    HEXMAP_DOOR_TYPES
 };
 
 typedef struct hexmap_door {
@@ -198,14 +201,11 @@ typedef struct hexmap_door {
     actual positions. */
     hexcollmap_elem_t *elem;
 
-    vec_t respawn_pos;
-    rot_t respawn_rot;
-    bool respawn_turn;
-    char *respawn_map_filename;
-    char *respawn_anim_filename;
-
-    int n_players;
-        /* For use when type == HEXMAP_DOOR_TYPE_PLAYERS */
+    union {
+        location_t location; /* type == HEXMAP_DOOR_TYPE_RESPAWN or HEXMAP_DOOR_TYPE_NEW_GAME */
+        int n_players; /* type == HEXMAP_DOOR_TYPE_PLAYERS */
+        prismelmapper_t *mapper; /* type == HEXMAP_DOOR_TYPE_MAPPER */
+    } u;
 } hexmap_door_t;
 
 typedef struct hexmap_submap {

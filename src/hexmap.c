@@ -13,6 +13,7 @@
 #include "geom.h"
 #include "vec4.h"
 #include "hexspace.h"
+#include "location.h"
 #include "prismelrenderer.h"
 
 
@@ -243,6 +244,10 @@ static int hexmap_parse_recording(fus_lexer_t *lexer,
     char **filename_ptr, char **palmapper_name_ptr, int *frame_offset_ptr
 ){
     int err;
+
+    err = fus_lexer_get(lexer, "(");
+    if(err)return err;
+
     err = fus_lexer_get_str(lexer, filename_ptr);
     if(err)return err;
     if(!fus_lexer_got(lexer, ")")){
@@ -258,6 +263,9 @@ static int hexmap_parse_recording(fus_lexer_t *lexer,
             if(err)return err;
         }
     }
+
+    err = fus_lexer_get(lexer, ")");
+    if(err)return err;
     return 0;
 }
 
@@ -497,7 +505,7 @@ static int hexmap_parse_door(hexmap_t *map, hexmap_submap_t *submap,
         err = fus_lexer_next(lexer);
         if(err)return err;
         door->type = HEXMAP_DOOR_TYPE_NEW_GAME;
-        err = fus_lexer_get_str(lexer, &door->respawn_map_filename);
+        err = fus_lexer_get_str(lexer, &door->u.location.map_filename);
         if(err)return err;
     }else if(fus_lexer_got(lexer, "continue")){
         err = fus_lexer_next(lexer);
@@ -507,12 +515,16 @@ static int hexmap_parse_door(hexmap_t *map, hexmap_submap_t *submap,
         err = fus_lexer_next(lexer);
         if(err)return err;
         door->type = HEXMAP_DOOR_TYPE_PLAYERS;
-        err = fus_lexer_get_int(lexer, &door->n_players);
+        err = fus_lexer_get_int(lexer, &door->u.n_players);
         if(err)return err;
     }else if(fus_lexer_got(lexer, "exit")){
         err = fus_lexer_next(lexer);
         if(err)return err;
         door->type = HEXMAP_DOOR_TYPE_EXIT;
+    }else if(fus_lexer_got(lexer, "zoomout")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        door->type = HEXMAP_DOOR_TYPE_ZOOMOUT;
     }else{
         door->type = HEXMAP_DOOR_TYPE_RESPAWN;
 
@@ -521,14 +533,14 @@ static int hexmap_parse_door(hexmap_t *map, hexmap_submap_t *submap,
             if(err)return err;
             err = fus_lexer_get(lexer, "(");
             if(err)return err;
-            err = fus_lexer_get_str(lexer, &door->respawn_map_filename);
+            err = fus_lexer_get_str(lexer, &door->u.location.map_filename);
             if(err)return err;
             err = fus_lexer_get(lexer, ")");
             if(err)return err;
         }else{
-            /* Non-null door->respawn_map_filename indicates player should
-            "teleport" to door->respawn_pos, door->respawn_rot, door->respawn_turn */
-            door->respawn_map_filename = strdup(map->name);
+            /* Non-null door->u.location.map_filename indicates player should
+            "teleport" to door->u.location */
+            door->u.location.map_filename = strdup(map->name);
         }
 
         if(fus_lexer_got(lexer, "anim")){
@@ -536,7 +548,7 @@ static int hexmap_parse_door(hexmap_t *map, hexmap_submap_t *submap,
             if(err)return err;
             err = fus_lexer_get(lexer, "(");
             if(err)return err;
-            err = fus_lexer_get_str(lexer, &door->respawn_anim_filename);
+            err = fus_lexer_get_str(lexer, &door->u.location.anim_filename);
             if(err)return err;
             err = fus_lexer_get(lexer, ")");
             if(err)return err;
@@ -546,7 +558,7 @@ static int hexmap_parse_door(hexmap_t *map, hexmap_submap_t *submap,
         if(err)return err;
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
-        err = fus_lexer_get_vec(lexer, space, door->respawn_pos);
+        err = fus_lexer_get_vec(lexer, space, door->u.location.pos);
         if(err)return err;
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
@@ -555,7 +567,7 @@ static int hexmap_parse_door(hexmap_t *map, hexmap_submap_t *submap,
         if(err)return err;
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
-        err = fus_lexer_get_int(lexer, &door->respawn_rot);
+        err = fus_lexer_get_int(lexer, &door->u.location.rot);
         if(err)return err;
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
@@ -564,7 +576,7 @@ static int hexmap_parse_door(hexmap_t *map, hexmap_submap_t *submap,
         if(err)return err;
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
-        err = fus_lexer_get_yn(lexer, &door->respawn_turn);
+        err = fus_lexer_get_yn(lexer, &door->u.location.turn);
         if(err)return err;
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
@@ -767,9 +779,6 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
         while(1){
             if(fus_lexer_got(lexer, ")"))break;
 
-            err = fus_lexer_get(lexer, "(");
-            if(err)return err;
-
             char *filename;
             char *palmapper_name = NULL;
             int frame_offset = 0;
@@ -782,9 +791,6 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
             err = hexmap_recording_init(recording,
                 HEXMAP_RECORDING_TYPE_RECORDING,
                 filename, palmapper_name, frame_offset);
-            if(err)return err;
-
-            err = fus_lexer_get(lexer, ")");
             if(err)return err;
         }
         err = fus_lexer_next(lexer);
@@ -1055,8 +1061,12 @@ int hexmap_step(hexmap_t *map){
  *****************/
 
 void hexmap_door_cleanup(hexmap_door_t *door){
-    free(door->respawn_map_filename);
-    free(door->respawn_anim_filename);
+    if(
+        door->type == HEXMAP_DOOR_TYPE_RESPAWN ||
+        door->type == HEXMAP_DOOR_TYPE_NEW_GAME
+    ){
+        location_cleanup(&door->u.location);
+    }
 }
 
 void hexmap_submap_cleanup(hexmap_submap_t *submap){

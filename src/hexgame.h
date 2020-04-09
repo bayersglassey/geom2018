@@ -12,6 +12,7 @@
 #include "geom.h"
 #include "vec4.h"
 #include "array.h"
+#include "location.h"
 
 
 #define MAX_FRAME_I 554400
@@ -27,27 +28,6 @@ enum reset_level {
     RESET_SOFT,
     RESET_HARD
 };
-
-
-
-/************
- * LOCATION *
- ************/
-
-typedef struct location {
-    vec_t pos;
-    rot_t rot;
-    bool turn;
-    char *map_filename;
-    char *anim_filename;
-    char *state_name;
-} location_t;
-
-void location_init(location_t *location);
-void location_cleanup(location_t *location);
-void location_set(location_t *location, vecspace_t *space,
-    vec_t pos, rot_t rot, bool turn, char *map_filename,
-    char *anim_filename, char *state_name);
 
 
 /************
@@ -118,6 +98,16 @@ int recording_step(recording_t *rec);
 /********
  * BODY *
  ********/
+
+#define FOREACH_BODY_CAMERA(BODY, CAMERA_VAR, BLOCK) { \
+    body_t *_foreach_body = (BODY); \
+    hexgame_t *_foreach_game = _foreach_body->game; \
+    for(int _foreach_i = 0; _foreach_i < _foreach_game->cameras_len; _foreach_i++){ \
+        camera_t *CAMERA_VAR = _foreach_game->cameras[_foreach_i]; \
+        if(CAMERA_VAR->body != _foreach_body)continue; \
+        BLOCK \
+    } \
+}
 
 typedef struct body {
     struct hexgame *game;
@@ -264,6 +254,9 @@ typedef struct camera {
 
     bool follow;
     bool smooth_scroll;
+    bool zoomout;
+        /* zoomout: set to false at start of each step, up to player/app/etc
+        to set it to true each step */
 
     SDL_Color colors[256];
     int colors_fade;
@@ -289,7 +282,7 @@ void camera_colors_flash_white(camera_t *camera, int percent);
 int camera_step(camera_t *camera);
 int camera_render(camera_t *camera,
     SDL_Renderer *renderer, SDL_Surface *surface,
-    SDL_Palette *pal, int x0, int y0, int zoom, bool zoomout);
+    SDL_Palette *pal, int x0, int y0, int zoom);
 
 
 /***********

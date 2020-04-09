@@ -224,22 +224,16 @@ void body_flash_cameras(body_t *body, Uint8 r, Uint8 g, Uint8 b,
     int percent
 ){
     /* Flash all cameras targeting given body */
-    hexgame_t *game = body->game;
-    for(int i = 0; i < game->cameras_len; i++){
-        camera_t *camera = game->cameras[i];
-        if(camera->body != body)continue;
+    FOREACH_BODY_CAMERA(body, camera, {
         camera_colors_flash(camera, r, g, b, percent);
-    }
+    })
 }
 
 void body_reset_cameras(body_t *body){
     /* Reset all cameras targeting given body */
-    hexgame_t *game = body->game;
-    for(int i = 0; i < game->cameras_len; i++){
-        camera_t *camera = game->cameras[i];
-        if(camera->body != body)continue;
+    FOREACH_BODY_CAMERA(body, camera, {
         camera->should_reset = true;
-    }
+    })
 }
 
 int body_remove(body_t *body){
@@ -253,12 +247,9 @@ int body_remove(body_t *body){
     ARRAY_UNHOOK(map->bodies, body)
 
     /* Update any cameras following this body */
-    for(int i = 0; i < game->cameras_len; i++){
-        camera_t *camera = game->cameras[i];
-        if(camera->body == body){
-            camera->body = NULL;
-        }
-    }
+    FOREACH_BODY_CAMERA(body, camera, {
+        camera->body = NULL;
+    })
     return 0;
 }
 
@@ -284,13 +275,10 @@ int body_move_to_map(body_t *body, hexmap_t *map){
     body_update_cur_submap(body);
 
     /* Update any cameras following this body */
-    for(int i = 0; i < game->cameras_len; i++){
-        camera_t *camera = game->cameras[i];
-        if(camera->body == body){
-            camera->map = map;
-            camera->cur_submap = body->cur_submap;
-        }
-    }
+    FOREACH_BODY_CAMERA(body, camera, {
+        camera->map = map;
+        camera->cur_submap = body->cur_submap;
+    })
     return 0;
 }
 
