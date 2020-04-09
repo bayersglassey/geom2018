@@ -241,6 +241,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->loop = true;
     app->hexgame_running = true;
     app->show_controls = true;
+    app->zoomout = false;
 
     test_app_init_input(app);
 
@@ -567,7 +568,7 @@ int test_app_mainloop_step(test_app_t *app){
             err = camera_render(app->camera,
                 app->renderer, app->surface,
                 app->sdl_palette, app->scw/2 + app->x0, app->sch/2 + app->y0,
-                1 /* app->zoom */);
+                1 /* app->zoom */, app->zoomout);
             if(err)return err;
 
             if(app->surface != NULL){
@@ -733,7 +734,7 @@ int test_app_mainloop_step(test_app_t *app){
                     }
                     continue;
                 }else if(event.key.keysym.sym == SDLK_F6){
-                    app->camera->zoomout = true;
+                    app->zoomout = true;
                 }else if(event.key.keysym.sym == SDLK_F7){
                     app->camera->follow = !app->camera->follow;
                 }else if(event.key.keysym.sym == SDLK_F8){
@@ -746,7 +747,7 @@ int test_app_mainloop_step(test_app_t *app){
                 }
             }else if(event.type == SDL_KEYUP){
                 if(event.key.keysym.sym == SDLK_F6){
-                    app->camera->zoomout = false;
+                    app->zoomout = false;
                 }
             }
 

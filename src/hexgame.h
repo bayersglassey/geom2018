@@ -262,7 +262,6 @@ typedef struct camera {
 
     body_t *body; /* optional: camera follows a body */
 
-    bool zoomout;
     bool follow;
     bool smooth_scroll;
 
@@ -290,7 +289,7 @@ void camera_colors_flash_white(camera_t *camera, int percent);
 int camera_step(camera_t *camera);
 int camera_render(camera_t *camera,
     SDL_Renderer *renderer, SDL_Surface *surface,
-    SDL_Palette *pal, int x0, int y0, int zoom);
+    SDL_Palette *pal, int x0, int y0, int zoom, bool zoomout);
 
 
 /***********

@@ -153,7 +153,6 @@ int camera_init(camera_t *camera, hexgame_t *game, hexmap_t *map,
     camera->cur_submap = NULL;
     camera->body = body;
 
-    camera->zoomout = false;
     camera->follow = false;
     camera->smooth_scroll = true;
 
@@ -307,7 +306,7 @@ int camera_step(camera_t *camera){
 
 int camera_render(camera_t *camera,
     SDL_Renderer *renderer, SDL_Surface *surface,
-    SDL_Palette *pal, int x0, int y0, int zoom
+    SDL_Palette *pal, int x0, int y0, int zoom, bool zoomout
 ){
     int err;
 
@@ -325,7 +324,7 @@ int camera_render(camera_t *camera,
 
     hexmap_submap_t *submap = camera->cur_submap;
     if(submap != NULL){
-        if(!camera->zoomout)mapper = submap->mapper;
+        if(!zoomout)mapper = submap->mapper;
     }
 
     /* Render map's submaps */
