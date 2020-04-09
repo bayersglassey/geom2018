@@ -65,8 +65,26 @@ fi
 
 "$CC" $CFLAGS $SOURCES "$MAIN_C" -o "$OUTFILE" $@
 
-if [ "$TARGET" = "emcc" -a "$RELEASE" = 1 ]
+if [ "$TARGET" = "emcc" ]
 then
-    # cp main.html www/
-    cp main.{js,html.mem,data} www/
+
+    # We've already got a modified version of emcc's main.html in www/,
+    # so get rid of the unmodified version it generates:
+    #
+    EMCC_FILES=$(echo main.{html,html.map})
+    echo "Removing files: $EMCC_FILES"
+    rm $EMCC_FILES
+
+    # Remove the following files or move them into www/:
+    #
+    WWW_EMCC_FILES=$(echo main.{js,html.mem,data})
+    if [ "$RELEASE" = 1 ]
+    then
+        echo "Copying www files: $WWW_EMCC_FILES"
+        cp $WWW_EMCC_FILES www/
+    else
+        echo "Removing www files: $WWW_EMCC_FILES"
+        rm $WWW_EMCC_FILES
+    fi
+
 fi

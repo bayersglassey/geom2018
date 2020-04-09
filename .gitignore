@@ -1,14 +1,16 @@
 /main
-/main.js
-/main.html
-/main.html.map
-/main.html.mem
-/main.data
 /demo
 /gmon.out
 /respawn*.txt
 /data/rec???.fus
 /ip.sh
+
+# EMCC files (should be removed by _compile_demo)
+#/main.js
+#/main.html
+#/main.html.map
+#/main.html.mem
+#/main.data
 
 # core dumps
 vgcore.*
