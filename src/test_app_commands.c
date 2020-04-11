@@ -22,6 +22,7 @@
 
 typedef struct test_app_command {
     const char *name;
+    const char *params;
     int (*action)(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr);
 } test_app_command_t;
 
@@ -240,19 +241,18 @@ lexer_err:
 }
 
 
-
 test_app_command_t _test_app_commands[] = {
-    {"exit", &_test_app_command_exit},
-    {"help", &_test_app_command_help},
-    {"cls", &_test_app_command_cls},
-    {"run", &_test_app_command_run},
-    {"add_player", &_test_app_command_add_player},
-    {"save", &_test_app_command_save},
-    {"dump", &_test_app_command_dump},
-    {"map", &_test_app_command_map},
-    {"renderall", &_test_app_command_renderall},
-    {"get_shape", &_test_app_command_get_shape},
-    {NULL, NULL},
+    {"exit", NULL, &_test_app_command_exit},
+    {"help", NULL, &_test_app_command_help},
+    {"cls", NULL, &_test_app_command_cls},
+    {"run", NULL, &_test_app_command_run},
+    {"add_player", "[stateset]", &_test_app_command_add_player},
+    {"save", "[filename]", &_test_app_command_save},
+    {"dump", "[rgraph|prend|nobitmaps|surfaces ...]", &_test_app_command_dump},
+    {"map", "mapper rgraph [resulting_rgraph]", &_test_app_command_map},
+    {"renderall", NULL, &_test_app_command_renderall},
+    {"get_shape", "shape", &_test_app_command_get_shape},
+    {NULL, NULL, NULL},
 };
 
 static int _test_app_command_help(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
@@ -260,6 +260,10 @@ static int _test_app_command_help(test_app_t *app, fus_lexer_t *lexer, bool *lex
     for(test_app_command_t *command = _test_app_commands; command->name; command++){
         console_write_msg(&app->console, " * ");
         console_write_msg(&app->console, command->name);
+        if(command->params){
+            console_write_msg(&app->console, " ");
+            console_write_msg(&app->console, command->params);
+        }
         console_write_msg(&app->console, "\n");
     }
     return 0;
