@@ -1,8 +1,8 @@
 anim: "anim/big_roller.fus"
 state: "stand"
-pos: ( 10 6)
-rot: 5
-turn: no
+pos: ( 8 8)
+rot: 3
+turn: yes
 keys:
     x:
     y:
@@ -10,4 +10,4 @@ keys:
     d:
     l:
     r:
-data: " w45+d w9+r w86-r w17+l w118-l w7+r w36-d w1-r w3+r w10-r w6+l w18+u w4-l w1-u w15+l w34-l w26+d w2+r w8-r w5-d w16+r w89-r w8+l w21-l w8+d w4+l w66-l w7+r w16-d w2-r w12+r w4-r w10+d w3+r w15-r w1-d w16+r w19-r w1+d w4+r w31-r w1-d w13+r w21-r w5+r w1+d w5-d w16+d w12-d w92-r w30+r w19+d w5-d w44-r w22+l w2+d w24-l w21+r w42-r w19+l w23-d w218-l w9+d w16+r w7-r w10+r w35-r w3-d w8+r w5-r w10+d w3+l w4-l w4-d w7+d w5-d w6+r w15-r w5+d w3+l w7-l w7+l w139-l w1-d w9+r w13-r w5+d w1+r w7-d w1-r w10+r w3-r w21+d w3+r w3-r w2-d w12+r w16-r w8+d w3-d w7+u w5-u w13+r w5-r w10+r w13-r w7+r w133-r w1+l w47-l w9+r w32+u w8-u w3-r w22+r w22-r w10+d w4+l w9-l w5-d w15+u w6-u w19+r w26-r w5+l w7-l w1+d w20+l w3-l w15-d w8+r w4-r w15+r w5-r w11+r w28-r w8+r w43-r w6+d w4+l w8-l w9+l w6-l w12+l w9-l w17+l w6-l w14-d w1+d w7+l w35-l w9+r w78-r w4+l w113-l w2+r w7-r w28+r w3-r w5-d w14+l w13-l w9+d w10+r w7-r w14-d w7+l w19-l w14+l w26-l w3+d w4+l w7-l w3-d w9+u w4+l w1-l w1-u w9+l w7-l w13+l w96-l w13+d w4+r w64+l w1-r w42-l w13+l w3-l w11-d w29"
+data: " w69+d w16+l w52-l w59+r w15-r w76+l w44-l w79+r w23-r w59+r w3-r w1+r w39-r w61+l w22-l w79+l w70-l w55-d w1+r w19-r w104+d w3+l w29-l w66-d w7+l w25-l w11+d w3+r w48-d w29-r w29+l w18-l w66+r w29-r w13+r w4-r w30"

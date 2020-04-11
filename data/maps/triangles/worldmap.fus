@@ -17,9 +17,10 @@ submaps:
                 rot: 1
                 turn: n
         recordings:
-            : "data/maps/triangles/recs/bigroller000.fus" "cya"
-            : "data/maps/triangles/recs/bigroller000.fus" "grn" 150
-            : "data/maps/triangles/recs/bigroller000.fus" "prp" 650
+            : "data/maps/triangles/recs/bigroller000.fus"
+            #: "data/maps/triangles/recs/bigroller000.fus" "cya"
+            #: "data/maps/triangles/recs/bigroller000.fus" "grn" 650
+            #: "data/maps/triangles/recs/bigroller000.fus" "prp" 1110
     :
         submaps:
             :
