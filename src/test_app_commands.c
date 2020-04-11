@@ -115,6 +115,41 @@ lexer_err:
     return 0;
 }
 
+static int _test_app_command_edit_player(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
+    int err;
+    int player_i = 0;
+    char *stateset_filename;
+
+    if(!fus_lexer_done(lexer)){
+        err = fus_lexer_get_int(lexer, &player_i);
+        if(err)goto lexer_err;
+    }
+
+    if(!fus_lexer_done(lexer)){
+        err = fus_lexer_get_str(lexer, &stateset_filename);
+        if(err)goto lexer_err;
+    }else{
+        stateset_filename = strdup(app->stateset_filename);
+        if(!stateset_filename)return 1;
+    }
+
+    hexgame_t *game = &app->hexgame;
+    if(player_i < 0 || player_i >= game->players_len){
+        console_write_msg(&app->console, "Player # invalid\n");
+        return 0;
+    }
+
+    player_t *player = game->players[player_i];
+
+    err = body_set_stateset(player->body, stateset_filename, NULL);
+    if(err)return err;
+
+    return 0;
+lexer_err:
+    *lexer_err_ptr = true;
+    return 0;
+}
+
 static int _test_app_command_save(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
     int err;
     char *filename = NULL;
@@ -247,6 +282,7 @@ test_app_command_t _test_app_commands[] = {
     {"cls", NULL, &_test_app_command_cls},
     {"run", NULL, &_test_app_command_run},
     {"add_player", "[stateset]", &_test_app_command_add_player},
+    {"edit_player", "player [stateset]", &_test_app_command_edit_player},
     {"save", "[filename]", &_test_app_command_save},
     {"dump", "[rgraph|prend|nobitmaps|surfaces ...]", &_test_app_command_dump},
     {"map", "mapper rgraph [resulting_rgraph]", &_test_app_command_map},
