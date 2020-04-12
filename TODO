@@ -386,30 +386,3 @@ Mar 29, 2020:
 * "Firefly" coins which fly around
 * "Fruit/flower" coins which grow on little plants
 
-
-Apr 10, 2020:
--------------
-
-BUG: in body_set_stateset or something, I guess if you try to load a nonexistant
-file, stateset_cleanup was already called successfully and therefore stateset.filename
-is already freed, and then when we return 2 on not finding the file, we end up
-trying to exit gracefully, including hexgame_cleanup, and ultimately attempting
-stateset_cleanup, and therefore double-free on stateset.filename:
-
-    Could not open file: anim/bigroller.fus
-    Cleaning up...
-    *** Error in `./main': double free or corruption (!prev): 0x00000000047fdb10 ***
-    ======= Backtrace: =========
-    /lib64/libc.so.6(+0x7cbac)[0x7f9da0b10bac]
-    /lib64/libc.so.6(+0x87a59)[0x7f9da0b1ba59]
-    /lib64/libc.so.6(cfree+0x16e)[0x7f9da0b213be]
-    ./main(stateset_cleanup+0xc0)[0x4074a5]
-    ./main(body_cleanup+0x2e)[0x4207fe]
-    ./main(hexmap_cleanup+0x44)[0x40b2b3]
-    ./main(hexgame_cleanup+0x35)[0x41f532]
-    ./main(test_app_cleanup+0x53)[0x41b7a7]
-    ./main(main+0x555)[0x42f684]
-    /lib64/libc.so.6(__libc_start_main+0xea)[0x7f9da0ab488a]
-    ./main(_start+0x2a)[0x40721a]
-
-
