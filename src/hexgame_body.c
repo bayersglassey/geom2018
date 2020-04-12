@@ -316,6 +316,11 @@ int body_set_stateset(body_t *body, const char *stateset_filename,
     const char *state_name
 ){
     stateset_cleanup(&body->stateset);
+
+    /* Make sure freed pointers are zeroed, in case body_init_stateset fails
+    before overwriting them */
+    memset(&body->stateset, 0, sizeof(body->stateset));
+
     return body_init_stateset(body, stateset_filename, state_name);
 }
 
