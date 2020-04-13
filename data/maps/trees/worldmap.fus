@@ -71,6 +71,10 @@ submaps:
                         camera: (10 0)
                     :
                         file: "data/maps/trees/bubbles2.fus"
-                        pos: (25 7)
+                        pos: eval: (25 7)
                         camera: (10 0)
+                    :
+                        file: "data/maps/trees/bubbles3.fus"
+                        pos: eval: (25 7) + (19 0)
+                        camera: (8 0)
 
