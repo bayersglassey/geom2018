@@ -63,6 +63,7 @@ int location_load(const char *filename, location_t *location);
 typedef struct recording {
     int action;
         /* 0: none, 1: play, 2: record */
+    bool reacts;
     bool loop;
     char *data;
     char *stateset_name;

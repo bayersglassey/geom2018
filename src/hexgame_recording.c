@@ -34,6 +34,7 @@ void recording_reset(recording_t *rec){
     rec->data = NULL;
     rec->stateset_name = NULL;
     rec->state_name = NULL;
+    rec->reacts = false;
 
     vec_zero(rec->pos0);
     rec->rot0 = 0;
@@ -52,6 +53,8 @@ void recording_reset(recording_t *rec){
 void recording_init(recording_t *rec, body_t *body,
     bool loop
 ){
+    /* This should probably call recording_reset... but it doesn't.
+    Should we fix that, or would it break something?.. */
     rec->body = body;
     rec->loop = loop;
 }
@@ -63,6 +66,17 @@ static int recording_parse(recording_t *rec,
 
     hexmap_t *map = rec->body->map;
     vecspace_t *space = map->space;
+
+    if(fus_lexer_got(lexer, "reacts")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_get_yesno(lexer, &rec->reacts);
+        if(err)return err;
+        err = fus_lexer_get(lexer, ")");
+        if(err)return err;
+    }
 
     if(fus_lexer_got(lexer, "loop")){
         err = fus_lexer_next(lexer);

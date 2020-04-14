@@ -881,7 +881,7 @@ int body_collide_against_body(body_t *body, body_t *body_other){
     /* Do whatever happens when two bodies collide */
     int err;
 
-    if(body->recording.action == 1){
+    if(body->recording.action == 1 && !body->recording.reacts){
         /* Bodies playing a recording don't react to collisions.
         In particular, they cannot be "killed" by other bodies.
         MAYBE TODO: These bodies should die too, but then their
