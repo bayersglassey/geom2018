@@ -109,6 +109,8 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
     body->game = game;
     body->palmapper = palmapper;
 
+    body->confused = false;
+
     body->out_of_bounds = false;
     body->map = map;
     body->cur_submap = NULL;
@@ -399,6 +401,10 @@ void body_keyup(body_t *body, int key_i){
 }
 
 int body_get_key_i(body_t *body, char c, bool absolute){
+    bool turn = false;
+    if(body){
+        turn = body->confused? !body->turn: body->turn;
+    }
     int key_i =
         c == 'x'? KEYINFO_KEY_ACTION1:
         c == 'y'? KEYINFO_KEY_ACTION2:
@@ -406,20 +412,24 @@ int body_get_key_i(body_t *body, char c, bool absolute){
         c == 'd'? KEYINFO_KEY_D:
         c == 'l'? KEYINFO_KEY_L:
         c == 'r'? KEYINFO_KEY_R:
-        c == 'f'? (!absolute && body->turn? KEYINFO_KEY_L: KEYINFO_KEY_R):
-        c == 'b'? (!absolute && body->turn? KEYINFO_KEY_R: KEYINFO_KEY_L):
+        c == 'f'? (!absolute && turn? KEYINFO_KEY_L: KEYINFO_KEY_R):
+        c == 'b'? (!absolute && turn? KEYINFO_KEY_R: KEYINFO_KEY_L):
         -1;
     return key_i;
 }
 
 char body_get_key_c(body_t *body, int key_i, bool absolute){
+    bool turn = false;
+    if(body){
+        turn = body->confused? !body->turn: body->turn;
+    }
     return
         key_i == KEYINFO_KEY_ACTION1? 'x':
         key_i == KEYINFO_KEY_ACTION2? 'y':
         key_i == KEYINFO_KEY_U? 'u':
         key_i == KEYINFO_KEY_D? 'd':
-        key_i == KEYINFO_KEY_L? (absolute? 'l': body->turn? 'f': 'b'):
-        key_i == KEYINFO_KEY_R? (absolute? 'r': body->turn? 'b': 'f'):
+        key_i == KEYINFO_KEY_L? (absolute? 'l': turn? 'f': 'b'):
+        key_i == KEYINFO_KEY_R? (absolute? 'r': turn? 'b': 'f'):
         ' ';
 }
 
@@ -579,6 +589,12 @@ static int body_match_rule(body_t *body,
     return 0;
 }
 
+static void effect_apply_boolean(int boolean, bool *b_ptr){
+    if(boolean == EFFECT_BOOLEAN_TRUE)*b_ptr = true;
+    else if(boolean == EFFECT_BOOLEAN_FALSE)*b_ptr = false;
+    else if(boolean == EFFECT_BOOLEAN_TOGGLE)*b_ptr = !*b_ptr;
+}
+
 static int body_apply_rule(body_t *body,
     actor_t *actor, hexgame_t *game,
     state_rule_t *rule, state_effect_goto_t **gotto_ptr
@@ -675,6 +691,12 @@ static int body_apply_rule(body_t *body,
                 RULE_PERROR()
                 return 2;}
             body->dead = effect->u.dead;
+        }else if(effect->type == state_effect_type_confused){
+            if(body == NULL){
+                fprintf(stderr, "No body");
+                RULE_PERROR()
+                return 2;}
+            effect_apply_boolean(effect->u.boolean, &body->confused);
         }else{
             fprintf(stderr, "Unrecognized state rule effect: %s\n",
                 effect->type);

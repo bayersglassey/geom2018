@@ -23,6 +23,12 @@ enum body_dead {
     BODY_ALL_DEAD
 };
 
+enum effect_boolean {
+    EFFECT_BOOLEAN_TRUE,
+    EFFECT_BOOLEAN_FALSE,
+    EFFECT_BOOLEAN_TOGGLE
+};
+
 
 typedef struct collmsg_handler {
     /* When colliding with another body who is "sending" the given collmsg,
@@ -134,6 +140,7 @@ typedef struct state_effect {
         char *play_filename;
         vec_t vec;
         rot_t rot;
+        int boolean; /* enum effect_boolean */
     } u;
 } state_effect_t;
 
@@ -146,6 +153,7 @@ extern const char state_effect_type_delay[];
 extern const char state_effect_type_spawn[];
 extern const char state_effect_type_play[];
 extern const char state_effect_type_die[];
+extern const char state_effect_type_confused[];
 extern const char *state_effect_types[];
 
 

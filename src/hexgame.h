@@ -135,6 +135,8 @@ typedef struct body {
     int dead; /* enum body_dead */
     bool safe; /* lets player know it should update its safe_location */
 
+    bool confused; /* Reverses l/r keys */
+
     bool out_of_bounds;
     hexmap_t *map;
     hexmap_submap_t *cur_submap;

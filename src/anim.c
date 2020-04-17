@@ -284,6 +284,20 @@ static int _parse_effect(fus_lexer_t *lexer,
             NEXT
             effect->u.dead = BODY_MOSTLY_DEAD;
         }else effect->u.dead = BODY_ALL_DEAD;
+    }else if(GOT("confused")){
+        NEXT
+        GET("(")
+        int boolean;
+        if(GOT("yes"))boolean = EFFECT_BOOLEAN_TRUE;
+        else if(GOT("no"))boolean = EFFECT_BOOLEAN_FALSE;
+        else if(GOT("toggle"))boolean = EFFECT_BOOLEAN_TOGGLE;
+        else {
+            UNEXPECTED("yes or no or toggle");
+        }
+        NEXT
+        effect->type = state_effect_type_confused;
+        effect->u.boolean = boolean;
+        GET(")")
     }else if(GOT("play")){
         NEXT
         GET("(")
@@ -501,6 +515,7 @@ const char state_effect_type_delay[] = "delay";
 const char state_effect_type_spawn[] = "spawn";
 const char state_effect_type_play[] = "play";
 const char state_effect_type_die[] = "die";
+const char state_effect_type_confused[] = "confused";
 const char *state_effect_types[] = {
     state_effect_type_print,
     state_effect_type_move,
@@ -511,6 +526,7 @@ const char *state_effect_types[] = {
     state_effect_type_spawn,
     state_effect_type_play,
     state_effect_type_die,
+    state_effect_type_confused,
     NULL
 };
 
