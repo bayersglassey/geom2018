@@ -22,6 +22,7 @@ $PREFIX ANIM_NS stand:
         ;;    .
         ;;    *
         ;; (.)  .
+    on "spit": $PREFIX ANIM_NS turn
 
     $IF PLAYER_ROLLER:
         if:
@@ -138,6 +139,14 @@ $PREFIX ANIM_NS stand:
         rot: 2
         turn
         delay: 1
+
+
+$PREFIX ANIM_NS turn:
+    # When bumped, turn around
+    if:
+    then:
+        confused: toggle
+        goto: $PREFIX ANIM_NS stand
 
 
 $PREFIX ANIM_NS grab:

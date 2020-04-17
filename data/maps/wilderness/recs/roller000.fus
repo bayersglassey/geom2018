@@ -1,4 +1,4 @@
-loop: no
+reacts: yes
 anim: "anim/death_roller.fus"
 state: "stand"
 pos: (0 0)
@@ -9,4 +9,4 @@ keys:
     d:
     l: is was
     r:
-data: "w1"
+nodata

@@ -1,15 +1,15 @@
 
-collmsgs: "collect"
+collmsgs: "collect" "spit"
 
 fly:
     rgraph: "spit_fly"
 
     hitbox:
         ;;   .   .
-        ;;   *\*/
-        ;; . - +   .
+        ;;   *\*/*\*/
+        ;; . - + - +
         ;;
-        ;;  ( )  .
+        ;;   .  (.)
 
     on "crush": dead
 
@@ -42,9 +42,9 @@ crouch_fly:
     rgraph: "spit_crouch_fly"
 
     hitbox:
-        ;;    .
-        ;;  */*\
-        ;; ( )  .
+        ;;    .   .
+        ;;  */*\*/*\
+        ;;  .  (.)  .
 
     on "crush": crouch_dead
 
