@@ -1153,7 +1153,7 @@ static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
 
         if(!cond){
             /* Eat everything up to & including closing ")" */
-            err = fus_lexer_next(lexer);
+            err = _fus_lexer_next(lexer);
             if(err)return err;
             err = fus_lexer_parse_silent(lexer);
             if(err)return err;

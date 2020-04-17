@@ -138,6 +138,14 @@ static int _run_tests(){
         "$PRINTVARS $SET_STR A aa $PRINTVARS $PRINTVAR A $PRINTVARS $SET_STR A aaaa $PRINTVARS",
         "");
     if(err)return err;
+    err = run_test(
+        "$UNSET_BOOL A 1 $IF A($SET_BOOL B) 2 $IF B(3)",
+        "1 2");
+    if(err)return err;
+    err = run_test(
+        "$SET_BOOL A 1 $IF A($SET_BOOL B) 2 $IF B(3)",
+        "1 2 3");
+    if(err)return err;
 
     return 0;
 }
