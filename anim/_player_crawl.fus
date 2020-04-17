@@ -15,7 +15,7 @@ crawl_looking_up:
     if:
         key: wentdown y
     then:
-        spawn: "anim/spit.fus" "crouch_fly" (1 0) 1 f
+        spawn: $GET_STR SPIT_FUS "crouch_fly" (1 0) 1 f
         goto: crawl_looking_up_spit
         delay: 9
 
@@ -70,7 +70,7 @@ crawl:
     if:
         key: wentdown y
     then:
-        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
+        spawn: $GET_STR SPIT_FUS "crouch_fly" (0 0) 0 f
         goto: crawl_spit
         delay: 9
 
@@ -170,7 +170,7 @@ crawl_step_down:
     if:
         key: wentdown y
     then:
-        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
+        spawn: $GET_STR SPIT_FUS "crouch_fly" (0 0) 0 f
         goto: crawl_spit
         delay: 9
 
@@ -194,7 +194,7 @@ crawl_step:
     if:
         key: wentdown y
     then:
-        spawn: "anim/spit.fus" "crouch_fly" (0 0) 0 f
+        spawn: $GET_STR SPIT_FUS "crouch_fly" (0 0) 0 f
         goto: crawl_spit
         delay: 9
 

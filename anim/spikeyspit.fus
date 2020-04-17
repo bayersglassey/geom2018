@@ -1,0 +1,4 @@
+
+$SET_STR RGRAPH_NS "spikey_"
+$SET_BOOL SPIKEY
+import "anim/_spit.fus"

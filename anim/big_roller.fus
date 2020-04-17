@@ -1,13 +1,15 @@
 
+collmsgs: "crush"
+
 stand:
     rgraph: "big_roller"
-    collmsgs: "crush"
     hitbox:
         ;;      .
         ;;      *
         ;;    . - .
         ;;    *\*/*
         ;; ( )  .   .
+    on "spikeyspit": turn
 
     if:
         key: wasdown u
@@ -104,9 +106,15 @@ stand:
         turn
         delay: 1
 
+turn:
+    # When bumped, turn around
+    if:
+    then:
+        confused: toggle
+        goto: stand
+
 grab:
     rgraph: "big_roller_grab"
-    collmsgs: "crush"
     hitbox:
         ;;      .   .   .
         ;;      *\*/*\*

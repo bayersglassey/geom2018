@@ -5,6 +5,11 @@
 # NOTE: make sure "stand" is the first anim, so any imports
 # should go below it
 
+$IF PLAYER_SPIKEY:
+    $SET_STR SPIT_FUS "anim/spikeyspit.fus"
+$IF !PLAYER_SPIKEY:
+    $SET_STR SPIT_FUS "anim/spit.fus"
+
 stand:
     rgraph: $PREFIX NS "stand"
 
@@ -18,7 +23,7 @@ stand:
     if:
         key: wentdown y
     then:
-        spawn: "anim/spit.fus" "fly" (0 0) 0 f
+        spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f
         goto: spit
         delay: 9
 
@@ -164,7 +169,7 @@ looking_up:
     if:
         key: wentdown y
     then:
-        spawn: "anim/spit.fus" "fly" (1 0) 1 f
+        spawn: $GET_STR SPIT_FUS "fly" (1 0) 1 f
         goto: looking_up_spit
         delay: 9
 
@@ -327,7 +332,7 @@ step_down:
     if:
         key: wentdown y
     then:
-        spawn: "anim/spit.fus" "fly" (0 0) 0 f
+        spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f
         goto: spit
         delay: 9
 
@@ -352,7 +357,7 @@ step:
     if:
         key: wentdown y
     then:
-        spawn: "anim/spit.fus" "fly" (0 0) 0 f
+        spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f
         goto: spit
         delay: 9
 

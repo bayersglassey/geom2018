@@ -1,0 +1,117 @@
+
+# Expected variables:
+# RGRAPH_NS (str): e.g. "spiky_", ""
+
+fly:
+    rgraph: $PREFIX RGRAPH_NS "spit_fly"
+    collmsgs: "collect" "spit" $IF SPIKEY("spikeyspit")
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*\*/
+        ;; . - + - +
+        ;;
+        ;;   .  (.)
+
+    on "crush": dead
+
+    if:
+        coll: any yes
+            ;;   .   .
+            ;;   *\*
+            ;; .   .   .
+            ;;
+            ;;  ( )  .
+    then:
+        goto: dead
+        delay: 11
+
+    if:
+        coll: all yes
+            ;;   .   .
+            ;;      /
+            ;; .   .   .
+            ;;
+            ;;  ( )  .
+    then:
+        move: 2 1
+        rot: 1
+
+    if() then:
+        move: 1 0
+
+crouch_fly:
+    rgraph: $PREFIX RGRAPH_NS "spit_crouch_fly"
+    collmsgs: "collect" "spit" $IF SPIKEY("spikeyspit")
+    hitbox:
+        ;;    .   .
+        ;;  */*\*/*\
+        ;;  .  (.)  .
+
+    on "crush": crouch_dead
+
+    if:
+        coll: any yes
+            ;;    .   .
+            ;;    *\*
+            ;; ( )  .
+    then:
+        goto: crouch_dead
+        delay: 11
+
+    if:
+        coll: all yes
+            ;;    .   .
+            ;;       /
+            ;; ( )  .
+    then:
+        move: 1 0
+        rot: 1
+
+    if() then:
+        move: 1 0
+
+dead:
+    rgraph: "spit_dead"
+    if() then: die
+
+crouch_dead:
+    rgraph: "spit_crouch_dead"
+    if() then: die
+
+
+
+
+
+##############################
+# UNUSED:
+crouch_fly_bouncy:
+    rgraph: $PREFIX RGRAPH_NS "spit_crouch_fly"
+    collmsgs: "collect" "spit" $IF SPIKEY("spikeyspit")
+    hitbox:
+        ;;    .
+        ;;    *
+        ;; ( )  .
+
+
+    if:
+        coll: all yes
+            ;;    .
+            ;;     \
+            ;; ( )  .
+    then:
+        move: 1 1
+        rot: 2
+        turn
+
+    if:
+        coll: any yes
+            ;;    .
+            ;;    *
+            ;; ( )  .
+    then:
+        goto: dead
+
+    if() then:
+        move: 1 1
+        rot: 3
+        turn
