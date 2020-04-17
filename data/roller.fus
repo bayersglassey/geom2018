@@ -15,6 +15,7 @@ shapes:
 
     "death_roller": map ("l.red") ("roller")
     "death_roller_grab": map ("l.red") ("roller_grab")
+    "death_roller_grab_flipped": map ("l.red") ("roller_grab_flipped")
 
 
     ##############
@@ -23,6 +24,7 @@ shapes:
 
     "big_roller": map ("double") ("roller")
     "big_roller_grab": map ("double") ("roller_grab")
+    "big_roller_grab_flipped": map ("double") ("roller_grab_flipped")
 
 
     ############
@@ -40,18 +42,6 @@ shapes:
             : "roller_body" (0 0 0  0) 0 f
             : "roller_body_hollow" (0 0 0  0) 2 f
             : "roller_foot" (0 0 0  0) 0 f
-
-
-    ############
-    # ROLLER 3 #
-    ############
-
-    "roller3":
-        shapes:
-            : "roller_body" (0 0 0 0) 0 f
-            : "roller_body_hollow" (3 2 0 -1) 2 f
-            : "roller_body_hollow" (3 2 0 -1) 0 f
-            : "roller_foot" (0 0 0 0) 0 f
 
 
     ################
@@ -82,3 +72,9 @@ shapes:
             : "water_roller_body" (3 2 0 -1) 2 f
             : "water_roller_foot" (0 0 0  0) 0 f
 
+    "water_roller_grab_flipped":
+        animation: cycle 8
+        shapes:
+            : "water_roller_body" (0 0 0  0) 0 f
+            : "water_roller_body" (0 0 0  0) 2 f
+            : "water_roller_foot" (0 0 0  0) 0 f
