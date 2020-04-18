@@ -868,6 +868,10 @@ static const char *_body_handle_collmsg(body_t *body, const char *msg){
     state_t *state = body->state;
     for(int j = 0; j < state->collmsg_handlers_len; j++){
         collmsg_handler_t *handler = &state->collmsg_handlers[j];
+        if(body->stateset.debug_collision){
+            fprintf(stderr, "    -> state handler: %s -> %s\n",
+                handler->msg, handler->state_name);
+        }
         if(!strcmp(msg, handler->msg)){
             return handler->state_name;
         }
@@ -875,6 +879,10 @@ static const char *_body_handle_collmsg(body_t *body, const char *msg){
     stateset_t *stateset = &body->stateset;
     for(int j = 0; j < stateset->collmsg_handlers_len; j++){
         collmsg_handler_t *handler = &stateset->collmsg_handlers[j];
+        if(body->stateset.debug_collision){
+            fprintf(stderr, "    -> stateset handler: %s -> %s\n",
+                handler->msg, handler->state_name);
+        }
         if(!strcmp(msg, handler->msg)){
             return handler->state_name;
         }
@@ -887,12 +895,18 @@ static const char *_body_handle_other_bodies_collmsgs(body_t *body, body_t *body
     state_t *state = body_other->state;
     for(int i = 0; i < state->collmsgs_len; i++){
         const char *msg = state->collmsgs[i];
+        if(body->stateset.debug_collision){
+            fprintf(stderr, "  -> state collmsg: %s\n", msg);
+        }
         state_name = _body_handle_collmsg(body, msg);
         if(state_name)return state_name;
     }
     stateset_t *stateset = &body_other->stateset;
     for(int i = 0; i < stateset->collmsgs_len; i++){
         const char *msg = stateset->collmsgs[i];
+        if(body->stateset.debug_collision){
+            fprintf(stderr, "  -> stateset collmsg: %s\n", msg);
+        }
         state_name = _body_handle_collmsg(body, msg);
         if(state_name)return state_name;
     }
@@ -903,18 +917,31 @@ int body_collide_against_body(body_t *body, body_t *body_other){
     /* Do whatever happens when two bodies collide */
     int err;
 
+    if(body->stateset.debug_collision){
+        fprintf(stderr, "Colliding bodies: %s (%s) against %s (%s)\n",
+            body->stateset.filename, body->state->name,
+            body_other->stateset.filename, body_other->state->name);
+    }
+
     if(body->recording.action == 1 && !body->recording.reacts){
         /* Bodies playing a recording don't react to collisions.
         In particular, they cannot be "killed" by other bodies.
         MAYBE TODO: These bodies should die too, but then their
         recording should restart after a brief pause?
         Maybe we can reuse body->cooldown for the pause. */
+        if(body->stateset.debug_collision){
+            fprintf(stderr, "  -> recording is playing, early exit\n");
+        }
         return 0;
     }
 
     /* Find first (if any) collmsg of body_other which is handled by body */
     const char *state_name = _body_handle_other_bodies_collmsgs(body, body_other);
     if(!state_name)return 0;
+
+    if(body->stateset.debug_collision){
+        fprintf(stderr, "  -> *** handling with state: %s\n", state_name);
+    }
 
     /* Body "handles" the collmsg by changing its state */
     err = body_set_state(body, state_name, true);

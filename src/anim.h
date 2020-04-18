@@ -58,6 +58,7 @@ typedef struct stateset {
     ARRAY_DECL(char*, collmsgs)
     ARRAY_DECL(struct collmsg_handler, collmsg_handlers)
     ARRAY_DECL(struct state*, states)
+    bool debug_collision;
 } stateset_t;
 
 typedef struct state_rule {

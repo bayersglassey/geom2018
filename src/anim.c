@@ -24,7 +24,6 @@ static int _parse_collmsg_handler(fus_lexer_t *lexer, char **msg_ptr, char **sta
     char *msg;
     char *state_name;
 
-    NEXT
     GET_STR(msg)
     GET("(")
     if(GOT(")")){
@@ -58,6 +57,7 @@ int stateset_init(stateset_t *stateset, char *filename){
     ARRAY_INIT(stateset->collmsgs)
     ARRAY_INIT(stateset->collmsg_handlers)
     ARRAY_INIT(stateset->states)
+    stateset->debug_collision = false;
     return 0;
 }
 
@@ -409,7 +409,8 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
 
             GET(")")
         }
-        if(GOT("on")){
+        while(GOT("on")){
+            NEXT
             collmsg_handler_t handler;
             err = _parse_collmsg_handler(lexer, &handler.msg, &handler.state_name);
             if(err)return err;
@@ -454,6 +455,10 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
 ){
     INIT
 
+    if(GOT("debug_collision")){
+        NEXT
+        stateset->debug_collision = true;
+    }
     if(GOT("collmsgs")){
         NEXT
         GET("(")
@@ -464,14 +469,39 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
         }
         NEXT
     }
-    if(GOT("on")){
+    while(GOT("on")){
+        NEXT
         collmsg_handler_t handler;
         err = _parse_collmsg_handler(lexer, &handler.msg, &handler.state_name);
         if(err)return err;
         ARRAY_PUSH(collmsg_handler_t, stateset->collmsg_handlers, handler)
     }
 
-    return _stateset_parse(stateset, lexer, prend, space);
+    err = _stateset_parse(stateset, lexer, prend, space);
+    if(err)return err;
+
+#ifdef GEOM_DUMP_COLLMSGS_AND_HANDLERS
+    #define DUMP_COLLMSGS_AND_HANDLERS(THING) { \
+        for(int i = 0; i < (THING)->collmsgs_len; i++){ \
+            char *collmsg = (THING)->collmsgs[i]; \
+            fprintf(stderr, "  COLLMSG: %s\n", collmsg); \
+        } \
+        for(int i = 0; i < (THING)->collmsg_handlers_len; i++){ \
+            collmsg_handler_t *collmsg_handler = &(THING)->collmsg_handlers[i]; \
+            fprintf(stderr, "  ON: %s -> %s\n", collmsg_handler->msg, collmsg_handler->state_name); \
+        } \
+    }
+    fprintf(stderr, "STATESET: %s\n", stateset->filename);
+    DUMP_COLLMSGS_AND_HANDLERS(stateset)
+    for(int i = 0; i < stateset->states_len; i++){
+        state_t *state = stateset->states[i];
+        fprintf(stderr, "STATE: %s\n", state->name);
+        DUMP_COLLMSGS_AND_HANDLERS(state)
+    }
+    #undef DUMP_COLLMSGS_AND_HANDLERS
+#endif
+
+    return 0;
 }
 
 state_t *stateset_get_state(stateset_t *stateset, const char *name){
