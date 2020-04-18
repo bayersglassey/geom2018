@@ -284,8 +284,6 @@ COINS ARE FUN
 Let's make different kinds of collectibles...
 Little flies, berries, that kind of thing.
 And place them on the maps.
--> need to add body->recording.react, a bool saying body should still
-    react to collisions even if body->recording.action == 1.
 
 
 Oct 8, 2019:
@@ -385,4 +383,3 @@ Mar 29, 2020:
 
 * "Firefly" coins which fly around
 * "Fruit/flower" coins which grow on little plants
-
