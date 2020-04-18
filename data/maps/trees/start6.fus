@@ -1,3 +1,6 @@
+parts:
+    "c": recording "data/maps/demo/recs/coin.fus"
+    "C": recording "data/maps/demo/recs/coin_crouch.fus"
 
 collmap:
     ;;

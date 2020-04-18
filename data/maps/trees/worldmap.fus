@@ -52,7 +52,12 @@ submaps:
             :
                 file: "data/maps/trees/start6.fus"
                 pos: eval: (5 5) + (11 14) + (10 16)
-                camera: (9 6)
+                camera: (11 6)
+                submaps:
+                    :
+                        file: "data/maps/trees/start6-0.fus"
+                        pos: eval: (31 19)
+                        camera: (0 0)
             :
                 bg
                 file: "data/maps/trees/start7_bg.fus"
@@ -77,4 +82,23 @@ submaps:
                         file: "data/maps/trees/bubbles3.fus"
                         pos: eval: (25 7) + (19 0)
                         camera: (8 0)
+                    :
+                        file: "data/maps/trees/bubbles3-0.fus"
+                        pos: eval: (25 7) + (19 0) + (25 12)
+                        camera: (10 -10)
+                        doors:
+                            :
+                                anim: "anim/rollerplayer.fus"
+                                pos: (181 43)
+                                rot: 0
+                                turn: y
+                            :
+                                anim: "anim/spikeyplayer.fus"
+                                pos: (179 36)
+                                rot: 0
+                                turn: y
+                    :
+                        file: "data/maps/trees/bubbles3-1.fus"
+                        pos: eval: (25 7) + (19 0) + (4 -9)
+                        camera: (0 0)
 
