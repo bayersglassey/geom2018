@@ -16,6 +16,16 @@ shapes:
 
 mappers:
 
+    "single":
+        # This is a hack which allows test_app->camera_mapper to be set to "single"
+        # to achieve a zoomout effect...
+        solid
+        unit: 1 0 0 0
+        entries:
+            : "sq" -> "sq"
+            : "tri" -> "tri"
+            : "dia" -> "dia"
+
     "l.red":
         unit: 1 0 0 0
         entries:

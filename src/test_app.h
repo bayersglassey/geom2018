@@ -47,7 +47,7 @@ typedef struct test_app {
     hexgame_t hexgame;
     camera_t *camera;
     bool hexgame_running;
-    bool zoomout;
+    prismelmapper_t *camera_mapper;
     bool show_controls;
 
     int x0;

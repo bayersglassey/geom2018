@@ -202,11 +202,14 @@ int camera_render(camera_t *camera,
     vec_t camera_renderpos;
     vec4_vec_from_hexspace(camera_renderpos, camera->scrollpos);
 
-    prismelmapper_t *mapper = NULL;
-
     hexmap_submap_t *submap = camera->cur_submap;
-    if(submap != NULL){
-        if(!camera->zoomout)mapper = submap->mapper;
+
+    /* Figure out which prismelmapper to use when rendering */
+    prismelmapper_t *mapper = NULL;
+    if(camera->mapper != NULL){
+        mapper = camera->mapper;
+    }else if(submap != NULL){
+        mapper = submap->mapper;
     }
 
     /* Render map's submaps */
@@ -541,10 +544,10 @@ int hexgame_step(hexgame_t *game){
 
     vecspace_t *space = game->space;
 
-    /* Reset all camera->zoomout for this step */
+    /* Reset all camera->mapper for this step */
     for(int i = 0; i < game->cameras_len; i++){
         camera_t *camera = game->cameras[i];
-        camera->zoomout = false;
+        camera->mapper = NULL;
     }
 
     /* Do 1 gameplay step for each actor */

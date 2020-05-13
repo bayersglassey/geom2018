@@ -215,9 +215,15 @@ static int player_use_door(player_t *player, hexmap_door_t *door){
     }else if(door->type == HEXMAP_DOOR_TYPE_EXIT){
         err = game->exit_callback(game, player);
         if(err)return err;
-    }else if(door->type == HEXMAP_DOOR_TYPE_ZOOMOUT){
+    }else if(door->type == HEXMAP_DOOR_TYPE_CAMERA_MAPPER){
+        prismelmapper_t *mapper = prismelrenderer_get_mapper(game->prend, door->u.s);
+        if(mapper == NULL){
+            fprintf(stderr, "%s: Couldn't find camera mapper: %s\n",
+                __func__, door->u.s);
+            return 2;
+        }
         FOREACH_BODY_CAMERA(body, camera, {
-            camera->zoomout = true;
+            camera->mapper = mapper;
         })
     }else if(door->type == HEXMAP_DOOR_TYPE_RESPAWN){
         hexmap_t *new_map = body->map;

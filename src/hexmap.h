@@ -188,7 +188,7 @@ enum hexmap_door_type {
     HEXMAP_DOOR_TYPE_CONTINUE,
     HEXMAP_DOOR_TYPE_PLAYERS,
     HEXMAP_DOOR_TYPE_EXIT,
-    HEXMAP_DOOR_TYPE_ZOOMOUT,
+    HEXMAP_DOOR_TYPE_CAMERA_MAPPER,
     HEXMAP_DOOR_TYPES
 };
 
@@ -204,7 +204,7 @@ typedef struct hexmap_door {
     union {
         location_t location; /* type == HEXMAP_DOOR_TYPE_RESPAWN or HEXMAP_DOOR_TYPE_NEW_GAME */
         int n_players; /* type == HEXMAP_DOOR_TYPE_PLAYERS */
-        prismelmapper_t *mapper; /* type == HEXMAP_DOOR_TYPE_MAPPER */
+        char *s; /* type == HEXMAP_DOOR_TYPE_CAMERA_MAPPER */
     } u;
 } hexmap_door_t;
 

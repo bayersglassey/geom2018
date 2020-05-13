@@ -257,9 +257,10 @@ typedef struct camera {
 
     bool follow;
     bool smooth_scroll;
-    bool zoomout;
-        /* zoomout: set to false at start of each step, up to player/app/etc
-        to set it to true each step */
+    prismelmapper_t *mapper;
+        /* mapper: set to NULL at start of each step, up to player/app/etc
+        to set it each step.
+        If set, overrides cur_submap->mapper for that step. */
 
     SDL_Color colors[256];
     int colors_fade;

@@ -253,7 +253,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->loop = true;
     app->hexgame_running = true;
     app->show_controls = true;
-    app->zoomout = false;
+    app->camera_mapper = NULL;
 
     test_app_init_input(app);
 
@@ -366,10 +366,10 @@ int test_app_mainloop_step(test_app_t *app){
                 RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
             }
 
-            if(app->zoomout){
-                /* camera->zoomout is set to false at start of each step, it's up
-                to us to set it to true if desired before calling camera_render */
-                app->camera->zoomout = true;
+            if(app->camera_mapper){
+                /* camera->mapper is set to NULL at start of each step, it's up
+                to us to set it if desired before calling camera_render */
+                app->camera->mapper = app->camera_mapper;
             }
             err = camera_render(app->camera,
                 app->renderer, app->surface,
@@ -543,7 +543,15 @@ int test_app_mainloop_step(test_app_t *app){
                     }
                     continue;
                 }else if(event.key.keysym.sym == SDLK_F6){
-                    app->zoomout = true;
+                    /* Hack, we really want to force camera->mapper to NULL, but
+                    instead we assume the existence of this mapper called "single" */
+                    const char *mapper_name = "single";
+                    app->camera_mapper = prismelrenderer_get_mapper(&app->prend, mapper_name);
+                    if(app->camera_mapper == NULL){
+                        fprintf(stderr, "%s: Couldn't find mapper: %s\n",
+                            __func__, mapper_name);
+                        return 2;
+                    }
                 }else if(event.key.keysym.sym == SDLK_F7){
                     app->camera->follow = !app->camera->follow;
                 }else if(event.key.keysym.sym == SDLK_F8){
@@ -556,7 +564,7 @@ int test_app_mainloop_step(test_app_t *app){
                 }
             }else if(event.type == SDL_KEYUP){
                 if(event.key.keysym.sym == SDLK_F6){
-                    app->zoomout = false;
+                    app->camera_mapper = NULL;
                 }
             }
 

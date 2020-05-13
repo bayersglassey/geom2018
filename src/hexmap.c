@@ -521,10 +521,20 @@ static int hexmap_parse_door(hexmap_t *map, hexmap_submap_t *submap,
         err = fus_lexer_next(lexer);
         if(err)return err;
         door->type = HEXMAP_DOOR_TYPE_EXIT;
-    }else if(fus_lexer_got(lexer, "zoomout")){
+    }else if(fus_lexer_got(lexer, "camera_mapper")){
         err = fus_lexer_next(lexer);
         if(err)return err;
-        door->type = HEXMAP_DOOR_TYPE_ZOOMOUT;
+        char *s;
+        {
+            err = fus_lexer_get(lexer, "(");
+            if(err)return err;
+            err = fus_lexer_get_str(lexer, &s);
+            if(err)return err;
+            err = fus_lexer_get(lexer, ")");
+            if(err)return err;
+        }
+        door->type = HEXMAP_DOOR_TYPE_CAMERA_MAPPER;
+        door->u.s = s;
     }else{
         door->type = HEXMAP_DOOR_TYPE_RESPAWN;
 
@@ -1061,11 +1071,16 @@ int hexmap_step(hexmap_t *map){
  *****************/
 
 void hexmap_door_cleanup(hexmap_door_t *door){
-    if(
-        door->type == HEXMAP_DOOR_TYPE_RESPAWN ||
-        door->type == HEXMAP_DOOR_TYPE_NEW_GAME
-    ){
-        location_cleanup(&door->u.location);
+    switch(door->type){
+        case HEXMAP_DOOR_TYPE_RESPAWN:
+        case HEXMAP_DOOR_TYPE_NEW_GAME:
+            location_cleanup(&door->u.location);
+            break;
+        case HEXMAP_DOOR_TYPE_CAMERA_MAPPER:
+            free(door->u.s);
+            break;
+        default:
+            break;
     }
 }
 

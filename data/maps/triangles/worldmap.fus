@@ -46,7 +46,8 @@ submaps:
                 camera: (16 6)
                 mapper: ("triple")
                 doors:
-                    : zoomout
+                    :
+                        camera_mapper: "single"
             :
                 file: "data/maps/triangles/start3.fus"
                 pos: eval: (14 12) + (22 15)
