@@ -6,23 +6,12 @@ default_tileset: "data/tileset1.fus"
 
 submaps:
     :
-        file: "data/maps/triangles/start.fus"
-        pos: (0 0)
-        camera: (0 0)
-        mapper: ("triple")
-        doors:
-            :
-                map: "data/maps/demo/worldmap.fus"
-                pos: (38 -80)
-                rot: 1
-                turn: n
-        recordings:
-            : "data/maps/triangles/recs/bigroller000.fus"
-            #: "data/maps/triangles/recs/bigroller000.fus" "cya"
-            #: "data/maps/triangles/recs/bigroller000.fus" "grn" 650
-            #: "data/maps/triangles/recs/bigroller000.fus" "prp" 1110
-    :
         submaps:
+            :
+                bg
+                file: "data/maps/triangles/start_bg.fus"
+                pos: eval: (0 0)
+                tileset: "data/tileset1_bg.fus"
             :
                 bg
                 file: "data/maps/triangles/start2_bg.fus"
@@ -35,6 +24,22 @@ submaps:
                 tileset: "data/tileset1_bg.fus"
     :
         submaps:
+            :
+                file: "data/maps/triangles/start.fus"
+                pos: (0 0)
+                camera: (0 0)
+                mapper: ("triple")
+                doors:
+                    :
+                        map: "data/maps/demo/worldmap.fus"
+                        pos: (38 -80)
+                        rot: 1
+                        turn: n
+                recordings:
+                    : "data/maps/triangles/recs/bigroller000.fus"
+                    #: "data/maps/triangles/recs/bigroller000.fus" "cya"
+                    #: "data/maps/triangles/recs/bigroller000.fus" "grn" 650
+                    #: "data/maps/triangles/recs/bigroller000.fus" "prp" 1110
             :
                 file: "data/maps/triangles/start2.fus"
                 pos: eval: (14 12)
