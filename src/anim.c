@@ -292,7 +292,7 @@ static int _parse_effect(fus_lexer_t *lexer,
         else if(GOT("no"))boolean = EFFECT_BOOLEAN_FALSE;
         else if(GOT("toggle"))boolean = EFFECT_BOOLEAN_TOGGLE;
         else {
-            UNEXPECTED("yes or no or toggle");
+            return UNEXPECTED("yes or no or toggle");
         }
         NEXT
         effect->type = state_effect_type_confused;
