@@ -18,6 +18,14 @@
 #include "hexgame.h"
 
 
+
+enum {
+    TEST_APP_MODE_GAME,
+    TEST_APP_MODE_EDITOR,
+    TEST_APP_MODES
+};
+
+
 typedef struct test_app {
     int scw, sch;
     int delay_goal;
@@ -50,6 +58,7 @@ typedef struct test_app {
 
     bool hexgame_running;
     bool show_controls;
+    int mode;
 
     int x0;
     int y0;

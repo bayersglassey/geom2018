@@ -29,13 +29,12 @@
     #define FONT_BLITTER_INIT geomfont_blitter_render_init
     #define FONT_BLITTER_PUTC_CALLBACK geomfont_blitter_putc_callback
     #define FONT_PRINTF geomfont_render_printf
-    #define FONT_ARGS(SURFACE, X0, Y0) app->geomfont, app->renderer, (SURFACE), \
-        app->sdl_palette, (X0), (Y0), 1, NULL, NULL
-    #define CONSOLE_W 60
-    #define CONSOLE_H 20
-    #define CONSOLE_Y 20
     #define CONSOLE_CHAR_H_MULTIPLIER 2
         /* Because we're using "sq" prismel, which is 2 pixels high */
+    #define FONT_ARGS(SURFACE, X0, Y0) app->geomfont, app->renderer, (SURFACE), \
+        app->sdl_palette, (X0), (Y0) * CONSOLE_CHAR_H_MULTIPLIER, 1, NULL, NULL
+    #define CONSOLE_W 60
+    #define CONSOLE_H 20
 #else
     #define FONT_BLITTER_T sdlfont_blitter_t
     #define FONT_BLITTER_INIT sdlfont_blitter_init
@@ -44,8 +43,6 @@
     #define FONT_ARGS(SURFACE, X0, Y0) &app->sdlfont, (SURFACE), (X0), (Y0)
     #define CONSOLE_W 80
     #define CONSOLE_H 40
-    #define CONSOLE_Y 20
-    #define CONSOLE_CHAR_H_MULTIPLIER 1
 #endif
 
 
@@ -265,6 +262,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->loop = true;
     app->hexgame_running = true;
     app->show_controls = true;
+    app->mode = TEST_APP_MODE_GAME;
 
     test_app_init_input(app);
 
@@ -350,362 +348,452 @@ int test_app_mainloop(test_app_t *app){
     return 0;
 }
 
-int test_app_mainloop_step(test_app_t *app){
-        int err;
-        Uint32 tick0 = SDL_GetTicks();
+static int test_app_render_game(test_app_t *app){
+    int err;
 
-        hexgame_t *game = &app->hexgame;
+    hexgame_t *game = &app->hexgame;
 
-        rendergraph_t *rgraph =
-            app->prend.rendergraphs[app->cur_rgraph_i];
-        int animated_frame_i = get_animated_frame_i(
-            rgraph->animation_type, rgraph->n_frames, app->frame_i);
+    if(app->surface != NULL){
+        RET_IF_SDL_NZ(SDL_FillRect(app->surface, NULL, 255));
+    }else{
+        SDL_Color *bgcolor = &app->sdl_palette->colors[255];
+        RET_IF_SDL_NZ(SDL_SetRenderDrawColor(app->renderer,
+            bgcolor->r, bgcolor->g, bgcolor->b, 255));
+        RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
+    }
 
-        err = palette_update_sdl_palette(&app->palette, app->sdl_palette);
-        if(err)return err;
-        err = palette_step(&app->palette);
-        if(err)return err;
+    if(app->camera_mapper){
+        /* camera->mapper is set to NULL at start of each step, it's up
+        to us to set it if desired before calling camera_render */
+        app->camera->mapper = app->camera_mapper;
+    }
+    err = camera_render(app->camera,
+        app->renderer, app->surface,
+        app->sdl_palette, app->scw/2 + app->x0, app->sch/2 + app->y0,
+        1 /* app->zoom */);
+    if(err)return err;
+
+    if(app->surface != NULL){
+        int line_y = 0;
+
+        for(int i = 0; i < game->players_len; i++){
+            player_t *player = game->players[i];
+            body_t *body = player->body;
+            if(!body)continue;
+            if(body->dead == BODY_MOSTLY_DEAD){
+                FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y * app->font.char_h),
+                    "You ran into a wall!\n"
+                    "Press jump to retry from where you jumped.\n"
+                    "Press %i to retry from last save point.\n",
+                    i+1);
+                line_y += 3;
+            }else if(body->dead == BODY_ALL_DEAD){
+                FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y * app->font.char_h),
+                    "You were crushed!\n"
+                    "Press jump or %i to retry from last save point.\n",
+                    i+1);
+                line_y += 2;
+            }else if(body->out_of_bounds && !body->state->flying){
+                FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y * app->font.char_h),
+                    "You jumped off the map!\n"
+                    "Press jump to retry from where you jumped.\n"
+                    "Press %i to retry from last save point.\n",
+                    i+1);
+                line_y += 3;
+            }
+        }
+
+        if(app->hexgame_running && app->show_controls){
+            FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y * app->font.char_h),
+                "*Controls:\n"
+                "  Left/right  -> Walk\n"
+                "  Up          -> Jump\n"
+                "  Down        -> Crawl\n"
+                "  Spacebar    -> Spit\n"
+                "  Shift       -> Look up\n"
+                "  1           -> Return to checkpoint\n"
+                "  Enter       -> Show/hide this message\n"
+                "  Escape      -> Quit\n"
+            );
+            line_y += 9;
+        }
+
+        if(!app->hexgame_running){
+            err = blit_console(app, app->surface, 0, line_y * app->font.char_h);
+            if(err)return err;
+        }
+
+        SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
+            app->renderer, app->surface);
+        RET_IF_SDL_NULL(render_texture);
+        SDL_RenderCopy(app->renderer, render_texture, NULL, NULL);
+        SDL_DestroyTexture(render_texture);
+    }
+
+    SDL_RenderPresent(app->renderer);
+    return 0;
+}
+
+static int test_app_render_editor(test_app_t *app){
+    int err;
+
+    rendergraph_t *rgraph =
+        app->prend.rendergraphs[app->cur_rgraph_i];
+    int animated_frame_i = get_animated_frame_i(
+        rgraph->animation_type, rgraph->n_frames, app->frame_i);
+
+    /******************************************************************
+    * Clear screen
+    */
+
+    RET_IF_SDL_NZ(SDL_FillRect(app->render_surface, NULL, 0));
+
+    if(app->surface != NULL){
+        RET_IF_SDL_NZ(SDL_FillRect(app->surface, NULL, 0));
+    }else{
+        RET_IF_SDL_NZ(SDL_SetRenderDrawColor(app->renderer,
+            0, 0, 0, 255));
+        RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
+    }
+
+    /******************************************************************
+    * Render rgraph
+    */
+
+    int x0 = app->scw / 2 + app->x0;
+    int y0 = app->sch / 2 + app->y0;
+    err = rendergraph_render(rgraph, app->renderer, app->surface,
+        app->sdl_palette, &app->prend, x0, y0, app->zoom,
+        (vec_t){0}, app->rot, app->flip, app->frame_i, NULL);
+    if(err)return err;
+
+    /******************************************************************
+    * Render text
+    */
+
+    int line_y = 0;
+
+    if(app->show_controls){
+        FONT_PRINTF(FONT_ARGS(app->render_surface, 0, line_y * app->font.char_h),
+            "Game running? %c\n"
+            "Frame rendered in: %i ms\n"
+            "  (Aiming for sub-%i ms)\n"
+            "# Textures in use: %i\n"
+            "Controls:\n"
+            "  up/down - zoom (hold shift for tap mode)\n"
+            "  left/right - rotate (hold shift for tap mode)\n"
+            "  control + up/down/left/right - pan (hold shift...)\n"
+            "  page up/down - cycle through available rendergraphs\n"
+            "  0 - reset rotation\n"
+            "Currently displaying rendergraphs from file: %s\n"
+            "Currently displaying rendergraph %i / %i:\n"
+            "  %s\n"
+            "  pan=(%i,%i), rot = %i, flip = %c, zoom = %i\n"
+            "  frame_i = %i (%i) / %i (%s)",
+            app->hexgame_running? 'y': 'n', app->took, app->delay_goal,
+            app->prend.n_textures,
+            app->prend_filename, app->cur_rgraph_i,
+            app->prend.rendergraphs_len, rgraph->name,
+            app->x0, app->y0, app->rot, app->flip? 'y': 'n', app->zoom,
+            app->frame_i, animated_frame_i,
+            rgraph->n_frames, rgraph->animation_type);
+
+        line_y += 15;
+    }
+
+    err = blit_console(app, app->render_surface, 0, line_y * app->font.char_h);
+    if(err)return 2;
+
+    /******************************************************************
+    * Draw to renderer and present it
+    */
+
+    if(app->surface != NULL){
+        SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
+            app->renderer, app->surface);
+        RET_IF_SDL_NULL(render_texture);
+        SDL_RenderCopy(app->renderer, render_texture, NULL, NULL);
+        SDL_DestroyTexture(render_texture);
+    }
+
+    {
+        SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
+            app->renderer, app->render_surface);
+        RET_IF_SDL_NULL(render_texture);
+        SDL_RenderCopy(app->renderer, render_texture, NULL, NULL);
+        SDL_DestroyTexture(render_texture);
+    }
+
+    SDL_RenderPresent(app->renderer);
+    return 0;
+}
+
+static int test_app_render(test_app_t *app){
+    if(app->mode == TEST_APP_MODE_GAME){
+        return test_app_render_game(app);
+    }else if(app->mode == TEST_APP_MODE_EDITOR){
+        return test_app_render_editor(app);
+    }else{
+        fprintf(stderr, "%s: Unrecognized app mode: %i\n",
+            __func__, app->mode);
+        return 2;
+    }
+}
+
+static int test_app_process_event_game(test_app_t *app, SDL_Event *event){
+    int err;
+    if(event->type == SDL_KEYDOWN){
+        if(event->key.keysym.sym == SDLK_RETURN){
+            if(app->hexgame_running){
+                app->show_controls = !app->show_controls;
+            }
+        }else if(event->key.keysym.sym == SDLK_F6){
+            /* Hack, we really want to force camera->mapper to NULL, but
+            instead we assume the existence of this mapper called "single" */
+            const char *mapper_name = "single";
+            app->camera_mapper = prismelrenderer_get_mapper(&app->prend, mapper_name);
+            if(app->camera_mapper == NULL){
+                fprintf(stderr, "%s: Couldn't find mapper: %s\n",
+                    __func__, mapper_name);
+                return 2;
+            }
+        }else if(event->key.keysym.sym == SDLK_F7){
+            app->camera->follow = !app->camera->follow;
+        }else if(event->key.keysym.sym == SDLK_F8){
+            app->camera->smooth_scroll = !app->camera->smooth_scroll;
+        }
+    }else if(event->type == SDL_KEYUP){
+        if(event->key.keysym.sym == SDLK_F6){
+            app->camera_mapper = NULL;
+        }
+    }
+    return 0;
+}
+
+static int test_app_process_event_editor(test_app_t *app, SDL_Event *event){
+    int err;
+    switch(event->type){
+        case SDL_KEYDOWN: {
+
+            if(event->key.keysym.sym == SDLK_0){
+                app->x0 = 0; app->y0 = 0;
+                app->rot = 0; app->flip = false; app->zoom = 1;}
+
+            if(event->key.keysym.sym == SDLK_SPACE){
+                app->flip = !app->flip;}
+
+            #define IF_KEYDOWN(SYM, KEY) \
+                if(event->key.keysym.sym == SDLK_##SYM \
+                    && app->keydown_##KEY == 0){ \
+                        app->keydown_##KEY = 2;}
+            IF_KEYDOWN(UP, u)
+            IF_KEYDOWN(DOWN, d)
+            IF_KEYDOWN(LEFT, l)
+            IF_KEYDOWN(RIGHT, r)
+            #undef IF_KEYDOWN
+
+            if(event->key.keysym.sym == SDLK_LSHIFT
+                || event->key.keysym.sym == SDLK_RSHIFT){
+                    app->keydown_shift = true;}
+            if(event->key.keysym.sym == SDLK_LCTRL
+                || event->key.keysym.sym == SDLK_RCTRL){
+                    app->keydown_ctrl = true;}
+
+            if(event->key.keysym.sym == SDLK_PAGEUP){
+                app->cur_rgraph_i++;
+                if(app->cur_rgraph_i >=
+                    app->prend.rendergraphs_len){
+                        app->cur_rgraph_i = 0;}}
+
+            if(event->key.keysym.sym == SDLK_PAGEDOWN){
+                app->cur_rgraph_i--;
+                if(app->cur_rgraph_i < 0){
+                    app->cur_rgraph_i =
+                        app->prend.rendergraphs_len - 1;}}
+
+            if(event->key.keysym.sym == SDLK_HOME){
+                app->frame_i++;}
+            if(event->key.keysym.sym == SDLK_END){
+                if(app->frame_i > 0)app->frame_i--;}
+
+        } break;
+        case SDL_KEYUP: {
+
+            #define IF_KEYUP(SYM, KEY) \
+                if(event->key.keysym.sym == SDLK_##SYM){ \
+                    app->keydown_##KEY = 0;}
+            IF_KEYUP(UP, u)
+            IF_KEYUP(DOWN, d)
+            IF_KEYUP(LEFT, l)
+            IF_KEYUP(RIGHT, r)
+            #undef IF_KEYUP
+
+            if(event->key.keysym.sym == SDLK_LSHIFT
+                || event->key.keysym.sym == SDLK_RSHIFT){
+                    app->keydown_shift = false;}
+            if(event->key.keysym.sym == SDLK_LCTRL
+                || event->key.keysym.sym == SDLK_RCTRL){
+                    app->keydown_ctrl = false;}
+        } break;
+        default: break;
+    }
+    return 0;
+}
+
+static int test_app_process_event_console(test_app_t *app, SDL_Event *event){
+    int err;
+    switch(event->type){
+        case SDL_KEYDOWN: {
+
+            /* Enter a line of console input */
+            if(event->key.keysym.sym == SDLK_RETURN){
+                console_newline(&app->console);
+
+                err = test_app_process_console_input(app);
+                if(err)return err;
+
+                console_input_clear(&app->console);
+                console_write_msg(&app->console, CONSOLE_START_TEXT);
+            }
+
+            /* Copy/paste a line of console input */
+            if(
+                event->key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL)
+                && event->key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)
+            ){
+                if(event->key.keysym.sym == SDLK_c){
+                    SDL_SetClipboardText(app->console.input);}
+                if(event->key.keysym.sym == SDLK_v
+                    && SDL_HasClipboardText()
+                ){
+                    char *input = SDL_GetClipboardText();
+                    char *c = input;
+                    while(*c != '\0'){
+                        console_input_char(&app->console, *c);
+                        c++;
+                    }
+                    SDL_free(input);
+                }
+            }
+
+            if(event->key.keysym.sym == SDLK_BACKSPACE){
+                console_input_backspace(&app->console);}
+            if(event->key.keysym.sym == SDLK_DELETE){
+                console_input_delete(&app->console);}
+
+        } break;
+        case SDL_TEXTINPUT: {
+            for(char *c = event->text.text; *c != '\0'; c++){
+                console_input_char(&app->console, *c);
+            }
+        } break;
+        default: break;
+    }
+    return 0;
+}
+
+static int test_app_poll_events(test_app_t *app){
+    int err;
+
+    hexgame_t *game = &app->hexgame;
+
+    SDL_Event event;
+    while(SDL_PollEvent(&event)){
+
+        if(event.type == SDL_QUIT){
+            app->loop = false;
+            break;
+        }
+
+        if(event.type == SDL_KEYDOWN){
+            if(event.key.keysym.sym == SDLK_ESCAPE){
+                app->loop = false;
+                break;
+            }else if(event.key.keysym.sym == SDLK_F5){
+                if(app->hexgame_running){
+                    app->hexgame_running = false;
+                    console_write_msg(&app->console, "Game stopped\n");
+                    console_write_msg(&app->console, CONSOLE_START_TEXT);
+                    SDL_StartTextInput();
+                }else{
+                    app->hexgame_running = true;
+                    app->mode = TEST_APP_MODE_GAME;
+                    test_app_init_input(app);
+                    console_write_msg(&app->console, "Game started\n");
+                    SDL_StopTextInput();
+                }
+                continue;
+            }else if(event.key.keysym.sym == SDLK_F11){
+                printf("Frame rendered in: %i ms\n", app->took);
+                printf("  (Aiming for sub-%i ms)\n", app->delay_goal);
+
+                prismelrenderer_dump_stats(&app->prend, stdout);
+            }
+        }
+
+        if(app->mode == TEST_APP_MODE_GAME){
+            err = test_app_process_event_game(app, &event);
+            if(err)return err;
+        }else if(app->mode == TEST_APP_MODE_EDITOR){
+            err = test_app_process_event_editor(app, &event);
+            if(err)return err;
+
+            #define IF_APP_KEY(KEY, BODY) \
+                if(app->keydown_##KEY >= (app->keydown_shift? 2: 1)){ \
+                    app->keydown_##KEY = 1; \
+                    BODY}
+            IF_APP_KEY(l, if(app->keydown_ctrl){app->x0 += 6;}else{app->rot += 1;})
+            IF_APP_KEY(r, if(app->keydown_ctrl){app->x0 -= 6;}else{app->rot -= 1;})
+            IF_APP_KEY(u, if(app->keydown_ctrl){app->y0 += 6;}else if(app->zoom < MAX_ZOOM){app->zoom += 1;})
+            IF_APP_KEY(d, if(app->keydown_ctrl){app->y0 -= 6;}else if(app->zoom > 1){app->zoom -= 1;})
+            #undef IF_APP_KEY
+        }
 
         if(app->hexgame_running){
-            err = hexgame_step(game);
+            err = hexgame_process_event(game, &event);
             if(err)return err;
-
-            if(app->surface != NULL){
-                RET_IF_SDL_NZ(SDL_FillRect(app->surface, NULL, 255));
-            }else{
-                SDL_Color *bgcolor = &app->sdl_palette->colors[255];
-                RET_IF_SDL_NZ(SDL_SetRenderDrawColor(app->renderer,
-                    bgcolor->r, bgcolor->g, bgcolor->b, 255));
-                RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
-            }
-
-            if(app->camera_mapper){
-                /* camera->mapper is set to NULL at start of each step, it's up
-                to us to set it if desired before calling camera_render */
-                app->camera->mapper = app->camera_mapper;
-            }
-            err = camera_render(app->camera,
-                app->renderer, app->surface,
-                app->sdl_palette, app->scw/2 + app->x0, app->sch/2 + app->y0,
-                1 /* app->zoom */);
-            if(err)return err;
-
-            if(app->surface != NULL){
-                int line_y = 0;
-                for(int i = 0; i < game->players_len; i++){
-                    player_t *player = game->players[i];
-                    body_t *body = player->body;
-                    if(!body)continue;
-                    if(body->dead == BODY_MOSTLY_DEAD){
-                        FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y),
-                            "You ran into a wall!\n"
-                            "Press jump to retry from where you jumped.\n"
-                            "Press %i to retry from last save point.\n",
-                            i+1);
-                        line_y += app->font.char_h * 2;
-                    }else if(body->dead == BODY_ALL_DEAD){
-                        FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y),
-                            "You were crushed!\n"
-                            "Press jump or %i to retry from last save point.\n",
-                            i+1);
-                        line_y += app->font.char_h * 3;
-                    }else if(body->out_of_bounds && !body->state->flying){
-                        FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y),
-                            "You jumped off the map!\n"
-                            "Press jump to retry from where you jumped.\n"
-                            "Press %i to retry from last save point.\n",
-                            i+1);
-                        line_y += app->font.char_h * 3;
-                    }
-                }
-                if(app->show_controls){
-                    FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y),
-                        "*Controls:\n"
-                        "  Left/right  -> Walk\n"
-                        "  Up          -> Jump\n"
-                        "  Down        -> Crawl\n"
-                        "  Spacebar    -> Spit\n"
-                        "  Shift       -> Look up\n"
-                        "  1           -> Return to checkpoint\n"
-                        "  Enter       -> Show/hide this message\n"
-                        "  Escape      -> Quit\n"
-                    );
-                    line_y += 9;
-                }
-                if(!app->hexgame_running){
-                    err = blit_console(app, app->surface, 0, line_y);
-                    if(err)return err;
-                }
-
-                SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
-                    app->renderer, app->surface);
-                RET_IF_SDL_NULL(render_texture);
-                SDL_RenderCopy(app->renderer, render_texture, NULL, NULL);
-                SDL_DestroyTexture(render_texture);
-            }
-
-            SDL_RenderPresent(app->renderer);
         }else{
-            /*****************
-             * DEBUG CONSOLE *
-             *****************/
-
-            /******************************************************************
-            * Clear screen
-            */
-
-            RET_IF_SDL_NZ(SDL_FillRect(app->render_surface, NULL, 0));
-
-            if(app->surface != NULL){
-                RET_IF_SDL_NZ(SDL_FillRect(app->surface, NULL, 0));
-            }else{
-                RET_IF_SDL_NZ(SDL_SetRenderDrawColor(app->renderer,
-                    0, 0, 0, 255));
-                RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
-            }
-
-            /******************************************************************
-            * Render rgraph
-            */
-
-            int x0 = app->scw / 2 + app->x0;
-            int y0 = app->sch / 2 + app->y0;
-            err = rendergraph_render(rgraph, app->renderer, app->surface,
-                app->sdl_palette, &app->prend, x0, y0, app->zoom,
-                (vec_t){0}, app->rot, app->flip, app->frame_i, NULL);
+            err = test_app_process_event_console(app, &event);
             if(err)return err;
-
-            /******************************************************************
-            * Render text
-            */
-
-            FONT_PRINTF(FONT_ARGS(app->render_surface, 0, 0),
-                "Game running? %c\n"
-                "Frame rendered in: %i ms\n"
-                "  (Aiming for sub-%i ms)\n"
-                "# Textures in use: %i\n"
-                "Controls:\n"
-                "  up/down - zoom (hold shift for tap mode)\n"
-                "  left/right - rotate (hold shift for tap mode)\n"
-                "  control + up/down/left/right - pan (hold shift...)\n"
-                "  page up/down - cycle through available rendergraphs\n"
-                "  0 - reset rotation\n"
-                "Currently displaying rendergraphs from file: %s\n"
-                "Currently displaying rendergraph %i / %i:\n"
-                "  %s\n"
-                "  pan=(%i,%i), rot = %i, flip = %c, zoom = %i\n"
-                "  frame_i = %i (%i) / %i (%s)",
-                app->hexgame_running? 'y': 'n', app->took, app->delay_goal,
-                app->prend.n_textures,
-                app->prend_filename, app->cur_rgraph_i,
-                app->prend.rendergraphs_len, rgraph->name,
-                app->x0, app->y0, app->rot, app->flip? 'y': 'n', app->zoom,
-                app->frame_i, animated_frame_i,
-                rgraph->n_frames, rgraph->animation_type);
-
-            err = blit_console(app, app->render_surface, 0,
-                CONSOLE_Y * app->font.char_h * CONSOLE_CHAR_H_MULTIPLIER);
-            if(err)return 2;
-
-            /******************************************************************
-            * Draw to renderer and present it
-            */
-
-            if(app->surface != NULL){
-                SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
-                    app->renderer, app->surface);
-                RET_IF_SDL_NULL(render_texture);
-                SDL_RenderCopy(app->renderer, render_texture, NULL, NULL);
-                SDL_DestroyTexture(render_texture);
-            }
-
-            {
-                SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
-                    app->renderer, app->render_surface);
-                RET_IF_SDL_NULL(render_texture);
-                SDL_RenderCopy(app->renderer, render_texture, NULL, NULL);
-                SDL_DestroyTexture(render_texture);
-            }
-
-            SDL_RenderPresent(app->renderer);
-
         }
+    }
 
-        SDL_Event event;
-        while(SDL_PollEvent(&event)){
-            if(event.type == SDL_QUIT){
-                app->loop = false; break;}
+    return 0;
+}
 
-            if(event.type == SDL_KEYDOWN){
-                if(event.key.keysym.sym == SDLK_ESCAPE){
-                    app->loop = false; break;
-                }else if(event.key.keysym.sym == SDLK_RETURN){
-                    app->show_controls = !app->show_controls;
-                }else if(event.key.keysym.sym == SDLK_F5){
-                    if(app->hexgame_running){
-                        app->hexgame_running = false;
-                        console_write_msg(&app->console, "Game stopped\n");
-                        console_write_msg(&app->console, CONSOLE_START_TEXT);
-                        SDL_StartTextInput();
-                    }else{
-                        app->hexgame_running = true;
-                        test_app_init_input(app);
-                        console_write_msg(&app->console, "Game started\n");
-                        SDL_StopTextInput();
-                    }
-                    continue;
-                }else if(event.key.keysym.sym == SDLK_F6){
-                    /* Hack, we really want to force camera->mapper to NULL, but
-                    instead we assume the existence of this mapper called "single" */
-                    const char *mapper_name = "single";
-                    app->camera_mapper = prismelrenderer_get_mapper(&app->prend, mapper_name);
-                    if(app->camera_mapper == NULL){
-                        fprintf(stderr, "%s: Couldn't find mapper: %s\n",
-                            __func__, mapper_name);
-                        return 2;
-                    }
-                }else if(event.key.keysym.sym == SDLK_F7){
-                    app->camera->follow = !app->camera->follow;
-                }else if(event.key.keysym.sym == SDLK_F8){
-                    app->camera->smooth_scroll = !app->camera->smooth_scroll;
-                }else if(event.key.keysym.sym == SDLK_F11){
-                    printf("Frame rendered in: %i ms\n", app->took);
-                    printf("  (Aiming for sub-%i ms)\n", app->delay_goal);
+int test_app_mainloop_step(test_app_t *app){
+    int err;
+    Uint32 tick0 = SDL_GetTicks();
 
-                    prismelrenderer_dump_stats(&app->prend, stdout);
-                }
-            }else if(event.type == SDL_KEYUP){
-                if(event.key.keysym.sym == SDLK_F6){
-                    app->camera_mapper = NULL;
-                }
-            }
+    hexgame_t *game = &app->hexgame;
 
-            if(app->hexgame_running){
-                err = hexgame_process_event(game, &event);
-                if(err)return err;
-                continue;}
+    err = palette_update_sdl_palette(&app->palette, app->sdl_palette);
+    if(err)return err;
+    err = palette_step(&app->palette);
+    if(err)return err;
 
-            switch(event.type){
-                case SDL_KEYDOWN: {
-                    if(event.key.keysym.sym == SDLK_RETURN){
-                        console_newline(&app->console);
-                        console_write_msg(&app->console, CONSOLE_START_TEXT);
+    if(app->hexgame_running){
+        err = hexgame_step(game);
+        if(err)return err;
+    }
 
-                        err = test_app_process_console_input(app);
-                        if(err)return err;
+    err = test_app_render(app);
+    if(err)return err;
 
-                        console_input_clear(&app->console);
-                    }
-                    if(event.key.keysym.sym == SDLK_BACKSPACE){
-                        console_input_backspace(&app->console);}
-                    if(event.key.keysym.sym == SDLK_DELETE){
-                        console_input_delete(&app->console);}
-                    if(
-                        event.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL)
-                        && event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)
-                    ){
-                        if(event.key.keysym.sym == SDLK_c){
-                            SDL_SetClipboardText(app->console.input);}
-                        if(event.key.keysym.sym == SDLK_v
-                            && SDL_HasClipboardText()
-                        ){
-                            char *input = SDL_GetClipboardText();
-                            char *c = input;
-                            while(*c != '\0'){
-                                console_input_char(&app->console, *c);
-                                c++;
-                            }
-                            SDL_free(input);
-                        }
-                    }
+    err = test_app_poll_events(app);
+    if(err)return err;
 
-                    if(event.key.keysym.sym == SDLK_0){
-                        app->x0 = 0; app->y0 = 0;
-                        app->rot = 0; app->flip = false; app->zoom = 1;}
-
-                    if(event.key.keysym.sym == SDLK_SPACE){
-                        app->flip = !app->flip;}
-
-                    #define IF_KEYDOWN(SYM, KEY) \
-                        if(event.key.keysym.sym == SDLK_##SYM \
-                            && app->keydown_##KEY == 0){ \
-                                app->keydown_##KEY = 2;}
-                    IF_KEYDOWN(UP, u)
-                    IF_KEYDOWN(DOWN, d)
-                    IF_KEYDOWN(LEFT, l)
-                    IF_KEYDOWN(RIGHT, r)
-                    #undef IF_KEYDOWN
-
-                    if(event.key.keysym.sym == SDLK_LSHIFT
-                        || event.key.keysym.sym == SDLK_RSHIFT){
-                            app->keydown_shift = true;}
-                    if(event.key.keysym.sym == SDLK_LCTRL
-                        || event.key.keysym.sym == SDLK_RCTRL){
-                            app->keydown_ctrl = true;}
-
-                    if(event.key.keysym.sym == SDLK_PAGEUP){
-                        app->cur_rgraph_i++;
-                        if(app->cur_rgraph_i >=
-                            app->prend.rendergraphs_len){
-                                app->cur_rgraph_i = 0;}}
-                    if(event.key.keysym.sym == SDLK_PAGEDOWN){
-                        app->cur_rgraph_i--;
-                        if(app->cur_rgraph_i < 0){
-                            app->cur_rgraph_i =
-                                app->prend.rendergraphs_len - 1;}}
-                    if(event.key.keysym.sym == SDLK_HOME){
-                        app->frame_i++;}
-                    if(event.key.keysym.sym == SDLK_END){
-                        if(app->frame_i > 0)app->frame_i--;}
-                } break;
-                case SDL_KEYUP: {
-
-                    #define IF_KEYUP(SYM, KEY) \
-                        if(event.key.keysym.sym == SDLK_##SYM){ \
-                            app->keydown_##KEY = 0;}
-                    IF_KEYUP(UP, u)
-                    IF_KEYUP(DOWN, d)
-                    IF_KEYUP(LEFT, l)
-                    IF_KEYUP(RIGHT, r)
-                    #undef IF_KEYUP
-
-                    if(event.key.keysym.sym == SDLK_LSHIFT
-                        || event.key.keysym.sym == SDLK_RSHIFT){
-                            app->keydown_shift = false;}
-                    if(event.key.keysym.sym == SDLK_LCTRL
-                        || event.key.keysym.sym == SDLK_RCTRL){
-                            app->keydown_ctrl = false;}
-                } break;
-                case SDL_TEXTINPUT: {
-                    for(char *c = event.text.text; *c != '\0'; c++){
-                        console_input_char(&app->console, *c);
-                    }
-                } break;
-                default: break;
-            }
-        }
-
-        #define IF_APP_KEY(KEY, BODY) \
-            if(app->keydown_##KEY >= (app->keydown_shift? 2: 1)){ \
-                app->keydown_##KEY = 1; \
-                BODY}
-        IF_APP_KEY(l, if(app->keydown_ctrl){app->x0 += 6;}else{app->rot += 1;})
-        IF_APP_KEY(r, if(app->keydown_ctrl){app->x0 -= 6;}else{app->rot -= 1;})
-        IF_APP_KEY(u, if(app->keydown_ctrl){app->y0 += 6;}else if(app->zoom < MAX_ZOOM){app->zoom += 1;})
-        IF_APP_KEY(d, if(app->keydown_ctrl){app->y0 -= 6;}else if(app->zoom > 1){app->zoom -= 1;})
-        #undef IF_APP_KEY
-
-        Uint32 tick1 = SDL_GetTicks();
-        app->took = tick1 - tick0;
-        if(app->took < app->delay_goal)SDL_Delay(app->delay_goal - app->took);
+    Uint32 tick1 = SDL_GetTicks();
+    app->took = tick1 - tick0;
+    if(app->took < app->delay_goal)SDL_Delay(app->delay_goal - app->took);
 #ifdef GEOM_HEXGAME_DEBUG_FRAMERATE
-        if(app->took > app->delay_goal){
-            fprintf(stderr, "WARNING: Frame rendered in %i ms "
-                "(aiming for sub-%i ms)\n",
-                app->took, app->delay_goal);
-        }
+    if(app->took > app->delay_goal){
+        fprintf(stderr, "WARNING: Frame rendered in %i ms "
+            "(aiming for sub-%i ms)\n",
+            app->took, app->delay_goal);
+    }
 #endif
 
-        return 0;
+    return 0;
 }
 

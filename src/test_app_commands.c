@@ -17,6 +17,7 @@
 #include "hexmap.h"
 #include "hexgame.h"
 #include "hexspace.h"
+#include "lexer_macros.h"
 
 
 
@@ -25,6 +26,14 @@ typedef struct test_app_command {
     const char *params;
     int (*action)(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr);
 } test_app_command_t;
+
+static void console_write_command(console_t *console, test_app_command_t *command){
+    console_write_msg(console, command->name);
+    if(command->params){
+        console_write_msg(console, " ");
+        console_write_msg(console, command->params);
+    }
+}
 
 
 
@@ -275,6 +284,22 @@ lexer_err:
     return 0;
 }
 
+static int _test_app_command_mode(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
+    int err;
+    if(GOT("game")){
+        app->mode = TEST_APP_MODE_GAME;
+    }else if(GOT("editor")){
+        app->mode = TEST_APP_MODE_EDITOR;
+    }else{
+        UNEXPECTED("game or editor");
+        goto lexer_err;
+    }
+    return 0;
+lexer_err:
+    *lexer_err_ptr = true;
+    return 0;
+}
+
 
 test_app_command_t _test_app_commands[] = {
     {"exit", NULL, &_test_app_command_exit},
@@ -288,6 +313,7 @@ test_app_command_t _test_app_commands[] = {
     {"map", "mapper rgraph [resulting_rgraph]", &_test_app_command_map},
     {"renderall", NULL, &_test_app_command_renderall},
     {"get_shape", "shape", &_test_app_command_get_shape},
+    {"mode", "game|editor", &_test_app_command_mode},
     {NULL, NULL, NULL},
 };
 
@@ -295,11 +321,7 @@ static int _test_app_command_help(test_app_t *app, fus_lexer_t *lexer, bool *lex
     console_write_msg(&app->console, "Commands:\n");
     for(test_app_command_t *command = _test_app_commands; command->name; command++){
         console_write_msg(&app->console, " * ");
-        console_write_msg(&app->console, command->name);
-        if(command->params){
-            console_write_msg(&app->console, " ");
-            console_write_msg(&app->console, command->params);
-        }
+        console_write_command(&app->console, command);
         console_write_msg(&app->console, "\n");
     }
     return 0;
@@ -334,7 +356,9 @@ static int _test_app_process_console_input(test_app_t *app, fus_lexer_t *lexer){
     console_write_msg(&app->console, "OK\n");
     return 0;
 lexer_err:
-    console_write_msg(&app->console, "Couldn't parse that\n");
+    console_write_msg(&app->console, "Couldn't parse that.\nUsage: ");
+    console_write_command(&app->console, command);
+    console_write_msg(&app->console, "\n");
     return 0;
 }
 
