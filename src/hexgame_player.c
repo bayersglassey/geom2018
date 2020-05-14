@@ -73,6 +73,15 @@ int player_init(player_t *player, hexgame_t *game, int keymap,
     return 0;
 }
 
+int player_get_index(player_t *player){
+    hexgame_t *game = player->game;
+    for(int i = 0; i < game->players_len; i++){
+        player_t *_player = game->players[i];
+        if(player == _player)return i;
+    }
+    return -1;
+}
+
 static int _player_set_location(player_t *player, location_t *location,
     vec_ptr_t pos, rot_t rot, bool turn, const char *map_filename,
     const char *anim_filename, const char *state_name

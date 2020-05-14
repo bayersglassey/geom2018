@@ -129,6 +129,15 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
     return 0;
 }
 
+int body_get_index(body_t *body){
+    hexmap_t *map = body->map;
+    for(int i = 0; i < map->bodies_len; i++){
+        body_t *_body = map->bodies[i];
+        if(body == _body)return i;
+    }
+    return -1;
+}
+
 int body_respawn(body_t *body, vec_t pos, rot_t rot, bool turn,
     hexmap_t *map
 ){
