@@ -120,6 +120,18 @@ static char *generate_respawn_filename(const char *base_name, int i, const char 
     return filename;
 }
 
+static int blit_console(test_app_t *app, SDL_Surface *surface, int x, int y){
+    int err;
+
+    FONT_BLITTER_T blitter;
+    FONT_BLITTER_INIT(&blitter, FONT_ARGS(surface, x, y));
+    err = console_blit(&app->console, &FONT_BLITTER_PUTC_CALLBACK,
+        &blitter);
+    if(err)return err;
+
+    return 0;
+}
+
 
 /***********
 * TEST_APP *
@@ -253,7 +265,6 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->loop = true;
     app->hexgame_running = true;
     app->show_controls = true;
-    app->camera_mapper = NULL;
 
     test_app_init_input(app);
 
@@ -284,6 +295,8 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 
         app->camera = camera;
     }
+
+    app->camera_mapper = NULL;
 
     return 0;
 }
@@ -417,6 +430,11 @@ int test_app_mainloop_step(test_app_t *app){
                         "  Enter       -> Show/hide this message\n"
                         "  Escape      -> Quit\n"
                     );
+                    line_y += 9;
+                }
+                if(!app->hexgame_running){
+                    err = blit_console(app, app->surface, 0, line_y);
+                    if(err)return err;
                 }
 
                 SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
@@ -485,15 +503,9 @@ int test_app_mainloop_step(test_app_t *app){
                 app->frame_i, animated_frame_i,
                 rgraph->n_frames, rgraph->animation_type);
 
-            {
-                FONT_BLITTER_T blitter;
-                FONT_BLITTER_INIT(&blitter, FONT_ARGS(app->render_surface,
-                    0, CONSOLE_Y
-                        * app->font.char_h
-                        * CONSOLE_CHAR_H_MULTIPLIER));
-                console_blit(&app->console, &FONT_BLITTER_PUTC_CALLBACK,
-                    &blitter);
-            }
+            err = blit_console(app, app->render_surface, 0,
+                CONSOLE_Y * app->font.char_h * CONSOLE_CHAR_H_MULTIPLIER);
+            if(err)return 2;
 
             /******************************************************************
             * Draw to renderer and present it
