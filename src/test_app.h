@@ -87,6 +87,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     bool cache_bitmaps, int n_players);
 int test_app_set_players(test_app_t *app, int n_players);
 int test_app_process_console_input(test_app_t *app);
+void test_app_write_console_commands(test_app_t *app, const char *prefix);
 int test_app_mainloop(test_app_t *app);
 int test_app_mainloop_step(test_app_t *app);
 

@@ -38,6 +38,20 @@ static void console_write_command(console_t *console, test_app_command_t *comman
 test_app_command_t _test_app_commands[];
 
 
+static bool _startswith(const char *s, const char *prefix){
+    return strncmp(s, prefix, strlen(prefix)) == 0;
+}
+
+void test_app_write_console_commands(test_app_t *app, const char *prefix){
+    for(test_app_command_t *command = _test_app_commands; command->name; command++){
+        if(prefix && !_startswith(command->name, prefix))continue;
+        console_write_msg(&app->console, " * ");
+        console_write_command(&app->console, command);
+        console_write_msg(&app->console, "\n");
+    }
+}
+
+
 
 /**************************
 * COMMAND IMPLEMENTATIONS *
@@ -50,11 +64,7 @@ static int _test_app_command_exit(test_app_t *app, fus_lexer_t *lexer, bool *lex
 
 static int _test_app_command_help(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
     console_write_msg(&app->console, "Commands:\n");
-    for(test_app_command_t *command = _test_app_commands; command->name; command++){
-        console_write_msg(&app->console, " * ");
-        console_write_command(&app->console, command);
-        console_write_msg(&app->console, "\n");
-    }
+    test_app_write_console_commands(app, NULL);
     return 0;
 }
 

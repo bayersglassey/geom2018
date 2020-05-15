@@ -577,11 +577,14 @@ static int test_app_process_event_game(test_app_t *app, SDL_Event *event){
                 body_t *body = player->body;
                 if(!body){
                     fprintf(stderr,
-                        "Can't stop recording without a body!\n");
+                        "Can't record without a body!\n");
                 }else if(body->recording.action != 2){
-                    fprintf(stderr,
-                        "Can't stop recording without starting first! "
-                        "(Try pressing 'R' before 'F9')\n");
+                    const char *recording_filename = get_next_recording_filename();
+                    fprintf(stderr, "Recording to file: %s "
+                        " (When finished, press F9 to save!)\n",
+                        recording_filename);
+                    err = body_start_recording(body, strdup(recording_filename));
+                    if(err)return err;
                 }else{
                     fprintf(stderr, "Finished recording. "
                         "Press F10 to play it back.\n");
@@ -595,7 +598,7 @@ static int test_app_process_event_game(test_app_t *app, SDL_Event *event){
             const char *recording_filename = get_last_recording_filename();
             if(recording_filename == NULL){
                 fprintf(stderr, "Couldn't find file of last recording. "
-                    "Maybe you need to record your first one with 'R'?\n");
+                    "Maybe you need to record your first one with F9?\n");
             }else{
                 fprintf(stderr, "Playing back from file: %s\n",
                     recording_filename);
@@ -628,25 +631,6 @@ static int test_app_process_event_game(test_app_t *app, SDL_Event *event){
                 player_t *player = game->players[i];
                 if(player->keymap < 0)continue;
                 hexgame_player_dump(player, 0);
-            }
-        }else if(event->key.keysym.sym == SDLK_r){
-            /* start recording */
-            for(int i = 0; i < game->players_len; i++){
-                player_t *player = game->players[i];
-                if(player->keymap != 0)continue;
-
-                body_t *body = player->body;
-                if(!body){
-                    fprintf(stderr,
-                        "Can't record without a body!\n");
-                }else{
-                    const char *recording_filename = get_next_recording_filename();
-                    fprintf(stderr, "Recording to file: %s "
-                        " (When finished, press F9 to save!)\n",
-                        recording_filename);
-                    err = body_start_recording(body, strdup(recording_filename));
-                    if(err)return err;
-                }
             }
         }else if(!event->key.repeat){
             int keymap = -1;
@@ -750,6 +734,14 @@ static int test_app_process_event_console(test_app_t *app, SDL_Event *event){
 
                 console_input_clear(&app->console);
                 console_write_msg(&app->console, CONSOLE_START_TEXT);
+            }
+
+            /* Tab completion */
+            if(event->key.keysym.sym == SDLK_TAB){
+                console_newline(&app->console);
+                test_app_write_console_commands(app, app->console.input);
+                console_write_msg(&app->console, CONSOLE_START_TEXT);
+                console_write_msg(&app->console, app->console.input);
             }
 
             /* Copy/paste a line of console input */
