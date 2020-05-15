@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <SDL2/SDL.h>
+#ifdef GEOM_DEBUG_MALLOC
+    #include <malloc.h>
+#endif
 
 #include "test_app.h"
 #include "prismelrenderer.h"
@@ -128,6 +131,7 @@ static int blit_console(test_app_t *app, SDL_Surface *surface, int x, int y){
 
     return 0;
 }
+
 
 
 /***********
@@ -542,6 +546,9 @@ static int test_app_render(test_app_t *app){
 
 static int test_app_process_event_game(test_app_t *app, SDL_Event *event){
     int err;
+
+    hexgame_t *game = &app->hexgame;
+
     if(event->type == SDL_KEYDOWN){
         if(event->key.keysym.sym == SDLK_RETURN){
             if(app->hexgame_running){
@@ -561,6 +568,95 @@ static int test_app_process_event_game(test_app_t *app, SDL_Event *event){
             app->camera->follow = !app->camera->follow;
         }else if(event->key.keysym.sym == SDLK_F8){
             app->camera->smooth_scroll = !app->camera->smooth_scroll;
+        }else if(event->key.keysym.sym == SDLK_F9){
+            /* save recording */
+            for(int i = 0; i < game->players_len; i++){
+                player_t *player = game->players[i];
+                if(player->keymap != 0)continue;
+
+                body_t *body = player->body;
+                if(!body){
+                    fprintf(stderr,
+                        "Can't stop recording without a body!\n");
+                }else if(body->recording.action != 2){
+                    fprintf(stderr,
+                        "Can't stop recording without starting first! "
+                        "(Try pressing 'R' before 'F9')\n");
+                }else{
+                    fprintf(stderr, "Finished recording. "
+                        "Press F10 to play it back.\n");
+                    err = body_stop_recording(body);
+                    if(err)return err;
+                }
+            }
+        }else if(event->key.keysym.sym == SDLK_F10){
+            /* load recording */
+            bool shift = event->key.keysym.mod & KMOD_SHIFT;
+            const char *recording_filename = get_last_recording_filename();
+            if(recording_filename == NULL){
+                fprintf(stderr, "Couldn't find file of last recording. "
+                    "Maybe you need to record your first one with 'R'?\n");
+            }else{
+                fprintf(stderr, "Playing back from file: %s\n",
+                    recording_filename);
+                for(int i = 0; i < game->players_len; i++){
+                    player_t *player = game->players[i];
+                    if(player->keymap != 0)continue;
+
+                    body_t *body = player->body;
+                    if(!body){
+                        fprintf(stderr,
+                            "Can't play back recording without a body!\n");
+                    }else if(shift){
+                        err = body_load_recording(body, recording_filename,
+                            true);
+                        if(err)return err;
+                        err = body_play_recording(body);
+                        if(err)return err;
+                    }else{
+                        /* TODO: Recordings need to state which map they
+                        expect! The following is a hack: you must play
+                        recordings belonging to your correct map... */
+                        err = hexmap_load_recording(body->map,
+                            recording_filename, NULL, true, 0, NULL);
+                        if(err)return err;
+                    }
+                }
+            }
+        }else if(event->key.keysym.sym == SDLK_F12){
+            for(int i = 0; i < game->players_len; i++){
+                player_t *player = game->players[i];
+                if(player->keymap < 0)continue;
+                hexgame_player_dump(player, 0);
+            }
+        }else if(event->key.keysym.sym == SDLK_r){
+            /* start recording */
+            for(int i = 0; i < game->players_len; i++){
+                player_t *player = game->players[i];
+                if(player->keymap != 0)continue;
+
+                body_t *body = player->body;
+                if(!body){
+                    fprintf(stderr,
+                        "Can't record without a body!\n");
+                }else{
+                    const char *recording_filename = get_next_recording_filename();
+                    fprintf(stderr, "Recording to file: %s "
+                        " (When finished, press F9 to save!)\n",
+                        recording_filename);
+                    err = body_start_recording(body, strdup(recording_filename));
+                    if(err)return err;
+                }
+            }
+        }else if(!event->key.repeat){
+            int keymap = -1;
+            if(event->key.keysym.sym == SDLK_1)keymap = 0;
+            if(event->key.keysym.sym == SDLK_2)keymap = 1;
+            if(keymap > -1){
+                err = hexgame_reset_player_by_keymap(game, keymap,
+                    RESET_SOFT, NULL);
+                if(err)return err;
+            }
         }
     }else if(event->type == SDL_KEYUP){
         if(event->key.keysym.sym == SDLK_F6){
@@ -697,19 +793,19 @@ static int test_app_poll_events(test_app_t *app){
 
     hexgame_t *game = &app->hexgame;
 
-    SDL_Event event;
-    while(SDL_PollEvent(&event)){
+    SDL_Event _event, *event = &_event;
+    while(SDL_PollEvent(event)){
 
-        if(event.type == SDL_QUIT){
+        if(event->type == SDL_QUIT){
             app->loop = false;
             break;
         }
 
-        if(event.type == SDL_KEYDOWN){
-            if(event.key.keysym.sym == SDLK_ESCAPE){
+        if(event->type == SDL_KEYDOWN){
+            if(event->key.keysym.sym == SDLK_ESCAPE){
                 app->loop = false;
                 break;
-            }else if(event.key.keysym.sym == SDLK_F5){
+            }else if(event->key.keysym.sym == SDLK_F5){
                 if(app->hexgame_running){
                     app->hexgame_running = false;
                     console_write_msg(&app->console, "Game stopped\n");
@@ -723,19 +819,23 @@ static int test_app_poll_events(test_app_t *app){
                     SDL_StopTextInput();
                 }
                 continue;
-            }else if(event.key.keysym.sym == SDLK_F11){
+            }else if(event->key.keysym.sym == SDLK_F11){
                 printf("Frame rendered in: %i ms\n", app->took);
                 printf("  (Aiming for sub-%i ms)\n", app->delay_goal);
 
                 prismelrenderer_dump_stats(&app->prend, stdout);
+
+#ifdef GEOM_DEBUG_MALLOC
+                malloc_stats();
+#endif
             }
         }
 
         if(app->mode == TEST_APP_MODE_GAME){
-            err = test_app_process_event_game(app, &event);
+            err = test_app_process_event_game(app, event);
             if(err)return err;
         }else if(app->mode == TEST_APP_MODE_EDITOR){
-            err = test_app_process_event_editor(app, &event);
+            err = test_app_process_event_editor(app, event);
             if(err)return err;
 
             #define IF_APP_KEY(KEY, BODY) \
@@ -750,10 +850,10 @@ static int test_app_poll_events(test_app_t *app){
         }
 
         if(app->hexgame_running){
-            err = hexgame_process_event(game, &event);
+            err = hexgame_process_event(game, event);
             if(err)return err;
         }else{
-            err = test_app_process_event_console(app, &event);
+            err = test_app_process_event_console(app, event);
             if(err)return err;
         }
     }

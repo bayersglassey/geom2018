@@ -14,6 +14,10 @@
 #include "write.h"
 
 
+static void print_tabs(FILE *file, int depth){
+    for(int i = 0; i < depth; i++)fprintf(file, "  ");
+}
+
 
 
 void player_cleanup(player_t *player){
@@ -80,6 +84,25 @@ int player_get_index(player_t *player){
         if(player == _player)return i;
     }
     return -1;
+}
+
+void hexgame_player_dump(player_t *player, int depth){
+    print_tabs(stderr, depth);
+    if(player->keymap >= 0)fprintf(stderr, "Player %i\n", player->keymap);
+    else fprintf(stderr, "CPU Player\n");
+
+    print_tabs(stderr, depth);
+    fprintf(stderr, "index: %i\n", player_get_index(player));
+
+    body_t *body = player->body;
+    if(body){
+        print_tabs(stderr, depth);
+        fprintf(stderr, "body:\n");
+        hexgame_body_dump(body, depth + 1);
+    }else{
+        print_tabs(stderr, depth);
+        fprintf(stderr, "no body!\n");
+    }
 }
 
 static int _player_set_location(player_t *player, location_t *location,

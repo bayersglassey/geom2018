@@ -35,14 +35,26 @@ static void console_write_command(console_t *console, test_app_command_t *comman
     }
 }
 
+test_app_command_t _test_app_commands[];
 
 
-static int _test_app_command_help(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr);
 
-
+/**************************
+* COMMAND IMPLEMENTATIONS *
+**************************/
 
 static int _test_app_command_exit(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
     app->loop = false;
+    return 0;
+}
+
+static int _test_app_command_help(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
+    console_write_msg(&app->console, "Commands:\n");
+    for(test_app_command_t *command = _test_app_commands; command->name; command++){
+        console_write_msg(&app->console, " * ");
+        console_write_command(&app->console, command);
+        console_write_msg(&app->console, "\n");
+    }
     return 0;
 }
 
@@ -51,7 +63,22 @@ static int _test_app_command_cls(test_app_t *app, fus_lexer_t *lexer, bool *lexe
     return 0;
 }
 
-static int _test_app_command_run(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
+static int _test_app_command_list_maps(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
+    console_write_msg(&app->console, "Try F5\n");
+    return 0;
+}
+
+static int _test_app_command_list_bodies(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
+    console_write_msg(&app->console, "Try F5\n");
+    return 0;
+}
+
+static int _test_app_command_list_players(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
+    console_write_msg(&app->console, "Try F5\n");
+    return 0;
+}
+
+static int _test_app_command_list_actors(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
     console_write_msg(&app->console, "Try F5\n");
     return 0;
 }
@@ -301,31 +328,31 @@ lexer_err:
 }
 
 
-test_app_command_t _test_app_commands[] = {
-    {"exit", NULL, &_test_app_command_exit},
-    {"help", NULL, &_test_app_command_help},
-    {"cls", NULL, &_test_app_command_cls},
-    {"run", NULL, &_test_app_command_run},
-    {"add_player", "[stateset]", &_test_app_command_add_player},
-    {"edit_player", "player [stateset]", &_test_app_command_edit_player},
-    {"save", "[filename]", &_test_app_command_save},
-    {"dump", "[rgraph|prend|nobitmaps|surfaces ...]", &_test_app_command_dump},
-    {"map", "mapper rgraph [resulting_rgraph]", &_test_app_command_map},
-    {"renderall", NULL, &_test_app_command_renderall},
-    {"get_shape", "shape", &_test_app_command_get_shape},
-    {"mode", "game|editor", &_test_app_command_mode},
-    {NULL, NULL, NULL},
-};
+/*********************************
+* END OF COMMAND IMPLEMENTATIONS *
+*********************************/
 
-static int _test_app_command_help(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    console_write_msg(&app->console, "Commands:\n");
-    for(test_app_command_t *command = _test_app_commands; command->name; command++){
-        console_write_msg(&app->console, " * ");
-        console_write_command(&app->console, command);
-        console_write_msg(&app->console, "\n");
-    }
-    return 0;
-}
+
+#define COMMAND(NAME, PARAMS) (test_app_command_t){#NAME, PARAMS, &_test_app_command_##NAME}
+#define NULLCOMMAND (test_app_command_t){NULL, NULL, NULL}
+test_app_command_t _test_app_commands[] = {
+    COMMAND(exit, NULL),
+    COMMAND(help, NULL),
+    COMMAND(cls, NULL),
+    COMMAND(list_maps, NULL),
+    COMMAND(list_bodies, "[map_index]"),
+    COMMAND(list_players, NULL),
+    COMMAND(list_actors, NULL),
+    COMMAND(add_player, "[stateset]"),
+    COMMAND(edit_player, "player_index [stateset]"),
+    COMMAND(save, "[filename]"),
+    COMMAND(dump, "[rgraph|prend|nobitmaps|surfaces ...]"),
+    COMMAND(map, "mapper rgraph [resulting_rgraph]"),
+    COMMAND(renderall, NULL),
+    COMMAND(get_shape, "shape"),
+    COMMAND(mode, "game|editor"),
+    NULLCOMMAND
+};
 
 
 

@@ -15,6 +15,11 @@
 
 
 
+static void print_tabs(FILE *file, int depth){
+    for(int i = 0; i < depth; i++)fprintf(file, "  ");
+}
+
+
 
 /************
  * KEY INFO *
@@ -136,6 +141,29 @@ int body_get_index(body_t *body){
         if(body == _body)return i;
     }
     return -1;
+}
+
+void hexgame_body_dump(body_t *body, int depth){
+    print_tabs(stderr, depth);
+    fprintf(stderr, "index: %i\n", body_get_index(body));
+    print_tabs(stderr, depth);
+    fprintf(stderr, "map: %s\n", body->map->name);
+    print_tabs(stderr, depth);
+    fprintf(stderr, "submap: %s\n",
+        body->cur_submap->filename);
+    print_tabs(stderr, depth);
+    fprintf(stderr, "stateset: %s\n",
+        body->stateset.filename);
+    print_tabs(stderr, depth);
+    fprintf(stderr, "state: %s\n",
+        body->state->name);
+    print_tabs(stderr, depth);
+    fprintf(stderr, "pos: %i %i\n",
+        body->pos[0], body->pos[1]);
+    print_tabs(stderr, depth);
+    fprintf(stderr, "rot: %i\n", body->rot);
+    print_tabs(stderr, depth);
+    fprintf(stderr, "turn: %c\n", body->turn? 'y': 'n');
 }
 
 int body_respawn(body_t *body, vec_t pos, rot_t rot, bool turn,

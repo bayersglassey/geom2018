@@ -146,6 +146,7 @@ void body_cleanup(body_t *body);
 int body_init(body_t *body, struct hexgame *game, hexmap_t *map,
     const char *stateset_filename, const char *state_name,
     palettemapper_t *palmapper);
+void hexgame_body_dump(body_t *body, int depth);
 int body_get_index(body_t *body);
 int body_respawn(body_t *body, vec_t pos, rot_t rot, bool turn,
     hexmap_t *map);
@@ -218,6 +219,7 @@ int player_init(player_t *player, struct hexgame *game, int keymap,
     char *respawn_map_filename, char *respawn_filename);
 
 int player_get_index(player_t *player);
+void hexgame_player_dump(player_t *player, int depth);
 int player_reload(player_t *player, bool *file_found_ptr);
 int player_process_event(player_t *player, SDL_Event *event);
 int player_step(player_t *player, struct hexgame *game);

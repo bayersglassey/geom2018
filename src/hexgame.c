@@ -4,10 +4,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#ifdef GEOM_HEXGAME_DEBUG_MALLOC
-    #include <malloc.h>
-#endif
-
 #include "hexgame.h"
 #include "anim.h"
 #include "hexmap.h"
@@ -409,130 +405,11 @@ int hexgame_reset_players(hexgame_t *game, int reset_level,
 
 int hexgame_process_event(hexgame_t *game, SDL_Event *event){
     int err;
-
-    if(event->type == SDL_KEYDOWN){
-        if(event->key.keysym.sym == SDLK_F9){
-            /* save recording */
-            for(int i = 0; i < game->players_len; i++){
-                player_t *player = game->players[i];
-                if(player->keymap != 0)continue;
-
-                body_t *body = player->body;
-                if(!body){
-                    fprintf(stderr,
-                        "Can't stop recording without a body!\n");
-                }else if(body->recording.action != 2){
-                    fprintf(stderr,
-                        "Can't stop recording without starting first! "
-                        "(Try pressing 'R' before 'F9')\n");
-                }else{
-                    fprintf(stderr, "Finished recording. "
-                        "Press F10 to play it back.\n");
-                    err = body_stop_recording(body);
-                    if(err)return err;
-                }
-            }
-        }else if(event->key.keysym.sym == SDLK_F10){
-            /* load recording */
-            bool shift = event->key.keysym.mod & KMOD_SHIFT;
-            const char *recording_filename = get_last_recording_filename();
-            if(recording_filename == NULL){
-                fprintf(stderr, "Couldn't find file of last recording. "
-                    "Maybe you need to record your first one with 'R'?\n");
-            }else{
-                fprintf(stderr, "Playing back from file: %s\n",
-                    recording_filename);
-                for(int i = 0; i < game->players_len; i++){
-                    player_t *player = game->players[i];
-                    if(player->keymap != 0)continue;
-
-                    body_t *body = player->body;
-                    if(!body){
-                        fprintf(stderr,
-                            "Can't play back recording without a body!\n");
-                    }else if(shift){
-                        err = body_load_recording(body, recording_filename,
-                            true);
-                        if(err)return err;
-                        err = body_play_recording(body);
-                        if(err)return err;
-                    }else{
-                        /* TODO: Recordings need to state which map they
-                        expect! The following is a hack: you must play
-                        recordings belonging to your correct map... */
-                        err = hexmap_load_recording(body->map,
-                            recording_filename, NULL, true, 0, NULL);
-                        if(err)return err;
-                    }
-                }
-            }
-#ifdef GEOM_HEXGAME_DEBUG_MALLOC
-        }else if(event->key.keysym.sym == SDLK_F11){
-            malloc_stats();
-#endif
-        }else if(event->key.keysym.sym == SDLK_F12){
-            for(int i = 0; i < game->players_len; i++){
-                player_t *player = game->players[i];
-                if(player->keymap < 0)continue;
-
-                fprintf(stderr, "Player %i:\n", player->keymap);
-
-                body_t *body = player->body;
-                if(!body){
-                    fprintf(stderr, "  no body!\n");
-                    continue;
-                }
-
-                hexmap_submap_t *submap = body->cur_submap;
-                fprintf(stderr, "  map: %s\n", body->map->name);
-                fprintf(stderr, "  submap: %s\n",
-                    body->cur_submap->filename);
-                fprintf(stderr, "  stateset: %s\n",
-                    body->stateset.filename);
-                fprintf(stderr, "  state: %s\n",
-                    body->state->name);
-                fprintf(stderr, "  pos: %i %i\n",
-                    body->pos[0], body->pos[1]);
-                fprintf(stderr, "  rot: %i\n", body->rot);
-                fprintf(stderr, "  turn: %c\n", body->turn? 'y': 'n');
-            }
-        }else if(event->key.keysym.sym == SDLK_r){
-            /* start recording */
-            for(int i = 0; i < game->players_len; i++){
-                player_t *player = game->players[i];
-                if(player->keymap != 0)continue;
-
-                body_t *body = player->body;
-                if(!body){
-                    fprintf(stderr,
-                        "Can't record without a body!\n");
-                }else{
-                    const char *recording_filename = get_next_recording_filename();
-                    fprintf(stderr, "Recording to file: %s "
-                        " (When finished, press F9 to save!)\n",
-                        recording_filename);
-                    err = body_start_recording(body, strdup(recording_filename));
-                    if(err)return err;
-                }
-            }
-        }else if(!event->key.repeat){
-            int keymap = -1;
-            if(event->key.keysym.sym == SDLK_1)keymap = 0;
-            if(event->key.keysym.sym == SDLK_2)keymap = 1;
-            if(keymap > -1){
-                err = hexgame_reset_player_by_keymap(game, keymap,
-                    RESET_SOFT, NULL);
-                if(err)return err;
-            }
-        }
-    }
-
     for(int i = 0; i < game->players_len; i++){
         player_t *player = game->players[i];
         err = player_process_event(player, event);
         if(err)return err;
     }
-
     return 0;
 }
 
