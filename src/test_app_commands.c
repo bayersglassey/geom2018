@@ -21,6 +21,10 @@
 
 
 
+/*************************************
+* GENERAL COMMAND STRUCTURES & UTILS *
+*************************************/
+
 typedef struct test_app_command {
     const char *name;
     const char *params;
@@ -53,6 +57,61 @@ void test_app_write_console_commands(test_app_t *app, const char *prefix){
 
 
 
+/**************************************
+* SPECIFIC COMMAND STRUCTURES & UTILS *
+**************************************/
+
+typedef struct test_app_list_data {
+    test_app_t *app;
+
+    /* Now a bag of fields which might be useful depending on what you're
+    listing. This structure doesn't know; that's determined by the callbacks
+    you passed to the app_list_t. */
+    hexmap_t *map;
+    hexmap_submap_t *submap;
+} test_app_list_data_t;
+
+static int _remainder(int a, int b){
+    int rem = a % b;
+    if(rem < 0){
+        rem = (b < 0)? rem - b: rem + b;
+    }
+    return rem;
+}
+
+static void _console_write_bar(console_t *console, int index, int length){
+    console_write_char(console, '[');
+    for(int i = 0; i < length; i++){
+        console_write_char(console, i == index? 'X': '-');
+    }
+    console_write_char(console, ']');
+}
+
+static int test_app_list_maps_render(test_app_list_t *list){
+    test_app_list_data_t *data = list->data;
+    hexgame_t *game = &data->app->hexgame;
+    int length = game->maps_len;
+    int index = _remainder(list->index, length);
+    hexmap_t *map = game->maps[index];
+
+    console_t *console = &data->app->console;
+    console_clear(console);
+    _console_write_bar(console, index, length);
+    console_write_msg(console, "\n");
+    console_write_msg(console, "Map: ");
+    console_write_msg(console, map->name);
+    console_write_msg(console, "\n");
+    return 0;
+}
+
+static int test_app_list_data_cleanup(test_app_list_t *list){
+    /* Generic implementation, just frees the data */
+    test_app_list_data_t *data = list->data;
+    free(data);
+    return 0;
+}
+
+
 /**************************
 * COMMAND IMPLEMENTATIONS *
 **************************/
@@ -74,8 +133,12 @@ static int _test_app_command_cls(test_app_t *app, fus_lexer_t *lexer, bool *lexe
 }
 
 static int _test_app_command_list_maps(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    console_write_msg(&app->console, "Try F5\n");
-    return 0;
+    test_app_list_data_t *data = calloc(1, sizeof(*data));
+    if(data == NULL)return 1;
+    data->app = app;
+    return test_app_open_list(app, data,
+        &test_app_list_maps_render,
+        &test_app_list_data_cleanup);
 }
 
 static int _test_app_command_list_bodies(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){

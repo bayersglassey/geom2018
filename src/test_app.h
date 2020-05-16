@@ -26,6 +26,36 @@ enum {
 };
 
 
+struct test_app_list;
+typedef int test_app_list_callback_t(struct test_app_list *list);
+
+typedef struct test_app_list {
+    /* Structure allowing app's console to display a list of objects.
+    Includes callbacks for list navigation, list item rendering, etc. */
+
+    void *data;
+        /* If data != NULL, app is in "list mode" (so, up/down keys scroll through
+        list etc) instead of the default "console mode" (where you type commands etc). */
+
+    int index;
+        /* For now, the callbacks *must* implement wraparound themselves:
+        there is no way to query list length, so index is unbound */
+
+    /* Callbacks */
+    test_app_list_callback_t *render;
+    test_app_list_callback_t *cleanup;
+    test_app_list_callback_t *select_item;
+        /* E.g. user hits "enter" on a particular item */
+    test_app_list_callback_t *back;
+        /* E.g. user hits the "back" button */
+
+} test_app_list_t;
+
+void test_app_list_clear(test_app_list_t *list);
+void test_app_list_cleanup(test_app_list_t *list);
+
+
+
 typedef struct test_app {
     int scw, sch;
     int delay_goal;
@@ -51,7 +81,6 @@ typedef struct test_app {
     int cur_rgraph_i;
 
     stateset_t stateset;
-    hexmap_t hexmap;
     hexgame_t hexgame;
     camera_t *camera;
     prismelmapper_t *camera_mapper;
@@ -73,6 +102,8 @@ typedef struct test_app {
     int keydown_d;
     int keydown_l;
     int keydown_r;
+
+    test_app_list_t list;
 } test_app_t;
 
 
@@ -90,6 +121,9 @@ int test_app_process_console_input(test_app_t *app);
 void test_app_write_console_commands(test_app_t *app, const char *prefix);
 int test_app_mainloop(test_app_t *app);
 int test_app_mainloop_step(test_app_t *app);
+int test_app_open_list(test_app_t *app, void *data,
+    test_app_list_callback_t *render, test_app_list_callback_t *cleanup);
+int test_app_close_list(test_app_t *app);
 
 
 #endif
