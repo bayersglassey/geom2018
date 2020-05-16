@@ -804,13 +804,19 @@ static int test_app_process_event_list(test_app_t *app, SDL_Event *event){
         case SDL_KEYDOWN: {
             switch(event->key.keysym.sym){
 
-                /* For now, we're lazy: we don't check index against length, so the
+                /* For now, we're lazy: we don't check indexes against length, so the
                 callbacks need to handle wraparound themselves */
                 case SDLK_UP: {
-                    app->list.index--;
+                    app->list.index_y--;
                 } break;
                 case SDLK_DOWN: {
-                    app->list.index++;
+                    app->list.index_y++;
+                } break;
+                case SDLK_LEFT: {
+                    app->list.index_x--;
+                } break;
+                case SDLK_RIGHT: {
+                    app->list.index_x++;
                 } break;
 
                 case SDLK_RETURN: {
@@ -957,7 +963,7 @@ int test_app_mainloop_step(test_app_t *app){
     return 0;
 }
 
-int test_app_open_list(test_app_t *app, void *data,
+int test_app_open_list(test_app_t *app, void *data, int index_x, int index_y,
     test_app_list_callback_t *render, test_app_list_callback_t *cleanup
 ){
     int err;
@@ -967,6 +973,8 @@ int test_app_open_list(test_app_t *app, void *data,
     }
     test_app_list_clear(&app->list);
     app->list.data = data;
+    app->list.index_x = index_x;
+    app->list.index_y = index_y;
     app->list.render = render;
     app->list.cleanup = cleanup;
     return 0;

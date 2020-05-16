@@ -37,9 +37,10 @@ typedef struct test_app_list {
         /* If data != NULL, app is in "list mode" (so, up/down keys scroll through
         list etc) instead of the default "console mode" (where you type commands etc). */
 
-    int index;
+    int index_x;
+    int index_y;
         /* For now, the callbacks *must* implement wraparound themselves:
-        there is no way to query list length, so index is unbound */
+        there is no way to query list length, so indexes are unbound */
 
     /* Callbacks */
     test_app_list_callback_t *render;
@@ -121,7 +122,7 @@ int test_app_process_console_input(test_app_t *app);
 void test_app_write_console_commands(test_app_t *app, const char *prefix);
 int test_app_mainloop(test_app_t *app);
 int test_app_mainloop_step(test_app_t *app);
-int test_app_open_list(test_app_t *app, void *data,
+int test_app_open_list(test_app_t *app, void *data, int index_x, int index_y,
     test_app_list_callback_t *render, test_app_list_callback_t *cleanup);
 int test_app_close_list(test_app_t *app);
 

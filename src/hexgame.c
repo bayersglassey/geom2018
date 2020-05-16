@@ -322,6 +322,13 @@ int hexgame_get_or_load_map(hexgame_t *game, const char *map_filename,
     return hexgame_load_map(game, map_filename, map_ptr);
 }
 
+int hexgame_get_map_index(hexgame_t *game, hexmap_t *map){
+    for(int i = 0; i < game->maps_len; i++){
+        if(game->maps[i] == map)return i;
+    }
+    return -1;
+}
+
 int hexgame_reset_player(hexgame_t *game, player_t *player,
     int reset_level, hexmap_t *reset_map
 ){

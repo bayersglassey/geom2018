@@ -104,7 +104,7 @@ static int test_app_list_maps_render(test_app_list_t *list){
     test_app_list_data_t *data = list->data;
     hexgame_t *game = &data->app->hexgame;
     int length = game->maps_len;
-    int index = _remainder(list->index, length);
+    int index = _remainder(list->index_x, length);
 
     console_t *console = &data->app->console;
     console_clear(console);
@@ -121,7 +121,7 @@ static int test_app_list_bodies_render(test_app_list_t *list){
     test_app_list_data_t *data = list->data;
     hexmap_t *map = data->map? data->map: data->app->hexgame.maps[0];
     int length = map->bodies_len;
-    int index = _remainder(list->index, length);
+    int index = _remainder(list->index_x, length);
 
     console_t *console = &data->app->console;
     console_clear(console);
@@ -138,7 +138,7 @@ static int test_app_list_players_render(test_app_list_t *list){
     test_app_list_data_t *data = list->data;
     hexgame_t *game = &data->app->hexgame;
     int length = game->players_len;
-    int index = _remainder(list->index, length);
+    int index = _remainder(list->index_x, length);
 
     console_t *console = &data->app->console;
     console_clear(console);
@@ -156,7 +156,7 @@ static int test_app_list_actors_render(test_app_list_t *list){
     test_app_list_data_t *data = list->data;
     hexgame_t *game = &data->app->hexgame;
     int length = game->actors_len;
-    int index = _remainder(list->index, length);
+    int index = _remainder(list->index_x, length);
 
     console_t *console = &data->app->console;
     console_clear(console);
@@ -206,7 +206,9 @@ static int _test_app_command_list_maps(test_app_t *app, fus_lexer_t *lexer, bool
     test_app_list_data_t *data = calloc(1, sizeof(*data));
     if(data == NULL)return 1;
     data->app = app;
-    return test_app_open_list(app, data,
+    body_t *body = app->camera->body;
+    hexmap_t *map = body? body->map: NULL;
+    return test_app_open_list(app, data, map? hexgame_get_map_index(&app->hexgame, map): 0, 0,
         &test_app_list_maps_render,
         &test_app_list_data_cleanup);
 }
@@ -217,7 +219,7 @@ static int _test_app_command_list_bodies(test_app_t *app, fus_lexer_t *lexer, bo
     data->app = app;
     body_t *body = app->camera->body;
     data->map = body? body->map: NULL;
-    return test_app_open_list(app, data,
+    return test_app_open_list(app, data, body? body_get_index(body): 0, 0,
         &test_app_list_bodies_render,
         &test_app_list_data_cleanup);
     return 0;
@@ -227,7 +229,7 @@ static int _test_app_command_list_players(test_app_t *app, fus_lexer_t *lexer, b
     test_app_list_data_t *data = calloc(1, sizeof(*data));
     if(data == NULL)return 1;
     data->app = app;
-    return test_app_open_list(app, data,
+    return test_app_open_list(app, data, 0, 0,
         &test_app_list_players_render,
         &test_app_list_data_cleanup);
     return 0;
@@ -237,7 +239,7 @@ static int _test_app_command_list_actors(test_app_t *app, fus_lexer_t *lexer, bo
     test_app_list_data_t *data = calloc(1, sizeof(*data));
     if(data == NULL)return 1;
     data->app = app;
-    return test_app_open_list(app, data,
+    return test_app_open_list(app, data, 0, 0,
         &test_app_list_actors_render,
         &test_app_list_data_cleanup);
     return 0;

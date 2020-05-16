@@ -338,6 +338,7 @@ int hexgame_load_map(hexgame_t *game, const char *map_filename,
     hexmap_t **map_ptr);
 int hexgame_get_or_load_map(hexgame_t *game, const char *map_filename,
     hexmap_t **map_ptr);
+int hexgame_get_map_index(hexgame_t *game, hexmap_t *map);
 int hexgame_reset_player(hexgame_t *game, player_t *player,
     int reset_level, hexmap_t *reset_map);
 int hexgame_reset_player_by_keymap(hexgame_t *game, int keymap,
