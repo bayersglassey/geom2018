@@ -72,6 +72,11 @@ typedef struct test_app_list_data {
 } test_app_list_data_t;
 
 static int _remainder(int a, int b){
+
+    /* We need this to be safe, so we can call it with a, b the
+    index and length of an empty test_app_list */
+    if(b == 0)return 0;
+
     int rem = a % b;
     if(rem < 0){
         rem = (b < 0)? rem - b: rem + b;
@@ -85,6 +90,14 @@ static void _console_write_bar(console_t *console, int index, int length){
         console_write_char(console, i == index? 'X': '-');
     }
     console_write_char(console, ']');
+    console_newline(console);
+}
+
+static void _console_write_field(console_t *console, const char *name, const char *value){
+    console_write_msg(console, name);
+    console_write_msg(console, ": ");
+    console_write_msg(console, value? value: "(unknown)");
+    console_newline(console);
 }
 
 static int test_app_list_maps_render(test_app_list_t *list){
@@ -92,15 +105,68 @@ static int test_app_list_maps_render(test_app_list_t *list){
     hexgame_t *game = &data->app->hexgame;
     int length = game->maps_len;
     int index = _remainder(list->index, length);
-    hexmap_t *map = game->maps[index];
 
     console_t *console = &data->app->console;
     console_clear(console);
+    console_write_line(console, "Maps");
     _console_write_bar(console, index, length);
-    console_write_msg(console, "\n");
-    console_write_msg(console, "Map: ");
-    console_write_msg(console, map->name);
-    console_write_msg(console, "\n");
+    if(length == 0)return 0;
+
+    hexmap_t *map = game->maps[index];
+    _console_write_field(console, "Name", map->name);
+    return 0;
+}
+
+static int test_app_list_bodies_render(test_app_list_t *list){
+    test_app_list_data_t *data = list->data;
+    hexmap_t *map = data->map? data->map: data->app->hexgame.maps[0];
+    int length = map->bodies_len;
+    int index = _remainder(list->index, length);
+
+    console_t *console = &data->app->console;
+    console_clear(console);
+    console_write_line(console, "Bodies");
+    _console_write_bar(console, index, length);
+    if(length == 0)return 0;
+
+    body_t *body = map->bodies[index];
+    _console_write_field(console, "Stateset", body->stateset.filename);
+    return 0;
+}
+
+static int test_app_list_players_render(test_app_list_t *list){
+    test_app_list_data_t *data = list->data;
+    hexgame_t *game = &data->app->hexgame;
+    int length = game->players_len;
+    int index = _remainder(list->index, length);
+
+    console_t *console = &data->app->console;
+    console_clear(console);
+    console_write_line(console, "Players");
+    _console_write_bar(console, index, length);
+    if(length == 0)return 0;
+
+    player_t *player = game->players[index];
+    body_t *body = player->body;
+    _console_write_field(console, "Stateset", body? body->stateset.filename: NULL);
+    return 0;
+}
+
+static int test_app_list_actors_render(test_app_list_t *list){
+    test_app_list_data_t *data = list->data;
+    hexgame_t *game = &data->app->hexgame;
+    int length = game->actors_len;
+    int index = _remainder(list->index, length);
+
+    console_t *console = &data->app->console;
+    console_clear(console);
+    console_write_line(console, "Actors");
+    _console_write_bar(console, index, length);
+    if(length == 0)return 0;
+
+    actor_t *actor = game->actors[index];
+    body_t *body = actor->body;
+    _console_write_field(console, "Stateset", body? body->stateset.filename: NULL);
     return 0;
 }
 
@@ -122,8 +188,12 @@ static int _test_app_command_exit(test_app_t *app, fus_lexer_t *lexer, bool *lex
 }
 
 static int _test_app_command_help(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    console_write_msg(&app->console, "Commands:\n");
-    test_app_write_console_commands(app, NULL);
+    console_write_msg(&app->console,
+        "Press Tab to see a list of commands.\n");
+    console_write_msg(&app->console,
+        "Type a few letters first to filter the listed commands.\n");
+    console_write_msg(&app->console,
+        "For example, \"he\"-Tab should list \"help\".\n");
     return 0;
 }
 
@@ -142,17 +212,34 @@ static int _test_app_command_list_maps(test_app_t *app, fus_lexer_t *lexer, bool
 }
 
 static int _test_app_command_list_bodies(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    console_write_msg(&app->console, "Try F5\n");
+    test_app_list_data_t *data = calloc(1, sizeof(*data));
+    if(data == NULL)return 1;
+    data->app = app;
+    body_t *body = app->camera->body;
+    data->map = body? body->map: NULL;
+    return test_app_open_list(app, data,
+        &test_app_list_bodies_render,
+        &test_app_list_data_cleanup);
     return 0;
 }
 
 static int _test_app_command_list_players(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    console_write_msg(&app->console, "Try F5\n");
+    test_app_list_data_t *data = calloc(1, sizeof(*data));
+    if(data == NULL)return 1;
+    data->app = app;
+    return test_app_open_list(app, data,
+        &test_app_list_players_render,
+        &test_app_list_data_cleanup);
     return 0;
 }
 
 static int _test_app_command_list_actors(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    console_write_msg(&app->console, "Try F5\n");
+    test_app_list_data_t *data = calloc(1, sizeof(*data));
+    if(data == NULL)return 1;
+    data->app = app;
+    return test_app_open_list(app, data,
+        &test_app_list_actors_render,
+        &test_app_list_data_cleanup);
     return 0;
 }
 

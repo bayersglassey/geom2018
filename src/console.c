@@ -107,6 +107,11 @@ void console_write_msg(console_t *console, const char *msg){
     }
 }
 
+void console_write_line(console_t *console, const char *msg){
+    console_write_msg(console, msg);
+    console_newline(console);
+}
+
 void console_backspace(console_t *console){
     console_move_left(console);
     int text_i = console_get_text_i(console);
