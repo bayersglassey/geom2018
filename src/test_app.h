@@ -90,9 +90,11 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 int test_app_set_players(test_app_t *app, int n_players);
 int test_app_mainloop(test_app_t *app);
 int test_app_mainloop_step(test_app_t *app);
-int test_app_open_list(test_app_t *app, int index_x, int index_y,
+int test_app_open_list(test_app_t *app, const char *title,
+    int index_x, int index_y,
     void *data,
     test_app_list_callback_t *render,
+    test_app_list_callback_t *select_item,
     test_app_list_callback_t *cleanup);
 int test_app_close_list(test_app_t *app);
 

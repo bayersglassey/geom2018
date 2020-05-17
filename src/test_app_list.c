@@ -25,6 +25,16 @@ static int _remainder(int a, int b){
     return rem;
 }
 
+static void _get_options_index_and_length(const char **options, int index,
+    int *index_ptr, int *length_ptr
+){
+    int length = 0;
+    for(; options[length]; length++);
+
+    *index_ptr = _remainder(index, length);
+    *length_ptr = length;
+}
+
 static void _console_write_bar(console_t *console, int index, int length){
     console_write_char(console, '[');
     for(int i = 0; i < length; i++){
@@ -41,13 +51,17 @@ static void _console_write_field(console_t *console, const char *name, const cha
     console_newline(console);
 }
 
-static void test_app_list_data_show_header(test_app_list_data_t *data,
+static void _console_write_options(console_t *console, const char **options,
     int index, int length
 ){
-    console_t *console = &data->app->console;
-    console_clear(console);
-    console_write_line(console, data->title);
-    _console_write_bar(console, index, length);
+    console_newline(console);
+    for(int i = 0; i < length; i++){
+        const char *option = options[i];
+        console_write_char(console, i == index? 'X': '-');
+        console_write_char(console, ' ');
+        console_write_msg(console, option);
+        console_newline(console);
+    }
 }
 
 
@@ -55,18 +69,22 @@ static void test_app_list_data_show_header(test_app_list_data_t *data,
 * TEST_APP_LIST *
 ****************/
 
-void test_app_list_init(test_app_list_t *list, test_app_list_t *prev,
+void test_app_list_init(test_app_list_t *list,
+    const char *title, test_app_list_t *prev,
     int index_x, int index_y,
     void *data,
     test_app_list_callback_t *render,
+    test_app_list_callback_t *select_item,
     test_app_list_callback_t *cleanup
 ){
     memset(list, 0, sizeof(*list));
+    list->title = title;
     list->prev = prev;
     list->index_x = index_x;
     list->index_y = index_y;
     list->data = data;
     list->render = render;
+    list->select_item = select_item;
     list->cleanup = cleanup;
 }
 
@@ -82,11 +100,10 @@ void test_app_list_cleanup(test_app_list_t *list){
 * TEST_APP_LIST_DATA *
 *********************/
 
-test_app_list_data_t *test_app_list_data_create(test_app_t *app, const char *title){
+test_app_list_data_t *test_app_list_data_create(test_app_t *app){
     test_app_list_data_t *data = calloc(1, sizeof(*data));
     if(data == NULL)return NULL;
     data->app = app;
-    data->title = title;
     return data;
 }
 
@@ -106,19 +123,62 @@ int test_app_list_cleanup_data(test_app_list_t *list){
     return 0;
 }
 
+const char *test_app_list_maps_options[] = {
+    "List bodies",
+    NULL
+};
+
 int test_app_list_maps_render(test_app_list_t *list){
     test_app_list_data_t *data = list->data;
     hexgame_t *game = &data->app->hexgame;
     int length = game->maps_len;
     int index = _remainder(list->index_x, length);
 
-    test_app_list_data_show_header(data, index, length);
+    console_t *console = &data->app->console;
+    _console_write_bar(console, index, length);
     if(length == 0)return 0;
 
     hexmap_t *map = game->maps[index];
 
-    console_t *console = &data->app->console;
     _console_write_field(console, "Name", map->name);
+
+    const char **options = test_app_list_maps_options;
+    int options_index, options_length;
+    _get_options_index_and_length(options, list->index_y,
+        &options_index, &options_length);
+    _console_write_options(console, options,
+        options_index, options_length);
+    return 0;
+}
+
+int test_app_list_maps_select_item(test_app_list_t *list){
+    test_app_list_data_t *data = list->data;
+    hexgame_t *game = &data->app->hexgame;
+    int length = game->maps_len;
+    int index = _remainder(list->index_x, length);
+    if(length == 0)return 0;
+
+    hexmap_t *map = game->maps[index];
+
+    const char **options = test_app_list_maps_options;
+    int options_index, options_length;
+    _get_options_index_and_length(options, list->index_y,
+        &options_index, &options_length);
+
+    switch(options_index){
+        case 0: {
+            test_app_list_data_t *new_data = test_app_list_data_create(data->app);
+            if(new_data == NULL)return 1;
+
+            new_data->map = map;
+            return test_app_open_list(data->app, "Bodies",
+                0, 0,
+                new_data,
+                &test_app_list_bodies_render,
+                &test_app_list_bodies_select_item,
+                &test_app_list_cleanup_data);
+        } break;
+    }
     return 0;
 }
 
@@ -128,13 +188,17 @@ int test_app_list_bodies_render(test_app_list_t *list){
     int length = map->bodies_len;
     int index = _remainder(list->index_x, length);
 
-    test_app_list_data_show_header(data, index, length);
+    console_t *console = &data->app->console;
+    _console_write_bar(console, index, length);
     if(length == 0)return 0;
 
     body_t *body = map->bodies[index];
 
-    console_t *console = &data->app->console;
     _console_write_field(console, "Stateset", body->stateset.filename);
+    return 0;
+}
+
+int test_app_list_bodies_select_item(test_app_list_t *list){
     return 0;
 }
 
@@ -144,14 +208,18 @@ int test_app_list_players_render(test_app_list_t *list){
     int length = game->players_len;
     int index = _remainder(list->index_x, length);
 
-    test_app_list_data_show_header(data, index, length);
+    console_t *console = &data->app->console;
+    _console_write_bar(console, index, length);
     if(length == 0)return 0;
 
     player_t *player = game->players[index];
     body_t *body = player->body;
 
-    console_t *console = &data->app->console;
     _console_write_field(console, "Stateset", body? body->stateset.filename: NULL);
+    return 0;
+}
+
+int test_app_list_players_select_item(test_app_list_t *list){
     return 0;
 }
 
@@ -161,15 +229,18 @@ int test_app_list_actors_render(test_app_list_t *list){
     int length = game->actors_len;
     int index = _remainder(list->index_x, length);
 
-    test_app_list_data_show_header(data, index, length);
+    console_t *console = &data->app->console;
+    _console_write_bar(console, index, length);
     if(length == 0)return 0;
 
     actor_t *actor = game->actors[index];
     body_t *body = actor->body;
 
-    console_t *console = &data->app->console;
     _console_write_field(console, "Stateset", body? body->stateset.filename: NULL);
     return 0;
 }
 
+int test_app_list_actors_select_item(test_app_list_t *list){
+    return 0;
+}
 

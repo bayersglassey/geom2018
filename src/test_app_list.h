@@ -21,6 +21,8 @@ typedef struct test_app_list {
     /* Structure allowing app's console to display a list of objects.
     Includes callbacks for list navigation, list item rendering, etc. */
 
+    const char *title;
+
     struct test_app_list *prev;
         /* Stack of lists: you can push new ones, hit "back" button to go
         back to previous list, kind of thing */
@@ -41,10 +43,12 @@ typedef struct test_app_list {
 
 } test_app_list_t;
 
-void test_app_list_init(test_app_list_t *list, test_app_list_t *prev,
+void test_app_list_init(test_app_list_t *list,
+    const char *title, test_app_list_t *prev,
     int index_x, int index_y,
     void *data,
     test_app_list_callback_t *render,
+    test_app_list_callback_t *select_item,
     test_app_list_callback_t *cleanup);
 void test_app_list_cleanup(test_app_list_t *list);
 
@@ -56,8 +60,6 @@ void test_app_list_cleanup(test_app_list_t *list);
 typedef struct test_app_list_data {
     struct test_app *app;
 
-    const char *title;
-
     /* Now a bag of fields which might be useful depending on what you're
     listing. This structure doesn't know; that's determined by the callbacks
     you passed to the app_list_t. */
@@ -65,7 +67,7 @@ typedef struct test_app_list_data {
     hexmap_submap_t *submap;
 } test_app_list_data_t;
 
-test_app_list_data_t *test_app_list_data_create(struct test_app *app, const char *title);
+test_app_list_data_t *test_app_list_data_create(struct test_app *app);
 void test_app_list_data_cleanup(test_app_list_data_t *data);
 
 
@@ -74,10 +76,18 @@ void test_app_list_data_cleanup(test_app_list_data_t *data);
 *******************************/
 
 int test_app_list_cleanup_data(test_app_list_t *list);
+
 int test_app_list_maps_render(test_app_list_t *list);
+int test_app_list_maps_select_item(test_app_list_t *list);
+
 int test_app_list_bodies_render(test_app_list_t *list);
+int test_app_list_bodies_select_item(test_app_list_t *list);
+
 int test_app_list_players_render(test_app_list_t *list);
+int test_app_list_players_select_item(test_app_list_t *list);
+
 int test_app_list_actors_render(test_app_list_t *list);
+int test_app_list_actors_select_item(test_app_list_t *list);
 
 
 #endif

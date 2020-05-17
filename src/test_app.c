@@ -910,6 +910,31 @@ static int test_app_poll_events(test_app_t *app){
     return 0;
 }
 
+static void _render_list_title(console_t *console, test_app_list_t *list){
+    if(list->prev != NULL){
+        _render_list_title(console, list->prev);
+        console_write_msg(console, " -> ");
+    }
+    console_write_msg(console, list->title);
+}
+
+static int test_app_render_list(test_app_t *app){
+    int err;
+
+    console_t *console = &app->console;
+    console_clear(console);
+
+    console_write_char(console, '(');
+    _render_list_title(console, app->list);
+    console_write_char(console, ')');
+    console_newline(console);
+
+    err = app->list->render(app->list);
+    if(err)return err;
+
+    return 0;
+}
+
 int test_app_mainloop_step(test_app_t *app){
     int err;
     Uint32 tick0 = SDL_GetTicks();
@@ -926,7 +951,7 @@ int test_app_mainloop_step(test_app_t *app){
         if(err)return err;
     }else{
         if(app->list){
-            err = app->list->render(app->list);
+            err = test_app_render_list(app);
             if(err)return err;
         }
     }
@@ -951,16 +976,18 @@ int test_app_mainloop_step(test_app_t *app){
     return 0;
 }
 
-int test_app_open_list(test_app_t *app, int index_x, int index_y,
+int test_app_open_list(test_app_t *app, const char *title,
+    int index_x, int index_y,
     void *data,
     test_app_list_callback_t *render,
+    test_app_list_callback_t *select_item,
     test_app_list_callback_t *cleanup
 ){
     test_app_list_t *new_list = malloc(sizeof(*new_list));
     if(new_list == NULL)return 1;
-    test_app_list_init(new_list, app->list,
+    test_app_list_init(new_list, title, app->list,
         index_x, index_y,
-        data, render, cleanup);
+        data, render, select_item, cleanup);
     app->list = new_list;
     return 0;
 }
@@ -978,6 +1005,7 @@ int test_app_close_list(test_app_t *app){
     if(!app->list){
         /* App is back in "console mode", so re-render console's input, which
         list's render probably erased */
+        console_clear(&app->console);
         console_write_msg(&app->console, CONSOLE_START_TEXT);
         console_write_msg(&app->console, app->console.input);
     }
