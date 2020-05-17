@@ -7,6 +7,7 @@
 #endif
 
 #include "test_app.h"
+#include "test_app_list.h"
 #include "prismelrenderer.h"
 #include "rendergraph.h"
 #include "array.h"
@@ -132,22 +133,6 @@ static int blit_console(test_app_t *app, SDL_Surface *surface, int x, int y){
     return 0;
 }
 
-
-
-/****************
-* TEST_APP_LIST *
-****************/
-
-void test_app_list_clear(test_app_list_t *list){
-    memset(list, 0, sizeof(*list));
-}
-
-void test_app_list_cleanup(test_app_list_t *list){
-    if(list->data){
-        int err = list->cleanup(list);
-        /* But do nothing with err, because we return void */
-    }
-}
 
 
 /***********

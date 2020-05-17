@@ -1,29 +1,27 @@
 
 #include <stdio.h>
 #include <stdbool.h>
-#include <SDL2/SDL.h>
+#include <string.h>
 
-#include "test_app.h"
-#include "prismelrenderer.h"
-#include "rendergraph.h"
-#include "array.h"
-#include "vec4.h"
-#include "font.h"
-#include "sdlfont.h"
-#include "geomfont.h"
 #include "console.h"
-#include "util.h"
-#include "anim.h"
-#include "hexmap.h"
-#include "hexgame.h"
-#include "hexspace.h"
+#include "test_app.h"
+#include "test_app_list.h"
 #include "lexer_macros.h"
 
 
 
-/*************************************
-* GENERAL COMMAND STRUCTURES & UTILS *
-*************************************/
+/*******************
+* STATIC UTILITIES *
+*******************/
+
+static bool _startswith(const char *s, const char *prefix){
+    return strncmp(s, prefix, strlen(prefix)) == 0;
+}
+
+
+/*******************
+* TEST_APP_COMMAND *
+*******************/
 
 typedef struct test_app_command {
     const char *name;
@@ -31,7 +29,9 @@ typedef struct test_app_command {
     int (*action)(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr);
 } test_app_command_t;
 
-static void console_write_command(console_t *console, test_app_command_t *command){
+static void test_app_command_write_to_console(
+    test_app_command_t *command, console_t *console
+){
     console_write_msg(console, command->name);
     if(command->params){
         console_write_msg(console, " ");
@@ -39,148 +39,11 @@ static void console_write_command(console_t *console, test_app_command_t *comman
     }
 }
 
-test_app_command_t _test_app_commands[];
 
 
-static bool _startswith(const char *s, const char *prefix){
-    return strncmp(s, prefix, strlen(prefix)) == 0;
-}
-
-void test_app_write_console_commands(test_app_t *app, const char *prefix){
-    for(test_app_command_t *command = _test_app_commands; command->name; command++){
-        if(prefix && !_startswith(command->name, prefix))continue;
-        console_write_msg(&app->console, " * ");
-        console_write_command(&app->console, command);
-        console_write_msg(&app->console, "\n");
-    }
-}
-
-
-
-/**************************************
-* SPECIFIC COMMAND STRUCTURES & UTILS *
-**************************************/
-
-typedef struct test_app_list_data {
-    test_app_t *app;
-
-    /* Now a bag of fields which might be useful depending on what you're
-    listing. This structure doesn't know; that's determined by the callbacks
-    you passed to the app_list_t. */
-    hexmap_t *map;
-    hexmap_submap_t *submap;
-} test_app_list_data_t;
-
-static int _remainder(int a, int b){
-
-    /* We need this to be safe, so we can call it with a, b the
-    index and length of an empty test_app_list */
-    if(b == 0)return 0;
-
-    int rem = a % b;
-    if(rem < 0){
-        rem = (b < 0)? rem - b: rem + b;
-    }
-    return rem;
-}
-
-static void _console_write_bar(console_t *console, int index, int length){
-    console_write_char(console, '[');
-    for(int i = 0; i < length; i++){
-        console_write_char(console, i == index? 'X': '-');
-    }
-    console_write_char(console, ']');
-    console_newline(console);
-}
-
-static void _console_write_field(console_t *console, const char *name, const char *value){
-    console_write_msg(console, name);
-    console_write_msg(console, ": ");
-    console_write_msg(console, value? value: "(unknown)");
-    console_newline(console);
-}
-
-static int test_app_list_maps_render(test_app_list_t *list){
-    test_app_list_data_t *data = list->data;
-    hexgame_t *game = &data->app->hexgame;
-    int length = game->maps_len;
-    int index = _remainder(list->index_x, length);
-
-    console_t *console = &data->app->console;
-    console_clear(console);
-    console_write_line(console, "Maps");
-    _console_write_bar(console, index, length);
-    if(length == 0)return 0;
-
-    hexmap_t *map = game->maps[index];
-    _console_write_field(console, "Name", map->name);
-    return 0;
-}
-
-static int test_app_list_bodies_render(test_app_list_t *list){
-    test_app_list_data_t *data = list->data;
-    hexmap_t *map = data->map? data->map: data->app->hexgame.maps[0];
-    int length = map->bodies_len;
-    int index = _remainder(list->index_x, length);
-
-    console_t *console = &data->app->console;
-    console_clear(console);
-    console_write_line(console, "Bodies");
-    _console_write_bar(console, index, length);
-    if(length == 0)return 0;
-
-    body_t *body = map->bodies[index];
-    _console_write_field(console, "Stateset", body->stateset.filename);
-    return 0;
-}
-
-static int test_app_list_players_render(test_app_list_t *list){
-    test_app_list_data_t *data = list->data;
-    hexgame_t *game = &data->app->hexgame;
-    int length = game->players_len;
-    int index = _remainder(list->index_x, length);
-
-    console_t *console = &data->app->console;
-    console_clear(console);
-    console_write_line(console, "Players");
-    _console_write_bar(console, index, length);
-    if(length == 0)return 0;
-
-    player_t *player = game->players[index];
-    body_t *body = player->body;
-    _console_write_field(console, "Stateset", body? body->stateset.filename: NULL);
-    return 0;
-}
-
-static int test_app_list_actors_render(test_app_list_t *list){
-    test_app_list_data_t *data = list->data;
-    hexgame_t *game = &data->app->hexgame;
-    int length = game->actors_len;
-    int index = _remainder(list->index_x, length);
-
-    console_t *console = &data->app->console;
-    console_clear(console);
-    console_write_line(console, "Actors");
-    _console_write_bar(console, index, length);
-    if(length == 0)return 0;
-
-    actor_t *actor = game->actors[index];
-    body_t *body = actor->body;
-    _console_write_field(console, "Stateset", body? body->stateset.filename: NULL);
-    return 0;
-}
-
-static int test_app_list_data_cleanup(test_app_list_t *list){
-    /* Generic implementation, just frees the data */
-    test_app_list_data_t *data = list->data;
-    free(data);
-    return 0;
-}
-
-
-/**************************
-* COMMAND IMPLEMENTATIONS *
-**************************/
+/********************
+* TEST_APP_COMMANDS *
+********************/
 
 static int _test_app_command_exit(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
     app->loop = false;
@@ -203,45 +66,45 @@ static int _test_app_command_cls(test_app_t *app, fus_lexer_t *lexer, bool *lexe
 }
 
 static int _test_app_command_list_maps(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    test_app_list_data_t *data = calloc(1, sizeof(*data));
+    test_app_list_data_t *data = test_app_list_data_create(app, "Maps");
     if(data == NULL)return 1;
-    data->app = app;
+
     body_t *body = app->camera->body;
     hexmap_t *map = body? body->map: NULL;
     return test_app_open_list(app, data, map? hexgame_get_map_index(&app->hexgame, map): 0, 0,
         &test_app_list_maps_render,
-        &test_app_list_data_cleanup);
+        &test_app_list_cleanup_data);
 }
 
 static int _test_app_command_list_bodies(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    test_app_list_data_t *data = calloc(1, sizeof(*data));
+    test_app_list_data_t *data = test_app_list_data_create(app, "Bodies");
     if(data == NULL)return 1;
-    data->app = app;
+
     body_t *body = app->camera->body;
     data->map = body? body->map: NULL;
     return test_app_open_list(app, data, body? body_get_index(body): 0, 0,
         &test_app_list_bodies_render,
-        &test_app_list_data_cleanup);
+        &test_app_list_cleanup_data);
     return 0;
 }
 
 static int _test_app_command_list_players(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    test_app_list_data_t *data = calloc(1, sizeof(*data));
+    test_app_list_data_t *data = test_app_list_data_create(app, "Players");
     if(data == NULL)return 1;
-    data->app = app;
+
     return test_app_open_list(app, data, 0, 0,
         &test_app_list_players_render,
-        &test_app_list_data_cleanup);
+        &test_app_list_cleanup_data);
     return 0;
 }
 
 static int _test_app_command_list_actors(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    test_app_list_data_t *data = calloc(1, sizeof(*data));
+    test_app_list_data_t *data = test_app_list_data_create(app, "Actors");
     if(data == NULL)return 1;
-    data->app = app;
+
     return test_app_open_list(app, data, 0, 0,
         &test_app_list_actors_render,
-        &test_app_list_data_cleanup);
+        &test_app_list_cleanup_data);
     return 0;
 }
 
@@ -490,11 +353,6 @@ lexer_err:
 }
 
 
-/*********************************
-* END OF COMMAND IMPLEMENTATIONS *
-*********************************/
-
-
 #define COMMAND(NAME, PARAMS) (test_app_command_t){#NAME, PARAMS, &_test_app_command_##NAME}
 #define NULLCOMMAND (test_app_command_t){NULL, NULL, NULL}
 test_app_command_t _test_app_commands[] = {
@@ -517,6 +375,11 @@ test_app_command_t _test_app_commands[] = {
 };
 
 
+
+
+/****************************
+* PUBLIC TEST_APP FUNCTIONS *
+****************************/
 
 static int _test_app_process_console_input(test_app_t *app, fus_lexer_t *lexer){
     int err;
@@ -546,7 +409,7 @@ static int _test_app_process_console_input(test_app_t *app, fus_lexer_t *lexer){
     return 0;
 lexer_err:
     console_write_msg(&app->console, "Couldn't parse that.\nUsage: ");
-    console_write_command(&app->console, command);
+    test_app_command_write_to_console(command, &app->console);
     console_write_msg(&app->console, "\n");
     return 0;
 }
@@ -566,3 +429,15 @@ int test_app_process_console_input(test_app_t *app){
     return 0;
 }
 
+void test_app_write_console_commands(test_app_t *app, const char *prefix){
+    for(
+        test_app_command_t *command = _test_app_commands;
+        command->name;
+        command++
+    ){
+        if(prefix && !_startswith(command->name, prefix))continue;
+        console_write_msg(&app->console, " * ");
+        test_app_command_write_to_console(command, &app->console);
+        console_write_msg(&app->console, "\n");
+    }
+}
