@@ -301,7 +301,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 
     app->camera_mapper = NULL;
 
-    test_app_list_clear(&app->list);
+    app->list = NULL;
 
     return 0;
 }
@@ -785,6 +785,10 @@ static int test_app_process_event_console(test_app_t *app, SDL_Event *event){
 
 static int test_app_process_event_list(test_app_t *app, SDL_Event *event){
     int err;
+
+    /* Guaranteed to be non-NULL if we make it into this function: */
+    test_app_list_t *list = app->list;
+
     switch(event->type){
         case SDL_KEYDOWN: {
             switch(event->key.keysym.sym){
@@ -792,32 +796,31 @@ static int test_app_process_event_list(test_app_t *app, SDL_Event *event){
                 /* For now, we're lazy: we don't check indexes against length, so the
                 callbacks need to handle wraparound themselves */
                 case SDLK_UP: {
-                    app->list.index_y--;
+                    list->index_y--;
                 } break;
                 case SDLK_DOWN: {
-                    app->list.index_y++;
+                    list->index_y++;
                 } break;
                 case SDLK_LEFT: {
-                    app->list.index_x--;
+                    list->index_x--;
                 } break;
                 case SDLK_RIGHT: {
-                    app->list.index_x++;
+                    list->index_x++;
                 } break;
 
                 case SDLK_RETURN: {
-                    if(app->list.select_item){
-                        err = app->list.select_item(&app->list);
+                    if(list->select_item){
+                        err = list->select_item(list);
                         if(err)return err;
                     }
                 } break;
 
                 case SDLK_BACKSPACE: {
-                    if(app->list.back){
-                        err = app->list.back(&app->list);
+                    if(list->back){
+                        err = list->back(list);
                         if(err)return err;
                     }else{
-                        /* If there's no "back" callback, default is to exit
-                        from "list mode" back to "console mode". */
+                        /* Default "back" action if no callback */
                         err = test_app_close_list(app);
                         if(err)return err;
                     }
@@ -895,7 +898,7 @@ static int test_app_poll_events(test_app_t *app){
         if(app->hexgame_running){
             err = hexgame_process_event(game, event);
             if(err)return err;
-        }else if(app->list.data){
+        }else if(app->list){
             err = test_app_process_event_list(app, event);
             if(err)return err;
         }else{
@@ -922,8 +925,8 @@ int test_app_mainloop_step(test_app_t *app){
         err = hexgame_step(game);
         if(err)return err;
     }else{
-        if(app->list.data){
-            err = app->list.render(&app->list);
+        if(app->list){
+            err = app->list->render(app->list);
             if(err)return err;
         }
     }
@@ -948,35 +951,36 @@ int test_app_mainloop_step(test_app_t *app){
     return 0;
 }
 
-int test_app_open_list(test_app_t *app, void *data, int index_x, int index_y,
-    test_app_list_callback_t *render, test_app_list_callback_t *cleanup
+int test_app_open_list(test_app_t *app, int index_x, int index_y,
+    void *data,
+    test_app_list_callback_t *render,
+    test_app_list_callback_t *cleanup
 ){
-    int err;
-    if(app->list.data){
-        err = app->list.cleanup(&app->list);
-        if(err)return err;
-    }
-    test_app_list_clear(&app->list);
-    app->list.data = data;
-    app->list.index_x = index_x;
-    app->list.index_y = index_y;
-    app->list.render = render;
-    app->list.cleanup = cleanup;
+    test_app_list_t *new_list = malloc(sizeof(*new_list));
+    if(new_list == NULL)return 1;
+    test_app_list_init(new_list, app->list,
+        index_x, index_y,
+        data, render, cleanup);
+    app->list = new_list;
     return 0;
 }
 
 int test_app_close_list(test_app_t *app){
     int err;
 
-    err = app->list.cleanup(&app->list);
-    if(err)return err;
+    test_app_list_t *prev = app->list->prev;
+    app->list->prev = NULL;
+        /* Set list->prev to NULL so it's not cleaned up, since we're
+        going to use it */
+    test_app_list_cleanup(app->list);
+    app->list = prev;
 
-    test_app_list_clear(&app->list);
-
-    /* App is back in "console mode", so re-render console's input, which
-    list's render probably erased */
-    console_write_msg(&app->console, CONSOLE_START_TEXT);
-    console_write_msg(&app->console, app->console.input);
+    if(!app->list){
+        /* App is back in "console mode", so re-render console's input, which
+        list's render probably erased */
+        console_write_msg(&app->console, CONSOLE_START_TEXT);
+        console_write_msg(&app->console, app->console.input);
+    }
 
     return 0;
 }

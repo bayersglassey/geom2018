@@ -55,12 +55,23 @@ static void test_app_list_data_show_header(test_app_list_data_t *data,
 * TEST_APP_LIST *
 ****************/
 
-void test_app_list_clear(test_app_list_t *list){
+void test_app_list_init(test_app_list_t *list, test_app_list_t *prev,
+    int index_x, int index_y,
+    void *data,
+    test_app_list_callback_t *render,
+    test_app_list_callback_t *cleanup
+){
     memset(list, 0, sizeof(*list));
+    list->prev = prev;
+    list->index_x = index_x;
+    list->index_y = index_y;
+    list->data = data;
+    list->render = render;
+    list->cleanup = cleanup;
 }
 
 void test_app_list_cleanup(test_app_list_t *list){
-    if(list->data){
+    if(list->cleanup){
         int err = list->cleanup(list);
         /* But do nothing with err, because we return void */
     }
@@ -89,7 +100,6 @@ void test_app_list_data_cleanup(test_app_list_data_t *data){
 *******************************/
 
 int test_app_list_cleanup_data(test_app_list_t *list){
-    /* Generic implementation, just frees the data */
     test_app_list_data_t *data = list->data;
     test_app_list_data_cleanup(data);
     free(data);
