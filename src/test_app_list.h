@@ -34,6 +34,7 @@ typedef struct test_app_list {
 
     /* Callbacks */
     void *data;
+    test_app_list_callback_t *step;
     test_app_list_callback_t *render;
     test_app_list_callback_t *cleanup;
     test_app_list_callback_t *select_item;
@@ -47,6 +48,7 @@ void test_app_list_init(test_app_list_t *list,
     const char *title, test_app_list_t *prev,
     int index_x, int index_y,
     void *data,
+    test_app_list_callback_t *step,
     test_app_list_callback_t *render,
     test_app_list_callback_t *select_item,
     test_app_list_callback_t *cleanup);
@@ -60,11 +62,18 @@ void test_app_list_cleanup(test_app_list_t *list);
 typedef struct test_app_list_data {
     /* Weakrefs */
 
-    struct test_app *app;
+    int index;
+    int length;
+    void *item;
 
-    /* Now a bag of fields which might be useful depending on what you're
-    listing. This structure doesn't know; that's determined by the callbacks
-    you passed to the app_list_t. */
+    const char **options;
+    int options_index;
+    int options_length;
+
+    struct test_app *app;
+    /* The following fields may or may not be used depending on the callbacks
+    passed to the app_list_t: */
+    body_t *body;
     hexmap_t *map;
     hexmap_submap_t *submap;
 } test_app_list_data_t;
@@ -79,15 +88,23 @@ void test_app_list_data_cleanup(test_app_list_data_t *data);
 
 int test_app_list_cleanup_data(test_app_list_t *list);
 
+int test_app_open_list_maps(struct test_app *app, body_t *body, hexmap_t *map);
+int test_app_list_maps_step(test_app_list_t *list);
 int test_app_list_maps_render(test_app_list_t *list);
 int test_app_list_maps_select_item(test_app_list_t *list);
 
+int test_app_open_list_bodies(struct test_app *app, body_t *body, hexmap_t *map);
+int test_app_list_bodies_step(test_app_list_t *list);
 int test_app_list_bodies_render(test_app_list_t *list);
 int test_app_list_bodies_select_item(test_app_list_t *list);
 
+int test_app_open_list_players(struct test_app *app);
+int test_app_list_players_step(test_app_list_t *list);
 int test_app_list_players_render(test_app_list_t *list);
 int test_app_list_players_select_item(test_app_list_t *list);
 
+int test_app_open_list_actors(struct test_app *app);
+int test_app_list_actors_step(test_app_list_t *list);
 int test_app_list_actors_render(test_app_list_t *list);
 int test_app_list_actors_select_item(test_app_list_t *list);
 

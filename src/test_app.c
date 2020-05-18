@@ -922,6 +922,15 @@ static void _render_list_title(console_t *console, test_app_list_t *list){
     console_write_msg(console, list->title);
 }
 
+static int test_app_step_list(test_app_t *app){
+    int err;
+
+    err = app->list->step(app->list);
+    if(err)return err;
+
+    return 0;
+}
+
 static int test_app_render_list(test_app_t *app){
     int err;
 
@@ -955,6 +964,8 @@ int test_app_mainloop_step(test_app_t *app){
         if(err)return err;
     }else{
         if(app->list){
+            err = test_app_step_list(app);
+            if(err)return err;
             err = test_app_render_list(app);
             if(err)return err;
         }
@@ -983,6 +994,7 @@ int test_app_mainloop_step(test_app_t *app){
 int test_app_open_list(test_app_t *app, const char *title,
     int index_x, int index_y,
     void *data,
+    test_app_list_callback_t *step,
     test_app_list_callback_t *render,
     test_app_list_callback_t *select_item,
     test_app_list_callback_t *cleanup
@@ -991,7 +1003,7 @@ int test_app_open_list(test_app_t *app, const char *title,
     if(new_list == NULL)return 1;
     test_app_list_init(new_list, title, app->list,
         index_x, index_y,
-        data, render, select_item, cleanup);
+        data, step, render, select_item, cleanup);
     app->list = new_list;
     return 0;
 }

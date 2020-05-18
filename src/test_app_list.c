@@ -28,11 +28,17 @@ static int _remainder(int a, int b){
 static void _get_options_index_and_length(const char **options, int index,
     int *index_ptr, int *length_ptr
 ){
+}
+
+static void test_app_list_data_set_options(test_app_list_data_t *data,
+    const char **options, int index
+){
     int length = 0;
     for(; options[length]; length++);
 
-    *index_ptr = _remainder(index, length);
-    *length_ptr = length;
+    data->options = options;
+    data->options_index = _remainder(index, length);
+    data->options_length = length;
 }
 
 static void _console_write_bar(console_t *console, int index, int length){
@@ -73,6 +79,7 @@ void test_app_list_init(test_app_list_t *list,
     const char *title, test_app_list_t *prev,
     int index_x, int index_y,
     void *data,
+    test_app_list_callback_t *step,
     test_app_list_callback_t *render,
     test_app_list_callback_t *select_item,
     test_app_list_callback_t *cleanup
@@ -83,6 +90,7 @@ void test_app_list_init(test_app_list_t *list,
     list->index_x = index_x;
     list->index_y = index_y;
     list->data = data;
+    list->step = step;
     list->render = render;
     list->select_item = select_item;
     list->cleanup = cleanup;
@@ -115,90 +123,125 @@ void test_app_list_data_cleanup(test_app_list_data_t *data){
     /* Nuthin */
 }
 
-
-/*******************************
-* TEST_APP_LIST_DATA CALLBACKS *
-*******************************/
-
 int test_app_list_cleanup_data(test_app_list_t *list){
+    /* (This is a list->cleanup callback) */
     test_app_list_data_t *data = list->data;
     test_app_list_data_cleanup(data);
     free(data);
     return 0;
 }
 
+
+/*********************
+* TEST_APP_LIST_MAPS *
+*********************/
+
 const char *test_app_list_maps_options[] = {
     "List bodies",
+    "List submaps (TODO)",
     NULL
 };
 
-int test_app_list_maps_render(test_app_list_t *list){
+int test_app_open_list_maps(test_app_t *app, body_t *body, hexmap_t *map){
+    test_app_list_data_t *new_data = test_app_list_data_create(app);
+    if(new_data == NULL)return 1;
+
+    if(body != NULL)map = body->map;
+    new_data->body = body;
+    new_data->map = map;
+    return test_app_open_list(app, "Maps",
+        map? hexgame_get_map_index(&app->hexgame, map): 0, 0,
+        new_data,
+        &test_app_list_maps_step,
+        &test_app_list_maps_render,
+        &test_app_list_maps_select_item,
+        &test_app_list_cleanup_data);
+}
+
+int test_app_list_maps_step(test_app_list_t *list){
     test_app_list_data_t *data = list->data;
     hexgame_t *game = &data->app->hexgame;
-    int length = game->maps_len;
-    int index = _remainder(list->index_x, length);
+    data->length = game->maps_len;
+    data->index = _remainder(list->index_x, data->length);
+    data->item = data->length > 0? game->maps[data->index]: NULL;
+    test_app_list_data_set_options(data,
+        test_app_list_maps_options, list->index_y);
+    return 0;
+}
 
+int test_app_list_maps_render(test_app_list_t *list){
+    test_app_list_data_t *data = list->data;
     console_t *console = &data->app->console;
-    _console_write_bar(console, index, length);
-    if(length == 0)return 0;
-
-    hexmap_t *map = game->maps[index];
-
-    _console_write_field(console, "Name", map->name);
-
-    const char **options = test_app_list_maps_options;
-    int options_index, options_length;
-    _get_options_index_and_length(options, list->index_y,
-        &options_index, &options_length);
-    _console_write_options(console, options,
-        options_index, options_length);
+    _console_write_bar(console, data->index, data->length);
+    hexmap_t *map = data->item;
+    if(map != NULL){
+        _console_write_field(console, "Name", map->name);
+        _console_write_options(console, data->options,
+            data->options_index, data->options_length);
+    }
     return 0;
 }
 
 int test_app_list_maps_select_item(test_app_list_t *list){
     test_app_list_data_t *data = list->data;
-    hexgame_t *game = &data->app->hexgame;
-    int length = game->maps_len;
-    int index = _remainder(list->index_x, length);
-    if(length == 0)return 0;
-
-    hexmap_t *map = game->maps[index];
-
-    const char **options = test_app_list_maps_options;
-    int options_index, options_length;
-    _get_options_index_and_length(options, list->index_y,
-        &options_index, &options_length);
-
-    switch(options_index){
-        case 0: {
-            test_app_list_data_t *new_data = test_app_list_data_create(data->app);
-            if(new_data == NULL)return 1;
-
-            new_data->map = map;
-            return test_app_open_list(data->app, "Bodies",
-                0, 0,
-                new_data,
-                &test_app_list_bodies_render,
-                &test_app_list_bodies_select_item,
-                &test_app_list_cleanup_data);
-        } break;
+    hexmap_t *map = data->item;
+    if(map == NULL)return 0;
+    switch(data->options_index){
+        case 0: return test_app_open_list_bodies(data->app, NULL, map);
+        default: break;
     }
+    return 0;
+}
+
+
+/***********************
+* TEST_APP_LIST_BODIES *
+***********************/
+
+const char *test_app_list_bodies_options[] = {
+    "Set camera target (TODO)",
+    "Open stateset (TODO)",
+    NULL
+};
+
+int test_app_open_list_bodies(test_app_t *app, body_t *body, hexmap_t *map){
+    test_app_list_data_t *new_data = test_app_list_data_create(app);
+    if(new_data == NULL)return 1;
+
+    if(body != NULL)map = body->map;
+    new_data->body = body;
+    new_data->map = map;
+    return test_app_open_list(app, "Bodies",
+        body? body_get_index(body): 0, 0,
+        new_data,
+        &test_app_list_bodies_step,
+        &test_app_list_bodies_render,
+        &test_app_list_bodies_select_item,
+        &test_app_list_cleanup_data);
+}
+
+int test_app_list_bodies_step(test_app_list_t *list){
+    test_app_list_data_t *data = list->data;
+    hexmap_t *map = data->map? data->map: data->app->hexgame.maps[0];
+    data->length = map->bodies_len;
+    data->index = _remainder(list->index_x, data->length);
+    data->item = data->length > 0? map->bodies[data->index]: NULL;
+    test_app_list_data_set_options(data,
+        test_app_list_bodies_options, list->index_y);
     return 0;
 }
 
 int test_app_list_bodies_render(test_app_list_t *list){
     test_app_list_data_t *data = list->data;
-    hexmap_t *map = data->map? data->map: data->app->hexgame.maps[0];
-    int length = map->bodies_len;
-    int index = _remainder(list->index_x, length);
-
     console_t *console = &data->app->console;
-    _console_write_bar(console, index, length);
-    if(length == 0)return 0;
-
-    body_t *body = map->bodies[index];
-
-    _console_write_field(console, "Stateset", body->stateset.filename);
+    _console_write_bar(console, data->index, data->length);
+    body_t *body = data->item;
+    if(body != NULL){
+        _console_write_field(console, "Stateset", body->stateset.filename);
+        _console_write_field(console, "State", body->state->name);
+        _console_write_options(console, data->options,
+            data->options_index, data->options_length);
+    }
     return 0;
 }
 
@@ -206,41 +249,116 @@ int test_app_list_bodies_select_item(test_app_list_t *list){
     return 0;
 }
 
-int test_app_list_players_render(test_app_list_t *list){
+
+/************************
+* TEST_APP_LIST_PLAYERS *
+************************/
+
+const char *test_app_list_players_options[] = {
+    "Open body",
+    NULL
+};
+
+int test_app_open_list_players(test_app_t *app){
+    test_app_list_data_t *new_data = test_app_list_data_create(app);
+    if(new_data == NULL)return 1;
+
+    return test_app_open_list(app, "Players",
+        0, 0,
+        new_data,
+        &test_app_list_players_step,
+        &test_app_list_players_render,
+        &test_app_list_players_select_item,
+        &test_app_list_cleanup_data);
+}
+
+int test_app_list_players_step(test_app_list_t *list){
     test_app_list_data_t *data = list->data;
     hexgame_t *game = &data->app->hexgame;
-    int length = game->players_len;
-    int index = _remainder(list->index_x, length);
+    data->length = game->players_len;
+    data->index = _remainder(list->index_x, data->length);
+    data->item = data->length > 0? game->players[data->index]: NULL;
+    test_app_list_data_set_options(data,
+        test_app_list_players_options, list->index_y);
+    return 0;
+}
 
+int test_app_list_players_render(test_app_list_t *list){
+    test_app_list_data_t *data = list->data;
     console_t *console = &data->app->console;
-    _console_write_bar(console, index, length);
-    if(length == 0)return 0;
-
-    player_t *player = game->players[index];
-    body_t *body = player->body;
-
-    _console_write_field(console, "Stateset", body? body->stateset.filename: NULL);
+    _console_write_bar(console, data->index, data->length);
+    player_t *player = data->item;
+    if(player != NULL){
+        body_t *body = player->body;
+        _console_write_field(console, "Stateset", body? body->stateset.filename: NULL);
+        _console_write_field(console, "State", body? body->state->name: NULL);
+        _console_write_options(console, data->options,
+            data->options_index, data->options_length);
+    }
     return 0;
 }
 
 int test_app_list_players_select_item(test_app_list_t *list){
+    test_app_list_data_t *data = list->data;
+    player_t *player = data->item;
+    if(player == NULL)return 0;
+    switch(data->options_index){
+        case 0: if(player->body){
+            return test_app_open_list_bodies(data->app, player->body, NULL);
+        } break;
+        default: break;
+    }
+    return 0;
+}
+
+
+
+/***********************
+* TEST_APP_LIST_ACTORS *
+***********************/
+
+const char *test_app_list_actors_options[] = {
+    NULL
+};
+
+int test_app_open_list_actors(test_app_t *app){
+    test_app_list_data_t *new_data = test_app_list_data_create(app);
+    if(new_data == NULL)return 1;
+
+    return test_app_open_list(app, "Actors",
+        0, 0,
+        new_data,
+        &test_app_list_actors_step,
+        &test_app_list_actors_render,
+        &test_app_list_actors_select_item,
+        &test_app_list_cleanup_data);
+}
+
+int test_app_list_actors_step(test_app_list_t *list){
+    test_app_list_data_t *data = list->data;
+    hexgame_t *game = &data->app->hexgame;
+    data->length = game->actors_len;
+    data->index = _remainder(list->index_x, data->length);
+    data->item = data->length > 0? game->actors[data->index]: NULL;
+    test_app_list_data_set_options(data,
+        test_app_list_actors_options, list->index_y);
     return 0;
 }
 
 int test_app_list_actors_render(test_app_list_t *list){
     test_app_list_data_t *data = list->data;
-    hexgame_t *game = &data->app->hexgame;
-    int length = game->actors_len;
-    int index = _remainder(list->index_x, length);
-
     console_t *console = &data->app->console;
-    _console_write_bar(console, index, length);
-    if(length == 0)return 0;
-
-    actor_t *actor = game->actors[index];
-    body_t *body = actor->body;
-
-    _console_write_field(console, "Stateset", body? body->stateset.filename: NULL);
+    _console_write_bar(console, data->index, data->length);
+    actor_t *actor = data->item;
+    if(actor != NULL){
+        body_t *body = actor->body;
+        _console_write_field(console, "Stateset", actor->stateset.filename);
+        _console_write_field(console, "State", actor->state->name);
+        _console_write_field(console, "Body stateset", body? body->stateset.filename: NULL);
+        _console_write_field(console, "Body state", body? body->state->name: NULL);
+        _console_write_options(console, data->options,
+            data->options_index, data->options_length);
+    }
     return 0;
 }
 

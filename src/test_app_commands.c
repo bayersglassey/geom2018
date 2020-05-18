@@ -66,58 +66,21 @@ static int _test_app_command_cls(test_app_t *app, fus_lexer_t *lexer, bool *lexe
 }
 
 static int _test_app_command_list_maps(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    test_app_list_data_t *data = test_app_list_data_create(app);
-    if(data == NULL)return 1;
-
     body_t *body = app->camera->body;
-    hexmap_t *map = body? body->map: NULL;
-    return test_app_open_list(app, "Maps",
-        map? hexgame_get_map_index(&app->hexgame, map): 0, 0,
-        data,
-        &test_app_list_maps_render,
-        &test_app_list_maps_select_item,
-        &test_app_list_cleanup_data);
+    return test_app_open_list_maps(app, body, NULL);
 }
 
 static int _test_app_command_list_bodies(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    test_app_list_data_t *data = test_app_list_data_create(app);
-    if(data == NULL)return 1;
-
     body_t *body = app->camera->body;
-    data->map = body? body->map: NULL;
-    return test_app_open_list(app, "Bodies",
-        body? body_get_index(body): 0, 0,
-        data,
-        &test_app_list_bodies_render,
-        &test_app_list_bodies_select_item,
-        &test_app_list_cleanup_data);
-    return 0;
+    return test_app_open_list_bodies(app, body, NULL);
 }
 
 static int _test_app_command_list_players(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    test_app_list_data_t *data = test_app_list_data_create(app);
-    if(data == NULL)return 1;
-
-    return test_app_open_list(app, "Players",
-        0, 0,
-        data,
-        &test_app_list_players_render,
-        &test_app_list_players_select_item,
-        &test_app_list_cleanup_data);
-    return 0;
+    return test_app_open_list_players(app);
 }
 
 static int _test_app_command_list_actors(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    test_app_list_data_t *data = test_app_list_data_create(app);
-    if(data == NULL)return 1;
-
-    return test_app_open_list(app, "Actors",
-        0, 0,
-        data,
-        &test_app_list_actors_render,
-        &test_app_list_actors_select_item,
-        &test_app_list_cleanup_data);
-    return 0;
+    return test_app_open_list_actors(app);
 }
 
 static int _test_app_command_add_player(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
