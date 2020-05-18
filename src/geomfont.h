@@ -19,12 +19,14 @@ typedef struct geomfont {
     char *name;
     font_t *font;
 
-    struct prismelrenderer *prend;
     struct rendergraph *char_rgraphs[FONT_N_CHARS];
     vec_t vx;
     vec_t vy;
 
     bool autoupper;
+
+    /* Weakrefs */
+    struct prismelrenderer *prend;
 } geomfont_t;
 
 void geomfont_cleanup(geomfont_t *geomfont);

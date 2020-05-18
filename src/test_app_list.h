@@ -58,6 +58,8 @@ void test_app_list_cleanup(test_app_list_t *list);
 *********************/
 
 typedef struct test_app_list_data {
+    /* Weakrefs */
+
     struct test_app *app;
 
     /* Now a bag of fields which might be useful depending on what you're

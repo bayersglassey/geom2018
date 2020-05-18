@@ -23,11 +23,15 @@ typedef struct hexmap_tileset_entry {
         /* How tiles' positions should affect the frame offset of
         their animation.
         For now, should basically be treated as a bool (0/1). */
+
+    /* Weakrefs */
     rendergraph_t *rgraphs[3];
 } hexmap_tileset_entry_t;
 
 typedef struct hexmap_tileset {
     char *name;
+
+    /* Weakrefs */
     ARRAY_DECL(hexmap_tileset_entry_t*, vert_entries)
     ARRAY_DECL(hexmap_tileset_entry_t*, edge_entries)
     ARRAY_DECL(hexmap_tileset_entry_t*, face_entries)
@@ -132,13 +136,16 @@ typedef struct hexcollmap {
     int h;
     int ox;
     int oy;
-    vecspace_t *space;
     hexcollmap_tile_t *tiles;
     ARRAY_DECL(hexmap_recording_t*, recordings)
     ARRAY_DECL(hexmap_rendergraph_t*, rendergraphs)
+
+    /* Weakrefs */
+    vecspace_t *space;
 } hexcollmap_t;
 
 typedef struct hexmap_collision_elem {
+    /* Weakrefs */
     struct hexmap_submap *submap;
     hexcollmap_elem_t *elem;
 } hexmap_collision_elem_t;
@@ -194,18 +201,18 @@ enum hexmap_door_type {
 
 typedef struct hexmap_door {
     int type; /* enum hexmap_door_type */
-
-    /* elem: we use this to mark door's position within its submap's
-    collmap, which is kind of silly but works well so long as
-    hexmap_collision_t also stores hexcollmap_elem_t* instead of
-    actual positions. */
-    hexcollmap_elem_t *elem;
-
     union {
         location_t location; /* type == HEXMAP_DOOR_TYPE_RESPAWN or HEXMAP_DOOR_TYPE_NEW_GAME */
         int n_players; /* type == HEXMAP_DOOR_TYPE_PLAYERS */
         char *s; /* type == HEXMAP_DOOR_TYPE_CAMERA_MAPPER */
     } u;
+
+    /* Weakrefs */
+    hexcollmap_elem_t *elem;
+        /* We use this to mark door's position within its submap's
+        collmap, which is kind of silly but works well so long as
+        hexmap_collision_t also stores hexcollmap_elem_t* instead of
+        actual positions. */
 } hexmap_door_t;
 
 typedef struct hexmap_submap {
@@ -219,26 +226,29 @@ typedef struct hexmap_submap {
         */
     char *filename;
     hexcollmap_t collmap;
-    rendergraph_t *rgraph_map;
-    prismelmapper_t *mapper;
     palette_t palette;
     hexmap_tileset_t tileset;
-
     ARRAY_DECL(hexmap_door_t*, doors)
+
+    /* Weakrefs */
+    rendergraph_t *rgraph_map;
+    prismelmapper_t *mapper;
 } hexmap_submap_t;
 
 typedef struct hexmap {
     char *name;
-    struct hexgame *game;
-    vecspace_t *space; /* Always hexspace! */
-    vec_t spawn;
 
-    prismelrenderer_t *prend;
+    vec_t spawn;
     vec_t unit;
 
     ARRAY_DECL(struct body*, bodies)
     ARRAY_DECL(hexmap_submap_t*, submaps)
     ARRAY_DECL(hexmap_recording_t*, recordings)
+
+    /* Weakrefs */
+    struct hexgame *game;
+    vecspace_t *space; /* Always hexspace! */
+    prismelrenderer_t *prend;
 } hexmap_t;
 
 
