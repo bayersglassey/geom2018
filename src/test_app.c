@@ -146,6 +146,10 @@ void test_app_cleanup(test_app_t *app){
     hexgame_cleanup(&app->hexgame);
     font_cleanup(&app->font);
     sdlfont_cleanup(&app->sdlfont);
+    if(app->list){
+        test_app_list_cleanup(app->list);
+        free(app->list);
+    }
 }
 
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,

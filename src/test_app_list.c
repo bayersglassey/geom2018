@@ -89,6 +89,10 @@ void test_app_list_init(test_app_list_t *list,
 }
 
 void test_app_list_cleanup(test_app_list_t *list){
+    if(list->prev){
+        test_app_list_cleanup(list->prev);
+        free(list->prev);
+    }
     if(list->cleanup){
         int err = list->cleanup(list);
         /* But do nothing with err, because we return void */
