@@ -25,16 +25,24 @@ static int _remainder(int a, int b){
     return rem;
 }
 
-static void _get_options_index_and_length(const char **options, int index,
-    int *index_ptr, int *length_ptr
-){
-}
-
 static void test_app_list_data_set_options(test_app_list_data_t *data,
     const char **options, int index
 ){
     int length = 0;
     for(; options[length]; length++);
+
+    data->options = options;
+    data->options_index = _remainder(index, length);
+    data->options_length = length;
+}
+
+static void test_app_list_data_set_options_stateset(test_app_list_data_t *data,
+    const char **options, int index,
+    stateset_t *stateset, state_t *cur_state
+){
+    int length = 0;
+    for(; options[length]; length++);
+    if(stateset)length += stateset->states_len;
 
     data->options = options;
     data->options_index = _remainder(index, length);
@@ -61,15 +69,36 @@ static void _console_write_field(console_t *console, const char *name, const cha
     console_newline(console);
 }
 
-static void _console_write_options(console_t *console, const char **options,
-    int index, int length
+static void _console_write_options(console_t *console,
+    const char **options, int index, int length
 ){
     console_newline(console);
-    for(int i = 0; i < length; i++){
-        const char *option = options[i];
-        console_write_char(console, i == index? 'X': '-');
+
+    /* NOTE: we must correctly handle the case where passed length is greater
+    than number of options (so e.g. caller can render more options dynamically
+    under these ones) */
+    int i = 0;
+    for(const char *option; option = options[i]; i++){
+        console_write_char(console, i == index? '>': '-');
         console_write_char(console, ' ');
         console_write_msg(console, option);
+        console_newline(console);
+    }
+}
+
+static void _console_write_options_stateset(console_t *console,
+    const char **options, int index, int length,
+    stateset_t *stateset, state_t *cur_state
+){
+    _console_write_options(console, options, index, length);
+
+    console_write_line(console, "  *** States: ***");
+    int options_length = length - stateset->states_len;
+    for(int i = 0; i < stateset->states_len; i++){
+        state_t *state = stateset->states[i];
+        console_write_char(console, options_length + i == index? '>': '-');
+        console_write_char(console, state == cur_state? '>': ' ');
+        console_write_msg(console, state->name);
         console_newline(console);
     }
 }
@@ -344,7 +373,19 @@ int test_app_list_players_select_item(test_app_list_t *list){
 
 const char *test_app_list_actors_options[] = {
     "Open body",
+    "State picker",
     NULL
+};
+
+const char *test_app_list_actors_options_statepicker[] = {
+    "Back",
+    NULL
+};
+
+enum {
+    TEST_APP_LIST_ACTORS_MODE_DEFAULT,
+    TEST_APP_LIST_ACTORS_MODE_STATEPICKER,
+    TEST_APP_LIST_ACTORS_MODES
 };
 
 int test_app_open_list_actors(test_app_t *app){
@@ -366,8 +407,15 @@ int test_app_list_actors_step(test_app_list_t *list){
     data->length = game->actors_len;
     data->index = _remainder(list->index_x, data->length);
     data->item = data->length > 0? game->actors[data->index]: NULL;
-    test_app_list_data_set_options(data,
-        test_app_list_actors_options, list->index_y);
+    actor_t *actor = data->item;
+    if(data->mode == TEST_APP_LIST_ACTORS_MODE_STATEPICKER){
+        test_app_list_data_set_options_stateset(data,
+            test_app_list_actors_options_statepicker, list->index_y,
+            actor? &actor->stateset: NULL, actor? actor->state: NULL);
+    }else{
+        test_app_list_data_set_options(data,
+            test_app_list_actors_options, list->index_y);
+    }
     return 0;
 }
 
@@ -382,21 +430,52 @@ int test_app_list_actors_render(test_app_list_t *list){
         _console_write_field(console, "State", actor->state->name);
         _console_write_field(console, "Body stateset", body? body->stateset.filename: NULL);
         _console_write_field(console, "Body state", body? body->state->name: NULL);
-        _console_write_options(console, data->options,
-            data->options_index, data->options_length);
+        if(data->mode == TEST_APP_LIST_ACTORS_MODE_STATEPICKER){
+            _console_write_options_stateset(console, data->options,
+                data->options_index, data->options_length,
+                &actor->stateset, actor->state);
+        }else{
+            _console_write_options(console, data->options,
+                data->options_index, data->options_length);
+        }
     }
     return 0;
 }
 
 int test_app_list_actors_select_item(test_app_list_t *list){
+    int err;
     test_app_list_data_t *data = list->data;
     actor_t *actor = data->item;
     if(actor == NULL)return 0;
-    switch(data->options_index){
-        case 0: if(actor->body){
-            return test_app_open_list_bodies(data->app, actor->body, NULL);
-        } break;
-        default: break;
+    body_t *body = actor->body;
+    if(body == NULL)return 0;
+    if(data->mode == TEST_APP_LIST_ACTORS_MODE_STATEPICKER){
+        switch(data->options_index){
+            case 0: {
+                data->mode = TEST_APP_LIST_ACTORS_MODE_DEFAULT;
+                list->index_y = 0;
+            } break;
+            default: {
+                if(actor->stateset.states_len == 0)return 0;
+                int options_length = data->options_length - actor->stateset.states_len;
+                int state_index = data->options_index - options_length;
+                state_t *state = actor->stateset.states[state_index];
+                err = actor_set_state(actor, state->name);
+                if(err)return err;
+                if(body != NULL)body->recording.action = 0;
+            } break;
+        }
+    }else{
+        switch(data->options_index){
+            case 0: {
+                return test_app_open_list_bodies(data->app, body, NULL);
+            } break;
+            case 1: {
+                data->mode = TEST_APP_LIST_ACTORS_MODE_STATEPICKER;
+                list->index_y = 0;
+            } break;
+            default: break;
+        }
     }
     return 0;
 }

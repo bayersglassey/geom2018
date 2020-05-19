@@ -66,6 +66,10 @@ typedef struct test_app_list_data {
     int length;
     void *item;
 
+    int mode;
+        /* mode: the meaning of its value is defined by the set of callbacks
+        passed to app_list_t. */
+
     const char **options;
     int options_index;
     int options_length;
