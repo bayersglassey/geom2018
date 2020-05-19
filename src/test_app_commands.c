@@ -25,6 +25,7 @@ static bool _startswith(const char *s, const char *prefix){
 
 typedef struct test_app_command {
     const char *name;
+    const char *alt_name;
     const char *params;
     int (*action)(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr);
 } test_app_command_t;
@@ -32,7 +33,15 @@ typedef struct test_app_command {
 static void test_app_command_write_to_console(
     test_app_command_t *command, console_t *console
 ){
-    console_write_msg(console, command->name);
+    if(command->alt_name){
+        console_write_char(console, '(');
+        console_write_msg(console, command->name);
+        console_write_msg(console, " | ");
+        console_write_msg(console, command->alt_name);
+        console_write_char(console, ')');
+    }else{
+        console_write_msg(console, command->name);
+    }
     if(command->params){
         console_write_msg(console, " ");
         console_write_msg(console, command->params);
@@ -328,24 +337,29 @@ lexer_err:
 }
 
 
-#define COMMAND(NAME, PARAMS) (test_app_command_t){#NAME, PARAMS, &_test_app_command_##NAME}
-#define NULLCOMMAND (test_app_command_t){NULL, NULL, NULL}
+#define COMMAND(NAME, ALT_NAME, PARAMS) (test_app_command_t){ \
+    .name = #NAME, \
+    .alt_name = ALT_NAME, \
+    .params = PARAMS, \
+    .action = &_test_app_command_##NAME \
+}
+#define NULLCOMMAND (test_app_command_t){0}
 test_app_command_t _test_app_commands[] = {
-    COMMAND(exit, NULL),
-    COMMAND(help, NULL),
-    COMMAND(cls, NULL),
-    COMMAND(list_maps, NULL),
-    COMMAND(list_bodies, "[map_index]"),
-    COMMAND(list_players, NULL),
-    COMMAND(list_actors, NULL),
-    COMMAND(add_player, "[stateset]"),
-    COMMAND(edit_player, "player_index [stateset]"),
-    COMMAND(save, "[filename]"),
-    COMMAND(dump, "[rgraph|prend|nobitmaps|surfaces ...]"),
-    COMMAND(map, "mapper rgraph [resulting_rgraph]"),
-    COMMAND(renderall, NULL),
-    COMMAND(get_shape, "shape"),
-    COMMAND(mode, "game|editor"),
+    COMMAND(exit, NULL, NULL),
+    COMMAND(help, NULL, NULL),
+    COMMAND(cls, NULL, NULL),
+    COMMAND(list_maps, "lm", NULL),
+    COMMAND(list_bodies, "lb", "[map_index]"),
+    COMMAND(list_players, "lp", NULL),
+    COMMAND(list_actors, "la", NULL),
+    COMMAND(add_player, NULL, "[stateset]"),
+    COMMAND(edit_player, NULL, "player_index [stateset]"),
+    COMMAND(save, NULL, "[filename]"),
+    COMMAND(dump, NULL, "[rgraph | prend | nobitmaps | surfaces ...]"),
+    COMMAND(map, NULL, "mapper rgraph [resulting_rgraph]"),
+    COMMAND(renderall, NULL, NULL),
+    COMMAND(get_shape, NULL, "shape"),
+    COMMAND(mode, NULL, "(game | editor)"),
     NULLCOMMAND
 };
 
@@ -361,7 +375,10 @@ static int _test_app_process_console_input(test_app_t *app, fus_lexer_t *lexer){
 
     test_app_command_t *command;
     for(command = _test_app_commands; command->name; command++){
-        if(fus_lexer_got(lexer, command->name)){
+        if(
+            fus_lexer_got(lexer, command->name) ||
+            (command->alt_name != NULL && fus_lexer_got(lexer, command->alt_name))
+        ){
             err = fus_lexer_next(lexer);
             if(err)goto lexer_err;
             break;
@@ -410,7 +427,12 @@ void test_app_write_console_commands(test_app_t *app, const char *prefix){
         command->name;
         command++
     ){
-        if(prefix && !_startswith(command->name, prefix))continue;
+        if(prefix != NULL && !(
+            _startswith(command->name, prefix) ||
+            (command->alt_name != NULL && _startswith(command->alt_name, prefix))
+        )){
+            continue;
+        }
         console_write_msg(&app->console, " * ");
         test_app_command_write_to_console(command, &app->console);
         console_write_msg(&app->console, "\n");
