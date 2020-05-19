@@ -33,6 +33,7 @@ int camera_init(camera_t *camera, hexgame_t *game, hexmap_t *map,
 
     camera->follow = false;
     camera->smooth_scroll = true;
+    camera->mapper = NULL;
 
     memset(camera->colors, 0, sizeof(camera->colors));
     camera->colors_fade = 0;
@@ -49,6 +50,11 @@ void camera_set(camera_t *camera, vec_t pos,
     vec_cpy(space->dims, camera->scrollpos, pos);
     camera->rot = rot;
     camera->should_reset = true;
+}
+
+void camera_set_body(camera_t *camera, body_t *body){
+    camera->body = body;
+    camera->mapper = NULL;
 }
 
 void camera_colors_flash(camera_t *camera, Uint8 r, Uint8 g, Uint8 b,
@@ -95,8 +101,12 @@ int camera_step(camera_t *camera){
             }
 #endif
 
-            err = palette_reset(&camera->cur_submap->palette);
-            if(err)return err;
+            /* camera->cur_submap could be NULL if it's following a weird
+            body like a coin... */
+            if(camera->cur_submap != NULL){
+                err = palette_reset(&camera->cur_submap->palette);
+                if(err)return err;
+            }
         }
     }
 
@@ -120,21 +130,27 @@ int camera_step(camera_t *camera){
     }
 #endif
 
-    err = camera_colors_step(camera, &camera->cur_submap->palette);
-    if(err)return err;
+    if(camera->cur_submap != NULL){
+        err = camera_colors_step(camera, &camera->cur_submap->palette);
+        if(err)return err;
+    }
 
     /* Set camera */
     int camera_type = -1;
     if(
         camera->follow ||
         (body && body->state && body->state->flying)
-    )camera_type = 1;
-    else if(camera->cur_submap != NULL){
-        camera_type = camera->cur_submap->camera_type;}
+    ){
+        camera_type = 1;
+    }else if(camera->cur_submap != NULL){
+        camera_type = camera->cur_submap->camera_type;
+    }
     if(camera_type == 0){
         /* camera determined by submap */
-        vec_cpy(space->dims, camera->pos,
-            camera->cur_submap->camera_pos);
+        if(camera->cur_submap != NULL){
+            vec_cpy(space->dims, camera->pos,
+                camera->cur_submap->camera_pos);
+        }
         camera->rot = 0;
     }else if(camera_type == 1){
         /* body-following camera */
@@ -198,14 +214,12 @@ int camera_render(camera_t *camera,
     vec_t camera_renderpos;
     vec4_vec_from_hexspace(camera_renderpos, camera->scrollpos);
 
-    hexmap_submap_t *submap = camera->cur_submap;
-
     /* Figure out which prismelmapper to use when rendering */
     prismelmapper_t *mapper = NULL;
     if(camera->mapper != NULL){
         mapper = camera->mapper;
-    }else if(submap != NULL){
-        mapper = submap->mapper;
+    }else if(camera->cur_submap != NULL){
+        mapper = camera->cur_submap->mapper;
     }
 
     /* Render map's submaps */
@@ -426,8 +440,6 @@ int hexgame_step(hexgame_t *game){
     game->frame_i++;
     if(game->frame_i == MAX_FRAME_I)game->frame_i = 0;
 
-    vecspace_t *space = game->space;
-
     /* Reset all camera->mapper for this step */
     for(int i = 0; i < game->cameras_len; i++){
         camera_t *camera = game->cameras[i];
@@ -454,6 +466,12 @@ int hexgame_step(hexgame_t *game){
         err = player_step(player, game);
         if(err)return err;
     }
+
+    return 0;
+}
+
+int hexgame_step_cameras(hexgame_t *game){
+    int err;
 
     /* Do 1 step for each camera */
     for(int i = 0; i < game->cameras_len; i++){

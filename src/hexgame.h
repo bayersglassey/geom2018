@@ -283,6 +283,7 @@ void camera_cleanup(camera_t *camera);
 int camera_init(camera_t *camera, struct hexgame *game, struct hexmap *map,
     body_t *body);
 void camera_set(camera_t *camera, vec_t pos, rot_t rot);
+void camera_set_body(camera_t *camera, body_t *body);
 void camera_colors_flash(camera_t *camera, Uint8 r, Uint8 g, Uint8 b,
     int percent);
 void camera_colors_flash_white(camera_t *camera, int percent);
@@ -347,6 +348,7 @@ int hexgame_reset_players(hexgame_t *game, int reset_level,
     hexmap_t *reset_map);
 int hexgame_process_event(hexgame_t *game, SDL_Event *event);
 int hexgame_step(hexgame_t *game);
+int hexgame_step_cameras(hexgame_t *game);
 
 
 #endif

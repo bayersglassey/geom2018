@@ -58,6 +58,7 @@ typedef struct test_app {
 
     bool hexgame_running;
     bool show_controls;
+    bool show_console;
     int mode;
 
     int x0;

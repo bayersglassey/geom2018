@@ -199,7 +199,7 @@ int test_app_list_maps_select_item(test_app_list_t *list){
 ***********************/
 
 const char *test_app_list_bodies_options[] = {
-    "Set camera target (TODO)",
+    "Set camera target",
     "Open stateset (TODO)",
     NULL
 };
@@ -246,6 +246,15 @@ int test_app_list_bodies_render(test_app_list_t *list){
 }
 
 int test_app_list_bodies_select_item(test_app_list_t *list){
+    test_app_list_data_t *data = list->data;
+    body_t *body = data->item;
+    if(body == NULL)return 0;
+    switch(data->options_index){
+        case 0: {
+            camera_set_body(data->app->camera, body);
+        } break;
+        default: break;
+    }
     return 0;
 }
 

@@ -271,6 +271,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->loop = true;
     app->hexgame_running = true;
     app->show_controls = true;
+    app->show_console = false;
     app->mode = TEST_APP_MODE_GAME;
 
     test_app_init_input(app);
@@ -414,7 +415,7 @@ static int test_app_render_game(test_app_t *app){
             }
         }
 
-        if(app->hexgame_running && app->show_controls){
+        if(app->show_controls && !app->show_console){
             FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y * app->font.char_h),
                 "*Controls:\n"
                 "  Left/right  -> Walk\n"
@@ -425,11 +426,12 @@ static int test_app_render_game(test_app_t *app){
                 "  1           -> Return to checkpoint\n"
                 "  Enter       -> Show/hide this message\n"
                 "  Escape      -> Quit\n"
+                "  F5          -> Pause/unpause\n"
             );
-            line_y += 9;
+            line_y += 10;
         }
 
-        if(!app->hexgame_running){
+        if(app->show_console){
             err = blit_console(app, app->surface, 0, line_y * app->font.char_h);
             if(err)return err;
         }
@@ -560,6 +562,12 @@ static int test_app_process_event_game(test_app_t *app, SDL_Event *event){
         if(event->key.keysym.sym == SDLK_RETURN){
             if(app->hexgame_running){
                 app->show_controls = !app->show_controls;
+            }
+        }else if(event->key.keysym.sym == SDLK_PAGEUP){
+            if(!app->hexgame_running){
+                /* Do 1 step */
+                err = hexgame_step(&app->hexgame);
+                if(err)return err;
             }
         }else if(event->key.keysym.sym == SDLK_F6){
             /* Hack, we really want to force camera->mapper to NULL, but
@@ -838,6 +846,21 @@ static int test_app_process_event_list(test_app_t *app, SDL_Event *event){
     return 0;
 }
 
+static void test_app_show_console(test_app_t *app){
+    console_write_msg(&app->console, "Welcome to debug console! Try \"help\".\n");
+    console_write_msg(&app->console, CONSOLE_START_TEXT);
+    SDL_StartTextInput();
+    app->show_console = true;
+}
+
+static void test_app_hide_console(test_app_t *app){
+    console_write_msg(&app->console, "Leaving debug console...\n");
+    SDL_StopTextInput();
+    test_app_init_input(app); /* ...? */
+    app->mode = TEST_APP_MODE_GAME;
+    app->show_console = false;
+}
+
 static int test_app_poll_events(test_app_t *app){
     int err;
 
@@ -856,17 +879,17 @@ static int test_app_poll_events(test_app_t *app){
                 app->loop = false;
                 break;
             }else if(event->key.keysym.sym == SDLK_F5){
-                if(app->hexgame_running){
+                if(event->key.keysym.mod & KMOD_CTRL){
+                    if(!app->show_console){
+                        test_app_show_console(app);
+                    }
+                }else if(app->hexgame_running){
                     app->hexgame_running = false;
-                    console_write_msg(&app->console, "Game stopped\n");
-                    console_write_msg(&app->console, CONSOLE_START_TEXT);
-                    SDL_StartTextInput();
                 }else{
                     app->hexgame_running = true;
-                    app->mode = TEST_APP_MODE_GAME;
-                    test_app_init_input(app);
-                    console_write_msg(&app->console, "Game started\n");
-                    SDL_StopTextInput();
+                    if(app->show_console){
+                        test_app_hide_console(app);
+                    }
                 }
                 continue;
             }else if(event->key.keysym.sym == SDLK_F11){
@@ -902,12 +925,16 @@ static int test_app_poll_events(test_app_t *app){
         if(app->hexgame_running){
             err = hexgame_process_event(game, event);
             if(err)return err;
-        }else if(app->list){
-            err = test_app_process_event_list(app, event);
-            if(err)return err;
-        }else{
-            err = test_app_process_event_console(app, event);
-            if(err)return err;
+        }
+
+        if(app->show_console){
+            if(app->list){
+                err = test_app_process_event_list(app, event);
+                if(err)return err;
+            }else{
+                err = test_app_process_event_console(app, event);
+                if(err)return err;
+            }
         }
     }
 
@@ -962,14 +989,17 @@ int test_app_mainloop_step(test_app_t *app){
     if(app->hexgame_running){
         err = hexgame_step(game);
         if(err)return err;
-    }else{
-        if(app->list){
-            err = test_app_step_list(app);
-            if(err)return err;
-            err = test_app_render_list(app);
-            if(err)return err;
-        }
     }
+
+    if(app->list){
+        err = test_app_step_list(app);
+        if(err)return err;
+        err = test_app_render_list(app);
+        if(err)return err;
+    }
+
+    err = hexgame_step_cameras(game);
+    if(err)return err;
 
     err = test_app_render(app);
     if(err)return err;
