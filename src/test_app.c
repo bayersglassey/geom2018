@@ -846,19 +846,30 @@ static int test_app_process_event_list(test_app_t *app, SDL_Event *event){
     return 0;
 }
 
-static void test_app_show_console(test_app_t *app){
-    console_write_msg(&app->console, "Welcome to debug console! Try \"help\".\n");
+static void test_app_start_console(test_app_t *app){
     console_write_msg(&app->console, CONSOLE_START_TEXT);
+    console_write_msg(&app->console, app->console.input);
     SDL_StartTextInput();
+}
+
+static void test_app_stop_console(test_app_t *app){
+    SDL_StopTextInput();
+    test_app_init_input(app); /* ...? */
+}
+
+static void test_app_show_console(test_app_t *app){
+    console_clear(&app->console);
+    console_write_msg(&app->console, "Welcome to debug console! Try \"help\".\n");
     app->show_console = true;
+    test_app_start_console(app);
 }
 
 static void test_app_hide_console(test_app_t *app){
+    console_newline(&app->console);
     console_write_msg(&app->console, "Leaving debug console...\n");
-    SDL_StopTextInput();
-    test_app_init_input(app); /* ...? */
     app->mode = TEST_APP_MODE_GAME;
     app->show_console = false;
+    test_app_stop_console(app);
 }
 
 static int test_app_poll_events(test_app_t *app){
@@ -879,14 +890,28 @@ static int test_app_poll_events(test_app_t *app){
                 app->loop = false;
                 break;
             }else if(event->key.keysym.sym == SDLK_F5){
-                if(event->key.keysym.mod & KMOD_CTRL){
+                bool mod_ctrl = event->key.keysym.mod & KMOD_CTRL;
+                if(mod_ctrl){
                     if(app->show_console){
                         test_app_hide_console(app);
                     }else{
                         test_app_show_console(app);
+                        app->hexgame_running = false;
                     }
                 }else{
                     app->hexgame_running = !app->hexgame_running;
+                    if(app->show_console){
+                        if(app->hexgame_running){
+                            test_app_stop_console(app);
+                            console_newline(&app->console);
+                            console_write_line(&app->console, "Game unpaused");
+                            console_write_line(&app->console,
+                                "(Note: console doesn't accept input while game unpaused)");
+                        }else{
+                            console_write_line(&app->console, "Game paused");
+                            test_app_start_console(app);
+                        }
+                    }
                 }
                 continue;
             }else if(event->key.keysym.sym == SDLK_F11){

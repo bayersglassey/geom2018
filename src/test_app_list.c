@@ -42,12 +42,16 @@ static void test_app_list_data_set_options(test_app_list_data_t *data,
 }
 
 static void _console_write_bar(console_t *console, int index, int length){
+#ifdef CONSOLE_WRITE_FANCY_BAR
     console_write_char(console, '[');
     for(int i = 0; i < length; i++){
         console_write_char(console, i == index? 'X': '-');
     }
     console_write_char(console, ']');
     console_newline(console);
+#else
+    console_printf(console, "[%i/%i]\n", index, length);
+#endif
 }
 
 static void _console_write_field(console_t *console, const char *name, const char *value){
@@ -311,8 +315,8 @@ int test_app_list_players_render(test_app_list_t *list){
     player_t *player = data->item;
     if(player != NULL){
         body_t *body = player->body;
-        _console_write_field(console, "Stateset", body? body->stateset.filename: NULL);
-        _console_write_field(console, "State", body? body->state->name: NULL);
+        _console_write_field(console, "Body stateset", body? body->stateset.filename: NULL);
+        _console_write_field(console, "Body state", body? body->state->name: NULL);
         _console_write_options(console, data->options,
             data->options_index, data->options_length);
     }
@@ -339,6 +343,7 @@ int test_app_list_players_select_item(test_app_list_t *list){
 ***********************/
 
 const char *test_app_list_actors_options[] = {
+    "Open body",
     NULL
 };
 
@@ -384,6 +389,15 @@ int test_app_list_actors_render(test_app_list_t *list){
 }
 
 int test_app_list_actors_select_item(test_app_list_t *list){
+    test_app_list_data_t *data = list->data;
+    actor_t *actor = data->item;
+    if(actor == NULL)return 0;
+    switch(data->options_index){
+        case 0: if(actor->body){
+            return test_app_open_list_bodies(data->app, actor->body, NULL);
+        } break;
+        default: break;
+    }
     return 0;
 }
 
