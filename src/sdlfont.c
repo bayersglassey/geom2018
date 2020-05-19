@@ -10,6 +10,7 @@
 #include "util.h"
 #include "font.h"
 #include "sdlfont.h"
+#include "generic_printf.h"
 
 
 static void get_char_coords(char c, int *char_x, int *char_y){
@@ -85,7 +86,7 @@ int sdlfont_printf(sdlfont_t *sdlfont, SDL_Surface *render_surface,
 
     sdlfont_blitter_t blitter;
     sdlfont_blitter_init(&blitter, sdlfont, render_surface, x0, y0);
-    err = font_vprintf(&sdlfont_blitter_putc_callback, &blitter,
+    err = generic_vprintf(&sdlfont_blitter_putc_callback, &blitter,
         msg, vlist);
 
     va_end(vlist);
@@ -173,6 +174,6 @@ int sdlfont_blitter_putc(sdlfont_blitter_t *blitter, char c){
 }
 
 int sdlfont_blitter_putc_callback(void *data, char c){
-    /* Callback for use with font_printf, console_blit, etc */
+    /* Callback for use with generic_printf, console_blit, etc */
     return sdlfont_blitter_putc(data, c);
 }

@@ -5,6 +5,7 @@
 
 #include "console.h"
 #include "font.h"
+#include "generic_printf.h"
 
 
 
@@ -110,6 +111,24 @@ void console_write_msg(console_t *console, const char *msg){
 void console_write_line(console_t *console, const char *msg){
     console_write_msg(console, msg);
     console_newline(console);
+}
+
+static int console_putc_callback(void *data, char c){
+    /* Callback for use with generic_printf, console_blit, etc */
+    console_write_char(data, c);
+    return 0;
+}
+
+void console_printf(console_t *console, const char *msg, ...){
+    va_list vlist;
+    va_start(vlist, msg);
+
+    int err = generic_vprintf(&console_putc_callback, console,
+        msg, vlist);
+    /* Ignore err, it can only be non-0 if our callback can return non-0,
+    which it can't: our console write functions all return void. */
+
+    va_end(vlist);
 }
 
 void console_backspace(console_t *console){

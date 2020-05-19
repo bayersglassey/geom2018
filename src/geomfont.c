@@ -11,6 +11,7 @@
 #include "geom.h"
 #include "prismelrenderer.h"
 #include "geomfont.h"
+#include "generic_printf.h"
 
 
 static char *generate_char_name(const char *base_name, const char *suffix, int i){
@@ -132,7 +133,7 @@ int geomfont_render_printf(geomfont_t *geomfont,
     geomfont_blitter_render_init(&blitter, geomfont,
         renderer, surface, pal,
         x0, y0, zoom, trf, mapper);
-    err = font_vprintf(&geomfont_blitter_putc_callback, &blitter,
+    err = generic_vprintf(&geomfont_blitter_putc_callback, &blitter,
         msg, vlist);
 
     va_end(vlist);
@@ -150,7 +151,7 @@ int geomfont_rgraph_printf(geomfont_t *geomfont,
     geomfont_blitter_t rgraph_blitter;
     geomfont_blitter_rgraph_init(&rgraph_blitter, geomfont,
         rgraph, cx, cy, trf);
-    err = font_vprintf(&geomfont_blitter_putc_callback,
+    err = generic_vprintf(&geomfont_blitter_putc_callback,
         &rgraph_blitter, msg, vlist);
 
     va_end(vlist);
@@ -331,7 +332,7 @@ int geomfont_blitter_putc(geomfont_blitter_t *blitter, char c){
 }
 
 int geomfont_blitter_putc_callback(void *data, char c){
-    /* Callback for use with font_printf, console_blit, etc */
+    /* Callback for use with generic_printf, console_blit, etc */
     return geomfont_blitter_putc(data, c);
 }
 

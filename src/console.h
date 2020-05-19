@@ -36,6 +36,7 @@ void console_newline(console_t *console);
 void console_write_char(console_t *console, char c);
 void console_write_msg(console_t *console, const char *msg);
 void console_write_line(console_t *console, const char *msg);
+void console_printf(console_t *console, const char *msg, ...);
 void console_backspace(console_t *console);
 void console_delete(console_t *console);
 void console_input_char(console_t *console, char c);
