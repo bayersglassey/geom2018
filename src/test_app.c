@@ -331,7 +331,7 @@ int test_app_set_players(test_app_t *app, int n_players){
         if(err)return err;
 
         /* Attach body to player */
-        player->body = body;
+        player_set_body(player, body);
 
         /* Move body to the respawn location */
         err = body_respawn(body,
@@ -880,16 +880,13 @@ static int test_app_poll_events(test_app_t *app){
                 break;
             }else if(event->key.keysym.sym == SDLK_F5){
                 if(event->key.keysym.mod & KMOD_CTRL){
-                    if(!app->show_console){
-                        test_app_show_console(app);
-                    }
-                }else if(app->hexgame_running){
-                    app->hexgame_running = false;
-                }else{
-                    app->hexgame_running = true;
                     if(app->show_console){
                         test_app_hide_console(app);
+                    }else{
+                        test_app_show_console(app);
                     }
+                }else{
+                    app->hexgame_running = !app->hexgame_running;
                 }
                 continue;
             }else if(event->key.keysym.sym == SDLK_F11){
@@ -925,9 +922,7 @@ static int test_app_poll_events(test_app_t *app){
         if(app->hexgame_running){
             err = hexgame_process_event(game, event);
             if(err)return err;
-        }
-
-        if(app->show_console){
+        }else if(app->show_console){
             if(app->list){
                 err = test_app_process_event_list(app, event);
                 if(err)return err;

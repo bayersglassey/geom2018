@@ -200,6 +200,8 @@ int test_app_list_maps_select_item(test_app_list_t *list){
 
 const char *test_app_list_bodies_options[] = {
     "Set camera target",
+    "Set first player",
+    "Reset recording",
     "Open stateset (TODO)",
     NULL
 };
@@ -239,6 +241,8 @@ int test_app_list_bodies_render(test_app_list_t *list){
     if(body != NULL){
         _console_write_field(console, "Stateset", body->stateset.filename);
         _console_write_field(console, "State", body->state->name);
+        _console_write_field(console, "Recording action",
+            recording_action_msg(body->recording.action));
         _console_write_options(console, data->options,
             data->options_index, data->options_length);
     }
@@ -252,6 +256,14 @@ int test_app_list_bodies_select_item(test_app_list_t *list){
     switch(data->options_index){
         case 0: {
             camera_set_body(data->app->camera, body);
+        } break;
+        case 1: {
+            player_t *player = data->app->hexgame.players[0];
+            player_set_body(player, body);
+            camera_set_body(data->app->camera, body);
+        } break;
+        case 2: {
+            recording_reset(&body->recording);
         } break;
         default: break;
     }

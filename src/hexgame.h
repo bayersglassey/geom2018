@@ -85,6 +85,8 @@ typedef struct recording {
     int offset;
 } recording_t;
 
+const char *recording_action_msg(int action);
+
 void recording_cleanup(recording_t *rec);
 void recording_reset(recording_t *rec);
 void recording_init(recording_t *rec, struct body *body,
@@ -218,6 +220,7 @@ int player_init(player_t *player, struct hexgame *game, int keymap,
     vec_t respawn_pos, rot_t respawn_rot, bool respawn_turn,
     char *respawn_map_filename, char *respawn_filename);
 
+void player_set_body(player_t *player, body_t *body);
 int player_get_index(player_t *player);
 void hexgame_player_dump(player_t *player, int depth);
 int player_reload(player_t *player, bool *file_found_ptr);

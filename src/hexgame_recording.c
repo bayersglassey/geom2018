@@ -14,6 +14,15 @@
 #include "write.h"
 
 
+const char *recording_action_msg(int action){
+    switch(action){
+        case 0: return "None";
+        case 1: return "Playing";
+        case 2: return "Recording";
+        default: return "Unknown";
+    }
+}
+
 
 /*************
  * RECORDING *
