@@ -79,6 +79,11 @@ static int _test_app_command_list_maps(test_app_t *app, fus_lexer_t *lexer, bool
     return test_app_open_list_maps(app, body, NULL);
 }
 
+static int _test_app_command_list_submaps(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
+    body_t *body = app->camera->body;
+    return test_app_open_list_submaps(app, body? body->cur_submap: NULL, body? body->map: NULL);
+}
+
 static int _test_app_command_list_bodies(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
     body_t *body = app->camera->body;
     return test_app_open_list_bodies(app, body, NULL);
@@ -349,7 +354,8 @@ test_app_command_t _test_app_commands[] = {
     COMMAND(help, NULL, NULL),
     COMMAND(cls, NULL, NULL),
     COMMAND(list_maps, "lm", NULL),
-    COMMAND(list_bodies, "lb", "[map_index]"),
+    COMMAND(list_submaps, "ls", NULL),
+    COMMAND(list_bodies, "lb", NULL),
     COMMAND(list_players, "lp", NULL),
     COMMAND(list_actors, "la", NULL),
     COMMAND(add_player, NULL, "[stateset]"),

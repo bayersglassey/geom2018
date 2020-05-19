@@ -97,6 +97,11 @@ int test_app_list_maps_step(test_app_list_t *list);
 int test_app_list_maps_render(test_app_list_t *list);
 int test_app_list_maps_select_item(test_app_list_t *list);
 
+int test_app_open_list_submaps(struct test_app *app, hexmap_submap_t *submap, hexmap_t *map);
+int test_app_list_submaps_step(test_app_list_t *list);
+int test_app_list_submaps_render(test_app_list_t *list);
+int test_app_list_submaps_select_item(test_app_list_t *list);
+
 int test_app_open_list_bodies(struct test_app *app, body_t *body, hexmap_t *map);
 int test_app_list_bodies_step(test_app_list_t *list);
 int test_app_list_bodies_render(test_app_list_t *list);

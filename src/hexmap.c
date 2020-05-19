@@ -830,6 +830,13 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
     return 0;
 }
 
+int hexmap_get_submap_index(hexmap_t *map, hexmap_submap_t *submap){
+    for(int i = 0; i < map->submaps_len; i++){
+        if(map->submaps[i] == submap)return i;
+    }
+    return -1;
+}
+
 int hexmap_load_recording(hexmap_t *map, const char *filename,
     palettemapper_t *palmapper, bool loop, int offset, trf_t *trf
 ){
@@ -1097,6 +1104,8 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
     prismelmapper_t *mapper, char *palette_filename, char *tileset_filename
 ){
     int err;
+
+    submap->map = map;
 
     submap->filename = filename;
     vec_cpy(MAX_VEC_DIMS, submap->pos, pos);

@@ -16,7 +16,7 @@ fi
 MAIN_C="src/main_demo.c"
 
 CFLAGS=""
-CFLAGS+=" -std=c99 -Wall -Werror -Wno-unused -Wno-missing-braces -Wno-tautological-compare"
+CFLAGS+=" -std=c99 -Wall -Werror -Wno-unused -Wno-missing-braces -Wno-tautological-compare -Wno-parentheses"
 
 SOURCES=""
 SOURCES+=" src/anim.c src/hexmap.c src/hexmap_hexcollmap.c"

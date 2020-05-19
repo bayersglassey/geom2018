@@ -231,6 +231,7 @@ typedef struct hexmap_submap {
     ARRAY_DECL(hexmap_door_t*, doors)
 
     /* Weakrefs */
+    struct hexmap *map;
     rendergraph_t *rgraph_map;
     prismelmapper_t *mapper;
 } hexmap_submap_t;
@@ -263,6 +264,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
     vec_t parent_pos, vec_t parent_camera_pos, int parent_camera_type,
     prismelmapper_t *parent_mapper, char *palette_filename,
     char *tileset_filename);
+int hexmap_get_submap_index(hexmap_t *map, hexmap_submap_t *submap);
 int hexmap_load_recording(hexmap_t *map, const char *filename,
     palettemapper_t *palmapper, bool loop, int offset, trf_t *trf);
 bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
