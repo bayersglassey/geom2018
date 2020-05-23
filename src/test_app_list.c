@@ -36,6 +36,11 @@ static void test_app_list_data_set_options(test_app_list_data_t *data,
     data->options_length = length;
 }
 
+static void test_app_list_data_set_mode(test_app_list_data_t *data, int mode){
+    data->mode = mode;
+    data->app->list->index_y = 0;
+}
+
 static void test_app_list_data_set_options_stateset(test_app_list_data_t *data,
     const char **options, int index,
     stateset_t *stateset, state_t *cur_state
@@ -62,6 +67,10 @@ static void _console_write_bar(console_t *console, int index, int length){
 #endif
 }
 
+static void _console_write_section(console_t *console, const char *name){
+    console_printf(console, "--- %s: ---\n", name);
+}
+
 static void _console_write_field_header(console_t *console, const char *name){
     console_write_msg(console, name);
     console_write_msg(console, ": ");
@@ -83,7 +92,7 @@ static void _console_write_field_int(console_t *console, const char *name, int v
     console_newline(console);
 }
 
-static void _console_write_field_pos(console_t *console, const char *name, int dims, vec_t value){
+static void _console_write_field_vec(console_t *console, const char *name, int dims, vec_t value){
     _console_write_field_header(console, name);
     for(int i = 0; i < dims; i++){
         if(i > 0)console_write_char(console, ' ');
@@ -95,7 +104,7 @@ static void _console_write_field_pos(console_t *console, const char *name, int d
 #define WRITE_FIELD(OBJ, FIELD) _console_write_field(console, #FIELD, (OBJ)->FIELD);
 #define WRITE_FIELD_BOOL(OBJ, FIELD) _console_write_field_bool(console, #FIELD, (OBJ)->FIELD);
 #define WRITE_FIELD_INT(OBJ, FIELD) _console_write_field_int(console, #FIELD, (OBJ)->FIELD);
-#define WRITE_FIELD_POS(OBJ, DIMS, FIELD) _console_write_field_pos(console, #FIELD, (DIMS), (OBJ)->FIELD);
+#define WRITE_FIELD_VEC(OBJ, DIMS, FIELD) _console_write_field_vec(console, #FIELD, (DIMS), (OBJ)->FIELD);
 
 static void _console_write_options(console_t *console,
     const char **options, int index, int length
@@ -306,8 +315,8 @@ int test_app_list_submaps_render(test_app_list_t *list){
 
         WRITE_FIELD(submap, filename)
         WRITE_FIELD_BOOL(submap, solid)
-        WRITE_FIELD_POS(submap, space->dims, pos)
-        WRITE_FIELD_POS(submap, space->dims, camera_pos)
+        WRITE_FIELD_VEC(submap, space->dims, pos)
+        WRITE_FIELD_VEC(submap, space->dims, camera_pos)
         _console_write_field(console, "camera_type",
             submap_camera_type_msg(submap->camera_type));
         WRITE_FIELD(submap, palette.name)
@@ -344,10 +353,29 @@ int test_app_list_submaps_select_item(test_app_list_t *list){
 const char *test_app_list_bodies_options[] = {
     "Set camera target",
     "Set first player",
-    "Reset recording",
+    "Open recording",
     "Open submap",
     "Open stateset (TODO)",
     NULL
+};
+
+const char *test_app_list_bodies_options_recording[] = {
+    "<- Back",
+    "Reset",
+    "Open data",
+    NULL
+};
+
+const char *test_app_list_bodies_options_recording_data[] = {
+    "<- Back",
+    NULL
+};
+
+enum {
+    TEST_APP_LIST_BODIES_MODE_DEFAULT,
+    TEST_APP_LIST_BODIES_MODE_RECORDING,
+    TEST_APP_LIST_BODIES_MODE_RECORDING_DATA,
+    TEST_APP_LIST_BODIES_MODES
 };
 
 int test_app_open_list_bodies(test_app_t *app, body_t *body, hexmap_t *map){
@@ -372,8 +400,16 @@ int test_app_list_bodies_step(test_app_list_t *list){
     data->length = map->bodies_len;
     data->index = _remainder(list->index_x, data->length);
     data->item = data->length > 0? map->bodies[data->index]: NULL;
-    test_app_list_data_set_options(data,
-        test_app_list_bodies_options, list->index_y);
+    if(data->mode == TEST_APP_LIST_BODIES_MODE_RECORDING){
+        test_app_list_data_set_options(data,
+            test_app_list_bodies_options_recording, list->index_y);
+    }else if(data->mode == TEST_APP_LIST_BODIES_MODE_RECORDING_DATA){
+        test_app_list_data_set_options(data,
+            test_app_list_bodies_options_recording_data, list->index_y);
+    }else{
+        test_app_list_data_set_options(data,
+            test_app_list_bodies_options, list->index_y);
+    }
     return 0;
 }
 
@@ -385,8 +421,37 @@ int test_app_list_bodies_render(test_app_list_t *list){
     if(body != NULL){
         _console_write_field(console, "Stateset", body->stateset.filename);
         _console_write_field(console, "State", body->state->name);
-        _console_write_field(console, "Recording action",
-            recording_action_msg(body->recording.action));
+
+        /* Section for body->recording */
+        recording_t *rec = &body->recording;
+        _console_write_section(console, "Recording");
+        _console_write_field(console, "Action",
+            recording_action_msg(rec->action));
+        WRITE_FIELD_BOOL(rec, reacts)
+        WRITE_FIELD_BOOL(rec, loop)
+        WRITE_FIELD(rec, stateset_name)
+        WRITE_FIELD(rec, state_name)
+        if(data->mode == TEST_APP_LIST_BODIES_MODE_RECORDING_DATA){
+            WRITE_FIELD(rec, data)
+        }else{
+            WRITE_FIELD_VEC(rec, 4, pos0)
+            WRITE_FIELD_INT(rec, rot0)
+            WRITE_FIELD_BOOL(rec, turn0)
+            for(int i = 0; i < KEYINFO_KEYS; i++){
+                char key_c = body_get_key_c(body, i, true);
+                console_printf(console, "Key %c:");
+                if(rec->keyinfo.isdown[i])console_write_msg(console, " is");
+                if(rec->keyinfo.wasdown[i])console_write_msg(console, " was");
+                if(rec->keyinfo.wentdown[i])console_write_msg(console, " went");
+                console_newline(console);
+            }
+        }
+        WRITE_FIELD_INT(rec, i)
+        WRITE_FIELD_INT(rec, size)
+        WRITE_FIELD_INT(rec, wait)
+        WRITE_FIELD(rec, name)
+        WRITE_FIELD_INT(rec, offset)
+
         _console_write_options(console, data->options,
             data->options_index, data->options_length);
     }
@@ -397,21 +462,51 @@ int test_app_list_bodies_select_item(test_app_list_t *list){
     test_app_list_data_t *data = list->data;
     body_t *body = data->item;
     if(body == NULL)return 0;
-    switch(data->options_index){
-        case 0: {
-            camera_set_body(data->app->camera, body);
-        } break;
-        case 1: {
-            player_t *player = data->app->hexgame.players[0];
-            player_set_body(player, body);
-            camera_set_body(data->app->camera, body);
-        } break;
-        case 2: {
-            recording_reset(&body->recording);
-        } break;
-        case 3: return test_app_open_list_submaps(data->app,
-            body->cur_submap, body->map);
-        default: break;
+    if(data->mode == TEST_APP_LIST_BODIES_MODE_RECORDING){
+        recording_t *rec = &body->recording;
+        switch(data->options_index){
+            case 0: {
+                test_app_list_data_set_mode(data,
+                    TEST_APP_LIST_BODIES_MODE_DEFAULT);
+            } break;
+            case 1: {
+                recording_reset(rec);
+            } break;
+            case 2: {
+                test_app_list_data_set_mode(data,
+                    TEST_APP_LIST_BODIES_MODE_RECORDING_DATA);
+            } break;
+            default: break;
+        }
+    }else if(data->mode == TEST_APP_LIST_BODIES_MODE_RECORDING_DATA){
+        recording_t *rec = &body->recording;
+        switch(data->options_index){
+            case 0: {
+                test_app_list_data_set_mode(data,
+                    TEST_APP_LIST_BODIES_MODE_RECORDING);
+            } break;
+            default: break;
+        }
+    }else{
+        switch(data->options_index){
+            case 0: {
+                camera_set_body(data->app->camera, body);
+            } break;
+            case 1: {
+                player_t *player = data->app->hexgame.players[0];
+                player_set_body(player, body);
+                camera_set_body(data->app->camera, body);
+            } break;
+            case 2: {
+                test_app_list_data_set_mode(data,
+                    TEST_APP_LIST_BODIES_MODE_RECORDING);
+            } break;
+            case 3: {
+                return test_app_open_list_submaps(data->app,
+                    body->cur_submap, body->map);
+            }
+            default: break;
+        }
     }
     return 0;
 }
@@ -491,7 +586,7 @@ const char *test_app_list_actors_options[] = {
 };
 
 const char *test_app_list_actors_options_statepicker[] = {
-    "Back",
+    "<- Back",
     NULL
 };
 
@@ -565,8 +660,8 @@ int test_app_list_actors_select_item(test_app_list_t *list){
     if(data->mode == TEST_APP_LIST_ACTORS_MODE_STATEPICKER){
         switch(data->options_index){
             case 0: {
-                data->mode = TEST_APP_LIST_ACTORS_MODE_DEFAULT;
-                list->index_y = 0;
+                test_app_list_data_set_mode(data,
+                    TEST_APP_LIST_ACTORS_MODE_DEFAULT);
             } break;
             default: {
                 if(actor->stateset.states_len == 0)return 0;
@@ -584,8 +679,8 @@ int test_app_list_actors_select_item(test_app_list_t *list){
                 return test_app_open_list_bodies(data->app, body, NULL);
             } break;
             case 1: {
-                data->mode = TEST_APP_LIST_ACTORS_MODE_STATEPICKER;
-                list->index_y = 0;
+                test_app_list_data_set_mode(data,
+                    TEST_APP_LIST_ACTORS_MODE_STATEPICKER);
             } break;
             default: break;
         }

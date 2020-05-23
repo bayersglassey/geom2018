@@ -38,7 +38,7 @@
     #define FONT_ARGS(SURFACE, X0, Y0) app->geomfont, app->renderer, (SURFACE), \
         app->sdl_palette, (X0), (Y0) * CONSOLE_CHAR_H_MULTIPLIER, 1, NULL, NULL
     #define CONSOLE_W 60
-    #define CONSOLE_H 20
+    #define CONSOLE_H 35
 #else
     #define FONT_BLITTER_T sdlfont_blitter_t
     #define FONT_BLITTER_INIT sdlfont_blitter_init
@@ -488,9 +488,7 @@ static int test_app_render_editor(test_app_t *app){
 
     if(app->show_controls){
         FONT_PRINTF(FONT_ARGS(app->render_surface, 0, line_y * app->font.char_h),
-            "Game running? %c\n"
-            "Frame rendered in: %i ms\n"
-            "  (Aiming for sub-%i ms)\n"
+            "Frame rendered in: %i ms (goal: %i ms)\n"
             "# Textures in use: %i\n"
             "Controls:\n"
             "  up/down - zoom (hold shift for tap mode)\n"
@@ -498,20 +496,18 @@ static int test_app_render_editor(test_app_t *app){
             "  control + up/down/left/right - pan (hold shift...)\n"
             "  page up/down - cycle through available rendergraphs\n"
             "  0 - reset rotation\n"
-            "Currently displaying rendergraphs from file: %s\n"
-            "Currently displaying rendergraph %i / %i:\n"
-            "  %s\n"
+            "Displaying rendergraphs from file: %s\n"
+            "Rendergraph %i / %i: %s\n"
             "  pan=(%i,%i), rot = %i, flip = %c, zoom = %i\n"
             "  frame_i = %i (%i) / %i (%s)",
-            app->hexgame_running? 'y': 'n', app->took, app->delay_goal,
+            app->took, app->delay_goal,
             app->prend.n_textures,
-            app->prend_filename, app->cur_rgraph_i,
-            app->prend.rendergraphs_len, rgraph->name,
+            app->prend_filename,
+            app->cur_rgraph_i, app->prend.rendergraphs_len, rgraph->name,
             app->x0, app->y0, app->rot, app->flip? 'y': 'n', app->zoom,
-            app->frame_i, animated_frame_i,
-            rgraph->n_frames, rgraph->animation_type);
+            app->frame_i, animated_frame_i, rgraph->n_frames, rgraph->animation_type);
 
-        line_y += 15;
+        line_y += 12;
     }
 
     err = blit_console(app, app->render_surface, 0, line_y * app->font.char_h);

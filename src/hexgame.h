@@ -52,8 +52,6 @@ void keyinfo_reset(keyinfo_t *info);
 void keyinfo_copy(keyinfo_t *info1, keyinfo_t *info2);
 int fus_lexer_get_keyinfo(fus_lexer_t *lexer,
     keyinfo_t *info);
-int location_save(const char *filename, location_t *location);
-int location_load(const char *filename, location_t *location);
 
 
 /*************
@@ -69,8 +67,6 @@ typedef struct recording {
     char *stateset_name;
     char *state_name;
 
-    struct body *body;
-
     vec_t pos0;
     rot_t rot0;
     bool turn0;
@@ -83,6 +79,9 @@ typedef struct recording {
     char *name;
     FILE *file;
     int offset;
+
+    /* Weakrefs: */
+    struct body *body;
 } recording_t;
 
 const char *recording_action_msg(int action);
