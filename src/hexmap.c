@@ -17,6 +17,20 @@
 #include "prismelrenderer.h"
 
 
+const char *hexmap_door_type_msg(int door_type){
+    switch(door_type){
+        case HEXMAP_DOOR_TYPE_DUD: return "Dud";
+        case HEXMAP_DOOR_TYPE_RESPAWN: return "Respawn";
+        case HEXMAP_DOOR_TYPE_NEW_GAME: return "New Game";
+        case HEXMAP_DOOR_TYPE_CONTINUE: return "Continue";
+        case HEXMAP_DOOR_TYPE_PLAYERS: return "Players";
+        case HEXMAP_DOOR_TYPE_EXIT: return "Exit";
+        case HEXMAP_DOOR_TYPE_CAMERA_MAPPER: return "Camera Mapper";
+        default: return "Unknown";
+    }
+}
+
+
 /******************
  * HEXMAP TILESET *
  ******************/
@@ -1076,6 +1090,14 @@ int hexmap_step(hexmap_t *map){
 /*****************
  * HEXMAP SUBMAP *
  *****************/
+
+const char *submap_camera_type_msg(int camera_type){
+    switch(camera_type){
+        case 0: return "Use camera_pos";
+        case 1: return "Follow player";
+        default: return "Unkown";
+    }
+}
 
 void hexmap_door_cleanup(hexmap_door_t *door){
     switch(door->type){

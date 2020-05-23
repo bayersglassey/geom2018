@@ -199,6 +199,8 @@ enum hexmap_door_type {
     HEXMAP_DOOR_TYPES
 };
 
+const char *hexmap_door_type_msg(int door_type);
+
 typedef struct hexmap_door {
     int type; /* enum hexmap_door_type */
     union {
@@ -235,6 +237,8 @@ typedef struct hexmap_submap {
     rendergraph_t *rgraph_map;
     prismelmapper_t *mapper;
 } hexmap_submap_t;
+
+const char *submap_camera_type_msg(int camera_type);
 
 typedef struct hexmap {
     char *name;

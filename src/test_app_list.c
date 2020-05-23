@@ -62,12 +62,40 @@ static void _console_write_bar(console_t *console, int index, int length){
 #endif
 }
 
-static void _console_write_field(console_t *console, const char *name, const char *value){
+static void _console_write_field_header(console_t *console, const char *name){
     console_write_msg(console, name);
     console_write_msg(console, ": ");
+}
+
+static void _console_write_field(console_t *console, const char *name, const char *value){
+    _console_write_field_header(console, name);
     console_write_msg(console, value? value: "(unknown)");
     console_newline(console);
 }
+
+static void _console_write_field_bool(console_t *console, const char *name, bool value){
+    _console_write_field(console, name, value? "Yes": "No");
+}
+
+static void _console_write_field_int(console_t *console, const char *name, int value){
+    _console_write_field_header(console, name);
+    console_printf(console, "%i", value);
+    console_newline(console);
+}
+
+static void _console_write_field_pos(console_t *console, const char *name, int dims, vec_t value){
+    _console_write_field_header(console, name);
+    for(int i = 0; i < dims; i++){
+        if(i > 0)console_write_char(console, ' ');
+        console_printf(console, "%i", value[i]);
+    }
+    console_newline(console);
+}
+
+#define WRITE_FIELD(OBJ, FIELD) _console_write_field(console, #FIELD, (OBJ)->FIELD);
+#define WRITE_FIELD_BOOL(OBJ, FIELD) _console_write_field_bool(console, #FIELD, (OBJ)->FIELD);
+#define WRITE_FIELD_INT(OBJ, FIELD) _console_write_field_int(console, #FIELD, (OBJ)->FIELD);
+#define WRITE_FIELD_POS(OBJ, DIMS, FIELD) _console_write_field_pos(console, #FIELD, (DIMS), (OBJ)->FIELD);
 
 static void _console_write_options(console_t *console,
     const char **options, int index, int length
@@ -273,7 +301,24 @@ int test_app_list_submaps_render(test_app_list_t *list){
     _console_write_bar(console, data->index, data->length);
     hexmap_submap_t *submap = data->item;
     if(submap != NULL){
-        _console_write_field(console, "Filename", submap->filename);
+        hexmap_t *map = submap->map;
+        vecspace_t *space = map->space;
+
+        WRITE_FIELD(submap, filename)
+        WRITE_FIELD_BOOL(submap, solid)
+        WRITE_FIELD_POS(submap, space->dims, pos)
+        WRITE_FIELD_POS(submap, space->dims, camera_pos)
+        _console_write_field(console, "camera_type",
+            submap_camera_type_msg(submap->camera_type));
+        WRITE_FIELD(submap, palette.name)
+        WRITE_FIELD(submap, tileset.name)
+        WRITE_FIELD(submap, mapper->name)
+        for(int i = 0; i < submap->doors_len; i++){
+            hexmap_door_t *door = submap->doors[i];
+            _console_write_field(console, "door",
+                hexmap_door_type_msg(door->type));
+        }
+
         _console_write_options(console, data->options,
             data->options_index, data->options_length);
     }
