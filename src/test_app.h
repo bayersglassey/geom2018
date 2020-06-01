@@ -19,6 +19,33 @@
 #include "test_app_list.h"
 
 
+#define MAX_ZOOM 4
+
+#define CONSOLE_START_TEXT "> "
+
+#define USE_GEOMFONT
+#ifdef USE_GEOMFONT
+    #define FONT_BLITTER_T geomfont_blitter_t
+    #define FONT_BLITTER_INIT geomfont_blitter_render_init
+    #define FONT_BLITTER_PUTC_CALLBACK geomfont_blitter_putc_callback
+    #define FONT_PRINTF geomfont_render_printf
+    #define CONSOLE_CHAR_H_MULTIPLIER 2
+        /* Because we're using "sq" prismel, which is 2 pixels high */
+    #define FONT_ARGS(SURFACE, X0, Y0) app->geomfont, app->renderer, (SURFACE), \
+        app->sdl_palette, (X0), (Y0) * CONSOLE_CHAR_H_MULTIPLIER, 1, NULL, NULL
+    #define CONSOLE_W 60
+    #define CONSOLE_H 35
+#else
+    #define FONT_BLITTER_T sdlfont_blitter_t
+    #define FONT_BLITTER_INIT sdlfont_blitter_init
+    #define FONT_BLITTER_PUTC_CALLBACK sdlfont_blitter_putc_callback
+    #define FONT_PRINTF sdlfont_printf
+    #define FONT_ARGS(SURFACE, X0, Y0) &app->sdlfont, (SURFACE), (X0), (Y0)
+    #define CONSOLE_W 80
+    #define CONSOLE_H 40
+#endif
+
+
 
 enum {
     TEST_APP_MODE_GAME,
@@ -82,13 +109,12 @@ typedef struct test_app {
 
 
 void test_app_cleanup(test_app_t *app);
-int test_app_load_rendergraphs(test_app_t *app);
+void test_app_init_input(test_app_t *app);
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
     const char *stateset_filename, const char *hexmap_filename,
     const char *submap_filename, bool use_textures,
     bool cache_bitmaps, int n_players);
-int test_app_set_players(test_app_t *app, int n_players);
 int test_app_mainloop(test_app_t *app);
 int test_app_mainloop_step(test_app_t *app);
 int test_app_open_list(test_app_t *app, const char *title,
@@ -104,6 +130,32 @@ int test_app_close_list(test_app_t *app);
 /* test_app_commands.c */
 int test_app_process_console_input(test_app_t *app);
 void test_app_write_console_commands(test_app_t *app, const char *prefix);
+
+
+/* test_app_console.c */
+int test_app_process_event_console(test_app_t *app, SDL_Event *event);
+int test_app_blit_console(test_app_t *app, SDL_Surface *surface, int x, int y);
+void test_app_start_console(test_app_t *app);
+void test_app_stop_console(test_app_t *app);
+void test_app_show_console(test_app_t *app);
+void test_app_hide_console(test_app_t *app);
+
+
+/* test_app_game.c */
+int test_app_exit_callback(hexgame_t *game, player_t *player);
+int test_app_set_players_callback(hexgame_t *game, player_t *player,
+    int n_players);
+int test_app_continue_callback(hexgame_t *game, player_t *player);
+int test_app_new_game_callback(hexgame_t *game, player_t *player,
+    const char *map_filename);
+int test_app_set_players(test_app_t *app, int n_players);
+int test_app_process_event_game(test_app_t *app, SDL_Event *event);
+int test_app_render_game(test_app_t *app);
+
+
+/* test_app_editor.c */
+int test_app_render_editor(test_app_t *app);
+int test_app_process_event_editor(test_app_t *app, SDL_Event *event);
 
 
 #endif
