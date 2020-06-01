@@ -117,14 +117,6 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     bool cache_bitmaps, int n_players);
 int test_app_mainloop(test_app_t *app);
 int test_app_mainloop_step(test_app_t *app);
-int test_app_open_list(test_app_t *app, const char *title,
-    int index_x, int index_y,
-    void *data,
-    test_app_list_callback_t *step,
-    test_app_list_callback_t *render,
-    test_app_list_callback_t *select_item,
-    test_app_list_callback_t *cleanup);
-int test_app_close_list(test_app_t *app);
 
 
 /* test_app_commands.c */
@@ -156,6 +148,20 @@ int test_app_render_game(test_app_t *app);
 /* test_app_editor.c */
 int test_app_render_editor(test_app_t *app);
 int test_app_process_event_editor(test_app_t *app, SDL_Event *event);
+
+
+/* test_app_list.c */
+int test_app_step_list(test_app_t *app);
+int test_app_render_list(test_app_t *app);
+int test_app_process_event_list(test_app_t *app, SDL_Event *event);
+int test_app_open_list(test_app_t *app, const char *title,
+    int index_x, int index_y,
+    void *data,
+    test_app_list_callback_t *step,
+    test_app_list_callback_t *render,
+    test_app_list_callback_t *select_item,
+    test_app_list_callback_t *cleanup);
+int test_app_close_list(test_app_t *app);
 
 
 #endif
