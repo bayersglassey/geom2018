@@ -106,6 +106,17 @@ static void _console_write_field_vec(console_t *console, const char *name, int d
 #define WRITE_FIELD_INT(OBJ, FIELD) _console_write_field_int(console, #FIELD, (OBJ)->FIELD);
 #define WRITE_FIELD_VEC(OBJ, DIMS, FIELD) _console_write_field_vec(console, #FIELD, (DIMS), (OBJ)->FIELD);
 
+static void _console_write_keyinfo(console_t *console, body_t *body, keyinfo_t *keyinfo){
+    for(int i = 0; i < KEYINFO_KEYS; i++){
+        char key_c = body_get_key_c(body, i, true);
+        console_printf(console, "Key %c:");
+        if(keyinfo->isdown[i])console_write_msg(console, " is");
+        if(keyinfo->wasdown[i])console_write_msg(console, " was");
+        if(keyinfo->wentdown[i])console_write_msg(console, " went");
+        console_newline(console);
+    }
+}
+
 static void _console_write_options(console_t *console,
     const char **options, int index, int length
 ){
@@ -421,6 +432,9 @@ int test_app_list_bodies_render(test_app_list_t *list){
     if(body != NULL){
         _console_write_field(console, "Stateset", body->stateset.filename);
         _console_write_field(console, "State", body->state->name);
+        if(data->mode != TEST_APP_LIST_BODIES_MODE_RECORDING_DATA){
+            _console_write_keyinfo(console, body, &body->keyinfo);
+        }
 
         /* Section for body->recording */
         recording_t *rec = &body->recording;
@@ -433,18 +447,11 @@ int test_app_list_bodies_render(test_app_list_t *list){
         WRITE_FIELD(rec, state_name)
         if(data->mode == TEST_APP_LIST_BODIES_MODE_RECORDING_DATA){
             WRITE_FIELD(rec, data)
+            _console_write_keyinfo(console, body, &rec->keyinfo);
         }else{
             WRITE_FIELD_VEC(rec, 4, pos0)
             WRITE_FIELD_INT(rec, rot0)
             WRITE_FIELD_BOOL(rec, turn0)
-            for(int i = 0; i < KEYINFO_KEYS; i++){
-                char key_c = body_get_key_c(body, i, true);
-                console_printf(console, "Key %c:");
-                if(rec->keyinfo.isdown[i])console_write_msg(console, " is");
-                if(rec->keyinfo.wasdown[i])console_write_msg(console, " was");
-                if(rec->keyinfo.wentdown[i])console_write_msg(console, " went");
-                console_newline(console);
-            }
         }
         WRITE_FIELD_INT(rec, i)
         WRITE_FIELD_INT(rec, size)
