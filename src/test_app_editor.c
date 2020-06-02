@@ -164,5 +164,16 @@ int test_app_process_event_editor(test_app_t *app, SDL_Event *event){
         } break;
         default: break;
     }
+
+    #define IF_APP_KEY(KEY, BODY) \
+        if(app->keydown_##KEY >= (app->keydown_shift? 2: 1)){ \
+            app->keydown_##KEY = 1; \
+            BODY}
+    IF_APP_KEY(l, if(app->keydown_ctrl){app->x0 += 6;}else{app->rot += 1;})
+    IF_APP_KEY(r, if(app->keydown_ctrl){app->x0 -= 6;}else{app->rot -= 1;})
+    IF_APP_KEY(u, if(app->keydown_ctrl){app->y0 += 6;}else if(app->zoom < MAX_ZOOM){app->zoom += 1;})
+    IF_APP_KEY(d, if(app->keydown_ctrl){app->y0 -= 6;}else if(app->zoom > 1){app->zoom -= 1;})
+    #undef IF_APP_KEY
+
     return 0;
 }
