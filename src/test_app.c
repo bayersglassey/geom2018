@@ -197,6 +197,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->hexgame_running = true;
     app->show_controls = true;
     app->show_console = false;
+    app->process_console = false;
     app->mode = TEST_APP_MODE_GAME;
 
     test_app_init_input(app);
@@ -264,6 +265,8 @@ static int test_app_poll_events(test_app_t *app){
 
     hexgame_t *game = &app->hexgame;
 
+    bool dont_process_console_this_frame = false;
+
     SDL_Event _event, *event = &_event;
     while(SDL_PollEvent(event)){
 
@@ -277,30 +280,24 @@ static int test_app_poll_events(test_app_t *app){
                 app->loop = false;
                 break;
             }else if(event->key.keysym.sym == SDLK_F5){
-                bool mod_ctrl = event->key.keysym.mod & KMOD_CTRL;
-                if(mod_ctrl){
+                app->hexgame_running = !app->hexgame_running;
+            }else if(event->key.keysym.sym == SDLK_BACKQUOTE){
+                dont_process_console_this_frame = true;
+                if(event->key.keysym.mod & KMOD_CTRL){
                     if(app->show_console){
-                        test_app_hide_console(app);
-                    }else{
-                        test_app_show_console(app);
-                        app->hexgame_running = false;
-                    }
-                }else{
-                    app->hexgame_running = !app->hexgame_running;
-                    if(app->show_console){
-                        if(app->hexgame_running){
+                        if(!app->process_console){
+                            console_write_line(&app->console, "Console started");
+                            test_app_start_console(app);
+                        }else{
                             test_app_stop_console(app);
                             console_newline(&app->console);
-                            console_write_line(&app->console, "Game unpaused");
-                            console_write_line(&app->console,
-                                "(Note: console doesn't accept input while game unpaused)");
-                        }else{
-                            console_write_line(&app->console, "Game paused");
-                            test_app_start_console(app);
+                            console_write_line(&app->console, "Console stopped");
                         }
                     }
+                }else{
+                    if(app->show_console)test_app_hide_console(app);
+                    else test_app_show_console(app);
                 }
-                continue;
             }else if(event->key.keysym.sym == SDLK_F11){
                 printf("Frame rendered in: %i ms\n", app->took);
                 printf("  (Aiming for sub-%i ms)\n", app->delay_goal);
@@ -311,6 +308,17 @@ static int test_app_poll_events(test_app_t *app){
                 malloc_stats();
 #endif
             }
+        }
+
+        if(app->process_console){
+            if(app->list){
+                err = test_app_process_event_list(app, event);
+                if(err)return err;
+            }else if(!dont_process_console_this_frame){
+                err = test_app_process_event_console(app, event);
+                if(err)return err;
+            }
+            continue;
         }
 
         if(app->mode == TEST_APP_MODE_GAME){
@@ -331,18 +339,8 @@ static int test_app_poll_events(test_app_t *app){
             #undef IF_APP_KEY
         }
 
-        if(app->hexgame_running){
-            err = hexgame_process_event(game, event);
-            if(err)return err;
-        }else if(app->show_console){
-            if(app->list){
-                err = test_app_process_event_list(app, event);
-                if(err)return err;
-            }else{
-                err = test_app_process_event_console(app, event);
-                if(err)return err;
-            }
-        }
+        err = hexgame_process_event(game, event);
+        if(err)return err;
     }
 
     return 0;
