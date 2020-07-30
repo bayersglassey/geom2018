@@ -226,6 +226,7 @@ static int _test_app_command_dump(test_app_t *app, fus_lexer_t *lexer, bool *lex
     int err;
     int dump_bitmaps = 1;
     int dump_what = 0; /* rgraph, prend */
+    FILE *file = NULL;
     while(1){
         if(fus_lexer_done(lexer))break;
         else if(fus_lexer_got(lexer, "rgraph"))dump_what = 0;
@@ -234,17 +235,34 @@ static int _test_app_command_dump(test_app_t *app, fus_lexer_t *lexer, bool *lex
         else if(fus_lexer_got(lexer, "surfaces")){
             /* WARNING: doing this with "prend" after "renderall" causes
             my laptop to hang... */
-            dump_bitmaps = 2;}
-        else goto lexer_err;
+            dump_bitmaps = 2;
+        }else if(fus_lexer_got(lexer, "file")){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            char *filename;
+            err = fus_lexer_get_str(lexer, &filename);
+            if(err)goto lexer_err;
+            file = fopen(filename, "w");
+            if(!file){
+                perror("fopen");
+                return 1;
+            }
+        }else goto lexer_err;
         err = fus_lexer_next(lexer);
         if(err)return err;
     }
     if(dump_what == 0){
         rendergraph_t *rgraph =
             app->prend.rendergraphs[app->cur_rgraph_i];
-        rendergraph_dump(rgraph, stdout, 0, dump_bitmaps);
+        rendergraph_dump(rgraph, file? file: stdout, 0, dump_bitmaps);
     }else if(dump_what == 1){
-        prismelrenderer_dump(&app->prend, stdout, dump_bitmaps);
+        prismelrenderer_dump(&app->prend, file? file: stdout, dump_bitmaps);
+    }
+    if(file != NULL){
+        if(fclose(file)){
+            perror("fclose");
+            return 1;
+        }
     }
     return 0;
 lexer_err:
@@ -361,7 +379,7 @@ test_app_command_t _test_app_commands[] = {
     COMMAND(add_player, NULL, "[stateset]"),
     COMMAND(edit_player, NULL, "player_index [stateset]"),
     COMMAND(save, NULL, "[filename]"),
-    COMMAND(dump, NULL, "[rgraph | prend | nobitmaps | surfaces ...]"),
+    COMMAND(dump, NULL, "[(rgraph | prend | nobitmaps | surfaces | file FILENAME) ...]"),
     COMMAND(map, NULL, "mapper rgraph [resulting_rgraph]"),
     COMMAND(renderall, NULL, NULL),
     COMMAND(get_shape, NULL, "shape"),
