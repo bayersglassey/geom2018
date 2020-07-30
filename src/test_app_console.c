@@ -84,11 +84,13 @@ void test_app_start_console(test_app_t *app){
     console_write_msg(&app->console, CONSOLE_START_TEXT);
     console_write_msg(&app->console, app->console.input);
     SDL_StartTextInput();
+    app->process_console = true;
 }
 
 void test_app_stop_console(test_app_t *app){
     SDL_StopTextInput();
     test_app_init_input(app); /* ...? */
+    app->process_console = false;
 }
 
 void test_app_show_console(test_app_t *app){
