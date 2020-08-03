@@ -10,6 +10,20 @@ submaps:
         pos: (0 0)
         camera: (3 2)
         mapper: ("triple")
+        recordings:
+            : "data/maps/water/recs/water_roller_000.fus"
+            : "data/maps/water/recs/flier_000.fus"
+            : "data/maps/water/recs/flier_001.fus"
+            : "data/maps/water/recs/roller_chain_000.fus" empty 0
+            : "data/maps/water/recs/roller_chain_000.fus" empty 100
+            : "data/maps/water/recs/roller_chain_000.fus" empty 200
+            : "data/maps/water/recs/roller_chain_000.fus" empty 300
+            : "data/maps/water/recs/roller_chain_000.fus" empty 400
+            : "data/maps/water/recs/roller_chain_000.fus" empty 500
+            : "data/maps/water/recs/roller_chain_000.fus" empty 600
+            : "data/maps/water/recs/roller_chain_000.fus" empty 700
+            : "data/maps/water/recs/roller_chain_000.fus" empty 800
+            : "data/maps/water/recs/roller_chain_000.fus" empty 900
         submaps:
             :
                 file: "data/maps/water/start.fus"
@@ -48,6 +62,11 @@ submaps:
                 file: "data/maps/water/air_bubbles_walled1.fus"
                 pos: eval: (42 0) + (29 10)
                 camera: (-1 -4)
+                recordings:
+                    : "data/maps/water/recs/air_bubbles_walled1_roller_000.fus" empty 0
+                    : "data/maps/water/recs/air_bubbles_walled1_roller_000.fus" empty 1000
+                    : "data/maps/water/recs/air_bubbles_walled1_roller_000.fus" empty 2000
+                    : "data/maps/water/recs/air_bubbles_walled1_roller_000.fus" empty 3000
                 submaps:
                     :
                         file: "data/maps/water/bubble_sm.fus"
@@ -71,3 +90,9 @@ submaps:
                 file: "data/maps/water/water_tri16_bite.fus"
                 pos: eval: (42 0) + (20 -19) + (25 4)
                 camera: (10 10)
+                doors:
+                    :
+                        map: "data/maps/demo/worldmap.fus"
+                        pos: (-77 5)
+                        rot: 3
+                        turn: y

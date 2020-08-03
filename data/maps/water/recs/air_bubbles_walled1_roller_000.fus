@@ -1,0 +1,13 @@
+anim: "anim/roller.fus"
+state: "stand"
+pos: ( 69 11)
+rot: 4
+turn: no
+keys:
+    x:
+    y:
+    u:
+    d:
+    l:
+    r: is was
+data: " w220+d w32-d w185+d w22-d w14+d w55-d w238+d w30-d w215+d w30-d w241+d w28-d w6-r w1+l w28+d w55-d w1-l w1+l w8-l w14+d w2+l w4-l w1-d w16+d w4-d w6+r w4-r w7+d w3-d w1+r w98-r w1+l w169-l w2+r w45+d w17-d w1-r w1+l w21+d w29-d w239+d w42-d w243-l w2+r w33-r w1+d w2+r w67-d w30+d w27-d w14+d w10-r w4+l w35-d w123"

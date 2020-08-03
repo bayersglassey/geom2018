@@ -1,0 +1,13 @@
+anim: "anim/flier.fus"
+state: "hover"
+pos: ( 67 -6)
+rot: 2
+turn: yes
+keys:
+    x:
+    y:
+    u: is was
+    d:
+    l:
+    r:
+data: " w11+r w2-r w15+r w2-r w15+r w2-r w16+r w2-r w12+r w2-r w12+r w4-r w28+r w1-r w6+l w2-l w31+l w7-l w13+r w6-r w5-u w12+l w2-l w5+u w18+r w2-r w14+r w3-r w21+r w3-r w23+r w4-r w21+r w4-r w19+r w3-r w12+r w2-r w16+r w3-r w18+l w3-l w18-u w4+l w2-l w14+u w5-u w6+r w2-r w7+u w6-u w4+l w3-l w7+u w11+r w3-r w16-u w6+l w2-l w32+l w5-l w10+u w11+l w1-u w2-l w19+l w2-l w5+r w2-r w4+r w3-r w6+r w2-r w18+r w4-r w16+u w5-u w3+l w2-l w21+u w13+r w2-r w11+l w2-l w15+l w4-l w12+r w3-r w15+l w3-l w14+r w4-r w10+l w3-l w15+r w2-r w4+l w3-l w14+r w3-r w17+l w12-l w6-u w14+r w7-r w18+r w7-r w21+l w8-l w3+u w36+l w2-l w58+r w8-r w16-u w12+r w10-r w15+u w6+l w3-l w16+r w3-r w14+l w7-l w6-u w24+l w1-l w10+r w5-r w25+u w5+l w2-l w6-u w14+r w4-r w11+u w12+l w2-l w4+r w4-r w18+l w3-l w17+l w4-l w24+r w14-r w24+l w2-l w1-u w15+l w1-l w9+r w2-r w13+u w2-u w7+r w1-r w11+u w15-u w9+r w5-r w32+u w9+l w6-l w12+r w4-r w9+l w3-l w17+r w4-r w15+l w3-l w8+r w3-r w15+r w2-r w39+r w2-r w9+l w3-l w17+r w4-r w17+l w2-l w7+r w6-r w14+l w4-l w10+r w3-r w10+l w7-l w18+r w4-r w19+r w2-r w6+l w3-l w15+r w3-r w13-u w23+l w2-l w3+r w2-r w11+u w10-u w23+r w2-r w5+u w9+r w2-r w16+r w2-r w3"

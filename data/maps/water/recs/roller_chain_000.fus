@@ -1,0 +1,14 @@
+resets_position: no
+anim: "anim/roller.fus"
+state: "stand"
+pos: ( 47 -6)
+rot: 0
+turn: yes
+keys:
+    x:
+    y:
+    u:
+    d:
+    l:
+    r:
+data: " w32+r w16-r w29+l w4-l w29"
