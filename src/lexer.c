@@ -1132,6 +1132,17 @@ static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
 
         vars_dumpvar(lexer->vars, name);
         free(name);
+    }else if(fus_lexer_got(lexer, "SKIP")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = _fus_lexer_get(lexer, "(");
+        if(err)return err;
+
+        /* Eat everything up to & including closing ")" */
+        err = _fus_lexer_next(lexer);
+        if(err)return err;
+        err = fus_lexer_parse_silent(lexer);
+        if(err)return err;
     }else if(fus_lexer_got(lexer, "IF")){
         bool not = false;
         err = fus_lexer_next(lexer);

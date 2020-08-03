@@ -300,6 +300,26 @@ static int player_use_door(player_t *player, hexmap_door_t *door){
     return 0;
 }
 
+int player_use_savepoint(player_t *player){
+    int err;
+
+    /* Update respawn location */
+    err = player_set_respawn(player);
+    if(err)return err;
+
+    /* Save player's new respawn location */
+    if(player->respawn_filename != NULL){
+        err = location_save(player->respawn_filename,
+            &player->respawn_location);
+        if(err)return err;
+    }
+
+    /* Flash screen white so player knows something happened */
+    body_flash_cameras(player->body, 255, 255, 255, 30);
+
+    return 0;
+}
+
 int player_step(player_t *player, hexgame_t *game){
     int err;
 
@@ -366,19 +386,8 @@ int player_step(player_t *player, hexgame_t *game){
         }
 
         if(savepoint_submap){
-            /* Update respawn location */
-            err = player_set_respawn(player);
+            err = player_use_savepoint(player);
             if(err)return err;
-
-            /* Save player's new respawn location */
-            if(player->respawn_filename != NULL){
-                err = location_save(player->respawn_filename,
-                    &player->respawn_location);
-                if(err)return err;
-            }
-
-            /* Flash screen white so player knows something happened */
-            body_flash_cameras(body, 255, 255, 255, 30);
         }
 
         if(door_submap){

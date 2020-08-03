@@ -66,6 +66,7 @@ void recording_init(recording_t *rec, body_t *body,
     Should we fix that, or would it break something?.. */
     rec->body = body;
     rec->loop = loop;
+    rec->resets_position = true;
 }
 
 static int recording_parse(recording_t *rec,
@@ -93,6 +94,17 @@ static int recording_parse(recording_t *rec,
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
         err = fus_lexer_get_yesno(lexer, &rec->loop);
+        if(err)return err;
+        err = fus_lexer_get(lexer, ")");
+        if(err)return err;
+    }
+
+    if(fus_lexer_got(lexer, "resets_position")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_get_yesno(lexer, &rec->resets_position);
         if(err)return err;
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
@@ -266,10 +278,10 @@ int body_play_recording(body_t *body){
         the recording just sets body's position/anim/state */
         body->recording.action = 1; /* play */
     }
-    return body_restart_recording(body, false);
+    return body_restart_recording(body, false, true);
 }
 
-int body_restart_recording(body_t *body, bool hard){
+int body_restart_recording(body_t *body, bool hard, bool reset_position){
     int err;
     recording_t *rec = &body->recording;
 
@@ -279,9 +291,11 @@ int body_restart_recording(body_t *body, bool hard){
     keyinfo_copy(&body->keyinfo, &rec->keyinfo);
     body_set_state(body, rec->state_name, true);
 
-    vec_cpy(MAX_VEC_DIMS, body->pos, rec->pos0);
-    body->rot = rec->rot0;
-    body->turn = rec->turn0;
+    if(reset_position){
+        vec_cpy(MAX_VEC_DIMS, body->pos, rec->pos0);
+        body->rot = rec->rot0;
+        body->turn = rec->turn0;
+    }
 
     if(!hard && rec->data){
         /* The following is pretty ganky; we're assuming that body won't
@@ -445,7 +459,7 @@ int recording_step(recording_t *rec){
         }else if(c == '\0'){
             if(loop){
                 /* loop! */
-                err = body_restart_recording(body, true);
+                err = body_restart_recording(body, true, rec->resets_position);
                 if(err)return err;
                 i = 0;
             }else{

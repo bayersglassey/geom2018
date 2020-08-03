@@ -63,6 +63,7 @@ typedef struct recording {
         /* 0: none, 1: play, 2: record */
     bool reacts;
     bool loop;
+    bool resets_position; /* default: true, if false, looping doesn't reset body's position */
     char *data;
     char *stateset_name;
     char *state_name;
@@ -191,7 +192,7 @@ char body_get_key_c(body_t *body, int key_i, bool absolute);
 
 int body_load_recording(body_t *body, const char *filename, bool loop);
 int body_play_recording(body_t *body);
-int body_restart_recording(body_t *body, bool hard);
+int body_restart_recording(body_t *body, bool hard, bool reset_position);
 int body_start_recording(body_t *body, char *name);
 int body_stop_recording(body_t *body);
 int body_record(body_t *body, const char *data);
@@ -225,6 +226,7 @@ void hexgame_player_dump(player_t *player, int depth);
 int player_reload(player_t *player, bool *file_found_ptr);
 int player_process_event(player_t *player, SDL_Event *event);
 int player_step(player_t *player, struct hexgame *game);
+int player_use_savepoint(player_t *player);
 
 
 

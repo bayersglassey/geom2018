@@ -170,7 +170,7 @@ static int _test_app_command_edit_player(test_app_t *app, fus_lexer_t *lexer, bo
     int player_i = 0;
     char *stateset_filename;
 
-    if(!fus_lexer_done(lexer)){
+    if(!fus_lexer_done(lexer) && fus_lexer_got_int(lexer)){
         err = fus_lexer_get_int(lexer, &player_i);
         if(err)goto lexer_err;
     }
@@ -192,6 +192,32 @@ static int _test_app_command_edit_player(test_app_t *app, fus_lexer_t *lexer, bo
     player_t *player = game->players[player_i];
 
     err = body_set_stateset(player->body, stateset_filename, NULL);
+    if(err)return err;
+
+    return 0;
+lexer_err:
+    *lexer_err_ptr = true;
+    return 0;
+}
+
+static int _test_app_command_save_player(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
+    int err;
+    int player_i = 0;
+
+    if(!fus_lexer_done(lexer)){
+        err = fus_lexer_get_int(lexer, &player_i);
+        if(err)goto lexer_err;
+    }
+
+    hexgame_t *game = &app->hexgame;
+    if(player_i < 0 || player_i >= game->players_len){
+        console_write_msg(&app->console, "Player # invalid\n");
+        return 0;
+    }
+
+    player_t *player = game->players[player_i];
+
+    err = player_use_savepoint(player);
     if(err)return err;
 
     return 0;
@@ -376,13 +402,14 @@ test_app_command_t _test_app_commands[] = {
     COMMAND(list_bodies, "lb", NULL),
     COMMAND(list_players, "lp", NULL),
     COMMAND(list_actors, "la", NULL),
-    COMMAND(add_player, NULL, "[stateset]"),
-    COMMAND(edit_player, NULL, "player_index [stateset]"),
-    COMMAND(save, NULL, "[filename]"),
+    COMMAND(add_player, "ap", "[STATESET]"),
+    COMMAND(edit_player, "ep", "[PLAYER_INDEX] [STATESET]"),
+    COMMAND(save_player, "sp", "[PLAYER_INDEX]"),
+    COMMAND(save, NULL, "[FILENAME]"),
     COMMAND(dump, NULL, "[(rgraph | prend | nobitmaps | surfaces | file FILENAME) ...]"),
-    COMMAND(map, NULL, "mapper rgraph [resulting_rgraph]"),
+    COMMAND(map, NULL, "MAPPER RGRAPH [RESULTING_RGRAPH]"),
     COMMAND(renderall, NULL, NULL),
-    COMMAND(get_shape, NULL, "shape"),
+    COMMAND(get_shape, NULL, "SHAPE"),
     COMMAND(mode, NULL, "(game | editor)"),
     NULLCOMMAND
 };
