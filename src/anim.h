@@ -11,6 +11,13 @@
 
 #define ANIM_KEY_CS "xyudlrfb"
 
+enum anim_cond_flag {
+    ANIM_COND_FLAGS_ALL    = 1,
+    ANIM_COND_FLAGS_YES    = 2,
+    ANIM_COND_FLAGS_WATER  = 4,
+    ANIM_COND_FLAGS_BODIES = 8,
+};
+
 
 /* One is "mostly" dead when one makes a jump and slams into a wall.
 One is "all" dead when one is crushed by a bad guy or whatever.
@@ -73,13 +80,7 @@ typedef struct state_cond {
     const char *type;
     union {
         struct {
-            int flags;
-                /*
-                    flags & 1: 0 -> any, 1 -> all
-                    flags & 2: 0 -> no,  1 -> yes
-                    flags & 4: 1 -> water
-                    flags & 8: 0 -> against map, 1 -> against bodies
-                */
+            int flags; /* ORed combination of enum anim_cond_flag values */
             hexcollmap_t *collmap;
         } coll;
         struct {

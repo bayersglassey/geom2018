@@ -140,18 +140,18 @@ static int _parse_cond(fus_lexer_t *lexer,
 
         if(GOT("water")){
             NEXT
-            flags ^= 4;
+            flags ^= ANIM_COND_FLAGS_WATER;
         }else if(GOT("bodies")){
             NEXT
-            flags ^= 8;
+            flags ^= ANIM_COND_FLAGS_BODIES;
         }
 
-        if(GOT("all"))flags ^= 1;
+        if(GOT("all"))flags ^= ANIM_COND_FLAGS_ALL;
         else if(GOT("any"))/* don't do nuthin */;
         else return UNEXPECTED("all or any");
         NEXT
 
-        if(GOT("yes"))flags ^= 2;
+        if(GOT("yes"))flags ^= ANIM_COND_FLAGS_YES;
         else if(GOT("no"))/* dinnae move a muscle */;
         else return UNEXPECTED("yes or no");
         NEXT

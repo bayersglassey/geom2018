@@ -536,10 +536,10 @@ static int body_match_cond(body_t *body,
             hexcollmap_t *hitbox = cond->u.coll.collmap;
 
             int flags = cond->u.coll.flags;
-            bool all = flags & 1;
-            bool yes = flags & 2;
-            bool water = flags & 4;
-            bool against_bodies = flags & 8;
+            bool all = flags & ANIM_COND_FLAGS_ALL;
+            bool yes = flags & ANIM_COND_FLAGS_YES;
+            bool water = flags & ANIM_COND_FLAGS_WATER;
+            bool against_bodies = flags & ANIM_COND_FLAGS_BODIES;
 
             if(against_bodies){
                 int n_matches = 0;
