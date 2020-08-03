@@ -2,6 +2,8 @@
 # Expected variables:
 # RGRAPH_NS (str): e.g. "spiky_", ""
 
+$SET_INT MAX_AGE 100
+
 fly:
     rgraph: $PREFIX RGRAPH_NS "spit_fly"
     collmsgs: "collect" "spit" $IF SPIKEY("spikeyspit")
@@ -15,6 +17,12 @@ fly:
     on "crush": dead
 
     if:
+    then:
+        inc: age
+        continue
+
+    if: any:
+        expr: > age $GET_INT MAX_AGE
         coll: any yes
             ;;   .   .
             ;;   *\*
@@ -50,6 +58,12 @@ crouch_fly:
     on "crush": crouch_dead
 
     if:
+    then:
+        inc: age
+        continue
+
+    if: any:
+        expr: > age $GET_INT MAX_AGE
         coll: any yes
             ;;    .   .
             ;;    *\*

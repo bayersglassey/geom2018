@@ -191,6 +191,22 @@ static int _parse_cond(fus_lexer_t *lexer,
             if(err)return err;
         }
         NEXT
+    }else if(GOT("expr")){
+        cond->type = state_cond_type_expr;
+        cond->u.expr.var_name = NULL;
+        NEXT
+        GET("(")
+        if(GOT("=="))cond->u.expr.op = STATE_COND_EXPR_OP_EQ;
+        else if(GOT("!="))cond->u.expr.op = STATE_COND_EXPR_OP_NE;
+        else if(GOT( "<"))cond->u.expr.op = STATE_COND_EXPR_OP_LT;
+        else if(GOT("<="))cond->u.expr.op = STATE_COND_EXPR_OP_LE;
+        else if(GOT( ">"))cond->u.expr.op = STATE_COND_EXPR_OP_GT;
+        else if(GOT(">="))cond->u.expr.op = STATE_COND_EXPR_OP_GE;
+        else return UNEXPECTED("== or != or < or <= or > or >=");
+        NEXT
+        GET_NAME(cond->u.expr.var_name)
+        GET_INT(cond->u.expr.value)
+        GET(")")
     }else{
         return UNEXPECTED(NULL);
     }
@@ -205,10 +221,14 @@ static int _parse_effect(fus_lexer_t *lexer,
     if(GOT("print")){
         NEXT
         GET("(")
-        char *msg;
-        GET_STR(msg)
         effect->type = state_effect_type_print;
-        effect->u.msg = msg;
+        GET_STR(effect->u.msg)
+        GET(")")
+    }else if(GOT("print_int")){
+        NEXT
+        GET("(")
+        effect->type = state_effect_type_print_int;
+        GET_NAME(effect->u.var_name)
         GET(")")
     }else if(GOT("move")){
         NEXT
@@ -284,6 +304,16 @@ static int _parse_effect(fus_lexer_t *lexer,
             NEXT
             effect->u.dead = BODY_MOSTLY_DEAD;
         }else effect->u.dead = BODY_ALL_DEAD;
+    }else if(GOT("inc")){
+        effect->type = state_effect_type_inc;
+        effect->u.var_name = NULL;
+        NEXT
+        GET("(")
+        GET_NAME(effect->u.var_name)
+        GET(")")
+    }else if(GOT("continue")){
+        effect->type = state_effect_type_continue;
+        NEXT
     }else if(GOT("confused")){
         NEXT
         GET("(")
@@ -525,6 +555,7 @@ const char state_cond_type_coll[] = "coll";
 const char state_cond_type_chance[] = "chance";
 const char state_cond_type_any[] = "any";
 const char state_cond_type_all[] = "all";
+const char state_cond_type_expr[] = "expr";
 const char *state_cond_types[] = {
     state_cond_type_false,
     state_cond_type_key,
@@ -532,11 +563,13 @@ const char *state_cond_types[] = {
     state_cond_type_chance,
     state_cond_type_any,
     state_cond_type_all,
+    state_cond_type_expr,
     NULL
 };
 
 
 const char state_effect_type_print[] = "print";
+const char state_effect_type_print_int[] = "print_int";
 const char state_effect_type_move[] = "move";
 const char state_effect_type_rot[] = "rot";
 const char state_effect_type_turn[] = "turn";
@@ -545,9 +578,12 @@ const char state_effect_type_delay[] = "delay";
 const char state_effect_type_spawn[] = "spawn";
 const char state_effect_type_play[] = "play";
 const char state_effect_type_die[] = "die";
+const char state_effect_type_inc[] = "inc";
+const char state_effect_type_continue[] = "continue";
 const char state_effect_type_confused[] = "confused";
 const char *state_effect_types[] = {
     state_effect_type_print,
+    state_effect_type_print_int,
     state_effect_type_move,
     state_effect_type_rot,
     state_effect_type_turn,
@@ -556,6 +592,8 @@ const char *state_effect_types[] = {
     state_effect_type_spawn,
     state_effect_type_play,
     state_effect_type_die,
+    state_effect_type_inc,
+    state_effect_type_continue,
     state_effect_type_confused,
     NULL
 };
@@ -600,12 +638,19 @@ static void state_cond_cleanup(state_cond_t *cond){
         cond->type == state_cond_type_all
     ){
         ARRAY_FREE_PTR(state_cond_t*, cond->u.subconds.conds, state_cond_cleanup)
+    }else if(cond->type == state_cond_type_expr){
+        free(cond->u.expr.var_name);
     }
 }
 
 static void state_effect_cleanup(state_effect_t *effect){
     if(effect->type == state_effect_type_print){
         free(effect->u.msg);
+    }else if(
+        effect->type == state_effect_type_print_int ||
+        effect->type == state_effect_type_inc
+    ){
+        free(effect->u.var_name);
     }else if(effect->type == state_effect_type_goto){
         free(effect->u.gotto.name);
     }else if(effect->type == state_effect_type_spawn){

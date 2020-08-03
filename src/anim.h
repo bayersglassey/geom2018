@@ -76,9 +76,23 @@ typedef struct state_rule {
 
 
 
+enum state_cond_expr_op {
+    STATE_COND_EXPR_OP_EQ,
+    STATE_COND_EXPR_OP_NE,
+    STATE_COND_EXPR_OP_LT,
+    STATE_COND_EXPR_OP_LE,
+    STATE_COND_EXPR_OP_GT,
+    STATE_COND_EXPR_OP_GE,
+};
+
 typedef struct state_cond {
     const char *type;
     union {
+        struct {
+            char *var_name;
+            int op; /* enum state_cond_expr_op */
+            int value;
+        } expr;
         struct {
             int flags; /* ORed combination of enum anim_cond_flag values */
             hexcollmap_t *collmap;
@@ -113,6 +127,7 @@ extern const char state_cond_type_coll[];
 extern const char state_cond_type_chance[];
 extern const char state_cond_type_any[];
 extern const char state_cond_type_all[];
+extern const char state_cond_type_expr[];
 extern const char *state_cond_types[];
 
 
@@ -135,6 +150,7 @@ typedef struct state_effect {
     const char *type;
     union {
         char *msg;
+        char *var_name;
         int delay;
         state_effect_goto_t gotto;
         int dead; /* enum body_dead */
@@ -143,10 +159,12 @@ typedef struct state_effect {
         vec_t vec;
         rot_t rot;
         int boolean; /* enum effect_boolean */
+        int i;
     } u;
 } state_effect_t;
 
 extern const char state_effect_type_print[];
+extern const char state_effect_type_print_int[];
 extern const char state_effect_type_move[];
 extern const char state_effect_type_rot[];
 extern const char state_effect_type_turn[];
@@ -155,6 +173,8 @@ extern const char state_effect_type_delay[];
 extern const char state_effect_type_spawn[];
 extern const char state_effect_type_play[];
 extern const char state_effect_type_die[];
+extern const char state_effect_type_inc[];
+extern const char state_effect_type_continue[];
 extern const char state_effect_type_confused[];
 extern const char *state_effect_types[];
 

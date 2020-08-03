@@ -587,6 +587,26 @@ static int body_match_cond(body_t *body,
             if(err)return err;
             if((all && !rule_matched) || (!all && rule_matched))break;
         }
+    }else if(cond->type == state_cond_type_expr){
+        if(body == NULL){
+            fprintf(stderr, "No body");
+            RULE_PERROR()
+            return 2;}
+        int value = vars_get_int(&body->vars, cond->u.expr.var_name);
+        int cond_value = cond->u.expr.value;
+        int op = cond->u.expr.op;
+        switch(op){
+            case STATE_COND_EXPR_OP_EQ: rule_matched = value == cond_value; break;
+            case STATE_COND_EXPR_OP_NE: rule_matched = value != cond_value; break;
+            case STATE_COND_EXPR_OP_LT: rule_matched = value  < cond_value; break;
+            case STATE_COND_EXPR_OP_LE: rule_matched = value <= cond_value; break;
+            case STATE_COND_EXPR_OP_GT: rule_matched = value  > cond_value; break;
+            case STATE_COND_EXPR_OP_GE: rule_matched = value >= cond_value; break;
+            default:
+                fprintf(stderr, "Bad expr op: %i\n", op);
+                RULE_PERROR()
+                return 2;
+        }
     }else{
         fprintf(stderr, "Unrecognized state rule condition: %s",
             cond->type);
@@ -634,7 +654,7 @@ static void effect_apply_boolean(int boolean, bool *b_ptr){
 
 static int body_apply_rule(body_t *body,
     actor_t *actor, hexgame_t *game,
-    state_rule_t *rule, state_effect_goto_t **gotto_ptr
+    state_rule_t *rule, state_effect_goto_t **gotto_ptr, bool *continues_ptr
 ){
     int err;
 
@@ -650,11 +670,19 @@ static int body_apply_rule(body_t *body,
                 effect->type, rule->state->name, \
                 rule->state->stateset->filename);
 
-        if(effect->type == state_effect_type_print){
+        if(
+            effect->type == state_effect_type_print ||
+            effect->type == state_effect_type_print_int
+        ){
             if(body != NULL)printf("body %p", body);
             else printf("unknown body");
             if(actor != NULL)printf(" (actor %p)", actor);
-            printf(" says: %s\n", effect->u.msg);
+            if(effect->type == state_effect_type_print_int){
+                int value = body? vars_get_int(&body->vars, effect->u.var_name): 0;
+                printf(" says: %i\n", value);
+            }else{
+                printf(" says: %s\n", effect->u.msg);
+            }
         }else if(effect->type == state_effect_type_move){
             if(body == NULL){
                 fprintf(stderr, "No body");
@@ -728,6 +756,16 @@ static int body_apply_rule(body_t *body,
                 RULE_PERROR()
                 return 2;}
             body->dead = effect->u.dead;
+        }else if(effect->type == state_effect_type_inc){
+            if(body == NULL){
+                fprintf(stderr, "No body");
+                RULE_PERROR()
+                return 2;}
+            int value = vars_get_int(&body->vars, effect->u.var_name);
+            err = vars_set_int(&body->vars, effect->u.var_name, value + 1);
+            if(err)return err;
+        }else if(effect->type == state_effect_type_continue){
+            *continues_ptr = true;
         }else if(effect->type == state_effect_type_confused){
             if(body == NULL){
                 fprintf(stderr, "No body");
@@ -761,10 +799,11 @@ int state_handle_rules(state_t *state, body_t *body,
         if(err)return err;
 
         if(rule_matched){
+            bool continues = false;
             err = body_apply_rule(body, actor, game, rule,
-                gotto_ptr);
+                gotto_ptr, &continues);
             if(err)return err;
-            break;
+            if(!continues)break;
         }
     }
 
