@@ -1,0 +1,13 @@
+anim: "anim/water_roller.fus"
+state: "stand"
+pos: ( 95 16)
+rot: 5
+turn: no
+keys:
+    x:
+    y:
+    u:
+    d:
+    l:
+    r:
+data: " w123+l w33-l w39+r w2-r w86+l w18-l w96+l w9"

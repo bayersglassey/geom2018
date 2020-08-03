@@ -13,6 +13,9 @@ submaps:
         mapper: ("triple")
         recordings:
             : "data/maps/water/recs/water_roller_000.fus"
+            : "data/maps/water/recs/water_roller_001.fus"
+            : "data/maps/water/recs/water_roller_002.fus"
+            : "data/maps/water/recs/water_roller_003.fus"
             : "data/maps/water/recs/flier_000.fus"
             : "data/maps/water/recs/flier_001.fus"
             : "data/maps/water/recs/roller_chain_000.fus" empty 0
