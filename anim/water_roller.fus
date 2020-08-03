@@ -3,6 +3,7 @@ on "crush": dead
 
 $SET_STR ANIM_NS ""
 $SET_STR RGRAPH_NS "water_"
+$SET_BOOL WATER_ROLLER
 import "anim/_roller.fus"
 
 dead:

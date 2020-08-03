@@ -27,14 +27,14 @@ $PREFIX ANIM_NS stand:
     $IF PLAYER_ROLLER:
         if:
             key: not isdown x
-            coll: all yes
+            coll: any yes
                 ;; ( )- .
         then:
             goto: crawl
 
         if:
             key: not isdown x
-            coll: all yes
+            coll: any yes
                 ;;    .
                 ;;   /
                 ;; ( )  .
@@ -43,41 +43,58 @@ $PREFIX ANIM_NS stand:
             rot: -2
             turn
 
-    if:
-        key: wasdown u
-        coll: all yes
-            ;;    .   +
-            ;;
-            ;; ( )  .
-        coll: all no
-            ;;    .
-            ;;     \*
-            ;; ( )  .
-    then:
-        move: 2 1
-        rot: 3
-        $IF GOTO_GRABBED:
-            goto: $PREFIX ANIM_NS grabbed
-        $IF !GOTO_GRABBED:
-            goto: $PREFIX ANIM_NS grab
-        delay: 1
+    $IF !NOGRAB:
+        if:
+            key: wasdown u
+            coll: any yes
+                ;;    .   +
+                ;;
+                ;; ( )  .
+            coll: all no
+                ;;    .
+                ;;     \*
+                ;; ( )  .
+            $IF WATER_ROLLER:
+                coll: water all no
+                    ;;    .
+                    ;;     \*
+                    ;; ( )  .
+        then:
+            move: 2 1
+            rot: 3
+            $IF GOTO_GRABBED:
+                goto: $PREFIX ANIM_NS grabbed
+            $IF !GOTO_GRABBED:
+                goto: $PREFIX ANIM_NS grab
+            delay: 1
 
-    if:
-        key: wasdown u
-        coll: all no
-            ;;    .
-            ;;     \*
-            ;; ( )  .
-    then:
-        goto: $PREFIX ANIM_NS grab
-        delay: 1
+    $IF !NOGRAB:
+        if:
+            key: wasdown u
+            coll: all no
+                ;;    .
+                ;;     \*
+                ;; ( )  .
+            $IF WATER_ROLLER:
+                coll: water all no
+                    ;;    .
+                    ;;     \*
+                    ;; ( )  .
+        then:
+            goto: $PREFIX ANIM_NS grab
+            delay: 1
 
     if:
         key: not isdown d
         key: not isdown b
         key: isdown f
-        coll: all yes
-            ;; ( )  +
+        any:
+            coll: any yes
+                ;; ( )  +
+            $IF WATER_ROLLER:
+                coll: water any yes
+                    ;; ( )  .
+                    ;;    *
     then:
         move: 1 0
         turn
@@ -86,9 +103,14 @@ $PREFIX ANIM_NS stand:
     if:
         key: not isdown b
         key: isdown f
-        coll: all no
-            ;; ( )-
-            ;;    *
+        all:
+            coll: all no
+                ;; ( )- .
+                ;;    *
+            $IF WATER_ROLLER:
+                coll: water all no
+                    ;; ( )- .
+                    ;;    *
     then:
         rot: -1
         delay: 1
@@ -96,8 +118,13 @@ $PREFIX ANIM_NS stand:
     if:
         key: not isdown b
         key: isdown f
-        coll: all yes
-            ;; ( )  +
+        any:
+            coll: any yes
+                ;; ( )  +
+            $IF WATER_ROLLER:
+                coll: water any yes
+                    ;; ( )  .
+                    ;;    *
     then:
         move: 1 0
         turn
@@ -107,10 +134,16 @@ $PREFIX ANIM_NS stand:
         key: not isdown d
         key: not isdown f
         key: isdown b
-        coll: all yes
-            ;;    +
-            ;;
-            ;; ( )
+        any:
+            coll: any yes
+                ;;    +
+                ;;
+                ;; ( )
+            $IF WATER_ROLLER:
+                coll: water any yes
+                    ;;    .
+                    ;;  *
+                    ;; ( )
     then:
         move: 1 1
         rot: 2
@@ -120,9 +153,14 @@ $PREFIX ANIM_NS stand:
     if:
         key: not isdown f
         key: isdown b
-        coll: all no
-            ;;  */
-            ;; ( )
+        all:
+            coll: all no
+                ;;  */
+                ;; ( )
+            $IF WATER_ROLLER:
+                coll: water all no
+                    ;;  */
+                    ;; ( )
     then:
         rot: 1
         delay: 1
@@ -130,10 +168,16 @@ $PREFIX ANIM_NS stand:
     if:
         key: not isdown f
         key: isdown b
-        coll: all yes
-            ;;    +
-            ;;
-            ;; ( )
+        any:
+            coll: any yes
+                ;;    +
+                ;;
+                ;; ( )
+            $IF WATER_ROLLER:
+                coll: water any yes
+                    ;;    .
+                    ;;  *
+                    ;; ( )
     then:
         move: 1 1
         rot: 2
@@ -166,8 +210,13 @@ $PREFIX ANIM_NS grab:
         if:
             key: isdown f
             key: not isdown b
-            coll: all yes
-                ;; ( )  +
+            any:
+                coll: any yes
+                    ;; ( )  +
+                $IF WATER_ROLLER:
+                    coll: water any yes
+                        ;; ( )  .
+                        ;;    *
         then:
             move: 1 0
             rot: 1
@@ -178,11 +227,15 @@ $PREFIX ANIM_NS grab:
         if:
             key: isdown f
             key: not isdown b
-            coll: all yes
+            coll: any yes
                 ;; ( )  .   +
             coll: all no
                 ;;    *\*/*
-                ;; ( )
+                ;; ( )  .   .
+            $IF WATER_ROLLER:
+                coll: water all no
+                    ;;    * * *
+                    ;; ( )  .   .
         then:
             move: 2 0
             rot: 2
@@ -194,18 +247,33 @@ $PREFIX ANIM_NS grab:
         if:
             key: isdown f
             key: not isdown b
-            coll: all yes
-                ;;        .
-                ;;
-                ;; ( )  .   .
-                ;;
-                ;;    +   .
+            any:
+                coll: any yes
+                    ;;        .
+                    ;;
+                    ;; ( )  .   .
+                    ;;
+                    ;;    +   .
+                $IF WATER_ROLLER:
+                    coll: water any yes
+                        ;;        .
+                        ;;
+                        ;; ( )  .   .
+                        ;;  *
+                        ;;    .   .
             coll: all no
                 ;;        .
                 ;;       /*
                 ;; ( )- + - .
                 ;;    */*\*
                 ;;    .   .
+            $IF WATER_ROLLER:
+                coll: water all no
+                    ;;        .
+                    ;;       /*
+                    ;; ( )- + - .
+                    ;;    */*\*
+                    ;;    .   .
         then:
             move: 0 -1
             goto: $PREFIX ANIM_NS grab_flipped
@@ -214,18 +282,34 @@ $PREFIX ANIM_NS grab:
     if:
         key: isdown f
         key: not isdown b
-        coll: all yes
-            ;;        .
-            ;;
-            ;; ( )  .   .
-            ;;
-            ;;    .   +
+        any:
+            coll: any yes
+                ;;        .
+                ;;
+                ;; ( )  .   .
+                ;;
+                ;;    .   +
+            $IF WATER_ROLLER:
+                coll: water any yes
+                    ;;        .
+                    ;;
+                    ;; ( )  .   .
+                    ;;
+                    ;;    .   .
+                    ;;      *
         coll: all no
             ;;        .
             ;;       /*
             ;; ( )- + - .
             ;;    */*\*
             ;;    .   .
+        $IF WATER_ROLLER:
+            coll: water all no
+                ;;        .
+                ;;       /*
+                ;; ( )- + - .
+                ;;    */*\*
+                ;;    .   .
     then:
         move: 1 -1
         rot: 2
@@ -240,6 +324,11 @@ $PREFIX ANIM_NS grab:
             ;;       /*
             ;; ( )- + -
             ;;    */*\*
+        $IF WATER_ROLLER:
+            coll: water all no
+                ;;       /*
+                ;; ( )- + -
+                ;;    */*\*
     then:
         rot: -1
         delay: 1
@@ -248,7 +337,7 @@ $PREFIX ANIM_NS grab:
         if:
             key: isdown b
             key: not isdown f
-            coll: all yes
+            coll: any yes
                 ;;    .   +
                 ;;
                 ;; ( )  .
@@ -256,6 +345,11 @@ $PREFIX ANIM_NS grab:
                 ;;    .
                 ;;     \*
                 ;; ( )  .
+            $IF WATER_ROLLER:
+                coll: water all no
+                    ;;    .
+                    ;;     \*
+                    ;; ( )  .
         then:
             move: 2 1
             rot: 3
@@ -304,6 +398,10 @@ $PREFIX ANIM_NS grab_flipped:
         coll: all no
             ;; ( )-
             ;;    *
+        $IF WATER_ROLLER:
+            coll: water all no
+                ;; ( )-
+                ;;    *
     then:
         rot: -1
         delay: 1
@@ -311,8 +409,13 @@ $PREFIX ANIM_NS grab_flipped:
     if:
         key: isdown f
         key: not isdown b
-        coll: all yes
-            ;; ( )  +
+        any:
+            coll: any yes
+                ;; ( )  +
+            $IF WATER_ROLLER:
+                coll: water any yes
+                    ;; ( )  .
+                    ;;    *
     then:
         move: 1 0
         rot: 2
@@ -325,6 +428,10 @@ $PREFIX ANIM_NS grab_flipped:
         coll: all no
             ;; ( )-
             ;;    *
+        $IF WATER_ROLLER:
+            coll: water all no
+                ;; ( )-
+                ;;    *
     then:
         rot: -1
         delay: 1
