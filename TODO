@@ -380,6 +380,7 @@ Mar 29, 2020:
     be cool if while paused you could see body's keyinfo in realtime.
     * Hmmm, currently we have it so console steals your keypresses while paused.
     * Can we find a clever way to make that optional?..
+        -> DONE (ctrl+F5)
 
 * list_submaps: add an option to jump the camera there?
 
@@ -418,4 +419,75 @@ Jun 15, 2020:
 Keep it simple... I want more places to play in
 Dodecas is probably my favourite, more like that plz.
 Mix hexas + bigtris, birds + bigrollers.
+
+
+Aug 2, 2020:
+------------
+
+
+Need to be able to auto-generate a minimap (and dump to .bmp etc)
+
+
+Spit needs to eventually disappear on its own, otherwise spitting repeatedly into empty space eventually slows down the game
+-> OK DONE, but watching list_bodies in the console, looks like dying doesn't actually remove a body.
+    ...which probably makes sense sometimes?.. but for spit needs to be totally removed.
+    Well anyway, not having a bunch of spit doing collision checks every frame should be an improvement, good enough for now.
+
+
+GET WATER_ROLLER WORKING BETTERER
+...then throw some in "water" map
+
+
+Anything fun we can do with body->vars now that we can "inc" etc?..
+E.g. collected "coins" are counted and can be... spent somehow.
+Issue with that is our crappy "event system"...
+
+    anim/coin.fus:
+        on "collect": collected
+
+    anim/player.fus:
+        collmsgs: "collect"
+
+...no way to get "code" to run for player when they actually collect something.
+...errr wait, can we just have a corresponding "collectible" message sent by coin to player???
+Ok ok, but even then, the only thing we can do when an event fires is a "goto".
+We want an arbitrary state_effect_t.
+I believe we want something like:
+
+    anim/coin.fus:
+        on "collect":
+            goto immediate: collected
+
+    anim/player.fus:
+        collmsgs:
+            "collect":
+                inc: coins_collected
+
+Question: how would we display e.g. that "coins_collected" variable?..
+camera_render would check player's body's variables?..
+Variables with a certain prefix are printed?..
+Or stateset has a list of variables to be printed, and their labels?..
+
+    anim/player.fus:
+
+        display:
+            int coins_collected
+        collmsgs:
+            "collect":
+                inc: coins_collected
+        on "crush":
+            goto immediate: dead
+
+        $SET_BOOL PLAYER_CAN_LOOK_UP
+        $SET_STR NS player_
+        import "anim/_player.fus"
+
+
+Can a body's vars be made to affect how its rgraph is rendered?..
+
+
+SOMETHING FUN:
+    Rollers can collect 1 "coin".
+    Then they are seen to be carrying it.
+    However, player can "steal" it by shooting or running into it.
 
