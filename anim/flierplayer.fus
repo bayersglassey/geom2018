@@ -9,4 +9,4 @@ import "anim/_player.fus"
 $SET_STR ANIM_NS flier_
 $SET_STR RGRAPH_NS flierplayer_
 $SET_BOOL PLAYER_FLIER
-import "anim/_flier.fus"
+import "anim/_flier_core.fus"

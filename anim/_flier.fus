@@ -1,123 +1,21 @@
 
-# Expected vars:
-# ANIM_NS (str), e.g. "flier_", ""
-# RGRAPH_NS (str), e.g. "flierplayer_", ""
-
-
-#$SET_BOOL ONLY_STICK_IF_NOT_SHIFT
-
-
-$PREFIX ANIM_NS hover:
-    rgraph: $PREFIX RGRAPH_NS "flier"
-    unsafe
-    flying
-    hitbox:
-        ;;   *\*/*
-        ;;   -(+)-
-        ;;   */*\*
-
-
-    ############
-    # ROTATE B #
-    ############
-
-    $IF PLAYER_FLIER:
-        if:
-            key: wasdown b
-            key: not wasdown f
-            $IF ONLY_STICK_IF_NOT_SHIFT:
-                key: not isdown x
-            coll: all yes
-                ;;  . - .
-                ;;
-                ;;   ( )
-        then:
-            move: 0 1
-            turn
-            rot: 3
-            goto: crawl
-            delay: 2
+born:
+    rgraph: "flier_born"
 
     if:
-        key: wasdown b
-        key: not wasdown f
         coll: all no
             ;;  *\*/*
-            ;;  - + -
-            ;;     \*
-            ;; ( )
-    then:
-        rot: 1
-        move: 1 0
-        goto: $PREFIX ANIM_NS fly
-        delay: 1
-
-    if:
-        key: wasdown b
-        key: not wasdown f
-        coll: all no
-            ;;     \*/*
-            ;; ( )  + -
-            ;;     /*\*
-    then:
-        move: 1 0
-        rot: 1
-        goto: $PREFIX ANIM_NS fly
-        delay: 1
-
-    if:
-        key: wasdown b
-        key: not wasdown f
-    then:
-        rot: 1
-        goto: $PREFIX ANIM_NS fly
-        delay: 1
-
-
-    ############
-    # ROTATE F #
-    ############
-
-    $IF PLAYER_FLIER:
-        if:
-            key: wasdown f
-            key: not wasdown b
-            $IF ONLY_STICK_IF_NOT_SHIFT:
-                key: not isdown x
-            coll: all yes
-                ;;   ( )
-                ;;
-                ;;  . - .
-        then:
-            move: -1 -1
-            goto: crawl
-            delay: 2
-
-    if:
-        key: wasdown f
-        key: not wasdown b
-        coll: all no
-            ;; ( )
-            ;;     /*
-            ;;  - + -
+            ;;  -(+)-
             ;;  */*\*
     then:
-        rot: -1
-        move: 1 0
-        goto: $PREFIX ANIM_NS fly
-        delay: 1
+        goto: hover
 
     if:
-        key: wasdown f
-        key: not wasdown b
-        coll: all no
-            ;;     \*/*
-            ;; ( )  + -
-            ;;     /*\*
+        key: wasdown b
+        key: not wasdown f
     then:
+        rot: 1
         move: 1 0
-        rot: -1
-        goto: $PREFIX ANIM_NS fly
         delay: 1
 
     if:
@@ -125,83 +23,18 @@ $PREFIX ANIM_NS hover:
         key: not wasdown b
     then:
         rot: -1
-        goto: $PREFIX ANIM_NS fly
+        move: 1 0
         delay: 1
-
-
-    ############
-    # STRAIGHT #
-    ############
-
-    $IF PLAYER_FLIER:
-        if:
-            key: wasdown u
-            $IF ONLY_STICK_IF_NOT_SHIFT:
-                key: not isdown x
-            coll: all yes
-                ;;   ( )  .
-                ;;       /
-            coll: all no
-                ;;       \
-                ;;   ( )  .
-        then:
-            move: 0 -1
-            rot: 1
-            goto: crawl
-            delay: 2
-
-        if:
-            key: wasdown u
-            $IF ONLY_STICK_IF_NOT_SHIFT:
-                key: not isdown x
-            coll: all yes
-                ;;       \
-                ;;   ( )  .
-            coll: all no
-                ;;   ( )  .
-                ;;       /
-        then:
-            move: 1 1
-            rot: 2
-            turn
-            goto: crawl
-            delay: 2
 
     if:
         key: wasdown u
-        coll: all no
-            ;;     \*/*
-            ;; ( )  + -
-            ;;     /*\*
     then:
         move: 1 0
-        goto: $PREFIX ANIM_NS fly
-        delay: 0
+        delay: 1
 
 
-$PREFIX ANIM_NS fly:
-    rgraph: $PREFIX RGRAPH_NS "flier_fly"
-    unsafe
-    flying
-    hitbox:
-        ;;   *\*/*
-        ;;   -(+)-
-        ;;   */*\*
+import "anim/_flier_core.fus"
 
-    # DOESN'T WORK BECAUSE NO WAY TO KNOW WHETHER WE SHOULD TURN OR NOT:
-    #$IF PLAYER_FLIER:
-    #    if:
-    #        coll: water any yes
-    #            ;;   .   .
-    #            ;;   *\*/*
-    #            ;; . -(+)- .
-    #            ;;   */*\*
-    #            ;;   .   .
-    #    then:
-    #        move: -1 -1
-    #        goto: swim_jump
-    #        delay: 4
-
-    if:
-    then:
-        goto: $PREFIX ANIM_NS hover
+dead:
+    rgraph: "dead"
+    if() then: die

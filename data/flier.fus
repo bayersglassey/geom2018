@@ -20,6 +20,7 @@ shapes:
             : "flier_born_sixth" (0 0 0 0) 10 f
 
 
+
 $SET_STR PLAYER_HEAD "player_head"
 $SET_STR NS ""
 $UNSET_BOOL PLAYER_FLIER
@@ -29,3 +30,14 @@ $SET_STR PLAYER_HEAD "flierplayer_head"
 $SET_STR NS "flierplayer_"
 $SET_BOOL PLAYER_FLIER
 import "data/_flier.fus"
+
+
+shapes:
+
+    ###############
+    # DEATH FLIER #
+    ###############
+
+    "death_flier": map ("l.blu") ("flier")
+    "death_flier_fly": map ("l.blu") ("flier_fly")
+    #"death_flier_born": map ("l.blu") ("flier_born")

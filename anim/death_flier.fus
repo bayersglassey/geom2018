@@ -1,6 +1,5 @@
-
-on "crush": dead
+collmsgs: "crush"
 
 $SET_STR ANIM_NS ""
-$SET_STR RGRAPH_NS ""
+$SET_STR RGRAPH_NS "death_"
 import "anim/_flier.fus"

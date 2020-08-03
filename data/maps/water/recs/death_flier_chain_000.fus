@@ -1,0 +1,13 @@
+anim: "anim/death_flier.fus"
+state: "hover"
+pos: ( -1 -41)
+rot: 1
+turn: no
+keys:
+    x:
+    y:
+    u:
+    d:
+    l:
+    r:
+data: " w13+u w173+l w7-l w15-u w56+u w132+l w3-l w18-u w43"
