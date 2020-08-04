@@ -325,6 +325,7 @@ typedef struct hexgame {
     set_players_callback_t *set_players_callback;
     exit_callback_t *exit_callback;
 
+    ARRAY_DECL(char*, worldmaps)
     ARRAY_DECL(hexmap_t*, maps)
     ARRAY_DECL(camera_t*, cameras)
     ARRAY_DECL(player_t*, players)
@@ -334,6 +335,7 @@ typedef struct hexgame {
 
 void hexgame_cleanup(hexgame_t *game);
 int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
+    const char *worldmaps_filename,
     const char *map_filename, void *app,
     new_game_callback_t *new_game_callback,
     continue_callback_t *continue_callback,

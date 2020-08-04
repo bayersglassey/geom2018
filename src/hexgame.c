@@ -12,6 +12,8 @@
 #include "array.h"
 #include "util.h"
 #include "location.h"
+#include "lexer.h"
+#include "lexer_macros.h"
 
 
 
@@ -273,13 +275,43 @@ int camera_render(camera_t *camera,
  ***********/
 
 void hexgame_cleanup(hexgame_t *game){
+    ARRAY_FREE_PTR(char*, game->worldmaps, (void))
     ARRAY_FREE_PTR(hexmap_t*, game->maps, hexmap_cleanup)
     ARRAY_FREE_PTR(camera_t*, game->cameras, camera_cleanup)
     ARRAY_FREE_PTR(player_t*, game->players, player_cleanup)
     ARRAY_FREE_PTR(actor_t*, game->actors, actor_cleanup)
 }
 
+static int hexgame_load_worldmaps(hexgame_t *game, const char *worldmaps_filename){
+    int err;
+    fus_lexer_t _lexer, *lexer = &_lexer;
+
+    char *text = load_file(worldmaps_filename);
+    if(text == NULL)return 1;
+
+    err = fus_lexer_init(lexer, text, worldmaps_filename);
+    if(err)return err;
+
+    GET("worldmaps")
+    GET("(")
+    while(1){
+        if(GOT(")"))break;
+        GET("(")
+        char *worldmap;
+        GET_STR(worldmap)
+        ARRAY_PUSH(char*, game->worldmaps, worldmap)
+        GET(")")
+    }
+    NEXT
+
+    fus_lexer_cleanup(lexer);
+
+    free(text);
+    return 0;
+}
+
 int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
+    const char *worldmaps_filename,
     const char *map_filename, void *app,
     new_game_callback_t *new_game_callback,
     continue_callback_t *continue_callback,
@@ -297,10 +329,22 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     game->set_players_callback = set_players_callback;
     game->exit_callback = exit_callback;
 
+    ARRAY_INIT(game->worldmaps)
     ARRAY_INIT(game->maps)
     ARRAY_INIT(game->cameras)
     ARRAY_INIT(game->players)
     ARRAY_INIT(game->actors)
+
+    err = hexgame_load_worldmaps(game, worldmaps_filename);
+    if(err)return err;
+
+    if(game->worldmaps_len == 0){
+        fprintf(stderr, "No worldmaps specified!\n");
+        return 2;
+    }
+
+    /* Default map to load is first worldmap */
+    if(map_filename == NULL)map_filename = game->worldmaps[0];
 
     hexmap_t *map;
     err = hexgame_load_map(game, map_filename, &map);
@@ -309,10 +353,24 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     return 0;
 }
 
+static const char *hexgame_get_worldmap(hexgame_t *game, const char *filename){
+    for(int i = 0; i < game->worldmaps_len; i++){
+        const char *worldmap = game->worldmaps[i];
+        if(!strcmp(filename, worldmap))return worldmap;
+    }
+    return NULL;
+}
+
 int hexgame_load_map(hexgame_t *game, const char *map_filename,
     hexmap_t **map_ptr
 ){
     int err;
+    const char *worldmap = hexgame_get_worldmap(game, map_filename);
+    if(worldmap == NULL){
+        fprintf(stderr, "Tried to load a map which wasn't declared as a worldmap: %s\n", map_filename);
+        return 2;
+    }
+
     ARRAY_PUSH_NEW(hexmap_t*, game->maps, map)
     err = hexmap_load(map, game, map_filename, NULL);
     if(err)return err;
