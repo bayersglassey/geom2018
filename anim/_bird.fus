@@ -1,11 +1,12 @@
 
 # Expected variables:
+# ANIM_NS (str), e.g. "bird_", ""
 # RGRAPH_NS (str): e.g. "player_", ""
 
 #$SET_BOOL CRAWL_MOVE
 
 
-stand:
+$PREFIX ANIM_NS stand:
     rgraph: $PREFIX RGRAPH_NS "bird_stand"
 
     collmsgs: "crush"
@@ -23,22 +24,22 @@ stand:
     if:
         key: isdown d
     then:
-        goto: crawl_arrive
+        goto: $PREFIX ANIM_NS crawl_arrive
         delay: 1
 
     if:
         key: isdown f
     then:
-        goto: step
+        goto: $PREFIX ANIM_NS step
         delay: 1
 
     if:
         key: isdown b
     then:
-        goto: turn
+        goto: $PREFIX ANIM_NS turn
         delay: 1
 
-turn:
+$PREFIX ANIM_NS turn:
     rgraph: $PREFIX RGRAPH_NS "bird_turn"
     collmsgs: "crush"
     hitbox:
@@ -54,10 +55,10 @@ turn:
     if() then:
         move: 1 0
         turn
-        goto: turn_arrive
+        goto: $PREFIX ANIM_NS turn_arrive
         delay: 1
 
-step:
+$PREFIX ANIM_NS step:
     rgraph: $PREFIX RGRAPH_NS "bird_step"
 
     collmsgs: "crush"
@@ -78,7 +79,7 @@ step:
         false
         key: not isdown f
     then:
-        goto: step_rev
+        goto: $PREFIX ANIM_NS step_rev
         delay: 2
 
     if:
@@ -96,7 +97,7 @@ step:
             ;;  (.)  .   .
     then:
         move: 1 0
-        goto: step_arrive
+        goto: $PREFIX ANIM_NS step_arrive
         delay: 2
 
     if:
@@ -117,7 +118,7 @@ step:
     then:
         move: 3 1
         rot: 1
-        goto: step_rot_up_arrive
+        goto: $PREFIX ANIM_NS step_rot_up_arrive
         delay: 2
 
     if:
@@ -137,7 +138,7 @@ step:
             ;;        .   .
     then:
         move: 1 -1
-        goto: step_down_arrive
+        goto: $PREFIX ANIM_NS step_down_arrive
         delay: 2
 
     if:
@@ -159,7 +160,7 @@ step:
             ;; ( )  .
     then:
         move: 2 1
-        goto: step_up_arrive
+        goto: $PREFIX ANIM_NS step_up_arrive
         delay: 2
 
     if:
@@ -180,14 +181,14 @@ step:
     then:
         move: 1 0
         rot: -1
-        goto: step_rot_down_arrive
+        goto: $PREFIX ANIM_NS step_rot_down_arrive
         delay: 2
 
     if() then:
-        goto: step_rev
+        goto: $PREFIX ANIM_NS step_rev
         delay: 2
 
-turn_arrive:
+$PREFIX ANIM_NS turn_arrive:
     rgraph: $PREFIX RGRAPH_NS "bird_turn_arrive"
     collmsgs: "crush"
     hitbox:
@@ -200,9 +201,9 @@ turn_arrive:
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto: stand
+    if() then: goto: $PREFIX ANIM_NS stand
 
-step_rev:
+$PREFIX ANIM_NS step_rev:
     rgraph: $PREFIX RGRAPH_NS "bird_step_rev"
     collmsgs: "crush"
     hitbox:
@@ -215,9 +216,9 @@ step_rev:
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto: stand
+    if() then: goto: $PREFIX ANIM_NS stand
 
-step_rot_up_arrive:
+$PREFIX ANIM_NS step_rot_up_arrive:
     rgraph: $PREFIX RGRAPH_NS "bird_step_rot_up_arrive"
     collmsgs: "crush"
     hitbox:
@@ -230,9 +231,9 @@ step_rot_up_arrive:
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto: stand
+    if() then: goto: $PREFIX ANIM_NS stand
 
-step_arrive:
+$PREFIX ANIM_NS step_arrive:
     rgraph: $PREFIX RGRAPH_NS "bird_step_arrive"
     collmsgs: "crush"
     hitbox:
@@ -245,9 +246,9 @@ step_arrive:
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto: stand
+    if() then: goto: $PREFIX ANIM_NS stand
 
-step_down_arrive:
+$PREFIX ANIM_NS step_down_arrive:
     rgraph: $PREFIX RGRAPH_NS "bird_step_down_arrive"
     collmsgs: "crush"
     hitbox:
@@ -260,9 +261,9 @@ step_down_arrive:
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto: stand
+    if() then: goto: $PREFIX ANIM_NS stand
 
-step_up_arrive:
+$PREFIX ANIM_NS step_up_arrive:
     rgraph: $PREFIX RGRAPH_NS "bird_step_up_arrive"
     collmsgs: "crush"
     hitbox:
@@ -275,9 +276,9 @@ step_up_arrive:
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto: stand
+    if() then: goto: $PREFIX ANIM_NS stand
 
-step_rot_down_arrive:
+$PREFIX ANIM_NS step_rot_down_arrive:
     rgraph: $PREFIX RGRAPH_NS "bird_step_rot_down_arrive"
     collmsgs: "crush"
     hitbox:
@@ -290,9 +291,9 @@ step_rot_down_arrive:
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto: stand
+    if() then: goto: $PREFIX ANIM_NS stand
 
-crawl_arrive:
+$PREFIX ANIM_NS crawl_arrive:
     rgraph: $PREFIX RGRAPH_NS "bird_crawl_arrive"
 
     hitbox:
@@ -303,9 +304,9 @@ crawl_arrive:
         ;;  (.)  .
 
     if:
-    then: goto: crawl
+    then: goto: $PREFIX ANIM_NS crawl
 
-crawl:
+$PREFIX ANIM_NS crawl:
     rgraph: $PREFIX RGRAPH_NS "bird_crawl"
 
     hitbox:
@@ -329,7 +330,7 @@ crawl:
             ;;  ( )  .
     then:
         delay: 1
-        goto: crawl_stand
+        goto: $PREFIX ANIM_NS crawl_stand
 
     $IF CRAWL_MOVE:
         if:
@@ -376,10 +377,10 @@ crawl:
     if:
         key: isdown b
     then:
-        goto: crawl_turn
+        goto: $PREFIX ANIM_NS crawl_turn
         delay: 1
 
-crawl_turn:
+$PREFIX ANIM_NS crawl_turn:
     rgraph: $PREFIX RGRAPH_NS "bird_crawl_turn"
     hitbox:
         ;;   . - .
@@ -390,10 +391,10 @@ crawl_turn:
     if() then:
         move: 1 0
         turn
-        goto: crawl_turn_arrive
+        goto: $PREFIX ANIM_NS crawl_turn_arrive
         delay: 1
 
-crawl_turn_arrive:
+$PREFIX ANIM_NS crawl_turn_arrive:
     rgraph: $PREFIX RGRAPH_NS "bird_crawl_turn_arrive"
     hitbox:
         ;;   . - .
@@ -401,9 +402,9 @@ crawl_turn_arrive:
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto: crawl
+    if() then: goto: $PREFIX ANIM_NS crawl
 
-crawl_stand:
+$PREFIX ANIM_NS crawl_stand:
     rgraph: $PREFIX RGRAPH_NS "bird_crawl_stand"
 
     hitbox:
@@ -418,4 +419,4 @@ crawl_stand:
         ;;  (.)  .
 
     if:
-    then: goto: stand
+    then: goto: $PREFIX ANIM_NS stand
