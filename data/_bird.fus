@@ -288,6 +288,14 @@ shapes:
             : $PREFIX NS "bird_step" (0 0 0 0) 0 f 0 (2 1)
             : $PREFIX NS "bird_step" (0 0 0 0) 0 f 0 (3 1)
 
+    $PREFIX NS "bird_step_arrive":
+        animation: cycle 3
+        shapes:
+            # frame 2 is bird_stand, for debugging purposes
+            : $PREFIX NS "bird_stand" (-3 0  0 0) 0 f 0 (0 1)
+            : $PREFIX NS "bird_stand" (-1 0  0 0) 0 f 0 (1 1)
+            : $PREFIX NS "bird_stand" ( 0 0  0 0) 0 f 0 (2 1)
+
     $PREFIX NS "bird_step_up_arrive":
         animation: cycle 3
         shapes:
@@ -336,7 +344,32 @@ shapes:
             : $PREFIX NS "bird_stand" (0  0  0  0)  0 f 0 (2 1)
             : $PREFIX NS "bird_step"  (0 -1 -3 -1)  2 f 1 (3 1)
 
+    $PREFIX NS "bird_crawl_arrive":
+        animation: cycle 2
+        shapes:
+            : $PREFIX NS "bird_legs_stand" (0 0 0 0) 0 f
+            : $PREFIX NS "bird_head" (-2 0 4  2)  0 f 0+ (0 1)
+            : $PREFIX NS "bird_head" (-1 0 2  1)  0 f 0+ (1 1)
+
+    $PREFIX NS "bird_crawl_stand":
+        # Inverse of "bird_crawl_arrive"
+        animation: cycle 2
+        shapes:
+            : $PREFIX NS "bird_legs_stand" (0 0 0 0) 0 f
+            : $PREFIX NS "bird_head" (-1 0 2  1)  0 f 0+ (0 1)
+            : $PREFIX NS "bird_head" (-2 0 4  2)  0 f 0+ (1 1)
+
     $PREFIX NS "bird_crawl":
         shapes:
             : $PREFIX NS "bird_head" ( 0 0 0  0)  0 f
 
+    $PREFIX NS "bird_crawl_turn":
+        animation: cycle 2
+        shapes:
+            : $PREFIX NS "bird_head_turn" ( 0 0 0  0)  0 f 0+ (0 2)
+
+    $PREFIX NS "bird_crawl_turn_arrive":
+        animation: cycle 2
+        shapes:
+            : $PREFIX NS "bird_head_turn" ( 0 0 0  0)  0 f 1 (0 1)
+            : $PREFIX NS "bird_head_turn" ( 0 0 0  0)  0 f 0 (1 1)

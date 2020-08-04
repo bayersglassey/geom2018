@@ -2,6 +2,9 @@
 # Expected variables:
 # RGRAPH_NS (str): e.g. "player_", ""
 
+#$SET_BOOL CRAWL_MOVE
+
+
 stand:
     rgraph: $PREFIX RGRAPH_NS "bird_stand"
 
@@ -20,8 +23,8 @@ stand:
     if:
         key: isdown d
     then:
-        goto: crawl
-        delay: 3
+        goto: crawl_arrive
+        delay: 1
 
     if:
         key: isdown f
@@ -80,6 +83,24 @@ step:
 
     if:
         coll: all yes
+            ;; ( )  +   +
+        coll: all no
+            ;;   .   .   .
+            ;;        \*/*
+            ;; .   .   + - .
+            ;;        /*\*
+            ;;   .   + - +
+            ;;        \*/*
+            ;; .   .   + - .
+            ;;        /*\*
+            ;;  (.)  .   .
+    then:
+        move: 1 0
+        goto: step_arrive
+        delay: 2
+
+    if:
+        coll: all yes
             ;;              +
             ;;
             ;;        .   +
@@ -87,9 +108,9 @@ step:
             ;; ( )  .
         coll: all no
             ;;         .   .
-            ;;
-            ;;   .   +   .   .
-            ;;        \
+            ;;         *\*/*
+            ;;   .   + - . - .
+            ;;        \*/*\*
             ;; .   .   .   .
             ;;
             ;;  (.)  .
@@ -105,12 +126,15 @@ step:
             ;;
             ;;        +   +
         coll: all no
+            ;;        .   .
             ;;       /*\*/*
-            ;;      + - + -
+            ;;      + - + - .
             ;;       \*/*\*
-            ;;        +
-            ;;       /
-            ;; ( )  .
+            ;;        + - .
+            ;;       /*\*/*
+            ;; ( )  . - + - .
+            ;;        */*\*
+            ;;        .   .
     then:
         move: 1 -1
         goto: step_down_arrive
@@ -122,14 +146,15 @@ step:
             ;;
             ;; ( )  .
         coll: all no
+            ;;        .   .
             ;;        *\*/*
-            ;;      . - + -
+            ;;      . - + - .
             ;;       \*/*\*
-            ;;        +
-            ;;       /
-            ;;      +
-            ;;       \
-            ;;        .
+            ;;        + - .
+            ;;       /*\*/*
+            ;;      + - + - .
+            ;;       \*/*\*
+            ;;        .   .
             ;;
             ;; ( )  .
     then:
@@ -139,16 +164,19 @@ step:
 
     if:
         coll: all yes
-            ;; ( )  .
+            ;; ( )  +
             ;;
             ;;        +
         coll: all no
+            ;;        .   .
             ;;       /*\*/*
-            ;;      + - + -
+            ;;      + - + - .   .
             ;;       \*/*\*/*\*/*
-            ;;        + - + - + -
-            ;;       /     \*/*\*
-            ;; ( )  .
+            ;;        + - + - + - .
+            ;;       /*\*/*\*/*\*
+            ;; ( )  . - + - .   .
+            ;;        */*\*
+            ;;        .   .
     then:
         move: 1 0
         rot: -1
@@ -191,6 +219,21 @@ step_rev:
 
 step_rot_up_arrive:
     rgraph: $PREFIX RGRAPH_NS "bird_step_rot_up_arrive"
+    collmsgs: "crush"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;   . - .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: stand
+
+step_arrive:
+    rgraph: $PREFIX RGRAPH_NS "bird_step_arrive"
     collmsgs: "crush"
     hitbox:
         ;;   .   .
@@ -249,6 +292,19 @@ step_rot_down_arrive:
         ;;  (.)  .
     if() then: goto: stand
 
+crawl_arrive:
+    rgraph: $PREFIX RGRAPH_NS "bird_crawl_arrive"
+
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+
+    if:
+    then: goto: crawl
+
 crawl:
     rgraph: $PREFIX RGRAPH_NS "bird_crawl"
 
@@ -262,6 +318,7 @@ crawl:
     if:
         key: not isdown d
         coll: all no
+            ;;   .   .
             ;;   *\*/*
             ;; . - + - .
             ;;   */ \*
@@ -269,55 +326,96 @@ crawl:
             ;;
             ;; .   .   .
             ;;
-            ;;  ( )
+            ;;  ( )  .
     then:
-        delay: 2
-        goto: stand
+        delay: 1
+        goto: crawl_stand
 
-    if:
-        key: isdown f
-        coll: all yes
-            ;;        +
-            ;;
-            ;; ( )  +
-    then:
-        move: 1 0
-        rot: 1
-        delay: 2
+    $IF CRAWL_MOVE:
+        if:
+            key: isdown f
+            coll: all yes
+                ;;        +
+                ;;
+                ;; ( )  +
+        then:
+            move: 1 0
+            rot: 1
+            delay: 2
 
-    if:
-        key: isdown f
-        coll: all yes
-            ;; ( )  +   +
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*
-            ;; ( )
-    then:
-        move: 1 0
-        delay: 2
+        if:
+            key: isdown f
+            coll: all yes
+                ;; ( )  +   +
+            coll: all no
+                ;;       \*/*
+                ;;        + -
+                ;;       /*\*
+                ;; ( )
+        then:
+            move: 1 0
+            delay: 2
 
-    if:
-        key: isdown f
-        coll: all yes
-            ;; ( )  +
-            ;;
-            ;;        +
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*/*
-            ;; ( )    - + -
-            ;;        */*\*
-    then:
-        move: 1 0
-        rot: -1
-        delay: 2
+        if:
+            key: isdown f
+            coll: all yes
+                ;; ( )  +
+                ;;
+                ;;        +
+            coll: all no
+                ;;       \*/*
+                ;;        + -
+                ;;       /*\*/*
+                ;; ( )    - + -
+                ;;        */*\*
+        then:
+            move: 1 0
+            rot: -1
+            delay: 2
 
     if:
         key: isdown b
     then:
+        goto: crawl_turn
+        delay: 1
+
+crawl_turn:
+    rgraph: $PREFIX RGRAPH_NS "bird_crawl_turn"
+    hitbox:
+        ;;   . - .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then:
         move: 1 0
         turn
-        delay: 2
+        goto: crawl_turn_arrive
+        delay: 1
+
+crawl_turn_arrive:
+    rgraph: $PREFIX RGRAPH_NS "bird_crawl_turn_arrive"
+    hitbox:
+        ;;   . - .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: crawl
+
+crawl_stand:
+    rgraph: $PREFIX RGRAPH_NS "bird_crawl_stand"
+
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;   . - .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+
+    if:
+    then: goto: stand
