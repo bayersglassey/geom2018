@@ -45,7 +45,7 @@ int test_app_render_editor(test_app_t *app){
 
     int line_y = 0;
 
-    if(app->show_controls){
+    if(app->show_editor_controls){
         FONT_PRINTF(FONT_ARGS(app->render_surface, 0, line_y * app->font.char_h),
             "Frame rendered in: %i ms (goal: %i ms)\n"
             "# Textures in use: %i\n"
@@ -101,6 +101,8 @@ int test_app_process_event_editor(test_app_t *app, SDL_Event *event){
     int err;
     switch(event->type){
         case SDL_KEYDOWN: {
+            if(event->key.keysym.sym == SDLK_RETURN){
+                app->show_editor_controls = !app->show_editor_controls;}
 
             if(event->key.keysym.sym == SDLK_0){
                 app->x0 = 0; app->y0 = 0;

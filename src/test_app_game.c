@@ -191,9 +191,7 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
 
     if(event->type == SDL_KEYDOWN){
         if(event->key.keysym.sym == SDLK_RETURN){
-            if(app->hexgame_running){
-                app->show_controls = !app->show_controls;
-            }
+            app->show_controls = !app->show_controls;
         }else if(event->key.keysym.sym == SDLK_PAGEUP){
             if(!app->hexgame_running){
                 /* Do 1 step */

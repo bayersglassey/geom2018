@@ -371,9 +371,9 @@ lexer_err:
 
 static int _test_app_command_mode(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
     int err;
-    if(GOT("game")){
+    if(GOT("game") || GOT("g")){
         app->mode = TEST_APP_MODE_GAME;
-    }else if(GOT("editor")){
+    }else if(GOT("editor") || GOT("e")){
         app->mode = TEST_APP_MODE_EDITOR;
     }else{
         UNEXPECTED("game or editor");
@@ -410,7 +410,7 @@ test_app_command_t _test_app_commands[] = {
     COMMAND(map, NULL, "MAPPER RGRAPH [RESULTING_RGRAPH]"),
     COMMAND(renderall, NULL, NULL),
     COMMAND(get_shape, NULL, "SHAPE"),
-    COMMAND(mode, NULL, "(game | editor)"),
+    COMMAND(mode, "m", "(game | g | editor | e)"),
     NULLCOMMAND
 };
 

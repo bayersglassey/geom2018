@@ -85,6 +85,7 @@ typedef struct test_app {
 
     bool hexgame_running;
     bool show_controls;
+    bool show_editor_controls;
     bool show_console; /* console is visible */
     bool process_console; /* console is grabbing input */
     int mode;

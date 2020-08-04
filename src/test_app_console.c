@@ -103,7 +103,6 @@ void test_app_show_console(test_app_t *app){
 void test_app_hide_console(test_app_t *app){
     console_newline(&app->console);
     console_write_msg(&app->console, "Leaving debug console...\n");
-    app->mode = TEST_APP_MODE_GAME;
     app->show_console = false;
     test_app_stop_console(app);
 }
