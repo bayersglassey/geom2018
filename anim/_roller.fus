@@ -27,17 +27,17 @@ $PREFIX ANIM_NS stand:
     $IF PLAYER_ROLLER:
         if:
             key: not isdown x
-            coll: any yes
-                ;; ( )- .
+            coll: all yes
+                ;; (+)- +
         then:
             goto: crawl
 
         if:
             key: not isdown x
-            coll: any yes
-                ;;    .
+            coll: all yes
+                ;;    +
                 ;;   /
-                ;; ( )  .
+                ;; (+)  .
         then:
             goto: crawl
             rot: -2

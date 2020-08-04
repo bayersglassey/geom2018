@@ -3,6 +3,6 @@ $SET_STR NS ""
 $UNSET_BOOL PLAYER_BIRD
 import "data/_bird.fus"
 
-$SET_STR NS "player_"
+$SET_STR NS "birdplayer_"
 $SET_BOOL PLAYER_BIRD
 import "data/_bird.fus"

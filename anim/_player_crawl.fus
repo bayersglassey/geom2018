@@ -81,6 +81,23 @@ crawl:
             goto: roller_stand
             delay: 1
 
+    $IF PLAYER_BIRD:
+        if:
+            key: wentdown x
+            coll: all no
+                ;;   .   .
+                ;;   *\*/*
+                ;; . - + - .
+                ;;   */*\*
+                ;;   . - .
+                ;;   *\*/*
+                ;; . - + - .
+                ;;   */*\*
+                ;;  (.)  .
+        then:
+            goto: bird_crawl
+            delay: 1
+
     if:
         key: not isdown d
         coll: all no

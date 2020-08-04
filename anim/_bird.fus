@@ -84,24 +84,6 @@ $PREFIX ANIM_NS step:
 
     if:
         coll: all yes
-            ;; ( )  +   +
-        coll: all no
-            ;;   .   .   .
-            ;;        \*/*
-            ;; .   .   + - .
-            ;;        /*\*
-            ;;   .   + - +
-            ;;        \*/*
-            ;; .   .   + - .
-            ;;        /*\*
-            ;;  (.)  .   .
-    then:
-        move: 1 0
-        goto: $PREFIX ANIM_NS step_arrive
-        delay: 2
-
-    if:
-        coll: all yes
             ;;              +
             ;;
             ;;        .   +
@@ -182,6 +164,24 @@ $PREFIX ANIM_NS step:
         move: 1 0
         rot: -1
         goto: $PREFIX ANIM_NS step_rot_down_arrive
+        delay: 2
+
+    if:
+        coll: all yes
+            ;; ( )  +   +
+        coll: all no
+            ;;   .   .   .
+            ;;        \*/*
+            ;; .   .   + - .
+            ;;        /*\*
+            ;;   .   + - +
+            ;;        \*/*
+            ;; .   .   + - .
+            ;;        /*\*
+            ;;  (.)  .   .
+    then:
+        move: 1 0
+        goto: $PREFIX ANIM_NS step_arrive
         delay: 2
 
     if() then:
@@ -315,6 +315,14 @@ $PREFIX ANIM_NS crawl:
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
+
+    $IF PLAYER_BIRD:
+        if:
+            key: not isdown x
+            coll: all yes
+                ;; (+)- +
+        then:
+            goto: crawl
 
     if:
         key: not isdown d
