@@ -652,12 +652,14 @@ int rendergraph_render(rendergraph_t *rgraph,
         }
     }
 
+    vec_t mapped_pos;
+    vec_cpy(rgraph->space->dims, mapped_pos, pos);
     if(mapper != NULL){
         err = prismelmapper_apply_to_rendergraph(mapper, prend, rgraph,
             NULL, rgraph->space, NULL, &rgraph);
         if(err)return err;
 
-        vec_mul(mapper->space, pos, mapper->unit);
+        vec_mul(mapper->space, mapped_pos, mapper->unit);
     }
 
     err = rendergraph_calculate_bitmap_bounds(rgraph,
@@ -671,7 +673,7 @@ int rendergraph_render(rendergraph_t *rgraph,
     if(bitmap->pbox.w == 0 || bitmap->pbox.h == 0)return 0;
 
     int x, y;
-    rgraph->space->vec_render(pos, &x, &y);
+    rgraph->space->vec_render(mapped_pos, &x, &y);
 
     int rect_zoom = MAPPER_ZOOM? 1: zoom;
     SDL_Rect dst_rect = {

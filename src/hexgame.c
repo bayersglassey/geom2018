@@ -211,7 +211,9 @@ int camera_render(camera_t *camera,
 
     hexgame_t *game = camera->game;
     hexmap_t *map = camera->map;
-    vecspace_t *space = map->space;
+    vecspace_t *map_space = map->space;
+    prismelrenderer_t *prend = camera->map->prend;
+    vecspace_t *prend_space = prend->space;
 
     vec_t camera_renderpos;
     vec4_vec_from_hexspace(camera_renderpos, camera->scrollpos);
@@ -227,43 +229,56 @@ int camera_render(camera_t *camera,
     /* Render map's submaps */
     for(int i = 0; i < map->submaps_len; i++){
         hexmap_submap_t *submap = map->submaps[i];
-        rendergraph_t *rgraph = submap->rgraph_map;
 
 #ifdef GEOM_ONLY_RENDER_CUR_SUBMAP
         if(submap != camera->cur_submap)continue;
 #endif
 
+        if(game->show_minimap && !submap->solid)continue;
+
         vec_t pos;
         vec4_vec_from_hexspace(pos, submap->pos);
-        vec_sub(rgraph->space->dims, pos, camera_renderpos);
-        vec_mul(rgraph->space, pos, camera->map->unit);
+        vec_sub(prend_space->dims, pos, camera_renderpos);
 
         rot_t rot = vec4_rot_from_hexspace(0);
         //rot_t rot = vec4_rot_from_hexspace(
-        //    rot_inv(space->rot_max, camera->rot));
+        //    rot_inv(map_space->rot_max, camera->rot));
         flip_t flip = false;
         int frame_i = game->frame_i;
 
-        err = rendergraph_render(rgraph, renderer, surface,
-            pal, camera->map->prend,
-            x0, y0, zoom,
-            pos, rot, flip, frame_i, mapper);
-        if(err)return err;
+        if(game->show_minimap){
+            /* rgraph_minimap's unit is the space's actual unit vector */
+            err = rendergraph_render(submap->rgraph_minimap, renderer, surface,
+                pal, camera->map->prend,
+                x0, y0, zoom,
+                pos, rot, flip, frame_i, NULL);
+            if(err)return err;
+        }else{
+            /* rgraph_map's unit is map->unit */
+            vec_mul(prend_space, pos, camera->map->unit);
+            err = rendergraph_render(submap->rgraph_map, renderer, surface,
+                pal, camera->map->prend,
+                x0, y0, zoom,
+                pos, rot, flip, frame_i, mapper);
+            if(err)return err;
+        }
     }
 
-    /* Render map's bodies */
-    for(int i = 0; i < map->bodies_len; i++){
-        body_t *body = map->bodies[i];
+    if(!game->show_minimap){
+        /* Render map's bodies */
+        for(int i = 0; i < map->bodies_len; i++){
+            body_t *body = map->bodies[i];
 
 #ifdef GEOM_ONLY_RENDER_CUR_SUBMAP
-        if(body->cur_submap != camera->cur_submap)continue;
+            if(body->cur_submap != camera->cur_submap)continue;
 #endif
 
-        err = body_render(body,
-            renderer, surface,
-            pal, x0, y0, zoom,
-            map, camera_renderpos, mapper);
-        if(err)return err;
+            err = body_render(body,
+                renderer, surface,
+                pal, x0, y0, zoom,
+                map, camera_renderpos, mapper);
+            if(err)return err;
+        }
     }
 
     return 0;
@@ -275,6 +290,7 @@ int camera_render(camera_t *camera,
  ***********/
 
 void hexgame_cleanup(hexgame_t *game){
+    hexmap_tileset_cleanup(&game->minimap_tileset);
     ARRAY_FREE_PTR(char*, game->worldmaps, (void))
     ARRAY_FREE_PTR(hexmap_t*, game->maps, hexmap_cleanup)
     ARRAY_FREE_PTR(camera_t*, game->cameras, camera_cleanup)
@@ -312,7 +328,9 @@ static int hexgame_load_worldmaps(hexgame_t *game, const char *worldmaps_filenam
 
 int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     const char *worldmaps_filename,
-    const char *map_filename, void *app,
+    const char *minimap_tileset_filename,
+    const char *map_filename,
+    void *app,
     new_game_callback_t *new_game_callback,
     continue_callback_t *continue_callback,
     set_players_callback_t *set_players_callback,
@@ -323,6 +341,9 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     game->frame_i = 0;
     game->prend = prend;
     game->space = &hexspace; /* NOT the same as prend->space! */
+
+    game->show_minimap = false;
+
     game->app = app;
     game->new_game_callback = new_game_callback;
     game->continue_callback = continue_callback;
@@ -334,6 +355,10 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     ARRAY_INIT(game->cameras)
     ARRAY_INIT(game->players)
     ARRAY_INIT(game->actors)
+
+    err = hexmap_tileset_load(&game->minimap_tileset, prend,
+        minimap_tileset_filename, NULL);
+    if(err)return err;
 
     err = hexgame_load_worldmaps(game, worldmaps_filename);
     if(err)return err;

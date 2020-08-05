@@ -199,14 +199,18 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
                 if(err)return err;
             }
         }else if(event->key.keysym.sym == SDLK_F6){
-            /* Hack, we really want to force camera->mapper to NULL, but
-            instead we assume the existence of this mapper called "single" */
-            const char *mapper_name = "single";
-            app->camera_mapper = prismelrenderer_get_mapper(&app->prend, mapper_name);
-            if(app->camera_mapper == NULL){
-                fprintf(stderr, "%s: Couldn't find mapper: %s\n",
-                    __func__, mapper_name);
-                return 2;
+            if(event->key.keysym.mod & KMOD_CTRL){
+                game->show_minimap = !game->show_minimap;
+            }else{
+                /* Hack, we really want to force camera->mapper to NULL, but
+                instead we assume the existence of this mapper called "single" */
+                const char *mapper_name = "single";
+                app->camera_mapper = prismelrenderer_get_mapper(&app->prend, mapper_name);
+                if(app->camera_mapper == NULL){
+                    fprintf(stderr, "%s: Couldn't find mapper: %s\n",
+                        __func__, mapper_name);
+                    return 2;
+                }
             }
         }else if(event->key.keysym.sym == SDLK_F7){
             app->camera->follow = !app->camera->follow;

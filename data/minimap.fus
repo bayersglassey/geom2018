@@ -1,0 +1,18 @@
+
+shapes:
+
+    "minimap.tri":
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval: 1 + 0 + 6
+
+    "minimap.save":
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 7
+
+    "minimap.door":
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval: 1 + 0 + 3
+
+    "minimap.water":
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval: 1 + 0 + 1

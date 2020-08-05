@@ -1,0 +1,19 @@
+
+verts:
+    "0": "empty"
+    "1": "empty"
+    "2": "empty"
+    "o": "empty"
+edges:
+    "0": "empty"
+    "1": "empty"
+    "2": "empty"
+    "o": "empty"
+faces:
+    "0": "minimap.tri"
+    "1": "minimap.tri"
+    "2": "minimap.tri"
+    "o": "minimap.tri"
+    "S": "minimap.save"
+    "D": "minimap.door"
+    "w": frame_offset(1) "minimap.water"

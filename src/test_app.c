@@ -141,7 +141,8 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 
     hexgame_t *game = &app->hexgame;
     err = hexgame_init(game, prend,
-        "data/maps/worldmaps.fus",
+        "data/worldmaps.fus",
+        "data/tileset_minimap.fus",
         app->hexmap_filename, app,
         &test_app_new_game_callback,
         &test_app_continue_callback,

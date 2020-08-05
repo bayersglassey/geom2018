@@ -1,10 +1,25 @@
 
+#include "hexgame.h"
 #include "hexmap.h"
 #include "util.h"
 #include "geom.h"
 #include "vec4.h"
 #include "hexspace.h"
 #include "prismelrenderer.h"
+
+
+
+/* BIG OL' HACK: If any "tile" rgraphs are animated, we need the
+map's rgraph to be animated also.
+The most correct way to do this is I guess to compute the LCD of
+the tile rgraphs' n_frames, and set the map's rgraph's n_frames
+to that.
+But for now we use a magic number which has "many" divisors.
+That's a lot of bitmaps to cache for the map's rgraph, though...
+if we're going to allow complicated map animations, maybe we
+should disable bitmap caching for it (somehow). */
+#define HEXMAP_SUBMAP_RGRAPH_N_FRAMES 24
+
 
 
 typedef void hexmap_tileset_get_rgraph(hexmap_tileset_t *tileset,
@@ -113,7 +128,8 @@ static int rendergraph_add_rgraph_from_tile(
 
 static int rendergraph_add_rgraphs_from_collmap(
     rendergraph_t *rgraph, hexcollmap_t *collmap,
-    hexmap_tileset_t *tileset, vec_t unit
+    hexmap_tileset_t *tileset, vec_t unit,
+    bool add_collmap_rendergraphs
 ){
     /* Add to rgraph->rendergraph_trfs, according to collmap->tiles,
     using tiles from tileset.
@@ -148,50 +164,49 @@ static int rendergraph_add_rgraphs_from_collmap(
         }
     }
 
-    for(int i = 0; i < collmap->rendergraphs_len; i++){
-        hexmap_rendergraph_t *hexmap_rgraph = collmap->rendergraphs[i];
-        rendergraph_t *rgraph2 = prismelrenderer_get_rendergraph(
-            prend, hexmap_rgraph->name);
-        if(rgraph2 == NULL){
-            fprintf(stderr, "Couldn't find hexmap rgraph: %s\n",
-                hexmap_rgraph->name);
-            return 2;}
+    /* A better name for collmap->rendergraphs might be collmap->decals...
+    They are rendergraphs attached to collmap for purely visual reasons,
+    e.g. text */
+    if(add_collmap_rendergraphs){
+        for(int i = 0; i < collmap->rendergraphs_len; i++){
+            hexmap_rendergraph_t *hexmap_rgraph = collmap->rendergraphs[i];
+            rendergraph_t *rgraph2 = prismelrenderer_get_rendergraph(
+                prend, hexmap_rgraph->name);
+            if(rgraph2 == NULL){
+                fprintf(stderr, "Couldn't find hexmap rgraph: %s\n",
+                    hexmap_rgraph->name);
+                return 2;}
 
-        trf_t *trf = &hexmap_rgraph->trf;
+            trf_t *trf = &hexmap_rgraph->trf;
 
-        /* Convert trf from hexspace to vec4 and multiply by unit */
-        vec_t v;
-        vec4_vec_from_hexspace(v, trf->add);
-        vec_mul(space, v, unit);
-        rot_t r = vec4_rot_from_hexspace(trf->rot);
+            /* Convert trf from hexspace to vec4 and multiply by unit */
+            vec_t v;
+            vec4_vec_from_hexspace(v, trf->add);
+            vec_mul(space, v, unit);
+            rot_t r = vec4_rot_from_hexspace(trf->rot);
 
-        int frame_i = 0;
+            int frame_i = 0;
 
-        err = rendergraph_add_rgraph(rgraph, rgraph2,
-            v, r, frame_i);
-        if(err)return err;
+            err = rendergraph_add_rgraph(rgraph, rgraph2,
+                v, r, frame_i);
+            if(err)return err;
+        }
     }
 
     return 0;
 }
 
-int hexmap_submap_create_rgraph(hexmap_submap_t *submap){
-    /* Build submap->rgraph based on submap->collmap. */
+
+int hexmap_submap_create_rgraph_map(hexmap_submap_t *submap){
+    /* Build submap->rgraph_map based on submap->collmap.
+    This rendergraph represents submap, treating hexcollmap's tiles
+    as rendergraphs of hexmap->tileset. */
     int err;
 
     hexmap_t *map = submap->map;
     prismelrenderer_t *prend = map->prend;
 
-    /* BIG OL' HACK: If any "tile" rgraphs are animated, we need the
-    map's rgraph to be animated also.
-    The most correct way to do this is I guess to compute the LCD of
-    the tile rgraphs' n_frames, and set the map's rgraph's n_frames
-    to that.
-    But for now we use a magic number which has "many" divisors.
-    That's a lot of bitmaps to cache for the map's rgraph, though...
-    if we're going to allow complicated map animations, maybe we
-    should disable bitmap caching for it (somehow). */
-    int n_frames = 24;
+    int n_frames = HEXMAP_SUBMAP_RGRAPH_N_FRAMES;
 
     ARRAY_PUSH_NEW(rendergraph_t*, prend->rendergraphs, rgraph)
     err = rendergraph_init(rgraph, strdup(submap->filename), prend, NULL,
@@ -200,9 +215,40 @@ int hexmap_submap_create_rgraph(hexmap_submap_t *submap){
     if(err)return err;
 
     err = rendergraph_add_rgraphs_from_collmap(
-        rgraph, &submap->collmap, &submap->tileset, map->unit);
+        rgraph, &submap->collmap, &submap->tileset,
+        map->unit, true);
     if(err)return err;
 
     submap->rgraph_map = rgraph;
+    return 0;
+}
+
+
+int hexmap_submap_create_rgraph_minimap(hexmap_submap_t *submap){
+    /* Build submap->rgraph_minimap based on submap->collmap.
+    This rendergraph represents submap as a "minimap" treating
+    hexcollmap's tiles as prismels (so, ignoring hexgame->unit and
+    hexmap->tileset) */
+    int err;
+
+    hexmap_t *map = submap->map;
+    prismelrenderer_t *prend = map->prend;
+
+    int n_frames = HEXMAP_SUBMAP_RGRAPH_N_FRAMES;
+
+    ARRAY_PUSH_NEW(rendergraph_t*, prend->rendergraphs, rgraph)
+    err = rendergraph_init(rgraph, strdupcat("minimap:", submap->filename),
+        prend, NULL,
+        rendergraph_animation_type_default,
+        n_frames);
+    if(err)return err;
+
+    vec_t unit = {1, 0, 0, 0};
+    err = rendergraph_add_rgraphs_from_collmap(
+        rgraph, &submap->collmap, &map->game->minimap_tileset,
+        unit, false);
+    if(err)return err;
+
+    submap->rgraph_minimap = rgraph;
     return 0;
 }

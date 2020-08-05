@@ -736,8 +736,10 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
             lexer->vars);
         if(err)return err;
 
-        /* render submap->rgraph_map */
-        err = hexmap_submap_create_rgraph(submap);
+        /* render submap->rgraph_map, submap->rgraph_minimap */
+        err = hexmap_submap_create_rgraph_map(submap);
+        if(err)return err;
+        err = hexmap_submap_create_rgraph_minimap(submap);
         if(err)return err;
 
         /* parse doors */
@@ -1114,6 +1116,7 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
     if(err)return err;
 
     submap->rgraph_map = NULL;
+    submap->rgraph_minimap = NULL;
     submap->mapper = mapper;
 
     err = palette_load(&submap->palette, palette_filename, NULL);

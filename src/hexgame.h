@@ -315,6 +315,9 @@ typedef struct hexgame {
     vecspace_t *space;
         /* should always be hexspace!
         NOT the same as prend->space! */
+    hexmap_tileset_t minimap_tileset;
+
+    bool show_minimap;
 
     /* app: the application which is running this game.
     The game isn't allowed to know anything about it, but it is
@@ -336,7 +339,9 @@ typedef struct hexgame {
 void hexgame_cleanup(hexgame_t *game);
 int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     const char *worldmaps_filename,
-    const char *map_filename, void *app,
+    const char *minimap_tileset_filename,
+    const char *map_filename,
+    void *app,
     new_game_callback_t *new_game_callback,
     continue_callback_t *continue_callback,
     set_players_callback_t *set_players_callback,
