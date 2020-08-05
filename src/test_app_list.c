@@ -56,7 +56,7 @@ test_app_list_data_t *test_app_list_data_create(test_app_t *app){
 }
 
 void test_app_list_data_cleanup(test_app_list_data_t *data){
-    /* Nuthin */
+    free(data->choices);
 }
 
 

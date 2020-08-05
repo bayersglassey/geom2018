@@ -18,7 +18,9 @@ const char *test_app_list_submaps_options[] = {
     NULL
 };
 
-int test_app_open_list_submaps(test_app_t *app, hexmap_submap_t *submap, hexmap_t *map){
+int test_app_open_list_submaps(test_app_t *app,
+    hexmap_submap_t *submap, hexmap_t *map
+){
     test_app_list_data_t *new_data = test_app_list_data_create(app);
     if(new_data == NULL)return 1;
 

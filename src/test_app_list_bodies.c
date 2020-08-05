@@ -41,7 +41,9 @@ enum {
     TEST_APP_LIST_BODIES_MODES
 };
 
-int test_app_open_list_bodies(test_app_t *app, body_t *body, hexmap_t *map){
+int test_app_open_list_bodies(test_app_t *app,
+    body_t *body, hexmap_t *map
+){
     test_app_list_data_t *new_data = test_app_list_data_create(app);
     if(new_data == NULL)return 1;
 

@@ -80,6 +80,7 @@ typedef struct test_app_list_data {
     body_t *body;
     hexmap_t *map;
     hexmap_submap_t *submap;
+    const char **choices; /* We own this */
 } test_app_list_data_t;
 
 test_app_list_data_t *test_app_list_data_create(struct test_app *app);
@@ -92,17 +93,25 @@ void test_app_list_data_cleanup(test_app_list_data_t *data);
 
 int test_app_list_cleanup_data(test_app_list_t *list);
 
+int test_app_open_list_choices(struct test_app *app, const char *title,
+    const char **choices);
+int test_app_list_choices_step(test_app_list_t *list);
+int test_app_list_choices_render(test_app_list_t *list);
+int test_app_list_choices_select_item(test_app_list_t *list);
+
 int test_app_open_list_maps(struct test_app *app, body_t *body, hexmap_t *map);
 int test_app_list_maps_step(test_app_list_t *list);
 int test_app_list_maps_render(test_app_list_t *list);
 int test_app_list_maps_select_item(test_app_list_t *list);
 
-int test_app_open_list_submaps(struct test_app *app, hexmap_submap_t *submap, hexmap_t *map);
+int test_app_open_list_submaps(struct test_app *app,
+    hexmap_submap_t *submap, hexmap_t *map);
 int test_app_list_submaps_step(test_app_list_t *list);
 int test_app_list_submaps_render(test_app_list_t *list);
 int test_app_list_submaps_select_item(test_app_list_t *list);
 
-int test_app_open_list_bodies(struct test_app *app, body_t *body, hexmap_t *map);
+int test_app_open_list_bodies(struct test_app *app,
+    body_t *body, hexmap_t *map);
 int test_app_list_bodies_step(test_app_list_t *list);
 int test_app_list_bodies_render(test_app_list_t *list);
 int test_app_list_bodies_select_item(test_app_list_t *list);

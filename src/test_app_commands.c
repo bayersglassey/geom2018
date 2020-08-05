@@ -74,6 +74,19 @@ static int _test_app_command_cls(test_app_t *app, fus_lexer_t *lexer, bool *lexe
     return 0;
 }
 
+static int _test_app_command_list_worldmaps(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
+    hexgame_t *game = &app->hexgame;
+
+    const char **choices = malloc(sizeof(*choices) * (game->worldmaps_len + 1));
+    if(choices == NULL)return 1;
+    for(int i = 0; i < game->worldmaps_len; i++){
+        choices[i] = game->worldmaps[i];
+    }
+    choices[game->worldmaps_len] = NULL;
+
+    return test_app_open_list_choices(app, "Worldmaps", choices);
+}
+
 static int _test_app_command_list_maps(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
     body_t *body = app->camera->body;
     return test_app_open_list_maps(app, body, NULL);
@@ -397,6 +410,7 @@ test_app_command_t _test_app_commands[] = {
     COMMAND(exit, NULL, NULL),
     COMMAND(help, NULL, NULL),
     COMMAND(cls, NULL, NULL),
+    COMMAND(list_worldmaps, "lw", NULL),
     COMMAND(list_maps, "lm", NULL),
     COMMAND(list_submaps, "ls", NULL),
     COMMAND(list_bodies, "lb", NULL),
