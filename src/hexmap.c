@@ -143,7 +143,13 @@ int hexmap_tileset_load(hexmap_tileset_t *tileset,
     return 0;
 }
 
-#define HEXMAP_TILESET_GET_RGRAPH(TYPE) \
+typedef void hexmap_tileset_get_rgraph(hexmap_tileset_t *tileset,
+    char tile_c, rot_t rot,
+    rendergraph_t **rgraph_ptr, bool *rot_ok_ptr,
+    int *frame_offset_ptr);
+typedef hexcollmap_elem_t *hexcollmap_tile_get_part(
+    hexcollmap_tile_t *tile, int i);
+#define HEXMAP_TILESET_DEFINE_HELPERS(TYPE) \
     static void hexmap_tileset_get_rgraph_##TYPE(hexmap_tileset_t *tileset, \
         char tile_c, rot_t rot, \
         rendergraph_t **rgraph_ptr, bool *rot_ok_ptr, \
@@ -169,10 +175,16 @@ int hexmap_tileset_load(hexmap_tileset_t *tileset,
         *rgraph_ptr = rgraph; \
         *rot_ok_ptr = rot_ok; \
         *frame_offset_ptr = frame_offset; \
+    } \
+    static hexcollmap_elem_t *hexcollmap_tile_get_##TYPE( \
+        hexcollmap_tile_t *tile, int i \
+    ){ \
+        return &tile->TYPE[i]; \
     }
-HEXMAP_TILESET_GET_RGRAPH(vert)
-HEXMAP_TILESET_GET_RGRAPH(edge)
-HEXMAP_TILESET_GET_RGRAPH(face)
+HEXMAP_TILESET_DEFINE_HELPERS(vert)
+HEXMAP_TILESET_DEFINE_HELPERS(edge)
+HEXMAP_TILESET_DEFINE_HELPERS(face)
+#undef HEXMAP_TILESET_DEFINE_HELPERS
 
 
 
@@ -339,6 +351,8 @@ int hexmap_load(hexmap_t *map, hexgame_t *game, const char *filename,
 ){
     int err;
     fus_lexer_t lexer;
+
+    fprintf(stderr, "Loading map: %s\n", filename);
 
     char *text = load_file(filename);
     if(text == NULL)return 1;
@@ -752,6 +766,8 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
     }
 
     if(submap_filename != NULL){
+        fprintf(stderr, "Loading submap: %s\n", submap_filename);
+
         ARRAY_PUSH_NEW(hexmap_submap_t*, map->submaps, submap)
         err = hexmap_submap_init(map, submap, strdup(submap_filename),
             solid, pos, camera_type, camera_pos, mapper,
@@ -1186,6 +1202,37 @@ static void get_rgraph_v_from_collmap(hexmap_t *map, hexmap_submap_t *submap,
     vec_mul(space, v, map->unit);
 }
 
+static int hexmap_submap_add_tile_rgraph(hexcollmap_tile_t *tile, int rot,
+    const char *part_name,
+    hexmap_tileset_t *tileset, int x, rendergraph_t *rgraph,
+    vecspace_t *space, vec_t v,
+    hexmap_tileset_get_rgraph *get_rgraph,
+    hexcollmap_tile_get_part *tile_get_part
+){
+    int err;
+    for(int i = 0; i < rot; i++){
+        hexcollmap_elem_t *elem = tile_get_part(tile, i);
+        if(!hexcollmap_elem_is_visible(elem))continue;
+        rendergraph_t *rgraph_tile;
+        bool rot_ok;
+        int frame_offset;
+        get_rgraph(tileset,
+                elem->tile_c, i,
+                &rgraph_tile, &rot_ok, &frame_offset);
+        int frame_i = frame_offset? x: 0;
+        if(rgraph_tile == NULL){
+            fprintf(stderr, "Couldn't find %s tile "
+                "for character: %c\n", part_name, elem->tile_c);
+            return 2;}
+        err = add_tile_rgraph(rgraph, rgraph_tile,
+            space, v,
+            rot_ok? 0: vec4_rot_from_hexspace(i),
+            frame_i);
+        if(err)return err;
+    }
+    return 0;
+}
+
 int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap){
     int err;
 
@@ -1220,30 +1267,16 @@ int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap){
             hexcollmap_tile_t *tile =
                 &collmap->tiles[y * collmap->w + x];
 
-            #define HEXMAP_ADD_TILE(PART, ROT) \
-                for(int i = 0; i < ROT; i++){ \
-                    hexcollmap_elem_t *elem = &tile->PART[i]; \
-                    if(!hexcollmap_elem_is_visible(elem))continue; \
-                    rendergraph_t *rgraph_tile; \
-                    bool rot_ok; \
-                    int frame_offset; \
-                    hexmap_tileset_get_rgraph_##PART(tileset, \
-                            elem->tile_c, i, \
-                            &rgraph_tile, &rot_ok, &frame_offset); \
-                    int frame_i = frame_offset? x: 0; \
-                    if(rgraph_tile == NULL){ \
-                        fprintf(stderr, "Couldn't find " #PART " tile " \
-                            "for character: %c\n", elem->tile_c); \
-                        return 2;} \
-                    err = add_tile_rgraph(rgraph, rgraph_tile, \
-                        space, v, \
-                        rot_ok? 0: vec4_rot_from_hexspace(i), \
-                        frame_i); \
-                    if(err)return err; \
-                }
-            HEXMAP_ADD_TILE(vert, 1)
-            HEXMAP_ADD_TILE(edge, 3)
-            HEXMAP_ADD_TILE(face, 2)
+            #define HEXMAP_ADD_TILE_RGRAPH(PART, ROT) { \
+                err = hexmap_submap_add_tile_rgraph(tile, ROT, #PART, \
+                    tileset, x, rgraph, space, v, \
+                    hexmap_tileset_get_rgraph_##PART, \
+                    hexcollmap_tile_get_##PART); \
+                if(err)return err; \
+            }
+            HEXMAP_ADD_TILE_RGRAPH(vert, 1)
+            HEXMAP_ADD_TILE_RGRAPH(edge, 3)
+            HEXMAP_ADD_TILE_RGRAPH(face, 2)
             #undef HEXMAP_ADD_TILE
         }
     }
