@@ -53,8 +53,8 @@ HEXMAP_TILESET_DEFINE_HELPERS(face)
 
 
 
-static int add_tile_rgraph(rendergraph_t *rgraph, rendergraph_t *rgraph2,
-    vecspace_t *space, vec_t add, rot_t rot, int frame_i
+static int rendergraph_add_rgraph(rendergraph_t *rgraph, rendergraph_t *rgraph2,
+    vec_t add, rot_t rot, int frame_i
 ){
     int err;
     rendergraph_trf_t *rendergraph_trf;
@@ -63,30 +63,26 @@ static int add_tile_rgraph(rendergraph_t *rgraph, rendergraph_t *rgraph2,
     rendergraph_trf->rendergraph = rgraph2;
     rendergraph_trf->trf.rot = rot;
     rendergraph_trf->frame_i = frame_i;
-    vec_cpy(space->dims, rendergraph_trf->trf.add, add);
+    vec_cpy(rgraph->prend->space->dims, rendergraph_trf->trf.add, add);
     return 0;
 }
 
-static void get_rgraph_v_from_collmap(hexmap_t *map, hexmap_submap_t *submap,
+static void hexcollmap_get_vec4(hexcollmap_t *collmap,
     int x, int y, vec_t v
 ){
-    /* Converts x, y coords of submap->collmap into a vec_t of
-    prend->space */
-    prismelrenderer_t *prend = map->prend;
-    vecspace_t *space = prend->space;
-    hexcollmap_t *collmap = &submap->collmap;
+    /* Converts x, y coords of collmap into a vec_t of hexspace (a, b, c, d) */
 
     int px = x - collmap->ox;
     int py = y - collmap->oy;
     vec_t w;
     hexspace_set(w, px, -py);
     vec4_vec_from_hexspace(v, w);
-    vec_mul(space, v, map->unit);
 }
 
-static int hexmap_submap_add_tile_rgraph(hexcollmap_tile_t *tile, int rot,
-    const char *part_name,
-    hexmap_tileset_t *tileset, int x, rendergraph_t *rgraph,
+static int rendergraph_add_rgraph_from_tile(
+    rendergraph_t *rgraph, hexcollmap_tile_t *tile,
+    int rot, const char *part_name,
+    hexmap_tileset_t *tileset, int x,
     vecspace_t *space, vec_t v,
     hexmap_tileset_get_rgraph *get_rgraph,
     hexcollmap_tile_get_part *tile_get_part
@@ -103,24 +99,88 @@ static int hexmap_submap_add_tile_rgraph(hexcollmap_tile_t *tile, int rot,
                 &rgraph_tile, &rot_ok, &frame_offset);
         int frame_i = frame_offset? x: 0;
         if(rgraph_tile == NULL){
-            fprintf(stderr, "Couldn't find %s tile "
-                "for character: %c\n", part_name, elem->tile_c);
+            fprintf(stderr,
+                "Couldn't find %s tile for character: %c\n",
+                part_name, elem->tile_c);
             return 2;}
-        err = add_tile_rgraph(rgraph, rgraph_tile,
-            space, v,
-            rot_ok? 0: vec4_rot_from_hexspace(i),
+        err = rendergraph_add_rgraph(rgraph, rgraph_tile,
+            v, rot_ok? 0: vec4_rot_from_hexspace(i),
             frame_i);
         if(err)return err;
     }
     return 0;
 }
 
-int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap){
+static int rendergraph_add_rgraphs_from_collmap(
+    rendergraph_t *rgraph, hexcollmap_t *collmap,
+    hexmap_tileset_t *tileset, vec_t unit
+){
+    /* Add to rgraph->rendergraph_trfs, according to collmap->tiles,
+    using tiles from tileset.
+    unit should be the tileset's unit vector; tileset_t doesn't currently
+    have an explicit unit, it's generally supplied by hexmap_t. */
     int err;
 
-    prismelrenderer_t *prend = map->prend;
+    prismelrenderer_t *prend = rgraph->prend;
     vecspace_t *space = prend->space;
-    hexcollmap_t *collmap = &submap->collmap;
+
+    for(int y = 0; y < collmap->h; y++){
+        for(int x = 0; x < collmap->w; x++){
+            vec_t v;
+            hexcollmap_get_vec4(collmap, x, y, v);
+            vec_mul(space, v, unit);
+
+            hexcollmap_tile_t *tile =
+                &collmap->tiles[y * collmap->w + x];
+
+            #define ADD_RGRAPH_FROM_TILE(PART, ROT) { \
+                err = rendergraph_add_rgraph_from_tile( \
+                    rgraph, tile, ROT, #PART, \
+                    tileset, x, space, v, \
+                    hexmap_tileset_get_rgraph_##PART, \
+                    hexcollmap_tile_get_##PART); \
+                if(err)return err; \
+            }
+            ADD_RGRAPH_FROM_TILE(vert, 1)
+            ADD_RGRAPH_FROM_TILE(edge, 3)
+            ADD_RGRAPH_FROM_TILE(face, 2)
+            #undef HEXMAP_ADD_TILE
+        }
+    }
+
+    for(int i = 0; i < collmap->rendergraphs_len; i++){
+        hexmap_rendergraph_t *hexmap_rgraph = collmap->rendergraphs[i];
+        rendergraph_t *rgraph2 = prismelrenderer_get_rendergraph(
+            prend, hexmap_rgraph->name);
+        if(rgraph2 == NULL){
+            fprintf(stderr, "Couldn't find hexmap rgraph: %s\n",
+                hexmap_rgraph->name);
+            return 2;}
+
+        trf_t *trf = &hexmap_rgraph->trf;
+
+        /* Convert trf from hexspace to vec4 and multiply by unit */
+        vec_t v;
+        vec4_vec_from_hexspace(v, trf->add);
+        vec_mul(space, v, unit);
+        rot_t r = vec4_rot_from_hexspace(trf->rot);
+
+        int frame_i = 0;
+
+        err = rendergraph_add_rgraph(rgraph, rgraph2,
+            v, r, frame_i);
+        if(err)return err;
+    }
+
+    return 0;
+}
+
+int hexmap_submap_create_rgraph(hexmap_submap_t *submap){
+    /* Build submap->rgraph based on submap->collmap. */
+    int err;
+
+    hexmap_t *map = submap->map;
+    prismelrenderer_t *prend = map->prend;
 
     /* BIG OL' HACK: If any "tile" rgraphs are animated, we need the
     map's rgraph to be animated also.
@@ -139,53 +199,9 @@ int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap){
         n_frames);
     if(err)return err;
 
-    hexmap_tileset_t *tileset = &submap->tileset;
-
-    for(int y = 0; y < collmap->h; y++){
-        for(int x = 0; x < collmap->w; x++){
-            vec_t v;
-            get_rgraph_v_from_collmap(map, submap, x, y, v);
-
-            hexcollmap_tile_t *tile =
-                &collmap->tiles[y * collmap->w + x];
-
-            #define HEXMAP_ADD_TILE_RGRAPH(PART, ROT) { \
-                err = hexmap_submap_add_tile_rgraph(tile, ROT, #PART, \
-                    tileset, x, rgraph, space, v, \
-                    hexmap_tileset_get_rgraph_##PART, \
-                    hexcollmap_tile_get_##PART); \
-                if(err)return err; \
-            }
-            HEXMAP_ADD_TILE_RGRAPH(vert, 1)
-            HEXMAP_ADD_TILE_RGRAPH(edge, 3)
-            HEXMAP_ADD_TILE_RGRAPH(face, 2)
-            #undef HEXMAP_ADD_TILE
-        }
-    }
-
-    for(int i = 0; i < collmap->rendergraphs_len; i++){
-        hexmap_rendergraph_t *hexmap_rgraph = collmap->rendergraphs[i];
-        rendergraph_t *rgraph2 = prismelrenderer_get_rendergraph(
-            prend, hexmap_rgraph->name);
-        if(rgraph2 == NULL){
-            fprintf(stderr, "Couldn't find hexmap rgraph: %s\n",
-                hexmap_rgraph->name);
-            return 2;}
-
-        trf_t *trf = &hexmap_rgraph->trf;
-
-        /* Convert trf from hexspace to vec4 and multiply by map->unit */
-        vec_t v;
-        vec4_vec_from_hexspace(v, trf->add);
-        vec_mul(space, v, map->unit);
-        rot_t r = vec4_rot_from_hexspace(trf->rot);
-
-        int frame_i = 0;
-
-        err = add_tile_rgraph(rgraph, rgraph2,
-            space, v, r, frame_i);
-        if(err)return err;
-    }
+    err = rendergraph_add_rgraphs_from_collmap(
+        rgraph, &submap->collmap, &submap->tileset, map->unit);
+    if(err)return err;
 
     submap->rgraph_map = rgraph;
     return 0;

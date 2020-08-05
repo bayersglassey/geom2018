@@ -283,7 +283,7 @@ void hexmap_submap_cleanup(hexmap_submap_t *submap);
 int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
     char *filename, bool solid, vec_t pos, int camera_type, vec_t camera_pos,
     prismelmapper_t *mapper, char *palette_filename, char *tileset_filename);
-int hexmap_submap_create_rgraph(hexmap_t *map, hexmap_submap_t *submap);
+int hexmap_submap_create_rgraph(hexmap_submap_t *submap);
 hexmap_door_t *hexmap_submap_get_door(hexmap_submap_t *submap,
     hexcollmap_elem_t *elem);
 

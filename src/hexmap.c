@@ -737,7 +737,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
         if(err)return err;
 
         /* render submap->rgraph_map */
-        err = hexmap_submap_create_rgraph(map, submap);
+        err = hexmap_submap_create_rgraph(submap);
         if(err)return err;
 
         /* parse doors */
