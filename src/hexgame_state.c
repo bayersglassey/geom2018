@@ -14,9 +14,9 @@
 #include "write.h"
 
 
-static int body_match_cond(body_t *body,
-    actor_t *actor, hexgame_t *game,
+static int state_rule_match_cond(
     state_rule_t *rule, state_cond_t *cond,
+    hexgame_t *game, body_t *body, actor_t *actor,
     bool *rule_matched_ptr
 ){
     int err;
@@ -121,7 +121,7 @@ static int body_match_cond(body_t *body,
         rule_matched = all? true: false;
         for(int i = 0; i < cond->u.subconds.conds_len; i++){
             state_cond_t *subcond = cond->u.subconds.conds[i];
-            err = body_match_cond(body, actor, game, rule, subcond,
+            err = state_rule_match_cond(rule, subcond, game, body, actor,
                 &rule_matched);
             if(err)return err;
             if((all && !rule_matched) || (!all && rule_matched))break;
@@ -158,9 +158,9 @@ static int body_match_cond(body_t *body,
     return 0;
 }
 
-static int body_match_rule(body_t *body,
-    actor_t *actor, hexgame_t *game,
-    state_rule_t *rule, bool *rule_matched_ptr
+static int state_rule_match(state_rule_t *rule,
+    hexgame_t *game, body_t *body, actor_t *actor,
+    bool *rule_matched_ptr
 ){
     int err;
 
@@ -174,7 +174,8 @@ static int body_match_rule(body_t *body,
     bool rule_matched = true;
     for(int i = 0; i < rule->conds_len; i++){
         state_cond_t *cond = rule->conds[i];
-        err = body_match_cond(body, actor, game, rule, cond, &rule_matched);
+        err = state_rule_match_cond(rule, cond, game, body, actor,
+            &rule_matched);
         if(err)return err;
         if(!rule_matched)break;
     }
@@ -191,14 +192,14 @@ static void effect_apply_boolean(int boolean, bool *b_ptr){
     else if(boolean == EFFECT_BOOLEAN_TOGGLE)*b_ptr = !*b_ptr;
 }
 
-static int body_apply_rule(body_t *body,
-    actor_t *actor, hexgame_t *game,
-    state_rule_t *rule, state_effect_goto_t **gotto_ptr, bool *continues_ptr
+static int state_rule_apply(state_rule_t *rule,
+    hexgame_t *game, body_t *body, actor_t *actor,
+    state_effect_goto_t **gotto_ptr, bool *continues_ptr
 ){
     int err;
 
     /* NOTE: body and/or actor may be NULL.
-    See comment on body_match_rule. */
+    See comment on rule_match. */
 
     for(int i = 0; i < rule->effects_len; i++){
         state_effect_t *effect = rule->effects[i];
@@ -321,8 +322,9 @@ static int body_apply_rule(body_t *body,
     return 0;
 }
 
-int state_handle_rules(state_t *state, body_t *body,
-    actor_t *actor, hexgame_t *game, state_effect_goto_t **gotto_ptr
+int state_handle_rules(state_t *state,
+    hexgame_t *game, body_t *body, actor_t *actor,
+    state_effect_goto_t **gotto_ptr
 ){
     int err;
 
@@ -333,13 +335,13 @@ int state_handle_rules(state_t *state, body_t *body,
             body, actor, i);}
 
         bool rule_matched;
-        err = body_match_rule(body, actor, game, rule,
+        err = state_rule_match(rule, game, body, actor,
             &rule_matched);
         if(err)return err;
 
         if(rule_matched){
             bool continues = false;
-            err = body_apply_rule(body, actor, game, rule,
+            err = state_rule_apply(rule, game, body, actor,
                 gotto_ptr, &continues);
             if(err)return err;
             if(!continues)break;

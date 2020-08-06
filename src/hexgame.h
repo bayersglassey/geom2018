@@ -174,8 +174,8 @@ int body_set_state(body_t *body, const char *state_name,
 
 struct actor;
 struct hexgame;
-int state_handle_rules(state_t *state, body_t *body,
-    struct actor *actor, struct hexgame *game,
+int state_handle_rules(state_t *state,
+    struct hexgame *game, body_t *body, struct actor *actor,
     state_effect_goto_t **gotto_ptr);
 void body_update_cur_submap(body_t *body);
 int body_step(body_t *body, struct hexgame *game);

@@ -572,7 +572,7 @@ int body_step(body_t *body, hexgame_t *game){
         /* Handle current state's rules */
         handle: {
             state_effect_goto_t *gotto = NULL;
-            err = state_handle_rules(body->state, body, NULL, game,
+            err = state_handle_rules(body->state, game, body, NULL,
                 &gotto);
             if(err)return err;
             if(gotto != NULL){

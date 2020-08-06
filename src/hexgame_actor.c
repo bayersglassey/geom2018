@@ -74,7 +74,7 @@ int actor_step(actor_t *actor, struct hexgame *game){
         /* Handle current state's rules */
         handle: {
             state_effect_goto_t *gotto = NULL;
-            err = state_handle_rules(actor->state, body, actor, game,
+            err = state_handle_rules(actor->state, game, body, actor,
                 &gotto);
             if(err)return err;
             if(gotto != NULL){
