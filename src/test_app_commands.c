@@ -74,10 +74,41 @@ static int _test_app_command_cls(test_app_t *app, fus_lexer_t *lexer, bool *lexe
     return 0;
 }
 
+static int _test_app_command_list_worldmaps_select_item(test_app_list_t *list){
+    int err;
+    test_app_list_data_t *data = list->data;
+    test_app_t *app = data->app;
+
+    int worldmap_index = data->options_index;
+    hexgame_t *game = &app->hexgame;
+    const char *worldmap = game->worldmaps[worldmap_index];
+
+    hexmap_t *map;
+    err = hexgame_get_or_load_map(game, worldmap, &map);
+    if(err)return err;
+
+    err = test_app_close_list(app);
+    if(err)return err;
+
+    return test_app_open_list_maps(app, NULL, map);
+}
+
 static int _test_app_command_list_worldmaps(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
     hexgame_t *game = &app->hexgame;
+    hexmap_t *map = app->camera->map;
+
+    int worldmap_index = 0;
+    for(int i = 0; i < game->worldmaps_len; i++){
+        const char *worldmap = game->worldmaps[i];
+        if(!strcmp(worldmap, map->name)){
+            worldmap_index = i;
+            break;
+        }
+    }
+
     return test_app_open_list_choices(app, "Worldmaps",
-        (const char **)game->worldmaps, game->worldmaps_len);
+        (const char **)game->worldmaps, game->worldmaps_len, worldmap_index,
+        &_test_app_command_list_worldmaps_select_item);
 }
 
 static int _test_app_command_list_maps(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){

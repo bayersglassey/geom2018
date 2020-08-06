@@ -93,7 +93,8 @@ void test_app_list_data_cleanup(test_app_list_data_t *data);
 int test_app_list_cleanup_data(test_app_list_t *list);
 
 int test_app_open_list_choices(struct test_app *app, const char *title,
-    const char **options, int options_length);
+    const char **options, int options_length, int options_index,
+    int select_item(test_app_list_t *list));
 int test_app_list_choices_step(test_app_list_t *list);
 int test_app_list_choices_render(test_app_list_t *list);
 int test_app_list_choices_select_item(test_app_list_t *list);
