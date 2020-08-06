@@ -371,17 +371,6 @@ of jumping, doing some kind of turn while swimming, then landing again.
 Mar 29, 2020:
 -------------
 
-* Beef up actors
-
-* Better tools for recordings
-    * Ok, we can now get a data dump with list_body. Cool!
-    * How might we go about editing a recording?..
-    * For one thing, we have pause/unpause (F5) and step (PgDn), so it would
-    be cool if while paused you could see body's keyinfo in realtime.
-    * Hmmm, currently we have it so console steals your keypresses while paused.
-    * Can we find a clever way to make that optional?..
-        -> DONE (ctrl+F5)
-
 * list_submaps: add an option to jump the camera there?
 
 * list_bodies: Can we plz add something like rendering a rect around currently selected body?
@@ -423,9 +412,6 @@ Mix hexas + bigtris, birds + bigrollers.
 
 Aug 2, 2020:
 ------------
-
-
-Need to be able to auto-generate a minimap (and dump to .bmp etc)
 
 
 Spit needs to eventually disappear on its own, otherwise spitting repeatedly into empty space eventually slows down the game
@@ -500,3 +486,48 @@ A palette where all dark/light colour pairs (call them A/B) work like this:
     then B fades to light...
 ...so occasionally everything is dark, or light. And occasionally dark/light is reversed.
 
+
+Way from console to move to another map?
+How about being able to respawn at arbitrary savepoints within current map?
+
+
+When you get crushed, you respawn... but keep your current stateset, even if you had a different one
+when your respawn point was last set!
+So e.g. you can travel a long ways, and get a new body, and then keep that new body even
+if you get crushed in it.
+Which could ruin puzzles whose purpose is to go in somewhere, get a new body, and make it out alive...
+
+
+Aug 4, 2020:
+------------
+
+* Beef up actors
+
+* Better tools for recordings
+    * Ok, we can now get a data dump with list_body. Cool!
+    * How might we go about editing a recording?..
+    * NOTE: we already have a (self-proclaimedly "ganky") way to start an animation from an arbitrary frame...
+        * body_restart_recording (which looks at body->rec.offset)
+        * Can we turn that into a simple "step forward/backward" feature?..
+        * And mix that with... ability to scroll through the parts of recording's data (e.g. "+l", "w15") and edit them?
+        * Would need ability to insert/delete/edit:
+            * [+-][udlrfbxy]
+            * w[0-9]+
+        * ...to keep it simple, could allow *typing in* raw data?.. uhhhh hmm gross...
+        * WE DON'T WANT TO EDIT RAW DATA!!! We want to press keys, duhh.
+            * So if you step backwards/forwards through the animation, you can record over it in any spot.
+            * Yeah ok, but what if you want to record over one part and keep the next part?..
+                * Well that would only work if you ended up in the exact same spot.
+                * So that probably only makes sense for animations which are already split up into actors.
+
+* minimap: need to be able to see verts & edges too!..
+    * So... currently we have a global vecspace_t vec4, whose render is vec4_render.
+        Can we add another global vecspace_t vec4_alt, whose render is vec4_render_alt?..
+        Should work.
+        And then we need a new set of prismels, like prismels_alt.fus.
+
+
+Aug 6, 2020:
+------------
+
+* Aiming up should be a "special ability" of some spider variant.
