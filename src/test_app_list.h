@@ -80,7 +80,6 @@ typedef struct test_app_list_data {
     body_t *body;
     hexmap_t *map;
     hexmap_submap_t *submap;
-    const char **choices; /* We own this */
 } test_app_list_data_t;
 
 test_app_list_data_t *test_app_list_data_create(struct test_app *app);
@@ -94,7 +93,7 @@ void test_app_list_data_cleanup(test_app_list_data_t *data);
 int test_app_list_cleanup_data(test_app_list_t *list);
 
 int test_app_open_list_choices(struct test_app *app, const char *title,
-    const char **choices);
+    const char **options, int options_length);
 int test_app_list_choices_step(test_app_list_t *list);
 int test_app_list_choices_render(test_app_list_t *list);
 int test_app_list_choices_select_item(test_app_list_t *list);

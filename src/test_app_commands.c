@@ -76,15 +76,8 @@ static int _test_app_command_cls(test_app_t *app, fus_lexer_t *lexer, bool *lexe
 
 static int _test_app_command_list_worldmaps(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
     hexgame_t *game = &app->hexgame;
-
-    const char **choices = malloc(sizeof(*choices) * (game->worldmaps_len + 1));
-    if(choices == NULL)return 1;
-    for(int i = 0; i < game->worldmaps_len; i++){
-        choices[i] = game->worldmaps[i];
-    }
-    choices[game->worldmaps_len] = NULL;
-
-    return test_app_open_list_choices(app, "Worldmaps", choices);
+    return test_app_open_list_choices(app, "Worldmaps",
+        (const char **)game->worldmaps, game->worldmaps_len);
 }
 
 static int _test_app_command_list_maps(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
