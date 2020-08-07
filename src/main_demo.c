@@ -35,7 +35,7 @@ int main(int n_args, char *args[]){
     const char *stateset_filename = "anim/player.fus";
     const char *hexmap_filename = "data/maps/title/worldmap.fus";
     const char *submap_filename = NULL;
-    bool minimap_alt = false;
+    bool minimap_alt = true;
     bool use_textures = false;
     bool cache_bitmaps = true;
     int n_players = 2;
@@ -78,7 +78,7 @@ int main(int n_args, char *args[]){
             arg = args[arg_i];
             submap_filename = arg;
         }else if(!strcmp(arg, "--minimap_alt")){
-            minimap_alt = true;
+            minimap_alt = !minimap_alt;
         }else if(!strcmp(arg, "--use_textures")){
             use_textures = true;
         }else if(!strcmp(arg, "--dont_cache_bitmaps")){
