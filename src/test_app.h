@@ -72,6 +72,7 @@ typedef struct test_app {
     palette_t palette;
     SDL_Palette *sdl_palette;
     prismelrenderer_t prend;
+    prismelrenderer_t minimap_prend;
     font_t font;
     sdlfont_t sdlfont;
     geomfont_t *geomfont;
@@ -115,7 +116,7 @@ void test_app_init_input(test_app_t *app);
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
     const char *stateset_filename, const char *hexmap_filename,
-    const char *submap_filename, bool use_textures,
+    const char *submap_filename, bool minimap_alt, bool use_textures,
     bool cache_bitmaps, int n_players);
 int test_app_mainloop(test_app_t *app);
 int test_app_mainloop_step(test_app_t *app);

@@ -211,9 +211,10 @@ int camera_render(camera_t *camera,
 
     hexgame_t *game = camera->game;
     hexmap_t *map = camera->map;
-    vecspace_t *map_space = map->space;
-    prismelrenderer_t *prend = camera->map->prend;
-    vecspace_t *prend_space = prend->space;
+    vecspace_t *map_space = map->space; /* hexspace */
+    prismelrenderer_t *prend = game->show_minimap?
+        game->minimap_prend: game->prend;
+    vecspace_t *prend_space = prend->space; /* vec4 or vec4_alt */
 
     vec_t camera_renderpos;
     vec4_vec_from_hexspace(camera_renderpos, camera->scrollpos);
@@ -249,7 +250,7 @@ int camera_render(camera_t *camera,
         if(game->show_minimap){
             /* rgraph_minimap's unit is the space's actual unit vector */
             err = rendergraph_render(submap->rgraph_minimap, renderer, surface,
-                pal, camera->map->prend,
+                pal, prend,
                 x0, y0, zoom,
                 pos, rot, flip, frame_i, NULL);
             if(err)return err;
@@ -257,7 +258,7 @@ int camera_render(camera_t *camera,
             /* rgraph_map's unit is map->unit */
             vec_mul(prend_space, pos, camera->map->unit);
             err = rendergraph_render(submap->rgraph_map, renderer, surface,
-                pal, camera->map->prend,
+                pal, prend,
                 x0, y0, zoom,
                 pos, rot, flip, frame_i, mapper);
             if(err)return err;
@@ -328,6 +329,7 @@ static int hexgame_load_worldmaps(hexgame_t *game, const char *worldmaps_filenam
 
 int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     const char *worldmaps_filename,
+    prismelrenderer_t *minimap_prend,
     const char *minimap_tileset_filename,
     const char *map_filename,
     void *app,
@@ -341,6 +343,8 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     game->frame_i = 0;
     game->prend = prend;
     game->space = &hexspace; /* NOT the same as prend->space! */
+
+    game->minimap_prend = minimap_prend;
 
     game->show_minimap = false;
 
@@ -356,7 +360,7 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     ARRAY_INIT(game->players)
     ARRAY_INIT(game->actors)
 
-    err = hexmap_tileset_load(&game->minimap_tileset, prend,
+    err = hexmap_tileset_load(&game->minimap_tileset, minimap_prend,
         minimap_tileset_filename, NULL);
     if(err)return err;
 

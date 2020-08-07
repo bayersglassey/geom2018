@@ -1,0 +1,36 @@
+
+# Expected variables:
+# ALT (bool) - Set this to use the "alternate" prismels for the minimap
+
+
+$IF ALT:
+    import "data/prismels_alt.fus"
+$IF !ALT:
+    import "data/prismels.fus"
+
+
+shapes:
+
+    "minimap.vert":
+        $IF ALT: prismels:
+            : "vert" (0 0 0 0)  0 f eval: 1 + 0 + 7
+
+    "minimap.edge":
+        $IF ALT: prismels:
+            : "edge" (0 0 0 0)  0 f eval: 1 + 0 + 2
+
+    "minimap.face":
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval: 1 + 0 + 6
+
+    "minimap.save":
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 6
+
+    "minimap.door":
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 3
+
+    "minimap.water":
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval: 1 + 0 + 1

@@ -232,7 +232,7 @@ int hexmap_submap_create_rgraph_minimap(hexmap_submap_t *submap){
     int err;
 
     hexmap_t *map = submap->map;
-    prismelrenderer_t *prend = map->prend;
+    prismelrenderer_t *prend = map->game->minimap_prend;
 
     int n_frames = HEXMAP_SUBMAP_RGRAPH_N_FRAMES;
 

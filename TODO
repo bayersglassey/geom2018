@@ -520,12 +520,6 @@ Aug 4, 2020:
                 * Well that would only work if you ended up in the exact same spot.
                 * So that probably only makes sense for animations which are already split up into actors.
 
-* minimap: need to be able to see verts & edges too!..
-    * So... currently we have a global vecspace_t vec4, whose render is vec4_render.
-        Can we add another global vecspace_t vec4_alt, whose render is vec4_render_alt?..
-        Should work.
-        And then we need a new set of prismels, like prismels_alt.fus.
-
 
 Aug 6, 2020:
 ------------

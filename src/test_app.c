@@ -58,6 +58,7 @@ void test_app_cleanup(test_app_t *app){
     palette_cleanup(&app->palette);
     SDL_FreePalette(app->sdl_palette);
     prismelrenderer_cleanup(&app->prend);
+    prismelrenderer_cleanup(&app->minimap_prend);
     hexgame_cleanup(&app->hexgame);
     font_cleanup(&app->font);
     sdlfont_cleanup(&app->sdlfont);
@@ -80,7 +81,7 @@ void test_app_init_input(test_app_t *app){
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
     const char *stateset_filename, const char *hexmap_filename,
-    const char *submap_filename, bool use_textures,
+    const char *submap_filename, bool minimap_alt, bool use_textures,
     bool cache_bitmaps, int n_players
 ){
     int err;
@@ -122,6 +123,15 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         return 2;}
     prend->cache_bitmaps = cache_bitmaps;
 
+    prismelrenderer_t *minimap_prend = &app->minimap_prend;
+    err = prismelrenderer_init(minimap_prend,
+        minimap_alt? &vec4_alt: &vec4);
+    if(err)return err;
+    err = prismelrenderer_load(minimap_prend,
+        minimap_alt? "data/minimap_alt.fus": "data/minimap.fus",
+        NULL);
+    if(err)return err;
+
     err = font_load(&app->font, strdup("data/font.fus"), NULL);
     if(err)return err;
 
@@ -142,6 +152,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     hexgame_t *game = &app->hexgame;
     err = hexgame_init(game, prend,
         "data/worldmaps.fus",
+        minimap_prend,
         "data/tileset_minimap.fus",
         app->hexmap_filename, app,
         &test_app_new_game_callback,
