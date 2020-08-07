@@ -14,6 +14,14 @@ vecspace_t vec4 = {
     vec4_render
 };
 
+vecspace_t vec4_alt = {
+    VEC4_DIMS,
+    VEC4_ROT_MAX,
+    vec4_rot,
+    vec4_flip,
+    vec4_render_alt
+};
+
 
 void vec4_set(vec_t v, int a, int b, int c, int d){
     v[0] = a;
@@ -54,6 +62,13 @@ void vec4_flip(vec_t v, flip_t flip){
 }
 
 void vec4_render(vec_t v, int *x, int *y){
+    /* See data/prismels.fus */
     *x =  (v[0] + v[1]) * 2 + v[2];
     *y = -(v[3] + v[2]) * 2 - v[1];
+}
+
+void vec4_render_alt(vec_t v, int *x, int *y){
+    /* See data/prismels_alt.fus */
+    *x =  (v[0] + v[1]) * 4 + v[2] * 2;
+    *y = -(v[3] + v[2]) * 4 - v[1] * 2;
 }
