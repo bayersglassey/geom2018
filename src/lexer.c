@@ -1224,7 +1224,9 @@ static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
         *found_token_ptr = true;
 
         free(name);
-    }else if(fus_lexer_got(lexer, "PREFIX")){
+    }else if(fus_lexer_got(lexer, "PREFIX") || fus_lexer_got(lexer, "SUFFIX")){
+        bool is_prefix = lexer->token[0] == 'P';
+
         err = fus_lexer_next(lexer);
         if(err)return err;
 
@@ -1246,9 +1248,11 @@ static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
 
         /* NOTE: need to quote the dupcatted string because lexer->token
         is expected to be something which e.g. fus_lexer_get_str will parse */
+        /* NOTE: is_prefix is true if val is being prefixed to s0, false if val
+        is being suffixed to s0 */
         char *s1 = lexer->token_type == FUS_LEXER_TOKEN_SYM?
-            strdupcat(val, s0):
-            strdupcat_quoted(val, s0);
+            (is_prefix? strdupcat(val, s0): strdupcat(s0, val)):
+            (is_prefix? strdupcat_quoted(val, s0): strdupcat_quoted(s0, val));
         if(!s1)return 1;
 
         fus_lexer_set_mem_managed_token(lexer, s1);
