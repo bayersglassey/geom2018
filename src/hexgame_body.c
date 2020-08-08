@@ -396,21 +396,7 @@ void body_keydown(body_t *body, int key_i){
     body->keyinfo.wentdown[key_i] = true;
 
     if(body->recording.action == 2){
-        /* record */
-        body_maybe_record_wait(body);
-
-        char c = body_get_key_c(body, key_i, true);
-        fprintf(body->recording.file, "+%c", c);
-        if(DEBUG_RECORDINGS)printf("+%c\n", c);
-
-        /*
-        char buffer[3];
-        buffer[0] = '+';
-        buffer[1] = c;
-        buffer[2] = '\0';
-        int err = body_record(body, buffer);
-        if(err){perror("body_record failed");}
-        */
+        body_record_keydown(body, key_i);
     }
 }
 
@@ -419,21 +405,7 @@ void body_keyup(body_t *body, int key_i){
     body->keyinfo.isdown[key_i] = false;
 
     if(body->recording.action == 2){
-        /* record */
-        body_maybe_record_wait(body);
-
-        char c = body_get_key_c(body, key_i, true);
-        fprintf(body->recording.file, "-%c", c);
-        if(DEBUG_RECORDINGS)printf("-%c\n", c);
-
-        /*
-        char buffer[3];
-        buffer[0] = '-';
-        buffer[1] = c;
-        buffer[2] = '\0';
-        int err = body_record(body, buffer);
-        if(err){perror("body_record failed");}
-        */
+        body_record_keyup(body, key_i);
     }
 }
 
@@ -538,28 +510,8 @@ int body_step(body_t *body, hexgame_t *game){
     vecspace_t *space = map->space;
 
     /* Handle recording & playback */
-    int rec_action = body->recording.action;
-    if(rec_action == 1){
-        /* play */
-        err = recording_step(&body->recording);
-        if(err)return err;
-    }else if(rec_action == 2){
-        /* record */
-        body->recording.wait++;
-    }
-    if(rec_action != 0 && DEBUG_RECORDINGS){
-        printf("KEYS: ");
-        #define DEBUG_PRINT_KEYS(keys) { \
-            printf("["); \
-            for(int i = 0; i < KEYINFO_KEYS; i++)printf("%i", keys[i]); \
-            printf("]"); \
-        }
-        DEBUG_PRINT_KEYS(body->keyinfo.isdown)
-        DEBUG_PRINT_KEYS(body->keyinfo.wasdown)
-        DEBUG_PRINT_KEYS(body->keyinfo.wentdown)
-        #undef DEBUG_PRINT_KEYS
-        printf("\n");
-    }
+    err = recording_step(&body->recording);
+    if(err)return err;
 
     /* Increment frame */
     body->frame_i++;

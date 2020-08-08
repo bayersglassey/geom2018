@@ -213,6 +213,125 @@ int recording_load(recording_t *rec, const char *filename,
     return 0;
 }
 
+static int recording_step_play(recording_t *rec){
+    int err;
+
+    body_t *body = rec->body;
+
+    if(rec->wait > 0){
+        rec->wait--;
+        if(rec->wait > 0)return 0;}
+
+    char *data = rec->data;
+    int i = rec->i;
+    char c;
+
+    bool loop = rec->loop;
+
+    while(1){
+        while(data[i] == ' ')i++;
+
+        c = data[i];
+        if(c == '+' || c == '-'){
+            bool keydown = c == '+';
+            char key_c = data[i+1]; i += 2;
+            if(DEBUG_RECORDINGS)printf("%c%c\n", c, key_c);
+            int key_i = body_get_key_i(body, key_c, false);
+            if(keydown)body_keydown(body, key_i);
+            else body_keyup(body, key_i);
+        }else if(c == 'w'){
+            i++; int wait = atoi(data + i);
+            if(DEBUG_RECORDINGS)printf("w%i\n", wait);
+            while(isdigit(data[i]))i++;
+            rec->wait = wait;
+            break;
+        }else if(c == '\0'){
+            if(loop){
+                /* loop! */
+                err = body_restart_recording(body, true, rec->resets_position);
+                if(err)return err;
+                i = 0;
+            }else{
+                break;
+            }
+        }else{
+            fprintf(stderr, "Unrecognized action: %c\n", c);
+            fprintf(stderr, "  ...in position %i of recording: %s\n",
+                i, rec->data);
+            return 2;
+        }
+    }
+
+    rec->i = i;
+
+    if(!loop && data[i] == '\0'){
+        recording_reset(rec);
+    }
+
+    return 0;
+}
+
+int recording_write(recording_t *recording, const char *data){
+    /* CURRENTLY UNUSED!.. we printf to recording->file instead.
+    See: body_record_keydown, body_record_keyup, body_maybe_record_wait */
+
+    int data_len = strlen(data);
+    int required_size = recording->i + data_len + 1;
+
+    if(DEBUG_RECORDINGS){
+        printf("RECORD: data=%s, len=%i, req=%i\n",
+            data, data_len, required_size);}
+
+    if(required_size >= recording->size){
+        int new_size = required_size + 200;
+        char *new_recording = realloc(recording->data,
+            sizeof(char) * new_size);
+        if(new_recording == NULL)return 1;
+        new_recording[new_size - 1] = '\0';
+        recording->data = new_recording;
+        recording->size = new_size;
+        if(DEBUG_RECORDINGS)printf("  REALLOC: new_size=%i\n", new_size);
+    }
+    strcpy(recording->data + recording->i, data);
+    recording->i += data_len;
+
+    if(DEBUG_RECORDINGS){
+        printf("  OK! i=%i, data=%s\n",
+            recording->i, recording->data);}
+
+    return 0;
+}
+
+int recording_step(recording_t *recording){
+    int rec_action = recording->action;
+
+    if(rec_action == 1){
+        /* play */
+        int err = recording_step_play(recording);
+        if(err)return err;
+    }else if(rec_action == 2){
+        /* record */
+        recording->wait++;
+    }
+
+    if(rec_action != 0 && DEBUG_RECORDINGS){
+        printf("KEYS: ");
+        #define DEBUG_PRINT_KEYS(keys) { \
+            printf("["); \
+            for(int i = 0; i < KEYINFO_KEYS; i++)printf("%i", keys[i]); \
+            printf("]"); \
+        }
+        body_t *body = recording->body;
+        DEBUG_PRINT_KEYS(body->keyinfo.isdown)
+        DEBUG_PRINT_KEYS(body->keyinfo.wasdown)
+        DEBUG_PRINT_KEYS(body->keyinfo.wentdown)
+        #undef DEBUG_PRINT_KEYS
+        printf("\n");
+    }
+
+    return 0;
+}
+
 static const char *get_recording_filename(int n){
     /* NOT REENTRANT, FORGIVE MEEE :( */
     static char recording_filename[200] = "data/rec000.fus";
@@ -255,6 +374,8 @@ const char *get_next_recording_filename(){
 /******************
  * BODY RECORDING *
  ******************/
+
+static int body_maybe_record_wait(body_t *body);
 
 int body_load_recording(body_t *body, const char *filename, bool loop){
     int err;
@@ -371,39 +492,9 @@ int body_stop_recording(body_t *body){
     return 0;
 }
 
-int body_record(body_t *body, const char *data){
-    /* CURRENTLY UNUSED!.. we write directly to file instead. */
-
-    int data_len = strlen(data);
-    int required_size = body->recording.i + data_len + 1;
-
-    if(DEBUG_RECORDINGS){
-        printf("RECORD: data=%s, len=%i, req=%i\n",
-            data, data_len, required_size);}
-
-    if(required_size >= body->recording.size){
-        int new_size = required_size + 200;
-        char *new_recording = realloc(body->recording.data,
-            sizeof(char) * new_size);
-        if(new_recording == NULL)return 1;
-        new_recording[new_size - 1] = '\0';
-        body->recording.data = new_recording;
-        body->recording.size = new_size;
-        if(DEBUG_RECORDINGS)printf("  REALLOC: new_size=%i\n", new_size);
-    }
-    strcpy(body->recording.data + body->recording.i, data);
-    body->recording.i += data_len;
-
-    if(DEBUG_RECORDINGS){
-        printf("  OK! i=%i, data=%s\n",
-            body->recording.i, body->recording.data);}
-
-    return 0;
-}
-
-int body_maybe_record_wait(body_t *body){
+static int body_maybe_record_wait(body_t *body){
     int wait = body->recording.wait;
-    if(wait == 0)goto ok;
+    if(wait == 0)return 0;
 
     fprintf(body->recording.file, " w%i", wait);
     if(DEBUG_RECORDINGS)printf("w%i\n", wait);
@@ -415,70 +506,48 @@ int body_maybe_record_wait(body_t *body){
     buffer[2] = '1'; // <---- ummmmm
     buffer[3] = '\0';
 
-    int err = body_record(body, buffer);
-    if(err){perror("body_record failed");}
+    int err = recording_write(body, buffer);
+    if(err)return err;
     */
 
     body->recording.wait = 0;
-ok:
     return 0;
 }
 
-int recording_step(recording_t *rec){
-    int err;
+int body_record_keydown(body_t *body, int key_i){
+    body_maybe_record_wait(body);
 
-    body_t *body = rec->body;
+    char c = body_get_key_c(body, key_i, true);
+    fprintf(body->recording.file, "+%c", c);
+    if(DEBUG_RECORDINGS)printf("+%c\n", c);
 
-    if(rec->wait > 0){
-        rec->wait--;
-        if(rec->wait > 0)return 0;}
-
-    char *data = rec->data;
-    int i = rec->i;
-    char c;
-
-    bool loop = rec->loop;
-
-    while(1){
-        while(data[i] == ' ')i++;
-
-        c = data[i];
-        if(c == '+' || c == '-'){
-            bool keydown = c == '+';
-            char key_c = data[i+1]; i += 2;
-            if(DEBUG_RECORDINGS)printf("%c%c\n", c, key_c);
-            int key_i = body_get_key_i(body, key_c, false);
-            if(keydown)body_keydown(body, key_i);
-            else body_keyup(body, key_i);
-        }else if(c == 'w'){
-            i++; int wait = atoi(data + i);
-            if(DEBUG_RECORDINGS)printf("w%i\n", wait);
-            while(isdigit(data[i]))i++;
-            rec->wait = wait;
-            break;
-        }else if(c == '\0'){
-            if(loop){
-                /* loop! */
-                err = body_restart_recording(body, true, rec->resets_position);
-                if(err)return err;
-                i = 0;
-            }else{
-                break;
-            }
-        }else{
-            fprintf(stderr, "Unrecognized action: %c\n", c);
-            fprintf(stderr, "  ...in position %i of recording: %s\n",
-                i, rec->data);
-            return 2;
-        }
-    }
-
-    rec->i = i;
-
-    if(!loop && data[i] == '\0'){
-        recording_reset(rec);
-    }
+    /*
+    char buffer[3];
+    buffer[0] = '+';
+    buffer[1] = c;
+    buffer[2] = '\0';
+    int err = recording_write(body, buffer);
+    if(err)return err;
+    */
 
     return 0;
 }
 
+int body_record_keyup(body_t *body, int key_i){
+    body_maybe_record_wait(body);
+
+    char c = body_get_key_c(body, key_i, true);
+    fprintf(body->recording.file, "-%c", c);
+    if(DEBUG_RECORDINGS)printf("-%c\n", c);
+
+    /*
+    char buffer[3];
+    buffer[0] = '-';
+    buffer[1] = c;
+    buffer[2] = '\0';
+    int err = recording_write(body, buffer);
+    if(err)return err;
+    */
+
+    return 0;
+}

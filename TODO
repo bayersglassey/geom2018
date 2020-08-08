@@ -286,15 +286,6 @@ Little flies, berries, that kind of thing.
 And place them on the maps.
 
 
-Oct 8, 2019:
-------------
-
-Figure out what's making it so slow having lots of bodies.
-Collision? Collmap collisions specifically? Etc.
-
-Add between-frames for (un)crouching?..
-
-
 Oct 13, 2019:
 -------------
 
@@ -519,6 +510,12 @@ Aug 4, 2020:
             * Yeah ok, but what if you want to record over one part and keep the next part?..
                 * Well that would only work if you ended up in the exact same spot.
                 * So that probably only makes sense for animations which are already split up into actors.
+
+    * Ah, right now recording uses a FILE* and writes directly to it.
+        It admits that this is cheating, and there is an unused recording_write() which shows the proper way.
+        But it looks like I was confused at how to turn an int into char * when that was originally written.
+        So... fix it!
+        And then add new stuff like recording_rewind (recording_seek?..)
 
 
 Aug 6, 2020:

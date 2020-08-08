@@ -64,7 +64,7 @@ typedef struct recording {
     bool reacts;
     bool loop;
     bool resets_position; /* default: true, if false, looping doesn't reset body's position */
-    char *data;
+    char *data; /* May be NULL, in which case "playing" the recording just sets body's position */
     char *stateset_name;
     char *state_name;
 
@@ -93,9 +93,10 @@ void recording_init(recording_t *rec, struct body *body,
     bool loop);
 int recording_load(recording_t *rec, const char *filename,
     vars_t *vars, struct body *body, bool loop);
+int recording_step(recording_t *rec);
+int recording_write(recording_t *recording, const char *data);
 const char *get_last_recording_filename();
 const char *get_next_recording_filename();
-int recording_step(recording_t *rec);
 
 
 /********
@@ -195,8 +196,8 @@ int body_play_recording(body_t *body);
 int body_restart_recording(body_t *body, bool hard, bool reset_position);
 int body_start_recording(body_t *body, char *name);
 int body_stop_recording(body_t *body);
-int body_record(body_t *body, const char *data);
-int body_maybe_record_wait(body_t *body);
+int body_record_keydown(body_t *body, int key_i);
+int body_record_keyup(body_t *body, int key_i);
 
 
 /**********
