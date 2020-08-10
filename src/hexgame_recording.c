@@ -10,6 +10,8 @@
 #include "hexspace.h"
 #include "prismelrenderer.h"
 #include "array.h"
+#include "lexer.h"
+#include "lexer_macros.h"
 #include "util.h"
 #include "write.h"
 
@@ -77,114 +79,35 @@ static int recording_parse(recording_t *rec,
     hexmap_t *map = rec->body->map;
     vecspace_t *space = map->space;
 
-    if(fus_lexer_got(lexer, "reacts")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
-        err = fus_lexer_get_yesno(lexer, &rec->reacts);
-        if(err)return err;
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
-    }
+    GET_ATTR_YESNO("reacts", rec->reacts, true)
+    GET_ATTR_YESNO("loop", rec->loop, true)
+    GET_ATTR_YESNO("resets_position", rec->resets_position, true)
+    GET_ATTR_STR("anim", rec->stateset_name, false)
+    GET_ATTR_STR("state", rec->state_name, false)
 
-    if(fus_lexer_got(lexer, "loop")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
-        err = fus_lexer_get_yesno(lexer, &rec->loop);
-        if(err)return err;
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
-    }
-
-    if(fus_lexer_got(lexer, "resets_position")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
-        err = fus_lexer_get_yesno(lexer, &rec->resets_position);
-        if(err)return err;
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
-    }
-
-    err = fus_lexer_get(lexer, "anim");
-    if(err)return err;
-    err = fus_lexer_get(lexer, "(");
-    if(err)return err;
-    err = fus_lexer_get_str(lexer, &rec->stateset_name);
-    if(err)return err;
-    err = fus_lexer_get(lexer, ")");
-    if(err)return err;
-
-    err = fus_lexer_get(lexer, "state");
-    if(err)return err;
-    err = fus_lexer_get(lexer, "(");
-    if(err)return err;
-    err = fus_lexer_get_str(lexer, &rec->state_name);
-    if(err)return err;
-    err = fus_lexer_get(lexer, ")");
-    if(err)return err;
-
-    err = fus_lexer_get(lexer, "pos");
-    if(err)return err;
-    err = fus_lexer_get(lexer, "(");
-    if(err)return err;
+    GET("pos")
+    GET("(")
     err = fus_lexer_get_vec(lexer, space, rec->pos0);
     if(err)return err;
-    err = fus_lexer_get(lexer, ")");
-    if(err)return err;
+    GET(")")
 
-    err = fus_lexer_get(lexer, "rot");
-    if(err)return err;
-    err = fus_lexer_get(lexer, "(");
-    if(err)return err;
-    err = fus_lexer_get_int(lexer, &rec->rot0);
-    if(err)return err;
-    err = fus_lexer_get(lexer, ")");
-    if(err)return err;
+    GET_ATTR_INT("rot", rec->rot0, false)
+    GET_ATTR_YESNO("turn", rec->turn0, false)
+    GET_ATTR_INT("offset", rec->offset, true)
 
-    err = fus_lexer_get(lexer, "turn");
-    if(err)return err;
-    err = fus_lexer_get(lexer, "(");
-    if(err)return err;
-    err = fus_lexer_get_yesno(lexer, &rec->turn0);
-    if(err)return err;
-    err = fus_lexer_get(lexer, ")");
-    if(err)return err;
-
-    if(fus_lexer_got(lexer, "offset")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
-        err = fus_lexer_get_int(lexer, &rec->offset);
-        if(err)return err;
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
-    }
-
-    if(fus_lexer_got(lexer, "keys")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
+    if(GOT("keys")){
+        NEXT
         err = fus_lexer_get_keyinfo(lexer, &rec->keyinfo);
         if(err)return err;
     }
 
-    if(fus_lexer_got(lexer, "data")){
-        err = fus_lexer_get(lexer, "data");
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
-        err = fus_lexer_get_str(lexer, &rec->data);
-        if(err)return err;
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
+    if(GOT("data")){
+        NEXT
+        GET("(")
+        GET_STR(rec->data)
+        GET(")")
     }else{
-        err = fus_lexer_get(lexer, "nodata");
-        if(err)return err;
+        GET("nodata")
         rec->data = NULL;
     }
 
