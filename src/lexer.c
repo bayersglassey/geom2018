@@ -839,6 +839,28 @@ int fus_lexer_get_attr_int(fus_lexer_t *lexer, const char *attr, int *i,
     return 0;
 }
 
+int fus_lexer_get_attr_str(fus_lexer_t *lexer, const char *attr, char **s,
+    bool optional
+){
+    int err;
+    if(fus_lexer_got(lexer, attr)){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_get_str(lexer, s);
+        if(err)return err;
+        err = fus_lexer_get(lexer, ")");
+        if(err)return err;
+    }else if(!optional){
+        fus_lexer_err_info(lexer); fprintf(stderr,
+            "Expected str attribute \"%s\", but got: ", attr);
+        fus_lexer_show(lexer, stderr); fprintf(stderr, "\n");
+        return 2;
+    }
+    return 0;
+}
+
 static int _fus_lexer_get_attr_bool(fus_lexer_t *lexer, const char *attr, bool *b,
     bool optional, const char *t, const char *f
 ){
@@ -848,7 +870,7 @@ static int _fus_lexer_get_attr_bool(fus_lexer_t *lexer, const char *attr, bool *
         if(err)return err;
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
-        err = fus_lexer_get_bool(lexer, b);
+        err = _fus_lexer_get_bool(lexer, b, t, f);
         if(err)return err;
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
@@ -865,6 +887,12 @@ int fus_lexer_get_attr_yn(fus_lexer_t *lexer, const char *attr, bool *b,
     bool optional
 ){
     return _fus_lexer_get_attr_bool(lexer, attr, b, optional, "y", "n");
+}
+
+int fus_lexer_get_attr_yesno(fus_lexer_t *lexer, const char *attr, bool *b,
+    bool optional
+){
+    return _fus_lexer_get_attr_bool(lexer, attr, b, optional, "yes", "no");
 }
 
 int fus_lexer_get_attr_bool(fus_lexer_t *lexer, const char *attr, bool *b,
