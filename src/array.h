@@ -79,11 +79,16 @@ data, then you're looking for ARRAY_CLONE. */
         array[i] = (new_elem);} \
 }
 
-#define ARRAY_PUSH(T, array, new_elem) \
+#define ARRAY_PUSH_UNINITIALIZED(T, array) \
 { \
     if(array##_len >= array##_size) \
         ARRAY_GROW(T, array) \
     array##_len++; \
+}
+
+#define ARRAY_PUSH(T, array, new_elem) \
+{ \
+    ARRAY_PUSH_UNINITIALIZED(T, array) \
     array[array##_len - 1] = (new_elem); \
 }
 

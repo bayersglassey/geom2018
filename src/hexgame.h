@@ -58,13 +58,27 @@ int fus_lexer_get_keyinfo(fus_lexer_t *lexer,
  * RECORDING *
  *************/
 
+enum recording_node_type {
+    RECORDING_NODE_TYPE_WAIT,
+    RECORDING_NODE_TYPE_KEYDOWN,
+    RECORDING_NODE_TYPE_KEYUP,
+    RECORDING_NODE_TYPES
+};
+
+typedef struct recording_node {
+    int type; /* enum recording_node_type */
+    union {
+        int wait;
+        int key_c;
+    } u;
+} recording_node_t;
+
 typedef struct recording {
     int action;
         /* 0: none, 1: play, 2: record */
     bool reacts;
     bool loop;
     bool resets_position; /* default: true, if false, looping doesn't reset body's position */
-    char *data; /* May be NULL, in which case "playing" the recording just sets body's position */
     char *stateset_name;
     char *state_name;
 
@@ -74,8 +88,9 @@ typedef struct recording {
 
     keyinfo_t keyinfo;
 
-    int i;
-    int size;
+    ARRAY_DECL(struct recording_node, nodes)
+
+    int node_i;
     int wait;
     char *name;
     FILE *file;
@@ -94,7 +109,6 @@ void recording_init(recording_t *rec, struct body *body,
 int recording_load(recording_t *rec, const char *filename,
     vars_t *vars, struct body *body, bool loop);
 int recording_step(recording_t *rec);
-int recording_write(recording_t *recording, const char *data);
 const char *get_last_recording_filename();
 const char *get_next_recording_filename();
 

@@ -26,23 +26,37 @@ const char *recording_action_msg(int action){
 }
 
 
+/******************
+ * RECORDING_NODE *
+ ******************/
+
+void recording_node_init_key_c(recording_node_t *node, bool keydown, int key_c){
+    node->type = keydown? RECORDING_NODE_TYPE_KEYDOWN: RECORDING_NODE_TYPE_KEYUP;
+    node->u.key_c = key_c;
+}
+
+void recording_node_init_wait(recording_node_t *node, int wait){
+    node->type = RECORDING_NODE_TYPE_WAIT;
+    node->u.wait = wait;
+}
+
+
 /*************
  * RECORDING *
  *************/
 
 void recording_cleanup(recording_t *rec){
-    free(rec->data);
     free(rec->name);
     free(rec->stateset_name);
     free(rec->state_name);
     if(rec->file != NULL)fclose(rec->file);
+    ARRAY_FREE(struct recording_node, rec->nodes, (void))
 }
 
 void recording_reset(recording_t *rec){
     recording_cleanup(rec);
 
     rec->action = 0; /* none */
-    rec->data = NULL;
     rec->stateset_name = NULL;
     rec->state_name = NULL;
     rec->reacts = false;
@@ -53,8 +67,9 @@ void recording_reset(recording_t *rec){
 
     keyinfo_reset(&rec->keyinfo);
 
-    rec->i = 0;
-    rec->size = 0;
+    ARRAY_INIT(rec->nodes)
+
+    rec->node_i = 0;
     rec->wait = 0;
     rec->name = NULL;
     rec->file = NULL;
@@ -69,6 +84,35 @@ void recording_init(recording_t *rec, body_t *body,
     rec->body = body;
     rec->loop = loop;
     rec->resets_position = true;
+}
+
+static int recording_parse_nodes(recording_t *rec, const char *data){
+    int err;
+    int i = 0;
+    while(1){
+        while(data[i] == ' ')i++;
+
+        char c = data[i];
+        if(c == '+' || c == '-'){
+            bool keydown = c == '+'; /* Otherwise, keyup */
+            char key_c = data[i+1]; i += 2;
+            ARRAY_PUSH_UNINITIALIZED(recording_node_t, rec->nodes)
+            recording_node_init_key_c(&rec->nodes[rec->nodes_len - 1], keydown, key_c);
+        }else if(c == 'w'){
+            i++; int wait = atoi(data + i);
+            while(isdigit(data[i]))i++;
+            ARRAY_PUSH_UNINITIALIZED(recording_node_t, rec->nodes)
+            recording_node_init_wait(&rec->nodes[rec->nodes_len - 1], wait);
+        }else if(c == '\0'){
+            break;
+        }else{
+            fprintf(stderr, "Unrecognized action: %c\n", c);
+            fprintf(stderr, "  ...in position %i of recording: %s\n",
+                i, data);
+            return 2;
+        }
+    }
+    return 0;
 }
 
 static int recording_parse(recording_t *rec,
@@ -104,11 +148,14 @@ static int recording_parse(recording_t *rec,
     if(GOT("data")){
         NEXT
         GET("(")
-        GET_STR(rec->data)
+        char *data;
+        GET_STR(data)
+        err = recording_parse_nodes(rec, data);
+        if(err)return err;
+        free(data);
         GET(")")
     }else{
         GET("nodata")
-        rec->data = NULL;
     }
 
     return 0;
@@ -145,82 +192,52 @@ static int recording_step_play(recording_t *rec){
         rec->wait--;
         if(rec->wait > 0)return 0;}
 
-    char *data = rec->data;
-    int i = rec->i;
-    char c;
-
-    bool loop = rec->loop;
+    /* Empty recording: early exit */
+    if(rec->nodes_len <= 0)return 0;
 
     while(1){
-        while(data[i] == ' ')i++;
-
-        c = data[i];
-        if(c == '+' || c == '-'){
-            bool keydown = c == '+';
-            char key_c = data[i+1]; i += 2;
-            if(DEBUG_RECORDINGS)printf("%c%c\n", c, key_c);
-            int key_i = body_get_key_i(body, key_c, false);
-            if(keydown)body_keydown(body, key_i);
-            else body_keyup(body, key_i);
-        }else if(c == 'w'){
-            i++; int wait = atoi(data + i);
-            if(DEBUG_RECORDINGS)printf("w%i\n", wait);
-            while(isdigit(data[i]))i++;
-            rec->wait = wait;
-            break;
-        }else if(c == '\0'){
-            if(loop){
-                /* loop! */
+        /* Exit conditions: */
+        if(rec->node_i >= rec->nodes_len){
+            if(rec->loop){
                 err = body_restart_recording(body, true, rec->resets_position);
                 if(err)return err;
-                i = 0;
             }else{
+                /* Stop playback, in fact unload recording entirely */
+                recording_reset(rec);
                 break;
             }
-        }else{
-            fprintf(stderr, "Unrecognized action: %c\n", c);
-            fprintf(stderr, "  ...in position %i of recording: %s\n",
-                i, rec->data);
-            return 2;
         }
+
+        /* Process next node: */
+        {
+            recording_node_t *node = &rec->nodes[rec->node_i];
+            switch(node->type){
+                case RECORDING_NODE_TYPE_WAIT: {
+                    rec->wait = node->u.wait;
+                    break;
+                }
+                case RECORDING_NODE_TYPE_KEYDOWN: {
+                    int key_i = body_get_key_i(body, node->u.key_c, false);
+                    body_keydown(body, key_i);
+                    break;
+                }
+                case RECORDING_NODE_TYPE_KEYUP: {
+                    int key_i = body_get_key_i(body, node->u.key_c, false);
+                    body_keyup(body, key_i);
+                    break;
+                }
+                default: {
+                    fprintf(stderr, "%s: Unrecognized node type: %i\n",
+                        __func__, node->type);
+                    return 2;
+                }
+            }
+            rec->node_i++;
+        }
+
+        /* Exit conditions: */
+        if(rec->wait > 0)break;
     }
-
-    rec->i = i;
-
-    if(!loop && data[i] == '\0'){
-        recording_reset(rec);
-    }
-
-    return 0;
-}
-
-int recording_write(recording_t *recording, const char *data){
-    /* CURRENTLY UNUSED!.. we printf to recording->file instead.
-    See: body_record_keydown, body_record_keyup, body_maybe_record_wait */
-
-    int data_len = strlen(data);
-    int required_size = recording->i + data_len + 1;
-
-    if(DEBUG_RECORDINGS){
-        printf("RECORD: data=%s, len=%i, req=%i\n",
-            data, data_len, required_size);}
-
-    if(required_size >= recording->size){
-        int new_size = required_size + 200;
-        char *new_recording = realloc(recording->data,
-            sizeof(char) * new_size);
-        if(new_recording == NULL)return 1;
-        new_recording[new_size - 1] = '\0';
-        recording->data = new_recording;
-        recording->size = new_size;
-        if(DEBUG_RECORDINGS)printf("  REALLOC: new_size=%i\n", new_size);
-    }
-    strcpy(recording->data + recording->i, data);
-    recording->i += data_len;
-
-    if(DEBUG_RECORDINGS){
-        printf("  OK! i=%i, data=%s\n",
-            recording->i, recording->data);}
 
     return 0;
 }
@@ -256,7 +273,8 @@ int recording_step(recording_t *recording){
 }
 
 static const char *get_recording_filename(int n){
-    /* NOT REENTRANT, FORGIVE MEEE :( */
+    /* NOT REENTRANT, FORGIVE MEEE :(
+    ...should be made a method of test_app. */
     static char recording_filename[200] = "data/rec000.fus";
     static const int zeros_pos = 8;
     static const int n_zeros = 3;
@@ -317,11 +335,7 @@ int body_play_recording(body_t *body){
     err = body_init_stateset(body, rec->stateset_name, rec->state_name);
     if(err)return err;
 
-    if(body->recording.data){
-        /* NOTE: data is allowed to be NULL, in which case "playing"
-        the recording just sets body's position/anim/state */
-        body->recording.action = 1; /* play */
-    }
+    body->recording.action = 1; /* play */
     return body_restart_recording(body, false, true);
 }
 
@@ -329,7 +343,7 @@ int body_restart_recording(body_t *body, bool hard, bool reset_position){
     int err;
     recording_t *rec = &body->recording;
 
-    rec->i = 0;
+    rec->node_i = 0;
     rec->wait = 0;
 
     keyinfo_copy(&body->keyinfo, &rec->keyinfo);
@@ -341,7 +355,7 @@ int body_restart_recording(body_t *body, bool hard, bool reset_position){
         body->turn = rec->turn0;
     }
 
-    if(!hard && rec->data){
+    if(!hard){
         /* The following is pretty ganky; we're assuming that body won't
         have any "side effects" on the game during each step.
         Like, for instance, killing a player.

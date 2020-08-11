@@ -100,15 +100,14 @@ int test_app_list_bodies_render(test_app_list_t *list){
         WRITE_FIELD(rec, stateset_name)
         WRITE_FIELD(rec, state_name)
         if(data->mode == TEST_APP_LIST_BODIES_MODE_RECORDING_DATA){
-            WRITE_FIELD(rec, data)
             _console_write_keyinfo(console, body, &rec->keyinfo);
         }else{
             WRITE_FIELD_VEC(rec, 4, pos0)
             WRITE_FIELD_INT(rec, rot0)
             WRITE_FIELD_BOOL(rec, turn0)
         }
-        WRITE_FIELD_INT(rec, i)
-        WRITE_FIELD_INT(rec, size)
+        WRITE_FIELD_INT(rec, node_i)
+        WRITE_FIELD_INT(rec, nodes_len)
         WRITE_FIELD_INT(rec, wait)
         WRITE_FIELD(rec, name)
         WRITE_FIELD_INT(rec, offset)

@@ -501,21 +501,12 @@ Aug 4, 2020:
         * body_restart_recording (which looks at body->rec.offset)
         * Can we turn that into a simple "step forward/backward" feature?..
         * And mix that with... ability to scroll through the parts of recording's data (e.g. "+l", "w15") and edit them?
-        * Would need ability to insert/delete/edit:
-            * [+-][udlrfbxy]
-            * w[0-9]+
-        * ...to keep it simple, could allow *typing in* raw data?.. uhhhh hmm gross...
+        * insert/delete/edit recording->nodes
         * WE DON'T WANT TO EDIT RAW DATA!!! We want to press keys, duhh.
             * So if you step backwards/forwards through the animation, you can record over it in any spot.
             * Yeah ok, but what if you want to record over one part and keep the next part?..
                 * Well that would only work if you ended up in the exact same spot.
                 * So that probably only makes sense for animations which are already split up into actors.
-
-    * Ah, right now recording uses a FILE* and writes directly to it.
-        It admits that this is cheating, and there is an unused recording_write() which shows the proper way.
-        But it looks like I was confused at how to turn an int into char * when that was originally written.
-        So... fix it!
-        And then add new stuff like recording_rewind (recording_seek?..)
 
 
 Aug 6, 2020:
