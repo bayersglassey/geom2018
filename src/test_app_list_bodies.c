@@ -63,7 +63,7 @@ int test_app_list_bodies_step(test_app_list_t *list){
     test_app_list_data_t *data = list->data;
     hexmap_t *map = data->map? data->map: data->app->hexgame.maps[0];
     data->length = map->bodies_len;
-    data->index = _remainder(list->index_x, data->length);
+    data->index = _test_app_list_remainder(list->index_x, data->length);
     data->item = data->length > 0? map->bodies[data->index]: NULL;
     if(data->mode == TEST_APP_LIST_BODIES_MODE_RECORDING){
         test_app_list_data_set_options(data,

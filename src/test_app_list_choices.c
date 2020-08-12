@@ -38,7 +38,7 @@ int test_app_list_choices_step(test_app_list_t *list){
     data->length = 0;
     data->index = 0;
     data->item = NULL;
-    data->options_index = _remainder(list->index_y, data->options_length);
+    data->options_index = _test_app_list_remainder(list->index_y, data->options_length);
     return 0;
 }
 

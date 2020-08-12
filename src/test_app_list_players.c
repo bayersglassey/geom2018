@@ -35,7 +35,7 @@ int test_app_list_players_step(test_app_list_t *list){
     test_app_list_data_t *data = list->data;
     hexgame_t *game = &data->app->hexgame;
     data->length = game->players_len;
-    data->index = _remainder(list->index_x, data->length);
+    data->index = _test_app_list_remainder(list->index_x, data->length);
     data->item = data->length > 0? game->players[data->index]: NULL;
     test_app_list_data_set_options(data,
         test_app_list_players_options, list->index_y);
