@@ -119,6 +119,7 @@ int test_app_list_bodies_render(test_app_list_t *list){
 }
 
 int test_app_list_bodies_select_item(test_app_list_t *list){
+    int err;
     test_app_list_data_t *data = list->data;
     body_t *body = data->item;
     if(body == NULL)return 0;
@@ -130,7 +131,8 @@ int test_app_list_bodies_select_item(test_app_list_t *list){
                     TEST_APP_LIST_BODIES_MODE_DEFAULT);
             } break;
             case 1: {
-                recording_reset(rec);
+                err = body_restart_recording(body, true, true);
+                if(err)return err;
             } break;
             case 2: {
                 test_app_list_data_set_mode(data,

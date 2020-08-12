@@ -99,7 +99,7 @@ static void _console_write_field_vec(console_t *console, const char *name, int d
 static void _console_write_keyinfo(console_t *console, body_t *body, keyinfo_t *keyinfo){
     for(int i = 0; i < KEYINFO_KEYS; i++){
         char key_c = body_get_key_c(body, i, true);
-        console_printf(console, "Key %c:");
+        console_printf(console, "Key %c:", key_c);
         if(keyinfo->isdown[i])console_write_msg(console, " is");
         if(keyinfo->wasdown[i])console_write_msg(console, " was");
         if(keyinfo->wentdown[i])console_write_msg(console, " went");

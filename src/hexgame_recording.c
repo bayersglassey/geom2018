@@ -339,7 +339,7 @@ int body_play_recording(body_t *body){
     return body_restart_recording(body, false, true);
 }
 
-int body_restart_recording(body_t *body, bool hard, bool reset_position){
+int body_restart_recording(body_t *body, bool ignore_offset, bool reset_position){
     int err;
     recording_t *rec = &body->recording;
 
@@ -355,7 +355,7 @@ int body_restart_recording(body_t *body, bool hard, bool reset_position){
         body->turn = rec->turn0;
     }
 
-    if(!hard){
+    if(!ignore_offset){
         /* The following is pretty ganky; we're assuming that body won't
         have any "side effects" on the game during each step.
         Like, for instance, killing a player.

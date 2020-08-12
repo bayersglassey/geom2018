@@ -207,7 +207,7 @@ char body_get_key_c(body_t *body, int key_i, bool absolute);
 
 int body_load_recording(body_t *body, const char *filename, bool loop);
 int body_play_recording(body_t *body);
-int body_restart_recording(body_t *body, bool hard, bool reset_position);
+int body_restart_recording(body_t *body, bool ignore_offset, bool reset_position);
 int body_start_recording(body_t *body, char *name);
 int body_stop_recording(body_t *body);
 int body_record_keydown(body_t *body, int key_i);
