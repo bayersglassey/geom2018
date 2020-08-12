@@ -29,15 +29,9 @@ const char *test_app_list_bodies_options_recording[] = {
     NULL
 };
 
-const char *test_app_list_bodies_options_recording_data[] = {
-    "<- Back",
-    NULL
-};
-
 enum {
     TEST_APP_LIST_BODIES_MODE_DEFAULT,
     TEST_APP_LIST_BODIES_MODE_RECORDING,
-    TEST_APP_LIST_BODIES_MODE_RECORDING_DATA,
     TEST_APP_LIST_BODIES_MODES
 };
 
@@ -68,9 +62,6 @@ int test_app_list_bodies_step(test_app_list_t *list){
     if(data->mode == TEST_APP_LIST_BODIES_MODE_RECORDING){
         test_app_list_data_set_options(data,
             test_app_list_bodies_options_recording, list->index_y);
-    }else if(data->mode == TEST_APP_LIST_BODIES_MODE_RECORDING_DATA){
-        test_app_list_data_set_options(data,
-            test_app_list_bodies_options_recording_data, list->index_y);
     }else{
         test_app_list_data_set_options(data,
             test_app_list_bodies_options, list->index_y);
@@ -86,31 +77,11 @@ int test_app_list_bodies_render(test_app_list_t *list){
     if(body != NULL){
         _console_write_field(console, "Stateset", body->stateset.filename);
         _console_write_field(console, "State", body->state->name);
-        if(data->mode != TEST_APP_LIST_BODIES_MODE_RECORDING_DATA){
-            _console_write_keyinfo(console, body, &body->keyinfo);
-        }
+        _console_write_keyinfo(console, body, &body->keyinfo);
 
-        /* Section for body->recording */
         recording_t *rec = &body->recording;
         _console_write_section(console, "Recording");
-        _console_write_field(console, "Action",
-            recording_action_msg(rec->action));
-        WRITE_FIELD_BOOL(rec, reacts)
-        WRITE_FIELD_BOOL(rec, loop)
-        WRITE_FIELD(rec, stateset_name)
-        WRITE_FIELD(rec, state_name)
-        if(data->mode == TEST_APP_LIST_BODIES_MODE_RECORDING_DATA){
-            _console_write_keyinfo(console, body, &rec->keyinfo);
-        }else{
-            WRITE_FIELD_VEC(rec, 4, pos0)
-            WRITE_FIELD_INT(rec, rot0)
-            WRITE_FIELD_BOOL(rec, turn0)
-        }
-        WRITE_FIELD_INT(rec, node_i)
-        WRITE_FIELD_INT(rec, nodes_len)
-        WRITE_FIELD_INT(rec, wait)
-        WRITE_FIELD(rec, name)
-        WRITE_FIELD_INT(rec, offset)
+        _console_write_recording(console, rec, false);
 
         _console_write_options(console, data->options,
             data->options_index, data->options_length);
@@ -124,7 +95,6 @@ int test_app_list_bodies_select_item(test_app_list_t *list){
     body_t *body = data->item;
     if(body == NULL)return 0;
     if(data->mode == TEST_APP_LIST_BODIES_MODE_RECORDING){
-        recording_t *rec = &body->recording;
         switch(data->options_index){
             case 0: {
                 test_app_list_data_set_mode(data,
@@ -135,17 +105,8 @@ int test_app_list_bodies_select_item(test_app_list_t *list){
                 if(err)return err;
             } break;
             case 2: {
-                test_app_list_data_set_mode(data,
-                    TEST_APP_LIST_BODIES_MODE_RECORDING_DATA);
-            } break;
-            default: break;
-        }
-    }else if(data->mode == TEST_APP_LIST_BODIES_MODE_RECORDING_DATA){
-        recording_t *rec = &body->recording;
-        switch(data->options_index){
-            case 0: {
-                test_app_list_data_set_mode(data,
-                    TEST_APP_LIST_BODIES_MODE_RECORDING);
+                recording_t *rec = &body->recording;
+                return test_app_open_list_recording(data->app, rec);
             } break;
             default: break;
         }

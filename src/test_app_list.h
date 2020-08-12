@@ -126,5 +126,10 @@ int test_app_list_actors_step(test_app_list_t *list);
 int test_app_list_actors_render(test_app_list_t *list);
 int test_app_list_actors_select_item(test_app_list_t *list);
 
+int test_app_open_list_recording(struct test_app *app, recording_t *rec);
+int test_app_list_recording_step(test_app_list_t *list);
+int test_app_list_recording_render(test_app_list_t *list);
+int test_app_list_recording_select_item(test_app_list_t *list);
+
 
 #endif

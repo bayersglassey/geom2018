@@ -102,6 +102,24 @@ void _console_write_keyinfo(console_t *console, body_t *body, keyinfo_t *keyinfo
     }
 }
 
+void _console_write_recording(console_t *console, recording_t *rec, bool show_data){
+    _console_write_field(console, "Action",
+        recording_action_msg(rec->action));
+    console_printf(console, "reacts=%c, loop=%c, resets_position=%c\n",
+        rec->reacts? 'y': 'n',
+        rec->loop? 'y': 'n',
+        rec->resets_position? 'y': 'n');
+    if(show_data){
+        _console_write_keyinfo(console, rec->body, &rec->keyinfo);
+    }else{
+        WRITE_FIELD_VEC(rec, 4, pos0)
+        WRITE_FIELD_INT(rec, rot0)
+        WRITE_FIELD_BOOL(rec, turn0)
+    }
+    console_printf(console, "Node %i/%i (offset=%i, wait=%i)\n",
+        rec->node_i, rec->nodes_len, rec->offset, rec->wait);
+}
+
 void _console_write_options(console_t *console,
     const char **options, int index, int length
 ){
