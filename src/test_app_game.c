@@ -225,7 +225,8 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
                     fprintf(stderr,
                         "Can't record without a body!\n");
                 }else if(body->recording.action != 2){
-                    const char *recording_filename = get_next_recording_filename();
+                    const char *recording_filename =
+                        test_app_get_next_recording_filename(app);
                     fprintf(stderr, "Recording to file: %s "
                         " (When finished, press F9 to save!)\n",
                         recording_filename);
@@ -241,7 +242,8 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
         }else if(event->key.keysym.sym == SDLK_F10){
             /* load recording */
             bool shift = event->key.keysym.mod & KMOD_SHIFT;
-            const char *recording_filename = get_last_recording_filename();
+            const char *recording_filename =
+                test_app_get_last_recording_filename(app);
             if(recording_filename == NULL){
                 fprintf(stderr, "Couldn't find file of last recording. "
                     "Maybe you need to record your first one with F9?\n");

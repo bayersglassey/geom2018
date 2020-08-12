@@ -97,6 +97,8 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->hexmap_filename = hexmap_filename;
     app->submap_filename = submap_filename;
 
+    strcpy(app->_recording_filename, "data/rec000.fus");
+
     SDL_Palette *sdl_palette = SDL_AllocPalette(256);
     app->sdl_palette = sdl_palette;
     RET_IF_SDL_NULL(sdl_palette);
@@ -396,3 +398,43 @@ int test_app_mainloop_step(test_app_t *app){
     return 0;
 }
 
+static const char *test_app_get_recording_filename(
+    test_app_t *app, int n
+){
+    char *recording_filename = app->_recording_filename;
+    static const int zeros_pos = 8;
+    static const int n_zeros = 3;
+    for(int i = 0; i < n_zeros; i++){
+        int rem = n % 10;
+        n = n / 10;
+        recording_filename[zeros_pos + n_zeros - 1 - i] = '0' + rem;
+    }
+    return recording_filename;
+}
+
+static const char *test_app_get_last_or_next_recording_filename(
+    test_app_t *app, bool next
+){
+    /* This function is... horrific */
+    const char *recording_filename;
+    int n = 0;
+    while(1){
+        recording_filename = test_app_get_recording_filename(app, n);
+        FILE *f = fopen(recording_filename, "r");
+        if(f == NULL)break;
+        n++;
+    }
+    if(!next){
+    if(n == 0)return NULL;
+        recording_filename = test_app_get_recording_filename(app, n-1);
+    }
+    return recording_filename;
+}
+
+const char *test_app_get_last_recording_filename(test_app_t *app){
+    return test_app_get_last_or_next_recording_filename(app, false);
+}
+
+const char *test_app_get_next_recording_filename(test_app_t *app){
+    return test_app_get_last_or_next_recording_filename(app, true);
+}

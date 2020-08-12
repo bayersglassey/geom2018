@@ -272,44 +272,6 @@ int recording_step(recording_t *recording){
     return 0;
 }
 
-static const char *get_recording_filename(int n){
-    /* NOT REENTRANT, FORGIVE MEEE :(
-    ...should be made a method of test_app. */
-    static char recording_filename[200] = "data/rec000.fus";
-    static const int zeros_pos = 8;
-    static const int n_zeros = 3;
-    for(int i = 0; i < n_zeros; i++){
-        int rem = n % 10;
-        n = n / 10;
-        recording_filename[zeros_pos + n_zeros - 1 - i] = '0' + rem;
-    }
-    return recording_filename;
-}
-
-static const char *get_last_or_next_recording_filename(bool next){
-    const char *recording_filename;
-    int n = 0;
-    while(1){
-        recording_filename = get_recording_filename(n);
-        FILE *f = fopen(recording_filename, "r");
-        if(f == NULL)break;
-        n++;
-    }
-    if(!next){
-        if(n == 0)return NULL;
-        recording_filename = get_recording_filename(n-1);
-    }
-    return recording_filename;
-}
-
-const char *get_last_recording_filename(){
-    return get_last_or_next_recording_filename(false);
-}
-
-const char *get_next_recording_filename(){
-    return get_last_or_next_recording_filename(true);
-}
-
 
 
 /******************

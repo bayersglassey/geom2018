@@ -109,8 +109,6 @@ void recording_init(recording_t *rec, struct body *body,
 int recording_load(recording_t *rec, const char *filename,
     vars_t *vars, struct body *body, bool loop);
 int recording_step(recording_t *rec);
-const char *get_last_recording_filename();
-const char *get_next_recording_filename();
 
 
 /********
