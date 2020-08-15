@@ -90,6 +90,7 @@ typedef struct recording {
 
     ARRAY_DECL(struct recording_node, nodes)
 
+    int frame_i;
     int node_i;
     int wait;
     char *name;

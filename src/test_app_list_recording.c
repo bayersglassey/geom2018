@@ -31,8 +31,14 @@ int test_app_list_recording_step(test_app_list_t *list){
     test_app_list_data_t *data = list->data;
     body_t *body = data->body;
     recording_t *rec = &body->recording;
+
+    /* We probably prefer index=frame_i, but then what's length?..
+    Cos we don't actually know max frames. We'd have to calculate it.
+    Maybe we can calculate it on recording load?..
+    And then have to keep updating it when recording?.. */
     data->length = rec->nodes_len;
     data->index = rec->node_i;
+
     return 0;
 }
 

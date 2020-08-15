@@ -69,6 +69,7 @@ void recording_reset(recording_t *rec){
 
     ARRAY_INIT(rec->nodes)
 
+    rec->frame_i = 0;
     rec->node_i = 0;
     rec->wait = 0;
     rec->name = NULL;
@@ -186,14 +187,16 @@ int recording_load(recording_t *rec, const char *filename,
 static int recording_step_play(recording_t *rec){
     int err;
 
+    /* Empty recording: early exit */
+    if(rec->nodes_len <= 0)return 0;
+
     body_t *body = rec->body;
+
+    rec->frame_i++;
 
     if(rec->wait > 0){
         rec->wait--;
         if(rec->wait > 0)return 0;}
-
-    /* Empty recording: early exit */
-    if(rec->nodes_len <= 0)return 0;
 
     while(1){
         /* Exit conditions: */
@@ -242,6 +245,19 @@ static int recording_step_play(recording_t *rec){
     return 0;
 }
 
+static int recording_step_play_reverse(recording_t *rec){
+    int err;
+
+    /* Empty recording: early exit */
+    if(rec->nodes_len <= 0)return 0;
+
+    body_t *body = rec->body;
+
+    /* TODO... */
+
+    return 0;
+}
+
 int recording_step(recording_t *recording){
     int rec_action = recording->action;
 
@@ -267,6 +283,25 @@ int recording_step(recording_t *recording){
         DEBUG_PRINT_KEYS(body->keyinfo.wentdown)
         #undef DEBUG_PRINT_KEYS
         printf("\n");
+    }
+
+    return 0;
+}
+
+int recording_step_reverse(recording_t *recording){
+    int rec_action = recording->action;
+
+    if(rec_action == 1){
+        /* play */
+        int err = recording_step_play_reverse(recording);
+        if(err)return err;
+    }else if(rec_action == 2){
+        /* record */
+        if(recording->wait > 0){
+            recording->wait--;
+        }else{
+            // TODO: pop a node or something...
+        }
     }
 
     return 0;
@@ -305,6 +340,7 @@ int body_restart_recording(body_t *body, bool ignore_offset, bool reset_position
     int err;
     recording_t *rec = &body->recording;
 
+    rec->frame_i = 0;
     rec->node_i = 0;
     rec->wait = 0;
 

@@ -116,8 +116,10 @@ void _console_write_recording(console_t *console, recording_t *rec, bool show_da
         WRITE_FIELD_INT(rec, rot0)
         WRITE_FIELD_BOOL(rec, turn0)
     }
-    console_printf(console, "Node %i/%i (offset=%i, wait=%i)\n",
-        rec->node_i, rec->nodes_len, rec->offset, rec->wait);
+    console_printf(console, "node %i/%i, frame %i\n",
+        rec->node_i, rec->nodes_len, rec->frame_i);
+    console_printf(console, "offset=%i, wait=%i\n",
+        rec->offset, rec->wait);
 }
 
 void _console_write_options(console_t *console,
