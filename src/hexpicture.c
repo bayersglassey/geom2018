@@ -32,9 +32,9 @@
 const int _neigh_coords[HEXPICTURE_VERT_NEIGHBOURS * 2][2] =
     HEXPICTURE_VERT_NEIGHBOUR_COORDS;
 
-#define HEXPICTURE_SQ_EDGES 4
-#define HEXPICTURE_TRI_EDGES 3
-#define HEXPICTURE_DIA_EDGES 4
+#define HEXPICTURE_FACE_SQ_MAX_ROT 3
+#define HEXPICTURE_FACE_TRI_MAX_ROT 4
+#define HEXPICTURE_FACE_DIA_MAX_ROT 6
 
 
 #define _GET_PART(_X, _Y) (&parts[(_Y) * max_line_len + (_X)])
@@ -58,7 +58,9 @@ enum hexpicture_part_type {
 
 typedef struct hexpicture_face {
     int type; /* enum hexpicture_face_type */
-    int color; /* 0=transparent, 1..16 are colours */
+    int color;
+        /* 0=transparent, 1..16 are colours, -1 is error
+        return value for e.g. _get_color */
 } hexpicture_face_t;
 
 typedef struct hexpicture_edge {
@@ -109,6 +111,25 @@ static const char *_face_type_msg(int type){
     }
 }
 
+static int _get_color(char c){
+    if(c == ' ')return 0;
+    if(c >= '0' && c <= '9')return c - '0' + 1;
+    if(c >= 'A' && c <= 'Z')return c - 'A' + 10 + 1;
+    if(c >= 'a' && c <= 'z')return c - 'a' + 10 + 1;
+    return -1;
+}
+
+static const char *_get_char(const char **lines,
+    size_t lines_len,
+    int x, int y
+){
+    if(x < 0 || y < 0 || y >= lines_len)return NULL;
+    const char *line = lines[y];
+    size_t line_len = strlen(line);
+    if(x >= line_len)return NULL;
+    return &line[x];
+}
+
 static hexpicture_part_t *_get_part(hexpicture_part_t *parts,
     size_t lines_len, size_t max_line_len,
     int x, int y
@@ -128,18 +149,18 @@ static hexpicture_vert_t *_get_vert(hexpicture_part_t *parts,
 }
 
 static bool _hexpicture_vert_check_face(hexpicture_vert_t *vert,
-    const int *edges, int rot,
+    const int *edge_rots, int rot,
     hexpicture_part_t *parts,
     size_t lines_len, size_t max_line_len
 ){
     int x = vert->x;
     int y = vert->y;
-    for(int edge; (edge = *edges) != -1; edges++){
-        edge += rot;
-        if(edge >= 12)edge -= 12;
+    for(int edge_rot; (edge_rot = *edge_rots) != -1; edge_rots++){
+        edge_rot += rot;
+        if(edge_rot >= 12)edge_rot -= 12;
 
-        x += _neigh_coords[edge][0];
-        y += _neigh_coords[edge][1];
+        x += _neigh_coords[edge_rot][0];
+        y += _neigh_coords[edge_rot][1];
 
         hexpicture_vert_t *found_vert = _get_vert(parts,
             lines_len, max_line_len, x, y);
@@ -258,32 +279,60 @@ int hexpicture_parse(hexpicture_t *pic,
     for(int vert_i = 0; vert_i < verts_len; vert_i++){
         hexpicture_vert_t *vert = &verts[vert_i];
 
-        static const int sq_edges[] = {0, 3, 6, 9, -1};
-        static const int tri_edges[] = {0, 4, 8, -1};
-        static const int dia_edges[] = {0, 1, 6, 7, -1};
-        /* TODO!!!!!!!
-        static const int sq_faces[][2] = {
-            {1, -1},
-            {0, -1},
+        /* Arrays of unit vectors (represented as rot values) describing
+        each prismel. Terminated with -1 */
+        static const int sq_edge_rots[] = {0, 3, 6, 9, -1};
+        static const int tri_edge_rots[] = {0, 4, 8, -1};
+        static const int dia_edge_rots[] = {0, 1, 6, 7, -1};
+
+        /* Location (x, y) of cell -- that is, lines[y][x] -- whose value
+        determines face->color, e.g. '0' -> 0, 'A' -> 10, etc. */
+        static const int sq_face_coords[HEXPICTURE_FACE_SQ_MAX_ROT][2] = {
+            { 1, -1},
+            { 0, -1},
+            { 0, -1}
         };
-        static const int tri_edges[] = {0, 4, 8, -1};
-        static const int dia_edges[] = {0, 1, 6, 7, -1};
-        */
+        static const int tri_face_coords[HEXPICTURE_FACE_TRI_MAX_ROT][2] = {
+            { 2, -1},
+            { 1, -2},
+            { 0, -1},
+            {-1, -2}
+        };
+        static const int dia_face_coords[HEXPICTURE_FACE_DIA_MAX_ROT][2] = {
+            { 3, -1},
+            { 2, -2},
+            { 1, -3},
+            {-1, -3},
+            {-2, -2},
+            {-3, -1}
+        };
+
+        /* Array to be indexed by type - 1 (sq=0, tri=1, dia=2) */
+        /* NOTE: C's type notation at its gankiest... */
+        static const int (*(face_coords[]))[2] = {
+            sq_face_coords,
+            tri_face_coords,
+            dia_face_coords
+        };
+
         for(int rot = 0; rot < HEXPICTURE_VERT_NEIGHBOURS; rot++){
             int type = HEXPICTURE_FACE_TYPE_NONE;
 
-            if(rot < 3 &&
-                _hexpicture_vert_check_face(vert, sq_edges, rot,
+            if(rot < HEXPICTURE_FACE_SQ_MAX_ROT &&
+                _hexpicture_vert_check_face(vert,
+                    sq_edge_rots, rot,
                     parts, lines_len, max_line_len)
             ){
                 type = HEXPICTURE_FACE_TYPE_SQ;
-            }else if(rot < 4 &&
-                _hexpicture_vert_check_face(vert, tri_edges, rot,
+            }else if(rot < HEXPICTURE_FACE_TRI_MAX_ROT &&
+                _hexpicture_vert_check_face(vert,
+                    tri_edge_rots, rot,
                     parts, lines_len, max_line_len)
             ){
                 type = HEXPICTURE_FACE_TYPE_TRI;
-            }else if(rot < 6 &&
-                _hexpicture_vert_check_face(vert, dia_edges, rot,
+            }else if(rot < HEXPICTURE_FACE_DIA_MAX_ROT &&
+                _hexpicture_vert_check_face(vert,
+                    dia_edge_rots, rot,
                     parts, lines_len, max_line_len)
             ){
                 type = HEXPICTURE_FACE_TYPE_DIA;
@@ -292,7 +341,19 @@ int hexpicture_parse(hexpicture_t *pic,
             if(type != HEXPICTURE_FACE_TYPE_NONE){
                 hexpicture_face_t *face = &vert->faces[rot];
                 face->type = type;
-                /* TODO: figure out face->color... */
+                const int (*coords)[2] = face_coords[type - 1];
+                    /* type - 1: sq=0, tri=1, dia=2 */
+                int x = vert->x + coords[rot][0];
+                int y = vert->y + coords[rot][1];
+                const char *c = _get_char(lines, lines_len, x, y);
+                int color = !c? 0: _get_color(*c);
+                if(color == -1){
+                    fprintf(stderr,
+                        "Couldn't find face colour, unrecognized char [%c] "
+                        "at position (%i, %i)\n", *c, x, y);
+                    return 2;
+                }
+                face->color = color;
             }
         }
     }
@@ -320,8 +381,8 @@ int hexpicture_parse(hexpicture_t *pic,
             for(int neigh_i = 0; neigh_i < HEXPICTURE_VERT_NEIGHBOURS; neigh_i++){
                 hexpicture_face_t *face = &vert->faces[neigh_i];
                 if(face->type == HEXPICTURE_FACE_TYPE_NONE)continue;
-                fprintf(stderr, "    face %i: %s\n", neigh_i,
-                    _face_type_msg(face->type));
+                fprintf(stderr, "    face %i: %s %i\n", neigh_i,
+                    _face_type_msg(face->type), face->color);
             }
         }
     }
