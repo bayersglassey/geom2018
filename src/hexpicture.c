@@ -13,24 +13,22 @@
 #define HEXPICTURE_CHAR_EDGE_VERTI '|'
 
 #define HEXPICTURE_VERT_NEIGHBOURS 6
-#define HEXPICTURE_VERT_NEIGHBOUR_COORDS { \
-    { 4,  0}, \
-    { 3, -2}, \
-    { 2, -3}, \
-    { 0, -4}, \
-    {-2, -3}, \
-    {-3, -2}, \
-    \
-    {-4,  0}, \
-    {-3,  2}, \
-    {-2,  3}, \
-    { 0,  4}, \
-    { 2,  3}, \
-    { 3,  2} \
-}
 
-const int _neigh_coords[HEXPICTURE_VERT_NEIGHBOURS * 2][2] =
-    HEXPICTURE_VERT_NEIGHBOUR_COORDS;
+const int _neigh_coords[HEXPICTURE_VERT_NEIGHBOURS * 2][2] = {
+    { 4,  0},
+    { 3, -2},
+    { 2, -3},
+    { 0, -4},
+    {-2, -3},
+    {-3, -2},
+
+    {-4,  0},
+    {-3,  2},
+    {-2,  3},
+    { 0,  4},
+    { 2,  3},
+    { 3,  2}
+};
 
 #define HEXPICTURE_FACE_SQ_MAX_ROT 3
 #define HEXPICTURE_FACE_TRI_MAX_ROT 4
@@ -72,7 +70,8 @@ typedef struct hexpicture_edge {
 } hexpicture_edge_t;
 
 typedef struct hexpicture_vert {
-    int x, y;
+    int x, y; /* Coords within lines */
+    int a, b, c, d; /* Coords in hexspace */
     struct hexpicture_edge edges[HEXPICTURE_VERT_NEIGHBOURS];
     struct hexpicture_face faces[HEXPICTURE_VERT_NEIGHBOURS];
     struct hexpicture_vert *reverse_verts[HEXPICTURE_VERT_NEIGHBOURS];
@@ -100,6 +99,8 @@ typedef struct hexpicture_part {
 } hexpicture_part_t;
 
 
+
+/* STATIC HELPER FUNCTIONS */
 
 static const char *_face_type_msg(int type){
     switch(type){
@@ -148,6 +149,114 @@ static hexpicture_vert_t *_get_vert(hexpicture_part_t *parts,
     return part->part.vert;
 }
 
+
+/* HEXPICTURE METHODS */
+
+void hexpicture_cleanup(hexpicture_t *pic){
+}
+
+void hexpicture_init(hexpicture_t *pic){
+}
+
+/* hexpicture_parse: defined below... */
+int hexpicture_parse(hexpicture_t *pic,
+    const char **lines, size_t lines_len,
+    bool verbose);
+
+
+/* HEXPICTURE PARSE */
+
+static void _hexpicture_parse_max_line_len_and_verts_len(
+    size_t *max_line_len_ptr, size_t *verts_len_ptr,
+    const char **lines, size_t lines_len
+){
+    size_t max_line_len = 0;
+    size_t verts_len = 0;
+    for(int y = 0; y < lines_len; y++){
+        const char *line = lines[y];
+        size_t line_len = strlen(line);
+        if(line_len > max_line_len)max_line_len = line_len;
+        char c;
+        for(const char *s = line; (c = *s); s++){
+            if(c == HEXPICTURE_CHAR_VERT || c == HEXPICTURE_CHAR_ORIGIN){
+                verts_len++;
+            }
+        }
+    }
+    *max_line_len_ptr = max_line_len;
+    *verts_len_ptr = verts_len;
+}
+
+static int _hexpicture_parse_origin_and_verts_and_parts(
+    hexpicture_vert_t **origin_ptr,
+    hexpicture_vert_t *verts,
+    hexpicture_part_t *parts,
+    const char **lines, size_t lines_len, size_t max_line_len
+){
+    hexpicture_vert_t *origin = NULL;
+    for(int vert_i = 0, y = 0; y < lines_len; y++){
+        const char *line = lines[y];
+        int x = 0;
+        char c;
+        for(const char *s = line; (c = *s); s++){
+            if(c == HEXPICTURE_CHAR_VERT || c == HEXPICTURE_CHAR_ORIGIN){
+                hexpicture_vert_t *vert = &verts[vert_i];
+                vert->x = x;
+                vert->y = y;
+
+                if(c == HEXPICTURE_CHAR_ORIGIN){
+                    if(origin){
+                        fprintf(stderr,
+                            "Multiple origins specified! "
+                            "vert %ti (%i, %i) and vert %ti (%i, %i)\n",
+                            origin - verts, origin->x, origin->y,
+                            vert - verts, vert->x, vert->y);
+                        return 2;
+                    }
+                    origin = vert;
+                }
+
+                hexpicture_part_t *part = _GET_PART(x, y);
+                part->type = HEXPICTURE_PART_TYPE_VERT;
+                part->part.vert = vert;
+
+                vert_i++;
+            }
+            x++;
+        }
+    }
+    *origin_ptr = origin;
+    return 0;
+}
+
+static int _hexpicture_parse_edges(
+    hexpicture_vert_t *verts, size_t verts_len,
+    hexpicture_part_t *parts,
+    size_t lines_len, size_t max_line_len
+){
+    for(int vert_i = 0; vert_i < verts_len; vert_i++){
+        hexpicture_vert_t *vert = &verts[vert_i];
+        for(int neigh_i = 0; neigh_i < HEXPICTURE_VERT_NEIGHBOURS; neigh_i++){
+            int neigh_x = vert->x + _neigh_coords[neigh_i][0];
+            int neigh_y = vert->y + _neigh_coords[neigh_i][1];
+            hexpicture_part_t *part = _get_part(parts,
+                lines_len, max_line_len,
+                neigh_x, neigh_y);
+            if(!part || part->type == HEXPICTURE_PART_TYPE_NONE)continue;
+            if(part->type != HEXPICTURE_PART_TYPE_VERT){
+                fprintf(stderr,
+                    "Bad part type at (%i, %i): %i, expected %i\n",
+                    neigh_x, neigh_y, part->type, HEXPICTURE_PART_TYPE_VERT);
+                return 2;
+            }
+            hexpicture_edge_t *edge = &vert->edges[neigh_i];
+            edge->vert = part->part.vert;
+            edge->vert->reverse_verts[neigh_i] = vert;
+        }
+    }
+    return 0;
+}
+
 static bool _hexpicture_vert_check_face(hexpicture_vert_t *vert,
     const int *edge_rots, int rot,
     hexpicture_part_t *parts,
@@ -169,131 +278,13 @@ static bool _hexpicture_vert_check_face(hexpicture_vert_t *vert,
     return true;
 }
 
-
-/* HEXPICTURE METHODS */
-
-void hexpicture_cleanup(hexpicture_t *pic){
-}
-
-void hexpicture_init(hexpicture_t *pic){
-}
-
-int hexpicture_parse(hexpicture_t *pic,
-    const char **lines, size_t lines_len,
-    bool verbose
+static int _hexpicture_parse_faces(
+    size_t *faces_len_ptr,
+    hexpicture_vert_t *verts, size_t verts_len,
+    hexpicture_part_t *parts,
+    const char **lines, size_t lines_len, size_t max_line_len
 ){
-    int err = 0;
-
-    if(verbose){
-        fprintf(stderr, "hexpicture_parse:\n");
-        fprintf(stderr, "lines_len: %zi\n", lines_len);
-    }
-
-    /* Determine max_line_len and verts_len */
-    size_t max_line_len = 0;
-    size_t verts_len = 0;
-    for(int y = 0; y < lines_len; y++){
-        const char *line = lines[y];
-        size_t line_len = strlen(line);
-        if(line_len > max_line_len)max_line_len = line_len;
-        char c;
-        for(const char *s = line; (c = *s); s++){
-            if(c == HEXPICTURE_CHAR_VERT || c == HEXPICTURE_CHAR_ORIGIN){
-                verts_len++;
-            }
-        }
-    }
-
-    if(verbose){
-        fprintf(stderr, "max_line_len: %zi\n", max_line_len);
-        fprintf(stderr, "verts_len: %zi\n", verts_len);
-    }
-
-    /* Allocate verts */
-    hexpicture_vert_t *verts = calloc(verts_len, sizeof(*verts));
-    if(!verts){
-        perror("calloc verts");
-        err = 1;
-        goto end;
-    }
-
-    /* Allocate parts */
-    hexpicture_part_t *parts = calloc(lines_len * max_line_len, sizeof(*parts));
-    if(!parts){
-        perror("calloc parts");
-        err = 1;
-        goto free_verts;
-    }
-
-    /* Determine origin, populate verts and their parts */
-    hexpicture_vert_t *origin = NULL;
-    for(int vert_i = 0, y = 0; y < lines_len; y++){
-        const char *line = lines[y];
-        int x = 0;
-        char c;
-        for(const char *s = line; (c = *s); s++){
-            if(c == HEXPICTURE_CHAR_VERT || c == HEXPICTURE_CHAR_ORIGIN){
-                hexpicture_vert_t *vert = &verts[vert_i];
-                vert->x = x;
-                vert->y = y;
-
-                if(c == HEXPICTURE_CHAR_ORIGIN){
-                    if(origin){
-                        fprintf(stderr,
-                            "Multiple origins specified! "
-                            "vert %ti (%i, %i) and vert %ti (%i, %i)\n",
-                            origin - verts, origin->x, origin->y,
-                            vert - verts, vert->x, vert->y);
-                        err = 2;
-                        goto free_parts;
-                    }
-                    origin = vert;
-                }
-
-                hexpicture_part_t *part = _GET_PART(x, y);
-                part->type = HEXPICTURE_PART_TYPE_VERT;
-                part->part.vert = vert;
-
-                vert_i++;
-            }
-            x++;
-        }
-    }
-
-    if(!origin){
-        fprintf(stderr, "No origin specified\n");
-        err = 2;
-        goto free_parts;
-    }
-
-    if(verbose){
-        fprintf(stderr, "origin: vert %ti\n", origin - verts);
-    }
-
-    /* Populate verts' edges and reverse_verts */
-    for(int vert_i = 0; vert_i < verts_len; vert_i++){
-        hexpicture_vert_t *vert = &verts[vert_i];
-        for(int neigh_i = 0; neigh_i < HEXPICTURE_VERT_NEIGHBOURS; neigh_i++){
-            int neigh_x = vert->x + _neigh_coords[neigh_i][0];
-            int neigh_y = vert->y + _neigh_coords[neigh_i][1];
-            hexpicture_part_t *part = _get_part(parts,
-                lines_len, max_line_len,
-                neigh_x, neigh_y);
-            if(!part || part->type == HEXPICTURE_PART_TYPE_NONE)continue;
-            if(part->type != HEXPICTURE_PART_TYPE_VERT){
-                fprintf(stderr,
-                    "Bad part type at (%i, %i): %i, expected %i\n",
-                    neigh_x, neigh_y, part->type, HEXPICTURE_PART_TYPE_VERT);
-                err = 2;
-                goto free_parts;
-            }
-            hexpicture_edge_t *edge = &vert->edges[neigh_i];
-            edge->vert = part->part.vert;
-            edge->vert->reverse_verts[neigh_i] = vert;
-        }
-    }
-
-    /* Populate verts' faces */
+    size_t faces_len = 0;
     for(int vert_i = 0; vert_i < verts_len; vert_i++){
         hexpicture_vert_t *vert = &verts[vert_i];
 
@@ -359,51 +350,134 @@ int hexpicture_parse(hexpicture_t *pic,
             if(type != HEXPICTURE_FACE_TYPE_NONE){
                 hexpicture_face_t *face = &vert->faces[rot];
                 face->type = type;
+
                 const int (*coords)[2] = face_coords[type - 1];
                     /* type - 1: sq=0, tri=1, dia=2 */
                 int x = vert->x + coords[rot][0];
                 int y = vert->y + coords[rot][1];
+
                 const char *c = _get_char(lines, lines_len, x, y);
                 int color = !c? 0: _get_color(*c);
                 if(color == -1){
                     fprintf(stderr,
                         "Couldn't find face colour, unrecognized char [%c] "
                         "at position (%i, %i)\n", *c, x, y);
-                    err = 2;
-                    goto free_parts;
+                    return 2;
                 }
                 face->color = color;
+
+                faces_len++;
             }
         }
     }
+    *faces_len_ptr = faces_len;
+    return 0;
+}
+
+static void _hexpicture_dump_verts(
+    hexpicture_vert_t *origin,
+    hexpicture_vert_t *verts, size_t verts_len
+){
+    fprintf(stderr, "verts, edges, faces:\n");
+    for(int vert_i = 0; vert_i < verts_len; vert_i++){
+        hexpicture_vert_t *vert = &verts[vert_i];
+        fprintf(stderr, "  vert %ti (%i, %i):\n",
+            vert - verts, vert->x, vert->y);
+        for(int neigh_i = 0; neigh_i < HEXPICTURE_VERT_NEIGHBOURS; neigh_i++){
+            hexpicture_edge_t *edge = &vert->edges[neigh_i];
+            if(!edge->vert)continue;
+            fprintf(stderr, "    edge %i: vert %ti (%i, %i)\n",
+                neigh_i, edge->vert - verts,
+                edge->vert->x, edge->vert->y);
+        }
+        if(false) for(int neigh_i = 0; neigh_i < HEXPICTURE_VERT_NEIGHBOURS; neigh_i++){
+            hexpicture_vert_t *reverse_vert = vert->reverse_verts[neigh_i];
+            if(!reverse_vert)continue;
+            fprintf(stderr, "    reverse vert %i: vert %ti (%i, %i)\n",
+                neigh_i, reverse_vert - verts,
+                reverse_vert->x, reverse_vert->y);
+        }
+        for(int neigh_i = 0; neigh_i < HEXPICTURE_VERT_NEIGHBOURS; neigh_i++){
+            hexpicture_face_t *face = &vert->faces[neigh_i];
+            if(face->type == HEXPICTURE_FACE_TYPE_NONE)continue;
+            fprintf(stderr, "    face %i: %s %i\n", neigh_i,
+                _face_type_msg(face->type), face->color);
+        }
+    }
+}
+
+int hexpicture_parse(hexpicture_t *pic,
+    const char **lines, size_t lines_len,
+    bool verbose
+){
+    int err = 0;
 
     if(verbose){
-        fprintf(stderr, "verts, edges, faces:\n");
-        for(int vert_i = 0; vert_i < verts_len; vert_i++){
-            hexpicture_vert_t *vert = &verts[vert_i];
-            fprintf(stderr, "  vert %ti (%i, %i):\n",
-                vert - verts, vert->x, vert->y);
-            for(int neigh_i = 0; neigh_i < HEXPICTURE_VERT_NEIGHBOURS; neigh_i++){
-                hexpicture_edge_t *edge = &vert->edges[neigh_i];
-                if(!edge->vert)continue;
-                fprintf(stderr, "    edge %i: vert %ti (%i, %i)\n",
-                    neigh_i, edge->vert - verts,
-                    edge->vert->x, edge->vert->y);
-            }
-            if(false) for(int neigh_i = 0; neigh_i < HEXPICTURE_VERT_NEIGHBOURS; neigh_i++){
-                hexpicture_vert_t *reverse_vert = vert->reverse_verts[neigh_i];
-                if(!reverse_vert)continue;
-                fprintf(stderr, "    reverse vert %i: vert %ti (%i, %i)\n",
-                    neigh_i, reverse_vert - verts,
-                    reverse_vert->x, reverse_vert->y);
-            }
-            for(int neigh_i = 0; neigh_i < HEXPICTURE_VERT_NEIGHBOURS; neigh_i++){
-                hexpicture_face_t *face = &vert->faces[neigh_i];
-                if(face->type == HEXPICTURE_FACE_TYPE_NONE)continue;
-                fprintf(stderr, "    face %i: %s %i\n", neigh_i,
-                    _face_type_msg(face->type), face->color);
-            }
-        }
+        fprintf(stderr, "hexpicture_parse:\n");
+        fprintf(stderr, "lines_len: %zi\n", lines_len);
+    }
+
+    /* Determine max_line_len and verts_len */
+    size_t max_line_len;
+    size_t verts_len;
+    _hexpicture_parse_max_line_len_and_verts_len(
+        &max_line_len, &verts_len,
+        lines, lines_len);
+
+    if(verbose){
+        fprintf(stderr, "max_line_len: %zi\n", max_line_len);
+        fprintf(stderr, "verts_len: %zi\n", verts_len);
+    }
+
+    /* Allocate verts */
+    hexpicture_vert_t *verts = calloc(verts_len, sizeof(*verts));
+    if(!verts){
+        perror("calloc verts");
+        err = 1;
+        goto end;
+    }
+
+    /* Allocate parts */
+    hexpicture_part_t *parts = calloc(lines_len * max_line_len, sizeof(*parts));
+    if(!parts){
+        perror("calloc parts");
+        err = 1;
+        goto free_verts;
+    }
+
+    /* Determine origin, populate verts and their parts */
+    hexpicture_vert_t *origin;
+    err = _hexpicture_parse_origin_and_verts_and_parts(
+        &origin, verts, parts,
+        lines, lines_len, max_line_len);
+    if(err)goto free_parts;
+
+    if(!origin){
+        fprintf(stderr, "No origin specified\n");
+        err = 2;
+        goto free_parts;
+    }
+
+    if(verbose){
+        fprintf(stderr, "origin: vert %ti\n", origin - verts);
+    }
+
+    /* Populate verts' edges and reverse_verts */
+    err = _hexpicture_parse_edges(
+        verts, verts_len, parts,
+        lines_len, max_line_len);
+    if(err)goto free_parts;
+
+    /* Populate verts' faces */
+    size_t faces_len;
+    err = _hexpicture_parse_faces(
+        &faces_len,
+        verts, verts_len, parts,
+        lines, lines_len, max_line_len);
+    if(err)goto free_parts;
+
+    if(verbose){
+        _hexpicture_dump_verts(origin, verts, verts_len);
     }
 
     free_parts: free(parts);
