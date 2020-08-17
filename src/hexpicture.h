@@ -1,6 +1,10 @@
 #ifndef _HEXPICTURE_H_
 #define _HEXPICTURE_H_
 
+#include <stddef.h>
+#include <stdbool.h>
+
+
 typedef struct hexpicture {
     int dummy;
 } hexpicture_t;
