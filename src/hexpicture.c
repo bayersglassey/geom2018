@@ -234,9 +234,21 @@ int hexpicture_parse(hexpicture_t *pic,
         for(const char *s = line; (c = *s); s++){
             if(c == HEXPICTURE_CHAR_VERT || c == HEXPICTURE_CHAR_ORIGIN){
                 hexpicture_vert_t *vert = &verts[vert_i];
-                if(c == HEXPICTURE_CHAR_ORIGIN)origin = vert;
                 vert->x = x;
                 vert->y = y;
+
+                if(c == HEXPICTURE_CHAR_ORIGIN){
+                    if(origin){
+                        fprintf(stderr,
+                            "Multiple origins specified! "
+                            "vert %ti (%i, %i) and vert %ti (%i, %i)\n",
+                            origin - verts, origin->x, origin->y,
+                            vert - verts, vert->x, vert->y);
+                        err = 2;
+                        goto free_parts;
+                    }
+                    origin = vert;
+                }
 
                 hexpicture_part_t *part = _GET_PART(x, y);
                 part->type = HEXPICTURE_PART_TYPE_VERT;
@@ -246,6 +258,12 @@ int hexpicture_parse(hexpicture_t *pic,
             }
             x++;
         }
+    }
+
+    if(!origin){
+        fprintf(stderr, "No origin specified\n");
+        err = 2;
+        goto free_parts;
     }
 
     if(verbose){
@@ -351,7 +369,8 @@ int hexpicture_parse(hexpicture_t *pic,
                     fprintf(stderr,
                         "Couldn't find face colour, unrecognized char [%c] "
                         "at position (%i, %i)\n", *c, x, y);
-                    return 2;
+                    err = 2;
+                    goto free_parts;
                 }
                 face->color = color;
             }
