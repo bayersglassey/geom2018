@@ -2,5 +2,5 @@
 gcc -g -std=c99 \
     -Wall -Werror -Wno-unused \
     -o main \
-    src/main_hexpicture.c src/hexpicture.c src/hexpicture_parse.c \
+    src/main_hexpicture.c src/hexpicture.c \
     $@

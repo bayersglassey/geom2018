@@ -86,14 +86,22 @@ int main(int n_args, char **args){
         }
     }
 
-    hexpicture_t _pic = {0}, *pic = &_pic;
-    hexpicture_init(pic);
-    err = hexpicture_parse(pic,
+    hexpicture_return_face_t *faces;
+    size_t faces_len;
+    err = hexpicture_parse(
+        &faces, &faces_len,
         (const char **)lines, lines_len,
         verbose);
     if(err)return err;
 
-    hexpicture_cleanup(pic);
+    fprintf(stderr, "GOT FACES:\n");
+    for(int i = 0; i < faces_len; i++){
+        fprintf(stderr, "%i: ", i);
+        hexpicture_return_face_t *face = &faces[i];
+        hexpicture_return_face_dump(face, stderr);
+    }
+
+    free(faces);
 
     return 0;
 }
