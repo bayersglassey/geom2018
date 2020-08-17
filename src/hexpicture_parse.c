@@ -30,6 +30,23 @@ const int _neigh_coords[HEXPICTURE_VERT_NEIGHBOURS * 2][2] = {
     { 3,  2}
 };
 
+
+const int _neigh_hexcoords[HEXPICTURE_VERT_NEIGHBOURS * 2][4] = {
+    { 1,  0,  0,  0},
+    { 0,  1,  0,  0},
+    { 0,  0,  1,  0},
+    { 0,  0,  0,  1},
+    {-1,  0,  1,  0},
+    { 0, -1,  0,  1},
+
+    {-1,  0,  0,  0},
+    { 0, -1,  0,  0},
+    { 0,  0, -1,  0},
+    { 0,  0,  0, -1},
+    { 1,  0, -1,  0},
+    { 0,  1,  0, -1}
+};
+
 #define HEXPICTURE_FACE_SQ_MAX_ROT 3
 #define HEXPICTURE_FACE_TRI_MAX_ROT 4
 #define HEXPICTURE_FACE_DIA_MAX_ROT 6
@@ -251,6 +268,71 @@ static int _hexpicture_parse_edges(
     return 0;
 }
 
+static int _hexpicture_parse_hexspace_coords(
+    hexpicture_vert_t *origin,
+    hexpicture_vert_t *verts, size_t verts_len
+){
+    if(verts_len <= 0)return 0;
+
+    /* Allocate vert_queue.
+    Queue of vert pointers, telling us in what order we should calculate
+    their hexspace coords (since each vert's hexspace coords are
+    calculated from a previous one's). */
+    hexpicture_vert_t **vert_queue =
+        calloc(verts_len, sizeof(*vert_queue));
+    if(!vert_queue){
+        perror("calloc vert_queue");
+        return 1;
+    }
+
+    /* Index of front & end of vert_queue.
+    We "pop" from the front of the queue by increasing queue_start_i.
+    We "push" to the end of the queue by increasing queue_end_i. */
+    int queue_start_i = 0;
+    int queue_end_i = 0;
+
+    /* Start with the origin: push it onto the queue. */
+    vert_queue[0] = origin;
+    queue_end_i++;
+
+    while(queue_start_i < queue_end_i){
+
+        /* Pop next vert from front of queue */
+        hexpicture_vert_t *vert = vert_queue[queue_start_i];
+        queue_start_i++;
+
+        for(int rot = 0; rot < HEXPICTURE_VERT_NEIGHBOURS * 2; rot++){
+            hexpicture_vert_t *other_vert =
+                (rot < HEXPICTURE_VERT_NEIGHBOURS)?
+                vert->edges[rot].vert:
+                vert->reverse_verts[rot - HEXPICTURE_VERT_NEIGHBOURS];
+            if(!other_vert)continue;
+
+            /* If other_vert is (or ever was) in the queue already,
+            continue */
+            for(int j = 0; j < queue_end_i; j++){
+                if(vert_queue[j] == other_vert)goto _continue;
+            }
+
+            /* Add to the queue */
+            vert_queue[queue_end_i] = other_vert;
+            queue_end_i++;
+
+            /* Calculate hexspace coords */
+            other_vert->a = vert->a + _neigh_hexcoords[rot][0];
+            other_vert->b = vert->b + _neigh_hexcoords[rot][1];
+            other_vert->c = vert->c + _neigh_hexcoords[rot][2];
+            other_vert->d = vert->d + _neigh_hexcoords[rot][3];
+
+            /* Lets us continue from within a deeper for-loop */
+            _continue: ;
+        }
+    }
+
+    free(vert_queue);
+    return 0;
+}
+
 static bool _hexpicture_vert_check_face(hexpicture_vert_t *vert,
     const int *edge_rots, int rot,
     hexpicture_part_t *parts,
@@ -388,8 +470,9 @@ static void _hexpicture_dump_verts(
     fprintf(file, "verts, edges, faces:\n");
     for(int vert_i = 0; vert_i < verts_len; vert_i++){
         hexpicture_vert_t *vert = &verts[vert_i];
-        fprintf(file, "  vert %ti (%i, %i):\n",
-            vert - verts, vert->x, vert->y);
+        fprintf(file, "  vert %ti (%i, %i) [%i %i %i %i]:\n",
+            vert - verts, vert->x, vert->y,
+            vert->a, vert->b, vert->c, vert->d);
         for(int neigh_i = 0; neigh_i < HEXPICTURE_VERT_NEIGHBOURS; neigh_i++){
             hexpicture_edge_t *edge = &vert->edges[neigh_i];
             if(!edge->vert)continue;
@@ -419,6 +502,9 @@ int hexpicture_parse(hexpicture_t *pic,
 ){
     int err = 0;
 
+    hexpicture_vert_t *verts = NULL;
+    hexpicture_part_t *parts = NULL;
+
     if(verbose){
         fprintf(stderr, "hexpicture_parse:\n");
         fprintf(stderr, "lines_len: %zi\n", lines_len);
@@ -439,19 +525,17 @@ int hexpicture_parse(hexpicture_t *pic,
     }
 
     /* Allocate verts */
-    hexpicture_vert_t *verts = calloc(verts_len, sizeof(*verts));
-    if(!verts){
+    if(!(verts = calloc(verts_len, sizeof(*verts)))){
         perror("calloc verts");
         err = 1;
         goto end;
     }
 
     /* Allocate parts */
-    hexpicture_part_t *parts = calloc(lines_len * max_line_len, sizeof(*parts));
-    if(!parts){
+    if(!(parts = calloc(lines_len * max_line_len, sizeof(*parts)))){
         perror("calloc parts");
         err = 1;
-        goto free_verts;
+        goto end;
     }
 
     /* Determine origin, populate verts and their parts */
@@ -459,12 +543,12 @@ int hexpicture_parse(hexpicture_t *pic,
     err = _hexpicture_parse_origin_and_verts_and_parts(
         &origin, verts, parts,
         lines, lines_len, max_line_len);
-    if(err)goto free_parts;
+    if(err)goto end;
 
     if(!origin){
         fprintf(stderr, "No origin specified\n");
         err = 2;
-        goto free_parts;
+        goto end;
     }
 
     if(verbose){
@@ -475,7 +559,11 @@ int hexpicture_parse(hexpicture_t *pic,
     err = _hexpicture_parse_edges(
         verts, verts_len, parts,
         lines_len, max_line_len);
-    if(err)goto free_parts;
+    if(err)goto end;
+
+    /* Populate vert's hexspace coords (a, b, c, d) */
+    err = _hexpicture_parse_hexspace_coords(origin, verts, verts_len);
+    if(err)goto end;
 
     /* Populate verts' faces */
     size_t faces_len;
@@ -483,14 +571,15 @@ int hexpicture_parse(hexpicture_t *pic,
         &faces_len,
         verts, verts_len, parts,
         lines, lines_len, max_line_len);
-    if(err)goto free_parts;
+    if(err)goto end;
 
     if(verbose){
         _hexpicture_dump_verts(stderr, origin, verts, verts_len);
     }
 
-    free_parts: free(parts);
-    free_verts: free(verts);
-    end: return err;
+    end:
+    free(parts);
+    free(verts);
+    return err;
 }
 
