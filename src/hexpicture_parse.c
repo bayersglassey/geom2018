@@ -156,6 +156,7 @@ static void _hexpicture_parse_max_line_len_and_verts_len(
     size_t *max_line_len_ptr, size_t *verts_len_ptr,
     const char **lines, size_t lines_len
 ){
+    /* Find max_line_len, verts_len */
     size_t max_line_len = 0;
     size_t verts_len = 0;
     for(int y = 0; y < lines_len; y++){
@@ -179,6 +180,11 @@ static int _hexpicture_parse_origin_and_verts_and_parts(
     hexpicture_part_t *parts,
     const char **lines, size_t lines_len, size_t max_line_len
 ){
+    /* Find origin.
+    Set vert->x, vert->y for all vert in verts.
+    Set part->type, part->part.vert for all part in parts which corresponds
+    to a vert.
+    */
     hexpicture_vert_t *origin = NULL;
     for(int vert_i = 0, y = 0; y < lines_len; y++){
         const char *line = lines[y];
@@ -220,6 +226,8 @@ static int _hexpicture_parse_edges(
     hexpicture_part_t *parts,
     size_t lines_len, size_t max_line_len
 ){
+    /* Populate vert->edges and vert->reverse_verts for all vert in verts.
+    */
     for(int vert_i = 0; vert_i < verts_len; vert_i++){
         hexpicture_vert_t *vert = &verts[vert_i];
         for(int neigh_i = 0; neigh_i < HEXPICTURE_VERT_NEIGHBOURS; neigh_i++){
@@ -248,6 +256,14 @@ static bool _hexpicture_vert_check_face(hexpicture_vert_t *vert,
     hexpicture_part_t *parts,
     size_t lines_len, size_t max_line_len
 ){
+    /* Checks whether the indicated face exists at vert's position.
+    The face is defined by edge_rots, an array of unit vectors represented
+    by rotation values in 0..11 (array is terminated with -1).
+    Rotation values are integers representing multiples of 30 degrees.
+    Each rotation value has rot added to it.
+    So for instance, edge_rots={0, 3, 6, 9, -1}, rot=0 represents a square.
+    With rot=1, that square is rotated by 30 degrees.
+    */
     int x = vert->x;
     int y = vert->y;
     for(int edge_rot; (edge_rot = *edge_rots) != -1; edge_rots++){
@@ -270,6 +286,8 @@ static int _hexpicture_parse_faces(
     hexpicture_part_t *parts,
     const char **lines, size_t lines_len, size_t max_line_len
 ){
+    /* Find faces_len, populate vert->faces for all vert in verts.
+    */
     size_t faces_len = 0;
     for(int vert_i = 0; vert_i < verts_len; vert_i++){
         hexpicture_vert_t *vert = &verts[vert_i];
@@ -361,32 +379,35 @@ static int _hexpicture_parse_faces(
 }
 
 static void _hexpicture_dump_verts(
+    FILE *file,
     hexpicture_vert_t *origin,
     hexpicture_vert_t *verts, size_t verts_len
 ){
-    fprintf(stderr, "verts, edges, faces:\n");
+    /* Dump a text representation of verts to file
+    */
+    fprintf(file, "verts, edges, faces:\n");
     for(int vert_i = 0; vert_i < verts_len; vert_i++){
         hexpicture_vert_t *vert = &verts[vert_i];
-        fprintf(stderr, "  vert %ti (%i, %i):\n",
+        fprintf(file, "  vert %ti (%i, %i):\n",
             vert - verts, vert->x, vert->y);
         for(int neigh_i = 0; neigh_i < HEXPICTURE_VERT_NEIGHBOURS; neigh_i++){
             hexpicture_edge_t *edge = &vert->edges[neigh_i];
             if(!edge->vert)continue;
-            fprintf(stderr, "    edge %i: vert %ti (%i, %i)\n",
+            fprintf(file, "    edge %i: vert %ti (%i, %i)\n",
                 neigh_i, edge->vert - verts,
                 edge->vert->x, edge->vert->y);
         }
         if(false) for(int neigh_i = 0; neigh_i < HEXPICTURE_VERT_NEIGHBOURS; neigh_i++){
             hexpicture_vert_t *reverse_vert = vert->reverse_verts[neigh_i];
             if(!reverse_vert)continue;
-            fprintf(stderr, "    reverse vert %i: vert %ti (%i, %i)\n",
+            fprintf(file, "    reverse vert %i: vert %ti (%i, %i)\n",
                 neigh_i, reverse_vert - verts,
                 reverse_vert->x, reverse_vert->y);
         }
         for(int neigh_i = 0; neigh_i < HEXPICTURE_VERT_NEIGHBOURS; neigh_i++){
             hexpicture_face_t *face = &vert->faces[neigh_i];
             if(face->type == HEXPICTURE_FACE_TYPE_NONE)continue;
-            fprintf(stderr, "    face %i: %s %i\n", neigh_i,
+            fprintf(file, "    face %i: %s %i\n", neigh_i,
                 _face_type_msg(face->type), face->color);
         }
     }
@@ -403,7 +424,9 @@ int hexpicture_parse(hexpicture_t *pic,
         fprintf(stderr, "lines_len: %zi\n", lines_len);
     }
 
-    /* Determine max_line_len and verts_len */
+    /* Determine max_line_len and verts_len.
+    (These are the width + height of our 2d coordinate system, used by
+    e.g. the "parts" array below) */
     size_t max_line_len;
     size_t verts_len;
     _hexpicture_parse_max_line_len_and_verts_len(
@@ -463,7 +486,7 @@ int hexpicture_parse(hexpicture_t *pic,
     if(err)goto free_parts;
 
     if(verbose){
-        _hexpicture_dump_verts(origin, verts, verts_len);
+        _hexpicture_dump_verts(stderr, origin, verts, verts_len);
     }
 
     free_parts: free(parts);
