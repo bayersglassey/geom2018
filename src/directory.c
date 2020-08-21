@@ -69,6 +69,28 @@ int directory_name_match_glob(
     }
 }
 
+void directory_parse_path(
+    const char *raw, char *path, int *path_len_ptr
+){
+    int path_len = 1;
+    while(1){
+        char raw_c = *(raw++);
+        if(raw_c == '/'){
+            *(path++) = '\0';
+            path_len++;
+        }else{
+            if(raw_c == '\\'){
+                raw_c = *(raw++);
+            }
+
+            *(path++) = raw_c;
+            if(!raw_c)break;
+        }
+    }
+
+    *path_len_ptr = path_len;
+}
+
 directory_entry_t *directory_list_find_name(
     directory_list_t *list, const char *name
 ){

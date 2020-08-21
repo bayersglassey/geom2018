@@ -13,7 +13,10 @@ struct directory_list;
 
 
 typedef struct directory_entry_class {
-    void (*list)(void *self, struct directory_list *list, int page);
+    void (*list)(
+        struct directory_entry *root,
+        struct directory_list *list,
+        int page);
 } directory_entry_class_t;
 
 typedef struct directory_entry {
@@ -32,6 +35,8 @@ int directory_name_match(
     const char *name, const char *name2);
 int directory_name_match_glob(
     const char *name, const char *glob);
+void directory_parse_path(
+    const char *raw, char *path, int *path_len_ptr);
 directory_entry_t *directory_list_find_name(
     directory_list_t *list, const char *name);
 directory_entry_t *directory_entry_find_path(
