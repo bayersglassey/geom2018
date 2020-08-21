@@ -1,0 +1,7 @@
+
+gcc -g -std=c99 \
+    -Wall -Werror -Wno-unused \
+    -o main \
+    src/main_directorytest.c src/directory.c \
+    src/lexer.c src/vars.c src/str_utils.c src/file_utils.c \
+    $@

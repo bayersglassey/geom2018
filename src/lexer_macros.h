@@ -10,6 +10,7 @@
 #define GOT_INT fus_lexer_got_int(lexer)
 #define GET_NAME(P) DO(fus_lexer_get_name(lexer, (&P)))
 #define GET_STR(P) DO(fus_lexer_get_str(lexer, (&P)))
+#define GET_NAME_OR_STR(P) DO(fus_lexer_get_name_or_str(lexer, (&P)))
 #define GET_INT(P) DO(fus_lexer_get_int(lexer, (&P)))
 #define GET_BOOL(P) DO(fus_lexer_get_bool(lexer, (&P)))
 #define GET_YN(P) DO(fus_lexer_get_yn(lexer, (&P)))
