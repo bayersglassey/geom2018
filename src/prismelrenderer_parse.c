@@ -10,6 +10,8 @@
 #include "font.h"
 #include "geomfont.h"
 #include "prismelrenderer.h"
+#include "hexpicture.h"
+#include "vec4.h"
 
 
 
@@ -440,6 +442,64 @@ static int parse_shape_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer,
 }
 
 
+static int parse_shape_hexpicture(prismelrenderer_t *prend, fus_lexer_t *lexer,
+    rendergraph_t *rgraph
+){
+    INIT
+    GET("(")
+
+    static const char *names[3] = {"sq", "tri", "dia"};
+    prismel_t *prismels[3];
+    for(int i = 0; i < 3; i++){
+        prismels[i] = prismelrenderer_get_prismel(prend, names[i]);
+        if(prismels[i] == NULL){
+            fprintf(stderr, "Couldn't find prismel: %s\n", names[i]);
+            return 2;
+        }
+    }
+
+    ARRAY_DECL(char *, lines)
+    ARRAY_INIT(lines)
+
+    while(1){
+        if(GOT(")"))break;
+
+        char *line;
+        GET_STR(line)
+        ARRAY_PUSH(char *, lines, line)
+    }
+    NEXT
+
+    bool verbose = true;
+    hexpicture_return_face_t *faces;
+    size_t faces_len;
+    err = hexpicture_parse(
+        &faces, &faces_len,
+        (const char **)lines, lines_len,
+        verbose);
+    if(err)return err;
+
+    for(int i = 0; i < faces_len; i++){
+        hexpicture_return_face_t *face = &faces[i];
+        prismel_trf_t *prismel_trf;
+        err = rendergraph_push_prismel_trf(rgraph, &prismel_trf);
+        if(err)return err;
+        prismel_trf->prismel = prismels[face->type];
+        prismel_trf->trf.rot = face->rot;
+        prismel_trf->trf.flip = false;
+        prismel_trf->color = face->color;
+        prismel_trf->frame_start = 0;
+        prismel_trf->frame_len = -1;
+        vec4_set(prismel_trf->trf.add,
+            face->a, face->b, face->c, face->d);
+    }
+
+    free(faces);
+    ARRAY_FREE_PTR(char *, lines, (void))
+    return 0;
+}
+
+
 int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
     prismelrenderer_t *prend, char *name, rendergraph_t **rgraph_ptr
 ){
@@ -519,6 +579,10 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
         }else if(GOT("prismels")){
             NEXT
             err = parse_shape_prismels(prend, lexer, rgraph);
+            if(err)return err;
+        }else if(GOT("hexpicture")){
+            NEXT
+            err = parse_shape_hexpicture(prend, lexer, rgraph);
             if(err)return err;
         }else if(GOT("text")){
             NEXT

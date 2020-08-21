@@ -18,7 +18,7 @@ typedef struct hexpicture_return_face {
     int type; /* enum hexpicture_return_face_type */
     int rot; /* 0..11 */
     int color;
-    int a, b, c, d; /* Coords in hexspace */
+    int a, b, c, d; /* Coords in vec4 space */
 } hexpicture_return_face_t;
 
 

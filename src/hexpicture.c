@@ -86,7 +86,7 @@ typedef struct hexpicture_edge {
 
 typedef struct hexpicture_vert {
     int x, y; /* Coords within lines */
-    int a, b, c, d; /* Coords in hexspace */
+    int a, b, c, d; /* Coords in vec4 space */
     struct hexpicture_edge edges[HEXPICTURE_VERT_NEIGHBOURS];
     struct hexpicture_face faces[HEXPICTURE_VERT_NEIGHBOURS];
     struct hexpicture_vert *reverse_verts[HEXPICTURE_VERT_NEIGHBOURS];
@@ -128,9 +128,10 @@ static const char *_face_type_msg(int type){
 }
 
 static int _get_color(char c){
-    if(c >= '0' && c <= '9')return c - '0';
-    if(c >= 'A' && c <= 'Z')return c - 'A' + 10;
-    if(c >= 'a' && c <= 'z')return c - 'a' + 10;
+    if(c == '.')return 0;
+    if(c >= '0' && c <= '9')return c - '0' + 1;
+    if(c >= 'A' && c <= 'Z')return c - 'A' + 10 + 1;
+    if(c >= 'a' && c <= 'z')return c - 'a' + 10 + 1;
     return -1;
 }
 
@@ -265,7 +266,7 @@ static int _hexpicture_parse_edges(
     return 0;
 }
 
-static int _hexpicture_parse_hexspace_coords(
+static int _hexpicture_parse_vec4_coords(
     hexpicture_vert_t *origin,
     hexpicture_vert_t *verts, size_t verts_len
 ){
@@ -273,7 +274,7 @@ static int _hexpicture_parse_hexspace_coords(
 
     /* Allocate vert_queue.
     Queue of vert pointers, telling us in what order we should calculate
-    their hexspace coords (since each vert's hexspace coords are
+    their vec4 coords (since each vert's vec4 coords are
     calculated from a previous one's). */
     hexpicture_vert_t **vert_queue =
         calloc(verts_len, sizeof(*vert_queue));
@@ -315,7 +316,7 @@ static int _hexpicture_parse_hexspace_coords(
             vert_queue[queue_end_i] = other_vert;
             queue_end_i++;
 
-            /* Calculate hexspace coords */
+            /* Calculate vec4 coords */
             other_vert->a = vert->a + _neigh_hexcoords[rot][0];
             other_vert->b = vert->b + _neigh_hexcoords[rot][1];
             other_vert->c = vert->c + _neigh_hexcoords[rot][2];
@@ -602,8 +603,8 @@ int hexpicture_parse(
         lines_len, max_line_len);
     if(err)goto end;
 
-    /* Populate vert's hexspace coords (a, b, c, d) */
-    err = _hexpicture_parse_hexspace_coords(origin, verts, verts_len);
+    /* Populate vert's vec4 coords (a, b, c, d) */
+    err = _hexpicture_parse_vec4_coords(origin, verts, verts_len);
     if(err)goto end;
 
     /* Populate verts' faces */

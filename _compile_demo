@@ -31,6 +31,7 @@ SOURCES+=" src/test_app_list_recording.c src/test_app_list_utils.c"
 SOURCES+=" src/hexgame_body.c src/hexgame_player.c src/hexgame_recording.c src/hexgame_state.c"
 SOURCES+=" src/hexgame_actor.c"
 SOURCES+=" src/prismelrenderer.c src/prismelrenderer_parse.c"
+SOURCES+=" src/hexpicture.c"
 SOURCES+=" src/rendergraph.c src/sdl_util.c src/generic_printf.c"
 
 if [ "$TARGET" = "bin" ]

@@ -40,7 +40,19 @@ shapes:
             : $PREFIX NS "_bird_eye_turn_half" (1 0 0 0)  6 f
 
     $PREFIX NS "_bird_head_sixth":
-        prismels:
+        hexpicture:
+            ;;            +
+            ;;           | |
+            ;;           |2|
+            ;;          +---+
+            ;;        -- | | |
+            ;;       +   |2|A|
+            ;;      | |   +---+
+            ;;      |A|9--|   |
+            ;;     *---+ 9|   |
+            ;;          --|1  |
+            ;;            +---+
+        $SKIP: prismels:
             : "tri" (0 0 0  0)  0 f eval: 1 + 8 + 2
 
             : "tri" (1 0 0  0) 11 f eval: 1 + 8 + 1
@@ -52,7 +64,23 @@ shapes:
             : "sq"  (1 1 0 -1)  0 f eval: 1 + 0 + 1
 
     $PREFIX NS "_bird_head_fringe_sixth":
-        prismels:
+        hexpicture:
+            ;;              +
+            ;;            -- |
+            ;;           +   |
+            ;;            |   +
+            ;;            |A-- |
+            ;;             +   |
+            ;;              |   +
+            ;;              |A--|
+            ;;               + 9|
+            ;;             --|--|
+            ;;    *---+---+ .|9 +
+            ;;             --|--|
+            ;;               + 9|
+            ;;                --|
+            ;;                  +
+        $SKIP: prismels:
             : "tri" (2 2 0 -1)  3 f eval: 1 + 8 + 1
             : "tri" (2 2 0 -1)  5 f eval: 1 + 8 + 1
             : "tri" (2 2 0 -1)  7 f eval: 1 + 8 + 1

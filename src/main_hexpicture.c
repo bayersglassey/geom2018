@@ -82,7 +82,7 @@ int main(int n_args, char **args){
 
     if(verbose){
         for(int i = 0; i < lines_len; i++){
-            fprintf(stderr, "LINE %i: [%s]\n", i, lines[i]);
+            fprintf(stderr, "LINE % 3i: [%s]\n", i, lines[i]);
         }
     }
 
