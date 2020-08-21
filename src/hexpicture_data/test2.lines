@@ -1,0 +1,32 @@
+# The "dia" faces at the bottom don't work properly...
+# In patricular, the 3 verts indicated here are interpreted as a "tri" face:
+#
+#         +
+#          \-
+#          | +  <--
+#       +---+ |
+#        --  -\
+#          +---+
+#
+#          ^   ^
+#          |   |
+#
+
+
+       +---+
+       |   |--
+       |   |2 +---+
+       |1  |--|   |
+       +---+3 |   |
+     -- | | --|A  |
+    +   |4|   +---+
+     |   *   |
+     |B-- --0|
+      +     +   +
+            || ||
+         +  || ||  +
+          \-| + |-/
+          | +3|2+ |
+       +---+4|||1+---+
+        -- 5-\|/-0 --
+          +---+---+

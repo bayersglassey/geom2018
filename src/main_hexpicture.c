@@ -26,6 +26,7 @@ int read_lines(FILE *file, char **lines, size_t *lines_len_ptr){
             }
             break;
         }
+        if(line[0] == '#')continue;
         line[strcspn(line, "\n")] = 0;
         lines_len++;
         if(lines_len > LINES_LEN){
