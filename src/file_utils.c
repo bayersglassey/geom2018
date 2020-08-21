@@ -7,9 +7,9 @@
 #include "file_utils.h"
 
 
-int getln(char buf[], int buf_len){
-    if(!fgets(buf, buf_len, stdin)){
-        perror("fgets failed");
+int getln(char buf[], int buf_len, FILE *file){
+    if(!fgets(buf, buf_len, file)){
+        perror("getln: fgets");
         return 1;
     }
     buf[strcspn(buf, "\n")] = '\0';

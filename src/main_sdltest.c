@@ -43,7 +43,7 @@ int audio_test(int n_args, char *args[]){
 
     printf("Choose device (empty string for best choice): ");
     char device[200];
-    err = getln(device, 200); if(err)return err;
+    err = getln(device, 200, stdin); if(err)return err;
 
     SDL_AudioSpec want, have;
     SDL_AudioDeviceID device_id;
@@ -86,7 +86,7 @@ int video_test(int n_args, char *args[]){
 
     printf("Choose driver: ");
     char driver[200];
-    err = getln(driver, 200); if(err)return err;
+    err = getln(driver, 200, stdin); if(err)return err;
 
     printf("Driver %s initializing...", driver);
     fflush(stdout);
@@ -98,7 +98,7 @@ int video_test(int n_args, char *args[]){
 
     printf("Fullscreen (y/n)? ");
     char fullscreen[200];
-    err = getln(fullscreen, 200); if(err)return err;
+    err = getln(fullscreen, 200, stdin); if(err)return err;
 
     printf("Creating window...");
     fflush(stdout);
@@ -116,7 +116,7 @@ int video_test(int n_args, char *args[]){
     while(1){
         char action[200];
         printf("Do something (\"exit\" to quit): ");
-        err = getln(action, 200); if(err)return err;
+        err = getln(action, 200, stdin); if(err)return err;
         printf("Doing %s\n", action);
         if(strcmp(action, "exit") == 0)break;
     }
