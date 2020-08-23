@@ -70,14 +70,14 @@ int directory_name_match_glob(
 }
 
 void directory_parse_path(
-    const char *raw, char *path, int *path_len_ptr
+    const char *raw, char *path, int *path_parts_len_ptr
 ){
-    int path_len = 1;
+    int path_parts_len = 1;
     while(1){
         char raw_c = *(raw++);
         if(raw_c == '/'){
             *(path++) = '\0';
-            path_len++;
+            path_parts_len++;
         }else{
             if(raw_c == '\\'){
                 raw_c = *(raw++);
@@ -88,7 +88,7 @@ void directory_parse_path(
         }
     }
 
-    *path_len_ptr = path_len;
+    *path_parts_len_ptr = path_parts_len;
 }
 
 directory_entry_t *directory_list_find_name(
@@ -102,13 +102,13 @@ directory_entry_t *directory_list_find_name(
 }
 
 directory_entry_t *directory_entry_find_path(
-    directory_entry_t *root, const char *path, int path_len
+    directory_entry_t *root, const char *path, int path_parts_len
 ){
     directory_list_t list;
 
     while(1){
         /* If path indicates root, return it */
-        if(path_len == 0)return root;
+        if(path_parts_len == 0)return root;
 
         /* If root isn't a directory, no match */
         if(!root->class->list)return NULL;
@@ -122,7 +122,7 @@ directory_entry_t *directory_entry_find_path(
                 the entry we found */
                 root = entry;
                 DIRECTORY_PATH_NEXT(path)
-                path_len--;
+                path_parts_len--;
 
                 /* Break out of page loop */
                 break;

@@ -36,11 +36,11 @@ int directory_name_match(
 int directory_name_match_glob(
     const char *name, const char *glob);
 void directory_parse_path(
-    const char *raw, char *path, int *path_len_ptr);
+    const char *raw, char *path, int *path_parts_len_ptr);
 directory_entry_t *directory_list_find_name(
     directory_list_t *list, const char *name);
 directory_entry_t *directory_entry_find_path(
-    directory_entry_t *root, const char *path, int path_len);
+    directory_entry_t *root, const char *path, int path_parts_len);
 
 
 #endif
