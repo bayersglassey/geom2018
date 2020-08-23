@@ -76,6 +76,45 @@ mainloop:
         key: down u
 
 
+    # Sometimes, crawl!
+    if:
+        chance: 25%
+        any:
+            all:
+                coll: any yes
+                    # Only crawl somewhere we couldn't just walk
+                    ;;       \*/*
+                    ;;        + -
+                    ;;
+                    ;; ( )  .
+                coll: all yes
+                    ;; ( )  + - +
+                coll: all no
+                    ;;     \*/*
+                    ;; (.)  .
+            all:
+                coll: any yes
+                    # Only crawl somewhere we couldn't just walk
+                    ;;       \*/*
+                    ;;        + -
+                    ;;         \*/*
+                    ;; ( )  .   + -
+                    ;;           \*
+                coll: all yes
+                    ;; ( )  +
+                    ;;       \
+                    ;;        +
+                coll: all no
+                    ;;     \*/*
+                    ;; (.)  . -
+                    ;;        *
+    then:
+        key: up f
+        key: down d
+        zero: crawl_time
+        goto: mainloop_crawl
+
+
     if:
         # Small chance to spontaneously turn around...
         # Can help get un-stuck from certain situations
@@ -157,6 +196,80 @@ mainloop:
         key: down f
 
 
+    # Turn around if we're stuck
+    if() then:
+        key: up f
+        key: down b
+        delay: 6
+
+
+mainloop_crawl:
+
+    if() then:
+        key: up b
+        inc: crawl_time
+        continue
+
+
+    # Sometimes, stand!
+    if:
+        expr: > crawl_time 7 # Don't just stand up right after crouching...
+        chance: 25%
+        coll: all no
+            ;;    *\*/*
+            ;;    - + -
+            ;;    */*\*
+            ;;   ( )
+    then:
+        key: up f
+        key: up d
+        goto: mainloop
+
+
+    # Always walk straight ahead if we can
+    if: any:
+        all:
+            coll: all yes
+                ;;        +
+                ;;       /
+                ;; ( )  +
+            coll: all no
+                ;;     \*
+                ;; ( )
+        all:
+            coll: all yes
+                ;; ( )  + - +
+            coll: all no
+                ;;     \*/*
+                ;; (.)  .
+        all:
+            coll: all yes
+                ;; ( )  +
+                ;;       \
+                ;;        +
+            coll: all no
+                ;;     \*/*
+                ;; (.)  . -
+                ;;        *
+    then:
+        key: down f
+
+
+    # Stand up if we're stuck
+    if:
+        chance: 70%
+        coll: all no
+            ;;    *\*/*
+            ;;    - + -
+            ;;    */*\*
+            ;;   ( )
+    then:
+        key: up f
+        key: up d
+        goto: mainloop
+
+
+    # Turn around if we're stuck
     if() then:
         key: up f
         key: down b
