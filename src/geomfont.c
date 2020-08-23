@@ -48,7 +48,6 @@ int geomfont_init(geomfont_t *geomfont, char *name, font_t *font,
     geomfont->name = name;
     geomfont->font = font;
     geomfont->prend = prend;
-    geomfont->autoupper = false;
     vec_cpy(space->dims, geomfont->vx, vx);
     vec_cpy(space->dims, geomfont->vy, vy);
 
@@ -164,7 +163,7 @@ static int geomfont_get_c_rgraph(geomfont_t *geomfont, char c,
     /* Sets *rgraph_ptr based on c
     Returns nonzero on error
     May set *rgraph_ptr to NULL on success if c has no bitmap */
-    if(geomfont->autoupper)c = toupper(c);
+    if(geomfont->font->autoupper)c = toupper(c);
     int char_i = c;
     if(char_i < 0 || char_i >= FONT_N_CHARS){
         fprintf(stderr, "%s: Char outside 0..%i: %i (%c)\n",

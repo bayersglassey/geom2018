@@ -796,12 +796,6 @@ static int parse_geomfonts(prismelrenderer_t *prend, fus_lexer_t *lexer){
         if(err)return err;
         free(font_filename);
 
-        bool autoupper = false;
-        if(GOT("autoupper")){
-            NEXT;
-            autoupper = true;
-        }
-
         GET("prismel")
         GET("(")
         {
@@ -817,7 +811,6 @@ static int parse_geomfonts(prismelrenderer_t *prend, fus_lexer_t *lexer){
                 prend, prismel_name, vx, vy);
             if(err)return err;
 
-            geomfont->autoupper = autoupper;
             free(prismel_name);
         }
         GET(")")

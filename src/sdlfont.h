@@ -15,7 +15,6 @@
 typedef struct sdlfont {
     font_t *font;
     SDL_Surface *surface;
-    bool autoupper;
 } sdlfont_t;
 
 void sdlfont_cleanup(sdlfont_t *sdlfont);

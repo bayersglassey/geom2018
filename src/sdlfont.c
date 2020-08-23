@@ -32,7 +32,6 @@ int sdlfont_init(sdlfont_t *sdlfont, font_t *font, SDL_Palette *pal){
     int err = 0;
 
     sdlfont->font = font;
-    sdlfont->autoupper = false;
 
     int char_w = font->char_w;
     int char_h = font->char_h;
@@ -102,7 +101,7 @@ static int sdlfont_putc(sdlfont_t *sdlfont, SDL_Surface *render_surface,
     int char_w = font->char_w;
     int char_h = font->char_h;
 
-    if(sdlfont->autoupper)c = toupper(c);
+    if(font->autoupper)c = toupper(c);
     int char_i = c;
     if(char_i < 0 || char_i >= FONT_N_CHARS){
         fprintf(stderr, "%s: Char outside 0..%i: %i (%c)\n",

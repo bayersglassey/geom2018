@@ -139,7 +139,6 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 
     err = sdlfont_init(&app->sdlfont, &app->font, sdl_palette);
     if(err)return err;
-    app->sdlfont.autoupper = true;
 
     const char *geomfont_name = "geomfont1";
     app->geomfont = prismelrenderer_get_geomfont(prend, geomfont_name);

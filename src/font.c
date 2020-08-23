@@ -22,6 +22,7 @@ void font_cleanup(font_t *font){
 
 int font_load(font_t *font, char *filename, vars_t *vars){
     font->filename = filename;
+    font->autoupper = false;
     font->char_w = 0;
     font->char_h = 0;
 
@@ -52,6 +53,11 @@ static void font_clear_all_char_data(font_t *font){
 int font_parse(font_t *font, fus_lexer_t *lexer){
     int err;
 
+    if(fus_lexer_got(lexer, "autoupper")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        font->autoupper = true;
+    }
 
     /*****************
      * GET CHAR W, H *

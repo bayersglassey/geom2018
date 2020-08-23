@@ -26,6 +26,10 @@ typedef struct font {
     int char_w;
     int char_h;
 
+    /* Font should specify autoupper if it does not contain lowercase
+    characters. */
+    bool autoupper;
+
     /* Each char_data[c] is NULL or a char_w*char_h array of "pixel
     values" representing the image of character c.
     Each pixel value is a number in the range 0-255, with 0 being

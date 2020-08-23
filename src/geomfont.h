@@ -23,8 +23,6 @@ typedef struct geomfont {
     vec_t vx;
     vec_t vy;
 
-    bool autoupper;
-
     /* Weakrefs */
     struct prismelrenderer *prend;
 } geomfont_t;
