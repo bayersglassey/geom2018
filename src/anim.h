@@ -187,6 +187,7 @@ extern const char state_effect_type_delay[];
 extern const char state_effect_type_spawn[];
 extern const char state_effect_type_play[];
 extern const char state_effect_type_die[];
+extern const char state_effect_type_zero[];
 extern const char state_effect_type_inc[];
 extern const char state_effect_type_continue[];
 extern const char state_effect_type_confused[];

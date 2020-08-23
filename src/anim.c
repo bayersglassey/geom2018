@@ -304,6 +304,13 @@ static int _parse_effect(fus_lexer_t *lexer,
             NEXT
             effect->u.dead = BODY_MOSTLY_DEAD;
         }else effect->u.dead = BODY_ALL_DEAD;
+    }else if(GOT("zero")){
+        effect->type = state_effect_type_zero;
+        effect->u.var_name = NULL;
+        NEXT
+        GET("(")
+        GET_NAME(effect->u.var_name)
+        GET(")")
     }else if(GOT("inc")){
         effect->type = state_effect_type_inc;
         effect->u.var_name = NULL;
@@ -610,6 +617,7 @@ const char state_effect_type_delay[] = "delay";
 const char state_effect_type_spawn[] = "spawn";
 const char state_effect_type_play[] = "play";
 const char state_effect_type_die[] = "die";
+const char state_effect_type_zero[] = "zero";
 const char state_effect_type_inc[] = "inc";
 const char state_effect_type_continue[] = "continue";
 const char state_effect_type_confused[] = "confused";
@@ -625,6 +633,7 @@ const char *state_effect_types[] = {
     state_effect_type_spawn,
     state_effect_type_play,
     state_effect_type_die,
+    state_effect_type_zero,
     state_effect_type_inc,
     state_effect_type_continue,
     state_effect_type_confused,
@@ -682,6 +691,7 @@ static void state_effect_cleanup(state_effect_t *effect){
         free(effect->u.msg);
     }else if(
         effect->type == state_effect_type_print_int ||
+        effect->type == state_effect_type_zero ||
         effect->type == state_effect_type_inc
     ){
         free(effect->u.var_name);

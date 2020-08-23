@@ -273,6 +273,10 @@ static int state_rule_apply(state_rule_t *rule,
         }else if(effect->type == state_effect_type_die){
             CHECK_BODY
             body->dead = effect->u.dead;
+        }else if(effect->type == state_effect_type_zero){
+            CHECK_BODY
+            err = vars_set_int(&body->vars, effect->u.var_name, 0);
+            if(err)return err;
         }else if(effect->type == state_effect_type_inc){
             CHECK_BODY
             int value = vars_get_int(&body->vars, effect->u.var_name);
