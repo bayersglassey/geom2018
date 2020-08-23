@@ -252,6 +252,7 @@ typedef struct actor {
     body_t *body;
     stateset_t stateset;
     state_t *state;
+    int wait;
 } actor_t;
 
 void actor_cleanup(actor_t *actor);

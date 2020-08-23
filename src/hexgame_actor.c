@@ -28,6 +28,8 @@ int actor_init(actor_t *actor, hexmap_t *map, body_t *body,
     err = actor_init_stateset(actor, stateset_filename, state_name, map);
     if(err)return err;
 
+    actor->wait = 0;
+
     return 0;
 }
 
@@ -67,6 +69,12 @@ int actor_set_state(actor_t *actor, const char *state_name){
 
 int actor_step(actor_t *actor, struct hexgame *game){
     int err;
+
+    if(actor->wait > 0){
+        actor->wait--;
+        return 0;
+    }
+
     body_t *body = actor->body;
     if(body == NULL || body->recording.action == 0){
         /* No body, or recording not playing */

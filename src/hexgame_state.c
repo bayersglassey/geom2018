@@ -248,8 +248,12 @@ static int state_rule_apply(state_rule_t *rule,
         }else if(effect->type == state_effect_type_goto){
             *gotto_ptr = &effect->u.gotto;
         }else if(effect->type == state_effect_type_delay){
-            CHECK_BODY
-            body->cooldown = effect->u.delay;
+            if(actor){
+                actor->wait = effect->u.delay;
+            }else{
+                CHECK_BODY
+                body->cooldown = effect->u.delay;
+            }
         }else if(effect->type == state_effect_type_spawn){
             CHECK_BODY
             state_effect_spawn_t *spawn = &effect->u.spawn;
