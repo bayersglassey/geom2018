@@ -513,3 +513,23 @@ Aug 6, 2020:
 ------------
 
 * Aiming up should be a "special ability" of some spider variant.
+
+
+Aug 21, 2020:
+-------------
+
+* Convert to Makefile plz
+
+
+Aug 23, 2020:
+-------------
+
+* Add a "delay" to actors, same as for body anim?..
+    * Then "delay" effect should check whether actor != NULL, and if so, affect it instead of body
+
+* MAKE AIPLAYER CUSTOMIZABLE
+    * "timid" variant, doesn't make big jumps, can therefore be confined to e.g. left part of spidertown...
+    * The chance percentages could be int vars...
+    * Separate chances for running vs "running off the edge"?..
+
+* airoller...
