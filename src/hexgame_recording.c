@@ -157,6 +157,15 @@ static int recording_parse(recording_t *rec,
         GET(")")
     }else{
         GET("nodata")
+
+        /* "nodata" is used when we essentially don't want to play a
+        recording at all, we just want to specify the anim, position, etc
+        of a body.
+        So, we turn off rec->loop, which causes recording_step_play to
+        immediately stop the recording.
+        ...that seems to work ok, but do we not want to just stop
+        body_play_recording from setting body->recording.action to 1?.. */
+        rec->loop = false;
     }
 
     return 0;
@@ -187,9 +196,6 @@ int recording_load(recording_t *rec, const char *filename,
 static int recording_step_play(recording_t *rec){
     int err;
 
-    /* Empty recording: early exit */
-    if(rec->nodes_len <= 0)return 0;
-
     body_t *body = rec->body;
 
     rec->frame_i++;
@@ -204,6 +210,9 @@ static int recording_step_play(recording_t *rec){
             if(rec->loop){
                 err = body_restart_recording(body, true, rec->resets_position);
                 if(err)return err;
+
+                /* Empty recording: early exit, avoiding an infinite loop */
+                if(rec->nodes_len <= 0)break;
             }else{
                 /* Stop playback, in fact unload recording entirely */
                 recording_reset(rec);
