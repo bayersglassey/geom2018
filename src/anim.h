@@ -10,6 +10,17 @@
 #include "prismelrenderer.h"
 
 #define ANIM_KEY_CS "xyudlrfb"
+/*
+Meaning of each character:
+'x' -> action (e.g. spit)
+'y' -> action2 (e.g. look up)
+'u' -> up
+'d' -> down
+'l' -> left
+'r' -> right
+'f' -> forward
+'b' -> back
+*/
 
 enum anim_cond_flag {
     ANIM_COND_FLAGS_ALL    = 1,
@@ -105,14 +116,7 @@ typedef struct state_cond {
                     1 -> wasdown
                     2 -> wentdown
                 */
-            char c;
-                /*
-                    'f' -> forward
-                    'b' -> back
-                    'u' -> up
-                    'd' -> down
-                    'x' -> action
-                */
+            char c; /* See: ANIM_KEY_CS */
         } key;
         int percent;
         struct {
@@ -160,6 +164,16 @@ typedef struct state_effect {
         rot_t rot;
         int boolean; /* enum effect_boolean */
         int i;
+        struct {
+            int action;
+                /*
+                    0x0 -> none
+                    0x1 -> keydown
+                    0x2 -> keyup
+                    0x3 -> keypress (down + up on same frame)
+                */
+            char c; /* See: ANIM_KEY_CS */
+        } key;
     } u;
 } state_effect_t;
 
@@ -176,6 +190,7 @@ extern const char state_effect_type_die[];
 extern const char state_effect_type_inc[];
 extern const char state_effect_type_continue[];
 extern const char state_effect_type_confused[];
+extern const char state_effect_type_key[];
 extern const char *state_effect_types[];
 
 

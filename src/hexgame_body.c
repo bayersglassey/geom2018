@@ -62,7 +62,7 @@ int fus_lexer_get_keyinfo(fus_lexer_t *lexer,
         key_c = name[0];
         free(name);
 
-        int key_i = body_get_key_i(NULL, key_c, true);
+        int key_i = body_get_key_i(NULL, key_c);
 
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
@@ -409,7 +409,7 @@ void body_keyup(body_t *body, int key_i){
     }
 }
 
-int body_get_key_i(body_t *body, char c, bool absolute){
+int body_get_key_i(body_t *body, char c){
     bool turn = false;
     if(body){
         turn = body->confused? !body->turn: body->turn;
@@ -421,8 +421,8 @@ int body_get_key_i(body_t *body, char c, bool absolute){
         c == 'd'? KEYINFO_KEY_D:
         c == 'l'? KEYINFO_KEY_L:
         c == 'r'? KEYINFO_KEY_R:
-        c == 'f'? (!absolute && turn? KEYINFO_KEY_L: KEYINFO_KEY_R):
-        c == 'b'? (!absolute && turn? KEYINFO_KEY_R: KEYINFO_KEY_L):
+        c == 'f'? (turn? KEYINFO_KEY_L: KEYINFO_KEY_R):
+        c == 'b'? (turn? KEYINFO_KEY_R: KEYINFO_KEY_L):
         -1;
     return key_i;
 }

@@ -328,6 +328,38 @@ static int _parse_effect(fus_lexer_t *lexer,
         effect->type = state_effect_type_confused;
         effect->u.boolean = boolean;
         GET(")")
+    }else if(GOT("key")){
+        NEXT
+        GET("(")
+
+        int action;
+        if(GOT("down")){
+            action = 0x1;
+        }else if(GOT("up")){
+            action = 0x2;
+        }else if(GOT("press")){
+            action = 0x3;
+        }else{
+            return UNEXPECTED(
+                "down or up or press");
+        }
+        NEXT
+
+        char *name;
+        GET_NAME(name)
+
+        char c = name[0];
+        if(strlen(name) != 1 || !strchr(ANIM_KEY_CS, c)){
+            UNEXPECTED(
+                "one of the characters: " ANIM_KEY_CS);
+        }
+
+        effect->type = state_effect_type_key;
+        effect->u.key.action = action;
+        effect->u.key.c = c;
+        free(name);
+
+        GET(")")
     }else if(GOT("play")){
         NEXT
         GET("(")
@@ -581,6 +613,7 @@ const char state_effect_type_die[] = "die";
 const char state_effect_type_inc[] = "inc";
 const char state_effect_type_continue[] = "continue";
 const char state_effect_type_confused[] = "confused";
+const char state_effect_type_key[] = "key";
 const char *state_effect_types[] = {
     state_effect_type_print,
     state_effect_type_print_int,
@@ -595,6 +628,7 @@ const char *state_effect_types[] = {
     state_effect_type_inc,
     state_effect_type_continue,
     state_effect_type_confused,
+    state_effect_type_key,
     NULL
 };
 

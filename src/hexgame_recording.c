@@ -229,12 +229,12 @@ static int recording_step_play(recording_t *rec){
                     break;
                 }
                 case RECORDING_NODE_TYPE_KEYDOWN: {
-                    int key_i = body_get_key_i(body, node->u.key_c, false);
+                    int key_i = body_get_key_i(body, node->u.key_c);
                     body_keydown(body, key_i);
                     break;
                 }
                 case RECORDING_NODE_TYPE_KEYUP: {
-                    int key_i = body_get_key_i(body, node->u.key_c, false);
+                    int key_i = body_get_key_i(body, node->u.key_c);
                     body_keyup(body, key_i);
                     break;
                 }

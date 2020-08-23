@@ -201,7 +201,7 @@ int body_render(body_t *body,
 
 void body_keydown(body_t *body, int key_i);
 void body_keyup(body_t *body, int key_i);
-int body_get_key_i(body_t *body, char c, bool absolute);
+int body_get_key_i(body_t *body, char c);
 char body_get_key_c(body_t *body, int key_i, bool absolute);
 
 int body_load_recording(body_t *body, const char *filename, bool loop);

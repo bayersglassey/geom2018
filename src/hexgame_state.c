@@ -59,7 +59,7 @@ static int state_rule_match_cond(
             return 2;}
 
         char c = cond->u.key.c;
-        int key_i = body_get_key_i(body, c, false);
+        int key_i = body_get_key_i(body, c);
         if(key_i == -1){
             fprintf(stderr, "Unrecognized key char: %c", c);
             RULE_PERROR()
@@ -283,6 +283,17 @@ static int state_rule_apply(state_rule_t *rule,
         }else if(effect->type == state_effect_type_confused){
             CHECK_BODY
             effect_apply_boolean(effect->u.boolean, &body->confused);
+        }else if(effect->type == state_effect_type_key){
+            CHECK_BODY
+            int key_i = body_get_key_i(body, effect->u.key.c);
+            bool keydown = effect->u.key.action & 0x1;
+            if(keydown){
+                body_keydown(body, key_i);
+            }
+            bool keyup = effect->u.key.action & 0x2;
+            if(keyup){
+                body_keyup(body, key_i);
+            }
         }else{
             fprintf(stderr, "Unrecognized state rule effect: %s\n",
                 effect->type);
