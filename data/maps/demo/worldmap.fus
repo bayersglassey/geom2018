@@ -14,6 +14,7 @@ actors:
     : "actor/aiplayer001.fus" "player_cpu"
     : "actor/aiplayer002.fus" "player_cpu"
     : "actor/aiplayer003.fus" "player_cpu"
+    : "actor/dodecas_aiplayer000.fus" "player_cpu"
 
 submaps:
     :
@@ -296,9 +297,9 @@ submaps:
             #: "data/maps/demo/recs/test_000.fus" "player_cpu"
             #: "data/maps/demo/recs/test_001.fus" "player_cpu"
             #: "data/maps/demo/recs/test_002.fus" "player_cpu"
-            #: "data/maps/demo/recs/test_003.fus" "player_cpu"
-            #: "data/maps/demo/recs/test_roller_000.fus"
-            #: "data/maps/demo/recs/test_flier_000.fus"
+            : "data/maps/demo/recs/test_003.fus" "player_cpu"
+            : "data/maps/demo/recs/test_roller_000.fus"
+            : "data/maps/demo/recs/test_flier_000.fus"
         submaps:
             :
                 file: "data/maps/test/map3.fus"
