@@ -10,6 +10,10 @@ default_tileset: "data/tileset1.fus"
 
 actors:
     : "actor/guide/actor.fus" "player_cpu"
+    : "actor/aiplayer000.fus" "player_cpu"
+    : "actor/aiplayer001.fus" "player_cpu"
+    : "actor/aiplayer002.fus" "player_cpu"
+    : "actor/aiplayer003.fus" "player_cpu"
 
 submaps:
     :
@@ -289,12 +293,12 @@ submaps:
         pos: (40 60)
         camera: (0 0)
         recordings:
-            : "data/maps/demo/recs/test_000.fus" "player_cpu"
-            : "data/maps/demo/recs/test_001.fus" "player_cpu"
-            : "data/maps/demo/recs/test_002.fus" "player_cpu"
-            : "data/maps/demo/recs/test_003.fus" "player_cpu"
-            : "data/maps/demo/recs/test_roller_000.fus"
-            : "data/maps/demo/recs/test_flier_000.fus"
+            #: "data/maps/demo/recs/test_000.fus" "player_cpu"
+            #: "data/maps/demo/recs/test_001.fus" "player_cpu"
+            #: "data/maps/demo/recs/test_002.fus" "player_cpu"
+            #: "data/maps/demo/recs/test_003.fus" "player_cpu"
+            #: "data/maps/demo/recs/test_roller_000.fus"
+            #: "data/maps/demo/recs/test_flier_000.fus"
         submaps:
             :
                 file: "data/maps/test/map3.fus"
