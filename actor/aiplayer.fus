@@ -2,40 +2,25 @@
 mainloop:
     # Main AI loop
 
+    if() then:
+        key: up b
+        continue
+
+
+    if:
+        key: isdown u
+        coll: all yes
+            ;; (+)- +
+    then:
+        # We're still on the ground, wait for our jump to start...
+
+
     if:
         coll: any no
             ;; (+)- +
     then:
-        key: up u
         # If we're jumping, then do nothing...
-        # ...but also don't "continue", so don't process any more rules.
-
-
-    if:
-        expr: > edge_wait 0
-        expr: < edge_wait 10
-    then:
-        # Take a moment to ponder...
-        inc: edge_wait
-
-    if:
-        expr: > edge_wait 0
-    then:
-        # Done pondering! Let's turn around.
-        key: down b
-        zero: edge_wait
-        inc: edge_wait_cooldown
-
-    if:
-        expr: > edge_wait_cooldown 0
-        expr: < edge_wait_cooldown 5
-    then:
-        # Give ourselves time to finish turning around before we decide to ponder again...
-        inc: edge_wait_cooldown
-
-    if() then:
-        zero: edge_wait_cooldown
-        continue
+        key: up u
 
 
     # Sometimes, jump!
@@ -88,13 +73,7 @@ mainloop:
                     ;; ( )  .   .   .   .
     then:
         key: up f
-        key: up b
         key: down u
-
-
-    if() then:
-        key: up u
-        continue
 
 
     if:
@@ -104,9 +83,9 @@ mainloop:
         chance: 1%
         chance: 20%
     then:
-        # Stop, think about things a bit, then turn around
         key: up f
-        inc: edge_wait
+        key: down b
+        delay: 4
 
 
     # Always walk straight ahead if we can
@@ -175,12 +154,10 @@ mainloop:
                 ;; ( )    - + -
                 ;;        */*\*
     then:
-        key: up b
         key: down f
 
 
     if() then:
         key: up f
-
-        # Stop, think about things a bit, then turn around
-        inc: edge_wait
+        key: down b
+        delay: 6
