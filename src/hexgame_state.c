@@ -14,6 +14,19 @@
 #include "write.h"
 
 
+#define CHECK_BODY \
+    if(body == NULL){ \
+        fprintf(stderr, "No body"); \
+        RULE_PERROR() \
+        return 2;}
+
+#define CHECK_ACTOR \
+    if(actor == NULL){ \
+        fprintf(stderr, "No actor"); \
+        RULE_PERROR() \
+        return 2;}
+
+
 static int state_rule_match_cond(
     state_rule_t *rule, state_cond_t *cond,
     hexgame_t *game, body_t *body, actor_t *actor,
@@ -33,11 +46,7 @@ static int state_rule_match_cond(
     if(cond->type == state_cond_type_false){
         rule_matched = false;
     }else if(cond->type == state_cond_type_key){
-        if(body == NULL){
-            fprintf(stderr, "No body");
-            RULE_PERROR()
-            return 2;}
-
+        CHECK_BODY
         int kstate_i = cond->u.key.kstate;
         bool *kstate =
             kstate_i == 0? body->keyinfo.isdown:
@@ -59,11 +68,7 @@ static int state_rule_match_cond(
         rule_matched = kstate[key_i];
         if(!cond->u.key.yes)rule_matched = !rule_matched;
     }else if(cond->type == state_cond_type_coll){
-        if(body == NULL){
-            fprintf(stderr, "No body");
-            RULE_PERROR()
-            return 2;}
-
+        CHECK_BODY
         if(body->state == NULL){
             rule_matched = false;
         }else{
@@ -127,10 +132,7 @@ static int state_rule_match_cond(
             if((all && !rule_matched) || (!all && rule_matched))break;
         }
     }else if(cond->type == state_cond_type_expr){
-        if(body == NULL){
-            fprintf(stderr, "No body");
-            RULE_PERROR()
-            return 2;}
+        CHECK_BODY
         int value = vars_get_int(&body->vars, cond->u.expr.var_name);
         int cond_value = cond->u.expr.value;
         int op = cond->u.expr.op;
@@ -224,11 +226,7 @@ static int state_rule_apply(state_rule_t *rule,
                 printf(" says: %s\n", effect->u.msg);
             }
         }else if(effect->type == state_effect_type_move){
-            if(body == NULL){
-                fprintf(stderr, "No body");
-                RULE_PERROR()
-                return 2;}
-
+            CHECK_BODY
             vecspace_t *space = body->map->space;
             vec_t vec;
             vec_cpy(space->dims, vec, effect->u.vec);
@@ -237,38 +235,23 @@ static int state_rule_apply(state_rule_t *rule,
             space->vec_rot(vec, rot);
             vec_add(space->dims, body->pos, vec);
         }else if(effect->type == state_effect_type_rot){
-            if(body == NULL){
-                fprintf(stderr, "No body");
-                RULE_PERROR()
-                return 2;}
-
+            CHECK_BODY
             vecspace_t *space = body->map->space;
             rot_t effect_rot = effect->u.rot;
             body->rot = rot_rot(space->rot_max,
                 body->rot, effect_rot);
         }else if(effect->type == state_effect_type_turn){
-            if(body == NULL){
-                fprintf(stderr, "No body");
-                RULE_PERROR()
-                return 2;}
-
+            CHECK_BODY
             vecspace_t *space = body->map->space;
             body->turn = !body->turn;
             body->rot = rot_flip(space->rot_max, body->rot, true);
         }else if(effect->type == state_effect_type_goto){
             *gotto_ptr = &effect->u.gotto;
         }else if(effect->type == state_effect_type_delay){
-            if(body == NULL){
-                fprintf(stderr, "No body");
-                RULE_PERROR()
-                return 2;}
+            CHECK_BODY
             body->cooldown = effect->u.delay;
         }else if(effect->type == state_effect_type_spawn){
-            if(body == NULL){
-                fprintf(stderr, "No body");
-                RULE_PERROR()
-                return 2;}
-
+            CHECK_BODY
             state_effect_spawn_t *spawn = &effect->u.spawn;
 
             /* TODO: look up palmapper from spawn->palmapper_name */
@@ -281,36 +264,24 @@ static int state_rule_apply(state_rule_t *rule,
                 spawn->pos, spawn->rot, spawn->turn);
             if(err)return err;
         }else if(effect->type == state_effect_type_play){
-            if(actor == NULL){
-                fprintf(stderr, "No actor");
-                RULE_PERROR()
-                return 2;}
+            CHECK_ACTOR
             const char *play_filename = effect->u.play_filename;
             err = body_load_recording(body, play_filename, false);
             if(err)return err;
             err = body_play_recording(body);
             if(err)return err;
         }else if(effect->type == state_effect_type_die){
-            if(body == NULL){
-                fprintf(stderr, "No body");
-                RULE_PERROR()
-                return 2;}
+            CHECK_BODY
             body->dead = effect->u.dead;
         }else if(effect->type == state_effect_type_inc){
-            if(body == NULL){
-                fprintf(stderr, "No body");
-                RULE_PERROR()
-                return 2;}
+            CHECK_BODY
             int value = vars_get_int(&body->vars, effect->u.var_name);
             err = vars_set_int(&body->vars, effect->u.var_name, value + 1);
             if(err)return err;
         }else if(effect->type == state_effect_type_continue){
             *continues_ptr = true;
         }else if(effect->type == state_effect_type_confused){
-            if(body == NULL){
-                fprintf(stderr, "No body");
-                RULE_PERROR()
-                return 2;}
+            CHECK_BODY
             effect_apply_boolean(effect->u.boolean, &body->confused);
         }else{
             fprintf(stderr, "Unrecognized state rule effect: %s\n",
