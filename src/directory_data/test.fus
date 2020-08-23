@@ -1,0 +1,13 @@
+thing
+thing
+
+stuff:
+    "whacky thing"
+    "thing 232323"
+    root:
+        etc:
+        home:
+        bin:
+            sh
+
+"my\nbig/thing!!!"
