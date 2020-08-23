@@ -470,7 +470,7 @@ static int parse_shape_hexpicture(prismelrenderer_t *prend, fus_lexer_t *lexer,
     }
     NEXT
 
-    bool verbose = true;
+    bool verbose = false;
     hexpicture_return_face_t *faces;
     size_t faces_len;
     err = hexpicture_parse(
