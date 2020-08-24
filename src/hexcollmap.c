@@ -143,8 +143,44 @@ void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
 ){
     /* Writes it so you can hopefully more or less read it back again */
 
+    if(extra)
+    for(int i = 0; i < collmap->recordings_len; i++){
+        hexmap_recording_t *recording = collmap->recordings[i];
+        fprintf(f, "# %s:\n",
+            hexmap_recording_type_msg(recording->type));
+        fprintf(f, "#     filename: %s\n", recording->filename);
+        if(recording->palmapper_name){
+            fprintf(f, "#     palmapper: %s\n",
+                recording->palmapper_name);
+        }
+        fprintf(f, "#     trf: (%i %i) %i %c\n",
+            recording->trf.add[0],
+            recording->trf.add[1],
+            recording->trf.rot,
+            recording->trf.flip? 'y': 'n');
+        fprintf(f, "#     frame_offset: %i\n", recording->frame_offset);
+    }
+
+    if(extra)
+    for(int i = 0; i < collmap->rendergraphs_len; i++){
+        hexmap_rendergraph_t *rgraph = collmap->rendergraphs[i];
+        fprintf(f, "# rendergraph:\n");
+        fprintf(f, "#     name: %s\n", rgraph->name);
+        if(rgraph->palmapper_name){
+            fprintf(f, "#     palmapper: %s\n",
+                rgraph->palmapper_name);
+        }
+        fprintf(f, "#     trf: (%i %i) %i %c\n",
+            rgraph->trf.add[0],
+            rgraph->trf.add[1],
+            rgraph->trf.rot,
+            rgraph->trf.flip? 'y': 'n');
+    }
+
     const char *tabs = "";
     if(!just_coll){
+        tabs = "    ";
+
         if(parts){
             fprintf(f, "parts:\n");
             for(int i = 0; i < parts_len; i++){
@@ -192,42 +228,7 @@ void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
         //fprintf(f, "default_edge: ...");
         //fprintf(f, "default_face: ...");
 
-        if(extra)
-        for(int i = 0; i < collmap->recordings_len; i++){
-            hexmap_recording_t *recording = collmap->recordings[i];
-            fprintf(f, "# %s:\n",
-                hexmap_recording_type_msg(recording->type));
-            fprintf(f, "#     filename: %s\n", recording->filename);
-            if(recording->palmapper_name){
-                fprintf(f, "#     palmapper: %s\n",
-                    recording->palmapper_name);
-            }
-            fprintf(f, "#     trf: (%i %i) %i %c\n",
-                recording->trf.add[0],
-                recording->trf.add[1],
-                recording->trf.rot,
-                recording->trf.flip? 'y': 'n');
-            fprintf(f, "#     frame_offset: %i\n", recording->frame_offset);
-        }
-
-        if(extra)
-        for(int i = 0; i < collmap->rendergraphs_len; i++){
-            hexmap_rendergraph_t *rgraph = collmap->rendergraphs[i];
-            fprintf(f, "# rendergraph:\n");
-            fprintf(f, "#     name: %s\n", rgraph->name);
-            if(rgraph->palmapper_name){
-                fprintf(f, "#     palmapper: %s\n",
-                    rgraph->palmapper_name);
-            }
-            fprintf(f, "#     trf: (%i %i) %i %c\n",
-                rgraph->trf.add[0],
-                rgraph->trf.add[1],
-                rgraph->trf.rot,
-                rgraph->trf.flip? 'y': 'n');
-        }
-
         fprintf(f, "collmap:\n");
-        tabs = "    ";
     }
 
     for(int y = 0; y < collmap->h; y++){
