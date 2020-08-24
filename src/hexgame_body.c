@@ -16,7 +16,7 @@
 
 
 static void print_tabs(FILE *file, int depth){
-    for(int i = 0; i < depth; i++)fprintf(file, "  ");
+    for(int i = 0; i < depth; i++)fprintf(file, "    ");
 }
 
 
@@ -158,12 +158,12 @@ void hexgame_body_dump(body_t *body, int depth){
     fprintf(stderr, "state: %s\n",
         body->state->name);
     print_tabs(stderr, depth);
-    fprintf(stderr, "pos: %i %i\n",
+    fprintf(stderr, "pos: (%i %i)\n",
         body->pos[0], body->pos[1]);
     print_tabs(stderr, depth);
     fprintf(stderr, "rot: %i\n", body->rot);
     print_tabs(stderr, depth);
-    fprintf(stderr, "turn: %c\n", body->turn? 'y': 'n');
+    fprintf(stderr, "turn: %s\n", body->turn? "yes": "no");
 }
 
 int body_respawn(body_t *body, vec_t pos, rot_t rot, bool turn,
