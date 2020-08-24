@@ -1,0 +1,12 @@
+reacts: yes
+anim: "anim/player.fus"
+state: "stand"
+pos: (-67 -2)
+rot: 0
+turn: no
+keys:
+    u:
+    d:
+    l:
+    r:
+nodata

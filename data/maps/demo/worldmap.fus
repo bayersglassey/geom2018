@@ -15,6 +15,7 @@ actors:
     : "actor/aiplayer002.fus" "player_cpu"
     : "actor/aiplayer003.fus" "player_cpu"
     : "actor/dodecas_aiplayer000.fus" "player_cpu"
+    : "actor/jungle_aiplayer000.fus" "player_cpu"
 
 submaps:
     :
