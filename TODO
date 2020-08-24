@@ -530,3 +530,19 @@ Aug 23, 2020:
     * Separate chances for running vs "running off the edge"?..
 
 * airoller...
+
+
+Aug 23, 2020:
+-------------
+
+* OMG birdplayer in jungle2.fus is amazing. You can run around & around the cave in the middle.
+    * Add an area full of hexagons and birds.
+    * Make it so when birdplayer is a bird, he's not crushed by birds.
+        * Cheapo way to do it: when birdplayer is bird, he has no hitbox.
+        So he neither crushes nor is crushed.
+    * Have this area eventually combine with big triangles area.
+    * Is there a "big_trangleplayer"?.. :P
+    * Finish up anim/hexroller.fus!..
+    * jungle_aiplayer gets crushed by birds :'(
+        * Add a special "invincible" thing to bodies?..
+        * (Currently just implicit when body->recording is playing...)
