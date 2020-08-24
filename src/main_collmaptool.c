@@ -52,6 +52,8 @@ static void print_help(){
         "Only parse/output the collmap's lines, no leading \"collmap:\" etc\n");
     fprintf(stderr, " -x --extra      "
         "Output extra info as fus comments (e.g. recordings, rendergraphs)\n");
+    fprintf(stderr, " -d --nodots     "
+        "Invisible verts are displayed as ' ' not '.'\n");
     fprintf(stderr, " -h --help       "
         "Show this message\n");
 }
@@ -60,6 +62,7 @@ static void print_help(){
 int main(int n_args, char **args){
     bool just_coll = false;
     bool extra = false;
+    bool nodots = false;
 
     /* Parse args */
     for(int i = 1; i < n_args; i++){
@@ -68,6 +71,8 @@ int main(int n_args, char **args){
             just_coll = true;
         }else if(!strcmp(arg, "-x") || !strcmp(arg, "--extra")){
             extra = true;
+        }else if(!strcmp(arg, "-d") || !strcmp(arg, "--nodots")){
+            nodots = true;
         }else if(!strcmp(arg, "-h") || !strcmp(arg, "--help")){
             print_help();
             return 0;
@@ -87,7 +92,7 @@ int main(int n_args, char **args){
     if(!collmap)return 2;
 
     /* Write collmap */
-    hexcollmap_write_with_parts(collmap, stdout, just_coll, extra,
+    hexcollmap_write_with_parts(collmap, stdout, just_coll, extra, nodots,
         parts, parts_len);
 
     /* Cleanup */

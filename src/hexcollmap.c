@@ -124,8 +124,8 @@ void hexcollmap_dump(hexcollmap_t *collmap, FILE *f){
     }
 }
 
-static char _write_vert(char tile_c){
-    return tile_c_is_visible(tile_c)? '+': '.';
+static char _write_vert(char tile_c, char _default){
+    return tile_c_is_visible(tile_c)? '+': _default;
 }
 
 static char _write_edge(char tile_c, char _default){
@@ -138,10 +138,12 @@ static char _write_face(char tile_c){
 }
 
 void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
-    bool just_coll, bool extra,
+    bool just_coll, bool extra, bool nodots,
     hexcollmap_part_t **parts, int parts_len
 ){
     /* Writes it so you can hopefully more or less read it back again */
+
+    char vert_default = nodots? ' ': '.';
 
     if(extra)
     for(int i = 0; i < collmap->recordings_len; i++){
@@ -262,7 +264,7 @@ void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
             hexcollmap_tile_t *tile = &collmap->tiles[y * collmap->w + x];
             fprintf(f, "%c%c%c%c",
                 is_origin? '(': ' ',
-                _write_vert(tile->vert[0].tile_c),
+                _write_vert(tile->vert[0].tile_c, vert_default),
                 is_origin? ')': ' ',
                 _write_edge(tile->edge[0].tile_c, '-'));
         }
@@ -271,9 +273,10 @@ void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
 }
 
 void hexcollmap_write(hexcollmap_t *collmap, FILE *f,
-    bool just_coll, bool extra
+    bool just_coll, bool extra, bool nodots
 ){
-    hexcollmap_write_with_parts(collmap, f, just_coll, extra, NULL, 0);
+    hexcollmap_write_with_parts(collmap, f,
+        just_coll, extra, nodots, NULL, 0);
 }
 
 int hexcollmap_load(hexcollmap_t *collmap, const char *filename,
