@@ -524,9 +524,6 @@ Aug 21, 2020:
 Aug 23, 2020:
 -------------
 
-* Add a "delay" to actors, same as for body anim?..
-    * Then "delay" effect should check whether actor != NULL, and if so, affect it instead of body
-
 * MAKE AIPLAYER CUSTOMIZABLE
     * "timid" variant, doesn't make big jumps, can therefore be confined to e.g. left part of spidertown...
     * The chance percentages could be int vars...
