@@ -5,15 +5,53 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "hexmap.h"
+#include "str_utils.h"
+#include "file_utils.h"
+#include "hexcollmap.h"
 #include "lexer.h"
-#include "util.h"
 #include "mathutil.h"
 #include "geom.h"
-#include "vec4.h"
 #include "hexspace.h"
-#include "prismelrenderer.h"
 
+
+/********************
+ * HEXMAP RECORDING *
+ ********************/
+
+void hexmap_recording_cleanup(hexmap_recording_t *recording){
+    free(recording->filename);
+    free(recording->palmapper_name);
+}
+
+int hexmap_recording_init(hexmap_recording_t *recording, int type,
+    char *filename, char *palmapper_name, int frame_offset
+){
+    recording->type = type;
+    recording->filename = filename;
+    recording->palmapper_name = palmapper_name;
+    recording->frame_offset = frame_offset;
+    trf_zero(&recording->trf);
+    return 0;
+}
+
+
+/**********************
+ * HEXMAP RENDERGRAPH *
+ **********************/
+
+void hexmap_rendergraph_cleanup(hexmap_rendergraph_t *rendergraph){
+    free(rendergraph->name);
+    free(rendergraph->palmapper_name);
+}
+
+int hexmap_rendergraph_init(hexmap_rendergraph_t *rendergraph,
+    char *name, char *palmapper_name
+){
+    rendergraph->name = name;
+    rendergraph->palmapper_name = palmapper_name;
+    trf_zero(&rendergraph->trf);
+    return 0;
+}
 
 
 /**************
@@ -61,16 +99,13 @@ int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
     return 0;
 }
 
-void hexcollmap_dump(hexcollmap_t *collmap, FILE *f, int n_spaces){
-    char spaces[20];
-    get_spaces(spaces, 20, n_spaces);
-
-    fprintf(f, "%shexcollmap: %p\n", spaces, collmap);
+void hexcollmap_dump(hexcollmap_t *collmap, FILE *f){
+    fprintf(f, "hexcollmap: %p\n", collmap);
     if(collmap == NULL)return;
-    fprintf(f, "%s  origin: %i %i\n", spaces, collmap->ox, collmap->oy);
-    fprintf(f, "%s  tiles:\n", spaces);
+    fprintf(f, "  origin: %i %i\n", collmap->ox, collmap->oy);
+    fprintf(f, "  tiles:\n");
     for(int y = 0; y < collmap->h; y++){
-        fprintf(f, "%s    ", spaces);
+        fprintf(f, "    ");
         for(int x = 0; x < collmap->w; x++){
             hexcollmap_tile_t *tile = &collmap->tiles[y * collmap->w + x];
             fprintf(f, "[");

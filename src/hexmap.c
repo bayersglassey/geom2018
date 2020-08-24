@@ -144,48 +144,6 @@ int hexmap_tileset_load(hexmap_tileset_t *tileset,
 }
 
 
-
-/********************
- * HEXMAP RECORDING *
- ********************/
-
-void hexmap_recording_cleanup(hexmap_recording_t *recording){
-    free(recording->filename);
-    free(recording->palmapper_name);
-}
-
-int hexmap_recording_init(hexmap_recording_t *recording, int type,
-    char *filename, char *palmapper_name, int frame_offset
-){
-    recording->type = type;
-    recording->filename = filename;
-    recording->palmapper_name = palmapper_name;
-    recording->frame_offset = frame_offset;
-    trf_zero(&recording->trf);
-    return 0;
-}
-
-
-/**********************
- * HEXMAP RENDERGRAPH *
- **********************/
-
-void hexmap_rendergraph_cleanup(hexmap_rendergraph_t *rendergraph){
-    free(rendergraph->name);
-    free(rendergraph->palmapper_name);
-}
-
-int hexmap_rendergraph_init(hexmap_rendergraph_t *rendergraph,
-    char *name, char *palmapper_name
-){
-    rendergraph->name = name;
-    rendergraph->palmapper_name = palmapper_name;
-    trf_zero(&rendergraph->trf);
-    return 0;
-}
-
-
-
 /**********
  * HEXMAP *
  **********/

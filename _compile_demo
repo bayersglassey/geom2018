@@ -19,7 +19,7 @@ CFLAGS=""
 CFLAGS+=" -std=c99 -Wall -Werror -Wno-unused -Wno-missing-braces -Wno-tautological-compare -Wno-parentheses"
 
 SOURCES=""
-SOURCES+=" src/anim.c src/hexmap.c src/hexmap_hexcollmap.c src/hexmap_submap_create_rgraph.c"
+SOURCES+=" src/anim.c src/hexmap.c src/hexcollmap.c src/hexmap_submap_create_rgraph.c"
 SOURCES+=" src/util.c src/str_utils.c src/file_utils.c src/lexer.c src/write.c src/stringstore.c src/vars.c"
 SOURCES+=" src/geom.c src/vec4.c src/hexspace.c src/bounds.c src/location.c"
 SOURCES+=" src/font.c src/sdlfont.c src/geomfont.c src/console.c"
