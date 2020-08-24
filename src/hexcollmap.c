@@ -100,6 +100,7 @@ int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
 }
 
 void hexcollmap_dump(hexcollmap_t *collmap, FILE *f){
+    /* The rawest of dumps */
     fprintf(f, "hexcollmap: %p\n", collmap);
     if(collmap == NULL)return;
     fprintf(f, "  origin: %i %i\n", collmap->ox, collmap->oy);
@@ -120,6 +121,71 @@ void hexcollmap_dump(hexcollmap_t *collmap, FILE *f){
             fprintf(f, "] ");
         }
         fprintf(f, "\n");
+    }
+}
+
+static char _write_vert(char tile_c){
+    return tile_c_is_visible(tile_c)? '+': '.';
+}
+
+static char _write_edge(char tile_c, char _default){
+    return tile_c_is_visible(tile_c)? _default: ' ';
+}
+
+static char _write_face(char tile_c){
+    return tile_c_is_visible(tile_c)?
+        (tile_c_is_special(tile_c)? tile_c: '*'): ' ';
+}
+
+void hexcollmap_write(hexcollmap_t *collmap, FILE *f, bool just_coll){
+    /* Writes it so you can hopefully more or less read it back again */
+
+    const char *tabs = "";
+    if(!just_coll){
+        fprintf(f, "parts:\n");
+        //fprintf(f, "default_vert: ...");
+        //fprintf(f, "default_edge: ...");
+        //fprintf(f, "default_face: ...");
+        fprintf(f, "collmap:\n");
+        tabs = "    ";
+    }
+
+    for(int y = 0; y < collmap->h; y++){
+        // \ /
+        //  . -
+
+        // \ /
+        fputs(tabs, f);
+        fputs(";; ", f);
+        for(int x = 0; x < y; x++){
+            fputs("  ", f);
+        }
+        for(int x = 0; x < collmap->w; x++){
+            hexcollmap_tile_t *tile = &collmap->tiles[y * collmap->w + x];
+            fprintf(f, "%c%c%c%c",
+                _write_edge(tile->edge[2].tile_c, '\\'),
+                _write_face(tile->face[1].tile_c),
+                _write_edge(tile->edge[1].tile_c, '/'),
+                _write_face(tile->face[0].tile_c));
+        }
+        fputc('\n', f);
+
+        //  . -
+        fputs(tabs, f);
+        fputs(";; ", f);
+        for(int x = 0; x < y; x++){
+            fputs("  ", f);
+        }
+        for(int x = 0; x < collmap->w; x++){
+            bool is_origin = x == collmap->ox && y == collmap->oy;
+            hexcollmap_tile_t *tile = &collmap->tiles[y * collmap->w + x];
+            fprintf(f, "%c%c%c%c",
+                is_origin? '(': ' ',
+                _write_vert(tile->vert[0].tile_c),
+                is_origin? ')': ' ',
+                _write_edge(tile->edge[0].tile_c, '-'));
+        }
+        fputc('\n', f);
     }
 }
 
@@ -1034,18 +1100,6 @@ hexcollmap_elem_t *hexcollmap_get_face(hexcollmap_t *collmap, trf_t *index){
     hexcollmap_tile_t *tile = hexcollmap_get_tile(collmap, index);
     if(tile == NULL)return NULL;
     return &tile->face[index->rot];
-}
-
-bool hexcollmap_elem_is_visible(hexcollmap_elem_t *elem){
-    if(elem == NULL)return false;
-    char tile_c = elem->tile_c;
-    return tile_c != ' ' && tile_c != 'x';
-}
-
-bool hexcollmap_elem_is_solid(hexcollmap_elem_t *elem){
-    if(elem == NULL)return false;
-    char tile_c = elem->tile_c;
-    return strchr(" xSDw", tile_c) == NULL;
 }
 
 static int hexcollmap_collide_elem(hexcollmap_t *collmap1, bool all,

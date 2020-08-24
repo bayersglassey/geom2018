@@ -1,0 +1,8 @@
+
+gcc -g -std=c99 \
+    -Wall -Werror -Wno-unused \
+    -o collmaptool \
+    src/main_collmaptool.c \
+    src/hexcollmap.c src/geom.c src/hexspace.c \
+    src/lexer.c src/vars.c src/str_utils.c src/file_utils.c \
+    $@

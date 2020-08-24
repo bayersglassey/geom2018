@@ -1,9 +1,12 @@
 #ifndef _HEXCOLLMAP_H_
 #define _HEXCOLLMAP_H_
 
+#include <stdbool.h>
+
 #include "array.h"
 #include "lexer.h"
 #include "geom.h"
+
 
 
 /********************
@@ -107,6 +110,35 @@ typedef struct hexcollmap {
 } hexcollmap_t;
 
 
+
+static bool tile_c_is_visible(char tile_c){
+    return tile_c != ' ' && tile_c != 'x';
+}
+
+static bool tile_c_is_solid(char tile_c){
+    return strchr(" xSDw", tile_c) == NULL;
+}
+
+static bool tile_c_is_special(char tile_c){
+    return strchr("xSDw", tile_c) != NULL;
+}
+
+static bool hexcollmap_elem_is_visible(hexcollmap_elem_t *elem){
+    if(elem == NULL)return false;
+    return tile_c_is_visible(elem->tile_c);
+}
+
+static bool hexcollmap_elem_is_solid(hexcollmap_elem_t *elem){
+    if(elem == NULL)return false;
+    return tile_c_is_solid(elem->tile_c);
+}
+
+static bool hexcollmap_elem_is_special(hexcollmap_elem_t *elem){
+    if(elem == NULL)return false;
+    return tile_c_is_special(elem->tile_c);
+}
+
+
 int hexcollmap_part_init(hexcollmap_part_t *part, int type,
     char part_c, char *filename, char *palmapper_name, int frame_offset);
 void hexcollmap_part_cleanup(hexcollmap_part_t *part);
@@ -115,6 +147,7 @@ void hexcollmap_cleanup(hexcollmap_t *collmap);
 int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
     char *name);
 void hexcollmap_dump(hexcollmap_t *collmap, FILE *f);
+void hexcollmap_write(hexcollmap_t *collmap, FILE *f, bool just_coll);
 int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
     bool just_coll);
 int hexcollmap_load(hexcollmap_t *collmap, const char *filename,
