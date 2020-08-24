@@ -29,6 +29,14 @@ typedef struct hexmap_recording {
     int frame_offset;
 } hexmap_recording_t;
 
+static const char *hexmap_recording_type_msg(int type){
+    switch(type){
+        case HEXMAP_RECORDING_TYPE_RECORDING: return "Recording";
+        case HEXMAP_RECORDING_TYPE_ACTOR: return "Actor";
+        default: return "Unknown";
+    }
+}
+
 void hexmap_recording_cleanup(hexmap_recording_t *recording);
 int hexmap_recording_init(hexmap_recording_t *recording, int type,
     char *filename, char *palmapper_name, int frame_offset);
@@ -147,7 +155,8 @@ void hexcollmap_cleanup(hexcollmap_t *collmap);
 int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
     char *name);
 void hexcollmap_dump(hexcollmap_t *collmap, FILE *f);
-void hexcollmap_write(hexcollmap_t *collmap, FILE *f, bool just_coll);
+void hexcollmap_write(hexcollmap_t *collmap, FILE *f,
+    bool just_coll, bool quiet);
 int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
     bool just_coll);
 int hexcollmap_load(hexcollmap_t *collmap, const char *filename,

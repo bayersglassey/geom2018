@@ -42,16 +42,34 @@ static hexcollmap_t *load_collmap(FILE *file, const char *filename){
 }
 
 
+static void print_help(){
+    fprintf(stderr, "Options:\n");
+    fprintf(stderr, "    --just_coll  "
+        "Only output the collmap's lines, no loading \"collmap:\" etc\n");
+    fprintf(stderr, " -x --extra      "
+        "Output extra info as fus comments (e.g. recordings, rendergraphs)\n");
+    fprintf(stderr, " -h --help       "
+        "Show this message\n");
+}
+
+
 int main(int n_args, char **args){
     bool just_coll = false;
+    bool quiet = true;
 
     /* Parse args */
     for(int i = 1; i < n_args; i++){
         const char *arg = args[i];
         if(!strcmp(arg, "--just_coll")){
             just_coll = true;
+        }else if(!strcmp(arg, "-x") || !strcmp(arg, "--extra")){
+            quiet = false;
+        }else if(!strcmp(arg, "-h") || !strcmp(arg, "--help")){
+            print_help();
+            return 0;
         }else{
             fprintf(stderr, "Unrecognized option: %s\n", arg);
+            print_help();
             return 1;
         }
     }
@@ -61,7 +79,7 @@ int main(int n_args, char **args){
     if(!collmap)return 2;
 
     /* Write collmap */
-    hexcollmap_write(collmap, stdout, just_coll);
+    hexcollmap_write(collmap, stdout, just_coll, quiet);
 
     return 0;
 }
