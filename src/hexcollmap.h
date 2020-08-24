@@ -21,14 +21,6 @@ enum hexmap_recording_type {
     HEXMAP_RECORDING_TYPE_ACTOR
 };
 
-typedef struct hexmap_recording {
-    int type; /* enum hexmap_recording_type */
-    char *filename;
-    char *palmapper_name;
-    trf_t trf;
-    int frame_offset;
-} hexmap_recording_t;
-
 static const char *hexmap_recording_type_msg(int type){
     switch(type){
         case HEXMAP_RECORDING_TYPE_RECORDING: return "Recording";
@@ -36,6 +28,14 @@ static const char *hexmap_recording_type_msg(int type){
         default: return "Unknown";
     }
 }
+
+typedef struct hexmap_recording {
+    int type; /* enum hexmap_recording_type */
+    char *filename;
+    char *palmapper_name;
+    trf_t trf;
+    int frame_offset;
+} hexmap_recording_t;
 
 void hexmap_recording_cleanup(hexmap_recording_t *recording);
 int hexmap_recording_init(hexmap_recording_t *recording, int type,
@@ -91,6 +91,15 @@ enum hexcollmap_part_type {
     HEXCOLLMAP_PART_TYPE_RECORDING,
     HEXCOLLMAP_PART_TYPE_RENDERGRAPH,
 };
+
+static const char *hexmap_part_type_msg(int type){
+    switch(type){
+        case HEXCOLLMAP_PART_TYPE_HEXCOLLMAP: return "Hexcollmap";
+        case HEXCOLLMAP_PART_TYPE_RECORDING: return "Recording";
+        case HEXCOLLMAP_PART_TYPE_RENDERGRAPH: return "Rendergraph";
+        default: return "Unknown";
+    }
+}
 
 typedef struct hexcollmap_part {
     int type; /* enum hexcollmap_part_type */
@@ -155,8 +164,14 @@ void hexcollmap_cleanup(hexcollmap_t *collmap);
 int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
     char *name);
 void hexcollmap_dump(hexcollmap_t *collmap, FILE *f);
+void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
+    bool just_coll, bool extra,
+    hexcollmap_part_t **parts, int parts_len);
 void hexcollmap_write(hexcollmap_t *collmap, FILE *f,
-    bool just_coll, bool quiet);
+    bool just_coll, bool extra);
+int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
+    bool just_coll,
+    hexcollmap_part_t ***parts_ptr, int *parts_len_ptr);
 int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
     bool just_coll);
 int hexcollmap_load(hexcollmap_t *collmap, const char *filename,

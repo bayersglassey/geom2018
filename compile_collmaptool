@@ -4,5 +4,5 @@ gcc -g -std=c99 \
     -o collmaptool \
     src/main_collmaptool.c \
     src/hexcollmap.c src/hexcollmap_parse.c src/geom.c src/hexspace.c \
-    src/lexer.c src/vars.c src/str_utils.c src/file_utils.c \
+    src/lexer.c src/write.c src/vars.c src/str_utils.c src/file_utils.c \
     $@

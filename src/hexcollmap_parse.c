@@ -656,8 +656,9 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
     return 0;
 }
 
-int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
-    bool just_coll
+int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
+    bool just_coll,
+    hexcollmap_part_t ***parts_ptr, int *parts_len_ptr
 ){
     int err;
 
@@ -843,9 +844,22 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
         collmap_lines[i] = NULL;}
     free(collmap_lines);
 
+    *parts_ptr = parts;
+    *parts_len_ptr = parts_len;
+    return 0;
+}
 
+
+int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
+    bool just_coll
+){
+    int err;
+
+    ARRAY_DECL(hexcollmap_part_t*, parts)
+    err = hexcollmap_parse_with_parts(collmap, lexer, just_coll,
+        &parts, &parts_len);
+    if(err)return err;
     ARRAY_FREE_PTR(hexcollmap_part_t*, parts, hexcollmap_part_cleanup)
 
     return 0;
 }
-

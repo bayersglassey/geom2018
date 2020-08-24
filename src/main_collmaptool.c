@@ -9,7 +9,10 @@
 #include "hexcollmap.h"
 
 
-static hexcollmap_t *load_collmap(FILE *file, const char *filename){
+static hexcollmap_t *load_collmap(FILE *file, const char *filename,
+    bool just_coll,
+    hexcollmap_part_t ***parts_ptr, int *parts_len_ptr
+){
     int err;
 
     char *buffer = read_stream(file, filename);
@@ -32,7 +35,8 @@ static hexcollmap_t *load_collmap(FILE *file, const char *filename){
         int err = fus_lexer_init(&lexer, buffer, filename);
         if(err)return NULL;
 
-        err = hexcollmap_parse(collmap, &lexer, false);
+        err = hexcollmap_parse_with_parts(collmap, &lexer, just_coll,
+            parts_ptr, parts_len_ptr);
         if(err)return NULL;
 
         fus_lexer_cleanup(&lexer);
@@ -45,7 +49,7 @@ static hexcollmap_t *load_collmap(FILE *file, const char *filename){
 static void print_help(){
     fprintf(stderr, "Options:\n");
     fprintf(stderr, "    --just_coll  "
-        "Only output the collmap's lines, no loading \"collmap:\" etc\n");
+        "Only parse/output the collmap's lines, no leading \"collmap:\" etc\n");
     fprintf(stderr, " -x --extra      "
         "Output extra info as fus comments (e.g. recordings, rendergraphs)\n");
     fprintf(stderr, " -h --help       "
@@ -55,7 +59,7 @@ static void print_help(){
 
 int main(int n_args, char **args){
     bool just_coll = false;
-    bool quiet = true;
+    bool extra = false;
 
     /* Parse args */
     for(int i = 1; i < n_args; i++){
@@ -63,7 +67,7 @@ int main(int n_args, char **args){
         if(!strcmp(arg, "--just_coll")){
             just_coll = true;
         }else if(!strcmp(arg, "-x") || !strcmp(arg, "--extra")){
-            quiet = false;
+            extra = true;
         }else if(!strcmp(arg, "-h") || !strcmp(arg, "--help")){
             print_help();
             return 0;
@@ -74,12 +78,24 @@ int main(int n_args, char **args){
         }
     }
 
+    hexcollmap_part_t **parts;
+    int parts_len;
+
     /* Load collmap */
-    hexcollmap_t *collmap = load_collmap(stdin, "<stdin>");
+    hexcollmap_t *collmap = load_collmap(stdin, "<stdin>", just_coll,
+        &parts, &parts_len);
     if(!collmap)return 2;
 
     /* Write collmap */
-    hexcollmap_write(collmap, stdout, just_coll, quiet);
+    hexcollmap_write_with_parts(collmap, stdout, just_coll, extra,
+        parts, parts_len);
+
+    /* Cleanup */
+    for(int i = 0; i < parts_len; i++){
+        hexcollmap_part_cleanup(parts[i]);
+        free(parts[i]);
+    }
+    free(parts);
 
     return 0;
 }

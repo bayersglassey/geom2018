@@ -9,6 +9,7 @@
 #include "file_utils.h"
 #include "hexcollmap.h"
 #include "lexer.h"
+#include "write.h"
 #include "geom.h"
 #include "hexspace.h"
 
@@ -136,20 +137,62 @@ static char _write_face(char tile_c){
         (tile_c_is_special(tile_c)? tile_c: '*'): ' ';
 }
 
-void hexcollmap_write(hexcollmap_t *collmap, FILE *f,
-    bool just_coll, bool quiet
+void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
+    bool just_coll, bool extra,
+    hexcollmap_part_t **parts, int parts_len
 ){
     /* Writes it so you can hopefully more or less read it back again */
 
     const char *tabs = "";
     if(!just_coll){
-        fprintf(f, "parts:\n");
+        if(parts){
+            fprintf(f, "parts:\n");
+            for(int i = 0; i < parts_len; i++){
+                hexcollmap_part_t *part = parts[i];
+                char part_c_str[2] = {part->part_c, '\0'};
+                fputs("    ", f);
+                fus_write_str(f, part_c_str);
+                fputs(": ", f);
+
+                if(part->type == HEXCOLLMAP_PART_TYPE_RECORDING){
+                    fputs("recording ", f);
+                }else if(part->type == HEXCOLLMAP_PART_TYPE_RENDERGRAPH){
+                    fputs("shape ", f);
+                }
+
+                if(part->filename){
+                    fus_write_str(f, part->filename);
+                }else{
+                    fputs("empty", f);
+                }
+
+                {
+                    trf_t *trf = &part->trf;
+                    if(trf->rot)fprintf(f, " ^%i", trf->rot);
+                    if(trf->flip)fputs(" ~", f);
+                    if(part->draw_z)fprintf(f, " |%i", part->draw_z);
+                }
+
+                if(part->palmapper_name){
+                    fputc(' ', f);
+                    fus_write_str(f, part->palmapper_name);
+                }else if(part->frame_offset){
+                    fputs(" empty", f);
+                }
+
+                if(part->frame_offset){
+                    fprintf(f, " %i", part->frame_offset);
+                }
+
+                fputc('\n', f);
+            }
+        }
 
         //fprintf(f, "default_vert: ...");
         //fprintf(f, "default_edge: ...");
         //fprintf(f, "default_face: ...");
 
-        if(!quiet)
+        if(extra)
         for(int i = 0; i < collmap->recordings_len; i++){
             hexmap_recording_t *recording = collmap->recordings[i];
             fprintf(f, "# %s:\n",
@@ -167,7 +210,7 @@ void hexcollmap_write(hexcollmap_t *collmap, FILE *f,
             fprintf(f, "#     frame_offset: %i\n", recording->frame_offset);
         }
 
-        if(!quiet)
+        if(extra)
         for(int i = 0; i < collmap->rendergraphs_len; i++){
             hexmap_rendergraph_t *rgraph = collmap->rendergraphs[i];
             fprintf(f, "# rendergraph:\n");
@@ -224,6 +267,12 @@ void hexcollmap_write(hexcollmap_t *collmap, FILE *f,
         }
         fputc('\n', f);
     }
+}
+
+void hexcollmap_write(hexcollmap_t *collmap, FILE *f,
+    bool just_coll, bool extra
+){
+    hexcollmap_write_with_parts(collmap, f, just_coll, extra, NULL, 0);
 }
 
 int hexcollmap_load(hexcollmap_t *collmap, const char *filename,
