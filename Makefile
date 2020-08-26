@@ -1,34 +1,19 @@
 
-CFLAGS += -g -rdynamic -std=c99 \
+CFLAGS += -O2 -g -rdynamic -std=c99 \
  `sdl2-config --libs --cflags` \
  -Wall -Werror -Wno-unused -Wno-missing-braces -Wno-tautological-compare -Wno-parentheses \
  -DGEOM_HEXGAME_DEBUG_FRAMERATE -D_WANT_STRNLEN -D_WANT_STRNDUP
 
-PROGS = collmaptool lexertest frozenstringtest hexpicturetest demo
+PROGS = \
+ bin/collmaptool bin/hexpicturetest bin/sdltest bin/directorytest \
+ bin/demo
 
-.PHONY: all clean
+TESTS = \
+ bin/lexertest bin/frozenstringtest bin/geomtest bin/stringstoretest bin/varstest
 
-all: $(PROGS)
+PROGS += $(TESTS)
 
-clean:
-	rm -f src/*.o $(PROGS)
-
-collmaptool: src/main_collmaptool.o \
- src/hexcollmap.o src/hexcollmap_parse.o src/geom.o src/hexspace.o \
- src/lexer.o src/write.o src/vars.o src/str_utils.o src/file_utils.o
-	$(CC) $(CFLAGS) -o $@ $^
-
-lexertest: src/main_lexertest.o \
- src/lexer.o src/vars.o src/str_utils.o
-	$(CC) $(CFLAGS) -o $@ $^
-
-frozenstringtest: src/main_frozen_string_test.o src/frozen_string.o
-	$(CC) $(CFLAGS) -o $@ $^
-
-hexpicturetest: src/main_hexpicture.o src/hexpicture.o
-	$(CC) $(CFLAGS) -o $@ $^
-
-demo: src/main_demo.o \
+OFILES = \
  src/anim.o src/hexmap.o src/hexcollmap.o src/hexcollmap_parse.o src/hexmap_submap_create_rgraph.o \
  src/util.o src/str_utils.o src/file_utils.o src/lexer.o src/write.o src/stringstore.o src/vars.o \
  src/geom.o src/vec4.o src/hexspace.o src/bounds.o src/location.o \
@@ -43,4 +28,53 @@ demo: src/main_demo.o \
  src/prismelrenderer.o src/prismelrenderer_parse.o \
  src/hexpicture.o \
  src/rendergraph.o src/sdl_util.o src/generic_printf.o
+
+.PHONY: all clean check www
+
+all: $(PROGS)
+
+clean:
+	rm -f src/*.o $(PROGS)
+
+check: $(TESTS)
+	./runtests.sh $(TESTS)
+
+bin/collmaptool: src/main_collmaptool.o $(OFILES)
+	mkdir -p bin
+	$(CC) $(CFLAGS) -o $@ $^
+
+bin/lexertest: src/main_lexertest.o $(OFILES)
+	mkdir -p bin
+	$(CC) $(CFLAGS) -o $@ $^
+
+bin/frozenstringtest: src/main_frozen_string_test.o src/frozen_string.o
+	mkdir -p bin
+	$(CC) $(CFLAGS) -o $@ $^
+
+bin/geomtest: src/main_geomtest.o $(OFILES)
+	mkdir -p bin
+	$(CC) $(CFLAGS) -o $@ $^
+
+bin/stringstoretest: src/main_stringstoretest.o src/stringstore.o
+	mkdir -p bin
+	$(CC) $(CFLAGS) -o $@ $^
+
+bin/varstest: src/main_varstest.o src/vars.o
+	mkdir -p bin
+	$(CC) $(CFLAGS) -o $@ $^
+
+bin/hexpicturetest: src/main_hexpicture.o src/hexpicture.o
+	mkdir -p bin
+	$(CC) $(CFLAGS) -o $@ $^
+
+bin/sdltest: src/main_sdltest.o src/util.o src/file_utils.o
+	mkdir -p bin
+	$(CC) $(CFLAGS) -o $@ $^
+
+bin/directorytest: src/main_directorytest.o src/directory.o src/directory_shell.o $(OFILES)
+	mkdir -p bin
+	$(CC) $(CFLAGS) -o $@ $^
+
+bin/demo: src/main_demo.o $(OFILES)
+	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^

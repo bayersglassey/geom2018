@@ -1,7 +1,6 @@
 set -e
 
-TARGET="$1"
-shift
+TARGET="emcc"
 
 RELEASE=0
 if [ "$1" = "release" ]
@@ -34,19 +33,7 @@ SOURCES+=" src/prismelrenderer.c src/prismelrenderer_parse.c"
 SOURCES+=" src/hexpicture.c"
 SOURCES+=" src/rendergraph.c src/sdl_util.c src/generic_printf.c"
 
-if [ "$TARGET" = "bin" ]
-then
-    CC="gcc"
-    OUTFILE="main"
-    CFLAGS+=" `sdl2-config --libs --cflags`"
-    CFLAGS+=" -DGEOM_HEXGAME_DEBUG_FRAMERATE -D_WANT_STRNLEN -D_WANT_STRNDUP"
-    if [ "$RELEASE" = 1 ]
-    then
-        CFLAGS+=" -O2"
-    else
-        CFLAGS+=" -O0 -g -rdynamic"
-    fi
-elif [ "$TARGET" = "emcc" ]
+if [ "$TARGET" = "emcc" ]
 then
     CC="emcc"
     OUTFILE="main.html"

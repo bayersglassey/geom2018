@@ -1,10 +1,6 @@
 # executables
 /main
-/demo
-/collmaptool
-/lexertest
-/frozenstringtest
-/hexpicturetest
+/bin/*
 
 # gcc stuff
 /src/*.o

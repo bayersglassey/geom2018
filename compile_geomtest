@@ -1,6 +1,0 @@
-
-gcc -g -std=c99 \
-    -Wall -Werror -Wno-unused \
-    -o main \
-    src/main_geomtest.c src/geom.c src/vec4.c src/hexspace.c src/lexer.c src/bounds.c \
-    $@
