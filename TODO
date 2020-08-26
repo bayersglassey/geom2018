@@ -515,12 +515,6 @@ Aug 6, 2020:
 * Aiming up should be a "special ability" of some spider variant.
 
 
-Aug 21, 2020:
--------------
-
-* Convert to Makefile plz
-
-
 Aug 23, 2020:
 -------------
 
@@ -552,4 +546,6 @@ Aug 25, 2020:
 -------------
 
 * Split geom_lexer.c off from geom.c?.. otherwise geom.c depends on lexer.c which is silly.
+
+* Fix our weirdo "touching savepoint" code... these days we can save your anim+state+pos+rot+turn, so just use hitbox.
 
