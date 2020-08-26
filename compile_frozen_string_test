@@ -1,1 +1,0 @@
-gcc -g -o main src/main_frozen_string_test.c src/frozen_string.c

@@ -1,9 +1,23 @@
+# executables
 /main
+/demo
 /collmaptool
-/gmon.out
+/lexertest
+/frozenstringtest
+/hexpicturetest
+
+# gcc stuff
+/src/*.o
+
+# demo stuff
 /respawn*.txt
 /data/rec???.fus
+
+# deploy stuff
 /ip.sh
+
+# gprof stuff
+/gmon.out
 
 # EMCC files (should be removed by _compile_demo)
 #/main.js

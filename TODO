@@ -546,3 +546,10 @@ Aug 23, 2020:
     * jungle_aiplayer gets crushed by birds :'(
         * Add a special "invincible" thing to bodies?..
         * (Currently just implicit when body->recording is playing...)
+
+
+Aug 25, 2020:
+-------------
+
+* Split geom_lexer.c off from geom.c?.. otherwise geom.c depends on lexer.c which is silly.
+
