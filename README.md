@@ -18,7 +18,7 @@ The game demo has sprouted from it, and come to overshadow the library...
 
 ## How to compile & run the game
 
-``./compile_demo && ./main`` should do the trick (if you have gcc).
+``make && ./bin/demo`` should do the trick (if you have gcc).
 You'll need the [SDL2](https://www.libsdl.org/) development/runtime libraries for your OS.
 
 Once the game is running, use the arrow keys to move, Escape to quit.
