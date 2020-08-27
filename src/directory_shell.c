@@ -37,8 +37,8 @@ int directory_shell_process_line(directory_shell_t *shell){
         }else{
             shell->path_parts_len = 0;
         }
-        directory_entry_t *entry = directory_entry_find_path(
-            shell->root, shell->path, shell->path_parts_len);
+        directory_entry_t _entry, *entry = directory_entry_find_path(
+            shell->root, shell->path, shell->path_parts_len, &_entry);
         if(!entry){
             fprintf(stderr, "Entry not found\n");
         }else if(!entry->class->list){
@@ -50,6 +50,7 @@ int directory_shell_process_line(directory_shell_t *shell){
                 for(int i = 0; i < list.entries_len; i++){
                     directory_entry_t *entry = &list.entries[i];
                     fputs(entry->name, stdout);
+                    if(entry->class->list)putc('/', stdout);
                     fputc('\n', stdout);
                 }
                 if(list.entries_len < DIRECTORY_LIST_ENTRIES)break;

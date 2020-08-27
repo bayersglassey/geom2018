@@ -31,6 +31,15 @@ typedef struct directory_list {
 } directory_list_t;
 
 
+static void directory_entry_init(directory_entry_t *entry,
+    directory_entry_class_t *class, const char *name, void *self
+){
+    entry->class = class;
+    entry->name = name;
+    entry->self = self;
+}
+
+
 int directory_name_match(
     const char *name, const char *name2);
 int directory_name_match_glob(
@@ -40,7 +49,8 @@ void directory_parse_path(
 directory_entry_t *directory_list_find_name(
     directory_list_t *list, const char *name);
 directory_entry_t *directory_entry_find_path(
-    directory_entry_t *root, const char *path, int path_parts_len);
+    directory_entry_t *root, const char *path, int path_parts_len,
+    directory_entry_t *entry_ptr);
 
 
 #endif

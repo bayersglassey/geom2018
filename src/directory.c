@@ -102,13 +102,20 @@ directory_entry_t *directory_list_find_name(
 }
 
 directory_entry_t *directory_entry_find_path(
-    directory_entry_t *root, const char *path, int path_parts_len
+    directory_entry_t *root, const char *path, int path_parts_len,
+    directory_entry_t *entry_ptr
 ){
+    /* If found, assigns to *entry_ptr and returns entry_ptr.
+    Otherwise, returns NULL. */
+
     directory_list_t list;
 
     while(1){
         /* If path indicates root, return it */
-        if(path_parts_len == 0)return root;
+        if(path_parts_len == 0){
+            *entry_ptr = *root;
+            return entry_ptr;
+        }
 
         /* If root isn't a directory, no match */
         if(!root->class->list)return NULL;
