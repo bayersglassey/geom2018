@@ -14,20 +14,24 @@ TESTS = \
 PROGS += $(TESTS)
 
 OFILES = \
- src/anim.o src/hexmap.o src/hexcollmap.o src/hexcollmap_parse.o src/hexmap_submap_create_rgraph.o \
- src/util.o src/str_utils.o src/file_utils.o src/lexer.o src/write.o src/stringstore.o src/vars.o \
+ src/hexcollmap.o src/hexcollmap_parse.o \
+ src/str_utils.o src/file_utils.o src/lexer.o src/write.o src/stringstore.o src/vars.o \
  src/geom.o src/vec4.o src/hexspace.o src/bounds.o src/location.o \
- src/font.o src/sdlfont.o src/geomfont.o src/console.o \
+ src/font.o src/console.o \
+ src/hexpicture.o src/generic_printf.o
+
+SDL_OFILES = \
+ src/prismelrenderer.o src/prismelrenderer_parse.o \
+ src/rendergraph.o src/anim.o src/util.o src/sdl_util.o \
+ src/sdlfont.o src/geomfont.o \
+ src/hexmap.o src/hexmap_submap_create_rgraph.o \
+ src/hexgame.o src/hexgame_body.o src/hexgame_player.o src/hexgame_recording.o \
+ src/hexgame_state.o src/hexgame_actor.o \
  src/test_app.o src/test_app_console.o src/test_app_game.o src/test_app_editor.o \
- src/test_app_list.o src/test_app_commands.o src/hexgame.o \
+ src/test_app_list.o src/test_app_commands.o \
  src/test_app_list_choices.o src/test_app_list_maps.o src/test_app_list_submaps.o \
  src/test_app_list_bodies.o src/test_app_list_players.o src/test_app_list_actors.o \
- src/test_app_list_recording.o src/test_app_list_utils.o \
- src/hexgame_body.o src/hexgame_player.o src/hexgame_recording.o src/hexgame_state.o \
- src/hexgame_actor.o \
- src/prismelrenderer.o src/prismelrenderer_parse.o \
- src/hexpicture.o \
- src/rendergraph.o src/sdl_util.o src/generic_printf.o
+ src/test_app_list_recording.o src/test_app_list_utils.o
 
 .PHONY: all clean check www
 
@@ -75,6 +79,6 @@ bin/directorytest: src/main_directorytest.o src/directory.o src/directory_shell.
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^
 
-bin/demo: src/main_demo.o $(OFILES)
+bin/demo: src/main_demo.o $(OFILES) $(SDL_OFILES)
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^
