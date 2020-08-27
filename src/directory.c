@@ -4,6 +4,9 @@
 
 #include "directory.h"
 
+directory_entry_class_t directory_entry_class_dummy = {
+    .list = NULL,
+};
 
 
 int directory_name_match(

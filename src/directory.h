@@ -39,6 +39,8 @@ static void directory_entry_init(directory_entry_t *entry,
     entry->self = self;
 }
 
+extern directory_entry_class_t directory_entry_class_dummy;
+
 
 int directory_name_match(
     const char *name, const char *name2);
