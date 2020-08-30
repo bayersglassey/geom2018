@@ -39,6 +39,7 @@ int main(int n_args, char *args[]){
     bool use_textures = false;
     bool cache_bitmaps = true;
     int n_players = 2;
+    int n_players_playing = 1;
 
     /* The classic */
     srand(time(0));
@@ -90,6 +91,7 @@ int main(int n_args, char *args[]){
                 return 2;}
             arg = args[arg_i];
             n_players = atoi(arg);
+            n_players_playing = n_players;
             fprintf(stderr, "Number of players set to %i\n", n_players);
         }else{
             fprintf(stderr, "Unrecognized option: %s\n", arg);
@@ -122,7 +124,7 @@ int main(int n_args, char *args[]){
                 if(test_app_init(&app, SCW, SCH, DELAY_GOAL,
                     window, renderer, prend_filename, stateset_filename,
                     hexmap_filename, submap_filename, minimap_alt,
-                    use_textures, cache_bitmaps, n_players)
+                    use_textures, cache_bitmaps, n_players, n_players_playing)
                 ){
                     e = 1;
                     fprintf(stderr, "Couldn't init test app\n");

@@ -82,7 +82,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
     const char *stateset_filename, const char *hexmap_filename,
     const char *submap_filename, bool minimap_alt, bool use_textures,
-    bool cache_bitmaps, int n_players
+    bool cache_bitmaps, int n_players, int n_players_playing
 ){
     int err;
 
@@ -224,7 +224,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     /* Player 0 gets a body right off the bat, everyone else has to
     wait for him to choose multiplayer mode.
     (See set_players_callback) */
-    err = test_app_set_players(app, 1);
+    err = test_app_set_players(app, n_players_playing);
     if(err)return err;
 
     {
