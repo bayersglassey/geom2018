@@ -9,7 +9,7 @@ PROGS = \
  bin/prendtool bin/demo
 
 TESTS = \
- bin/lexertest bin/frozenstringtest bin/geomtest bin/stringstoretest bin/varstest
+ bin/lexertest bin/lexertool bin/frozenstringtest bin/geomtest bin/stringstoretest bin/varstest
 
 PROGS += $(TESTS)
 
@@ -48,6 +48,10 @@ bin/collmaptool: src/main_collmaptool.o $(OFILES)
 	$(CC) $(CFLAGS) -o $@ $^
 
 bin/lexertest: src/main_lexertest.o $(OFILES)
+	mkdir -p bin
+	$(CC) $(CFLAGS) -o $@ $^
+
+bin/lexertool: src/main_lexertool.o $(OFILES)
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^
 

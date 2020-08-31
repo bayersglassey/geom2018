@@ -2,6 +2,7 @@
 #define _FUS_WRITE_H_
 
 
+void fus_nwrite_str(FILE *f, const char *s, int n);
 void fus_write_str(FILE *f, const char *s);
 void fus_write_str_padded(FILE *f, const char *s, int w);
 
