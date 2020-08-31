@@ -165,10 +165,10 @@ int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
     char *name);
 void hexcollmap_dump(hexcollmap_t *collmap, FILE *f);
 void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
-    bool just_coll, bool extra, bool nodots,
+    bool just_coll, bool extra, bool nodots, bool eol_semicolons,
     hexcollmap_part_t **parts, int parts_len);
 void hexcollmap_write(hexcollmap_t *collmap, FILE *f,
-    bool just_coll, bool extra, bool nodots);
+    bool just_coll, bool extra, bool nodots, bool eol_semicolons);
 int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
     bool just_coll,
     hexcollmap_part_t ***parts_ptr, int *parts_len_ptr);

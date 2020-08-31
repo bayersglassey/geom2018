@@ -138,7 +138,7 @@ static char _write_face(char tile_c){
 }
 
 void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
-    bool just_coll, bool extra, bool nodots,
+    bool just_coll, bool extra, bool nodots, bool eol_semicolons,
     hexcollmap_part_t **parts, int parts_len
 ){
     /* Writes it so you can hopefully more or less read it back again */
@@ -251,6 +251,7 @@ void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
                 _write_edge(tile->edge[1].tile_c, '/'),
                 _write_face(tile->face[0].tile_c));
         }
+        if(eol_semicolons)fputc(';', f);
         fputc('\n', f);
 
         //  . -
@@ -268,15 +269,16 @@ void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
                 is_origin? ')': ' ',
                 _write_edge(tile->edge[0].tile_c, '-'));
         }
+        if(eol_semicolons)fputc(';', f);
         fputc('\n', f);
     }
 }
 
 void hexcollmap_write(hexcollmap_t *collmap, FILE *f,
-    bool just_coll, bool extra, bool nodots
+    bool just_coll, bool extra, bool nodots, bool eol_semicolons
 ){
     hexcollmap_write_with_parts(collmap, f,
-        just_coll, extra, nodots, NULL, 0);
+        just_coll, extra, nodots, eol_semicolons, NULL, 0);
 }
 
 int hexcollmap_load(hexcollmap_t *collmap, const char *filename,

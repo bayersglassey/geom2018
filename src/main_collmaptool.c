@@ -48,13 +48,15 @@ static hexcollmap_t *load_collmap(FILE *file, const char *filename,
 
 static void print_help(){
     fprintf(stderr, "Options:\n");
-    fprintf(stderr, "    --just_coll  "
+    fprintf(stderr, "    --just_coll      "
         "Only parse/output the collmap's lines, no leading \"collmap:\" etc\n");
-    fprintf(stderr, " -x --extra      "
+    fprintf(stderr, " -x --extra          "
         "Output extra info as fus comments (e.g. recordings, rendergraphs)\n");
-    fprintf(stderr, " -d --nodots     "
+    fprintf(stderr, " -d --nodots         "
         "Invisible verts are displayed as ' ' not '.'\n");
-    fprintf(stderr, " -h --help       "
+    fprintf(stderr, " -e --eol_semicolons "
+        "Semicolons written to end of each line marking end of tile data.\n");
+    fprintf(stderr, " -h --help           "
         "Show this message\n");
 }
 
@@ -63,6 +65,7 @@ int main(int n_args, char **args){
     bool just_coll = false;
     bool extra = false;
     bool nodots = false;
+    bool eol_semicolons = false;
 
     /* Parse args */
     for(int i = 1; i < n_args; i++){
@@ -73,6 +76,8 @@ int main(int n_args, char **args){
             extra = true;
         }else if(!strcmp(arg, "-d") || !strcmp(arg, "--nodots")){
             nodots = true;
+        }else if(!strcmp(arg, "-e") || !strcmp(arg, "--eol_semicolons")){
+            eol_semicolons = true;
         }else if(!strcmp(arg, "-h") || !strcmp(arg, "--help")){
             print_help();
             return 0;
@@ -92,7 +97,8 @@ int main(int n_args, char **args){
     if(!collmap)return 2;
 
     /* Write collmap */
-    hexcollmap_write_with_parts(collmap, stdout, just_coll, extra, nodots,
+    hexcollmap_write_with_parts(collmap, stdout,
+        just_coll, extra, nodots, eol_semicolons,
         parts, parts_len);
 
     /* Cleanup */

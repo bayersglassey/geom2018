@@ -300,7 +300,7 @@ static int _hexcollmap_parse_lines_origin(
                 ox = x + 1;
                 oy = y;
                 x += 2;
-            }else if(c == '['){
+            }else if(c == '[' || c == ';'){
                 /* next line plz, "tilebuckets" don't affect the origin */
                 break;
             }else if(!elem_type){
@@ -351,7 +351,7 @@ static int _hexcollmap_parse_lines_bounds(
                 map_b = _max(map_b, my);
                 map_l = _min(map_l, mx);
                 map_r = _max(map_r, mx);
-            }else if(c == '['){
+            }else if(c == '[' || c == ';'){
                 /* next line plz, "tilebuckets" don't affect bounds */
                 break;
             }
@@ -595,6 +595,9 @@ static int _hexcollmap_parse_lines_tiles(hexcollmap_t *collmap,
                     }
                 }
 
+            }else if(c == ';'){
+                /* Explicit end of tile data */
+                break;
             }else if(c == '['){
                 /* We hit a tilebucket, so no more regular tile data on
                 this line. Next plz! */
