@@ -1,13 +1,13 @@
 
 # Expected vars:
-# ANIM_NS (str), e.g. "hexagon_", ""
-# RGRAPH_NS (str), e.g. "hexagonplayer_", ""
+# ANIM_NS (str), e.g. "hexroller_", ""
+# RGRAPH_NS (str), e.g. "hexrollerplayer_", ""
 # R0, R1, R5 (str), e.g. "", "_R1", ..., "_R5"
 
 
 
 $SUFFIX R0 $PREFIX ANIM_NS stand:
-    rgraph: $SUFFIX R0 $PREFIX RGRAPH_NS "hexagon"
+    rgraph: $SUFFIX R0 $PREFIX RGRAPH_NS "hexroller"
     hitbox:
         ;;   .   .
         ;;   *\*/*
