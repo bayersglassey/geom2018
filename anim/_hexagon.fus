@@ -1,0 +1,43 @@
+
+# Expected vars:
+# ANIM_NS (str), e.g. "hexagon_", ""
+# RGRAPH_NS (str), e.g. "hexagonplayer_", ""
+# R0, R1, R5 (str), e.g. "", "_R1", ..., "_R5"
+
+
+
+$SUFFIX R0 $PREFIX ANIM_NS stand:
+    rgraph: $SUFFIX R0 $PREFIX RGRAPH_NS "hexagon"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+
+    if:
+        key: not isdown b
+        key: isdown f
+        coll: any yes
+            ;; ( )  +
+    then:
+        move: 1 0
+        rot: 1
+        goto immediate: $SUFFIX R5 $PREFIX ANIM_NS stand
+
+    if:
+        key: not isdown b
+        key: isdown f
+        coll: all no
+            ;; ( )  +
+    then:
+        rot: -1
+        delay: $GET_INT DELAY
+
+    if:
+        key: not isdown f
+        key: isdown b
+    then:
+        rot: -1
+        turn
+        delay: $GET_INT DELAY

@@ -1,0 +1,36 @@
+
+# Expected vars:
+# ANIM_NS (str), e.g. "hexagon_", ""
+# RGRAPH_NS (str), e.g. "hexagonplayer_", ""
+
+$SET_STR ANIM_NS ""
+$SET_STR RGRAPH_NS ""
+
+
+$SET_INT DELAY 1
+
+
+$SET_STR R0 ""
+$SET_STR R1 "_R1"
+$SET_STR R5 "_R5"
+import "anim/_hexagon.fus"
+$SET_STR R0 "_R1"
+$SET_STR R1 "_R2"
+$SET_STR R5 ""
+import "anim/_hexagon.fus"
+$SET_STR R0 "_R2"
+$SET_STR R1 "_R3"
+$SET_STR R5 "_R1"
+import "anim/_hexagon.fus"
+$SET_STR R0 "_R3"
+$SET_STR R1 "_R4"
+$SET_STR R5 "_R2"
+import "anim/_hexagon.fus"
+$SET_STR R0 "_R4"
+$SET_STR R1 "_R5"
+$SET_STR R5 "_R3"
+import "anim/_hexagon.fus"
+$SET_STR R0 "_R5"
+$SET_STR R1 ""
+$SET_STR R5 "_R4"
+import "anim/_hexagon.fus"

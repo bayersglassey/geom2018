@@ -1,0 +1,47 @@
+
+# Expected vars:
+# NS (str), e.g. "player_", ""
+
+$SET_STR NS ""
+
+shapes:
+
+    $PREFIX NS "_hexagon":
+        shapes:
+            : "map_vert0" (0 0 0 0)  0 f
+            : "map_edge1" (0 0 0 0)  0 f
+            : "map_edge1" (0 0 0 0)  2 f
+            : "map_edge0" (0 0 0 0)  4 f
+            : "map_edge0" (0 0 0 0)  6 f
+            : "map_edge0" (0 0 0 0)  8 f
+            : "map_edge0" (0 0 0 0) 10 f
+            : "map_face1" (0 0 0 0)  0 f
+            : "map_face1" (0 0 0 0)  2 f
+            : "map_face0" (0 0 0 0)  4 f
+            : "map_face0" (0 0 0 0)  6 f
+            : "map_face0" (0 0 0 0)  8 f
+            : "map_face0" (0 0 0 0) 10 f
+
+    $PREFIX NS "hexagon":
+        shapes:
+            : "_hexagon" ( 0  1  3  1)  0 f
+
+    $PREFIX NS "hexagon_R1":
+        shapes:
+            : "_hexagon" ( 0  1  3  1)  2 f
+
+    $PREFIX NS "hexagon_R2":
+        shapes:
+            : "_hexagon" ( 0  1  3  1)  4 f
+
+    $PREFIX NS "hexagon_R3":
+        shapes:
+            : "_hexagon" ( 0  1  3  1)  6 f
+
+    $PREFIX NS "hexagon_R4":
+        shapes:
+            : "_hexagon" ( 0  1  3  1)  8 f
+
+    $PREFIX NS "hexagon_R5":
+        shapes:
+            : "_hexagon" ( 0  1  3  1) 10 f
