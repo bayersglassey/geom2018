@@ -1,6 +1,6 @@
 
 stand_r0:
-    rgraph: "hexroller_r0"
+    rgraph: "bubblecar_r0"
     collmsgs: "crush"
     hitbox:
         ;;                 .   .
@@ -95,7 +95,7 @@ stand_r0:
         delay: 4
 
 stand_r1:
-    rgraph: "hexroller_r1"
+    rgraph: "bubblecar_r1"
     collmsgs: "crush"
     hitbox:
         ;;                 .   .
@@ -190,7 +190,7 @@ stand_r1:
         delay: 4
 
 stand_r2:
-    rgraph: "hexroller_r2"
+    rgraph: "bubblecar_r2"
     collmsgs: "crush"
     hitbox:
         ;;                 .   .
@@ -285,7 +285,7 @@ stand_r2:
         delay: 4
 
 stand_r3:
-    rgraph: "hexroller_r3"
+    rgraph: "bubblecar_r3"
     collmsgs: "crush"
     hitbox:
         ;;                 .   .

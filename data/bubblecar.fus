@@ -35,14 +35,14 @@ shapes:
     #   X = ( 3  2  0 -1)
     #   Y = (-3 -1  3  2)
 
-    "hexroller_hex0_sixth":
+    "bubblecar_hex0_sixth":
         shapes:
             : "map_edge0" ( 0  0  0  0)  0 f
 
             : "map_vert0" ( 3  2  0 -1)  0 f
             : "map_edge0" ( 3  2  0 -1)  4 f
 
-    "hexroller_hex1_sixth":
+    "bubblecar_hex1_sixth":
         shapes:
             : "map_edge0" ( 0  0  0  0)  0 f
             : "map_face0" ( 0  0  0  0)  0 f
@@ -50,7 +50,7 @@ shapes:
             #: "map_vert0" ( 3  2  0 -1)  0 f
             #: "map_edge0" ( 3  2  0 -1)  4 f
 
-    "hexroller_hex2_sixth":
+    "bubblecar_hex2_sixth":
         shapes:
             : "map_edge1" ( 0  0  0  0)  0 f
             : "map_face1" ( 0  0  0  0)  0 f
@@ -58,122 +58,122 @@ shapes:
             : "map_vert1" ( 3  2  0 -1)  0 f
             : "map_edge1" ( 3  2  0 -1)  4 f
 
-    "hexroller_hex0":
+    "bubblecar_hex0":
         shapes:
             : "map_vert0" ( 0  0  0  0)  0 f
-            : "hexroller_hex0_sixth" ( 0  0  0  0)  0 f
-            : "hexroller_hex0_sixth" ( 0  0  0  0)  2 f
-            : "hexroller_hex0_sixth" ( 0  0  0  0)  4 f
-            : "hexroller_hex0_sixth" ( 0  0  0  0)  6 f
-            : "hexroller_hex0_sixth" ( 0  0  0  0)  8 f
-            : "hexroller_hex0_sixth" ( 0  0  0  0) 10 f
+            : "bubblecar_hex0_sixth" ( 0  0  0  0)  0 f
+            : "bubblecar_hex0_sixth" ( 0  0  0  0)  2 f
+            : "bubblecar_hex0_sixth" ( 0  0  0  0)  4 f
+            : "bubblecar_hex0_sixth" ( 0  0  0  0)  6 f
+            : "bubblecar_hex0_sixth" ( 0  0  0  0)  8 f
+            : "bubblecar_hex0_sixth" ( 0  0  0  0) 10 f
 
-    "hexroller_hex1":
+    "bubblecar_hex1":
         shapes:
             : "map_vert0" ( 0  0  0  0)  0 f
-            : "hexroller_hex1_sixth" ( 0  0  0  0)  0 f
-            : "hexroller_hex1_sixth" ( 0  0  0  0)  2 f
-            : "hexroller_hex1_sixth" ( 0  0  0  0)  4 f
-            : "hexroller_hex1_sixth" ( 0  0  0  0)  6 f
-            : "hexroller_hex1_sixth" ( 0  0  0  0)  8 f
-            : "hexroller_hex1_sixth" ( 0  0  0  0) 10 f
+            : "bubblecar_hex1_sixth" ( 0  0  0  0)  0 f
+            : "bubblecar_hex1_sixth" ( 0  0  0  0)  2 f
+            : "bubblecar_hex1_sixth" ( 0  0  0  0)  4 f
+            : "bubblecar_hex1_sixth" ( 0  0  0  0)  6 f
+            : "bubblecar_hex1_sixth" ( 0  0  0  0)  8 f
+            : "bubblecar_hex1_sixth" ( 0  0  0  0) 10 f
 
-    "hexroller_hex2":
+    "bubblecar_hex2":
         shapes:
             : "map_vert1" ( 0  0  0  0)  0 f
-            : "hexroller_hex2_sixth" ( 0  0  0  0)  0 f
-            : "hexroller_hex2_sixth" ( 0  0  0  0)  2 f
-            : "hexroller_hex2_sixth" ( 0  0  0  0)  4 f
-            : "hexroller_hex2_sixth" ( 0  0  0  0)  6 f
-            : "hexroller_hex2_sixth" ( 0  0  0  0)  8 f
-            : "hexroller_hex2_sixth" ( 0  0  0  0) 10 f
+            : "bubblecar_hex2_sixth" ( 0  0  0  0)  0 f
+            : "bubblecar_hex2_sixth" ( 0  0  0  0)  2 f
+            : "bubblecar_hex2_sixth" ( 0  0  0  0)  4 f
+            : "bubblecar_hex2_sixth" ( 0  0  0  0)  6 f
+            : "bubblecar_hex2_sixth" ( 0  0  0  0)  8 f
+            : "bubblecar_hex2_sixth" ( 0  0  0  0) 10 f
 
-    "hexroller_sixth0":
+    "bubblecar_sixth0":
         shapes:
-            : "hexroller_hex0"
+            : "bubblecar_hex0"
                 eval: ( 3  2  0 -1) * -2 + (-3 -1  3  2) * -4
                 0 f
-    "hexroller_sixth0b":
+    "bubblecar_sixth0b":
         shapes:
-            : "hexroller_hex0"
+            : "bubblecar_hex0"
                 eval: ( 3  2  0 -1) *  0 + (-3 -1  3  2) * -3
                 0 f
 
-    "hexroller_sixth1":
+    "bubblecar_sixth1":
         shapes:
-            : "hexroller_hex0"
+            : "bubblecar_hex0"
                 eval: ( 3  2  0 -1) * -2 + (-3 -1  3  2) * -4
                 0 f
-    "hexroller_sixth1b":
+    "bubblecar_sixth1b":
         shapes:
-            : "hexroller_hex1"
+            : "bubblecar_hex1"
                 eval: ( 3  2  0 -1) * -2 + (-3 -1  3  2) * -4
                 0 f
-            : "hexroller_hex0"
+            : "bubblecar_hex0"
                 eval: ( 3  2  0 -1) *  0 + (-3 -1  3  2) * -3
                 0 f
 
-    "hexroller_sixth2":
+    "bubblecar_sixth2":
         shapes:
-            : "hexroller_hex2"
+            : "bubblecar_hex2"
                 eval: ( 3  2  0 -1) * -2 + (-3 -1  3  2) * -4
                 0 f
-            : "hexroller_hex1"
+            : "bubblecar_hex1"
                 eval: ( 3  2  0 -1) *  0 + (-3 -1  3  2) * -3
                 0 f
-    "hexroller_sixth2b":
+    "bubblecar_sixth2b":
         shapes:
-            : "hexroller_hex2"
+            : "bubblecar_hex2"
                 eval: ( 3  2  0 -1) *  0 + (-3 -1  3  2) * -3
                 0 f
 
-    "hexroller_r0":
+    "bubblecar_r0":
         shapes:
-            : "hexroller_sixth2"  (0 0 0 0)  0 f
-            : "hexroller_sixth1"  (0 0 0 0)  2 f
-            : "hexroller_sixth2"  (0 0 0 0)  4 f
-            : "hexroller_sixth1"  (0 0 0 0)  6 f
-            : "hexroller_sixth2"  (0 0 0 0)  8 f
-            : "hexroller_sixth1"  (0 0 0 0) 10 f
+            : "bubblecar_sixth2"  (0 0 0 0)  0 f
+            : "bubblecar_sixth1"  (0 0 0 0)  2 f
+            : "bubblecar_sixth2"  (0 0 0 0)  4 f
+            : "bubblecar_sixth1"  (0 0 0 0)  6 f
+            : "bubblecar_sixth2"  (0 0 0 0)  8 f
+            : "bubblecar_sixth1"  (0 0 0 0) 10 f
 
             : "player_stand"
                 eval: ( 3  2  0 -1) *  0 + (-3 -1  3  2) * -2
                 0 f
 
-    "hexroller_r1":
+    "bubblecar_r1":
         shapes:
-            : "hexroller_sixth2b" (0 0 0 0)  0 f
-            : "hexroller_sixth1b" (0 0 0 0)  2 f
-            : "hexroller_sixth2b" (0 0 0 0)  4 f
-            : "hexroller_sixth1b" (0 0 0 0)  6 f
-            : "hexroller_sixth2b" (0 0 0 0)  8 f
-            : "hexroller_sixth1b" (0 0 0 0) 10 f
+            : "bubblecar_sixth2b" (0 0 0 0)  0 f
+            : "bubblecar_sixth1b" (0 0 0 0)  2 f
+            : "bubblecar_sixth2b" (0 0 0 0)  4 f
+            : "bubblecar_sixth1b" (0 0 0 0)  6 f
+            : "bubblecar_sixth2b" (0 0 0 0)  8 f
+            : "bubblecar_sixth1b" (0 0 0 0) 10 f
 
             : "player_stand"
                 eval: ( 3  2  0 -1) *  0 + (-3 -1  3  2) * -2
                 0 f
 
-    "hexroller_r2":
+    "bubblecar_r2":
         shapes:
-            : "hexroller_sixth1"  (0 0 0 0)  0 f
-            : "hexroller_sixth2"  (0 0 0 0)  2 f
-            : "hexroller_sixth1"  (0 0 0 0)  4 f
-            : "hexroller_sixth2"  (0 0 0 0)  6 f
-            : "hexroller_sixth1"  (0 0 0 0)  8 f
-            : "hexroller_sixth2"  (0 0 0 0) 10 f
+            : "bubblecar_sixth1"  (0 0 0 0)  0 f
+            : "bubblecar_sixth2"  (0 0 0 0)  2 f
+            : "bubblecar_sixth1"  (0 0 0 0)  4 f
+            : "bubblecar_sixth2"  (0 0 0 0)  6 f
+            : "bubblecar_sixth1"  (0 0 0 0)  8 f
+            : "bubblecar_sixth2"  (0 0 0 0) 10 f
 
             : "player_stand"
                 eval: ( 3  2  0 -1) *  0 + (-3 -1  3  2) * -2
                 0 f
 
-    "hexroller_r3":
+    "bubblecar_r3":
         shapes:
-            : "hexroller_sixth1b" (0 0 0 0)  0 f
-            : "hexroller_sixth2b" (0 0 0 0)  2 f
-            : "hexroller_sixth1b" (0 0 0 0)  4 f
-            : "hexroller_sixth2b" (0 0 0 0)  6 f
-            : "hexroller_sixth1b" (0 0 0 0)  8 f
-            : "hexroller_sixth2b" (0 0 0 0) 10 f
+            : "bubblecar_sixth1b" (0 0 0 0)  0 f
+            : "bubblecar_sixth2b" (0 0 0 0)  2 f
+            : "bubblecar_sixth1b" (0 0 0 0)  4 f
+            : "bubblecar_sixth2b" (0 0 0 0)  6 f
+            : "bubblecar_sixth1b" (0 0 0 0)  8 f
+            : "bubblecar_sixth2b" (0 0 0 0) 10 f
 
             : "player_stand"
                 eval: ( 3  2  0 -1) *  0 + (-3 -1  3  2) * -2

@@ -1,7 +1,7 @@
 
 unit: 3 2 0 -1
 spawn: "data/maps/title/title.fus"
-#spawn: "data/maps/demo/hexroller_test.fus"
+#spawn: "data/maps/demo/bubblecar_test.fus"
 default_palette: "data/pal1.fus"
 default_tileset: "data/tileset1.fus"
 
@@ -38,6 +38,6 @@ submaps:
                         rot: 0
                         turn: n
             :
-                file: "data/maps/demo/hexroller_test.fus"
+                file: "data/maps/demo/bubblecar_test.fus"
                 pos: (50 50)
                 camera: (0 0)
