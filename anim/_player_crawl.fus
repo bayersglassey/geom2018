@@ -152,6 +152,32 @@ crawl:
         goto: crawl_step_down
         delay: 2
 
+    $IF PLAYER_ROLLER:
+        if:
+            key: isdown f
+            coll: all no
+                ;;     \*
+                ;; (.)  .
+        then:
+            goto: roller_stand
+            move: 1 0
+            turn
+            rot: 1
+            delay: 1
+
+    $IF PLAYER_ROLLER:
+        if:
+            key: isdown f
+            coll: all yes
+                ;;    +
+                ;;     \
+                ;; (.)  +
+        then:
+            goto: crawl_step
+            move: 1 0
+            rot: 2
+            delay: 2
+
     if:
         key: isdown b
     then:
