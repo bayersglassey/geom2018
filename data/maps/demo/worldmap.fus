@@ -172,6 +172,8 @@ submaps:
                             : "data/maps/demo/recs/dodecas_roller_000.fus"
                             : "data/maps/demo/recs/dodecas_roller_001.fus"
                             : "data/maps/demo/recs/dodecas_roller_002.fus"
+                            : "data/maps/demo/recs/dodecas_hexroller_000.fus"
+                            : "data/maps/demo/recs/dodecas_hexroller_001.fus" "player_cpu"
                         submaps: : mapper(("double")) submaps:
                             :
                                 file: "data/maps/demo/dodecas_bg.fus"

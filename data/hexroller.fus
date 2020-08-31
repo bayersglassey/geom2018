@@ -6,7 +6,7 @@ $SET_STR NS ""
 
 shapes:
 
-    $PREFIX NS "_hexroller":
+    $PREFIX NS "hexroller_body":
         shapes:
             : "map_vert0" (0 0 0 0)  0 f
             : "map_edge1" (0 0 0 0)  0 f
@@ -24,24 +24,24 @@ shapes:
 
     $PREFIX NS "hexroller":
         shapes:
-            : "_hexroller" ( 0  1  3  1)  0 f
+            : "hexroller_body" ( 0  1  3  1)  0 f
 
     $PREFIX NS "hexroller_R1":
         shapes:
-            : "_hexroller" ( 0  1  3  1)  2 f
+            : "hexroller_body" ( 0  1  3  1)  2 f
 
     $PREFIX NS "hexroller_R2":
         shapes:
-            : "_hexroller" ( 0  1  3  1)  4 f
+            : "hexroller_body" ( 0  1  3  1)  4 f
 
     $PREFIX NS "hexroller_R3":
         shapes:
-            : "_hexroller" ( 0  1  3  1)  6 f
+            : "hexroller_body" ( 0  1  3  1)  6 f
 
     $PREFIX NS "hexroller_R4":
         shapes:
-            : "_hexroller" ( 0  1  3  1)  8 f
+            : "hexroller_body" ( 0  1  3  1)  8 f
 
     $PREFIX NS "hexroller_R5":
         shapes:
-            : "_hexroller" ( 0  1  3  1) 10 f
+            : "hexroller_body" ( 0  1  3  1) 10 f

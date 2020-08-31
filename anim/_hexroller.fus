@@ -2,7 +2,7 @@
 # Expected vars:
 # ANIM_NS (str), e.g. "hexroller_", ""
 # RGRAPH_NS (str), e.g. "hexrollerplayer_", ""
-# R0, R1, R5 (str), e.g. "", "_R1", ..., "_R5"
+# R0, R1, R4, R5 (str), e.g. "", "_R1", ..., "_R5"
 
 
 
@@ -16,6 +16,19 @@ $SUFFIX R0 $PREFIX ANIM_NS stand:
         ;;  (.)  .
 
     if:
+        key: not isdown d
+        key: not isdown b
+        key: isdown f
+        coll: any yes
+            ;;        +
+            ;;
+            ;; ( )  .
+    then:
+        move: 2 1
+        rot: 2
+        goto: $SUFFIX R4 $PREFIX ANIM_NS stand
+
+    if:
         key: not isdown b
         key: isdown f
         coll: any yes
@@ -23,13 +36,17 @@ $SUFFIX R0 $PREFIX ANIM_NS stand:
     then:
         move: 1 0
         rot: 1
-        goto immediate: $SUFFIX R5 $PREFIX ANIM_NS stand
+        goto: $SUFFIX R5 $PREFIX ANIM_NS stand
 
     if:
         key: not isdown b
         key: isdown f
         coll: all no
-            ;; ( )  +
+            ;;        .
+            ;;       /*
+            ;; ( )- + - .
+            ;;    */*\*
+            ;;    .   .
     then:
         rot: -1
         delay: $GET_INT DELAY
