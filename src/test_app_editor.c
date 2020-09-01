@@ -18,15 +18,7 @@ int test_app_render_editor(test_app_t *app){
     * Clear screen
     */
 
-    RET_IF_SDL_NZ(SDL_FillRect(app->render_surface, NULL, 0));
-
-    if(app->surface != NULL){
-        RET_IF_SDL_NZ(SDL_FillRect(app->surface, NULL, 0));
-    }else{
-        RET_IF_SDL_NZ(SDL_SetRenderDrawColor(app->renderer,
-            0, 0, 0, 255));
-        RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
-    }
+    RET_IF_SDL_NZ(SDL_FillRect(app->surface, NULL, 0));
 
     /******************************************************************
     * Render rgraph
@@ -46,7 +38,7 @@ int test_app_render_editor(test_app_t *app){
     int line_y = 0;
 
     if(app->show_editor_controls){
-        FONT_PRINTF(FONT_ARGS(app->render_surface, 0, line_y * app->font.char_h),
+        FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y * app->font.char_h),
             "Frame rendered in: %i ms (goal: %i ms)\n"
             "# Textures in use: %i\n"
             "Controls:\n"
@@ -69,7 +61,7 @@ int test_app_render_editor(test_app_t *app){
         line_y += 12;
     }
 
-    err = test_app_blit_console(app, app->render_surface,
+    err = test_app_blit_console(app, app->surface,
         0, line_y * app->font.char_h);
     if(err)return 2;
 
@@ -77,17 +69,9 @@ int test_app_render_editor(test_app_t *app){
     * Draw to renderer and present it
     */
 
-    if(app->surface != NULL){
-        SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
-            app->renderer, app->surface);
-        RET_IF_SDL_NULL(render_texture);
-        SDL_RenderCopy(app->renderer, render_texture, NULL, NULL);
-        SDL_DestroyTexture(render_texture);
-    }
-
     {
         SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
-            app->renderer, app->render_surface);
+            app->renderer, app->surface);
         RET_IF_SDL_NULL(render_texture);
         SDL_RenderCopy(app->renderer, render_texture, NULL, NULL);
         SDL_DestroyTexture(render_texture);

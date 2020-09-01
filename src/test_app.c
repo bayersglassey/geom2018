@@ -81,7 +81,7 @@ void test_app_init_input(test_app_t *app){
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
     const char *stateset_filename, const char *hexmap_filename,
-    const char *submap_filename, bool minimap_alt, bool use_textures,
+    const char *submap_filename, bool minimap_alt,
     bool cache_bitmaps, int n_players, int n_players_playing
 ){
     int err;
@@ -107,13 +107,9 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     err = palette_load(palette, "data/pal1.fus", NULL);
     if(err)return err;
 
-    if(use_textures){
-        app->surface = NULL;
-    }else{
-        app->surface = surface8_create(scw, sch, false, false,
-            app->sdl_palette);
-        if(app->surface == NULL)return 1;
-    }
+    app->surface = surface8_create(scw, sch, false, false,
+        app->sdl_palette);
+    if(app->surface == NULL)return 1;
 
     prismelrenderer_t *prend = &app->prend;
     err = prismelrenderer_init(prend, &vec4);
@@ -216,10 +212,6 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->mode = TEST_APP_MODE_GAME;
 
     test_app_init_input(app);
-
-    app->render_surface = surface32_create(app->scw, app->sch,
-        false, true);
-    if(app->render_surface == NULL)return 2;
 
     /* Player 0 gets a body right off the bat, everyone else has to
     wait for him to choose multiplayer mode.

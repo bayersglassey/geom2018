@@ -62,7 +62,6 @@ typedef struct test_app {
     SDL_Window *window;
     SDL_Renderer *renderer;
     SDL_Surface *surface;
-    SDL_Surface *render_surface;
 
     const char *prend_filename;
     const char *stateset_filename;
@@ -118,7 +117,7 @@ void test_app_init_input(test_app_t *app);
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
     const char *stateset_filename, const char *hexmap_filename,
-    const char *submap_filename, bool minimap_alt, bool use_textures,
+    const char *submap_filename, bool minimap_alt,
     bool cache_bitmaps, int n_players, int n_players_playing);
 int test_app_mainloop(test_app_t *app);
 int test_app_mainloop_step(test_app_t *app);

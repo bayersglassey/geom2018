@@ -100,14 +100,7 @@ int test_app_render_game(test_app_t *app){
 
     hexgame_t *game = &app->hexgame;
 
-    if(app->surface != NULL){
-        RET_IF_SDL_NZ(SDL_FillRect(app->surface, NULL, 255));
-    }else{
-        SDL_Color *bgcolor = &app->sdl_palette->colors[255];
-        RET_IF_SDL_NZ(SDL_SetRenderDrawColor(app->renderer,
-            bgcolor->r, bgcolor->g, bgcolor->b, 255));
-        RET_IF_SDL_NZ(SDL_RenderClear(app->renderer));
-    }
+    RET_IF_SDL_NZ(SDL_FillRect(app->surface, NULL, 255));
 
     if(app->camera_mapper){
         /* camera->mapper is set to NULL at start of each step, it's up
@@ -120,64 +113,62 @@ int test_app_render_game(test_app_t *app){
         1 /* app->zoom */);
     if(err)return err;
 
-    if(app->surface != NULL){
-        int line_y = 0;
+    int line_y = 0;
 
-        for(int i = 0; i < game->players_len; i++){
-            player_t *player = game->players[i];
-            body_t *body = player->body;
-            if(!body)continue;
-            if(body->dead == BODY_MOSTLY_DEAD){
-                FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y * app->font.char_h),
-                    "You ran into a wall!\n"
-                    "Press jump to retry from where you jumped.\n"
-                    "Press %i to retry from last save point.\n",
-                    i+1);
-                line_y += 3;
-            }else if(body->dead == BODY_ALL_DEAD){
-                FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y * app->font.char_h),
-                    "You were crushed!\n"
-                    "Press jump or %i to retry from last save point.\n",
-                    i+1);
-                line_y += 2;
-            }else if(body->out_of_bounds && !body->state->flying){
-                FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y * app->font.char_h),
-                    "You jumped off the map!\n"
-                    "Press jump to retry from where you jumped.\n"
-                    "Press %i to retry from last save point.\n",
-                    i+1);
-                line_y += 3;
-            }
-        }
-
-        if(app->show_controls && !app->show_console){
+    for(int i = 0; i < game->players_len; i++){
+        player_t *player = game->players[i];
+        body_t *body = player->body;
+        if(!body)continue;
+        if(body->dead == BODY_MOSTLY_DEAD){
             FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y * app->font.char_h),
-                "*Controls:\n"
-                "  Left/right  -> Walk\n"
-                "  Up          -> Jump\n"
-                "  Down        -> Crawl\n"
-                "  Spacebar    -> Spit\n"
-                "  Shift       -> Look up\n"
-                "  1           -> Return to checkpoint\n"
-                "  Enter       -> Show/hide this message\n"
-                "  Escape      -> Quit\n"
-                "  F5          -> Pause/unpause\n"
-            );
-            line_y += 10;
+                "You ran into a wall!\n"
+                "Press jump to retry from where you jumped.\n"
+                "Press %i to retry from last save point.\n",
+                i+1);
+            line_y += 3;
+        }else if(body->dead == BODY_ALL_DEAD){
+            FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y * app->font.char_h),
+                "You were crushed!\n"
+                "Press jump or %i to retry from last save point.\n",
+                i+1);
+            line_y += 2;
+        }else if(body->out_of_bounds && !body->state->flying){
+            FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y * app->font.char_h),
+                "You jumped off the map!\n"
+                "Press jump to retry from where you jumped.\n"
+                "Press %i to retry from last save point.\n",
+                i+1);
+            line_y += 3;
         }
-
-        if(app->show_console){
-            err = test_app_blit_console(app, app->surface,
-                0, line_y * app->font.char_h);
-            if(err)return err;
-        }
-
-        SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
-            app->renderer, app->surface);
-        RET_IF_SDL_NULL(render_texture);
-        SDL_RenderCopy(app->renderer, render_texture, NULL, NULL);
-        SDL_DestroyTexture(render_texture);
     }
+
+    if(app->show_controls && !app->show_console){
+        FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y * app->font.char_h),
+            "*Controls:\n"
+            "  Left/right  -> Walk\n"
+            "  Up          -> Jump\n"
+            "  Down        -> Crawl\n"
+            "  Spacebar    -> Spit\n"
+            "  Shift       -> Look up\n"
+            "  1           -> Return to checkpoint\n"
+            "  Enter       -> Show/hide this message\n"
+            "  Escape      -> Quit\n"
+            "  F5          -> Pause/unpause\n"
+        );
+        line_y += 10;
+    }
+
+    if(app->show_console){
+        err = test_app_blit_console(app, app->surface,
+            0, line_y * app->font.char_h);
+        if(err)return err;
+    }
+
+    SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
+        app->renderer, app->surface);
+    RET_IF_SDL_NULL(render_texture);
+    SDL_RenderCopy(app->renderer, render_texture, NULL, NULL);
+    SDL_DestroyTexture(render_texture);
 
     SDL_RenderPresent(app->renderer);
     return 0;
