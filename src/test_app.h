@@ -104,7 +104,7 @@ const char *test_app_get_next_recording_filename(test_app_t *app);
 void test_app_blitter_render_init(test_app_t *app,
     geomfont_blitter_t *blitter,
     int x0, int y0);
-int test_app_printf(test_app_t *app, int x0, int y0, const char *msg, ...);
+int test_app_printf(test_app_t *app, int col, int row, const char *msg, ...);
 
 
 /* test_app_commands.c */

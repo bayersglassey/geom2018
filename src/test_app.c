@@ -427,36 +427,15 @@ const char *test_app_get_next_recording_filename(test_app_t *app){
     return test_app_get_last_or_next_recording_filename(app, true);
 }
 
-void test_app_blitter_render_init(test_app_t *app,
-    geomfont_blitter_t *blitter,
-    int x0, int y0
-){
-    /* TODO: replace these hardcoded "* 2" with fancier stuff involving
-    app->geomfont->v{x,y} and vec4_render.
-    We're currently assuming "geomfont1" which uses "sq" as its prismel,
-    and (1 0 0 0), (0 0 0 1) as vx, vy, which render to (2 0) and (0 2),
-    thus the "* 2". */
-    int x = x0 * 2;
-    int y = y0 * 2;
-
-    /* The following are hardcoded for now, though geomfont can handle
-    other values */
-    int zoom = 1;
-    trf_t *trf = NULL;
-    prismelmapper_t *mapper = NULL;
-
-    geomfont_blitter_render_init(blitter, app->geomfont,
-        app->surface, app->sdl_palette,
-        x, y, zoom, trf, mapper);
-}
-
-int test_app_printf(test_app_t *app, int x0, int y0, const char *msg, ...){
+int test_app_printf(test_app_t *app, int col, int row, const char *msg, ...){
     int err = 0;
     va_list vlist;
     va_start(vlist, msg);
 
     geomfont_blitter_t blitter;
-    test_app_blitter_render_init(app, &blitter, x0, y0);
+    geomfont_blitter_render_init(&blitter, app->geomfont,
+        app->surface, app->sdl_palette,
+        0, 0, col, row, 1, NULL, NULL);
     err = generic_vprintf(&geomfont_blitter_putc_callback, &blitter,
         msg, vlist);
 

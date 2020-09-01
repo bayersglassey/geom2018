@@ -7,6 +7,7 @@
 
 #include "font.h"
 #include "geom.h"
+#include "prismelrenderer.h"
 
 struct prismelmapper;
 
@@ -33,7 +34,8 @@ int geomfont_init(geomfont_t *geomfont, char *name, font_t *font,
     vec_t vx, vec_t vy);
 int geomfont_render_printf(geomfont_t *geomfont,
     SDL_Surface *surface, SDL_Palette *pal,
-    int x0, int y0, int zoom, trf_t *trf, struct prismelmapper *mapper,
+    int x0, int y0, int col, int row, int zoom,
+    trf_t *trf, struct prismelmapper *mapper,
     const char *msg, ...);
 int geomfont_rgraph_printf(geomfont_t *geomfont,
     struct rendergraph *rgraph, int cx, int cy, trf_t *trf,
@@ -78,7 +80,8 @@ typedef struct geomfont_blitter {
 void geomfont_blitter_render_init(
     geomfont_blitter_t *blitter, geomfont_t *geomfont,
     SDL_Surface *surface, SDL_Palette *pal,
-    int x0, int y0, int zoom, trf_t *trf, struct prismelmapper *mapper);
+    int x0, int y0, int col, int row, int zoom,
+    trf_t *trf, struct prismelmapper *mapper);
 void geomfont_blitter_rgraph_init(geomfont_blitter_t *blitter,
     geomfont_t *geomfont, struct rendergraph *rgraph,
     int cx, int cy, trf_t *trf);

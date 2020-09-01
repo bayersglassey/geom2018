@@ -72,7 +72,9 @@ int test_app_blit_console(test_app_t *app, int x, int y){
     int err;
 
     geomfont_blitter_t blitter;
-    test_app_blitter_render_init(app, &blitter, x, y);
+    geomfont_blitter_render_init(&blitter, app->geomfont,
+        app->surface, app->sdl_palette,
+        0, 0, x, y, 1, NULL, NULL);
     err = console_blit(&app->console, &geomfont_blitter_putc_callback,
         &blitter);
     if(err)return err;

@@ -121,7 +121,8 @@ int geomfont_init(geomfont_t *geomfont, char *name, font_t *font,
 
 int geomfont_render_printf(geomfont_t *geomfont,
     SDL_Surface *surface, SDL_Palette *pal,
-    int x0, int y0, int zoom, trf_t *trf, prismelmapper_t *mapper,
+    int x0, int y0, int col, int row, int zoom,
+    trf_t *trf, prismelmapper_t *mapper,
     const char *msg, ...
 ){
     int err = 0;
@@ -131,7 +132,7 @@ int geomfont_render_printf(geomfont_t *geomfont,
     geomfont_blitter_t blitter;
     geomfont_blitter_render_init(&blitter, geomfont,
         surface, pal,
-        x0, y0, zoom, trf, mapper);
+        x0, y0, col, row, zoom, trf, mapper);
     err = generic_vprintf(&geomfont_blitter_putc_callback, &blitter,
         msg, vlist);
 
@@ -197,14 +198,23 @@ static void geomfont_blitter_init_core(int type,
 void geomfont_blitter_render_init(
     geomfont_blitter_t *blitter, geomfont_t *geomfont,
     SDL_Surface *surface, SDL_Palette *pal,
-    int x0, int y0, int zoom, trf_t *trf, prismelmapper_t *mapper
+    int x0, int y0, int col, int row, int zoom,
+    trf_t *trf, prismelmapper_t *mapper
 ){
     geomfont_blitter_init_core(GEOMFONT_BLITTER_TYPE_RENDER,
         blitter, geomfont, trf);
     blitter->u.render.surface = surface;
     blitter->u.render.pal = pal;
-    blitter->u.render.x0 = x0;
-    blitter->u.render.y0 = y0;
+
+    /* TODO: replace these hardcoded "* 2" with fancier stuff involving
+    app->geomfont->v{x,y} and vec4_render.
+    We're currently assuming "geomfont1" which uses "sq" as its prismel,
+    and (1 0 0 0), (0 0 0 1) as vx, vy, which render to (2 0) and (0 2),
+    thus the "* 2".
+    NOTE: x0, y0 can stay as they are: it's col, row we need to multiply by vx, vy. */
+    blitter->u.render.x0 = x0 + col * 2;
+    blitter->u.render.y0 = y0 + row * 2;
+
     blitter->u.render.zoom = zoom;
     blitter->u.render.mapper = mapper;
 }
