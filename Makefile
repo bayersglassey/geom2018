@@ -23,7 +23,7 @@ OFILES = \
 SDL_OFILES = \
  src/prismelrenderer.o src/prismelrenderer_parse.o \
  src/rendergraph.o src/anim.o src/util.o src/sdl_util.o \
- src/sdlfont.o src/geomfont.o \
+ src/sdlfont.o src/geomfont.o src/minieditor.o \
  src/hexmap.o src/hexmap_submap_create_rgraph.o \
  src/hexgame.o src/hexgame_body.o src/hexgame_player.o src/hexgame_recording.o \
  src/hexgame_state.o src/hexgame_actor.o \

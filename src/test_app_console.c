@@ -91,7 +91,6 @@ void test_app_start_console(test_app_t *app){
 
 void test_app_stop_console(test_app_t *app){
     SDL_StopTextInput();
-    test_app_init_input(app); /* ...? */
     app->process_console = false;
 }
 

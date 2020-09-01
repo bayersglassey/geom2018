@@ -61,21 +61,13 @@ void test_app_cleanup(test_app_t *app){
     prismelrenderer_cleanup(&app->minimap_prend);
     hexgame_cleanup(&app->hexgame);
     font_cleanup(&app->font);
+    minieditor_cleanup(&app->editor);
     if(app->list){
         test_app_list_cleanup(app->list);
         free(app->list);
     }
 }
 
-
-void test_app_init_input(test_app_t *app){
-    app->keydown_shift = false;
-    app->keydown_ctrl = false;
-    app->keydown_u = 0;
-    app->keydown_d = 0;
-    app->keydown_l = 0;
-    app->keydown_r = 0;
-}
 
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
@@ -193,22 +185,12 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         if(err)return err;
     }
 
-    app->cur_rgraph_i = 0;
-    app->x0 = 0;
-    app->y0 = 0;
-    app->rot = 0;
-    app->flip = false;
-    app->zoom = 1;
-    app->frame_i = 0;
     app->loop = true;
     app->hexgame_running = true;
     app->show_controls = true;
-    app->show_editor_controls = true;
     app->show_console = false;
     app->process_console = false;
     app->mode = TEST_APP_MODE_GAME;
-
-    test_app_init_input(app);
 
     /* Player 0 gets a body right off the bat, everyone else has to
     wait for him to choose multiplayer mode.
@@ -235,6 +217,12 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     }
 
     app->camera_mapper = NULL;
+
+    minieditor_init(&app->editor,
+        app->surface, app->sdl_palette,
+        app->prend_filename,
+        &app->font, app->geomfont, &app->prend,
+        app->scw, app->sch);
 
     app->list = NULL;
 

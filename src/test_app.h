@@ -16,9 +16,8 @@
 #include "hexmap.h"
 #include "hexgame.h"
 #include "test_app_list.h"
+#include "minieditor.h"
 
-
-#define MAX_ZOOM 4
 
 #define TEST_APP_CONSOLE_START_TEXT "> "
 #define TEST_APP_CONSOLE_W 60
@@ -54,7 +53,7 @@ typedef struct test_app {
     font_t font;
     geomfont_t *geomfont;
     console_t console;
-    int cur_rgraph_i;
+    minieditor_t editor;
 
     stateset_t stateset;
     hexgame_t hexgame;
@@ -68,19 +67,7 @@ typedef struct test_app {
     bool process_console; /* console is grabbing input */
     int mode;
 
-    int x0;
-    int y0;
-    int rot;
-    int flip;
-    int zoom;
-    int frame_i;
     bool loop;
-    bool keydown_shift;
-    bool keydown_ctrl;
-    int keydown_u;
-    int keydown_d;
-    int keydown_l;
-    int keydown_r;
 
     char _recording_filename[200];
 

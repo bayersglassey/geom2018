@@ -316,7 +316,7 @@ static int _test_app_command_dump(test_app_t *app, fus_lexer_t *lexer, bool *lex
     }
     if(dump_what == 0){
         rendergraph_t *rgraph =
-            app->prend.rendergraphs[app->cur_rgraph_i];
+            app->prend.rendergraphs[app->editor.cur_rgraph_i];
         rendergraph_dump(rgraph, file? file: stdout, 0, dump_bitmaps);
     }else if(dump_what == 1){
         prismelrenderer_dump(&app->prend, file? file: stdout, dump_bitmaps);
@@ -391,7 +391,7 @@ static int _test_app_command_get_shape(test_app_t *app, fus_lexer_t *lexer, bool
     for(int i = 0; i < app->prend.rendergraphs_len; i++){
         rendergraph_t *rgraph = app->prend.rendergraphs[i];
         if(!strcmp(rgraph->name, name)){
-            app->cur_rgraph_i = i;
+            app->editor.cur_rgraph_i = i;
             found = true;
             break;
         }
