@@ -13,7 +13,6 @@
 #include "array.h"
 #include "vec4.h"
 #include "font.h"
-#include "sdlfont.h"
 #include "geomfont.h"
 #include "console.h"
 #include "util.h"
@@ -21,6 +20,7 @@
 #include "hexmap.h"
 #include "hexgame.h"
 #include "hexspace.h"
+#include "generic_printf.h"
 
 
 
@@ -61,7 +61,6 @@ void test_app_cleanup(test_app_t *app){
     prismelrenderer_cleanup(&app->minimap_prend);
     hexgame_cleanup(&app->hexgame);
     font_cleanup(&app->font);
-    sdlfont_cleanup(&app->sdlfont);
     if(app->list){
         test_app_list_cleanup(app->list);
         free(app->list);
@@ -133,9 +132,6 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     err = font_load(&app->font, strdup("data/font.fus"), NULL);
     if(err)return err;
 
-    err = sdlfont_init(&app->sdlfont, &app->font, sdl_palette);
-    if(err)return err;
-
     const char *geomfont_name = "geomfont1";
     app->geomfont = prismelrenderer_get_geomfont(prend, geomfont_name);
     if(app->geomfont == NULL){
@@ -143,7 +139,8 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         return 2;
     }
 
-    err = console_init(&app->console, CONSOLE_W, CONSOLE_H, 20000);
+    err = console_init(&app->console,
+        TEST_APP_CONSOLE_W, TEST_APP_CONSOLE_H, 20000);
     if(err)return err;
 
     hexgame_t *game = &app->hexgame;
@@ -428,4 +425,41 @@ const char *test_app_get_last_recording_filename(test_app_t *app){
 
 const char *test_app_get_next_recording_filename(test_app_t *app){
     return test_app_get_last_or_next_recording_filename(app, true);
+}
+
+void test_app_blitter_render_init(test_app_t *app,
+    geomfont_blitter_t *blitter,
+    int x0, int y0
+){
+    /* TODO: replace these hardcoded "* 2" with fancier stuff involving
+    app->geomfont->v{x,y} and vec4_render.
+    We're currently assuming "geomfont1" which uses "sq" as its prismel,
+    and (1 0 0 0), (0 0 0 1) as vx, vy, which render to (2 0) and (0 2),
+    thus the "* 2". */
+    int x = x0 * 2;
+    int y = y0 * 2;
+
+    /* The following are hardcoded for now, though geomfont can handle
+    other values */
+    int zoom = 1;
+    trf_t *trf = NULL;
+    prismelmapper_t *mapper = NULL;
+
+    geomfont_blitter_render_init(blitter, app->geomfont,
+        app->surface, app->sdl_palette,
+        x, y, zoom, trf, mapper);
+}
+
+int test_app_printf(test_app_t *app, int x0, int y0, const char *msg, ...){
+    int err = 0;
+    va_list vlist;
+    va_start(vlist, msg);
+
+    geomfont_blitter_t blitter;
+    test_app_blitter_render_init(app, &blitter, x0, y0);
+    err = generic_vprintf(&geomfont_blitter_putc_callback, &blitter,
+        msg, vlist);
+
+    va_end(vlist);
+    return err;
 }

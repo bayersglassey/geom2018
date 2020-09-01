@@ -193,7 +193,7 @@ int test_app_close_list(test_app_t *app){
         /* App is back in "console mode", so re-render console's input, which
         list's render probably erased */
         console_clear(&app->console);
-        console_write_msg(&app->console, CONSOLE_START_TEXT);
+        console_write_msg(&app->console, TEST_APP_CONSOLE_START_TEXT);
         console_write_msg(&app->console, app->console.input);
     }
 

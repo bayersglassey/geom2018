@@ -38,7 +38,7 @@ int test_app_render_editor(test_app_t *app){
     int line_y = 0;
 
     if(app->show_editor_controls){
-        FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y * app->font.char_h),
+        test_app_printf(app, 0, line_y * app->font.char_h,
             "Frame rendered in: %i ms (goal: %i ms)\n"
             "Controls:\n"
             "  up/down - zoom (hold shift for tap mode)\n"
@@ -59,8 +59,7 @@ int test_app_render_editor(test_app_t *app){
         line_y += 12;
     }
 
-    err = test_app_blit_console(app, app->surface,
-        0, line_y * app->font.char_h);
+    err = test_app_blit_console(app, 0, line_y * app->font.char_h);
     if(err)return 2;
 
     /******************************************************************

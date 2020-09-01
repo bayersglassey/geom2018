@@ -21,14 +21,14 @@ int test_app_process_event_console(test_app_t *app, SDL_Event *event){
                 if(err)return err;
 
                 console_input_clear(&app->console);
-                console_write_msg(&app->console, CONSOLE_START_TEXT);
+                console_write_msg(&app->console, TEST_APP_CONSOLE_START_TEXT);
             }
 
             /* Tab completion */
             if(event->key.keysym.sym == SDLK_TAB){
                 console_newline(&app->console);
                 test_app_write_console_commands(app, app->console.input);
-                console_write_msg(&app->console, CONSOLE_START_TEXT);
+                console_write_msg(&app->console, TEST_APP_CONSOLE_START_TEXT);
                 console_write_msg(&app->console, app->console.input);
             }
 
@@ -68,12 +68,12 @@ int test_app_process_event_console(test_app_t *app, SDL_Event *event){
     return 0;
 }
 
-int test_app_blit_console(test_app_t *app, SDL_Surface *surface, int x, int y){
+int test_app_blit_console(test_app_t *app, int x, int y){
     int err;
 
-    FONT_BLITTER_T blitter;
-    FONT_BLITTER_INIT(&blitter, FONT_ARGS(surface, x, y));
-    err = console_blit(&app->console, &FONT_BLITTER_PUTC_CALLBACK,
+    geomfont_blitter_t blitter;
+    test_app_blitter_render_init(app, &blitter, x, y);
+    err = console_blit(&app->console, &geomfont_blitter_putc_callback,
         &blitter);
     if(err)return err;
 
@@ -81,7 +81,7 @@ int test_app_blit_console(test_app_t *app, SDL_Surface *surface, int x, int y){
 }
 
 void test_app_start_console(test_app_t *app){
-    console_write_msg(&app->console, CONSOLE_START_TEXT);
+    console_write_msg(&app->console, TEST_APP_CONSOLE_START_TEXT);
     console_write_msg(&app->console, app->console.input);
     SDL_StartTextInput();
     app->process_console = true;
