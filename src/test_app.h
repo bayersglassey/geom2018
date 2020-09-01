@@ -31,7 +31,7 @@
     #define FONT_PRINTF geomfont_render_printf
     #define CONSOLE_CHAR_H_MULTIPLIER 2
         /* Because we're using "sq" prismel, which is 2 pixels high */
-    #define FONT_ARGS(SURFACE, X0, Y0) app->geomfont, app->renderer, (SURFACE), \
+    #define FONT_ARGS(SURFACE, X0, Y0) app->geomfont, (SURFACE), \
         app->sdl_palette, (X0), (Y0) * CONSOLE_CHAR_H_MULTIPLIER, 1, NULL, NULL
     #define CONSOLE_W 60
     #define CONSOLE_H 35

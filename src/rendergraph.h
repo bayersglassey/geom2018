@@ -42,7 +42,6 @@ typedef struct rendergraph_bitmap {
     bool pbox_calculated;
     position_box_t pbox;
     SDL_Surface *surface;
-    SDL_Texture *texture;
 } rendergraph_bitmap_t;
 
 typedef struct rendergraph {
@@ -111,12 +110,9 @@ int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
     rendergraph_bitmap_t **bitmap_ptr,
     rot_t rot, flip_t flip, int frame_i,
     SDL_Palette *pal);
-int rendergraph_bitmap_get_texture(rendergraph_t *rgraph,
-    rendergraph_bitmap_t *bitmap,
-    SDL_Renderer *renderer, bool force_create, SDL_Texture **texture_ptr);
 struct prismelmapper;
 int rendergraph_render(rendergraph_t *rgraph,
-    SDL_Renderer *renderer, SDL_Surface *surface,
+    SDL_Surface *surface,
     SDL_Palette *pal, struct prismelrenderer *prend,
     int x0, int y0, int zoom,
     vec_t pos, rot_t rot, flip_t flip, int frame_i,

@@ -120,7 +120,7 @@ int geomfont_init(geomfont_t *geomfont, char *name, font_t *font,
 }
 
 int geomfont_render_printf(geomfont_t *geomfont,
-    SDL_Renderer *renderer, SDL_Surface *surface, SDL_Palette *pal,
+    SDL_Surface *surface, SDL_Palette *pal,
     int x0, int y0, int zoom, trf_t *trf, prismelmapper_t *mapper,
     const char *msg, ...
 ){
@@ -130,7 +130,7 @@ int geomfont_render_printf(geomfont_t *geomfont,
 
     geomfont_blitter_t blitter;
     geomfont_blitter_render_init(&blitter, geomfont,
-        renderer, surface, pal,
+        surface, pal,
         x0, y0, zoom, trf, mapper);
     err = generic_vprintf(&geomfont_blitter_putc_callback, &blitter,
         msg, vlist);
@@ -196,12 +196,11 @@ static void geomfont_blitter_init_core(int type,
 
 void geomfont_blitter_render_init(
     geomfont_blitter_t *blitter, geomfont_t *geomfont,
-    SDL_Renderer *renderer, SDL_Surface *surface, SDL_Palette *pal,
+    SDL_Surface *surface, SDL_Palette *pal,
     int x0, int y0, int zoom, trf_t *trf, prismelmapper_t *mapper
 ){
     geomfont_blitter_init_core(GEOMFONT_BLITTER_TYPE_RENDER,
         blitter, geomfont, trf);
-    blitter->u.render.renderer = renderer;
     blitter->u.render.surface = surface;
     blitter->u.render.pal = pal;
     blitter->u.render.x0 = x0;
@@ -294,7 +293,6 @@ int geomfont_blitter_putc(geomfont_blitter_t *blitter, char c){
 
         /* Render that rgraph */
         err = rendergraph_render(c_rgraph,
-            blitter->u.render.renderer,
             blitter->u.render.surface,
             blitter->u.render.pal,
             geomfont->prend,

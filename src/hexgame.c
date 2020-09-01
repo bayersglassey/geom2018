@@ -201,7 +201,7 @@ int camera_step(camera_t *camera){
 }
 
 int camera_render(camera_t *camera,
-    SDL_Renderer *renderer, SDL_Surface *surface,
+    SDL_Surface *surface,
     SDL_Palette *pal, int x0, int y0, int zoom
 ){
     int err;
@@ -249,7 +249,7 @@ int camera_render(camera_t *camera,
 
         if(game->show_minimap){
             /* rgraph_minimap's unit is the space's actual unit vector */
-            err = rendergraph_render(submap->rgraph_minimap, renderer, surface,
+            err = rendergraph_render(submap->rgraph_minimap, surface,
                 pal, prend,
                 x0, y0, zoom,
                 pos, rot, flip, frame_i, NULL);
@@ -257,7 +257,7 @@ int camera_render(camera_t *camera,
         }else{
             /* rgraph_map's unit is map->unit */
             vec_mul(prend_space, pos, camera->map->unit);
-            err = rendergraph_render(submap->rgraph_map, renderer, surface,
+            err = rendergraph_render(submap->rgraph_map, surface,
                 pal, prend,
                 x0, y0, zoom,
                 pos, rot, flip, frame_i, mapper);
@@ -275,7 +275,7 @@ int camera_render(camera_t *camera,
 #endif
 
             err = body_render(body,
-                renderer, surface,
+                surface,
                 pal, x0, y0, zoom,
                 map, camera_renderpos, mapper);
             if(err)return err;

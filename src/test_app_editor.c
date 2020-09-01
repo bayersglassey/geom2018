@@ -26,7 +26,7 @@ int test_app_render_editor(test_app_t *app){
 
     int x0 = app->scw / 2 + app->x0;
     int y0 = app->sch / 2 + app->y0;
-    err = rendergraph_render(rgraph, app->renderer, app->surface,
+    err = rendergraph_render(rgraph, app->surface,
         app->sdl_palette, &app->prend, x0, y0, app->zoom,
         (vec_t){0}, app->rot, app->flip, app->frame_i, NULL);
     if(err)return err;
@@ -40,7 +40,6 @@ int test_app_render_editor(test_app_t *app){
     if(app->show_editor_controls){
         FONT_PRINTF(FONT_ARGS(app->surface, 0, line_y * app->font.char_h),
             "Frame rendered in: %i ms (goal: %i ms)\n"
-            "# Textures in use: %i\n"
             "Controls:\n"
             "  up/down - zoom (hold shift for tap mode)\n"
             "  left/right - rotate (hold shift for tap mode)\n"
@@ -52,7 +51,6 @@ int test_app_render_editor(test_app_t *app){
             "  pan=(%i,%i), rot = %i, flip = %c, zoom = %i\n"
             "  frame_i = %i (%i) / %i (%s)",
             app->took, app->delay_goal,
-            app->prend.n_textures,
             app->prend_filename,
             app->cur_rgraph_i, app->prend.rendergraphs_len, rgraph->name,
             app->x0, app->y0, app->rot, app->flip? 'y': 'n', app->zoom,

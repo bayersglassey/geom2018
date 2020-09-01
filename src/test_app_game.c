@@ -108,7 +108,7 @@ int test_app_render_game(test_app_t *app){
         app->camera->mapper = app->camera_mapper;
     }
     err = camera_render(app->camera,
-        app->renderer, app->surface,
+        app->surface,
         app->sdl_palette, app->scw/2 + app->x0, app->sch/2 + app->y0,
         1 /* app->zoom */);
     if(err)return err;

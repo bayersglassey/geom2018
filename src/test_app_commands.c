@@ -376,7 +376,6 @@ lexer_err:
 
 static int _test_app_command_renderall(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
     int err;
-    SDL_Renderer *renderer = NULL;
     err = prismelrenderer_render_all_bitmaps(
         &app->prend, app->sdl_palette);
     if(err)return err;

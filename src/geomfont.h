@@ -32,7 +32,7 @@ int geomfont_init(geomfont_t *geomfont, char *name, font_t *font,
     struct prismelrenderer *prend, const char *prismel_name,
     vec_t vx, vec_t vy);
 int geomfont_render_printf(geomfont_t *geomfont,
-    SDL_Renderer *renderer, SDL_Surface *surface, SDL_Palette *pal,
+    SDL_Surface *surface, SDL_Palette *pal,
     int x0, int y0, int zoom, trf_t *trf, struct prismelmapper *mapper,
     const char *msg, ...);
 int geomfont_rgraph_printf(geomfont_t *geomfont,
@@ -55,7 +55,6 @@ typedef struct geomfont_blitter {
     int type; /* enum geomfont_blitter_type */
     union {
         struct {
-            SDL_Renderer *renderer;
             SDL_Surface *surface;
             SDL_Palette *pal;
             int x0;
@@ -78,7 +77,7 @@ typedef struct geomfont_blitter {
 
 void geomfont_blitter_render_init(
     geomfont_blitter_t *blitter, geomfont_t *geomfont,
-    SDL_Renderer *renderer, SDL_Surface *surface, SDL_Palette *pal,
+    SDL_Surface *surface, SDL_Palette *pal,
     int x0, int y0, int zoom, trf_t *trf, struct prismelmapper *mapper);
 void geomfont_blitter_rgraph_init(geomfont_blitter_t *blitter,
     geomfont_t *geomfont, struct rendergraph *rgraph,

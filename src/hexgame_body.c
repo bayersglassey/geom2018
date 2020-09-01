@@ -643,7 +643,7 @@ int body_collide_against_body(body_t *body, body_t *body_other){
  ***************/
 
 int body_render(body_t *body,
-    SDL_Renderer *renderer, SDL_Surface *surface,
+    SDL_Surface *surface,
     SDL_Palette *pal, int x0, int y0, int zoom,
     hexmap_t *map, vec_t camera_renderpos, prismelmapper_t *mapper
 ){
@@ -674,7 +674,7 @@ int body_render(body_t *body,
     flip_t flip = body->turn;
     int frame_i = body->frame_i;
 
-    err = rendergraph_render(rgraph, renderer, surface,
+    err = rendergraph_render(rgraph, surface,
         pal, prend,
         x0, y0, zoom,
         pos, rot, flip, frame_i, mapper);

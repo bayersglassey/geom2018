@@ -49,10 +49,6 @@ void rendergraph_cleanup(rendergraph_t *rendergraph){
     for(int i = 0; i < rendergraph->n_bitmaps; i++){
         rendergraph_bitmap_t *bitmap = &rendergraph->bitmaps[i];
         SDL_FreeSurface(bitmap->surface);
-        if(bitmap->texture){
-            SDL_DestroyTexture(bitmap->texture);
-            rendergraph->prend->n_textures--;
-        }
     }
     free(rendergraph->bitmaps);
 }
@@ -126,10 +122,10 @@ void rendergraph_bitmap_dump(rendergraph_bitmap_t *bitmap, FILE *f,
     get_spaces(spaces, MAX_SPACES, n_spaces);
 
     SDL_Surface *surface = bitmap->surface;
-    fprintf(f, "%sbitmap %i: x=%i y=%i w=%i h=%i surface=%p texture=%p\n",
+    fprintf(f, "%sbitmap %i: x=%i y=%i w=%i h=%i surface=%p\n",
         spaces, i,
         bitmap->pbox.x, bitmap->pbox.y, bitmap->pbox.w, bitmap->pbox.h,
-        surface, bitmap->texture);
+        surface);
     if(dump_surface && surface != NULL){
         SDL_LockSurface(surface);
         for(int y = 0; y < surface->h; y++){
@@ -451,11 +447,6 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
         SDL_FreeSurface(bitmap->surface);
         bitmap->surface = NULL;
     }
-    if(bitmap->texture != NULL){
-        SDL_DestroyTexture(bitmap->texture);
-        rendergraph->prend->n_textures--;
-        bitmap->texture = NULL;
-    }
     SDL_Surface *surface = surface8_create(bitmap->pbox.w, bitmap->pbox.h,
         false, true, pal);
     if(surface == NULL)return 2;
@@ -603,28 +594,8 @@ int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
     return 0;
 }
 
-int rendergraph_bitmap_get_texture(rendergraph_t *rgraph,
-    rendergraph_bitmap_t *bitmap,
-    SDL_Renderer *renderer, bool force_create, SDL_Texture **texture_ptr
-){
-    if(force_create && bitmap->texture){
-        SDL_DestroyTexture(bitmap->texture);
-        rgraph->prend->n_textures--;
-        bitmap->texture = NULL;
-    }
-    if(bitmap->texture == NULL){
-        SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer,
-            bitmap->surface);
-        RET_IF_SDL_NULL(texture);
-        bitmap->texture = texture;
-        rgraph->prend->n_textures++;
-    }
-    *texture_ptr = bitmap->texture;
-    return 0;
-}
-
 int rendergraph_render(rendergraph_t *rgraph,
-    SDL_Renderer *renderer, SDL_Surface *surface,
+    SDL_Surface *surface,
     SDL_Palette *pal, prismelrenderer_t *prend,
     int x0, int y0, int zoom,
     vec_t pos, rot_t rot, flip_t flip, int frame_i,
@@ -669,7 +640,7 @@ int rendergraph_render(rendergraph_t *rgraph,
     rendergraph_bitmap_t *bitmap = rendergraph_get_bitmap(rgraph,
         rot, flip, animated_frame_i);
 
-    /* Can't create a texture with either dimension 0, so exit early */
+    /* Exit early for dimensionless bitmap */
     if(bitmap->pbox.w == 0 || bitmap->pbox.h == 0)return 0;
 
     int x, y;
@@ -683,17 +654,9 @@ int rendergraph_render(rendergraph_t *rgraph,
         bitmap->pbox.h * rect_zoom
     };
 
-    if(surface != NULL){
-        /* Exit early if rgraph wouldn't even show up on target surface. */
-        SDL_Rect target_rect = {0, 0, surface->w, surface->h};
-        if(!SDL_HasIntersection(&dst_rect, &target_rect))return 0;
-    }else if(renderer != NULL){
-        /* MAYBE TODO: exit early if rgraph woldn't even show up on target
-        renderer...
-        We can't implement this at the moment, because SDL_Renderer is
-        totally opaque, so we would have to pass its x, y, w, h into this
-        function somehow. */
-    }
+    /* Exit early if rgraph wouldn't even show up on target surface. */
+    SDL_Rect target_rect = {0, 0, surface->w, surface->h};
+    if(!SDL_HasIntersection(&dst_rect, &target_rect))return 0;
 
     if(cache_bitmaps){
         /* Render rgraph and cache result on one of rgraph's bitmaps */
@@ -706,24 +669,14 @@ int rendergraph_render(rendergraph_t *rgraph,
         if(err)return err;
     }
 
-    /* Finally render, blit, or copy the rgraph onto target surface
-    or renderer */
-    if(surface != NULL){
-        if(cache_bitmaps){
-            RET_IF_SDL_NZ(SDL_BlitScaled(bitmap->surface, NULL,
-                surface, &dst_rect));
-        }else{
-            err = rendergraph_render_to_surface(rgraph, surface, &dst_rect,
-                rot, flip, animated_frame_i, pal);
-            if(err)return err;
-        }
-    }else if(renderer != NULL){
-        SDL_Texture *bitmap_texture;
-        err = rendergraph_bitmap_get_texture(rgraph, bitmap, renderer,
-            false, &bitmap_texture);
+    /* Finally render, blit, or copy the rgraph onto target surface */
+    if(cache_bitmaps){
+        RET_IF_SDL_NZ(SDL_BlitScaled(bitmap->surface, NULL,
+            surface, &dst_rect));
+    }else{
+        err = rendergraph_render_to_surface(rgraph, surface, &dst_rect,
+            rot, flip, animated_frame_i, pal);
         if(err)return err;
-        RET_IF_SDL_NZ(SDL_RenderCopy(renderer, bitmap_texture,
-            NULL, &dst_rect));
     }
 
     return 0;
