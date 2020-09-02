@@ -3,6 +3,22 @@
 
 #include "geom.h"
 
+/*
+
+  Y +
+     \
+     (+)- +
+     /    X
+  Z +
+
+  X + Y + Z = 0
+
+  ...so, coords are given as (x y)
+  And if you need it, you've got z = -x -y
+
+*/
+
+
 #define HEXSPACE_DIMS 2
 #define HEXSPACE_ROT_MAX 6
 

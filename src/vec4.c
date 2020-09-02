@@ -5,6 +5,18 @@
 
 #include "vec4.h"
 
+/*
+
+      D
+        C
+      +
+      . +
+      .. + B
+      ...
+      *...+ A
+
+*/
+
 
 vecspace_t vec4 = {
     VEC4_DIMS,

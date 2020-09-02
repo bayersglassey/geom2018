@@ -3,6 +3,7 @@
 
 #include "vec4.h"
 #include "hexspace.h"
+#include "hexbox.h"
 #include "bounds.h"
 
 
@@ -81,17 +82,36 @@ int position_box_test(position_box_t *b1, int x, int y, int w, int h){
     return ok? 0: 1;
 }
 
+int hexbox_test(hexbox_t *hexbox,
+    int min_x, int max_x,
+    int min_y, int max_y,
+    int min_z, int max_z
+){
+    hexbox_t hexbox2 = {
+        .values = {
+            min_x, max_x,
+            min_y, max_y,
+            min_z, max_z
+        },
+    };
+    bool ok = hexbox_eq(hexbox, &hexbox2);
+    printf("%c ", ok_char(ok)); hexbox_printf(hexbox);
+    printf(" == "); hexbox_printf(&hexbox2); printf("\n");
+    return ok? 0: 1;
+}
+
 void print_title(const char *title){
     printf("\n  %s\n", title);
 }
 
 
-int vec4_tests(){
+int run_tests(){
     int fails = 0;
     vec_t v, w;
     trf_t t, s;
     boundary_box_t bbox;
     position_box_t pbox;
+    hexbox_t hexbox;
 
 
     /****** HEXSPACE TESTS ******/
@@ -219,6 +239,22 @@ int vec4_tests(){
         position_box_from_boundary_box(&pbox, &bbox);
         fails += position_box_test(&pbox, 2, 1, 5, 4);
 
+    /****** HEXBOX TESTS ******/
+
+        print_title("[hexbox] Rotations");
+        hexbox_set(&hexbox, 0, 1, 2, 3, 4, 5);
+        hexbox_rot(&hexbox, 0);
+        fails += hexbox_test(&hexbox, 0, 1, 2, 3, 4, 5);
+        hexbox_set(&hexbox, 0, 1, 2, 3, 4, 5);
+        hexbox_rot(&hexbox, 6);
+        fails += hexbox_test(&hexbox, 0, 1, 2, 3, 4, 5);
+        hexbox_set(&hexbox, 0, 1, 2, 3, 4, 5);
+        hexbox_rot(&hexbox, 1);
+        fails += hexbox_test(&hexbox, 4, 5, 0, 1, 3, 2);
+        hexbox_set(&hexbox, 0, 1, 2, 3, 4, 5);
+        hexbox_rot(&hexbox, 3);
+        fails += hexbox_test(&hexbox, 1, 0, 3, 2, 5, 4);
+
 results:
     /****** RESULTS ******/
 
@@ -233,6 +269,6 @@ results:
 
 
 int main(int n_args, char *args[]){
-    return vec4_tests();
+    return run_tests();
 }
 

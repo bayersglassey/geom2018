@@ -3,6 +3,19 @@
 
 #include "geom.h"
 
+/*
+
+      D
+        C
+      +
+      . +
+      .. + B
+      ...
+      *...+ A
+
+*/
+
+
 #define VEC4_DIMS 4
 #define VEC4_ROT_MAX 12
 

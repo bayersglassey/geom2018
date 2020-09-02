@@ -11,7 +11,13 @@
   Y +
      \
      (+)- +
-          X
+     /    X
+  Z +
+
+  X + Y + Z = 0
+
+  ...so, coords are given as (x y)
+  And if you need it, you've got z = -x -y
 
 */
 
