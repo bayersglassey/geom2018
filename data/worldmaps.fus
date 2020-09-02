@@ -1,4 +1,6 @@
 worldmaps:
+    : "data/maps/wastes/worldmap.fus"
+    : "data/maps/crazyspidertown/worldmap.fus"
     : "data/maps/demo/worldmap.fus"
     : "data/maps/triangles/worldmap.fus"
     : "data/maps/water/worldmap.fus"
