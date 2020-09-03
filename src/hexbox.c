@@ -4,10 +4,22 @@
 
 #include "hexspace.h"
 #include "hexbox.h"
+#include "mathutil.h"
+
+
+
+#define HEXBOX_SET_MIN(HEXBOX, DIM, VALUE) { \
+    int *_i = &(HEXBOX)->values[HEXBOX_INDEX((DIM), HEXBOX_MIN)]; \
+    *_i = _min(*_i, (VALUE)); \
+}
+
+#define HEXBOX_SET_MAX(HEXBOX, DIM, VALUE) { \
+    int *_i = &(HEXBOX)->values[HEXBOX_INDEX((DIM), HEXBOX_MAX)]; \
+    *_i = _max(*_i, (VALUE)); \
+}
 
 
 int hexbox_rot_matrix[HEXBOX_VALUES] = HEXBOX_ROT_MATRIX;
-
 
 
 void hexbox_set(hexbox_t *hexbox,
@@ -21,6 +33,20 @@ void hexbox_set(hexbox_t *hexbox,
     hexbox->values[3] = max_y;
     hexbox->values[4] = min_z;
     hexbox->values[5] = max_z;
+}
+
+void hexbox_zero(hexbox_t *hexbox){
+    memset(hexbox, 0, sizeof(*hexbox));
+}
+
+void hexbox_point_union(hexbox_t *hexbox, int x, int y){
+    int z = x - y;
+    HEXBOX_SET_MIN(hexbox, HEXBOX_X, x)
+    HEXBOX_SET_MAX(hexbox, HEXBOX_X, x)
+    HEXBOX_SET_MIN(hexbox, HEXBOX_Y, y)
+    HEXBOX_SET_MAX(hexbox, HEXBOX_Y, y)
+    HEXBOX_SET_MIN(hexbox, HEXBOX_Z, z)
+    HEXBOX_SET_MAX(hexbox, HEXBOX_Z, z)
 }
 
 bool hexbox_eq(hexbox_t *hexbox1, hexbox_t *hexbox2){

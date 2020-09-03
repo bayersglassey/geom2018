@@ -241,6 +241,11 @@ int run_tests(){
 
     /****** HEXBOX TESTS ******/
 
+        print_title("[hexbox] Zero");
+        hexbox_set(&hexbox, 0, 1, 2, 3, 4, 5);
+        hexbox_zero(&hexbox);
+        fails += hexbox_test(&hexbox, 0, 0, 0, 0, 0, 0);
+
         print_title("[hexbox] Rotations");
         hexbox_set(&hexbox, 0, 1, 2, 3, 4, 5);
         hexbox_rot(&hexbox, 0);
@@ -254,6 +259,17 @@ int run_tests(){
         hexbox_set(&hexbox, 0, 1, 2, 3, 4, 5);
         hexbox_rot(&hexbox, 3);
         fails += hexbox_test(&hexbox, 1, 0, 3, 2, 5, 4);
+
+        print_title("[hexbox] Point union");
+        hexbox_zero(&hexbox);
+        hexbox_point_union(&hexbox, 1, 0);
+        fails += hexbox_test(&hexbox, 0, 1, 0, 0, 0, 1);
+        hexbox_zero(&hexbox);
+        hexbox_point_union(&hexbox, 0, 1);
+        fails += hexbox_test(&hexbox, 0, 0, 0, 1, -1, 0);
+        hexbox_zero(&hexbox);
+        hexbox_point_union(&hexbox, 1, 1);
+        fails += hexbox_test(&hexbox, 0, 1, 0, 1, 0, 0);
 
 results:
     /****** RESULTS ******/

@@ -12,6 +12,7 @@
 #include "mathutil.h"
 #include "geom.h"
 #include "hexspace.h"
+#include "hexbox.h"
 
 
 static char get_elem_type(char c){
@@ -320,15 +321,12 @@ static int _hexcollmap_parse_lines_origin(
     return 0;
 }
 
-static int _hexcollmap_parse_lines_bounds(
+static int _hexcollmap_parse_lines_hexbox(
     char **lines, int lines_len, int ox, int oy,
-    int *map_t_ptr, int *map_b_ptr, int *map_l_ptr, int *map_r_ptr
+    hexbox_t *hexbox
 ){
     int err;
-    int map_t = 0;
-    int map_b = 0;
-    int map_l = 0;
-    int map_r = 0;
+    hexbox_zero(hexbox);
     for(int y = 0; y < lines_len; y++){
         char *line = lines[y];
         int line_len = strlen(line);
@@ -347,20 +345,15 @@ static int _hexcollmap_parse_lines_bounds(
                 get_map_coords(x-ox, y-oy, elem_type,
                     &mx, &my, &is_face1);
 
-                map_t = _min(map_t, my);
-                map_b = _max(map_b, my);
-                map_l = _min(map_l, mx);
-                map_r = _max(map_r, mx);
+                /* We were fools: tile coords have Y flipped compared */
+                /* to vecspaces... thus, -my here */
+                hexbox_point_union(hexbox, mx, -my);
             }else if(c == '[' || c == ';'){
                 /* next line plz, "tilebuckets" don't affect bounds */
                 break;
             }
         }
     }
-    *map_t_ptr = map_t;
-    *map_b_ptr = map_b;
-    *map_l_ptr = map_l;
-    *map_r_ptr = map_r;
     return 0;
 }
 
@@ -619,14 +612,17 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
     err = _hexcollmap_parse_lines_origin(lines, lines_len, &ox, &oy);
     if(err)return err;
 
-    /* Iteration 2: Find map bounds */
-    int map_t, map_b, map_l, map_r;
-    err = _hexcollmap_parse_lines_bounds(lines, lines_len,
-        ox, oy, &map_t, &map_b, &map_l, &map_r);
+    /* Iteration 2: Find map bounds (set collmap->hexbox) */
+    err = _hexcollmap_parse_lines_hexbox(lines, lines_len,
+        ox, oy, &collmap->hexbox);
     if(err)return err;
 
     /* Intermission: initialize collmap with empty tile data */
     /* ...Allocate map data */
+    int map_l = collmap->hexbox.values[HEXBOX_INDEX(HEXBOX_X, HEXBOX_MIN)];
+    int map_r = collmap->hexbox.values[HEXBOX_INDEX(HEXBOX_X, HEXBOX_MAX)];
+    int map_t = -collmap->hexbox.values[HEXBOX_INDEX(HEXBOX_Y, HEXBOX_MAX)];
+    int map_b = -collmap->hexbox.values[HEXBOX_INDEX(HEXBOX_Y, HEXBOX_MIN)];
     int map_w = map_r - map_l + 1;
     int map_h = map_b - map_t + 1;
     int map_size = map_w * map_h;

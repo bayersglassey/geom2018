@@ -103,7 +103,11 @@ void hexcollmap_dump(hexcollmap_t *collmap, FILE *f){
     /* The rawest of dumps */
     fprintf(f, "hexcollmap: %p\n", collmap);
     if(collmap == NULL)return;
-    fprintf(f, "  origin: %i %i\n", collmap->ox, collmap->oy);
+    fprintf(f, "  hexbox: (%i %i) (%i %i) (%i %i)\n",
+        collmap->hexbox.values[0], collmap->hexbox.values[1],
+        collmap->hexbox.values[2], collmap->hexbox.values[3],
+        collmap->hexbox.values[4], collmap->hexbox.values[5]);
+    fprintf(f, "  origin: %i %i\n", collmap->ox, -collmap->oy);
     fprintf(f, "  tiles:\n");
     for(int y = 0; y < collmap->h; y++){
         fprintf(f, "    ");
@@ -135,6 +139,13 @@ static char _write_edge(char tile_c, char _default){
 static char _write_face(char tile_c){
     return tile_c_is_visible(tile_c)?
         (tile_c_is_special(tile_c)? tile_c: '*'): ' ';
+}
+
+static bool out_of_bounds_z(hexcollmap_t *collmap, int x, int y){
+    int z = x - y;
+    return
+        z < collmap->hexbox.values[HEXBOX_INDEX(HEXBOX_Z, HEXBOX_MIN)] ||
+        z > collmap->hexbox.values[HEXBOX_INDEX(HEXBOX_Z, HEXBOX_MAX)];
 }
 
 void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
@@ -233,9 +244,18 @@ void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
         fprintf(f, "collmap:\n");
     }
 
+    fprintf(f, "    # origin: (%i %i)\n",
+        collmap->ox, collmap->oy);
+    fprintf(f, "    # hexbox: (%i %i) (%i %i) (%i %i)\n",
+        collmap->hexbox.values[0], collmap->hexbox.values[1],
+        collmap->hexbox.values[2], collmap->hexbox.values[3],
+        collmap->hexbox.values[4], collmap->hexbox.values[5]);
+
     for(int y = 0; y < collmap->h; y++){
         // \ /
         //  . -
+
+        int _y = collmap->oy - y;
 
         // \ /
         fputs(tabs, f);
@@ -244,6 +264,11 @@ void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
             fputs("  ", f);
         }
         for(int x = 0; x < collmap->w; x++){
+            int _x = x - collmap->ox;
+            if(out_of_bounds_z(collmap, _x, _y)){
+                fputs("    ", f);
+                continue;
+            }
             hexcollmap_tile_t *tile = &collmap->tiles[y * collmap->w + x];
             fprintf(f, "%c%c%c%c",
                 _write_edge(tile->edge[2].tile_c, '\\'),
@@ -261,6 +286,11 @@ void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
             fputs("  ", f);
         }
         for(int x = 0; x < collmap->w; x++){
+            int _x = x - collmap->ox;
+            if(out_of_bounds_z(collmap, _x, _y)){
+                fputs("    ", f);
+                continue;
+            }
             bool is_origin = x == collmap->ox && y == collmap->oy;
             hexcollmap_tile_t *tile = &collmap->tiles[y * collmap->w + x];
             fprintf(f, "%c%c%c%c",
@@ -369,6 +399,8 @@ static int hexcollmap_collide_elem(hexcollmap_t *collmap1, bool all,
     /* Returns true (1) or false (0), or 2 if caller should continue
     checking for a collision. */
 
+    /* TODO: can we do a fancy boundary check to see if we can early exit? */
+
     for(int r2 = 0; r2 < rot; r2++){
         if(!hexcollmap_elem_is_solid(&elems2[r2]))continue;
 
@@ -408,6 +440,8 @@ bool hexcollmap_collide(
 
     /* NOTE: for tile coords (ox, oy, x, y, w, h),
     Y is reversed (down is positive, up is negative) */
+
+    /* TODO: can we do a fancy boundary check to see if we can early exit? */
 
     trf_t trf;
     trf_cpy(space, &trf, trf2);

@@ -6,6 +6,7 @@
 #include "array.h"
 #include "lexer.h"
 #include "geom.h"
+#include "hexbox.h"
 
 
 
@@ -114,6 +115,7 @@ typedef struct hexcollmap_part {
 
 typedef struct hexcollmap {
     char *name;
+    hexbox_t hexbox;
     int w;
     int h;
     int ox;
