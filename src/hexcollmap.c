@@ -99,6 +99,36 @@ int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
     return 0;
 }
 
+int hexcollmap_init_tiles_from_hexmap(hexcollmap_t *collmap){
+    int map_l = collmap->hexbox.values[HEXBOX_INDEX(HEXBOX_X, HEXBOX_MIN)];
+    int map_r = collmap->hexbox.values[HEXBOX_INDEX(HEXBOX_X, HEXBOX_MAX)];
+    int map_t = -collmap->hexbox.values[HEXBOX_INDEX(HEXBOX_Y, HEXBOX_MAX)];
+    int map_b = -collmap->hexbox.values[HEXBOX_INDEX(HEXBOX_Y, HEXBOX_MIN)];
+    int map_w = map_r - map_l + 1;
+    int map_h = map_b - map_t + 1;
+    int map_size = map_w * map_h;
+
+    /* ...Allocate map data */
+    hexcollmap_tile_t *tiles = calloc(map_size, sizeof(*tiles));
+    if(tiles == NULL)return 1;
+
+    /* ...Initialize tile elements */
+    for(int i = 0; i < map_size; i++){
+        for(int j = 0; j < 1; j++)tiles[i].vert[j].tile_c = ' ';
+        for(int j = 0; j < 3; j++)tiles[i].edge[j].tile_c = ' ';
+        for(int j = 0; j < 2; j++)tiles[i].face[j].tile_c = ' ';
+    }
+
+    /* ...Assign attributes */
+    collmap->ox = -map_l;
+    collmap->oy = -map_t;
+    collmap->w = map_w;
+    collmap->h = map_h;
+    collmap->tiles = tiles;
+
+    return 0;
+}
+
 void hexcollmap_dump(hexcollmap_t *collmap, FILE *f){
     /* The rawest of dumps */
     fprintf(f, "hexcollmap: %p\n", collmap);
