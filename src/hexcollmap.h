@@ -163,8 +163,10 @@ int hexcollmap_part_init(hexcollmap_part_t *part, int type,
 void hexcollmap_part_cleanup(hexcollmap_part_t *part);
 
 void hexcollmap_cleanup(hexcollmap_t *collmap);
-int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
+void hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
     char *name);
+void hexcollmap_init_clone(hexcollmap_t *collmap,
+    hexcollmap_t *from_collmap, char *name);
 int hexcollmap_init_tiles_from_hexmap(hexcollmap_t *collmap);
 void hexcollmap_dump(hexcollmap_t *collmap, FILE *f);
 void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,

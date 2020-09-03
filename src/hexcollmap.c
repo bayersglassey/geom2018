@@ -88,7 +88,7 @@ void hexcollmap_cleanup(hexcollmap_t *collmap){
         hexmap_rendergraph_cleanup)
 }
 
-int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
+void hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
     char *name
 ){
     memset(collmap, 0, sizeof(*collmap));
@@ -96,7 +96,13 @@ int hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
     collmap->space = space;
     ARRAY_INIT(collmap->recordings);
     ARRAY_INIT(collmap->rendergraphs);
-    return 0;
+}
+
+void hexcollmap_init_clone(hexcollmap_t *collmap,
+    hexcollmap_t *from_collmap, char *name
+){
+    hexcollmap_init(collmap, from_collmap->space, name);
+    collmap->hexbox = from_collmap->hexbox;
 }
 
 int hexcollmap_init_tiles_from_hexmap(hexcollmap_t *collmap){
@@ -137,7 +143,7 @@ void hexcollmap_dump(hexcollmap_t *collmap, FILE *f){
         collmap->hexbox.values[0], collmap->hexbox.values[1],
         collmap->hexbox.values[2], collmap->hexbox.values[3],
         collmap->hexbox.values[4], collmap->hexbox.values[5]);
-    fprintf(f, "  origin: %i %i\n", collmap->ox, -collmap->oy);
+    fprintf(f, "  origin: %i %i\n", collmap->ox, collmap->oy);
     fprintf(f, "  tiles:\n");
     for(int y = 0; y < collmap->h; y++){
         fprintf(f, "    ");
@@ -274,8 +280,6 @@ void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
         fprintf(f, "collmap:\n");
     }
 
-    fprintf(f, "    # origin: (%i %i)\n",
-        collmap->ox, collmap->oy);
     fprintf(f, "    # hexbox: (%i %i) (%i %i) (%i %i)\n",
         collmap->hexbox.values[0], collmap->hexbox.values[1],
         collmap->hexbox.values[2], collmap->hexbox.values[3],

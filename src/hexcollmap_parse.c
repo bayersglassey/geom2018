@@ -230,9 +230,8 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
         if(part->filename == NULL)return 0;
 
         hexcollmap_t part_collmap;
-        err = hexcollmap_init(&part_collmap,
+        hexcollmap_init(&part_collmap,
             collmap->space, strdup(part->filename));
-        if(err)return err;
         err = hexcollmap_load(&part_collmap,
             part->filename, NULL);
         if(err)return err;

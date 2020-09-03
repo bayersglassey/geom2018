@@ -27,8 +27,7 @@ static hexcollmap_t *load_collmap(FILE *file, const char *filename,
         return NULL;
     }
 
-    err = hexcollmap_init(collmap, &hexspace, strdup(filename));
-    if(err)return NULL;
+    hexcollmap_init(collmap, &hexspace, strdup(filename));
 
     {
         fus_lexer_t lexer;

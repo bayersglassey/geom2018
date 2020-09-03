@@ -1070,8 +1070,7 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
     submap->camera_type = camera_type;
     vec_cpy(MAX_VEC_DIMS, submap->camera_pos, camera_pos);
 
-    err = hexcollmap_init(&submap->collmap, map->space, strdup(filename));
-    if(err)return err;
+    hexcollmap_init(&submap->collmap, map->space, strdup(filename));
 
     submap->rgraph_map = NULL;
     submap->rgraph_minimap = NULL;
