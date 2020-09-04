@@ -255,10 +255,10 @@ int run_tests(){
         fails += hexbox_test(&hexbox, 0, 1, 2, 3, 4, 5);
         hexbox_set(&hexbox, 0, 1, 2, 3, 4, 5);
         hexbox_rot(&hexbox, 1);
-        fails += hexbox_test(&hexbox, 4, 5, 0, 1, 3, 2);
+        fails += hexbox_test(&hexbox, 4, 5, 0, 1, -3, -2);
         hexbox_set(&hexbox, 0, 1, 2, 3, 4, 5);
         hexbox_rot(&hexbox, 3);
-        fails += hexbox_test(&hexbox, 1, 0, 3, 2, 5, 4);
+        fails += hexbox_test(&hexbox, -1, 0, -3, -2, -5, -4);
 
         print_title("[hexbox] Point union");
         hexbox_zero(&hexbox);

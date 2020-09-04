@@ -72,9 +72,9 @@
     ...so transformation matrix is:
 
     {
-        4, 5,
-        0, 1,
-        3, 2,
+        +[4], +[5],
+        +[0], +[1],
+        -[3], -[2],
     }
 
     (see HEXBOX_ROT_MATRIX, hexbox_rot_matrix)

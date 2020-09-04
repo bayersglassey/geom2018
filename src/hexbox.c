@@ -72,9 +72,15 @@ void hexbox_rot(hexbox_t *hexbox, rot_t rot){
     rot = rot_contain(HEXSPACE_ROT_MAX, rot);
     for(int i = 0; i < rot; i++){
         hexbox_t original = *hexbox;
-        for(int j = 0; j < HEXBOX_VALUES; j++){
+        /* X, Y */
+        for(int j = 0; j < HEXBOX_VALUES - 2; j++){
             int j_rot = hexbox_rot_matrix[j];
             hexbox->values[j] = original.values[j_rot];
+        }
+        /* Z */
+        for(int j = HEXBOX_VALUES - 2; j < HEXBOX_VALUES; j++){
+            int j_rot = hexbox_rot_matrix[j];
+            hexbox->values[j] = -original.values[j_rot];
         }
     }
 }
