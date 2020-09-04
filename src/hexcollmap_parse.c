@@ -617,7 +617,7 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
     if(err)return err;
 
     /* Intermission: initialize collmap with empty tile data */
-    err = hexcollmap_init_tiles_from_hexmap(collmap);
+    err = hexcollmap_init_tiles_from_hexbox(collmap);
     if(err)return err;
 
     /* Iterations 3 & 4: The meat of it all - parse tile data */
@@ -838,6 +838,43 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
         &parts, &parts_len);
     if(err)return err;
     ARRAY_FREE_PTR(hexcollmap_part_t*, parts, hexcollmap_part_cleanup)
+
+    return 0;
+}
+
+int hexcollmap_parse_clone(hexcollmap_t *collmap,
+    hexcollmap_t *from_collmap, rot_t rot
+){
+    int err;
+
+    hexbox_rot(&collmap->hexbox, rot);
+
+    err = hexcollmap_init_tiles_from_hexbox(collmap);
+    if(err)return err;
+
+    for(int from_y = 0; from_y < from_collmap->h; from_y++){
+        // \ /
+        //  . -
+
+        int from_vy = from_collmap->oy - from_y;
+        for(int from_x = 0; from_x < from_collmap->w; from_x++){
+            int from_vx = from_x - from_collmap->ox;
+
+            vec_t v = {from_vx, from_vy};
+            hexspace_rot(v, rot);
+
+            int x = collmap->ox + v[0];
+            int y = collmap->oy - v[1];
+            hexcollmap_tile_t *tile =
+                &collmap->tiles[y * collmap->w + x];
+
+            hexcollmap_tile_t *from_tile =
+                &from_collmap->tiles[from_y * from_collmap->w + from_x];
+
+            //fprintf(stderr, "    # %i %i -> %i %i\n", from_x, from_y, x, y);
+            tile->vert[0] = from_tile->vert[0];
+        }
+    }
 
     return 0;
 }

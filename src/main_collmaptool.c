@@ -49,12 +49,16 @@ static void print_help(){
     fprintf(stderr, "Options:\n");
     fprintf(stderr, "    --just_coll      "
         "Only parse/output the collmap's lines, no leading \"collmap:\" etc\n");
+    fprintf(stderr, "    --dump           "
+        "Raw dump instead of pretty write\n");
     fprintf(stderr, " -x --extra          "
         "Output extra info as fus comments (e.g. recordings, rendergraphs)\n");
     fprintf(stderr, " -d --nodots         "
         "Invisible verts are displayed as ' ' not '.'\n");
     fprintf(stderr, " -e --eol_semicolons "
         "Semicolons written to end of each line marking end of tile data.\n");
+    fprintf(stderr, "    --rot            "
+        "Rotate collmap\n");
     fprintf(stderr, " -h --help           "
         "Show this message\n");
 }
@@ -62,21 +66,29 @@ static void print_help(){
 
 int main(int n_args, char **args){
     bool just_coll = false;
+    bool dump = false;
     bool extra = false;
     bool nodots = false;
     bool eol_semicolons = false;
+    rot_t rot = -1;
 
     /* Parse args */
     for(int i = 1; i < n_args; i++){
         const char *arg = args[i];
         if(!strcmp(arg, "--just_coll")){
             just_coll = true;
+        }else if(!strcmp(arg, "--dump")){
+            dump = true;
         }else if(!strcmp(arg, "-x") || !strcmp(arg, "--extra")){
             extra = true;
         }else if(!strcmp(arg, "-d") || !strcmp(arg, "--nodots")){
             nodots = true;
         }else if(!strcmp(arg, "-e") || !strcmp(arg, "--eol_semicolons")){
             eol_semicolons = true;
+        }else if(!strcmp(arg, "--rot")){
+            i++;
+            if(i >= n_args)goto arg_missing_value;
+            rot = rot_contain(HEXSPACE_ROT_MAX, atoi(args[i]));
         }else if(!strcmp(arg, "-h") || !strcmp(arg, "--help")){
             print_help();
             return 0;
@@ -85,6 +97,12 @@ int main(int n_args, char **args){
             print_help();
             return 1;
         }
+
+        continue;
+        arg_missing_value:
+        fprintf(stderr, "Missing value for option: %s\n", arg);
+        print_help();
+        return 2;
     }
 
     hexcollmap_part_t **parts;
@@ -95,10 +113,27 @@ int main(int n_args, char **args){
         &parts, &parts_len);
     if(!collmap)return 2;
 
+    /* Transform collmap */
+    if(rot != -1){
+        hexcollmap_t *from_collmap = collmap;
+        collmap = calloc(1, sizeof(*collmap));
+        if(!collmap){
+            perror("calloc collmap");
+            return 1;
+        }
+        hexcollmap_init_clone(collmap, from_collmap, "<clone>");
+        int err = hexcollmap_parse_clone(collmap, from_collmap, rot);
+        if(err)return err;
+    }
+
     /* Write collmap */
-    hexcollmap_write_with_parts(collmap, stdout,
-        just_coll, extra, nodots, eol_semicolons,
-        parts, parts_len);
+    if(dump){
+        hexcollmap_dump(collmap, stdout);
+    }else{
+        hexcollmap_write_with_parts(collmap, stdout,
+            just_coll, extra, nodots, eol_semicolons,
+            parts, parts_len);
+    }
 
     /* Cleanup */
     for(int i = 0; i < parts_len; i++){

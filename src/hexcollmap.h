@@ -167,7 +167,7 @@ void hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
     char *name);
 void hexcollmap_init_clone(hexcollmap_t *collmap,
     hexcollmap_t *from_collmap, char *name);
-int hexcollmap_init_tiles_from_hexmap(hexcollmap_t *collmap);
+int hexcollmap_init_tiles_from_hexbox(hexcollmap_t *collmap);
 void hexcollmap_dump(hexcollmap_t *collmap, FILE *f);
 void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
     bool just_coll, bool extra, bool nodots, bool eol_semicolons,
@@ -179,6 +179,8 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
     hexcollmap_part_t ***parts_ptr, int *parts_len_ptr);
 int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
     bool just_coll);
+int hexcollmap_parse_clone(hexcollmap_t *collmap,
+    hexcollmap_t *collmap_from, rot_t rot);
 int hexcollmap_load(hexcollmap_t *collmap, const char *filename,
     vars_t *vars);
 void hexcollmap_normalize_vert(trf_t *index);

@@ -105,7 +105,7 @@ void hexcollmap_init_clone(hexcollmap_t *collmap,
     collmap->hexbox = from_collmap->hexbox;
 }
 
-int hexcollmap_init_tiles_from_hexmap(hexcollmap_t *collmap){
+int hexcollmap_init_tiles_from_hexbox(hexcollmap_t *collmap){
     int map_l = collmap->hexbox.values[HEXBOX_INDEX(HEXBOX_X, HEXBOX_MIN)];
     int map_r = collmap->hexbox.values[HEXBOX_INDEX(HEXBOX_X, HEXBOX_MAX)];
     int map_t = -collmap->hexbox.values[HEXBOX_INDEX(HEXBOX_Y, HEXBOX_MAX)];
