@@ -523,7 +523,7 @@ Aug 23, 2020:
     * The chance percentages could be int vars...
     * Separate chances for running vs "running off the edge"?..
 
-* airoller...
+* airoller... aibigroller... etc
 
 
 Aug 23, 2020:
@@ -536,7 +536,7 @@ Aug 23, 2020:
         So he neither crushes nor is crushed.
     * Have this area eventually combine with big triangles area.
     * Is there a "big_trangleplayer"?.. :P
-    * Finish up anim/hexroller.fus!..
+    * Finish up anim/bubblecar.fus!..
     * jungle_aiplayer gets crushed by birds :'(
         * Add a special "invincible" thing to bodies?..
         * (Currently just implicit when body->recording is playing...)
@@ -549,3 +549,49 @@ Aug 25, 2020:
 
 * Fix our weirdo "touching savepoint" code... these days we can save your anim+state+pos+rot+turn, so just use hitbox.
 
+
+Aug 29, 2020:
+-------------
+
+* roller: after grab, stop until next "wentdown u"?..
+
+Sep 1, 2020:
+------------
+
+* aiplayer jumps into walls & explodes sometimes. Not ideal.
+* after you pass big_roller in triangles world, he goes "crazed" and comes after you?..
+    * so we... have anim/_big_roller.fus and pass it an IS_CRAZED bool?.. :P
+* use hexbox_t with hexcollmap_t so collmaptool can rotate maps!
+    * then do so with wastes/start.fus, etc
+
+
+Sep 5, 2020:
+------------
+
+* Spikeyplayer puzzle!.. there's one already (data/maps/trees/bubbles3-0.fus) where you become rollerplayer,
+then become spikeyplayer, then can get through a place with 4 deathrollers.
+If there's only 3 deathrollers, you can get through by waiting for a gap in them so you can safely
+jump across a little gap & escape.
+HOWEVER, even when there are 4, you can still escape if you spit at them and confuse them!
+So that could be used somewhere...
+
+* Roller movement:
+    * While extended ("grabbing"), don't grab things on your long sides...
+    that is,
+
+        All 3 vertices are "sticky":
+
+              +
+             / \
+           (+)- +
+
+        Only the "tip" vertex is "sticky":
+
+              + - +
+             /   /
+           (+)- +
+
+    ...that still allows e.g. rolling over large gaps of this form:
+
+
+        +   .   +   .   +
