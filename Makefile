@@ -14,7 +14,7 @@ TESTS = \
 PROGS += $(TESTS)
 
 OFILES = \
- src/hexcollmap.o src/hexcollmap_parse.o \
+ src/hexcollmap.o src/hexcollmap_parse.o src/hexcollmap_write.o \
  src/str_utils.o src/file_utils.o src/lexer.o src/write.o src/stringstore.o src/vars.o \
  src/geom.o src/vec4.o src/hexspace.o src/bounds.o src/hexbox.o src/location.o \
  src/font.o src/console.o src/directory.o src/directory_shell.o \
