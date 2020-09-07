@@ -15,6 +15,108 @@
 #include "hexbox.h"
 
 
+static void hexcollmap_edge_rot(
+    int *x_ptr, int *y_ptr, int *i_ptr, rot_t addrot
+){
+    int x = *x_ptr;
+    int y = *y_ptr;
+    rot_t rot_from = *i_ptr;
+    rot_t rot_to = rot_contain(HEXSPACE_ROT_MAX, rot_from + addrot);
+
+    static const int leupsticoedophaeia[6][3] = {
+        /*
+
+            This table uses the following data structure:
+
+            {x, y, i}
+
+            ...to represent the following diagram:
+
+               \ /
+            . -(.)-
+               / \
+              .   .
+
+            ...where the x, y axes are:
+
+            (.)- . X
+              \
+               .
+                Y
+
+            ...and i is an index into the 3 edges stored at each coordinate:
+
+            2   1
+             \ /
+             (.)- 0
+
+        */
+        { 0,  0, 0},
+        { 0,  0, 1},
+        { 0,  0, 2},
+        {-1,  0, 0},
+        {-1,  1, 1},
+        { 0,  1, 2}
+    };
+
+    const int *leupsticoedophum_from = leupsticoedophaeia[rot_from];
+    const int *leupsticoedophum_to = leupsticoedophaeia[rot_to];
+    *x_ptr = x - leupsticoedophum_from[0] + leupsticoedophum_to[0];
+    *y_ptr = y - leupsticoedophum_from[1] + leupsticoedophum_to[1];
+    *i_ptr = leupsticoedophum_to[2];
+}
+
+static void hexcollmap_face_rot(
+    int *x_ptr, int *y_ptr, int *i_ptr, rot_t addrot
+){
+    int x = *x_ptr;
+    int y = *y_ptr;
+    rot_t rot_from = *i_ptr;
+    rot_t rot_to = rot_contain(HEXSPACE_ROT_MAX, rot_from + addrot);
+
+    static const int hypsofactodontaseri[6][3] = {
+        /*
+
+            This table uses the following data structure:
+
+            {x, y, i}
+
+            ...to represent the following diagram:
+
+              * * *
+            .  (.)
+              * * *
+              .   .
+
+            ...where the x, y axes are:
+
+            (.)- . X
+              \
+               .
+                Y
+
+            ...and i is an index into the 2 faces stored at each coordinate:
+
+              1 0
+              * *
+             (.)
+
+        */
+        { 0,  0, 0},
+        { 0,  0, 1},
+        {-1,  0, 0},
+        {-1,  1, 1},
+        {-1,  1, 0},
+        { 0,  1, 1}
+    };
+
+    const int *hypsofactodontaserus_from = hypsofactodontaseri[rot_from];
+    const int *hypsofactodontaserus_to = hypsofactodontaseri[rot_to];
+    *x_ptr = x - hypsofactodontaserus_from[0] + hypsofactodontaserus_to[0];
+    *y_ptr = y - hypsofactodontaserus_from[1] + hypsofactodontaserus_to[1];
+    *i_ptr = hypsofactodontaserus_to[2];
+}
+
 static char get_elem_type(char c){
     switch(c){
         case '.':
@@ -860,19 +962,36 @@ int hexcollmap_parse_clone(hexcollmap_t *collmap,
         for(int from_x = 0; from_x < from_collmap->w; from_x++){
             int from_vx = from_x - from_collmap->ox;
 
+            hexcollmap_tile_t *from_tile =
+                &from_collmap->tiles[from_y * from_collmap->w + from_x];
+
             vec_t v = {from_vx, from_vy};
             hexspace_rot(v, rot);
 
             int x = collmap->ox + v[0];
             int y = collmap->oy - v[1];
-            hexcollmap_tile_t *tile =
-                &collmap->tiles[y * collmap->w + x];
 
-            hexcollmap_tile_t *from_tile =
-                &from_collmap->tiles[from_y * from_collmap->w + from_x];
-
-            //fprintf(stderr, "    # %i %i -> %i %i\n", from_x, from_y, x, y);
-            tile->vert[0] = from_tile->vert[0];
+            {
+                int i = 0;
+                int to_x = x, to_y = y, to_i = i;
+                hexcollmap_tile_t *tile =
+                    &collmap->tiles[to_y * collmap->w + to_x];
+                tile->vert[to_i] = from_tile->vert[i];
+            }
+            for(int i = 0; i < 3; i++){
+                int to_x = x, to_y = y, to_i = i;
+                hexcollmap_edge_rot(&to_x, &to_y, &to_i, rot);
+                hexcollmap_tile_t *tile =
+                    &collmap->tiles[to_y * collmap->w + to_x];
+                tile->edge[to_i] = from_tile->edge[i];
+            }
+            for(int i = 0; i < 2; i++){
+                int to_x = x, to_y = y, to_i = i;
+                hexcollmap_face_rot(&to_x, &to_y, &to_i, rot);
+                hexcollmap_tile_t *tile =
+                    &collmap->tiles[to_y * collmap->w + to_x];
+                tile->face[to_i] = from_tile->face[i];
+            }
         }
     }
 
