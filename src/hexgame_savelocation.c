@@ -5,18 +5,18 @@
 #include <stdbool.h>
 
 #include "geom.h"
-#include "location.h"
+#include "hexgame_savelocation.h"
 #include "util.h"
 #include "lexer.h"
 #include "write.h"
 
 
 
-/************
- * LOCATION *
- ************/
+/****************
+ * SAVELOCATION *
+ ****************/
 
-void location_init(location_t *location){
+void hexgame_savelocation_init(hexgame_savelocation_t *location){
     vec_zero(location->pos);
     location->rot = 0;
     location->turn = false;
@@ -25,13 +25,13 @@ void location_init(location_t *location){
     location->state_name = NULL;
 }
 
-void location_cleanup(location_t *location){
+void hexgame_savelocation_cleanup(hexgame_savelocation_t *location){
     free(location->map_filename);
     free(location->anim_filename);
     free(location->state_name);
 }
 
-void location_set(location_t *location, vecspace_t *space,
+void hexgame_savelocation_set(hexgame_savelocation_t *location, vecspace_t *space,
     vec_t pos, rot_t rot, bool turn, char *map_filename,
     char *anim_filename, char *state_name
 ){
@@ -49,7 +49,7 @@ void location_set(location_t *location, vecspace_t *space,
     #undef SET_A_THING
 }
 
-int location_save(const char *filename, location_t *location){
+int hexgame_savelocation_save(const char *filename, hexgame_savelocation_t *location){
     FILE *f = fopen(filename, "w");
     if(f == NULL){
         fprintf(stderr, "Couldn't save player to %s: ", filename);
@@ -71,7 +71,7 @@ int location_save(const char *filename, location_t *location){
     return 0;
 }
 
-int location_load(const char *filename, location_t *location){
+int hexgame_savelocation_load(const char *filename, hexgame_savelocation_t *location){
     int err = 0;
 
     char *text = load_file(filename);

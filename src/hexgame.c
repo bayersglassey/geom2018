@@ -11,7 +11,7 @@
 #include "prismelrenderer.h"
 #include "array.h"
 #include "util.h"
-#include "location.h"
+#include "hexgame_savelocation.h"
 #include "lexer.h"
 #include "lexer_macros.h"
 
@@ -458,7 +458,7 @@ int hexgame_reset_player(hexgame_t *game, player_t *player,
         map = reset_map? reset_map: game->maps[0];
         pos = map->spawn;
     }else{
-        location_t *location = reset_level == RESET_SOFT?
+        hexgame_savelocation_t *location = reset_level == RESET_SOFT?
             &player->respawn_location:
             &player->safe_location;
 

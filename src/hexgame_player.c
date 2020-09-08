@@ -21,8 +21,8 @@ static void print_tabs(FILE *file, int depth){
 
 
 void player_cleanup(player_t *player){
-    location_cleanup(&player->respawn_location);
-    location_cleanup(&player->safe_location);
+    hexgame_savelocation_cleanup(&player->respawn_location);
+    hexgame_savelocation_cleanup(&player->safe_location);
     free(player->respawn_filename);
 }
 
@@ -59,16 +59,16 @@ int player_init(player_t *player, hexgame_t *game, int keymap,
     vecspace_t *space = map->space;
     if(respawn_pos == NULL)respawn_pos = map->spawn;
 
-    location_init(&player->respawn_location);
-    location_set(&player->respawn_location, space,
+    hexgame_savelocation_init(&player->respawn_location);
+    hexgame_savelocation_set(&player->respawn_location, space,
         respawn_pos, respawn_rot, respawn_turn, respawn_map_filename,
         NULL, NULL);
 
     /* Locations own their map filenames, so need to strdup */
     char *jump_map_filename = strdup(respawn_map_filename);
 
-    location_init(&player->safe_location);
-    location_set(&player->safe_location, space,
+    hexgame_savelocation_init(&player->safe_location);
+    hexgame_savelocation_set(&player->safe_location, space,
         respawn_pos, respawn_rot, respawn_turn, jump_map_filename,
         NULL, NULL);
 
@@ -109,7 +109,7 @@ void hexgame_player_dump(player_t *player, int depth){
     }
 }
 
-static int _player_set_location(player_t *player, location_t *location,
+static int _player_set_location(player_t *player, hexgame_savelocation_t *location,
     vec_ptr_t pos, rot_t rot, bool turn, const char *map_filename,
     const char *anim_filename, const char *state_name
 ){
@@ -142,7 +142,7 @@ static int _player_set_location(player_t *player, location_t *location,
     ASSIGN_A_THING(state_name)
     #undef ASSIGN_A_THING
 
-    location_set(location, space, pos, rot, turn, new_map_filename,
+    hexgame_savelocation_set(location, space, pos, rot, turn, new_map_filename,
         new_anim_filename, new_state_name);
     return 0;
 }
@@ -172,10 +172,10 @@ int player_reload(player_t *player, bool *file_found_ptr){
         return 0;
     }
 
-    location_t *location = &player->respawn_location;
+    hexgame_savelocation_t *location = &player->respawn_location;
 
     /* Attempt to load file */
-    err = location_load(player->respawn_filename, location);
+    err = hexgame_savelocation_load(player->respawn_filename, location);
     bool file_found = err == 0;
 
     /* If we couldn't load it, that's not an "error" per se, we'll just
@@ -309,7 +309,7 @@ int player_use_savepoint(player_t *player){
 
     /* Save player's new respawn location */
     if(player->respawn_filename != NULL){
-        err = location_save(player->respawn_filename,
+        err = hexgame_savelocation_save(player->respawn_filename,
             &player->respawn_location);
         if(err)return err;
     }

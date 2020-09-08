@@ -4,7 +4,7 @@
 #include "array.h"
 #include "lexer.h"
 #include "geom.h"
-#include "location.h"
+#include "hexgame_savelocation.h"
 #include "prismelrenderer.h"
 #include "hexcollmap.h"
 
@@ -79,7 +79,7 @@ const char *hexmap_door_type_msg(int door_type);
 typedef struct hexmap_door {
     int type; /* enum hexmap_door_type */
     union {
-        location_t location; /* type == HEXMAP_DOOR_TYPE_RESPAWN or HEXMAP_DOOR_TYPE_NEW_GAME */
+        hexgame_savelocation_t location; /* type == HEXMAP_DOOR_TYPE_RESPAWN or HEXMAP_DOOR_TYPE_NEW_GAME */
         int n_players; /* type == HEXMAP_DOOR_TYPE_PLAYERS */
         char *s; /* type == HEXMAP_DOOR_TYPE_CAMERA_MAPPER */
     } u;

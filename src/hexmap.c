@@ -13,7 +13,7 @@
 #include "geom.h"
 #include "vec4.h"
 #include "hexspace.h"
-#include "location.h"
+#include "hexgame_savelocation.h"
 #include "prismelrenderer.h"
 
 
@@ -1036,7 +1036,7 @@ void hexmap_door_cleanup(hexmap_door_t *door){
     switch(door->type){
         case HEXMAP_DOOR_TYPE_RESPAWN:
         case HEXMAP_DOOR_TYPE_NEW_GAME:
-            location_cleanup(&door->u.location);
+            hexgame_savelocation_cleanup(&door->u.location);
             break;
         case HEXMAP_DOOR_TYPE_CAMERA_MAPPER:
             free(door->u.s);

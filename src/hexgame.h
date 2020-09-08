@@ -12,7 +12,7 @@
 #include "geom.h"
 #include "vec4.h"
 #include "array.h"
-#include "location.h"
+#include "hexgame_savelocation.h"
 
 
 #define MAX_FRAME_I 554400
@@ -221,8 +221,8 @@ typedef struct player {
     struct hexgame *game;
     body_t *body;
 
-    location_t respawn_location;
-    location_t safe_location;
+    hexgame_savelocation_t respawn_location;
+    hexgame_savelocation_t safe_location;
     char *respawn_filename;
 
     int keymap;
