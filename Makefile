@@ -9,7 +9,7 @@ PROGS = \
  bin/prendtool bin/demo
 
 TESTS = \
- bin/lexertest bin/lexertool bin/frozenstringtest bin/geomtest bin/stringstoretest bin/varstest
+ bin/lexertest bin/frozenstringtest bin/geomtest bin/stringstoretest bin/varstest
 
 PROGS += $(TESTS)
 
