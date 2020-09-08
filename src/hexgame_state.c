@@ -231,20 +231,20 @@ static int state_rule_apply(state_rule_t *rule,
             vec_t vec;
             vec_cpy(space->dims, vec, effect->u.vec);
             rot_t rot = body_get_rot(body);
-            space->vec_flip(vec, body->turn);
+            space->vec_flip(vec, body->loc.turn);
             space->vec_rot(vec, rot);
-            vec_add(space->dims, body->pos, vec);
+            vec_add(space->dims, body->loc.pos, vec);
         }else if(effect->type == state_effect_type_rot){
             CHECK_BODY
             vecspace_t *space = body->map->space;
             rot_t effect_rot = effect->u.rot;
-            body->rot = rot_rot(space->rot_max,
-                body->rot, effect_rot);
+            body->loc.rot = rot_rot(space->rot_max,
+                body->loc.rot, effect_rot);
         }else if(effect->type == state_effect_type_turn){
             CHECK_BODY
             vecspace_t *space = body->map->space;
-            body->turn = !body->turn;
-            body->rot = rot_flip(space->rot_max, body->rot, true);
+            body->loc.turn = !body->loc.turn;
+            body->loc.rot = rot_flip(space->rot_max, body->loc.rot, true);
         }else if(effect->type == state_effect_type_goto){
             *gotto_ptr = &effect->u.gotto;
         }else if(effect->type == state_effect_type_delay){
@@ -265,7 +265,7 @@ static int state_rule_apply(state_rule_t *rule,
             err = body_add_body(body, &new_body,
                 spawn->stateset_filename,
                 spawn->state_name, palmapper,
-                spawn->pos, spawn->rot, spawn->turn);
+                spawn->loc.pos, spawn->loc.rot, spawn->loc.turn);
             if(err)return err;
         }else if(effect->type == state_effect_type_play){
             CHECK_ACTOR

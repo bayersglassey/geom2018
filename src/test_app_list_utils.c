@@ -112,9 +112,9 @@ void _console_write_recording(console_t *console, recording_t *rec, bool show_da
     if(show_data){
         _console_write_keyinfo(console, rec->body, &rec->keyinfo);
     }else{
-        WRITE_FIELD_VEC(rec, 4, pos0)
-        WRITE_FIELD_INT(rec, rot0)
-        WRITE_FIELD_BOOL(rec, turn0)
+        WRITE_FIELD_VEC(rec, 4, loc0.pos)
+        WRITE_FIELD_INT(rec, loc0.rot)
+        WRITE_FIELD_BOOL(rec, loc0.turn)
     }
     console_printf(console, "node %i/%i, frame %i\n",
         rec->node_i, rec->nodes_len, rec->frame_i);

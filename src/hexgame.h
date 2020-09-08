@@ -82,9 +82,7 @@ typedef struct recording {
     char *stateset_name;
     char *state_name;
 
-    vec_t pos0;
-    rot_t rot0;
-    bool turn0;
+    hexgame_location_t loc0;
 
     keyinfo_t keyinfo;
 
@@ -129,9 +127,7 @@ int recording_step(recording_t *rec);
 typedef struct body {
     struct hexgame *game;
 
-    vec_t pos;
-    rot_t rot;
-    bool turn;
+    hexgame_location_t loc;
 
     keyinfo_t keyinfo;
 

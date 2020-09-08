@@ -158,8 +158,8 @@ int camera_step(camera_t *camera){
         /* body-following camera */
         if(body != NULL){
             vec_cpy(space->dims, camera->pos,
-                body->pos);
-            camera->rot = body->rot;
+                body->loc.pos);
+            camera->rot = body->loc.rot;
         }
     }
 

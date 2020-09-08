@@ -159,11 +159,11 @@ void hexgame_body_dump(body_t *body, int depth){
         body->state->name);
     print_tabs(stderr, depth);
     fprintf(stderr, "pos: (%i %i)\n",
-        body->pos[0], body->pos[1]);
+        body->loc.pos[0], body->loc.pos[1]);
     print_tabs(stderr, depth);
-    fprintf(stderr, "rot: %i\n", body->rot);
+    fprintf(stderr, "rot: %i\n", body->loc.rot);
     print_tabs(stderr, depth);
-    fprintf(stderr, "turn: %s\n", body->turn? "yes": "no");
+    fprintf(stderr, "turn: %s\n", body->loc.turn? "yes": "no");
 }
 
 int body_respawn(body_t *body, vec_t pos, rot_t rot, bool turn,
@@ -176,9 +176,9 @@ int body_respawn(body_t *body, vec_t pos, rot_t rot, bool turn,
     vecspace_t *space = game->space;
 
     /* Set body pos, rot, turn */
-    vec_cpy(space->dims, body->pos, pos);
-    body->rot = rot;
-    body->turn = turn;
+    vec_cpy(space->dims, body->loc.pos, pos);
+    body->loc.rot = rot;
+    body->loc.turn = turn;
 
     /* Set body state */
     err = body_set_state(body, body->stateset.states[0]->name, true);
@@ -214,16 +214,16 @@ int body_add_body(body_t *body, body_t **new_body_ptr,
 
     vec_t addpos_cpy;
     vec_cpy(space->dims, addpos_cpy, addpos);
-    space->vec_flip(addpos_cpy, body->turn);
+    space->vec_flip(addpos_cpy, body->loc.turn);
     space->vec_rot(addpos_cpy, rot);
 
-    vec_cpy(space->dims, new_body->pos, body->pos);
-    vec_add(space->dims, new_body->pos, addpos_cpy);
+    vec_cpy(space->dims, new_body->loc.pos, body->loc.pos);
+    vec_add(space->dims, new_body->loc.pos, addpos_cpy);
 
-    new_body->rot =
-        rot_rot(space->rot_max, body->rot, addrot);
+    new_body->loc.rot =
+        rot_rot(space->rot_max, body->loc.rot, addrot);
 
-    new_body->turn = turn? !body->turn: body->turn;
+    new_body->loc.turn = turn? !body->loc.turn: body->loc.turn;
 
     if(new_body_ptr)*new_body_ptr = new_body;
     return 0;
@@ -236,12 +236,12 @@ int body_add_body(body_t *body, body_t **new_body_ptr,
  *************/
 
 rot_t body_get_rot(body_t *body){
-    /* Coverts body->rot/turn into the rot_t value representing
+    /* Coverts body->loc.rot/turn into the rot_t value representing
     the vector parallel to body's bottom (that is, the bottom of
     body's hitbox, where the body rests upon the ground) */
     vecspace_t *space = body->map->space;
-    rot_t rot = body->rot;
-    if(body->turn){
+    rot_t rot = body->loc.rot;
+    if(body->loc.turn){
         rot = rot_contain(space->rot_max,
             space->rot_max/2 - rot);}
     return rot;
@@ -249,14 +249,14 @@ rot_t body_get_rot(body_t *body){
 
 void body_init_trf(body_t *body, trf_t *trf){
     /* Initializes trf so that it represents the transformation needed to
-    bring a body from zero pos/rot/turn to body->pos/rot/turn.
+    bring a body from zero pos/rot/turn to body->loc.pos/rot/turn.
     If you see what I mean.
     In particular, we use this to set up transformations which will move
     the body's hitbox over top of it. */
     vecspace_t *space = body->map->space;
-    vec_cpy(space->dims, trf->add, body->pos);
+    vec_cpy(space->dims, trf->add, body->loc.pos);
     trf->rot = body_get_rot(body);
-    trf->flip = body->turn;
+    trf->flip = body->loc.turn;
 }
 
 void body_flash_cameras(body_t *body, Uint8 r, Uint8 g, Uint8 b,
@@ -412,7 +412,7 @@ void body_keyup(body_t *body, int key_i){
 int body_get_key_i(body_t *body, char c){
     bool turn = false;
     if(body){
-        turn = body->confused? !body->turn: body->turn;
+        turn = body->confused? !body->loc.turn: body->loc.turn;
     }
     int key_i =
         c == 'x'? KEYINFO_KEY_ACTION1:
@@ -430,7 +430,7 @@ int body_get_key_i(body_t *body, char c){
 char body_get_key_c(body_t *body, int key_i, bool absolute){
     bool turn = false;
     if(body){
-        turn = body->confused? !body->turn: body->turn;
+        turn = body->confused? !body->loc.turn: body->loc.turn;
     }
     return
         key_i == KEYINFO_KEY_ACTION1? 'x':
@@ -467,8 +467,8 @@ void body_update_cur_submap(body_t *body){
         /* A HACK! */
         trf_t index = {0};
         hexspace_set(index.add,
-             body->pos[0] - submap->pos[0],
-            -body->pos[1] + submap->pos[1]);
+             body->loc.pos[0] - submap->pos[0],
+            -body->loc.pos[1] + submap->pos[1]);
 
         hexcollmap_elem_t *vert =
             hexcollmap_get_vert(collmap, &index);
@@ -665,13 +665,13 @@ int body_render(body_t *body,
     }
 
     vec_t pos;
-    vec4_vec_from_hexspace(pos, body->pos);
+    vec4_vec_from_hexspace(pos, body->loc.pos);
     vec_sub(rgraph->space->dims, pos, camera_renderpos);
     vec_mul(rgraph->space, pos, map->unit);
 
     rot_t body_rot = body_get_rot(body);
     rot_t rot = vec4_rot_from_hexspace(body_rot);
-    flip_t flip = body->turn;
+    flip_t flip = body->loc.turn;
     int frame_i = body->frame_i;
 
     err = rendergraph_render(rgraph, surface,

@@ -802,10 +802,10 @@ int hexmap_load_recording(hexmap_t *map, const char *filename,
 
     if(trf){
         vecspace_t *space = map->space;
-        if(trf->flip)body->recording.turn0 = !body->recording.turn0;
-        body->recording.rot0 = rot_rot(space->rot_max,
-            body->recording.rot0, trf->rot);
-        vec_add(space->dims, body->recording.pos0, trf->add);
+        if(trf->flip)body->recording.loc0.turn = !body->recording.loc0.turn;
+        body->recording.loc0.rot = rot_rot(space->rot_max,
+            body->recording.loc0.rot, trf->rot);
+        vec_add(space->dims, body->recording.loc0.pos, trf->add);
     }
 
     err = body_play_recording(body);

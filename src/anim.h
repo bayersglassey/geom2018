@@ -145,9 +145,7 @@ typedef struct state_effect_spawn {
     char *stateset_filename;
     char *state_name;
     char *palmapper_name;
-    vec_t pos;
-    rot_t rot;
-    bool turn;
+    hexgame_location_t loc;
 } state_effect_spawn_t;
 
 typedef struct state_effect {

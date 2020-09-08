@@ -61,9 +61,9 @@ void recording_reset(recording_t *rec){
     rec->state_name = NULL;
     rec->reacts = false;
 
-    vec_zero(rec->pos0);
-    rec->rot0 = 0;
-    rec->turn0 = false;
+    vec_zero(rec->loc0.pos);
+    rec->loc0.rot = 0;
+    rec->loc0.turn = false;
 
     keyinfo_reset(&rec->keyinfo);
 
@@ -132,12 +132,12 @@ static int recording_parse(recording_t *rec,
 
     GET("pos")
     GET("(")
-    err = fus_lexer_get_vec(lexer, space, rec->pos0);
+    err = fus_lexer_get_vec(lexer, space, rec->loc0.pos);
     if(err)return err;
     GET(")")
 
-    GET_ATTR_INT("rot", rec->rot0, false)
-    GET_ATTR_YESNO("turn", rec->turn0, false)
+    GET_ATTR_INT("rot", rec->loc0.rot, false)
+    GET_ATTR_YESNO("turn", rec->loc0.turn, false)
     GET_ATTR_INT("offset", rec->offset, true)
 
     if(GOT("keys")){
@@ -357,9 +357,9 @@ int body_restart_recording(body_t *body, bool ignore_offset, bool reset_position
     body_set_state(body, rec->state_name, true);
 
     if(reset_position){
-        vec_cpy(MAX_VEC_DIMS, body->pos, rec->pos0);
-        body->rot = rec->rot0;
-        body->turn = rec->turn0;
+        vec_cpy(MAX_VEC_DIMS, body->loc.pos, rec->loc0.pos);
+        body->loc.rot = rec->loc0.rot;
+        body->loc.turn = rec->loc0.turn;
     }
 
     if(!ignore_offset){
@@ -399,12 +399,12 @@ int body_start_recording(body_t *body, char *name){
 
     fprintf(f, "pos: (");
     for(int i = 0; i < hexspace.dims; i++){
-        fprintf(f, " %i", body->pos[i]);
+        fprintf(f, " %i", body->loc.pos[i]);
     }
     fprintf(f, ")\n");
 
-    fprintf(f, "rot: %i\n", body->rot);
-    fprintf(f, "turn: %s\n", body->turn? "yes": "no");
+    fprintf(f, "rot: %i\n", body->loc.rot);
+    fprintf(f, "turn: %s\n", body->loc.turn? "yes": "no");
 
     fprintf(f, "keys:\n");
     for(int i = 0; i < KEYINFO_KEYS; i++){

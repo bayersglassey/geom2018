@@ -286,11 +286,11 @@ static int _parse_effect(fus_lexer_t *lexer,
         GET_STR(spawn.stateset_filename)
         GET_STR(spawn.state_name)
         GET("(")
-        GET_INT(spawn.pos[0])
-        GET_INT(spawn.pos[1])
+        GET_INT(spawn.loc.pos[0])
+        GET_INT(spawn.loc.pos[1])
         GET(")")
-        GET_INT(spawn.rot)
-        GET_BOOL(spawn.turn)
+        GET_INT(spawn.loc.rot)
+        GET_BOOL(spawn.loc.turn)
 
         effect->type = state_effect_type_spawn;
         effect->u.spawn = spawn;

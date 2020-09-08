@@ -150,14 +150,14 @@ static int _player_set_location(player_t *player, hexgame_savelocation_t *locati
 static int player_set_respawn(player_t *player){
     body_t *body = player->body;
     return _player_set_location(player, &player->respawn_location,
-        body->pos, body->rot, body->turn, body->map->name,
+        body->loc.pos, body->loc.rot, body->loc.turn, body->map->name,
         body->stateset.filename, body->state->name);
 }
 
 static int player_set_safe_location(player_t *player){
     body_t *body = player->body;
     return _player_set_location(player, &player->safe_location,
-        body->pos, body->rot, body->turn, body->map->name,
+        body->loc.pos, body->loc.rot, body->loc.turn, body->map->name,
         body->stateset.filename, body->state->name);
 }
 
@@ -380,7 +380,7 @@ int player_step(player_t *player, hexgame_t *game){
             player turns around in-place.
             HACK: we check distance between body's current position and
             player's respawn position. */
-            int dist = hexspace_dist(body->pos, player->respawn_location.loc.pos);
+            int dist = hexspace_dist(body->loc.pos, player->respawn_location.loc.pos);
             bool at_respawn = dist <= 5;
             if(at_respawn)savepoint_submap = NULL;
         }
