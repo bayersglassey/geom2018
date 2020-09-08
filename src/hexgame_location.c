@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 #include "geom.h"
-#include "hexgame_savelocation.h"
+#include "hexgame_location.h"
 #include "util.h"
 #include "lexer.h"
 #include "write.h"

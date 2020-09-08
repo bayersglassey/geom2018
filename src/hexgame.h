@@ -12,7 +12,7 @@
 #include "geom.h"
 #include "vec4.h"
 #include "array.h"
-#include "hexgame_savelocation.h"
+#include "hexgame_location.h"
 
 
 #define MAX_FRAME_I 554400

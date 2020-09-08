@@ -13,7 +13,7 @@
 #include "geom.h"
 #include "vec4.h"
 #include "hexspace.h"
-#include "hexgame_savelocation.h"
+#include "hexgame_location.h"
 #include "prismelrenderer.h"
 
 

@@ -1,5 +1,5 @@
-#ifndef _HEXGAME_SAVELOCATION_H_
-#define _HEXGAME_SAVELOCATION_H_
+#ifndef _HEXGAME_LOCATION_H_
+#define _HEXGAME_LOCATION_H_
 
 #include <stdbool.h>
 
