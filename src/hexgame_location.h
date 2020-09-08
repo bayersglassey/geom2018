@@ -6,11 +6,24 @@
 #include "geom.h"
 
 
+/************
+ * LOCATION *
+ ************/
+
 typedef struct hexgame_location {
+    /* Applied in the following order: pos, rot, turn */
     vec_t pos;
     rot_t rot;
     bool turn;
 } hexgame_location_t;
+
+rot_t hexgame_location_get_rot(hexgame_location_t *loc);
+void hexgame_location_init_trf(hexgame_location_t *loc, trf_t *trf);
+
+
+/****************
+ * SAVELOCATION *
+ ****************/
 
 typedef struct hexgame_savelocation {
     hexgame_location_t loc;

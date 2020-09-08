@@ -981,7 +981,7 @@ int hexmap_step(hexmap_t *map){
         if(hitbox == NULL)continue;
 
         trf_t hitbox_trf;
-        body_init_trf(body, &hitbox_trf);
+        hexgame_location_init_trf(&body->loc, &hitbox_trf);
 
         /* This body has a hitbox! So collide it against all other bodies'
         hitboxes. */
@@ -992,7 +992,7 @@ int hexmap_step(hexmap_t *map){
             if(hitbox_other == NULL)continue;
 
             trf_t hitbox_other_trf;
-            body_init_trf(body_other, &hitbox_other_trf);
+            hexgame_location_init_trf(&body_other->loc, &hitbox_other_trf);
 
             /* The other body has a hitbox! Do the collision... */
             bool collide = hexcollmap_collide(hitbox, &hitbox_trf,

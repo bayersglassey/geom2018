@@ -9,6 +9,45 @@
 #include "util.h"
 #include "lexer.h"
 #include "write.h"
+#include "hexspace.h"
+
+
+
+/************
+ * LOCATION *
+ ************/
+
+rot_t hexgame_location_get_rot(hexgame_location_t *loc){
+    /* Easiest described in terms of when loc is body->loc:
+    Coverts body->loc.rot/turn into the rot_t value representing
+    the vector parallel to body's bottom (that is, the bottom of
+    body's hitbox, where the body rests upon the ground)
+
+    TODO: better description, not involving body, maybe use a
+    diagram or something eh */
+
+    rot_t rot = loc->rot;
+    if(loc->turn){
+        rot = rot_contain(HEXSPACE_ROT_MAX,
+            HEXSPACE_ROT_MAX/2 - rot);
+    }
+    return rot;
+}
+
+void hexgame_location_init_trf(hexgame_location_t *loc, trf_t *trf){
+    /* Initializes trf so that it represents the transformation needed to
+    bring a body from zero pos/rot/turn to body->loc.pos/rot/turn.
+    If you see what I mean.
+    In particular, we use this to set up transformations which will move
+    the body's hitbox over top of it.
+
+    TODO: better description, not involving body, maybe use a
+    diagram or something eh */
+
+    vec_cpy(HEXSPACE_DIMS, trf->add, loc->pos);
+    trf->rot = hexgame_location_get_rot(loc);
+    trf->flip = loc->turn;
+}
 
 
 

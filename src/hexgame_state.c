@@ -76,7 +76,7 @@ static int state_rule_match_cond(
             vecspace_t *space = map->space;
 
             trf_t hitbox_trf;
-            body_init_trf(body, &hitbox_trf);
+            hexgame_location_init_trf(&body->loc, &hitbox_trf);
             hexcollmap_t *hitbox = cond->u.coll.collmap;
 
             int flags = cond->u.coll.flags;
@@ -95,7 +95,7 @@ static int state_rule_match_cond(
                     if(hitbox_other == NULL)continue;
 
                     trf_t hitbox_other_trf;
-                    body_init_trf(body_other, &hitbox_other_trf);
+                    hexgame_location_init_trf(&body_other->loc, &hitbox_other_trf);
 
                     /* The other body has a hitbox! Do the collision... */
                     bool collide = hexcollmap_collide(hitbox, &hitbox_trf,
@@ -230,7 +230,7 @@ static int state_rule_apply(state_rule_t *rule,
             vecspace_t *space = body->map->space;
             vec_t vec;
             vec_cpy(space->dims, vec, effect->u.vec);
-            rot_t rot = body_get_rot(body);
+            rot_t rot = hexgame_location_get_rot(&body->loc);
             space->vec_flip(vec, body->loc.turn);
             space->vec_rot(vec, rot);
             vec_add(space->dims, body->loc.pos, vec);

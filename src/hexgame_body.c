@@ -210,7 +210,7 @@ int body_add_body(body_t *body, body_t **new_body_ptr,
     if(err)return err;
     vecspace_t *space = body->map->space;
 
-    rot_t rot = body_get_rot(body);
+    rot_t rot = hexgame_location_get_rot(&body->loc);
 
     vec_t addpos_cpy;
     vec_cpy(space->dims, addpos_cpy, addpos);
@@ -234,30 +234,6 @@ int body_add_body(body_t *body, body_t **new_body_ptr,
 /*************
  * BODY MISC *
  *************/
-
-rot_t body_get_rot(body_t *body){
-    /* Coverts body->loc.rot/turn into the rot_t value representing
-    the vector parallel to body's bottom (that is, the bottom of
-    body's hitbox, where the body rests upon the ground) */
-    vecspace_t *space = body->map->space;
-    rot_t rot = body->loc.rot;
-    if(body->loc.turn){
-        rot = rot_contain(space->rot_max,
-            space->rot_max/2 - rot);}
-    return rot;
-}
-
-void body_init_trf(body_t *body, trf_t *trf){
-    /* Initializes trf so that it represents the transformation needed to
-    bring a body from zero pos/rot/turn to body->loc.pos/rot/turn.
-    If you see what I mean.
-    In particular, we use this to set up transformations which will move
-    the body's hitbox over top of it. */
-    vecspace_t *space = body->map->space;
-    vec_cpy(space->dims, trf->add, body->loc.pos);
-    trf->rot = body_get_rot(body);
-    trf->flip = body->loc.turn;
-}
 
 void body_flash_cameras(body_t *body, Uint8 r, Uint8 g, Uint8 b,
     int percent
@@ -487,7 +463,7 @@ void body_update_cur_submap(body_t *body){
         hexcollmap_t *hitbox = body->state? body->state->hitbox: NULL;
         if(hitbox != NULL){
             trf_t hitbox_trf;
-            body_init_trf(body, &hitbox_trf);
+            hexgame_location_init_trf(&body->loc, &hitbox_trf);
 
             hexmap_collision_t collision;
             hexmap_collide_special(map, hitbox, &hitbox_trf, &collision);
@@ -669,7 +645,7 @@ int body_render(body_t *body,
     vec_sub(rgraph->space->dims, pos, camera_renderpos);
     vec_mul(rgraph->space, pos, map->unit);
 
-    rot_t body_rot = body_get_rot(body);
+    rot_t body_rot = hexgame_location_get_rot(&body->loc);
     rot_t rot = vec4_rot_from_hexspace(body_rot);
     flip_t flip = body->loc.turn;
     int frame_i = body->frame_i;
