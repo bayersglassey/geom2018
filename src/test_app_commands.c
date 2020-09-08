@@ -156,9 +156,9 @@ static int _test_app_command_add_player(test_app_t *app, fus_lexer_t *lexer, boo
     if(game->players_len > 0){
         /* HACK: we just grab players[0] */
         player_t *player = game->players[0];
-        respawn_pos = player->respawn_location.pos;
-        respawn_rot = player->respawn_location.rot;
-        respawn_turn = player->respawn_location.turn;
+        respawn_pos = player->respawn_location.loc.pos;
+        respawn_rot = player->respawn_location.loc.rot;
+        respawn_turn = player->respawn_location.loc.turn;
         respawn_map_filename = strdup(player->respawn_location.map_filename);
         if(!respawn_map_filename)return 1;
     }else{

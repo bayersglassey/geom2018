@@ -6,10 +6,14 @@
 #include "geom.h"
 
 
-typedef struct hexgame_savelocation {
+typedef struct hexgame_location {
     vec_t pos;
     rot_t rot;
     bool turn;
+} hexgame_location_t;
+
+typedef struct hexgame_savelocation {
+    hexgame_location_t loc;
     char *map_filename;
     char *anim_filename;
     char *state_name;

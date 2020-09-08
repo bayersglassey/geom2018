@@ -467,9 +467,9 @@ int hexgame_reset_player(hexgame_t *game, player_t *player,
         err = hexgame_get_or_load_map(game, location->map_filename,
             &map);
         if(err)return err;
-        pos = location->pos;
-        rot = location->rot;
-        turn = location->turn;
+        pos = location->loc.pos;
+        rot = location->loc.rot;
+        turn = location->loc.turn;
     }
 
     err = body_respawn(body, pos, rot, turn, map);

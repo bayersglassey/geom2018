@@ -511,7 +511,7 @@ static int hexmap_parse_door(hexmap_t *map, hexmap_submap_t *submap,
         if(err)return err;
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
-        err = fus_lexer_get_vec(lexer, space, door->u.location.pos);
+        err = fus_lexer_get_vec(lexer, space, door->u.location.loc.pos);
         if(err)return err;
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
@@ -520,7 +520,7 @@ static int hexmap_parse_door(hexmap_t *map, hexmap_submap_t *submap,
         if(err)return err;
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
-        err = fus_lexer_get_int(lexer, &door->u.location.rot);
+        err = fus_lexer_get_int(lexer, &door->u.location.loc.rot);
         if(err)return err;
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
@@ -529,7 +529,7 @@ static int hexmap_parse_door(hexmap_t *map, hexmap_submap_t *submap,
         if(err)return err;
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
-        err = fus_lexer_get_yn(lexer, &door->u.location.turn);
+        err = fus_lexer_get_yn(lexer, &door->u.location.loc.turn);
         if(err)return err;
         err = fus_lexer_get(lexer, ")");
         if(err)return err;

@@ -80,8 +80,8 @@ int test_app_set_players(test_app_t *app, int n_players){
 
         /* Move body to the respawn location */
         err = body_respawn(body,
-            player->respawn_location.pos, player->respawn_location.rot,
-            player->respawn_location.turn, respawn_map);
+            player->respawn_location.loc.pos, player->respawn_location.loc.rot,
+            player->respawn_location.loc.turn, respawn_map);
         if(err)return err;
     }
     for(int i = n_players; i < game->players_len; i++){

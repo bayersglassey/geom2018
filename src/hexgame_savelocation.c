@@ -17,9 +17,9 @@
  ****************/
 
 void hexgame_savelocation_init(hexgame_savelocation_t *location){
-    vec_zero(location->pos);
-    location->rot = 0;
-    location->turn = false;
+    vec_zero(location->loc.pos);
+    location->loc.rot = 0;
+    location->loc.turn = false;
     location->map_filename = NULL;
     location->anim_filename = NULL;
     location->state_name = NULL;
@@ -35,9 +35,9 @@ void hexgame_savelocation_set(hexgame_savelocation_t *location, vecspace_t *spac
     vec_t pos, rot_t rot, bool turn, char *map_filename,
     char *anim_filename, char *state_name
 ){
-    vec_cpy(space->dims, location->pos, pos);
-    location->rot = rot;
-    location->turn = turn;
+    vec_cpy(space->dims, location->loc.pos, pos);
+    location->loc.rot = rot;
+    location->loc.turn = turn;
 
     #define SET_A_THING(THING) if(location->THING != THING){ \
         free(location->THING); \
@@ -56,8 +56,8 @@ int hexgame_savelocation_save(const char *filename, hexgame_savelocation_t *loca
         perror(NULL);
         return 2;
     }
-    fprintf(f, "%i %i %i %c ", location->pos[0], location->pos[1],
-        location->rot, location->turn? 'y': 'n');
+    fprintf(f, "%i %i %i %c ", location->loc.pos[0], location->loc.pos[1],
+        location->loc.rot, location->loc.turn? 'y': 'n');
     fus_write_str(f, location->map_filename);
     if(location->anim_filename){
         putc(' ', f);
@@ -110,10 +110,10 @@ int hexgame_savelocation_load(const char *filename, hexgame_savelocation_t *loca
         }
     }
 
-    location->pos[0] = x;
-    location->pos[1] = y;
-    location->rot = rot;
-    location->turn = turn;
+    location->loc.pos[0] = x;
+    location->loc.pos[1] = y;
+    location->loc.rot = rot;
+    location->loc.turn = turn;
     location->map_filename = map_filename;
     location->anim_filename = anim_filename;
     location->state_name = state_name;

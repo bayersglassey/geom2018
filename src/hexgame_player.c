@@ -191,7 +191,7 @@ int player_reload(player_t *player, bool *file_found_ptr){
     if(err)return err;
 
     err = body_respawn(player->body,
-        location->pos, location->rot, location->turn, respawn_map);
+        location->loc.pos, location->loc.rot, location->loc.turn, respawn_map);
     if(err)return err;
 
     if(location->anim_filename){
@@ -272,7 +272,7 @@ static int player_use_door(player_t *player, hexmap_door_t *door){
 
         /* Respawn body */
         err = body_respawn(body,
-            door->u.location.pos, door->u.location.rot, door->u.location.turn, new_map);
+            door->u.location.loc.pos, door->u.location.loc.rot, door->u.location.loc.turn, new_map);
         if(err)return err;
 
         /* Colour to flash screen (default: cyan) */
@@ -380,7 +380,7 @@ int player_step(player_t *player, hexgame_t *game){
             player turns around in-place.
             HACK: we check distance between body's current position and
             player's respawn position. */
-            int dist = hexspace_dist(body->pos, player->respawn_location.pos);
+            int dist = hexspace_dist(body->pos, player->respawn_location.loc.pos);
             bool at_respawn = dist <= 5;
             if(at_respawn)savepoint_submap = NULL;
         }
