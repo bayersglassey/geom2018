@@ -120,7 +120,8 @@ static int state_rule_match_cond(
         rule_matched = n <= cond->u.percent;
     }else if(
         cond->type == state_cond_type_any ||
-        cond->type == state_cond_type_all
+        cond->type == state_cond_type_all ||
+        cond->type == state_cond_type_not
     ){
         bool all = cond->type == state_cond_type_all;
         rule_matched = all? true: false;
@@ -130,6 +131,9 @@ static int state_rule_match_cond(
                 &rule_matched);
             if(err)return err;
             if((all && !rule_matched) || (!all && rule_matched))break;
+        }
+        if(cond->type == state_cond_type_not){
+            rule_matched = !rule_matched;
         }
     }else if(cond->type == state_cond_type_expr){
         CHECK_BODY

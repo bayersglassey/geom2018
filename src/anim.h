@@ -131,6 +131,7 @@ extern const char state_cond_type_coll[];
 extern const char state_cond_type_chance[];
 extern const char state_cond_type_any[];
 extern const char state_cond_type_all[];
+extern const char state_cond_type_not[];
 extern const char state_cond_type_expr[];
 extern const char *state_cond_types[];
 
