@@ -1,0 +1,6 @@
+create_body:
+    if() then:
+        play: "actor/rec/aibird.fus"
+        goto: mainloop
+
+import "actor/_aibird.fus"
