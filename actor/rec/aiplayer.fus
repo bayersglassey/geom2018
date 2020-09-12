@@ -1,8 +1,8 @@
 anim: "anim/player.fus"
 state: "stand"
-pos: (42 75)
+pos: (0 0)
 rot: 0
-turn: yes
+turn: no
 keys:
     u:
     d:

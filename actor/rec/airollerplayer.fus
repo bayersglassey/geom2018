@@ -1,7 +1,7 @@
-anim: "anim/player.fus"
+anim: "anim/rollerplayer.fus"
 state: "stand"
-pos: (51 78)
-rot: 2
+pos: (0 0)
+rot: 0
 turn: no
 keys:
     u:

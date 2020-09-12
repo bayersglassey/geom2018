@@ -1,6 +1,6 @@
 create_body:
     if() then:
-        play: "actor/rec/aiplayer.fus"
+        play: "actor/rec/airollerplayer.fus"
         goto: mainloop
 
 import "actor/_aiplayer.fus"

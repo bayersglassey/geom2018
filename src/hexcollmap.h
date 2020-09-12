@@ -33,6 +33,10 @@ static const char *hexmap_recording_type_msg(int type){
 typedef struct hexmap_recording {
     int type; /* enum hexmap_recording_type */
     char *filename;
+        /*
+        HEXMAP_RECORDING_TYPE_RECORDING -> recording filename
+        HEXMAP_RECORDING_TYPE_ACTOR -> actor stateset filename
+        */
     char *palmapper_name;
     trf_t trf;
     int frame_offset;

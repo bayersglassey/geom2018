@@ -243,6 +243,7 @@ int player_use_savepoint(player_t *player);
  *********/
 
 typedef struct actor {
+    trf_t trf;
     body_t *body;
     stateset_t stateset;
     state_t *state;

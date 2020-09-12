@@ -272,6 +272,7 @@ static int state_rule_apply(state_rule_t *rule,
             const char *play_filename = effect->u.play_filename;
             err = body_load_recording(body, play_filename, false);
             if(err)return err;
+            hexgame_location_apply(&body->recording.loc0, &actor->trf);
             err = body_play_recording(body);
             if(err)return err;
         }else if(effect->type == state_effect_type_die){

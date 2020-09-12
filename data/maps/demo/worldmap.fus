@@ -10,12 +10,12 @@ default_tileset: "data/tileset1.fus"
 
 actors:
     : "actor/guide/actor.fus" "player_cpu"
-    : "actor/aiplayer000.fus" "player_cpu"
-    : "actor/aiplayer001.fus" "player_cpu"
-    : "actor/aiplayer002.fus" "player_cpu"
-    : "actor/aiplayer003.fus" "player_cpu"
-    : "actor/dodecas_aiplayer000.fus" "player_cpu"
-    : "actor/jungle_aiplayer000.fus" "player_cpu"
+    : (42 75) 0 y "actor/aiplayer.fus" "player_cpu"
+    : (55 67) 0 y "actor/aiplayer.fus" "player_cpu"
+    : (51 78) 2 n "actor/aiplayer.fus" "player_cpu"
+    : (47 52) 0 n "actor/aiplayer.fus" "player_cpu"
+    : (21 -15) 5 y "actor/airollerplayer.fus" "player_cpu"
+    : (-67 -2) 0 n "actor/aiplayer.fus" "player_cpu"
 
 submaps:
     :

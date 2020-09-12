@@ -23,12 +23,12 @@ int actor_init(actor_t *actor, hexmap_t *map, body_t *body,
 ){
     int err;
 
+    memset(actor, 0, sizeof(*actor));
+
     actor->body = body;
 
     err = actor_init_stateset(actor, stateset_filename, state_name, map);
     if(err)return err;
-
-    actor->wait = 0;
 
     return 0;
 }
