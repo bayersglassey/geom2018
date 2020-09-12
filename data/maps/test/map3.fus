@@ -1,6 +1,7 @@
 
 parts:
     "c": "data/maps/test/bighex_corner.fus"
+    "r": actor "actor/airoller.fus"
 
 collmap:
     ;;                         .                           .
@@ -13,7 +14,7 @@ collmap:
     ;;                        \     /   /*\
     ;;                         + - +   + - +   +       .
     ;;                                  \*/*\   \
-    ;;                   .               + - +   +       + - + - +
+    ;;                   .               + - +   +       ! - + - +      [r]
     ;;                                  /*\*/   /*\     /         \
     ;;                 .   .   .   +   + - +   + - +   +   +       +
     ;;                              \ /*\*/     \*/*\   \   \       \

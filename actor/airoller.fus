@@ -3,4 +3,12 @@ create_body:
         play: "actor/rec/airoller.fus"
         goto: mainloop
 
+$SET_INT KUP_F 40
+$SET_INT KDOWN_F 200
+
+$SET_INT KUP_D 40
+$SET_INT KDOWN_D 150
+
+$SET_INT TURN 40
+
 import "actor/_airoller.fus"

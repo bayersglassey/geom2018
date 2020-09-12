@@ -1,4 +1,11 @@
 
+# Expected variables:
+#  int KUP_F
+#  int KDOWN_F
+#  int KUP_D
+#  int KDOWN_D
+#  int TURN
+
 mainloop:
 
     if:
@@ -7,26 +14,26 @@ mainloop:
         continue
 
     if:
-        chance: 4%
+        chance: $GET_INT KUP_F/1000
     then:
         key: up f
         continue
 
     if:
-        chance: 20%
+        chance: $GET_INT KDOWN_F/1000
     then:
         key: down f
         continue
 
     if:
-        chance: 4%
+        chance: $GET_INT TURN/1000
     then:
         key: up f
         key: down b
         continue
 
     if: any:
-        chance: 15%
+        chance: $GET_INT KDOWN_D/1000
         coll: all yes
             ;;    +
             ;;
@@ -36,7 +43,7 @@ mainloop:
         continue
 
     if:
-        chance: 4%
+        chance: $GET_INT KUP_D/1000
         not: coll: all yes
             ;;    +
             ;;

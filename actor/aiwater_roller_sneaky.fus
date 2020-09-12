@@ -1,0 +1,14 @@
+create_body:
+    if() then:
+        play: "actor/rec/aiwater_roller.fus"
+        goto: mainloop
+
+$SET_INT KUP_F 100
+$SET_INT KDOWN_F 2
+
+$SET_INT KUP_D 150
+$SET_INT KDOWN_D 150
+
+$SET_INT TURN 1
+
+import "actor/_airoller.fus"
