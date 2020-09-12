@@ -5,12 +5,22 @@ spawn: (-2 1)
 default_palette: "data/pal1.fus"
 default_tileset: "data/tileset1.fus"
 
+actors:
+    #: (0 0) 0 n "actor/aiplayer.fus" "player_cpu"
+    : (14 1) 1 n "actor/aibird.fus" "player_cpu"
+    #: (-6 -11) 4 y "actor/aibig_roller.fus" "player_cpu"
+
 submaps:
     :
         file: "data/maps/wastes/start.fus"
         pos: (0 0)
         camera: (5 -5)
         mapper: ("triple")
+        recordings:
+            : "data/maps/wastes/rec/player000.fus" "player_cpu"
+            : "data/maps/wastes/rec/player001.fus" "player_cpu"
+            #: "data/maps/wastes/rec/big_roller000.fus" "player_cpu"
+            #: "data/maps/wastes/rec/big_roller001.fus" "player_cpu"
     :
         file: "data/maps/wastes/start2.fus"
         pos: (18 5)
