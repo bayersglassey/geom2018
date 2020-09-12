@@ -116,8 +116,8 @@ static int state_rule_match_cond(
             }
         }
     }else if(cond->type == state_cond_type_chance){
-        int n = rand() % 100;
-        rule_matched = n <= cond->u.percent;
+        int n = rand() % cond->u.ratio.b;
+        rule_matched = n <= cond->u.ratio.a;
     }else if(
         cond->type == state_cond_type_any ||
         cond->type == state_cond_type_all ||

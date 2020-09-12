@@ -171,12 +171,19 @@ static int _parse_cond(fus_lexer_t *lexer,
     }else if(GOT("chance")){
         NEXT
         GET("(")
-        int percent = 0;
-        GET_INT(percent)
-        GET("%")
+        int a;
+        int b = 100;
+        GET_INT(a)
+        if(GOT("%")){
+            NEXT
+        }else{
+            GET("/")
+            GET_INT(b)
+        }
         GET(")")
         cond->type = state_cond_type_chance;
-        cond->u.percent = percent;
+        cond->u.ratio.a = a;
+        cond->u.ratio.b = b;
     }else if(GOT("any") || GOT("all") || GOT("not")){
         cond->type =
             GOT("any")? state_cond_type_any:

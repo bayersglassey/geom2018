@@ -118,7 +118,11 @@ typedef struct state_cond {
                 */
             char c; /* See: ANIM_KEY_CS */
         } key;
-        int percent;
+        struct {
+            /* ratio: a / b */
+            int a;
+            int b;
+        } ratio;
         struct {
             ARRAY_DECL(struct state_cond*, conds)
         } subconds;
