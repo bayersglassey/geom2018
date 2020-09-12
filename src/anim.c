@@ -177,8 +177,11 @@ static int _parse_cond(fus_lexer_t *lexer,
         GET(")")
         cond->type = state_cond_type_chance;
         cond->u.percent = percent;
-    }else if(GOT("any") || GOT("all")){
-        cond->type = GOT("any")? state_cond_type_any: state_cond_type_all;
+    }else if(GOT("any") || GOT("all") || GOT("not")){
+        cond->type =
+            GOT("any")? state_cond_type_any:
+            GOT("all")? state_cond_type_all:
+            state_cond_type_not;
         ARRAY_INIT(cond->u.subconds.conds)
 
         NEXT
@@ -592,6 +595,7 @@ const char state_cond_type_coll[] = "coll";
 const char state_cond_type_chance[] = "chance";
 const char state_cond_type_any[] = "any";
 const char state_cond_type_all[] = "all";
+const char state_cond_type_not[] = "not";
 const char state_cond_type_expr[] = "expr";
 const char *state_cond_types[] = {
     state_cond_type_false,
@@ -600,6 +604,7 @@ const char *state_cond_types[] = {
     state_cond_type_chance,
     state_cond_type_any,
     state_cond_type_all,
+    state_cond_type_not,
     state_cond_type_expr,
     NULL
 };
@@ -676,7 +681,8 @@ static void state_cond_cleanup(state_cond_t *cond){
         }
     }else if(
         cond->type == state_cond_type_any ||
-        cond->type == state_cond_type_all
+        cond->type == state_cond_type_all ||
+        cond->type == state_cond_type_not
     ){
         ARRAY_FREE_PTR(state_cond_t*, cond->u.subconds.conds, state_cond_cleanup)
     }else if(cond->type == state_cond_type_expr){

@@ -24,6 +24,10 @@ $PREFIX ANIM_NS stand:
         ;; (.)  .
     on "spit": $PREFIX ANIM_NS turn
 
+
+    ################################################
+    # rollerplayer turning back into player
+
     $IF PLAYER_ROLLER:
         if:
             key: not isdown x
@@ -43,7 +47,12 @@ $PREFIX ANIM_NS stand:
             rot: -2
             turn
 
+
+    ################################################
+    # Grabbing
+
     $IF !NOGRAB:
+        # Grabbing a vertex
         if:
             key: wasdown u
             coll: any yes
@@ -69,6 +78,7 @@ $PREFIX ANIM_NS stand:
             delay: 1
 
     $IF !NOGRAB:
+        # Attempting to grab, but no vertex (so we just stick out our pseudopod)
         if:
             key: wasdown u
             coll: all no
@@ -84,7 +94,12 @@ $PREFIX ANIM_NS stand:
             goto: $PREFIX ANIM_NS grab
             delay: 1
 
+
+    ################################################
+    # Rolling forward
+
     if:
+        # Roll forward (not holding d)
         key: not isdown d
         key: not isdown b
         key: isdown f
@@ -97,10 +112,11 @@ $PREFIX ANIM_NS stand:
                     ;;    *
     then:
         move: 1 0
-        turn
+        rot: 2
         delay: 1
 
     if:
+        # Spin around forward (possibly holding d)
         key: not isdown b
         key: isdown f
         all:
@@ -116,6 +132,7 @@ $PREFIX ANIM_NS stand:
         delay: 1
 
     if:
+        # Roll forward (possibly holding d)
         key: not isdown b
         key: isdown f
         any:
@@ -127,62 +144,22 @@ $PREFIX ANIM_NS stand:
                     ;;    *
     then:
         move: 1 0
-        turn
-        delay: 1
-
-    if:
-        key: not isdown d
-        key: not isdown f
-        key: isdown b
-        any:
-            coll: any yes
-                ;;    +
-                ;;
-                ;; ( )
-            $IF WATER_ROLLER:
-                coll: water any yes
-                    ;;    .
-                    ;;  *
-                    ;; ( )
-    then:
-        move: 1 1
         rot: 2
+        delay: 1
+
+
+    ################################################
+    # Turning around
+
+    if:
+        # Turn around
+        key: not isdown f
+        key: isdown b
+    then:
         turn
-        delay: 1
-
-    if:
-        key: not isdown f
-        key: isdown b
-        all:
-            coll: all no
-                ;;  */
-                ;; ( )
-            $IF WATER_ROLLER:
-                coll: water all no
-                    ;;  */
-                    ;; ( )
-    then:
-        rot: 1
-        delay: 1
-
-    if:
-        key: not isdown f
-        key: isdown b
-        any:
-            coll: any yes
-                ;;    +
-                ;;
-                ;; ( )
-            $IF WATER_ROLLER:
-                coll: water any yes
-                    ;;    .
-                    ;;  *
-                    ;; ( )
-    then:
-        move: 1 1
         rot: 2
-        turn
         delay: 1
+
 
 
 $PREFIX ANIM_NS turn:

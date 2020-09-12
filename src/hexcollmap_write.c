@@ -90,6 +90,8 @@ void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
 
                 if(part->type == HEXCOLLMAP_PART_TYPE_RECORDING){
                     fputs("recording ", f);
+                }else if(part->type == HEXCOLLMAP_PART_TYPE_ACTOR){
+                    fputs("actor ", f);
                 }else if(part->type == HEXCOLLMAP_PART_TYPE_RENDERGRAPH){
                     fputs("shape ", f);
                 }

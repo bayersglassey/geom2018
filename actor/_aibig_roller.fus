@@ -1,0 +1,46 @@
+
+mainloop:
+
+    if:
+    then:
+        # For now: JUST GO FOR IT!!!!
+        key: down f
+
+
+mainloop2:
+
+    if:
+    then:
+        # Unpress keys
+        key: up f
+        key: up b
+        continue
+
+
+    ###################################
+    # Try to roll forwards
+
+    if:
+        false
+        coll: all no
+            ;; ( )- + -
+            ;;    */*\*
+            ;;      -
+    then:
+        key: down f
+
+    if:
+        false
+        coll: all yes
+            ;; ( )  .   +
+    then:
+        key: down f
+
+
+    ###################################
+    # Try to turn around
+
+    if:
+    then:
+        #key: down b
+

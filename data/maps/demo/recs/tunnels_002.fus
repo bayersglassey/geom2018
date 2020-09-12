@@ -1,6 +1,0 @@
-anim: "anim/roller.fus"
-state: "stand"
-pos: ( 44 18)
-rot: 0
-turn: no
-data: " w3+l w43+d w62-l w2+r w200-d w71+d w47-d w75+d w167-d w1-r"

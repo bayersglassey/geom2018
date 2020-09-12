@@ -341,7 +341,10 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
             &trf2, draw_z);
         if(err)return err;
         hexcollmap_cleanup(&part_collmap);
-    }else if(part->type == HEXCOLLMAP_PART_TYPE_RECORDING){
+    }else if(
+        part->type == HEXCOLLMAP_PART_TYPE_RECORDING ||
+        part->type == HEXCOLLMAP_PART_TYPE_ACTOR
+    ){
         char *filename = part->filename?
             strdup(part->filename): NULL;
         char *palmapper_name = part->palmapper_name?
@@ -349,7 +352,9 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
         ARRAY_PUSH_NEW(hexmap_recording_t*, collmap->recordings,
             recording)
         err = hexmap_recording_init(recording,
-            HEXMAP_RECORDING_TYPE_RECORDING,
+            part->type == HEXCOLLMAP_PART_TYPE_RECORDING?
+                HEXMAP_RECORDING_TYPE_RECORDING:
+                HEXMAP_RECORDING_TYPE_ACTOR,
             filename, palmapper_name, part->frame_offset);
         if(err)return err;
 
@@ -777,6 +782,10 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
                         err = fus_lexer_next(lexer);
                         if(err)return err;
                         type = HEXCOLLMAP_PART_TYPE_RECORDING;
+                    }else if(fus_lexer_got(lexer, "actor")){
+                        err = fus_lexer_next(lexer);
+                        if(err)return err;
+                        type = HEXCOLLMAP_PART_TYPE_ACTOR;
                     }else if(fus_lexer_got(lexer, "shape")){
                         err = fus_lexer_next(lexer);
                         if(err)return err;

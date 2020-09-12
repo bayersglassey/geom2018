@@ -1,0 +1,47 @@
+
+mainloop:
+
+    if:
+    then:
+        key: up b
+        continue
+
+    if:
+        chance: 4%
+    then:
+        key: up f
+        continue
+
+    if:
+        chance: 20%
+    then:
+        key: down f
+        continue
+
+    if:
+        chance: 4%
+    then:
+        key: up f
+        key: down b
+        continue
+
+    if: any:
+        chance: 15%
+        coll: all yes
+            ;;    +
+            ;;
+            ;; (+)  +
+    then:
+        key: down d
+        continue
+
+    if:
+        chance: 4%
+        not: coll: all yes
+            ;;    +
+            ;;
+            ;; (+)  +
+    then:
+        key: up d
+        continue
+

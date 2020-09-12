@@ -1,0 +1,6 @@
+create_body:
+    if() then:
+        play: "actor/rec/aibig_roller.fus"
+        goto: mainloop
+
+import "actor/_aibig_roller.fus"
