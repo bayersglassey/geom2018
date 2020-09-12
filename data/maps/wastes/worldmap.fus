@@ -16,3 +16,8 @@ submaps:
         pos: (18 5)
         camera: (-5 -5)
         mapper: ("triple")
+    :
+        file: "data/maps/wastes/start3.fus"
+        pos: (-8 2)
+        camera: (-5 -5)
+        mapper: ("triple")
