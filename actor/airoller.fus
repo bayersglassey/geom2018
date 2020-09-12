@@ -3,6 +3,8 @@ create_body:
         play: "actor/rec/airoller.fus"
         goto: mainloop
 
+$UNSET_BOOL BIGROLLER
+
 $SET_INT KUP_F 40
 $SET_INT KDOWN_F 200
 

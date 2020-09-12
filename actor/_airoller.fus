@@ -1,5 +1,6 @@
 
 # Expected variables:
+#  bool BIGROLLER
 #  int KUP_F
 #  int KDOWN_F
 #  int KUP_D
@@ -35,9 +36,16 @@ mainloop:
     if: any:
         chance: $GET_INT KDOWN_D/1000
         coll: all yes
-            ;;    +
-            ;;
-            ;; (+)  +
+            $IF BIGROLLER:
+                ;;      +
+                ;;
+                ;;    .   .
+                ;;
+                ;; (+)  .   +
+            $IF !BIGROLLER:
+                ;;    +
+                ;;
+                ;; (+)  +
     then:
         key: down d
         continue
@@ -45,9 +53,16 @@ mainloop:
     if:
         chance: $GET_INT KUP_D/1000
         not: coll: all yes
-            ;;    +
-            ;;
-            ;; (+)  +
+            $IF BIGROLLER:
+                ;;      +
+                ;;
+                ;;    .   .
+                ;;
+                ;; (+)  .   +
+            $IF !BIGROLLER:
+                ;;    +
+                ;;
+                ;; (+)  +
     then:
         key: up d
         continue
