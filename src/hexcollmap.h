@@ -94,6 +94,7 @@ typedef struct hexcollmap_tile {
 enum hexcollmap_part_type {
     HEXCOLLMAP_PART_TYPE_HEXCOLLMAP,
     HEXCOLLMAP_PART_TYPE_RECORDING,
+    HEXCOLLMAP_PART_TYPE_ACTOR,
     HEXCOLLMAP_PART_TYPE_RENDERGRAPH,
 };
 
@@ -101,6 +102,7 @@ static const char *hexmap_part_type_msg(int type){
     switch(type){
         case HEXCOLLMAP_PART_TYPE_HEXCOLLMAP: return "Hexcollmap";
         case HEXCOLLMAP_PART_TYPE_RECORDING: return "Recording";
+        case HEXCOLLMAP_PART_TYPE_ACTOR: return "Actor";
         case HEXCOLLMAP_PART_TYPE_RENDERGRAPH: return "Rendergraph";
         default: return "Unknown";
     }
