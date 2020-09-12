@@ -18,13 +18,18 @@
  ************/
 
 rot_t hexgame_location_get_rot(hexgame_location_t *loc){
-    /* Easiest described in terms of when loc is body->loc:
-    Coverts body->loc.rot/turn into the rot_t value representing
-    the vector parallel to body's bottom (that is, the bottom of
-    body's hitbox, where the body rests upon the ground)
+    /* Returns trf.rot, where trf is loc converted to a trf_t.
 
-    TODO: better description, not involving body, maybe use a
-    diagram or something eh */
+    * If !loc->turn, returns loc->rot.
+    * If loc->turn, maps loc->rot to return value as follows:
+
+        0 => 3
+        1 => 2
+        2 => 1
+        3 => 0
+        4 => 5
+        5 => 4
+    */
 
     rot_t rot = loc->rot;
     if(loc->turn){
@@ -35,20 +40,26 @@ rot_t hexgame_location_get_rot(hexgame_location_t *loc){
 }
 
 void hexgame_location_init_trf(hexgame_location_t *loc, trf_t *trf){
-    /* Initializes trf so that it represents the transformation needed to
-    bring a body from zero pos/rot/turn to body->loc.pos/rot/turn.
-    If you see what I mean.
-    In particular, we use this to set up transformations which will move
-    the body's hitbox over top of it.
-
-    TODO: better description, not involving body, maybe use a
-    diagram or something eh */
-
+    /* Converts loc to a trf_t. */
     vec_cpy(HEXSPACE_DIMS, trf->add, loc->pos);
     trf->rot = hexgame_location_get_rot(loc);
     trf->flip = loc->turn;
 }
 
+void hexgame_location_from_trf(hexgame_location_t *loc, trf_t *trf){
+    /* Converts a trf_t to loc. */
+    vec_cpy(HEXSPACE_DIMS, loc->pos, trf->add);
+    loc->rot = trf->flip? (HEXSPACE_ROT_MAX/2 - trf->rot): trf->rot;
+    loc->turn = trf->flip;
+}
+
+void hexgame_location_apply(hexgame_location_t *loc, trf_t *trf){
+    /* Applies a trf_t to loc. */
+    trf_t loctrf;
+    hexgame_location_init_trf(loc, &loctrf);
+    trf_apply(&hexspace, &loctrf, trf);
+    hexgame_location_from_trf(loc, &loctrf);
+}
 
 
 /****************
