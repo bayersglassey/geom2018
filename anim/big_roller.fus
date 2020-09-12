@@ -12,6 +12,7 @@ stand:
     on "spikeyspit": turn
 
     if:
+        # Grabbing
         key: wasdown u
         coll: all yes
             ;;      .   .   +
@@ -32,6 +33,7 @@ stand:
         delay: 1
 
     if:
+        # Rolling forward (not holding d)
         key: not isdown d
         key: not isdown b
         key: isdown f
@@ -39,10 +41,11 @@ stand:
             ;; ( )  .   +
     then:
         move: 2 0
-        turn
+        rot: 2
         delay: 1
 
     if:
+        # Spinning around forward (possibly holding d)
         key: not isdown b
         key: isdown f
         coll: all no
@@ -54,56 +57,22 @@ stand:
         delay: 1
 
     if:
+        # Rolling forward (possibly holding d)
         key: not isdown b
         key: isdown f
         coll: all yes
             ;; ( )  .   +
     then:
         move: 2 0
-        turn
-        delay: 1
-
-    if:
-        key: not isdown d
-        key: not isdown f
-        key: isdown b
-        coll: all yes
-            ;;      +
-            ;;
-            ;;    .
-            ;;
-            ;; ( )
-    then:
-        move: 2 2
         rot: 2
+        delay: 1
+
+    if:
+        key: not isdown f
+        key: isdown b
+    then:
         turn
-        delay: 1
-
-    if:
-        key: not isdown f
-        key: isdown b
-        coll: all no
-            ;; /*\*/
-            ;;  - +
-            ;;  */
-            ;; ( )
-    then:
-        rot: 1
-        delay: 1
-
-    if:
-        key: not isdown f
-        key: isdown b
-        coll: all yes
-            ;;      +
-            ;;
-            ;;    .
-            ;;
-            ;; ( )
-    then:
-        move: 2 2
         rot: 2
-        turn
         delay: 1
 
 turn:
