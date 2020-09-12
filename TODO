@@ -568,6 +568,9 @@ Sep 1, 2020:
 Sep 5, 2020:
 ------------
 
+* Need a way for rollers to get out of dodecas section without hexrollers doing so...
+    * data/maps/demo/pebbles3.fus
+
 * Spikeyplayer puzzle!.. there's one already (data/maps/trees/bubbles3-0.fus) where you become rollerplayer,
 then become spikeyplayer, then can get through a place with 4 deathrollers.
 If there's only 3 deathrollers, you can get through by waiting for a gap in them so you can safely
@@ -595,3 +598,35 @@ So that could be used somewhere...
 
 
         +   .   +   .   +
+
+Sep 12, 2020:
+-------------
+
+Saw an aiplayer jump in from left, fly out top right, get stuck somewhere...
+The AI bug in action?!?!
+data/maps/wastes/start.fus
+
+
+                /exit
+               /
+enter   +   .   .
+   \
+    \ .   .   .
+
+    +   .   +
+
+  + - +   +
+       \
+        +
+
+
+Player 2 can't be crushed?!?!?!
+(See bird on data/maps/wastes/start2.fus
+
+
+** Need a way to make actors invincible -- we've got that hardcoded thing with recordings,
+I want to replace that with an explicit thing, maybe can be set by a recording, but
+if so, needs to last once recording stops and actor takes over
+    * We already have rec->reacts, is that all we need?.. but make it body->reacts?..
+
+** redo big_roller recording in triangles area!
