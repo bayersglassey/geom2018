@@ -51,34 +51,6 @@
         MIN_Z, MAX_Z,
     }
 
------------------------------------
-
-    ...after rotation:
-
-               MAX_X
-               * - *
-        MAX_Y / \   \ MAX_Z
-             * -( )- *
-        MIN_Z \   \ / MIN_Y
-               * - *
-               MIN_X
-
-    {
-        MIN_Z, MAX_Z,
-        MIN_X, MAX_X,
-        MAX_Y, MIN_Y,
-    }
-
-    ...so transformation matrix is:
-
-    {
-        +[4], +[5],
-        +[0], +[1],
-        -[3], -[2],
-    }
-
-    (see HEXBOX_ROT_MATRIX, hexbox_rot_matrix)
-
 */
 
 #define HEXBOX_X    0
@@ -94,14 +66,6 @@
 
 #define HEXBOX_VALUES (HEXBOX_DIMS * HEXBOX_BOUNDS)
 
-#define HEXBOX_ROT_MATRIX { \
-    4, 5, \
-    0, 1, \
-    3, 2  \
-}
-
-extern int hexbox_rot_matrix[HEXBOX_DIMS * HEXBOX_BOUNDS];
-
 
 typedef struct hexbox {
     int values[HEXBOX_VALUES]; // lookup with HEXBOX_INDEX(dim, bound)
@@ -113,6 +77,12 @@ void hexbox_set(hexbox_t *hexbox,
     int min_y, int max_y,
     int min_z, int max_z);
 void hexbox_zero(hexbox_t *hexbox);
+void hexbox_add(hexbox_t *hexbox, vec_t add);
+void hexbox_rot1(hexbox_t *hexbox);
+void hexbox_rot(hexbox_t *hexbox, rot_t rot);
+void hexbox_flip1(hexbox_t *hexbox);
+void hexbox_flip(hexbox_t *hexbox, flip_t flip);
+void hexbox_apply(hexbox_t *hexbox, trf_t *trf);
 void hexbox_point_union(hexbox_t *hexbox, int x, int y);
 void hexbox_union(hexbox_t *hexbox1, hexbox_t *hexbox2);
 bool hexbox_eq(hexbox_t *hexbox1, hexbox_t *hexbox2);
