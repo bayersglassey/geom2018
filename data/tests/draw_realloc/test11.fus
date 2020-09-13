@@ -1,0 +1,12 @@
+parts:
+    "h": "data/tests/draw_realloc/hexagon2.fus"
+
+collmap:
+    ;;
+    ;;     +   .   ?   +     [h^1]
+    ;;
+    ;;   +  (.)  .   .   +
+    ;;
+    ;;     +   .   .   +
+    ;;
+

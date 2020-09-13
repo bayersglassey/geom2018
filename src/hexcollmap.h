@@ -174,6 +174,7 @@ void hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
 void hexcollmap_init_clone(hexcollmap_t *collmap,
     hexcollmap_t *from_collmap, char *name);
 int hexcollmap_init_tiles_from_hexbox(hexcollmap_t *collmap);
+int hexcollmap_union_hexbox(hexcollmap_t *collmap, hexbox_t *hexbox);
 void hexcollmap_dump(hexcollmap_t *collmap, FILE *f);
 void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
     bool just_coll, bool extra, bool nodots, bool eol_semicolons,

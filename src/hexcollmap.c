@@ -134,6 +134,45 @@ int hexcollmap_init_tiles_from_hexbox(hexcollmap_t *collmap){
     return 0;
 }
 
+int hexcollmap_union_hexbox(hexcollmap_t *collmap, hexbox_t *hexbox){
+    /* Expands collmap's hexbox by unioning it with given hexbox.
+    Tile data is reallocated (and old data preserved). */
+    int err;
+
+    hexbox_t old_hexbox = collmap->hexbox;
+    hexbox_union(&collmap->hexbox, hexbox);
+    if(hexbox_eq(&old_hexbox, &collmap->hexbox)){
+        /* Hexbox unchanged: nothing to change, so early exit! */
+        return 0;
+    }
+
+    hexcollmap_tile_t *old_tiles = collmap->tiles;
+    int old_ox = collmap->ox;
+    int old_oy = collmap->oy;
+    int old_w = collmap->w;
+    int old_h = collmap->h;
+
+    /* (re)initialize tiles etc */
+    err = hexcollmap_init_tiles_from_hexbox(collmap);
+    if(err)return err;
+
+    /* Copy old tile data onto new tile array */
+    for(int y = 0; y < old_h; y++){
+        for(int x = 0; x < old_w; x++){
+            int new_x = x - old_ox + collmap->ox;
+            int new_y = y - old_oy + collmap->oy;
+            hexcollmap_tile_t *old_tile =
+                &old_tiles[old_w * y + x];
+            hexcollmap_tile_t *new_tile =
+                &collmap->tiles[collmap->w * new_y + new_x];
+            *new_tile = *old_tile;
+        }
+    }
+
+    free(old_tiles);
+    return 0;
+}
+
 void hexcollmap_dump(hexcollmap_t *collmap, FILE *f){
     /* The rawest of dumps */
     fprintf(f, "hexcollmap: %p\n", collmap);

@@ -227,6 +227,12 @@ static int hexcollmap_draw(hexcollmap_t *collmap1, hexcollmap_t *collmap2,
 
     int err;
 
+    /* Resize collmap1 */
+    hexbox_t hexbox2 = collmap2->hexbox;
+    hexbox_apply(&hexbox2, trf);
+    err = hexcollmap_union_hexbox(collmap1, &hexbox2);
+    if(err)return err;
+
     int ox2 = collmap2->ox;
     int oy2 = collmap2->oy;
     int w2 = collmap2->w;
