@@ -114,6 +114,7 @@ void hexbox_set(hexbox_t *hexbox,
     int min_z, int max_z);
 void hexbox_zero(hexbox_t *hexbox);
 void hexbox_point_union(hexbox_t *hexbox, int x, int y);
+void hexbox_union(hexbox_t *hexbox1, hexbox_t *hexbox2);
 bool hexbox_eq(hexbox_t *hexbox1, hexbox_t *hexbox2);
 void hexbox_fprintf(FILE *f, hexbox_t *hexbox);
 void hexbox_printf(hexbox_t *hexbox);

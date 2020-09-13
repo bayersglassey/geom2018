@@ -8,13 +8,19 @@
 
 
 
+#define HEXBOX_GET_MIN(HEXBOX, DIM) \
+    ((HEXBOX)->values[HEXBOX_INDEX((DIM), HEXBOX_MIN)])
+
+#define HEXBOX_GET_MAX(HEXBOX, DIM) \
+    ((HEXBOX)->values[HEXBOX_INDEX((DIM), HEXBOX_MAX)])
+
 #define HEXBOX_SET_MIN(HEXBOX, DIM, VALUE) { \
-    int *_i = &(HEXBOX)->values[HEXBOX_INDEX((DIM), HEXBOX_MIN)]; \
+    int *_i = &HEXBOX_GET_MIN(HEXBOX, DIM); \
     *_i = _min(*_i, (VALUE)); \
 }
 
 #define HEXBOX_SET_MAX(HEXBOX, DIM, VALUE) { \
-    int *_i = &(HEXBOX)->values[HEXBOX_INDEX((DIM), HEXBOX_MAX)]; \
+    int *_i = &HEXBOX_GET_MAX(HEXBOX, DIM); \
     *_i = _max(*_i, (VALUE)); \
 }
 
@@ -47,6 +53,13 @@ void hexbox_point_union(hexbox_t *hexbox, int x, int y){
     HEXBOX_SET_MAX(hexbox, HEXBOX_Y, y)
     HEXBOX_SET_MIN(hexbox, HEXBOX_Z, z)
     HEXBOX_SET_MAX(hexbox, HEXBOX_Z, z)
+}
+
+void hexbox_union(hexbox_t *hexbox1, hexbox_t *hexbox2){
+    for(int dim = 0; dim < HEXBOX_DIMS; dim++){
+        HEXBOX_SET_MIN(hexbox1, dim, HEXBOX_GET_MIN(hexbox2, dim))
+        HEXBOX_SET_MAX(hexbox1, dim, HEXBOX_GET_MAX(hexbox2, dim))
+    }
 }
 
 bool hexbox_eq(hexbox_t *hexbox1, hexbox_t *hexbox2){

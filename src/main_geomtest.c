@@ -111,7 +111,7 @@ int run_tests(){
     trf_t t, s;
     boundary_box_t bbox;
     position_box_t pbox;
-    hexbox_t hexbox;
+    hexbox_t hexbox, hexbox2;
 
 
     /****** HEXSPACE TESTS ******/
@@ -270,6 +270,16 @@ int run_tests(){
         hexbox_zero(&hexbox);
         hexbox_point_union(&hexbox, 1, 1);
         fails += hexbox_test(&hexbox, 0, 1, 0, 1, 0, 0);
+
+        print_title("[hexbox] Union");
+        hexbox_zero(&hexbox);
+        hexbox_set(&hexbox2, 1, 2, 3, 4, 5, 6);
+        hexbox_union(&hexbox, &hexbox2);
+        fails += hexbox_test(&hexbox, 0, 2, 0, 4, 0, 6);
+        hexbox_zero(&hexbox);
+        hexbox_set(&hexbox2, -1, -2, -3, -4, -5, -6);
+        hexbox_union(&hexbox, &hexbox2);
+        fails += hexbox_test(&hexbox, -1, 0, -3, 0, -5, 0);
 
 results:
     /****** RESULTS ******/
