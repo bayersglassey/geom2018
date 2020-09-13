@@ -1,23 +1,4 @@
 
-
-Jun 3, 2018:
-------------
-
-- reload + renderall crashes!
-    run valgrind, maybe it will find something
-    ...nope, it's happening in SDL dynamic lib somewhere...
-
-
-Jun 23, 2018:
--------------
-
-hexmap_submap_t: if these don't share collmaps, just modify collmaps'
-    ox, oy instead of messing around with submap's pos?..
-
-COLLMAP INDICES NEED TO USE SAME Y COORDS AS TRF_T
-    (currently they are vertically flipped and it ruins everything)
-
-
 Jun 25, 2018:
 -------------
 
@@ -91,24 +72,6 @@ WHAT'S NEEDED FOR A PROPER DEMO:
                         "double":
                             # ...
 
-    - Title screen. (Maybe allow setting controls, save/load game,
-        character select, multiplayer, etc.)
-    - Can we abuse player->cooldown and have the "jump" state
-        trigger death after some amount of time?
-
-
-
-Instead of "import" in .fus files, we should maybe add "require", or anyway
-    imports should be idempotent.
-So all you do is specify worldmap, and it loads rgraphs as required.
-
-
-July 12, 2018:
---------------
-
-hexcollmap "parts":
-    - need to realloc collmap1 as necessary for collmap2 to fit. (in hexcollmap_draw)
-
 
 Dec 9, 2018:
 ------------
@@ -129,9 +92,6 @@ of themselves (if you see what I mean).
 
 Dec 10, 2018:
 -------------
-
-Actor states should maybe come with a "pos" so we don't have to rely on
-the position of the last recording to have played...
 
 Actor recordings: if we get a fus format for ranges of frames, and a
 half-decent tool for stepping through a recording (e.g. if player->keymap
@@ -171,13 +131,8 @@ behind camera pos by 1 frame.
 Dec 24, 2018:
 -------------
 
-We need player->respawn_stateset_filename
-
 Hardcoded "dead" anim: each stateset should be able to specify its
 dead_anim_name, and if NULL, body can't die.
-
-Improve roller's "grab" so it can get around easier, particularly
-the pebbles area
 
 Currently spider -> roller transformation is kinda hacky
 
@@ -286,24 +241,6 @@ Little flies, berries, that kind of thing.
 And place them on the maps.
 
 
-Oct 13, 2019:
--------------
-
-TEST_APP.C: INSTEAD OF USING FONT_PRINTF, USE A BLITTER.
-Our current approach with line_y is relying on a bug in geomfont_putc
-or whatever: x0, y0 are being multiplied by vectors.
-(So also TODO: fix that bug.)
-
-
-Area full of big rollers.
-Basic theme is big triangles like this:
-     +
-    / \
-   + - +
-  / \ / \
- + - + - +
-
-
 Nov 2, 2019:
 ------------
 
@@ -332,12 +269,6 @@ Nov 2, 2019:
 Nov 3, 2019:
 ------------
 
-Spikey spiders???
-Can't aim up, giving people a reason to figure out how to traverse maps
-without angled-up jumps!
-Maybe can't even spit?.. but on the other hand is invincible and maybe
-even crushes other stuff?..
-
 Trees: we have right-slanting trees... now also have left-slanting ones!..
 E.g. one at bottom-right of current map.
 Need to go through the water area at top to come around down other side of
@@ -361,15 +292,6 @@ of jumping, doing some kind of turn while swimming, then landing again.
 
 Mar 29, 2020:
 -------------
-
-* list_submaps: add an option to jump the camera there?
-
-* list_bodies: Can we plz add something like rendering a rect around currently selected body?
-    * Or even: set app->camera->body to currently selected body?.. too crazy?..
-
-* Auto resize map if .fus file's collmap data requires it
-* Maps should be 6-sided, not 4-sided
-    * Render the border for debugging purposes
 
 * "Firefly" coins which fly around
 * "Fruit/flower" coins which grow on little plants
@@ -469,14 +391,6 @@ SOMETHING FUN:
     However, player can "steal" it by shooting or running into it.
 
 
-A palette where all dark/light colour pairs (call them A/B) work like this:
-    A is dark, B is light...
-    then A fades to same shade as light...
-    then B fades to dark...
-    then A fades to dark...
-    then B fades to light...
-...so occasionally everything is dark, or light. And occasionally dark/light is reversed.
-
 
 Way from console to move to another map?
 How about being able to respawn at arbitrary savepoints within current map?
@@ -513,6 +427,9 @@ Aug 6, 2020:
 ------------
 
 * Aiming up should be a "special ability" of some spider variant.
+    * Or possibly... a "pickup"?.. one of few such pickups.
+    * Another pickup: ABILITY TO VIEW THE MINIMAP (with tab)
+        * This is per hexmap?.. so one minimap pickup per hexmap?..
 
 
 Aug 23, 2020:
@@ -630,3 +547,16 @@ if so, needs to last once recording stops and actor takes over
     * We already have rec->reacts, is that all we need?.. but make it body->reacts?..
 
 ** redo big_roller recording in triangles area!
+
+
+** We need player->respawn_stateset_filename
+    Don't we have this now?.. maybe it's just not used?..
+
+** Render hexmap submaps' hexboxes for debugging purposes...
+
+** map-level vars and "global" (game-level) vars.
+    * Can be saved/loaded (i.e. in respawn.txt)
+    * actors don't need to create a body!.. (this is already true)
+        so if they had map/game-level vars to play with, we could start doing neat stuff
+    * one var type stores bodies?.. so you can look up bodies by name... (per map?.. per game?..)
+    * turn "visibility" of submaps on/off. And that can be saved/loaded (in respawn.txt).
