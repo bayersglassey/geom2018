@@ -31,3 +31,23 @@ submaps:
         pos: (-8 2)
         camera: (-5 -5)
         mapper: ("triple")
+    :
+        file: "data/maps/wastes/grid1.fus"
+        pos: (20 20)
+        camera: (0 0)
+        mapper: ("double")
+    :
+        file: "data/maps/wastes/grid2.fus"
+        pos: (0 20)
+        camera: (0 0)
+        mapper: ("double")
+    :
+        file: "data/maps/wastes/unsafe_grid1.fus"
+        pos: (0 35)
+        camera: (0 0)
+        mapper: ("double")
+    :
+        file: "data/maps/wastes/unsafe_grid2.fus"
+        pos: (36 40)
+        camera: (0 0)
+        mapper: ("double")
