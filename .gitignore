@@ -25,5 +25,5 @@
 # core dumps
 vgcore.*
 
-# byzanz output (e.g. gameplay video GIFs)
+# screencast output (e.g. byzanz, recordmydesktop)
 out.*

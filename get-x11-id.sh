@@ -1,0 +1,1 @@
+xwininfo -name "Depths of Uo" | sed -E -n -e 's/^.*Window id: ([^ ]+).*/\1/p'
