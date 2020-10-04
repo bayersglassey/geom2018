@@ -3,6 +3,27 @@
 # ANIM_NS (str), e.g. "roller_", ""
 # RGRAPH_NS (str), e.g. "rollerplayer_", ""
 
+# Optional vars:
+#
+# STICKY_GRAB: you can "catch" an otherwise uncatchable vertex
+# as you rotate past it
+#
+#      + - +             + - +
+#     /   /      =>       \   \
+#   (+)- +   +         +   + - +
+#
+# FLIPPY_GRAB: you can roll onto your "side"
+# (and grabbing with your side has a separate anim)
+#
+#   + - +
+#    \   \
+#    (+)- +
+#
+# GOTO_GRABBED: when you grab something, you stay grabbed until
+# letting go of "f"
+#
+
+
 
 #$SET_BOOL FLIPPY_GRAB
 
@@ -11,6 +32,11 @@
 $SET_BOOL STICKY_GRAB
 $SET_BOOL FLIPPY_GRAB
 
+#$SET_BOOL STICKY_GRAB
+#$SET_BOOL GOTO_GRABBED
+
+# TODO: when GOTO_GRABBED is active, when you do the STICKY_GRAB "side grab",
+# you should stay grabbed until you let go of "f"
 #$SET_BOOL STICKY_GRAB
 #$SET_BOOL GOTO_GRABBED
 #$SET_BOOL FLIPPY_GRAB
@@ -171,6 +197,8 @@ $PREFIX ANIM_NS turn:
 
 
 $PREFIX ANIM_NS grab:
+    # Rolling around with your pseudopod stuck out
+
     rgraph: $PREFIX RGRAPH_NS "roller_grab"
     hitbox:
         ;;    .   .
