@@ -118,10 +118,15 @@ int hexcollmap_init_tiles_from_hexbox(hexcollmap_t *collmap){
     if(tiles == NULL)return 1;
 
     /* ...Initialize tile elements */
+    hexcollmap_elem_t initial_elem = {
+        .tile_c = ' ',
+        .z = -99,
+            /* So you can have tiles whose z is between this initial value and 0 */
+    };
     for(int i = 0; i < map_size; i++){
-        for(int j = 0; j < 1; j++)tiles[i].vert[j].tile_c = ' ';
-        for(int j = 0; j < 3; j++)tiles[i].edge[j].tile_c = ' ';
-        for(int j = 0; j < 2; j++)tiles[i].face[j].tile_c = ' ';
+        for(int j = 0; j < 1; j++)tiles[i].vert[j] = initial_elem;
+        for(int j = 0; j < 3; j++)tiles[i].edge[j] = initial_elem;
+        for(int j = 0; j < 2; j++)tiles[i].face[j] = initial_elem;
     }
 
     /* ...Assign attributes */

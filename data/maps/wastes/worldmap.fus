@@ -17,8 +17,8 @@ submaps:
         camera: (5 -5)
         mapper: ("triple")
         recordings:
-            : "data/maps/wastes/rec/player000.fus" "player_cpu"
-            : "data/maps/wastes/rec/player001.fus" "player_cpu"
+            #: "data/maps/wastes/rec/player000.fus" "player_cpu"
+            #: "data/maps/wastes/rec/player001.fus" "player_cpu"
             #: "data/maps/wastes/rec/big_roller000.fus" "player_cpu"
             #: "data/maps/wastes/rec/big_roller001.fus" "player_cpu"
     :
@@ -37,17 +37,12 @@ submaps:
         camera: (0 0)
         mapper: ("double")
     :
-        file: "data/maps/wastes/grid2.fus"
+        file: "data/maps/wastes/grid2a.fus"
         pos: (0 20)
         camera: (0 0)
         mapper: ("double")
     :
         file: "data/maps/wastes/unsafe_grid1.fus"
         pos: (0 35)
-        camera: (0 0)
-        mapper: ("double")
-    :
-        file: "data/maps/wastes/unsafe_grid2.fus"
-        pos: (36 40)
         camera: (0 0)
         mapper: ("double")

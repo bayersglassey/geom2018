@@ -553,6 +553,8 @@ if so, needs to last once recording stops and actor takes over
     Don't we have this now?.. maybe it's just not used?..
 
 ** Render hexmap submaps' hexboxes for debugging purposes...
+    * Instead of trying to render the outlines, we could e.g. render all tiles
+        a solid colour while some button was held down?..
 
 ** map-level vars and "global" (game-level) vars.
     * Can be saved/loaded (i.e. in respawn.txt)
@@ -560,3 +562,5 @@ if so, needs to last once recording stops and actor takes over
         so if they had map/game-level vars to play with, we could start doing neat stuff
     * one var type stores bodies?.. so you can look up bodies by name... (per map?.. per game?..)
     * turn "visibility" of submaps on/off. And that can be saved/loaded (in respawn.txt).
+
+** roller: still uses the old "turn" movement style while "u" is held??? (whlie "grabbing")
