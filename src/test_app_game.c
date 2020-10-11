@@ -248,7 +248,16 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
                     if(!body){
                         fprintf(stderr,
                             "Can't play back recording without a body!\n");
-                    }else if(shift){
+                        break;
+                    }
+
+                    /* If we're recording, save the recording so it can be loaded. */
+                    if(body->recording.action == 2){
+                        err = body_stop_recording(body);
+                        if(err)return err;
+                    }
+
+                    if(shift){
                         err = body_load_recording(body, recording_filename,
                             true);
                         if(err)return err;
