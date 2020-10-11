@@ -56,7 +56,7 @@ shapes:
         # (+)- + _ |
         #          +
         prismels:
-            : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 4
+            : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 1
             : "tri" (1 0 0 0) 11 f eval: 1 + 8 + 2
             : "sq"  (1 0 0 0)  1 f eval: 1 + 8 + 1
 
@@ -69,18 +69,36 @@ shapes:
             : "sq"  (0 1 1 0) 10 f eval: 1 + 0 + 5
             : "tri" (0 2 1 0) 10 f eval: 1 + 8 + 5
 
+    $PREFIX NS "head_spikes":
+        shapes:
+            : $PREFIX NS "_head_spike" (0 0 0 0)  0 f
+            : $PREFIX NS "_head_spike" (0 0 0 0)  2 f
+            : $PREFIX NS "_head_spike" (0 0 0 0)  4 f
+            : $PREFIX NS "_head_spike" (0 0 0 0)  6 f
+
+    $PREFIX NS "head_spikes_extended":
+        shapes:
+            : $PREFIX NS "_head_spike_long" (0 0 0 0)  0 f
+            : $PREFIX NS "_head_spike"      (0 0 0 0)  1 f
+            : $PREFIX NS "_head_spike_long" (0 0 0 0)  2 f
+            : $PREFIX NS "_head_spike"      (0 0 0 0)  3 f
+            : $PREFIX NS "_head_spike_long" (0 0 0 0)  4 f
+            : $PREFIX NS "_head_spike"      (0 0 0 0)  5 f
+            : $PREFIX NS "_head_spike_long" (0 0 0 0)  6 f
+
+    $PREFIX NS "eye":
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 4
+            : "tri" (0 0 0 0)  2 f eval: 1 + 8 + 4
+            : "tri" (0 0 0 0)  4 f eval: 1 + 8 + 4
+            : "tri" (0 0 0 0)  6 f eval: 1 + 8 + 4
+            : "tri" (0 0 0 0)  8 f eval: 1 + 8 + 4
+            : "tri" (0 0 0 0) 10 f eval: 1 + 8 + 4
+
     $PREFIX NS "_head":
         $IF PLAYER_ROLLER:
             shapes:
                 : "_roller_body_hollow" (0 0 0 0)  0 f
-            prismels:
-                # Got to add the eye by hand, as it were
-                : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 4
-                : "tri" (0 0 0 0)  2 f eval: 1 + 8 + 4
-                : "tri" (0 0 0 0)  4 f eval: 1 + 8 + 4
-                : "tri" (0 0 0 0)  6 f eval: 1 + 8 + 4
-                : "tri" (0 0 0 0)  8 f eval: 1 + 8 + 4
-                : "tri" (0 0 0 0) 10 f eval: 1 + 8 + 4
         $IF !PLAYER_ROLLER:
             shapes:
                 : $PREFIX NS "_head_sixth" (0 0 0 0)  0 f
@@ -103,27 +121,26 @@ shapes:
     $PREFIX NS "head":
         shapes:
             : $PREFIX NS "_head" (0 0 0 0) 0 f
+            : $PREFIX NS "eye" (0 0 0 0)  0 f
             : $PREFIX NS "nose" (1 1 0 -1) 0 f
             $IF PLAYER_SPIKEY:
-                : $PREFIX NS "_head_spike" (0 0 0 0)  0 f
-                : $PREFIX NS "_head_spike" (0 0 0 0)  2 f
-                : $PREFIX NS "_head_spike" (0 0 0 0)  4 f
-                : $PREFIX NS "_head_spike" (0 0 0 0)  6 f
+                : $PREFIX NS "head_spikes" (0 0 0 0)  0 f
 
     $PREFIX NS "crawl_head":
         shapes:
             : $PREFIX NS "_head" (0 0 0 0) 0 f
+            : $PREFIX NS "eye" (0 0 0 0)  0 f
+            : $PREFIX NS "nose" (1 1 0 -1) 0 f
             $IF PLAYER_SPIKEY:
-                : $PREFIX NS "_head_spike_long" (0 0 0 0)  0 f
-                : $PREFIX NS "_head_spike"      (0 0 0 0)  1 f
-                : $PREFIX NS "_head_spike_long" (0 0 0 0)  2 f
-                : $PREFIX NS "_head_spike"      (0 0 0 0)  3 f
-                : $PREFIX NS "_head_spike_long" (0 0 0 0)  4 f
-                : $PREFIX NS "_head_spike"      (0 0 0 0)  5 f
-                : $PREFIX NS "_head_spike_long" (0 0 0 0)  6 f
-        prismels:
-            : "sq"  (1 1 0 -1) 0 f eval: 1 + 8 + 1
-            : "tri" (2 1 0 -1) 1 f eval: 1 + 8 + 2
+                : $PREFIX NS "head_spikes_extended" (0 0 0 0)  0 f
+
+    $PREFIX NS "sleep_head":
+        shapes:
+            : $PREFIX NS "_head" (0 0 0 0) 0 f
+            # No eye (it's "closed")
+            : $PREFIX NS "nose" (1 1 0 -1) 0 f
+            $IF PLAYER_SPIKEY:
+                : $PREFIX NS "head_spikes" (0 0 0 0)  0 f
 
     $PREFIX NS "stand":
         shapes:
@@ -370,6 +387,12 @@ shapes:
             : $PREFIX NS "crawl_head" ( 0  1  2  0)  0 f 0 (3 2)
             : $PREFIX NS "bleg"  (-1  1  1  1)  0 f 0 (3 2)
             : $PREFIX NS "fleg"  ( 2  1  1  1)  6 t 0 (3 2)
+
+    $PREFIX NS "sleep":
+        shapes:
+            : $PREFIX NS "sleep_head" ( 0  1  2  0)  0 f
+            : $PREFIX NS "bleg"  (-1  1  1  1)  0 f
+            : $PREFIX NS "fleg"  ( 2  1  1  1)  6 t
 
     $PREFIX NS "swim":
         animation: cycle 12

@@ -387,6 +387,19 @@ step:
 
     if() then: goto: stand
 
+sleep:
+    rgraph: $PREFIX NS "sleep"
+    hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)  .
+    if: any:
+        key: isdown u
+        key: isdown d
+        key: isdown l
+        key: isdown r
+    then: goto: crawl
+
 mostly_dead:
     rgraph: "dead"
     unsafe
