@@ -79,7 +79,7 @@ crawl:
             key: wentdown x
         then:
             goto: roller_stand
-            delay: 1
+            delay: $GET_INT ROLLER_STAND_DELAY
 
     $IF PLAYER_BIRD:
         if:
@@ -163,7 +163,7 @@ crawl:
             move: 1 0
             turn
             rot: 1
-            delay: 1
+            delay: $GET_INT ROLLER_STAND_DELAY
 
     $IF PLAYER_ROLLER:
         if:
@@ -222,7 +222,7 @@ crawl_step_down:
             key: wentdown x
         then:
             goto: roller_stand
-            delay: 1
+            delay: $GET_INT ROLLER_STAND_DELAY
 
     if() then: goto: crawl
 
@@ -246,7 +246,7 @@ crawl_step:
             key: wentdown x
         then:
             goto: roller_stand
-            delay: 1
+            delay: $GET_INT ROLLER_STAND_DELAY
 
     if() then: goto: crawl
 
