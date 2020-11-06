@@ -521,7 +521,7 @@ static int hexmap_parse_door(hexmap_t *map, hexmap_submap_t *submap,
             if(err)return err;
             err = fus_lexer_get(lexer, "(");
             if(err)return err;
-            err = fus_lexer_get_str(lexer, &door->u.location.anim_filename);
+            err = fus_lexer_get_str(lexer, &door->u.location.stateset_filename);
             if(err)return err;
             err = fus_lexer_get(lexer, ")");
             if(err)return err;

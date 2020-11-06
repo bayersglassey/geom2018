@@ -71,19 +71,19 @@ void hexgame_savelocation_init(hexgame_savelocation_t *location){
     location->loc.rot = 0;
     location->loc.turn = false;
     location->map_filename = NULL;
-    location->anim_filename = NULL;
+    location->stateset_filename = NULL;
     location->state_name = NULL;
 }
 
 void hexgame_savelocation_cleanup(hexgame_savelocation_t *location){
     free(location->map_filename);
-    free(location->anim_filename);
+    free(location->stateset_filename);
     free(location->state_name);
 }
 
 void hexgame_savelocation_set(hexgame_savelocation_t *location, vecspace_t *space,
     vec_t pos, rot_t rot, bool turn, char *map_filename,
-    char *anim_filename, char *state_name
+    char *stateset_filename, char *state_name
 ){
     vec_cpy(space->dims, location->loc.pos, pos);
     location->loc.rot = rot;
@@ -94,7 +94,7 @@ void hexgame_savelocation_set(hexgame_savelocation_t *location, vecspace_t *spac
         location->THING = THING; \
     }
     SET_A_THING(map_filename)
-    SET_A_THING(anim_filename)
+    SET_A_THING(stateset_filename)
     SET_A_THING(state_name)
     #undef SET_A_THING
 }
@@ -109,9 +109,9 @@ int hexgame_savelocation_save(const char *filename, hexgame_savelocation_t *loca
     fprintf(f, "%i %i %i %c ", location->loc.pos[0], location->loc.pos[1],
         location->loc.rot, location->loc.turn? 'y': 'n');
     fus_write_str(f, location->map_filename);
-    if(location->anim_filename){
+    if(location->stateset_filename){
         putc(' ', f);
-        fus_write_str(f, location->anim_filename);
+        fus_write_str(f, location->stateset_filename);
         if(location->state_name){
             putc(' ', f);
             fus_write_str(f, location->state_name);
@@ -138,7 +138,7 @@ int hexgame_savelocation_load(const char *filename, hexgame_savelocation_t *loca
     rot_t rot;
     bool turn;
     char *map_filename = NULL;
-    char *anim_filename = NULL;
+    char *stateset_filename = NULL;
     char *state_name = NULL;
 
     err = fus_lexer_get_int(&lexer, &x);
@@ -152,7 +152,7 @@ int hexgame_savelocation_load(const char *filename, hexgame_savelocation_t *loca
     err = fus_lexer_get_str(&lexer, &map_filename);
     if(err)goto err;
     if(!fus_lexer_done(&lexer)){
-        err = fus_lexer_get_str(&lexer, &anim_filename);
+        err = fus_lexer_get_str(&lexer, &stateset_filename);
         if(err)goto err;
         if(!fus_lexer_done(&lexer)){
             err = fus_lexer_get_str(&lexer, &state_name);
@@ -165,13 +165,13 @@ int hexgame_savelocation_load(const char *filename, hexgame_savelocation_t *loca
     location->loc.rot = rot;
     location->loc.turn = turn;
     location->map_filename = map_filename;
-    location->anim_filename = anim_filename;
+    location->stateset_filename = stateset_filename;
     location->state_name = state_name;
     goto done;
 
 err:
     free(map_filename);
-    free(anim_filename);
+    free(stateset_filename);
     free(state_name);
 done:
     fus_lexer_cleanup(&lexer);

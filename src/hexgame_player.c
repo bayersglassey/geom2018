@@ -111,13 +111,13 @@ void hexgame_player_dump(player_t *player, int depth){
 
 static int _player_set_location(player_t *player, hexgame_savelocation_t *location,
     vec_ptr_t pos, rot_t rot, bool turn, const char *map_filename,
-    const char *anim_filename, const char *state_name
+    const char *stateset_filename, const char *state_name
 ){
     hexgame_t *game = player->game;
     vecspace_t *space = game->space;
 
     char *new_map_filename;
-    char *new_anim_filename;
+    char *new_stateset_filename;
     char *new_state_name;
     #define ASSIGN_A_THING(THING) { \
         if(THING == NULL){ \
@@ -138,12 +138,12 @@ static int _player_set_location(player_t *player, hexgame_savelocation_t *locati
         } \
     }
     ASSIGN_A_THING(map_filename)
-    ASSIGN_A_THING(anim_filename)
+    ASSIGN_A_THING(stateset_filename)
     ASSIGN_A_THING(state_name)
     #undef ASSIGN_A_THING
 
     hexgame_savelocation_set(location, space, pos, rot, turn, new_map_filename,
-        new_anim_filename, new_state_name);
+        new_stateset_filename, new_state_name);
     return 0;
 }
 
@@ -194,11 +194,11 @@ int player_reload(player_t *player, bool *file_found_ptr){
         location->loc.pos, location->loc.rot, location->loc.turn, respawn_map);
     if(err)return err;
 
-    if(location->anim_filename){
+    if(location->stateset_filename){
         /* NOTE: location->state_name may be NULL, in which case
         body_set_stateset uses the stateset's default state. */
         err = body_set_stateset(player->body,
-            location->anim_filename, location->state_name);
+            location->stateset_filename, location->state_name);
         if(err)return err;
     }
 
@@ -280,10 +280,10 @@ static int player_use_door(player_t *player, hexmap_door_t *door){
         int flash_g = 255;
         int flash_b = 255;
 
-        if(door->u.location.anim_filename != NULL){
-            if(strcmp(body->stateset.filename, door->u.location.anim_filename)){
+        if(door->u.location.stateset_filename != NULL){
+            if(strcmp(body->stateset.filename, door->u.location.stateset_filename)){
                 /* Switch anim (stateset) */
-                err = body_set_stateset(body, door->u.location.anim_filename, NULL);
+                err = body_set_stateset(body, door->u.location.stateset_filename, NULL);
                 if(err)return err;
 
                 /* Pink flash indicates your body was changed, not just teleported */
