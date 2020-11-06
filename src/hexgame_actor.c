@@ -44,7 +44,7 @@ int actor_init_stateset(actor_t *actor, const char *stateset_filename,
     if(err)return err;
 
     if(state_name == NULL){
-        state_name = actor->stateset.states[0]->name;
+        state_name = actor->stateset.default_state_name;
     }
 
     err = actor_set_state(actor, state_name);

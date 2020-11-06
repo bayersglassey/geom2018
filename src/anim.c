@@ -557,26 +557,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
     err = _stateset_parse(stateset, lexer, prend, space);
     if(err)return err;
 
-#ifdef GEOM_DUMP_COLLMSGS_AND_HANDLERS
-    #define DUMP_COLLMSGS_AND_HANDLERS(THING) { \
-        for(int i = 0; i < (THING)->collmsgs_len; i++){ \
-            char *collmsg = (THING)->collmsgs[i]; \
-            fprintf(stderr, "  COLLMSG: %s\n", collmsg); \
-        } \
-        for(int i = 0; i < (THING)->collmsg_handlers_len; i++){ \
-            collmsg_handler_t *collmsg_handler = &(THING)->collmsg_handlers[i]; \
-            fprintf(stderr, "  ON: %s -> %s\n", collmsg_handler->msg, collmsg_handler->state_name); \
-        } \
-    }
-    fprintf(stderr, "STATESET: %s\n", stateset->filename);
-    DUMP_COLLMSGS_AND_HANDLERS(stateset)
-    for(int i = 0; i < stateset->states_len; i++){
-        state_t *state = stateset->states[i];
-        fprintf(stderr, "STATE: %s\n", state->name);
-        DUMP_COLLMSGS_AND_HANDLERS(state)
-    }
-    #undef DUMP_COLLMSGS_AND_HANDLERS
-#endif
+    stateset->default_state_name = stateset->states[0]->name;
 
     return 0;
 }

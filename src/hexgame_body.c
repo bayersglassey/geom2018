@@ -181,7 +181,7 @@ int body_respawn(body_t *body, vec_t pos, rot_t rot, bool turn,
     body->loc.turn = turn;
 
     /* Set body state */
-    err = body_set_state(body, body->stateset.states[0]->name, true);
+    err = body_set_state(body, body->stateset.default_state_name, true);
     if(err)return err;
 
     /* Set body map */
@@ -318,7 +318,7 @@ int body_init_stateset(body_t *body, const char *stateset_filename,
     if(err)return err;
 
     if(state_name == NULL){
-        state_name = body->stateset.states[0]->name;
+        state_name = body->stateset.default_state_name;
     }
 
     err = body_set_state(body, state_name, true);
