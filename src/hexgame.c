@@ -433,9 +433,34 @@ int hexgame_get_map_index(hexgame_t *game, hexmap_t *map){
 int hexgame_reset_player(hexgame_t *game, player_t *player,
     int reset_level, hexmap_t *reset_map
 ){
-    /* reset_level:
-    RESET_TO_SAFETY is to player->safe_location, RESET_SOFT is to
-    player->respawn_location, RESET_HARD is to start of game. */
+    /*
+        This function handles what happens in the following situations:
+
+            * You choose "continue" at start of game
+
+            * You press "1", "2", etc
+
+            * You die and press jump
+
+        Player is reset to a location determined by the reset_level param:
+
+            * RESET_TO_SAFETY: player->safe_location
+
+            * RESET_SOFT: player->respawn_location
+
+            * RESET_HARD: start of game
+
+                ! ! ! WARNING ! ! !
+
+                Hexgame does not actually have enough information
+                to do RESET_HARD properly.
+                In particular, test_app is the thing which knows the default
+                stateset_filename (e.g. "anim/player.fus").
+                See: test_app_set_players, app->stateset_filename
+                ...so I think we want to get rid of RESET_HARD and turn it
+                into a separate function, which lives in test_app_game.c
+                or something.
+    */
 
     /* WARNING: this function calls body_respawn, which calls
     body_move_to_map, which modifies map->bodies for two maps.
@@ -448,32 +473,27 @@ int hexgame_reset_player(hexgame_t *game, player_t *player,
     /* If no body, do nothing */
     if(!body)return 0;
 
-    vecspace_t *space = game->space;
-    hexmap_t *map = NULL;
-    vec_ptr_t pos = NULL;
-    rot_t rot = 0;
-    bool turn = false;
-
     if(reset_level == RESET_HARD){
-        map = reset_map? reset_map: game->maps[0];
-        pos = map->spawn;
+        /* Respawn at start of game.
+        (WARNING: has no way to know what stateset to use, we probably
+        want to turn this into a separate function controlled by
+        test_app.) */
+        hexmap_t *map = reset_map? reset_map: game->maps[0];
+        err = body_respawn(body, map->spawn, 0, false, map);
+        if(err)return err;
     }else{
         hexgame_savelocation_t *location = reset_level == RESET_SOFT?
             &player->respawn_location:
             &player->safe_location;
 
-        /* Don't we have a function which wraps the following these days?
-        player_reload -- does it differ from this at all? */
-        err = hexgame_get_or_load_map(game, location->map_filename,
-            &map);
+        err = player_reload_from_location(player, location);
         if(err)return err;
-        pos = location->loc.pos;
-        rot = location->loc.rot;
-        turn = location->loc.turn;
-    }
 
-    err = body_respawn(body, pos, rot, turn, map);
-    if(err)return err;
+        const char *stateset_filename = location->stateset_filename;
+        const char *state_name = location->state_name;
+        err = body_set_stateset(body, stateset_filename, state_name);
+        if(err)return err;
+    }
 
     body_reset_cameras(body);
     body_flash_cameras(body, 255, 255, 255, 30);

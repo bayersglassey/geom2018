@@ -122,13 +122,26 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
 
     vars_init(&body->vars);
 
+    body->state = NULL;
+    body->frame_i = 0;
+    body->cooldown = 0;
+    body->dead = BODY_NOT_DEAD;
+
+    memset(&body->stateset, 0, sizeof(body->stateset));
+
     if(stateset_filename != NULL){
-        err = body_init_stateset(body, stateset_filename, state_name);
+        err = body_set_stateset(body, stateset_filename, state_name);
         if(err)return err;
     }else{
-        /* We really really expect you to call body_init_stateset
-        right away! */
-        body_set_state(body, NULL, true);
+        /* We really really expect you to call body_set_stateset
+        right away!
+        Why didn't caller provide a stateset_filename?..
+        Maybe because they're about to call recording_load, or actor_init,
+        etc.
+        WARNING: if this body is for an actor, but actor doesn't execute the
+        "play" effect right away, then this body will remain in this strange
+        state with no stateset loaded!!
+        ...I do believe we want to fix this. */
     }
 
     return 0;
@@ -169,7 +182,11 @@ void hexgame_body_dump(body_t *body, int depth){
 int body_respawn(body_t *body, vec_t pos, rot_t rot, bool turn,
     hexmap_t *map
 ){
-    /* Respawn body at given map and location */
+    /* Respawns body at given map and location.
+    Only moves body, does NOT change stateset or state.
+    Caller is free to use body_set_stateset/body_set_state to achieve
+    that. */
+
     int err;
 
     hexgame_t *game = body->game;
@@ -302,58 +319,74 @@ int body_move_to_map(body_t *body, hexmap_t *map){
  * BODY STATE *
  **************/
 
-int body_init_stateset(body_t *body, const char *stateset_filename,
-    const char *state_name
-){
-    /* body->stateset is expected to have been cleaned up already;
-    basically this function is a hack, only ever called (?) by body_init
-    or body_set_stateset */
-    int err;
-    hexmap_t *map = body->map;
-
-    char *stateset_filename_dup = strdup(stateset_filename);
-    if(!stateset_filename_dup)return 1;
-    err = stateset_load(&body->stateset, stateset_filename_dup,
-        NULL, map->prend, map->space);
-    if(err)return err;
-
-    if(state_name == NULL){
-        state_name = body->stateset.default_state_name;
-    }
-
-    err = body_set_state(body, state_name, true);
-    if(err)return err;
-
-    return 0;
-}
-
 int body_set_stateset(body_t *body, const char *stateset_filename,
     const char *state_name
 ){
-    stateset_cleanup(&body->stateset);
+    /* Sets body's stateset and state.
+    If state_name is NULL, uses stateset's default state. */
 
-    /* Make sure freed pointers are zeroed, in case body_init_stateset fails
-    before overwriting them */
-    memset(&body->stateset, 0, sizeof(body->stateset));
+    int err;
 
-    return body_init_stateset(body, stateset_filename, state_name);
+    if(stateset_filename == NULL){
+        fprintf(stderr, "body_set_stateset: stateset_filename is NULL\n");
+        return 2;
+    }
+
+    /* Is new stateset different from old one?..
+    Note we check for body->stateset.filename == NULL, the weird case
+    where body doesn't have a stateset set up yet (and therefore
+    body->stateset.filename == NULL). */
+    bool stateset_is_different =
+        body->stateset.filename != stateset_filename && (
+            body->stateset.filename == NULL ||
+            strcmp(body->stateset.filename, stateset_filename)
+        );
+
+    /* If new stateset is different from old one, make the change */
+    if(stateset_is_different){
+
+        /* Don't attempt to cleanup stateset if it's not initialized
+        (that weird possibility we want to remove) */
+        if(body->stateset.filename != NULL){
+            stateset_cleanup(&body->stateset);
+        }
+
+        /* Make sure freed pointers are zeroed, etc */
+        memset(&body->stateset, 0, sizeof(body->stateset));
+
+        hexmap_t *map = body->map;
+
+        char *stateset_filename_dup = strdup(stateset_filename);
+        if(!stateset_filename_dup)return 1;
+        err = stateset_load(&body->stateset, stateset_filename_dup,
+            NULL, map->prend, map->space);
+        if(err)return err;
+    }
+
+    if(state_name == NULL){
+        /* If state_name not provided, use stateset's default state */
+        state_name = body->stateset.default_state_name;
+    }
+
+    return body_set_state(body, state_name, true);
 }
 
 int body_set_state(body_t *body, const char *state_name,
     bool reset_cooldown
 ){
     if(state_name == NULL){
-        /* Is this ever used other than by body_init, which expects you
-        to set a proper state ASAP?.. */
-        body->state = NULL;
-    }else{
-        body->state = stateset_get_state(&body->stateset, state_name);
-        if(body->state == NULL){
-            fprintf(stderr, "Couldn't init body stateset: "
-                "couldn't find state %s in stateset %s\n",
-                state_name, body->stateset.filename);
-            return 2;}
+        fprintf(stderr, "body_set_state: state_name is NULL\n");
+        return 2;
     }
+
+    body->state = stateset_get_state(&body->stateset, state_name);
+    if(body->state == NULL){
+        fprintf(stderr, "Couldn't init body stateset: "
+            "couldn't find state %s in stateset %s\n",
+            state_name, body->stateset.filename);
+        return 2;
+    }
+
     body->frame_i = 0;
     if(reset_cooldown)body->cooldown = 0;
     body->dead = BODY_NOT_DEAD;

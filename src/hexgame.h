@@ -136,6 +136,30 @@ typedef struct body {
         on repeat, or body created when you press F10). */
 
     stateset_t stateset;
+        /* Bodies can be in a strange state where their stateset is
+        not initialized yet.
+        This happens when the stateset_filename passed to body_init is
+        NULL.
+        This happens in the following cases (as of this writing):
+
+            * An actor is loaded by a hexmap (hexmap_load_hexmap_recording)
+            ...in this case, a body is created for the actor with
+            uninitialized stateset, because we expect the actor to execute
+            the "play" effect and initialize body's stateset. (?)
+
+            * A recording is loaded by a hexmap (hexmap_load_recording)
+            ...in this case, we need a body because the recording object
+            lives on it.
+            Once recording is loaded, we call body_play_recording which
+            initializes body's stateset.
+
+        I believe we can detect this situation with either of the following:
+            * body->stateset->filename = NULL
+            * body->state == NULL (?)
+
+        ...I would rather not have to support bodies with uninitialized
+        statesets. Can we fix it somehow?.. */
+
     int frame_i;
     int cooldown;
     int dead; /* enum body_dead */
@@ -172,8 +196,6 @@ void body_reset_cameras(body_t *body);
 int body_remove(body_t *body);
 int body_move_to_map(body_t *body, hexmap_t *map);
 
-int body_init_stateset(body_t *body, const char *stateset_filename,
-    const char *state_name);
 int body_set_stateset(body_t *body, const char *stateset_filename,
     const char *state_name);
 int body_set_state(body_t *body, const char *state_name,
@@ -232,6 +254,8 @@ void player_set_body(player_t *player, body_t *body);
 int player_get_index(player_t *player);
 void hexgame_player_dump(player_t *player, int depth);
 int player_reload(player_t *player, bool *file_found_ptr);
+int player_reload_from_location(player_t *player,
+    hexgame_savelocation_t *location);
 int player_process_event(player_t *player, SDL_Event *event);
 int player_step(player_t *player, struct hexgame *game);
 int player_use_savepoint(player_t *player);

@@ -139,7 +139,7 @@ Currently spider -> roller transformation is kinda hacky
     * Can we make doors which are only visible to rollers? Too hacky!
 
     * Can we have doors better indicate their effect?
-        E.g. after submap is loaded, if its door_anim_filename is non-NULL,
+        E.g. after submap is loaded, if its door_stateset_filename is non-NULL,
         change it in some way, perhaps adding a body of the proper anim
         with no recording, so it just stands there showing you what you
         will become...
@@ -564,3 +564,21 @@ if so, needs to last once recording stops and actor takes over
     * turn "visibility" of submaps on/off. And that can be saved/loaded (in respawn.txt).
 
 ** roller: still uses the old "turn" movement style while "u" is held??? (whlie "grabbing")
+
+
+Oct 11, 2020:
+-------------
+
+* Goal of game: find spider town.
+* Secondary/optional goal: "lead" the other spiders to spider town.
+* Start of game: you can follow one of a number of other spiders, who guide/follow you through certain parts of the map.
+    * The existing "guide" actor is for dodecas area...
+    * One for "vines", "jungle"...
+        * That guy will open the "hermit's hut" for you?? Or like... rescue the hermit??
+    * One for tunnels...
+        * Will show you to "pseudo" spidertown up top of demo map?.. and thence to trees?..
+        * Actually maybe you meet someone partway through trees?..
+
+* Extend trees worldmap at data/maps/trees/bubbles3-1.fus, going below-right, adding right-sloping tree.
+    * Also: instead of trying to get this bubbles3-1.fus etc area "right", just copy-paste
+    it a bunch (or make a bunch of similar things below it) -- remember why dodecas area is so fun!!

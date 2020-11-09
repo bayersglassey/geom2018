@@ -338,7 +338,7 @@ int body_play_recording(body_t *body){
     int err;
     recording_t *rec = &body->recording;
 
-    err = body_init_stateset(body, rec->stateset_name, rec->state_name);
+    err = body_set_stateset(body, rec->stateset_name, rec->state_name);
     if(err)return err;
 
     body->recording.action = 1; /* play */

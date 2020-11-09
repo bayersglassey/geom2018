@@ -66,6 +66,7 @@ int player_init(player_t *player, hexgame_t *game, int keymap,
 
     /* Locations own their map filenames, so need to strdup */
     char *jump_map_filename = strdup(respawn_map_filename);
+    if(!jump_map_filename)return 1;
 
     hexgame_savelocation_init(&player->safe_location);
     hexgame_savelocation_set(&player->safe_location, space,
@@ -116,6 +117,8 @@ static int _player_set_location(player_t *player, hexgame_savelocation_t *locati
     hexgame_t *game = player->game;
     vecspace_t *space = game->space;
 
+    /* We now do some weird C macro stuff so we don't free+malloc
+    a string if its new value is same as old value. */
     char *new_map_filename;
     char *new_stateset_filename;
     char *new_state_name;
@@ -183,7 +186,18 @@ int player_reload(player_t *player, bool *file_found_ptr){
     *file_found_ptr = file_found;
     if(!file_found)return 0;
 
-    /* NOTE: everything below this point should probably be moved into body_respawn! */
+    return player_reload_from_location(player, location);
+}
+
+int player_reload_from_location(player_t *player,
+    hexgame_savelocation_t *location
+){
+    int err;
+
+    if(player->body == NULL){
+        fprintf(stderr, "player_reload_from_location: player has no body\n");
+        return 2;
+    }
 
     hexmap_t *respawn_map;
     err = hexgame_get_or_load_map(player->game,
@@ -191,18 +205,12 @@ int player_reload(player_t *player, bool *file_found_ptr){
     if(err)return err;
 
     err = body_respawn(player->body,
-        location->loc.pos, location->loc.rot, location->loc.turn, respawn_map);
+        location->loc.pos, location->loc.rot, location->loc.turn,
+        respawn_map);
     if(err)return err;
 
-    if(location->stateset_filename){
-        /* NOTE: location->state_name may be NULL, in which case
-        body_set_stateset uses the stateset's default state. */
-        err = body_set_stateset(player->body,
-            location->stateset_filename, location->state_name);
-        if(err)return err;
-    }
-
-    return 0;
+    return body_set_stateset(player->body,
+        location->stateset_filename, location->state_name);
 }
 
 
