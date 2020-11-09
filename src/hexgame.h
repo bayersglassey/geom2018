@@ -125,12 +125,8 @@ int recording_step(recording_t *rec);
 }
 
 typedef struct body {
-    struct hexgame *game;
-
     hexgame_location_t loc;
-
     keyinfo_t keyinfo;
-
     vars_t vars;
 
     recording_t recording;
@@ -139,9 +135,7 @@ typedef struct body {
         (e.g. bodies loaded by hexmap which simply play a recording
         on repeat, or body created when you press F10). */
 
-    palettemapper_t *palmapper;
     stateset_t stateset;
-    state_t *state;
     int frame_i;
     int cooldown;
     int dead; /* enum body_dead */
@@ -150,8 +144,13 @@ typedef struct body {
     bool confused; /* Reverses l/r keys */
 
     bool out_of_bounds;
+
+    /* Weakrefs: */
+    struct hexgame *game;
     hexmap_t *map;
     hexmap_submap_t *cur_submap;
+    palettemapper_t *palmapper;
+    state_t *state;
 } body_t;
 
 void body_cleanup(body_t *body);
@@ -212,15 +211,16 @@ int body_record_keyup(body_t *body, int key_i);
  **********/
 
 typedef struct player {
-    struct hexgame *game;
-    body_t *body;
-
     hexgame_savelocation_t respawn_location;
     hexgame_savelocation_t safe_location;
     char *respawn_filename;
 
     int keymap;
     SDL_Keycode key_code[KEYINFO_KEYS];
+
+    /* Weakrefs: */
+    struct hexgame *game;
+    body_t *body;
 } player_t;
 
 void player_cleanup(player_t *player);
@@ -244,10 +244,12 @@ int player_use_savepoint(player_t *player);
 
 typedef struct actor {
     trf_t trf;
-    body_t *body;
     stateset_t stateset;
-    state_t *state;
     int wait;
+
+    /* Weakrefs: */
+    body_t *body;
+    state_t *state;
 } actor_t;
 
 void actor_cleanup(actor_t *actor);
@@ -266,18 +268,8 @@ int actor_step(actor_t *actor, struct hexgame *game);
  **********/
 
 typedef struct camera {
-    struct hexgame *game;
-    hexmap_t *map;
-    hexmap_submap_t *cur_submap;
-
-    body_t *body; /* optional: camera follows a body */
-
     bool follow;
     bool smooth_scroll;
-    prismelmapper_t *mapper;
-        /* mapper: set to NULL at start of each step, up to player/app/etc
-        to set it each step.
-        If set, overrides cur_submap->mapper for that step. */
 
     SDL_Color colors[256];
     int colors_fade;
@@ -291,6 +283,16 @@ typedef struct camera {
     bool should_reset;
         /* If true, on next step scrollpos should jump to pos
         and should_reset should be set to false. */
+
+    /* Weakrefs: */
+    struct hexgame *game;
+    hexmap_t *map;
+    hexmap_submap_t *cur_submap;
+    body_t *body; /* optional: camera follows a body */
+    prismelmapper_t *mapper;
+        /* mapper: set to NULL at start of each step, up to player/app/etc
+        to set it each step.
+        If set, overrides cur_submap->mapper for that step. */
 } camera_t;
 
 void camera_cleanup(camera_t *camera);
@@ -321,31 +323,30 @@ typedef int exit_callback_t(struct hexgame *game, player_t *player);
 
 typedef struct hexgame {
     int frame_i;
-    prismelrenderer_t *prend;
-    vecspace_t *space;
-        /* should always be hexspace!
-        NOT the same as prend->space! */
-
-    prismelrenderer_t *minimap_prend;
-        /* May use a different space than prend, e.g. vec4_alt instead of vec4 */
-    hexmap_tileset_t minimap_tileset;
-
     bool show_minimap;
-
-    /* app: the application which is running this game.
-    The game isn't allowed to know anything about it, but it is
-    used in some callbacks. */
-    void *app;
-    new_game_callback_t *new_game_callback;
-    continue_callback_t *continue_callback;
-    set_players_callback_t *set_players_callback;
-    exit_callback_t *exit_callback;
+    hexmap_tileset_t minimap_tileset;
 
     ARRAY_DECL(char*, worldmaps)
     ARRAY_DECL(hexmap_t*, maps)
     ARRAY_DECL(camera_t*, cameras)
     ARRAY_DECL(player_t*, players)
     ARRAY_DECL(actor_t*, actors)
+
+    /* Weakrefs: */
+    prismelrenderer_t *prend;
+    prismelrenderer_t *minimap_prend;
+        /* May use a different space than prend, e.g. vec4_alt instead of vec4 */
+    vecspace_t *space;
+        /* should always be hexspace!
+        NOT the same as prend->space! */
+    void *app;
+        /* app: the application which is running this game.
+        The game isn't allowed to know anything about it, but it is
+        used in some callbacks. */
+    new_game_callback_t *new_game_callback;
+    continue_callback_t *continue_callback;
+    set_players_callback_t *set_players_callback;
+    exit_callback_t *exit_callback;
 } hexgame_t;
 
 
