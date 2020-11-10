@@ -6,7 +6,7 @@ CFLAGS += -O2 -g -rdynamic -std=c99 \
 
 PROGS = \
  bin/collmaptool bin/hexpicturetest bin/sdltest bin/directorytest \
- bin/prendtool bin/demo
+ bin/prendtool bin/demo bin/minieditor
 
 TESTS = \
  bin/lexertest bin/frozenstringtest bin/geomtest bin/stringstoretest bin/varstest
@@ -88,5 +88,9 @@ bin/prendtool: src/main_prendtool.o $(OFILES) $(SDL_OFILES)
 	$(CC) $(CFLAGS) -o $@ $^
 
 bin/demo: src/main_demo.o $(OFILES) $(SDL_OFILES)
+	mkdir -p bin
+	$(CC) $(CFLAGS) -o $@ $^
+
+bin/minieditor: src/main_minieditor.o $(OFILES) $(SDL_OFILES)
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^
