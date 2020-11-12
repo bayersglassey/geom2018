@@ -141,6 +141,10 @@ int prismelrenderer_save(prismelrenderer_t *prend, const char *filename);
 int prismelrenderer_write(prismelrenderer_t *prend, FILE *f);
 int prismelrenderer_render_all_bitmaps(prismelrenderer_t *prend,
     SDL_Palette *pal);
+int prismelrenderer_get_rgraph_i(prismelrenderer_t *prend,
+    const char *name);
+rendergraph_t *prismelrenderer_get_rgraph(prismelrenderer_t *prend,
+    const char *name);
 
 
 

@@ -800,6 +800,24 @@ int prismelrenderer_render_all_bitmaps(prismelrenderer_t *prend,
     return 0;
 }
 
+int prismelrenderer_get_rgraph_i(prismelrenderer_t *prend,
+    const char *name
+){
+    for(int i = 0; i < prend->rendergraphs_len; i++){
+        rendergraph_t *rgraph = prend->rendergraphs[i];
+        if(!strcmp(rgraph->name, name))return i;
+    }
+    return -1;
+}
+
+rendergraph_t *prismelrenderer_get_rgraph(prismelrenderer_t *prend,
+    const char *name
+){
+    int rgraph_i = prismelrenderer_get_rgraph_i(prend, name);
+    if(rgraph_i < 0)return NULL;
+    return prend->rendergraphs[rgraph_i];
+}
+
 
 
 

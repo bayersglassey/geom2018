@@ -387,18 +387,12 @@ static int _test_app_command_get_shape(test_app_t *app, fus_lexer_t *lexer, bool
     char *name;
     err = fus_lexer_get_str(lexer, &name);
     if(err)goto lexer_err;
-    bool found = false;
-    for(int i = 0; i < app->prend.rendergraphs_len; i++){
-        rendergraph_t *rgraph = app->prend.rendergraphs[i];
-        if(!strcmp(rgraph->name, name)){
-            app->editor.cur_rgraph_i = i;
-            found = true;
-            break;
-        }
-    }
-    if(!found){
+    int rgraph_i = prismelrenderer_get_rgraph_i(
+        &app->prend, name);
+    if(rgraph_i < 0){
         fprintf(stderr, "Couldn't find shape: %s\n", name);
         return 2;}
+    app->editor.cur_rgraph_i = rgraph_i;
     return 0;
 lexer_err:
     *lexer_err_ptr = true;
