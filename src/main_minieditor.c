@@ -101,12 +101,31 @@ static int _mainloop(minieditor_t *editor, palette_t *palette,
     return 0;
 }
 
+#define DEFAULT_PREND_FILENAME "data/test.fus"
+
+
+static void print_help(){
+    fprintf(stderr,
+        "Options:\n"
+        "  -h | --help      Print this message and exit\n"
+        "  -F               Fullscreen\n"
+        "  -FD              Fullscreen Desktop\n"
+        "  -f  FILENAME     Load prend data (default: " DEFAULT_PREND_FILENAME ")\n"
+        "  -r  NAME         Load rgraph\n"
+        "  -z  ZOOM         Set zoom (1 - %i)\n"
+        "  --nocontrols     Don't show controls initially\n"
+    , MINIEDITOR_MAX_ZOOM);
+}
+
 
 
 int main(int n_args, char *args[]){
     int e = 0;
     Uint32 window_flags = SDL_WINDOW_SHOWN;
-    const char *prend_filename = "data/nothing.fus";
+    const char *prend_filename = DEFAULT_PREND_FILENAME;
+    const char *rgraph_name = NULL;
+    int zoom = 1;
+    bool show_editor_controls = true;
     bool cache_bitmaps = true;
 
     /* The classic */
@@ -114,7 +133,10 @@ int main(int n_args, char *args[]){
 
     for(int arg_i = 1; arg_i < n_args; arg_i++){
         char *arg = args[arg_i];
-        if(!strcmp(arg, "-F")){
+        if(!strcmp(arg, "-h") || !strcmp(arg, "--help")){
+            print_help();
+            return 0;
+        }else if(!strcmp(arg, "-F")){
             window_flags |= SDL_WINDOW_FULLSCREEN;
         }else if(!strcmp(arg, "-FD")){
             window_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
@@ -123,11 +145,27 @@ int main(int n_args, char *args[]){
             if(arg_i >= n_args){
                 fprintf(stderr, "Missing filename after %s\n", arg);
                 return 2;}
-            arg = args[arg_i];
-            prend_filename = arg;
+            prend_filename = args[arg_i];
+        }else if(!strcmp(arg, "-r")){
+            arg_i++;
+            if(arg_i >= n_args){
+                fprintf(stderr, "Missing rgraph name after %s\n", arg);
+                return 2;}
+            rgraph_name = args[arg_i];
+        }else if(!strcmp(arg, "-z")){
+            arg_i++;
+            if(arg_i >= n_args){
+                fprintf(stderr, "Missing value after %s\n", arg);
+                return 2;}
+            zoom = atoi(args[arg_i]);
+            if(zoom < 1)zoom = 1;
+            if(zoom > MINIEDITOR_MAX_ZOOM)zoom = MINIEDITOR_MAX_ZOOM;
+        }else if(!strcmp(arg, "--nocontrols")){
+            show_editor_controls = false;
         }else if(!strcmp(arg, "--dont_cache_bitmaps")){
             cache_bitmaps = false;
         }else{
+            print_help();
             fprintf(stderr, "Unrecognized option: %s\n", arg);
             return 2;
         }
@@ -201,6 +239,18 @@ int main(int n_args, char *args[]){
                     surface, sdl_palette, prend_filename,
                     font, geomfont, prend,
                     SCW, SCH);
+                editor.zoom = zoom;
+                editor.show_editor_controls = show_editor_controls;
+
+                if(rgraph_name){
+                    int rgraph_i = prismelrenderer_get_rgraph_i(
+                        prend, rgraph_name);
+                    if(rgraph_i < 0){
+                        fprintf(stderr, "Couldn't find rgraph: %s\n", rgraph_name);
+                        return 2;
+                    }
+                    editor.cur_rgraph_i = rgraph_i;
+                }
 
                 e = _mainloop(&editor, palette, renderer);
 
