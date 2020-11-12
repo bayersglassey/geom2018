@@ -217,6 +217,9 @@ int main(int n_args, char *args[]){
 
                 err = prismelrenderer_load(prend, prend_filename, NULL);
                 if(err)return err;
+                if(prend->rendergraphs_len < 1){
+                    fprintf(stderr, "No rendergraphs in %s\n", prend_filename);
+                    return 2;}
                 prend->cache_bitmaps = cache_bitmaps;
 
                 prismelrenderer_t _font_prend, *font_prend = &_font_prend;
