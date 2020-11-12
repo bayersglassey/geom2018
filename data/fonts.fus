@@ -1,0 +1,5 @@
+# Loads just enough stuff into a prismelrenderer so that you can
+# get a geomfont out of it
+
+import "data/prismels.fus"
+import "data/geomfonts.fus"

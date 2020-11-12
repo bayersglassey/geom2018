@@ -1,9 +1,4 @@
 
-geomfonts:
-    "geomfont1":
-        "data/font.fus"
-        prismel: "sq" (1 0 0 0) (0 0 0 1)
-
 shapes:
     "_txt_title":
         text: "geomfont1" "Depths\n  of\n  Uo" (3 1)
