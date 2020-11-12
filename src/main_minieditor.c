@@ -5,6 +5,8 @@
 #include <time.h>
 #include <SDL2/SDL.h>
 
+#include "util.h"
+#include "vec4.h"
 #include "minieditor.h"
 
 
@@ -15,30 +17,84 @@
 #define DELAY_GOAL 30
 
 
-int minieditor_mainloop(minieditor_t *editor){
+static int _render(minieditor_t *editor, SDL_Renderer *renderer){
+    int err;
+
+    RET_IF_SDL_NZ(SDL_FillRect(editor->surface, NULL, 0));
+
+    int line_y = 0;
+
+    err = minieditor_render(editor, &line_y);
+    if(err)return err;
+
+    {
+        SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
+            renderer, editor->surface);
+        RET_IF_SDL_NULL(render_texture);
+        SDL_RenderCopy(renderer, render_texture, NULL, NULL);
+        SDL_DestroyTexture(render_texture);
+    }
+
+    SDL_RenderPresent(renderer);
+    return 0;
+}
+
+
+static int _poll_events(minieditor_t *editor, bool *loop){
+    int err;
+    SDL_Event _event, *event = &_event;
+    while(SDL_PollEvent(event)){
+        if(event->type == SDL_QUIT){
+            *loop = false;
+            break;
+        }
+
+        if(event->type == SDL_KEYDOWN){
+            if(event->key.keysym.sym == SDLK_ESCAPE){
+                *loop = false;
+                break;
+            }
+        }
+
+        err = minieditor_process_event(editor, event);
+        if(err)return err;
+    }
+    return 0;
+}
+
+
+static int _mainloop(minieditor_t *editor, palette_t *palette,
+    SDL_Renderer *renderer
+){
     int err;
 
     SDL_StartTextInput();
 
     bool loop = true;
     while(loop){
-        SDL_Event _event, *event = &_event;
-        while(SDL_PollEvent(event)){
-            if(event->type == SDL_QUIT){
-                loop = false;
-                break;
-            }
+        Uint32 tick0 = SDL_GetTicks();
 
-            if(event->type == SDL_KEYDOWN){
-                if(event->key.keysym.sym == SDLK_ESCAPE){
-                    loop = false;
-                    break;
-                }
-            }
+        err = palette_update_sdl_palette(palette, editor->sdl_palette);
+        if(err)return err;
+        err = palette_step(palette);
+        if(err)return err;
 
-            err = minieditor_process_event(editor, event);
-            if(err)return err;
+        err = _render(editor, renderer);
+        if(err)return err;
+
+        err = _poll_events(editor, &loop);
+        if(err)return err;
+
+        Uint32 tick1 = SDL_GetTicks();
+        Uint32 took = tick1 - tick0;
+        if(took < DELAY_GOAL)SDL_Delay(DELAY_GOAL - took);
+#ifdef GEOM_HEXGAME_DEBUG_FRAMERATE
+        if(took > DELAY_GOAL){
+            fprintf(stderr, "WARNING: Frame rendered in %i ms "
+                "(aiming for sub-%i ms)\n",
+                took, DELAY_GOAL);
         }
+#endif
     }
 
     SDL_StopTextInput();
@@ -50,7 +106,7 @@ int minieditor_mainloop(minieditor_t *editor){
 int main(int n_args, char *args[]){
     int e = 0;
     Uint32 window_flags = SDL_WINDOW_SHOWN;
-    const char *prend_filename = "data/test.fus";
+    const char *prend_filename = "data/nothing.fus";
     bool cache_bitmaps = true;
 
     /* The classic */
@@ -100,16 +156,61 @@ int main(int n_args, char *args[]){
                 fprintf(stderr, "SDL_CreateRenderer error: %s\n",
                     SDL_GetError());
             }else{
+                int err;
+
+                SDL_Palette *sdl_palette = SDL_AllocPalette(256);
+                RET_IF_SDL_NULL(sdl_palette);
+
+                SDL_Surface *surface = surface8_create(
+                    SCW, SCH, false, false, sdl_palette);
+                if(surface == NULL)return 1;
+
+                palette_t _palette, *palette = &_palette;
+                err = palette_load(palette, "data/pal1.fus", NULL);
+                if(err)return err;
+
+                font_t _font, *font=&_font;
+                err = font_load(font, strdup("data/font.fus"), NULL);
+                if(err)return err;
+
+                prismelrenderer_t _prend, *prend = &_prend;
+                err = prismelrenderer_init(prend, &vec4);
+                if(err)return err;
+
+                err = prismelrenderer_load(prend, prend_filename, NULL);
+                if(err)return err;
+                prend->cache_bitmaps = cache_bitmaps;
+
+                prismelrenderer_t _font_prend, *font_prend = &_font_prend;
+                err = prismelrenderer_init(font_prend, &vec4);
+                if(err)return err;
+
+                err = prismelrenderer_load(font_prend, "data/fonts.fus", NULL);
+                if(err)return err;
+
+                const char *geomfont_name = "geomfont1";
+                geomfont_t *geomfont = prismelrenderer_get_geomfont(
+                    font_prend, geomfont_name);
+                if(geomfont == NULL){
+                    fprintf(stderr, "Couldn't find geomfont: %s\n", geomfont_name);
+                    return 2;
+                }
+
                 minieditor_t editor;
                 minieditor_init(&editor,
-                    NULL, NULL, prend_filename,
-                    NULL, NULL, NULL,
+                    surface, sdl_palette, prend_filename,
+                    font, geomfont, prend,
                     SCW, SCH);
 
-                e = minieditor_mainloop(&editor);
+                e = _mainloop(&editor, palette, renderer);
 
                 fprintf(stderr, "Cleaning up...\n");
                 minieditor_cleanup(&editor);
+                prismelrenderer_cleanup(font_prend);
+                prismelrenderer_cleanup(prend);
+                font_cleanup(font);
+                SDL_FreeSurface(surface);
+                SDL_FreePalette(sdl_palette);
 
                 SDL_DestroyRenderer(renderer);
             }

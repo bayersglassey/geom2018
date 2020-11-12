@@ -49,21 +49,26 @@ void minieditor_init(minieditor_t *editor,
 int minieditor_render(minieditor_t *editor, int *line_y_ptr){
     int err;
 
-    rendergraph_t *rgraph =
-        editor->prend->rendergraphs[editor->cur_rgraph_i];
-    int animated_frame_i = get_animated_frame_i(
-        rgraph->animation_type, rgraph->n_frames, editor->frame_i);
+    rendergraph_t *rgraph = NULL;
+    int animated_frame_i = editor->frame_i;
 
-    /******************************************************************
-    * Render rgraph
-    */
+    /* Attempt to get rgraph */
+    if(editor->prend->rendergraphs_len > 0){
+        rgraph = editor->prend->rendergraphs[editor->cur_rgraph_i];
+        animated_frame_i = get_animated_frame_i(
+            rgraph->animation_type, rgraph->n_frames, editor->frame_i);
 
-    int x0 = editor->scw / 2 + editor->x0;
-    int y0 = editor->sch / 2 + editor->y0;
-    err = rendergraph_render(rgraph, editor->surface,
-        editor->sdl_palette, editor->prend, x0, y0, editor->zoom,
-        (vec_t){0}, editor->rot, editor->flip, editor->frame_i, NULL);
-    if(err)return err;
+        /******************************************************************
+        * Render rgraph
+        */
+
+        int x0 = editor->scw / 2 + editor->x0;
+        int y0 = editor->sch / 2 + editor->y0;
+        err = rendergraph_render(rgraph, editor->surface,
+            editor->sdl_palette, editor->prend, x0, y0, editor->zoom,
+            (vec_t){0}, editor->rot, editor->flip, editor->frame_i, NULL);
+        if(err)return err;
+    }
 
     /******************************************************************
     * Render text
@@ -72,6 +77,10 @@ int minieditor_render(minieditor_t *editor, int *line_y_ptr){
     int line_y = line_y_ptr? *line_y_ptr: 0;
 
     if(editor->show_editor_controls){
+        const char *rgraph_name = rgraph? rgraph->name: "(none)";
+        int rgraph_n_frames = rgraph? rgraph->n_frames: 0;
+        const char *rgraph_animation_type =
+            rgraph? rgraph->animation_type: "(none)";
         minieditor_printf(editor, 0, line_y * editor->font->char_h,
             "Controls:\n"
             "  up/down - zoom (hold shift for tap mode)\n"
@@ -84,9 +93,9 @@ int minieditor_render(minieditor_t *editor, int *line_y_ptr){
             "  pan=(%i,%i), rot = %i, flip = %c, zoom = %i\n"
             "  frame_i = %i (%i) / %i (%s)",
             editor->prend_filename,
-            editor->cur_rgraph_i, editor->prend->rendergraphs_len, rgraph->name,
+            editor->cur_rgraph_i, editor->prend->rendergraphs_len, rgraph_name,
             editor->x0, editor->y0, editor->rot, editor->flip? 'y': 'n', editor->zoom,
-            editor->frame_i, animated_frame_i, rgraph->n_frames, rgraph->animation_type);
+            editor->frame_i, animated_frame_i, rgraph_n_frames, rgraph_animation_type);
 
         line_y += 11;
     }
