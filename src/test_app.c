@@ -222,7 +222,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         app->surface, app->sdl_palette,
         app->prend_filename,
         &app->font, app->geomfont, &app->prend,
-        app->scw, app->sch);
+        app->delay_goal, app->scw, app->sch);
 
     app->list = NULL;
 

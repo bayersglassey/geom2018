@@ -34,8 +34,8 @@ int test_app_process_event_console(test_app_t *app, SDL_Event *event){
 
             /* Copy/paste a line of console input */
             if(
-                event->key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL)
-                && event->key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)
+                event->key.keysym.mod & KMOD_CTRL
+                && event->key.keysym.mod & KMOD_SHIFT
             ){
                 if(event->key.keysym.sym == SDLK_c){
                     SDL_SetClipboardText(app->console.input);}
