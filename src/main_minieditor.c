@@ -53,8 +53,8 @@ void options_init(options_t *opts){
 }
 
 
-static void print_help(){
-    fprintf(stderr,
+static void print_help(FILE *file){
+    fprintf(file,
         "Options:\n"
         "  -h | --help      Print this message and exit\n"
         "  -F               Fullscreen\n"
@@ -81,7 +81,8 @@ static int parse_options(options_t *opts,
     for(int arg_i = 1; arg_i < n_args; arg_i++){
         const char *arg = args[arg_i];
         if(!strcmp(arg, "-h") || !strcmp(arg, "--help")){
-            print_help();
+            print_help(stdout);
+            *quit = true;
             return 0;
         }else if(!strcmp(arg, "-F")){
             opts->window_flags |= SDL_WINDOW_FULLSCREEN;
@@ -159,7 +160,6 @@ static int parse_options(options_t *opts,
         }else if(!strcmp(arg, "--dont_cache_bitmaps")){
             opts->cache_bitmaps = false;
         }else{
-            print_help();
             fprintf(stderr, "Unrecognized option: %s\n", arg);
             return 2;
         }
@@ -428,7 +428,11 @@ int main(int n_args, char **args){
     {
         bool quit = false;
         int err = parse_options(&opts, n_args, (const char **)args, &quit);
-        if(err)return err;
+        if(err){
+            fputc('\n', stderr);
+            print_help(stderr);
+            return err;
+        }
         if(quit)return 0;
     }
 
