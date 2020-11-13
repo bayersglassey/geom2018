@@ -60,7 +60,7 @@ static void print_help(FILE *file){
         "  -F               Fullscreen\n"
         "  -FD              Fullscreen Desktop\n"
         "  -f  FILENAME     Load prend data (default: " DEFAULT_PREND_FILENAME ")\n"
-        "  -if FILENAME     With --nogui, where to save image (default: " DEFAULT_IMAGE_FILENAME ")\n"
+        "  -if FILENAME     Where to save screenshot (default: " DEFAULT_IMAGE_FILENAME ")\n"
         "  -n  NAME         Load rgraph\n"
         "  -i  FRAME        Set frame_i\n"
         "  -z  ZOOM         Set zoom (1 - %i)\n"
@@ -70,7 +70,7 @@ static void print_help(FILE *file){
         "  -s SCW SCH       Set screen width and height (default: %i %i)\n"
         "  -p X0 Y0         Set screen position\n"
         "  --nocontrols     Don't show controls initially\n"
-        "  --nogui          Run in pure command mode, dump image data to stdout\n"
+        "  --nogui          Run in pure command mode, save screenshot (see -if)\n"
     , MINIEDITOR_MAX_ZOOM, DEFAULT_DELAY_GOAL, DEFAULT_SCW, DEFAULT_SCH);
 }
 
@@ -208,7 +208,15 @@ static int _render(minieditor_t *editor, SDL_Renderer *renderer){
 }
 
 
-static int _poll_events(minieditor_t *editor, bool *loop){
+static int _save_image(minieditor_t *editor, options_t *opts){
+    const char *filename = opts->image_filename;
+    fprintf(stderr, "Saving image to: %s\n", filename);
+    RET_IF_SDL_NZ(SDL_SaveBMP(editor->surface, filename))
+    return 0;
+}
+
+
+static int _poll_events(minieditor_t *editor, options_t *opts, bool *loop){
     int err;
     SDL_Event _event, *event = &_event;
     while(SDL_PollEvent(event)){
@@ -223,6 +231,9 @@ static int _poll_events(minieditor_t *editor, bool *loop){
                 break;
             }else if(event->key.keysym.sym == SDLK_F6){
                 _print_args(editor, stderr);
+            }else if(event->key.keysym.sym == SDLK_F7){
+                err = _save_image(editor, opts);
+                if(err)return err;
             }
         }
 
@@ -233,8 +244,8 @@ static int _poll_events(minieditor_t *editor, bool *loop){
 }
 
 
-static int _mainloop(minieditor_t *editor, palette_t *palette,
-    SDL_Renderer *renderer
+static int _mainloop(minieditor_t *editor, options_t *opts,
+    palette_t *palette, SDL_Renderer *renderer
 ){
     int err;
 
@@ -252,7 +263,7 @@ static int _mainloop(minieditor_t *editor, palette_t *palette,
         err = _render(editor, renderer);
         if(err)return err;
 
-        err = _poll_events(editor, &loop);
+        err = _poll_events(editor, opts, &loop);
         if(err)return err;
 
         Uint32 tick1 = SDL_GetTicks();
@@ -341,7 +352,7 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
 
     if(renderer){
         /* We're running in a window -- interactive GUI mode, go! */
-        err = _mainloop(editor, palette, renderer);
+        err = _mainloop(editor, opts, palette, renderer);
         if(err)return err;
 
         fprintf(stderr, "Cleaning up...\n");
@@ -356,7 +367,8 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
         err = minieditor_render(editor, &line_y);
         if(err)return err;
 
-        RET_IF_SDL_NZ(SDL_SaveBMP(editor->surface, opts->image_filename))
+        err = _save_image(editor, opts);
+        if(err)return err;
     }
 
     minieditor_cleanup(editor);
