@@ -216,6 +216,36 @@ static int _save_image(minieditor_t *editor, options_t *opts){
 }
 
 
+static int _reload_editor(minieditor_t *editor, options_t *opts){
+    int err;
+
+    prismelrenderer_cleanup(editor->prend);
+
+    err = prismelrenderer_init(editor->prend, &vec4);
+    if(err)return err;
+
+    err = prismelrenderer_load(editor->prend, opts->prend_filename, NULL);
+    if(err)return err;
+    if(editor->prend->rendergraphs_len < 1){
+        fprintf(stderr, "No rendergraphs in %s\n", opts->prend_filename);
+        return 2;}
+    editor->prend->cache_bitmaps = opts->cache_bitmaps;
+
+    if(opts->rgraph_name){
+        int rgraph_i = prismelrenderer_get_rgraph_i(
+            editor->prend, opts->rgraph_name);
+        if(rgraph_i < 0){
+            fprintf(stderr, "Couldn't find rgraph: %s\n",
+                opts->rgraph_name);
+            return 2;
+        }
+        editor->cur_rgraph_i = rgraph_i;
+    }
+
+    return 0;
+}
+
+
 static int _poll_events(minieditor_t *editor, options_t *opts, bool *loop){
     int err;
     SDL_Event _event, *event = &_event;
@@ -233,6 +263,9 @@ static int _poll_events(minieditor_t *editor, options_t *opts, bool *loop){
                 _print_args(editor, stderr);
             }else if(event->key.keysym.sym == SDLK_F7){
                 err = _save_image(editor, opts);
+                if(err)return err;
+            }else if(event->key.keysym.sym == SDLK_F8){
+                err = _reload_editor(editor, opts);
                 if(err)return err;
             }
         }
