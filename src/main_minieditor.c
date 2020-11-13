@@ -11,6 +11,7 @@
 
 
 #define DEFAULT_PREND_FILENAME "data/test.fus"
+#define DEFAULT_IMAGE_FILENAME "screen.bmp"
 
 #define DEFAULT_SCW 1024
 #define DEFAULT_SCH 768
@@ -24,6 +25,7 @@ typedef struct options {
     Uint32 window_flags;
     const char *prend_filename;
     const char *rgraph_name;
+    const char *image_filename;
     int zoom;
     int frame_i;
     rot_t rot;
@@ -41,6 +43,7 @@ void options_init(options_t *opts){
     opts->gui_mode = true;
     opts->window_flags = SDL_WINDOW_SHOWN;
     opts->prend_filename = DEFAULT_PREND_FILENAME;
+    opts->image_filename = DEFAULT_IMAGE_FILENAME;
     opts->zoom = 1;
     opts->show_editor_controls = true;
     opts->cache_bitmaps = true;
@@ -57,6 +60,7 @@ static void print_help(){
         "  -F               Fullscreen\n"
         "  -FD              Fullscreen Desktop\n"
         "  -f  FILENAME     Load prend data (default: " DEFAULT_PREND_FILENAME ")\n"
+        "  -if FILENAME     With --nogui, where to save image (default: " DEFAULT_IMAGE_FILENAME ")\n"
         "  -n  NAME         Load rgraph\n"
         "  -i  FRAME        Set frame_i\n"
         "  -z  ZOOM         Set zoom (1 - %i)\n"
@@ -89,6 +93,12 @@ static int parse_options(options_t *opts,
                 fprintf(stderr, "Missing filename after %s\n", arg);
                 return 2;}
             opts->prend_filename = args[arg_i];
+        }else if(!strcmp(arg, "-if")){
+            arg_i++;
+            if(arg_i >= n_args){
+                fprintf(stderr, "Missing filename after %s\n", arg);
+                return 2;}
+            opts->image_filename = args[arg_i];
         }else if(!strcmp(arg, "-n")){
             arg_i++;
             if(arg_i >= n_args){
@@ -346,7 +356,7 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
         err = minieditor_render(editor, &line_y);
         if(err)return err;
 
-        /* TODO: dump pixel data to stdout */
+        RET_IF_SDL_NZ(SDL_SaveBMP(editor->surface, opts->image_filename))
     }
 
     minieditor_cleanup(editor);
