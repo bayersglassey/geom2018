@@ -5,7 +5,7 @@ CFLAGS += -O2 -g -rdynamic -std=c99 \
  -DGEOM_HEXGAME_DEBUG_FRAMERATE -D_WANT_STRNLEN -D_WANT_STRNDUP
 
 PROGS = \
- bin/collmaptool bin/hexpicturetest bin/sdltest bin/directorytest \
+ bin/lexertool bin/collmaptool bin/hexpicturetest bin/sdltest bin/directorytest \
  bin/prendtool bin/demo bin/minieditor
 
 TESTS = \

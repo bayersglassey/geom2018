@@ -66,6 +66,10 @@ static int _fus_lexer_init(fus_lexer_t *lexer, const char *text,
     lexer->filename = filename;
     lexer->text = text;
     lexer->text_len = strlen(text);
+
+    lexer->whitespace_pos = 0;
+    lexer->whitespace_len = 0;
+
     lexer->token = NULL;
     lexer->token_len = 0;
     lexer->_token_len = 0;
@@ -419,6 +423,8 @@ static int fus_lexer_parse_blockstr(fus_lexer_t *lexer){
 }
 
 static int fus_lexer_handle_whitespace(fus_lexer_t *lexer){
+    /* "Handle" whitespace, e.g. eat it while properly dealing with
+    comments, newlines, indentation, etc. */
     int err;
 
     /* Eat whitespace up to first non-whitespace character or newline
@@ -912,6 +918,8 @@ int fus_lexer_unexpected(fus_lexer_t *lexer, const char *expected){
 static int _fus_lexer_next(fus_lexer_t *lexer){
     /* Gets a single token. */
     int err;
+    int initial_pos = lexer->pos;
+
 restart:
 
     /* Handle whitespace (unless we already know we need to
@@ -920,6 +928,9 @@ restart:
         err = fus_lexer_handle_whitespace(lexer);
         if(err)return err;
     }
+
+    /* Update whitespace_len */
+    lexer->whitespace_len = lexer->pos - initial_pos;
 
     /* Maybe output open/close parens */
     if(lexer->returning_indents > 0){
@@ -1301,10 +1312,30 @@ int fus_lexer_next(fus_lexer_t *lexer){
     if lexer->vars != NULL */
     int err;
 
+    int whitespace_pos = lexer->pos;
+    int whitespace_len = 0;
+
+    bool first_token = true;
+
     while(1){
+
+        /* Actually parse a token */
         err = _fus_lexer_next(lexer);
         if(err)return err;
 
+        if(first_token){
+            first_token = false;
+
+            /* Save the value of lexer->whitespace_len generated
+            by _fus_lexer_next.
+            This is in case we start parsing a macro, in which case there
+            will be further calls to _fus_lexer_next, invalidating
+            lexer->whitespace_len as far as our caller is
+            concerned. */
+            whitespace_len = lexer->whitespace_len;
+        }
+
+        /* If lexer->vars != NULL, we implement a little macro language. */
         if(lexer->vars && fus_lexer_got(lexer, "$")){
             bool found_token = false;
             err = _fus_lexer_parse_macro(lexer, &found_token);
@@ -1314,6 +1345,9 @@ int fus_lexer_next(fus_lexer_t *lexer){
 
         break;
     }
+
+    lexer->whitespace_pos = whitespace_pos;
+    lexer->whitespace_len = whitespace_len;
 
     return 0;
 }
