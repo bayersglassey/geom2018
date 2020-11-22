@@ -285,12 +285,24 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
         Example data:
 
         :
-            : sixth (0 0 0 0)  0 f
-            : sixth (0 0 0 0)  2 f
-            : sixth (0 0 0 0)  4 f  0 (0 1)
-            : sixth (0 0 0 0)  4 f  0+ (0 1)
-            : sixth (0 0 0 0)  6 f "red"  0 (0 1)
-            : sixth (0 0 0 0)  6 f "red"  0+ (0 1)
+            : "sixth" (0 0 0 0)  0 f
+
+            # rot = 2, flip = true
+            : "sixth" (0 0 0 0)  2 t
+
+            # Animation properties: frame_i (frame_start frame_length)
+            # ...where:
+            #   frame_i: what frame of sub-rgraph is used
+            #   frame_start: sub-rgraph is shown starting on this frame
+            #   frame_length: sub-rgraph is shown for this many frames
+            : "sixth" (0 0 0 0)  4 f  0 (0 1)
+
+            # The "+" makes frame_i "additive", that is, rgraph's frame_i
+            # is added to sub-rgraph's frame_i
+            : "sixth" (0 0 0 0)  4 f  0+ (0 1)
+
+            # Adding a palmapper, "red" in this case
+            : "sixth" (0 0 0 0)  4 f "red"  0+ (0 1)
     */
     INIT
     GET("(")
