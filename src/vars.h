@@ -14,7 +14,6 @@ enum var_type {
     VAR_TYPE_INT,
     VAR_TYPE_STR,
     VAR_TYPE_CONST_STR,
-    VAR_TYPE_PTR,
     VAR_TYPES
 };
 
@@ -26,7 +25,6 @@ typedef struct var {
         int i;
         char *s;
         const char *cs;
-        void *p;
     } value;
 } var_t;
 
@@ -45,7 +43,6 @@ void var_set_bool(var_t *var, bool b);
 void var_set_int(var_t *var, int i);
 void var_set_str(var_t *var, char *s);
 void var_set_const_str(var_t *var, const char *cs);
-void var_set_ptr(var_t *var, void *p);
 
 void vars_cleanup(vars_t *vars);
 void vars_init(vars_t *vars);
@@ -58,14 +55,12 @@ var_t *vars_get_or_add(vars_t *vars, const char *key);
 bool vars_get_bool(vars_t *vars, const char *key);
 int vars_get_int(vars_t *vars, const char *key);
 const char *vars_get_str(vars_t *vars, const char *key);
-void *vars_get_ptr(vars_t *vars, const char *key);
 
 int vars_set_null(vars_t *vars, const char *key);
 int vars_set_bool(vars_t *vars, const char *key, bool b);
 int vars_set_int(vars_t *vars, const char *key, int i);
 int vars_set_str(vars_t *vars, const char *key, char *s);
 int vars_set_const_str(vars_t *vars, const char *key, const char *s);
-int vars_set_ptr(vars_t *vars, const char *key, void *p);
 
 
 #endif

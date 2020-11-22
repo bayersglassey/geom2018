@@ -29,14 +29,13 @@ void var_fprintf(var_t *var, FILE *file){
         case VAR_TYPE_INT: fprintf(file, "%i", var->value.i); break;
         case VAR_TYPE_STR: fputs(var->value.s, file); break;
         case VAR_TYPE_CONST_STR: fputs(var->value.cs, file); break;
-        case VAR_TYPE_PTR: fprintf(file, "%p", var->value.p); break;
         default: fputs("???", file); break;
     }
 }
 
 const char *var_type_name(int type){
     static const char *names[VAR_TYPES] = {
-        "null", "bool", "int", "str", "str", "ptr"
+        "null", "bool", "int", "str", "str"
     };
     if(type < 0 || type >= VAR_TYPES)return "unknown";
     return names[type];
@@ -70,11 +69,6 @@ void var_set_const_str(var_t *var, const char *cs){
     var_unset(var);
     var->type = VAR_TYPE_CONST_STR;
     var->value.cs = cs;
-}
-void var_set_ptr(var_t *var, void *p){
-    var_unset(var);
-    var->type = VAR_TYPE_PTR;
-    var->value.p = p;
 }
 
 
@@ -163,11 +157,6 @@ const char *vars_get_str(vars_t *vars, const char *key){
     if(var->type == VAR_TYPE_CONST_STR)return var->value.cs;
     return NULL;
 }
-void *vars_get_ptr(vars_t *vars, const char *key){
-    var_t *var = vars_get(vars, key);
-    if(var == NULL || var->type != VAR_TYPE_PTR)return NULL;
-    return var->value.p;
-}
 
 int vars_set_null(vars_t *vars, const char *key){
     var_t *var = vars_get_or_add(vars, key);
@@ -197,12 +186,6 @@ int vars_set_const_str(vars_t *vars, const char *key, const char *cs){
     var_t *var = vars_get_or_add(vars, key);
     if(var == NULL)return 1;
     var_set_const_str(var, cs);
-    return 0;
-}
-int vars_set_ptr(vars_t *vars, const char *key, void *p){
-    var_t *var = vars_get_or_add(vars, key);
-    if(var == NULL)return 1;
-    var_set_ptr(var, p);
     return 0;
 }
 

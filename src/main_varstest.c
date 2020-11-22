@@ -58,7 +58,6 @@ int testrunner(){
     ASSERT(!vars_get_bool(vars, "fake"))
     ASSERT(vars_get_int(vars, "fake") == 0)
     ASSERT(vars_get_str(vars, "fake") == NULL)
-    ASSERT(vars_get_ptr(vars, "fake") == NULL)
 
     vars_dump(vars);
     vars_cleanup(vars);
