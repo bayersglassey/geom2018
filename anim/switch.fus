@@ -1,0 +1,16 @@
+
+on "collect": switch_on
+
+switch_off:
+    rgraph: "switch_off"
+    hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)- .
+
+switch_on:
+    rgraph: "switch_on"
+    hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)- .

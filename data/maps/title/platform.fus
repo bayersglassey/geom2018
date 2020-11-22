@@ -1,0 +1,10 @@
+parts:
+    "c": recording "data/maps/demo/recs/coin.fus"
+collmap:
+    ;;    ?   ?        [c][c]
+    ;;
+    ;;  ?   ?   ?     [c][c][c]
+    ;;
+    ;;    + - + - +
+    ;;     \       \
+    ;;      + - + -(+)

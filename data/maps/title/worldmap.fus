@@ -28,6 +28,9 @@ submaps:
                         rot: 0
                         turn: n
             :
+                file: "data/maps/title/platform.fus"
+                pos: (-5 5)
+            :
                 file: "data/maps/title/secret.fus"
                 pos: (20 -14)
                 camera: follow
