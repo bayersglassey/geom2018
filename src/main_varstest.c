@@ -67,6 +67,28 @@ int testrunner(){
     vars_write_simple(vars, stderr);
     vars_cleanup(vars);
 
+    {
+        vars_t _vars, *vars=&_vars;
+        vars_init(vars);
+
+        ASSERT(!vars_load(vars, "test_data/varstest_data/test.fus"))
+        ASSERT(vars_get_int(vars, "x") == 3)
+        ASSERT(!strcmp(vars_get_str(vars, "hello"), "world"))
+        ASSERT(vars_get_bool(vars, "yes"))
+        ASSERT(!vars_get_bool(vars, "no"))
+
+        /* Maybe todo: add vars_is_{int,str,bool,null}?..
+        Or vars_typeof() and it can be any of:
+            VAR_TYPE_{INT,STR,BOOL,NULL,MISSING}
+        ..?
+        */
+        var_t *var = vars_get(vars, "nothing");
+        ASSERT(var != NULL)
+        ASSERT(var->type == VAR_TYPE_NULL)
+
+        vars_cleanup(vars);
+    }
+
     if(n_fails > 0){
         printf("### ! %i/%i TESTS FAILED ! ###\n", n_fails, n_tests);
     }else{

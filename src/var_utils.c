@@ -3,6 +3,8 @@
 #include <stdbool.h>
 
 #include "var_utils.h"
+#include "file_utils.h"
+#include "lexer.h"
 #include "lexer_macros.h"
 #include "write.h"
 
@@ -44,17 +46,39 @@ int vars_parse(vars_t *vars, fus_lexer_t *lexer){
             GET_STR(s)
             DO(vars_set_str(vars, name, s))
         }else if(GOT("null")){
+            NEXT
             DO(vars_set_null(vars, name))
-        }else if(GOT("t")){
+        }else if(GOT("T")){
+            NEXT
             DO(vars_set_bool(vars, name, true))
-        }else if(GOT("f")){
+        }else if(GOT("F")){
+            NEXT
             DO(vars_set_bool(vars, name, false))
         }else{
-            return UNEXPECTED("an int or str, or one of: null, t, f");
+            return UNEXPECTED("an int or str, or one of: null T F");
         }
         GET(")")
 
         free(name);
     }
+    return 0;
+}
+
+int vars_load(vars_t *vars, const char *filename){
+    int err;
+    fus_lexer_t lexer;
+
+    char *text = load_file(filename);
+    if(text == NULL)return 1;
+
+    err = fus_lexer_init(&lexer, text, filename);
+    if(err)return err;
+
+    err = vars_parse(vars, &lexer);
+    if(err)return err;
+
+    fus_lexer_cleanup(&lexer);
+
+    free(text);
     return 0;
 }
