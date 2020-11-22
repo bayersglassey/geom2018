@@ -15,6 +15,15 @@
 #include "hexbox.h"
 
 
+static void _debug_print_line(const char *line, int x, int y){
+    fprintf(stderr, "%s\n", line);
+
+    for(int i = 0; i < x; i++)fputc(' ', stderr);
+    fputs("^\n", stderr);
+
+    fprintf(stderr, "hexcollmap_parse: [line=%i char=%i] ", y+1, x+1);
+}
+
 static void hexcollmap_edge_rot(
     int *x_ptr, int *y_ptr, int *i_ptr, rot_t addrot
 ){
@@ -400,14 +409,13 @@ static int _hexcollmap_parse_lines_origin(
             char elem_type = get_elem_type(c);
             if(c == '('){
                 if(x+2 >= line_len || line[x+2] != ')'){
-                    fprintf(stderr, "Line %i, char %i: '(' without "
-                        "matching ')'. Line: %s\n",
-                        y, x, line);
+                    _debug_print_line(line, x, y);
+                    fprintf(stderr, "'(' without matching ')'.\n");
                     return 2;
                 }
                 if(oy != -1){
-                    fprintf(stderr, "Line %i, char %i: another '('."
-                        " Line: %s\n", y, x, line);
+                    _debug_print_line(line, x, y);
+                    fprintf(stderr, "another '('.");
                     return 2;
                 }
                 ox = x + 1;
@@ -417,8 +425,9 @@ static int _hexcollmap_parse_lines_origin(
                 /* next line plz, "tilebuckets" don't affect the origin */
                 break;
             }else if(!elem_type){
-                fprintf(stderr, "Line %i, char %i: unexpected character (%c)."
-                    " Line: %s\n", y, x, isgraph(c)? c: ' ', line);
+                _debug_print_line(line, x, y);
+                fprintf(stderr, "unexpected character (%c).",
+                    isgraph(c)? c: ' ');
                 return 2;
             }
         }
@@ -448,9 +457,11 @@ static int _hexcollmap_parse_lines_hexbox(
             if(elem_type && elem_type != ' '){
                 char map_elem_type = get_map_elem_type(x-ox, y-oy);
                 if(elem_type != map_elem_type){
-                    fprintf(stderr, "Line %i, char %i: character doesn't "
-                        "belong at these coordinates: got %c (type %c), expected type %c\n",
-                        y, x, c, elem_type, map_elem_type);
+                    _debug_print_line(line, x, y);
+                    fprintf(stderr,
+                        "character doesn't belong at these coordinates: "
+                        "got [%c] (type [%c]), expected type [%c]\n",
+                        c, elem_type, map_elem_type);
                     return 2;}
 
                 int mx, my; bool is_face1;
