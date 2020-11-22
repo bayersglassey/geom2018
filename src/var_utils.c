@@ -8,10 +8,15 @@
 #include "lexer_macros.h"
 #include "write.h"
 
-void vars_write(vars_t *vars, FILE *file, const char *tabs){
+static void _print_tabs(FILE *file, int indent){
+    for(int i = 0; i < indent; i++)putc(' ', file);
+}
+
+void vars_write(vars_t *vars, FILE *file, int indent){
     for(int i = 0; i < vars->vars_len; i++){
         var_t *var = vars->vars[i];
-        fprintf(file, "%s%s: ", tabs, var->key);
+        _print_tabs(file, indent);
+        fprintf(file, "%s: ", var->key);
         switch(var->type){
             case VAR_TYPE_NULL: fputs("null", file); break;
             case VAR_TYPE_BOOL: putc(var->value.b? 'T': 'F', file); break;
@@ -26,7 +31,7 @@ void vars_write(vars_t *vars, FILE *file, const char *tabs){
 
 void vars_write_simple(vars_t *vars, FILE *file){
     fputs(":\n", file);
-    vars_write(vars, file, "  ");
+    vars_write(vars, file, 4);
 }
 
 int vars_parse(vars_t *vars, fus_lexer_t *lexer){

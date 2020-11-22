@@ -12,11 +12,14 @@
 #include "array.h"
 #include "util.h"
 #include "write.h"
+#include "var_utils.h"
 
 
 
+#define TAB_SPACES 4
 static void print_tabs(FILE *file, int depth){
-    for(int i = 0; i < depth; i++)fprintf(file, "    ");
+    int n = depth * TAB_SPACES;
+    for(int i = 0; i < n; i++)putc(' ', file);
 }
 
 
@@ -164,6 +167,9 @@ void hexgame_body_dump(body_t *body, int depth){
     print_tabs(stderr, depth);
     fprintf(stderr, "submap: %s\n",
         body->cur_submap->filename);
+    print_tabs(stderr, depth);
+    fprintf(stderr, "map vars:\n");
+    vars_write(&body->map->vars, stderr, TAB_SPACES * (depth + 1));
     print_tabs(stderr, depth);
     fprintf(stderr, "stateset: %s\n",
         body->stateset.filename);

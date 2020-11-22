@@ -3,6 +3,7 @@
 
 #include "array.h"
 #include "lexer.h"
+#include "vars.h"
 #include "geom.h"
 #include "hexgame_location.h"
 #include "prismelrenderer.h"
@@ -118,6 +119,8 @@ const char *submap_camera_type_msg(int camera_type);
 
 typedef struct hexmap {
     char *name;
+
+    vars_t vars;
 
     vec_t spawn;
     vec_t unit;

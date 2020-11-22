@@ -5,6 +5,11 @@ spawn: "data/maps/title/title.fus"
 default_palette: "data/pal1.fus"
 default_tileset: "data/tileset1.fus"
 
+vars:
+    x: -99
+    dummy: null
+    platform_visible: F
+
 submaps:
     :
         pos: (0 0)

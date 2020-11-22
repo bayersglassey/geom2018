@@ -8,6 +8,8 @@
 #include "hexmap.h"
 #include "hexgame.h"
 #include "lexer.h"
+#include "vars.h"
+#include "var_utils.h"
 #include "util.h"
 #include "mathutil.h"
 #include "geom.h"
@@ -157,6 +159,8 @@ void hexmap_cleanup(hexmap_t *map){
     ARRAY_FREE_PTR(hexmap_submap_t*, map->submaps, hexmap_submap_cleanup)
     ARRAY_FREE_PTR(hexmap_recording_t*, map->recordings,
         hexmap_recording_cleanup)
+
+    vars_cleanup(&map->vars);
 }
 
 int hexmap_init(hexmap_t *map, hexgame_t *game, char *name,
@@ -174,6 +178,8 @@ int hexmap_init(hexmap_t *map, hexgame_t *game, char *name,
 
     map->prend = prend;
     vec_cpy(prend->space->dims, map->unit, unit);
+
+    vars_init(&map->vars);
 
     ARRAY_INIT(map->bodies)
     ARRAY_INIT(map->submaps)
@@ -407,6 +413,21 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, char *name,
     }
     err = fus_lexer_next(lexer);
     if(err)return err;
+    }
+
+
+    /* parse vars */
+    if(fus_lexer_got(lexer, "vars")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+
+        err = vars_parse(&map->vars, lexer);
+        if(err)return err;
+
+        err = fus_lexer_get(lexer, ")");
+        if(err)return err;
     }
 
 
