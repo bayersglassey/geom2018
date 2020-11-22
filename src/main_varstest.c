@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "vars.h"
+#include "var_utils.h"
 
 
 #define ASSERT(COND) n_tests++; if(COND){ \
@@ -55,11 +56,15 @@ int testrunner(){
     ASSERT(vars->vars_len == 5)
     ASSERT(!vars_get_bool(vars, "no"))
 
+    ASSERT(!vars_set_null(vars, "nothing"))
+    ASSERT(vars->vars_len == 6)
+
     ASSERT(!vars_get_bool(vars, "fake"))
     ASSERT(vars_get_int(vars, "fake") == 0)
     ASSERT(vars_get_str(vars, "fake") == NULL)
 
     vars_dump(vars);
+    vars_write_simple(vars, stderr);
     vars_cleanup(vars);
 
     if(n_fails > 0){

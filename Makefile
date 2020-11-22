@@ -15,7 +15,7 @@ PROGS += $(TESTS)
 
 OFILES = \
  src/hexcollmap.o src/hexcollmap_parse.o src/hexcollmap_write.o \
- src/str_utils.o src/file_utils.o src/lexer.o src/write.o src/stringstore.o src/vars.o \
+ src/str_utils.o src/file_utils.o src/lexer.o src/write.o src/stringstore.o src/vars.o src/var_utils.o \
  src/geom.o src/vec4.o src/hexspace.o src/bounds.o src/hexbox.o src/hexgame_location.o \
  src/font.o src/console.o src/directory.o src/directory_shell.o \
  src/hexpicture.o src/generic_printf.o
@@ -67,7 +67,7 @@ bin/stringstoretest: src/main_stringstoretest.o src/stringstore.o
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^
 
-bin/varstest: src/main_varstest.o src/vars.o
+bin/varstest: src/main_varstest.o src/vars.o src/lexer.o src/write.o src/str_utils.o src/var_utils.o
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^
 
