@@ -17,6 +17,12 @@ submaps:
         camera: (5 -5)
         mapper: ("triple")
         recordings:
+            : "data/maps/wastes/rec/rec038.fus"
+            : "data/maps/wastes/rec/rec039.fus"
+            : "data/maps/wastes/rec/rec040.fus"
+            : "data/maps/wastes/rec/rec041.fus"
+            : "data/maps/wastes/rec/rec042.fus"
+            : "data/maps/wastes/rec/rec043.fus"
             #: "data/maps/wastes/rec/player000.fus" "player_cpu"
             #: "data/maps/wastes/rec/player001.fus" "player_cpu"
             #: "data/maps/wastes/rec/big_roller000.fus" "player_cpu"
