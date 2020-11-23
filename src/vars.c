@@ -189,3 +189,40 @@ int vars_set_const_str(vars_t *vars, const char *key, const char *cs){
     return 0;
 }
 
+int vars_copy(vars_t *vars1, vars_t *vars2){
+    /* Copies variables from vars2 to vars1 */
+    int err;
+    for(int i = 0; i < vars2->vars_len; i++){
+        var_t *var = vars2->vars[i];
+        switch(var->type){
+            case VAR_TYPE_NULL:
+                err = vars_set_null(vars1, var->key);
+                if(err)return err;
+                break;
+            case VAR_TYPE_BOOL:
+                err = vars_set_bool(vars1, var->key, var->value.b);
+                if(err)return err;
+                break;
+            case VAR_TYPE_INT:
+                err = vars_set_int(vars1, var->key, var->value.i);
+                if(err)return err;
+                break;
+            case VAR_TYPE_STR: {
+                char *s2 = strdup(var->value.s);
+                if(!s2)return 1;
+                err = vars_set_str(vars1, var->key, s2);
+                if(err)return err;
+                break;
+            }
+            case VAR_TYPE_CONST_STR:
+                err = vars_set_const_str(vars1, var->key, var->value.cs);
+                if(err)return err;
+                break;
+            default:
+                fprintf(stderr, "Unrecognized var type: %i\n", var->type);
+                return 2;
+        }
+    }
+    return 0;
+}
+

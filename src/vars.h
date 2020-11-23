@@ -29,6 +29,33 @@ typedef struct var {
 } var_t;
 
 typedef struct vars {
+    /* NOTE: vars_t must guarantee that:
+
+        * It can be freely copied (that is, using C assignment operator)
+        * A vars_t which has been initialized, but has had no variables set,
+          has allocated no memory and may be freely overwritten
+
+    Example:
+
+        vars_t vars_original;
+        vars_t vars_copy;
+
+        vars_init(&vars_original);
+        vars_set_int(&vars_original, "x", 3);
+
+        // The "copy" is initialized, but has no variables set...
+        vars_init(&vars_copy);
+
+        // ...so we can overwrite it.
+        vars_copy = vars_original;
+
+        // We can now use vars_copy...
+
+        // ...and clean it up when done.
+        // DO NOT cleanup the original!.. because it was copied.
+        vars_cleanup(&vars_copy);
+    */
+
     ARRAY_DECL(var_t*, vars)
 } vars_t;
 
@@ -61,6 +88,8 @@ int vars_set_bool(vars_t *vars, const char *key, bool b);
 int vars_set_int(vars_t *vars, const char *key, int i);
 int vars_set_str(vars_t *vars, const char *key, char *s);
 int vars_set_const_str(vars_t *vars, const char *key, const char *s);
+
+int vars_copy(vars_t *vars1, vars_t *vars2);
 
 
 #endif

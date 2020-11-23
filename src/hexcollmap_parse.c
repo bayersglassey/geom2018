@@ -9,6 +9,8 @@
 #include "file_utils.h"
 #include "hexcollmap.h"
 #include "lexer.h"
+#include "vars.h"
+#include "var_utils.h"
 #include "mathutil.h"
 #include "geom.h"
 #include "hexspace.h"
@@ -376,6 +378,9 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
         /* hexmap_recording_init set up recording->trf already, and now
         we modify it by applying trf2 to it */
         trf_apply(space, &recording->trf, &trf2);
+
+        err = vars_copy(&recording->vars, &part->vars);
+        if(err)return err;
     }else if(part->type == HEXCOLLMAP_PART_TYPE_RENDERGRAPH){
         char *filename = part->filename?
             strdup(part->filename): NULL;
@@ -775,6 +780,9 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
     trf_t trf = {0};
     int draw_z = 0;
 
+    vars_t vars;
+    vars_init(&vars);
+
     err = fus_lexer_get(lexer, "(");
     if(err)return err;
     {
@@ -815,7 +823,7 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
             }
         }
 
-        if(!fus_lexer_got(lexer, ")")){
+        if(!fus_lexer_got(lexer, ")") && !fus_lexer_got(lexer, "vars")){
             if(fus_lexer_got(lexer, "empty")){
                 err = fus_lexer_next(lexer);
                 if(err)return err;
@@ -828,12 +836,23 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
                 if(err)return err;
             }
         }
+
+        if(fus_lexer_got(lexer, "vars")){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            err = fus_lexer_get(lexer, "(");
+            if(err)return err;
+            err = vars_parse(&vars, lexer);
+            if(err)return err;
+            err = fus_lexer_get(lexer, ")");
+            if(err)return err;
+        }
     }
     err = fus_lexer_get(lexer, ")");
     if(err)return err;
 
     err = hexcollmap_part_init(part, type, part_c,
-        filename, palmapper_name, frame_offset);
+        filename, palmapper_name, frame_offset, &vars);
     if(err)return err;
     trf_cpy(collmap->space, &part->trf, &trf);
     part->draw_z = draw_z;

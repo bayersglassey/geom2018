@@ -183,6 +183,9 @@ void hexgame_body_dump(body_t *body, int depth){
     fprintf(stderr, "rot: %i\n", body->loc.rot);
     print_tabs(stderr, depth);
     fprintf(stderr, "turn: %s\n", body->loc.turn? "yes": "no");
+    print_tabs(stderr, depth);
+    fprintf(stderr, "body vars:\n");
+    vars_write(&body->vars, stderr, TAB_SPACES * (depth + 1));
 }
 
 int body_respawn(body_t *body, vec_t pos, rot_t rot, bool turn,

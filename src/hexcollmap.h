@@ -5,6 +5,7 @@
 
 #include "array.h"
 #include "lexer.h"
+#include "vars.h"
 #include "geom.h"
 #include "hexbox.h"
 
@@ -40,6 +41,7 @@ typedef struct hexmap_recording {
     char *palmapper_name;
     trf_t trf;
     int frame_offset;
+    vars_t vars;
 } hexmap_recording_t;
 
 void hexmap_recording_cleanup(hexmap_recording_t *recording);
@@ -109,6 +111,29 @@ static const char *hexmap_part_type_msg(int type){
 }
 
 typedef struct hexcollmap_part {
+    /* "Parts" only exist while hexcollmap is being parsed.
+    They are declared at the top of hexcollmap's data, like this:
+
+        parts:
+            "a": ...etc...
+            "b": ...etc...
+
+    Each part is assigned a character ('a' and 'b' in the above example).
+    They can be referred to using '?' (part) and '!' (part+vert), along
+    with their character in the "tilebucket" (the [...] at end of line):
+
+        collmap:
+            ;; .   .   ?   .   [a]
+            ;;
+            ;;   .   ! - +     [b]
+            ;;        \ /
+            ;;     .   +
+
+    Based on part's type (see enum hexcollmap_part_type), part may represent:
+        * Another hexcollmap to be drawn onto current hexcollmap
+        * A recording, actor, or rendergraph
+    */
+
     int type; /* enum hexcollmap_part_type */
     char part_c;
     char *filename;
@@ -117,6 +142,8 @@ typedef struct hexcollmap_part {
 
     trf_t trf;
     int draw_z;
+
+    vars_t vars;
 } hexcollmap_part_t;
 
 typedef struct hexcollmap {
@@ -165,7 +192,8 @@ static bool hexcollmap_elem_is_special(hexcollmap_elem_t *elem){
 
 
 int hexcollmap_part_init(hexcollmap_part_t *part, int type,
-    char part_c, char *filename, char *palmapper_name, int frame_offset);
+    char part_c, char *filename, char *palmapper_name, int frame_offset,
+    vars_t *vars);
 void hexcollmap_part_cleanup(hexcollmap_part_t *part);
 
 void hexcollmap_cleanup(hexcollmap_t *collmap);

@@ -11,6 +11,9 @@ parts:
     "C": recording "data/maps/demo/recs/coin_crouch.fus"
 
     "s": recording "data/maps/demo/recs/switch.fus"
+        vars:
+            key: "platform_visible"
+            val: T
 
 collmap:
     ;;
