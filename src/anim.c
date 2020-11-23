@@ -13,13 +13,24 @@
 #include "lexer_macros.h"
 
 
-
+static void state_effect_cleanup(state_effect_t *effect);
 void collmsg_handler_cleanup(collmsg_handler_t *handler){
     free(handler->msg);
     free(handler->state_name);
+    ARRAY_FREE_PTR(state_effect_t*, handler->effects, state_effect_cleanup)
 }
 
-static int _parse_collmsg_handler(fus_lexer_t *lexer, char **msg_ptr, char **state_name_ptr){
+void collmsg_handler_init(collmsg_handler_t *handler,
+    char *msg, char *state_name
+){
+    handler->msg = msg;
+    handler->state_name = state_name;
+    ARRAY_INIT(handler->effects)
+}
+
+static int _parse_collmsg_handler(fus_lexer_t *lexer,
+    collmsg_handler_t *handler
+){
     INIT
     char *msg;
     char *state_name;
@@ -33,8 +44,7 @@ static int _parse_collmsg_handler(fus_lexer_t *lexer, char **msg_ptr, char **sta
     }
     GET(")")
 
-    *msg_ptr = msg;
-    *state_name_ptr = state_name;
+    collmsg_handler_init(handler, msg, state_name);
     return 0;
 }
 
@@ -489,7 +499,7 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
         while(GOT("on")){
             NEXT
             collmsg_handler_t handler;
-            err = _parse_collmsg_handler(lexer, &handler.msg, &handler.state_name);
+            err = _parse_collmsg_handler(lexer, &handler);
             if(err)return err;
             ARRAY_PUSH(collmsg_handler_t, state->collmsg_handlers, handler)
         }
@@ -549,7 +559,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
     while(GOT("on")){
         NEXT
         collmsg_handler_t handler;
-        err = _parse_collmsg_handler(lexer, &handler.msg, &handler.state_name);
+        err = _parse_collmsg_handler(lexer, &handler);
         if(err)return err;
         ARRAY_PUSH(collmsg_handler_t, stateset->collmsg_handlers, handler)
     }

@@ -569,7 +569,7 @@ int body_step(body_t *body, hexgame_t *game){
     return 0;
 }
 
-static const char *_body_handle_collmsg(body_t *body, const char *msg){
+static collmsg_handler_t *_body_handle_collmsg(body_t *body, const char *msg){
     state_t *state = body->state;
     for(int j = 0; j < state->collmsg_handlers_len; j++){
         collmsg_handler_t *handler = &state->collmsg_handlers[j];
@@ -578,7 +578,7 @@ static const char *_body_handle_collmsg(body_t *body, const char *msg){
                 handler->msg, handler->state_name);
         }
         if(!strcmp(msg, handler->msg)){
-            return handler->state_name;
+            return handler;
         }
     }
     stateset_t *stateset = &body->stateset;
@@ -589,22 +589,22 @@ static const char *_body_handle_collmsg(body_t *body, const char *msg){
                 handler->msg, handler->state_name);
         }
         if(!strcmp(msg, handler->msg)){
-            return handler->state_name;
+            return handler;
         }
     }
     return NULL;
 }
 
-static const char *_body_handle_other_bodies_collmsgs(body_t *body, body_t *body_other){
-    const char *state_name = NULL;
+static collmsg_handler_t *_body_handle_other_bodies_collmsgs(body_t *body, body_t *body_other){
+    collmsg_handler_t *handler = NULL;
     state_t *state = body_other->state;
     for(int i = 0; i < state->collmsgs_len; i++){
         const char *msg = state->collmsgs[i];
         if(body->stateset.debug_collision){
             fprintf(stderr, "  -> state collmsg: %s\n", msg);
         }
-        state_name = _body_handle_collmsg(body, msg);
-        if(state_name)return state_name;
+        handler = _body_handle_collmsg(body, msg);
+        if(handler)return handler;
     }
     stateset_t *stateset = &body_other->stateset;
     for(int i = 0; i < stateset->collmsgs_len; i++){
@@ -612,8 +612,8 @@ static const char *_body_handle_other_bodies_collmsgs(body_t *body, body_t *body
         if(body->stateset.debug_collision){
             fprintf(stderr, "  -> stateset collmsg: %s\n", msg);
         }
-        state_name = _body_handle_collmsg(body, msg);
-        if(state_name)return state_name;
+        handler = _body_handle_collmsg(body, msg);
+        if(handler)return handler;
     }
     return NULL;
 }
@@ -641,15 +641,16 @@ int body_collide_against_body(body_t *body, body_t *body_other){
     }
 
     /* Find first (if any) collmsg of body_other which is handled by body */
-    const char *state_name = _body_handle_other_bodies_collmsgs(body, body_other);
-    if(!state_name)return 0;
+    collmsg_handler_t *handler = _body_handle_other_bodies_collmsgs(
+        body, body_other);
+    if(!handler)return 0;
 
     if(body->stateset.debug_collision){
-        fprintf(stderr, "  -> *** handling with state: %s\n", state_name);
+        fprintf(stderr, "  -> *** handling with state: %s\n", handler->state_name);
     }
 
     /* Body "handles" the collmsg by changing its state */
-    err = body_set_state(body, state_name, true);
+    err = body_set_state(body, handler->state_name, true);
     if(err)return err;
 
     return 0;

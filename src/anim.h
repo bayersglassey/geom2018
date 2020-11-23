@@ -50,12 +50,16 @@ enum effect_boolean {
 
 typedef struct collmsg_handler {
     /* When colliding with another body who is "sending" the given collmsg,
-    goto the associated state */
+    goto the associated state (old behaviour) or apply the associated
+    effects (new behaviour) */
     char *msg;
     char *state_name;
+    ARRAY_DECL(struct state_effect*, effects)
 } collmsg_handler_t;
 
 void collmsg_handler_cleanup(collmsg_handler_t *handler);
+void collmsg_handler_init(collmsg_handler_t *handler,
+    char *msg, char *state_name);
 
 
 
