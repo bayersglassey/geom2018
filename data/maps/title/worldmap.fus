@@ -34,6 +34,7 @@ submaps:
                         turn: n
             :
                 file: "data/maps/title/platform.fus"
+                visible: platform_visible
                 pos: (-5 5)
             :
                 file: "data/maps/title/secret.fus"

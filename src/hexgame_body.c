@@ -475,7 +475,7 @@ void body_update_cur_submap(body_t *body){
     bool out_of_bounds = true;
     for(int i = 0; i < map->submaps_len; i++){
         hexmap_submap_t *submap = map->submaps[i];
-        if(!submap->solid)continue;
+        if(!hexmap_submap_is_solid(submap))continue;
 
         hexcollmap_t *collmap = &submap->collmap;
 

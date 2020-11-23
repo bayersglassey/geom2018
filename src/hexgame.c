@@ -231,6 +231,8 @@ int camera_render(camera_t *camera,
     for(int i = 0; i < map->submaps_len; i++){
         hexmap_submap_t *submap = map->submaps[i];
 
+        if(!hexmap_submap_is_visible(submap))continue;
+
 #ifdef GEOM_ONLY_RENDER_CUR_SUBMAP
         if(submap != camera->cur_submap)continue;
 #endif

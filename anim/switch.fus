@@ -4,7 +4,7 @@ on "collect": switch_on
 switch_off:
     rgraph: "switch_off"
     hitbox:
-        ;;     .
+        ;;     +
         ;;     *
         ;;  (.)- .
 
