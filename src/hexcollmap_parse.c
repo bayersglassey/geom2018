@@ -758,6 +758,88 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
     return 0;
 }
 
+static int _hexcollmap_parse_part(hexcollmap_t *collmap,
+    hexcollmap_part_t *part, fus_lexer_t *lexer
+){
+    /* Parses part data from lexer and initializes part if successful. */
+    int err;
+
+    char part_c;
+    err = fus_lexer_get_chr(lexer, &part_c);
+    if(err)return err;
+
+    int type = HEXCOLLMAP_PART_TYPE_HEXCOLLMAP;
+    char *filename = NULL;
+    char *palmapper_name = NULL;
+    int frame_offset = 0;
+    trf_t trf = {0};
+    int draw_z = 0;
+
+    err = fus_lexer_get(lexer, "(");
+    if(err)return err;
+    {
+        if(fus_lexer_got(lexer, "recording")){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            type = HEXCOLLMAP_PART_TYPE_RECORDING;
+        }else if(fus_lexer_got(lexer, "actor")){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            type = HEXCOLLMAP_PART_TYPE_ACTOR;
+        }else if(fus_lexer_got(lexer, "shape")){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            type = HEXCOLLMAP_PART_TYPE_RENDERGRAPH;
+        }
+
+        if(fus_lexer_got(lexer, "empty")){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+        }else{
+            err = fus_lexer_get_str(lexer, &filename);
+            if(err)return err;
+            while(1){
+                if(fus_lexer_got(lexer, "^")){
+                    err = fus_lexer_next(lexer);
+                    if(err)return err;
+                    err = fus_lexer_get_int(lexer, &trf.rot);
+                    if(err)return err;
+                }else if(fus_lexer_got(lexer, "~")){
+                    trf.flip = !trf.flip;
+                }else if(fus_lexer_got(lexer, "|")){
+                    err = fus_lexer_next(lexer);
+                    if(err)return err;
+                    err = fus_lexer_get_int(lexer, &draw_z);
+                    if(err)return err;
+                }else break;
+            }
+        }
+
+        if(!fus_lexer_got(lexer, ")")){
+            if(fus_lexer_got(lexer, "empty")){
+                err = fus_lexer_next(lexer);
+                if(err)return err;
+            }else{
+                err = fus_lexer_get_str(lexer, &palmapper_name);
+                if(err)return err;
+            }
+            if(fus_lexer_got_int(lexer)){
+                err = fus_lexer_get_int(lexer, &frame_offset);
+                if(err)return err;
+            }
+        }
+    }
+    err = fus_lexer_get(lexer, ")");
+    if(err)return err;
+
+    err = hexcollmap_part_init(part, type, part_c,
+        filename, palmapper_name, frame_offset);
+    if(err)return err;
+    trf_cpy(collmap->space, &part->trf, &trf);
+    part->draw_z = draw_z;
+    return 0;
+}
+
 int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
     bool just_coll,
     hexcollmap_part_t ***parts_ptr, int *parts_len_ptr
@@ -781,80 +863,10 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
             while(1){
                 if(fus_lexer_got(lexer, ")"))break;
 
-                char part_c;
-                err = fus_lexer_get_chr(lexer, &part_c);
-                if(err)return err;
-
-                int type = HEXCOLLMAP_PART_TYPE_HEXCOLLMAP;
-                char *filename = NULL;
-                char *palmapper_name = NULL;
-                int frame_offset = 0;
-                trf_t trf = {0};
-                int draw_z = 0;
-
-                err = fus_lexer_get(lexer, "(");
-                if(err)return err;
-                {
-                    if(fus_lexer_got(lexer, "recording")){
-                        err = fus_lexer_next(lexer);
-                        if(err)return err;
-                        type = HEXCOLLMAP_PART_TYPE_RECORDING;
-                    }else if(fus_lexer_got(lexer, "actor")){
-                        err = fus_lexer_next(lexer);
-                        if(err)return err;
-                        type = HEXCOLLMAP_PART_TYPE_ACTOR;
-                    }else if(fus_lexer_got(lexer, "shape")){
-                        err = fus_lexer_next(lexer);
-                        if(err)return err;
-                        type = HEXCOLLMAP_PART_TYPE_RENDERGRAPH;
-                    }
-
-                    if(fus_lexer_got(lexer, "empty")){
-                        err = fus_lexer_next(lexer);
-                        if(err)return err;
-                    }else{
-                        err = fus_lexer_get_str(lexer, &filename);
-                        if(err)return err;
-                        while(1){
-                            if(fus_lexer_got(lexer, "^")){
-                                err = fus_lexer_next(lexer);
-                                if(err)return err;
-                                err = fus_lexer_get_int(lexer, &trf.rot);
-                                if(err)return err;
-                            }else if(fus_lexer_got(lexer, "~")){
-                                trf.flip = !trf.flip;
-                            }else if(fus_lexer_got(lexer, "|")){
-                                err = fus_lexer_next(lexer);
-                                if(err)return err;
-                                err = fus_lexer_get_int(lexer, &draw_z);
-                                if(err)return err;
-                            }else break;
-                        }
-                    }
-
-                    if(!fus_lexer_got(lexer, ")")){
-                        if(fus_lexer_got(lexer, "empty")){
-                            err = fus_lexer_next(lexer);
-                            if(err)return err;
-                        }else{
-                            err = fus_lexer_get_str(lexer, &palmapper_name);
-                            if(err)return err;
-                        }
-                        if(fus_lexer_got_int(lexer)){
-                            err = fus_lexer_get_int(lexer, &frame_offset);
-                            if(err)return err;
-                        }
-                    }
-                }
-                err = fus_lexer_get(lexer, ")");
-                if(err)return err;
-
                 ARRAY_PUSH_NEW(hexcollmap_part_t*, parts, part)
-                err = hexcollmap_part_init(part, type, part_c,
-                    filename, palmapper_name, frame_offset);
+
+                err = _hexcollmap_parse_part(collmap, part, lexer);
                 if(err)return err;
-                trf_cpy(collmap->space, &part->trf, &trf);
-                part->draw_z = draw_z;
             }
             err = fus_lexer_next(lexer);
             if(err)return err;
