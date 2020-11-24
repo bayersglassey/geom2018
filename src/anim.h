@@ -195,7 +195,8 @@ typedef struct state_effect {
 } state_effect_t;
 
 extern const char state_effect_type_print[];
-extern const char state_effect_type_print_int[];
+extern const char state_effect_type_print_var[];
+extern const char state_effect_type_print_vars[];
 extern const char state_effect_type_move[];
 extern const char state_effect_type_rot[];
 extern const char state_effect_type_turn[];

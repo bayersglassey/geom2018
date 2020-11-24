@@ -11,6 +11,7 @@
 #include "prismelrenderer.h"
 #include "array.h"
 #include "util.h"
+#include "var_utils.h"
 #include "write.h"
 
 
@@ -213,16 +214,29 @@ int state_effect_apply(state_effect_t *effect,
 
     if(
         effect->type == state_effect_type_print ||
-        effect->type == state_effect_type_print_int
+        effect->type == state_effect_type_print_var ||
+        effect->type == state_effect_type_print_vars
     ){
-        if(body != NULL)printf("body %p", body);
-        else printf("unknown body");
-        if(actor != NULL)printf(" (actor %p)", actor);
-        if(effect->type == state_effect_type_print_int){
-            int value = body? vars_get_int(&body->vars, effect->u.var_name): 0;
-            printf(" says: %i\n", value);
+        if(body != NULL)fprintf(stderr, "body %p", body);
+        else fprintf(stderr, "unknown body");
+        if(actor != NULL)fprintf(stderr, " (actor %p)", actor);
+
+        vars_t *vars = actor? &actor->vars: &body->vars;
+        if(effect->type == state_effect_type_print_vars){
+            fprintf(stderr, " vars:\n");
+            vars_write(vars, stderr, 1);
+        }else if(effect->type == state_effect_type_print_var){
+            var_t *var = vars_get(vars, effect->u.var_name);
+            if(var){
+                fprintf(stderr, " says: ");
+                var_fprintf(var, stderr);
+                fprintf(stderr, "\n");
+            }else{
+                // :P
+                fprintf(stderr, " was tongue-tied\n");
+            }
         }else{
-            printf(" says: %s\n", effect->u.msg);
+            fprintf(stderr, " says: %s\n", effect->u.msg);
         }
     }else if(effect->type == state_effect_type_move){
         CHECK_BODY

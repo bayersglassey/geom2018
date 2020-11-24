@@ -257,12 +257,15 @@ static int _parse_effect(fus_lexer_t *lexer,
         effect->type = state_effect_type_print;
         GET_STR(effect->u.msg)
         GET(")")
-    }else if(GOT("print_int")){
+    }else if(GOT("print_var")){
         NEXT
         GET("(")
-        effect->type = state_effect_type_print_int;
+        effect->type = state_effect_type_print_var;
         GET_NAME(effect->u.var_name)
         GET(")")
+    }else if(GOT("print_vars")){
+        NEXT
+        effect->type = state_effect_type_print_vars;
     }else if(GOT("move")){
         NEXT
         GET("(")
@@ -623,7 +626,8 @@ const char *state_cond_types[] = {
 
 
 const char state_effect_type_print[] = "print";
-const char state_effect_type_print_int[] = "print_int";
+const char state_effect_type_print_var[] = "print_var";
+const char state_effect_type_print_vars[] = "print_vars";
 const char state_effect_type_move[] = "move";
 const char state_effect_type_rot[] = "rot";
 const char state_effect_type_turn[] = "turn";
@@ -639,7 +643,8 @@ const char state_effect_type_confused[] = "confused";
 const char state_effect_type_key[] = "key";
 const char *state_effect_types[] = {
     state_effect_type_print,
-    state_effect_type_print_int,
+    state_effect_type_print_var,
+    state_effect_type_print_vars,
     state_effect_type_move,
     state_effect_type_rot,
     state_effect_type_turn,
@@ -734,7 +739,7 @@ void state_effect_cleanup(state_effect_t *effect){
     if(effect->type == state_effect_type_print){
         free(effect->u.msg);
     }else if(
-        effect->type == state_effect_type_print_int ||
+        effect->type == state_effect_type_print_var ||
         effect->type == state_effect_type_zero ||
         effect->type == state_effect_type_inc
     ){
