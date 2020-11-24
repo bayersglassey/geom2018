@@ -1,6 +1,6 @@
 
 collmsgs: "collect"
-on "crush": goto dead
+on "crush": goto: dead
 
 $SET_STR NS birdplayer_
 $SET_BOOL PLAYER_BIRD

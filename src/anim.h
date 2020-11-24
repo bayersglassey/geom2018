@@ -22,6 +22,14 @@ Meaning of each character:
 'b' -> back
 */
 
+
+/* Need these declarations for state_cond_match, state_effect_apply,
+collmsg_handler_apply */
+struct hexgame;
+struct body;
+struct actor;
+
+
 enum anim_cond_flag {
     ANIM_COND_FLAGS_ALL    = 1,
     ANIM_COND_FLAGS_YES    = 2,
@@ -53,14 +61,15 @@ typedef struct collmsg_handler {
     goto the associated state (old behaviour) or apply the associated
     effects (new behaviour) */
     char *msg;
-    char *state_name;
     ARRAY_DECL(struct state_effect*, effects)
 } collmsg_handler_t;
 
 void collmsg_handler_cleanup(collmsg_handler_t *handler);
-void collmsg_handler_init(collmsg_handler_t *handler,
-    char *msg, char *state_name);
-
+void collmsg_handler_init(collmsg_handler_t *handler, char *msg);
+struct state_effect_goto;
+int collmsg_handler_apply(collmsg_handler_t *handler,
+    struct hexgame *game, struct body *body, struct actor *actor,
+    bool *continues_ptr);
 
 
 typedef struct state {
@@ -223,11 +232,6 @@ void state_dump(state_t *state, FILE *file, int depth);
 void state_rule_cleanup(state_rule_t *rule);
 int state_rule_init(state_rule_t *rule, state_t *state);
 void state_rule_dump(state_rule_t *rule, FILE *file, int depth);
-
-/* Need these declarations for state_cond_match, state_effect_apply */
-struct hexgame;
-struct body;
-struct actor;
 
 void state_cond_cleanup(state_cond_t *cond);
 void state_cond_dump(state_cond_t *cond, FILE *file, int depth);

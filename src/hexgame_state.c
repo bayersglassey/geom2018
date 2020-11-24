@@ -366,3 +366,43 @@ int state_handle_rules(state_t *state,
     return 0;
 }
 
+int collmsg_handler_apply(collmsg_handler_t *handler,
+    struct hexgame *game, struct body *body, struct actor *actor,
+    bool *continues_ptr
+){
+    int err;
+
+    for(int i = 0; i < handler->effects_len; i++){
+        state_effect_t *effect = handler->effects[i];
+
+        state_effect_goto_t *gotto = NULL;
+        err = state_effect_apply(effect, game, body, actor,
+            &gotto, continues_ptr);
+        if(err)return err;
+
+        if(gotto != NULL){
+            if(actor != NULL){
+                /* ACTOR */
+                err = actor_set_state(actor, gotto->name);
+                if(err)return err;
+                if(gotto->immediate){
+                    /* If there was an "immediate goto" effect,
+                    then we immediately handle the new state's rules */
+                    err = actor_handle_rules(actor);
+                    if(err)return err;
+                }
+            }else{
+                /* BODY */
+                err = body_set_state(body, gotto->name, false);
+                if(err)return err;
+                if(gotto->immediate){
+                    /* If there was an "immediate goto" effect,
+                    then we immediately handle the new state's rules */
+                    err = body_handle_rules(body);
+                    if(err)return err;
+                }
+            }
+        }
+    }
+    return 0;
+}

@@ -20,41 +20,36 @@ static void _print_tabs(FILE *file, int depth){
 
 void collmsg_handler_cleanup(collmsg_handler_t *handler){
     free(handler->msg);
-    free(handler->state_name);
     ARRAY_FREE_PTR(state_effect_t*, handler->effects, state_effect_cleanup)
 }
 
-void collmsg_handler_init(collmsg_handler_t *handler,
-    char *msg, char *state_name
-){
+void collmsg_handler_init(collmsg_handler_t *handler, char *msg){
     handler->msg = msg;
-    handler->state_name = state_name;
     ARRAY_INIT(handler->effects)
 }
 
+static int _parse_effect(fus_lexer_t *lexer,
+    prismelrenderer_t *prend, vecspace_t *space,
+    state_effect_t *effect);
 static int _parse_collmsg_handler(fus_lexer_t *lexer,
     collmsg_handler_t *handler, prismelrenderer_t *prend, vecspace_t *space
 ){
     INIT
-    char *msg;
-    char *state_name;
 
+    char *msg;
     GET_STR(msg)
 
+    collmsg_handler_init(handler, msg);
+
     GET("(")
-    GET("goto")
-    GET_NAME(state_name)
-    /*
     while(true){
         if(GOT(")"))break;
         ARRAY_PUSH_NEW(state_effect_t*, handler->effects, effect)
         err = _parse_effect(lexer, prend, space, effect);
         if(err)return err;
     }
-    */
-    GET(")")
+    NEXT
 
-    collmsg_handler_init(handler, msg, state_name);
     return 0;
 }
 

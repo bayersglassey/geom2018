@@ -9,7 +9,7 @@ stand:
         ;;    . - .
         ;;    *\*/*
         ;; ( )  .   .
-    on "spikeyspit": goto turn
+    on "spikeyspit": goto: turn
 
     if:
         # Grabbing

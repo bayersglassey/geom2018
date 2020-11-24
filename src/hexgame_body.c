@@ -518,6 +518,25 @@ void body_update_cur_submap(body_t *body){
     if(new_submap != NULL)body->cur_submap = new_submap;
 }
 
+int body_handle_rules(body_t *body){
+    int err;
+    handle: {
+        state_effect_goto_t *gotto = NULL;
+        err = state_handle_rules(body->state, body->game, body, NULL,
+            &gotto);
+        if(err)return err;
+        if(gotto != NULL){
+            err = body_set_state(body, gotto->name, false);
+            if(err)return err;
+
+            if(gotto->immediate)goto handle;
+                /* If there was an "immediate goto" effect,
+                then we immediately handle the new state's rules */
+        }
+    }
+    return 0;
+}
+
 int body_step(body_t *body, hexgame_t *game){
     int err;
 
@@ -540,20 +559,8 @@ int body_step(body_t *body, hexgame_t *game){
         body->cooldown--;
     }else{
         /* Handle current state's rules */
-        handle: {
-            state_effect_goto_t *gotto = NULL;
-            err = state_handle_rules(body->state, game, body, NULL,
-                &gotto);
-            if(err)return err;
-            if(gotto != NULL){
-                err = body_set_state(body, gotto->name, false);
-                if(err)return err;
-
-                if(gotto->immediate)goto handle;
-                    /* If there was an "immediate goto" effect,
-                    then we immediately handle the new state's rules */
-            }
-        }
+        err = body_handle_rules(body);
+        if(err)return err;
 
         /* Start of new frame, no keys have gone down yet.
         Note this only happens after cooldown is finished, which allows
@@ -652,9 +659,18 @@ int body_collide_against_body(body_t *body, body_t *body_other){
         }
     }
 
-    /* Body "handles" the collmsg by changing its state */
-    err = body_set_state(body, handler->state_name, true);
-    if(err)return err;
+    /* Body "handles" the collmsg by applying handler's effects to itself */
+    {
+        bool continues = false;
+            /* Unused. The "continue" effect only makes sense when handling
+            rules: it means "continue checking for matching rules after this
+            one".
+            But here, we are only applying a series of effects. */
+
+        err = collmsg_handler_apply(handler, body->game, body, NULL,
+            &continues);
+        if(err)return err;
+    }
 
     return 0;
 }

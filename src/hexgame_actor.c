@@ -25,10 +25,13 @@ int actor_init(actor_t *actor, hexmap_t *map, body_t *body,
 
     memset(actor, 0, sizeof(*actor));
 
+    /* NOTE: body may be NULL */
     actor->body = body;
 
     err = actor_init_stateset(actor, stateset_filename, state_name, map);
     if(err)return err;
+
+    actor->game = map->game;
 
     return 0;
 }
@@ -67,6 +70,25 @@ int actor_set_state(actor_t *actor, const char *state_name){
     return 0;
 }
 
+int actor_handle_rules(actor_t *actor){
+    int err;
+    handle: {
+        state_effect_goto_t *gotto = NULL;
+        err = state_handle_rules(actor->state, actor->game,
+            actor->body, actor, &gotto);
+        if(err)return err;
+        if(gotto != NULL){
+            err = actor_set_state(actor, gotto->name);
+            if(err)return err;
+
+            if(gotto->immediate)goto handle;
+                /* If there was an "immediate goto" effect,
+                then we immediately handle the new state's rules */
+        }
+    }
+    return 0;
+}
+
 int actor_step(actor_t *actor, struct hexgame *game){
     int err;
 
@@ -80,20 +102,8 @@ int actor_step(actor_t *actor, struct hexgame *game){
         /* No body, or recording not playing */
 
         /* Handle current state's rules */
-        handle: {
-            state_effect_goto_t *gotto = NULL;
-            err = state_handle_rules(actor->state, game, body, actor,
-                &gotto);
-            if(err)return err;
-            if(gotto != NULL){
-                err = actor_set_state(actor, gotto->name);
-                if(err)return err;
-
-                if(gotto->immediate)goto handle;
-                    /* If there was an "immediate goto" effect,
-                    then we immediately handle the new state's rules */
-            }
-        }
+        err = actor_handle_rules(actor);
+        if(err)return err;
     }
     return 0;
 }

@@ -14,7 +14,7 @@ fly:
         ;;
         ;;   .  (.)
 
-    on "crush": goto dead
+    on "crush": goto: dead
 
     if:
     then:
@@ -55,7 +55,7 @@ crouch_fly:
         ;;  */*\*/*\
         ;;  .  (.)  .
 
-    on "crush": goto crouch_dead
+    on "crush": goto: crouch_dead
 
     if:
     then:
