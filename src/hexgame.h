@@ -272,6 +272,8 @@ typedef struct actor {
     stateset_t stateset;
     int wait;
 
+    vars_t vars;
+
     /* Weakrefs: */
     struct hexgame *game;
     body_t *body;

@@ -16,6 +16,7 @@
 
 void actor_cleanup(actor_t *actor){
     stateset_cleanup(&actor->stateset);
+    vars_cleanup(&actor->vars);
 }
 
 int actor_init(actor_t *actor, hexmap_t *map, body_t *body,
@@ -24,6 +25,8 @@ int actor_init(actor_t *actor, hexmap_t *map, body_t *body,
     int err;
 
     memset(actor, 0, sizeof(*actor));
+
+    vars_init(&actor->vars);
 
     /* NOTE: body may be NULL */
     actor->body = body;
