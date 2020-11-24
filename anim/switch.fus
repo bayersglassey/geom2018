@@ -1,5 +1,5 @@
 
-on "collect": goto: switch_on
+$SET_INT DELAY 2
 
 switch_off:
     rgraph: "switch_off"
@@ -7,6 +7,19 @@ switch_off:
         ;;     +
         ;;     *
         ;;  (.)- .
+    on "collect":
+        print_vars
+        goto: switching_on
+        delay: $GET_INT DELAY
+
+switching_on:
+    rgraph: "switch_on"
+    hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)- .
+    if:
+    then: goto: switch_on
 
 switch_on:
     rgraph: "switch_on"
@@ -14,3 +27,15 @@ switch_on:
         ;;     .
         ;;     *
         ;;  (.)- .
+    on "collect":
+        goto: switching_off
+        delay: $GET_INT DELAY
+
+switching_off:
+    rgraph: "switch_off"
+    hitbox:
+        ;;     +
+        ;;     *
+        ;;  (.)- .
+    if:
+    then: goto: switch_off
