@@ -224,4 +224,21 @@ void state_rule_cleanup(state_rule_t *rule);
 int state_rule_init(state_rule_t *rule, state_t *state);
 void state_rule_dump(state_rule_t *rule, FILE *file, int depth);
 
+/* Need these declarations for state_cond_match, state_effect_apply */
+struct hexgame;
+struct body;
+struct actor;
+
+void state_cond_cleanup(state_cond_t *cond);
+void state_cond_dump(state_cond_t *cond, FILE *file, int depth);
+int state_cond_match(state_cond_t *cond,
+    struct hexgame *game, struct body *body, struct actor *actor,
+    bool *matched_ptr);
+
+void state_effect_cleanup(state_effect_t *effect);
+void state_effect_dump(state_effect_t *effect, FILE *file, int depth);
+int state_effect_apply(state_effect_t *effect,
+    struct hexgame *game, struct body *body, struct actor *actor,
+    state_effect_goto_t **gotto_ptr, bool *continues_ptr);
+
 #endif

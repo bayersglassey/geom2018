@@ -14,37 +14,41 @@
 #include "write.h"
 
 
+/* TODO: these error handling macros are silly :P */
+
 #define CHECK_BODY \
     if(body == NULL){ \
-        fprintf(stderr, "No body"); \
         RULE_PERROR() \
+        fprintf(stderr, "No body"); \
         return 2;}
 
 #define CHECK_ACTOR \
     if(actor == NULL){ \
-        fprintf(stderr, "No actor"); \
         RULE_PERROR() \
+        fprintf(stderr, "No actor"); \
         return 2;}
 
 
-static int state_rule_match_cond(
-    state_rule_t *rule, state_cond_t *cond,
+int state_cond_match(state_cond_t *cond,
     hexgame_t *game, body_t *body, actor_t *actor,
-    bool *rule_matched_ptr
+    bool *matched_ptr
 ){
     int err;
 
-    if(DEBUG_RULES)printf("  if: %s\n", cond->type);
+    /* NOTE: body and/or actor may be NULL.
+    We are basically reusing the rule/cond/effect structure for bodies
+    and actors; most conds/effects naturally apply to one or the other.
+    E.g. keypress stuff is for the body; "play" is for actor.
+    However, actor may want to check some stuff about the body, so
+    it may make use of "body-oriented" rules. */
 
     #define RULE_PERROR() \
-        fprintf(stderr, " (cond=%s, state=%s, stateset=%s)\n", \
-            cond->type, rule->state->name, \
-            rule->state->stateset->filename);
+        fprintf(stderr, "Error in condition: %s\n", cond->type);
 
-    bool rule_matched = false;
+    bool matched = false;
 
     if(cond->type == state_cond_type_false){
-        rule_matched = false;
+        matched = false;
     }else if(cond->type == state_cond_type_key){
         CHECK_BODY
         int kstate_i = cond->u.key.kstate;
@@ -65,12 +69,12 @@ static int state_rule_match_cond(
             RULE_PERROR()
             return 2;}
 
-        rule_matched = kstate[key_i];
-        if(!cond->u.key.yes)rule_matched = !rule_matched;
+        matched = kstate[key_i];
+        if(!cond->u.key.yes)matched = !matched;
     }else if(cond->type == state_cond_type_coll){
         CHECK_BODY
         if(body->state == NULL){
-            rule_matched = false;
+            matched = false;
         }else{
             hexmap_t *map = body->map;
             vecspace_t *space = map->space;
@@ -103,37 +107,37 @@ static int state_rule_match_cond(
                         yes? all: !all);
                     if(yes? collide: !collide)n_matches++;
                 }
-                rule_matched = n_matches > 0;
+                matched = n_matches > 0;
             }else if(water){
                 hexmap_collision_t collision;
                 hexmap_collide_special(map, hitbox, &hitbox_trf, &collision);
                 bool collide = collision.water.submap != NULL;
-                rule_matched = yes? collide: !collide;
+                matched = yes? collide: !collide;
             }else{
                 bool collide = hexmap_collide(map,
                     hitbox, &hitbox_trf, yes? all: !all);
-                rule_matched = yes? collide: !collide;
+                matched = yes? collide: !collide;
             }
         }
     }else if(cond->type == state_cond_type_chance){
         int n = rand() % cond->u.ratio.b;
-        rule_matched = n <= cond->u.ratio.a;
+        matched = n <= cond->u.ratio.a;
     }else if(
         cond->type == state_cond_type_any ||
         cond->type == state_cond_type_all ||
         cond->type == state_cond_type_not
     ){
         bool all = cond->type == state_cond_type_all;
-        rule_matched = all? true: false;
+        matched = all? true: false;
         for(int i = 0; i < cond->u.subconds.conds_len; i++){
             state_cond_t *subcond = cond->u.subconds.conds[i];
-            err = state_rule_match_cond(rule, subcond, game, body, actor,
-                &rule_matched);
+            err = state_cond_match(subcond, game, body, actor,
+                &matched);
             if(err)return err;
-            if((all && !rule_matched) || (!all && rule_matched))break;
+            if((all && !matched) || (!all && matched))break;
         }
         if(cond->type == state_cond_type_not){
-            rule_matched = !rule_matched;
+            matched = !matched;
         }
     }else if(cond->type == state_cond_type_expr){
         CHECK_BODY
@@ -141,54 +145,54 @@ static int state_rule_match_cond(
         int cond_value = cond->u.expr.value;
         int op = cond->u.expr.op;
         switch(op){
-            case STATE_COND_EXPR_OP_EQ: rule_matched = value == cond_value; break;
-            case STATE_COND_EXPR_OP_NE: rule_matched = value != cond_value; break;
-            case STATE_COND_EXPR_OP_LT: rule_matched = value  < cond_value; break;
-            case STATE_COND_EXPR_OP_LE: rule_matched = value <= cond_value; break;
-            case STATE_COND_EXPR_OP_GT: rule_matched = value  > cond_value; break;
-            case STATE_COND_EXPR_OP_GE: rule_matched = value >= cond_value; break;
+            case STATE_COND_EXPR_OP_EQ: matched = value == cond_value; break;
+            case STATE_COND_EXPR_OP_NE: matched = value != cond_value; break;
+            case STATE_COND_EXPR_OP_LT: matched = value  < cond_value; break;
+            case STATE_COND_EXPR_OP_LE: matched = value <= cond_value; break;
+            case STATE_COND_EXPR_OP_GT: matched = value  > cond_value; break;
+            case STATE_COND_EXPR_OP_GE: matched = value >= cond_value; break;
             default:
                 fprintf(stderr, "Bad expr op: %i\n", op);
                 RULE_PERROR()
                 return 2;
         }
     }else{
-        fprintf(stderr, "Unrecognized state rule condition: %s",
+        fprintf(stderr, "Unrecognized condition: %s",
             cond->type);
         RULE_PERROR()
         return 2;
     }
     #undef RULE_PERROR
 
-    *rule_matched_ptr = rule_matched;
+    *matched_ptr = matched;
     return 0;
 }
 
 static int state_rule_match(state_rule_t *rule,
     hexgame_t *game, body_t *body, actor_t *actor,
-    bool *rule_matched_ptr
+    bool *matched_ptr
 ){
     int err;
 
-    /* NOTE: body and/or actor may be NULL.
-    We are basically reusing the rule/cond/effect structure for bodies
-    and actors; most conds/effects naturally apply to one or the other.
-    E.g. keypress stuff is for the body; "play" is for actor.
-    However, actor may want to check some stuff about the body, so
-    it may make use of "body-oriented" rules. */
-
-    bool rule_matched = true;
+    bool matched = true;
     for(int i = 0; i < rule->conds_len; i++){
         state_cond_t *cond = rule->conds[i];
-        err = state_rule_match_cond(rule, cond, game, body, actor,
-            &rule_matched);
-        if(err)return err;
-        if(!rule_matched)break;
+        if(DEBUG_RULES)printf("  if: %s\n", cond->type);
+        err = state_cond_match(cond, game, body, actor,
+            &matched);
+        if(err){
+            if(err == 2){
+                fprintf(stderr, "...in: state=%s, stateset=%s\n",
+                    rule->state->name, rule->state->stateset->filename);
+            }
+            return err;
+        }
+        if(!matched)break;
     }
 
-    if(DEBUG_RULES && !rule_matched)printf("    NO MATCH\n");
+    if(DEBUG_RULES && !matched)printf("    NO MATCH\n");
 
-    *rule_matched_ptr = rule_matched;
+    *matched_ptr = matched;
     return 0;
 }
 
@@ -196,6 +200,116 @@ static void effect_apply_boolean(int boolean, bool *b_ptr){
     if(boolean == EFFECT_BOOLEAN_TRUE)*b_ptr = true;
     else if(boolean == EFFECT_BOOLEAN_FALSE)*b_ptr = false;
     else if(boolean == EFFECT_BOOLEAN_TOGGLE)*b_ptr = !*b_ptr;
+}
+
+int state_effect_apply(state_effect_t *effect,
+    hexgame_t *game, body_t *body, actor_t *actor,
+    state_effect_goto_t **gotto_ptr, bool *continues_ptr
+){
+    #define RULE_PERROR() \
+        fprintf(stderr, "Error in effect: %s\n", effect->type);
+
+    int err;
+
+    if(
+        effect->type == state_effect_type_print ||
+        effect->type == state_effect_type_print_int
+    ){
+        if(body != NULL)printf("body %p", body);
+        else printf("unknown body");
+        if(actor != NULL)printf(" (actor %p)", actor);
+        if(effect->type == state_effect_type_print_int){
+            int value = body? vars_get_int(&body->vars, effect->u.var_name): 0;
+            printf(" says: %i\n", value);
+        }else{
+            printf(" says: %s\n", effect->u.msg);
+        }
+    }else if(effect->type == state_effect_type_move){
+        CHECK_BODY
+        vecspace_t *space = body->map->space;
+        vec_t vec;
+        vec_cpy(space->dims, vec, effect->u.vec);
+        rot_t rot = hexgame_location_get_rot(&body->loc);
+        space->vec_flip(vec, body->loc.turn);
+        space->vec_rot(vec, rot);
+        vec_add(space->dims, body->loc.pos, vec);
+    }else if(effect->type == state_effect_type_rot){
+        CHECK_BODY
+        vecspace_t *space = body->map->space;
+        rot_t effect_rot = effect->u.rot;
+        body->loc.rot = rot_rot(space->rot_max,
+            body->loc.rot, effect_rot);
+    }else if(effect->type == state_effect_type_turn){
+        CHECK_BODY
+        vecspace_t *space = body->map->space;
+        body->loc.turn = !body->loc.turn;
+        body->loc.rot = rot_flip(space->rot_max, body->loc.rot, true);
+    }else if(effect->type == state_effect_type_goto){
+        *gotto_ptr = &effect->u.gotto;
+    }else if(effect->type == state_effect_type_delay){
+        if(actor){
+            actor->wait = effect->u.delay;
+        }else{
+            CHECK_BODY
+            body->cooldown = effect->u.delay;
+        }
+    }else if(effect->type == state_effect_type_spawn){
+        CHECK_BODY
+        state_effect_spawn_t *spawn = &effect->u.spawn;
+
+        /* TODO: look up palmapper from spawn->palmapper_name */
+        palettemapper_t *palmapper = NULL;
+
+        body_t *new_body;
+        err = body_add_body(body, &new_body,
+            spawn->stateset_filename,
+            spawn->state_name, palmapper,
+            spawn->loc.pos, spawn->loc.rot, spawn->loc.turn);
+        if(err)return err;
+    }else if(effect->type == state_effect_type_play){
+        CHECK_ACTOR
+        const char *play_filename = effect->u.play_filename;
+        err = body_load_recording(body, play_filename, false);
+        if(err)return err;
+        hexgame_location_apply(&body->recording.loc0, &actor->trf);
+        err = body_play_recording(body);
+        if(err)return err;
+    }else if(effect->type == state_effect_type_die){
+        CHECK_BODY
+        body->dead = effect->u.dead;
+    }else if(effect->type == state_effect_type_zero){
+        CHECK_BODY
+        err = vars_set_int(&body->vars, effect->u.var_name, 0);
+        if(err)return err;
+    }else if(effect->type == state_effect_type_inc){
+        CHECK_BODY
+        int value = vars_get_int(&body->vars, effect->u.var_name);
+        err = vars_set_int(&body->vars, effect->u.var_name, value + 1);
+        if(err)return err;
+    }else if(effect->type == state_effect_type_continue){
+        *continues_ptr = true;
+    }else if(effect->type == state_effect_type_confused){
+        CHECK_BODY
+        effect_apply_boolean(effect->u.boolean, &body->confused);
+    }else if(effect->type == state_effect_type_key){
+        CHECK_BODY
+        int key_i = body_get_key_i(body, effect->u.key.c);
+        bool keydown = effect->u.key.action & 0x1;
+        if(keydown){
+            body_keydown(body, key_i);
+        }
+        bool keyup = effect->u.key.action & 0x2;
+        if(keyup){
+            body_keyup(body, key_i);
+        }
+    }else{
+        fprintf(stderr, "Unrecognized effect: %s\n",
+            effect->type);
+        return 2;
+    }
+
+    return 0;
+    #undef RULE_PERROR
 }
 
 static int state_rule_apply(state_rule_t *rule,
@@ -210,109 +324,15 @@ static int state_rule_apply(state_rule_t *rule,
     for(int i = 0; i < rule->effects_len; i++){
         state_effect_t *effect = rule->effects[i];
         if(DEBUG_RULES)printf("  then: %s\n", effect->type);
-
-        #define RULE_PERROR() \
-            fprintf(stderr, " (effect=%s, state=%s, stateset=%s)\n", \
-                effect->type, rule->state->name, \
-                rule->state->stateset->filename);
-
-        if(
-            effect->type == state_effect_type_print ||
-            effect->type == state_effect_type_print_int
-        ){
-            if(body != NULL)printf("body %p", body);
-            else printf("unknown body");
-            if(actor != NULL)printf(" (actor %p)", actor);
-            if(effect->type == state_effect_type_print_int){
-                int value = body? vars_get_int(&body->vars, effect->u.var_name): 0;
-                printf(" says: %i\n", value);
-            }else{
-                printf(" says: %s\n", effect->u.msg);
+        err = state_effect_apply(effect, game, body, actor,
+            gotto_ptr, continues_ptr);
+        if(err){
+            if(err == 2){
+                fprintf(stderr, "...in: state=%s, stateset=%s\n",
+                    rule->state->name, rule->state->stateset->filename);
             }
-        }else if(effect->type == state_effect_type_move){
-            CHECK_BODY
-            vecspace_t *space = body->map->space;
-            vec_t vec;
-            vec_cpy(space->dims, vec, effect->u.vec);
-            rot_t rot = hexgame_location_get_rot(&body->loc);
-            space->vec_flip(vec, body->loc.turn);
-            space->vec_rot(vec, rot);
-            vec_add(space->dims, body->loc.pos, vec);
-        }else if(effect->type == state_effect_type_rot){
-            CHECK_BODY
-            vecspace_t *space = body->map->space;
-            rot_t effect_rot = effect->u.rot;
-            body->loc.rot = rot_rot(space->rot_max,
-                body->loc.rot, effect_rot);
-        }else if(effect->type == state_effect_type_turn){
-            CHECK_BODY
-            vecspace_t *space = body->map->space;
-            body->loc.turn = !body->loc.turn;
-            body->loc.rot = rot_flip(space->rot_max, body->loc.rot, true);
-        }else if(effect->type == state_effect_type_goto){
-            *gotto_ptr = &effect->u.gotto;
-        }else if(effect->type == state_effect_type_delay){
-            if(actor){
-                actor->wait = effect->u.delay;
-            }else{
-                CHECK_BODY
-                body->cooldown = effect->u.delay;
-            }
-        }else if(effect->type == state_effect_type_spawn){
-            CHECK_BODY
-            state_effect_spawn_t *spawn = &effect->u.spawn;
-
-            /* TODO: look up palmapper from spawn->palmapper_name */
-            palettemapper_t *palmapper = NULL;
-
-            body_t *new_body;
-            err = body_add_body(body, &new_body,
-                spawn->stateset_filename,
-                spawn->state_name, palmapper,
-                spawn->loc.pos, spawn->loc.rot, spawn->loc.turn);
-            if(err)return err;
-        }else if(effect->type == state_effect_type_play){
-            CHECK_ACTOR
-            const char *play_filename = effect->u.play_filename;
-            err = body_load_recording(body, play_filename, false);
-            if(err)return err;
-            hexgame_location_apply(&body->recording.loc0, &actor->trf);
-            err = body_play_recording(body);
-            if(err)return err;
-        }else if(effect->type == state_effect_type_die){
-            CHECK_BODY
-            body->dead = effect->u.dead;
-        }else if(effect->type == state_effect_type_zero){
-            CHECK_BODY
-            err = vars_set_int(&body->vars, effect->u.var_name, 0);
-            if(err)return err;
-        }else if(effect->type == state_effect_type_inc){
-            CHECK_BODY
-            int value = vars_get_int(&body->vars, effect->u.var_name);
-            err = vars_set_int(&body->vars, effect->u.var_name, value + 1);
-            if(err)return err;
-        }else if(effect->type == state_effect_type_continue){
-            *continues_ptr = true;
-        }else if(effect->type == state_effect_type_confused){
-            CHECK_BODY
-            effect_apply_boolean(effect->u.boolean, &body->confused);
-        }else if(effect->type == state_effect_type_key){
-            CHECK_BODY
-            int key_i = body_get_key_i(body, effect->u.key.c);
-            bool keydown = effect->u.key.action & 0x1;
-            if(keydown){
-                body_keydown(body, key_i);
-            }
-            bool keyup = effect->u.key.action & 0x2;
-            if(keyup){
-                body_keyup(body, key_i);
-            }
-        }else{
-            fprintf(stderr, "Unrecognized state rule effect: %s\n",
-                effect->type);
-            return 2;
+            return err;
         }
-        #undef RULE_PERROR
     }
     return 0;
 }
@@ -329,12 +349,12 @@ int state_handle_rules(state_t *state,
         if(DEBUG_RULES){printf("body %p, actor %p, rule %i:\n",
             body, actor, i);}
 
-        bool rule_matched;
+        bool matched;
         err = state_rule_match(rule, game, body, actor,
-            &rule_matched);
+            &matched);
         if(err)return err;
 
-        if(rule_matched){
+        if(matched){
             bool continues = false;
             err = state_rule_apply(rule, game, body, actor,
                 gotto_ptr, &continues);

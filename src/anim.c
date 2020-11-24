@@ -18,7 +18,6 @@ static void _print_tabs(FILE *file, int depth){
 }
 
 
-static void state_effect_cleanup(state_effect_t *effect);
 void collmsg_handler_cleanup(collmsg_handler_t *handler){
     free(handler->msg);
     free(handler->state_name);
@@ -703,7 +702,7 @@ void state_dump(state_t *state, FILE *file, int depth){
 }
 
 
-static void state_cond_cleanup(state_cond_t *cond){
+void state_cond_cleanup(state_cond_t *cond){
     if(cond->type == state_cond_type_coll){
         hexcollmap_t *collmap = cond->u.coll.collmap;
         if(collmap != NULL){
@@ -721,7 +720,7 @@ static void state_cond_cleanup(state_cond_t *cond){
     }
 }
 
-static void state_cond_dump(state_cond_t *cond, FILE *file, int depth){
+void state_cond_dump(state_cond_t *cond, FILE *file, int depth){
     _print_tabs(file, depth);
     fprintf(file, "%s\n", cond->type);
     if(
@@ -736,7 +735,7 @@ static void state_cond_dump(state_cond_t *cond, FILE *file, int depth){
     }
 }
 
-static void state_effect_cleanup(state_effect_t *effect){
+void state_effect_cleanup(state_effect_t *effect){
     if(effect->type == state_effect_type_print){
         free(effect->u.msg);
     }else if(
@@ -756,7 +755,7 @@ static void state_effect_cleanup(state_effect_t *effect){
     }
 }
 
-static void state_effect_dump(state_effect_t *effect, FILE *file, int depth){
+void state_effect_dump(state_effect_t *effect, FILE *file, int depth){
     _print_tabs(file, depth);
     fprintf(file, "%s\n", effect->type);
 }

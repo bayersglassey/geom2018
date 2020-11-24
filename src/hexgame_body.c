@@ -574,8 +574,7 @@ static collmsg_handler_t *_body_handle_collmsg(body_t *body, const char *msg){
     for(int j = 0; j < state->collmsg_handlers_len; j++){
         collmsg_handler_t *handler = &state->collmsg_handlers[j];
         if(body->stateset.debug_collision){
-            fprintf(stderr, "    -> state handler: %s -> %s\n",
-                handler->msg, handler->state_name);
+            fprintf(stderr, "    -> state handler: %s\n", handler->msg);
         }
         if(!strcmp(msg, handler->msg)){
             return handler;
@@ -585,8 +584,7 @@ static collmsg_handler_t *_body_handle_collmsg(body_t *body, const char *msg){
     for(int j = 0; j < stateset->collmsg_handlers_len; j++){
         collmsg_handler_t *handler = &stateset->collmsg_handlers[j];
         if(body->stateset.debug_collision){
-            fprintf(stderr, "    -> stateset handler: %s -> %s\n",
-                handler->msg, handler->state_name);
+            fprintf(stderr, "    -> stateset handler: %s\n", handler->msg);
         }
         if(!strcmp(msg, handler->msg)){
             return handler;
@@ -646,7 +644,12 @@ int body_collide_against_body(body_t *body, body_t *body_other){
     if(!handler)return 0;
 
     if(body->stateset.debug_collision){
-        fprintf(stderr, "  -> *** handling with state: %s\n", handler->state_name);
+        fprintf(stderr, "  -> *** handling with:\n");
+        for(int i = 0; i < handler->effects_len; i++){
+            state_effect_t *effect = handler->effects[i];
+            int depth = 2; // indentation: depth * "  "
+            state_effect_dump(effect, stderr, depth);
+        }
     }
 
     /* Body "handles" the collmsg by changing its state */
