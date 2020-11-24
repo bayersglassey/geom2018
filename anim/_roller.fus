@@ -48,7 +48,7 @@ $PREFIX ANIM_NS stand:
         ;;    .
         ;;    *
         ;; (.)  .
-    on "spit": $PREFIX ANIM_NS turn
+    on "spit": goto $PREFIX ANIM_NS turn
 
 
     ################################################

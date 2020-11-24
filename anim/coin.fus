@@ -1,5 +1,5 @@
 
-on "collect": collected
+on "collect": goto collected
 
 stand:
     rgraph: "coin"

@@ -1,5 +1,5 @@
 
-on "collect": switch_on
+on "collect": goto switch_on
 
 switch_off:
     rgraph: "switch_off"

@@ -37,11 +37,8 @@ static int _parse_collmsg_handler(fus_lexer_t *lexer,
 
     GET_STR(msg)
     GET("(")
-    if(GOT(")")){
-        state_name = NULL;
-    }else{
-        GET_NAME(state_name)
-    }
+    GET("goto")
+    GET_NAME(state_name)
     GET(")")
 
     collmsg_handler_init(handler, msg, state_name);
