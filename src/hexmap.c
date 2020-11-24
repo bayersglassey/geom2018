@@ -269,8 +269,12 @@ static int hexmap_load_hexmap_recording(
     if(submap)vec_add(space->dims, trf.add, submap->pos);
 
     if(recording->type == HEXMAP_RECORDING_TYPE_RECORDING){
+        body_t *body;
         err = hexmap_load_recording(map, recording->filename,
-            palmapper, true, recording->frame_offset, &trf);
+            palmapper, true, recording->frame_offset, &trf, &body);
+        if(err)return err;
+
+        err = vars_copy(&body->vars, &recording->vars);
         if(err)return err;
     }else if(recording->type == HEXMAP_RECORDING_TYPE_ACTOR){
         /* We create a body with NULL stateset, state.
@@ -286,6 +290,9 @@ static int hexmap_load_hexmap_recording(
         if(err)return err;
 
         actor->trf = trf;
+
+        err = vars_copy(&actor->vars, &recording->vars);
+        if(err)return err;
     }else{
         fprintf(stderr, "%s: Unrecognized hexmap recording type: %i\n",
             __func__, recording->type);
@@ -865,7 +872,8 @@ int hexmap_get_submap_index(hexmap_t *map, hexmap_submap_t *submap){
 }
 
 int hexmap_load_recording(hexmap_t *map, const char *filename,
-    palettemapper_t *palmapper, bool loop, int offset, trf_t *trf
+    palettemapper_t *palmapper, bool loop, int offset, trf_t *trf,
+    body_t **body_ptr
 ){
     int err;
 
@@ -887,6 +895,7 @@ int hexmap_load_recording(hexmap_t *map, const char *filename,
     err = body_play_recording(body);
     if(err)return err;
 
+    *body_ptr = body;
     return 0;
 }
 

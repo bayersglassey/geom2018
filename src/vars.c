@@ -6,6 +6,7 @@
 
 #include "str_utils.h"
 #include "vars.h"
+#include "write.h"
 
 
 /*******
@@ -27,8 +28,8 @@ void var_fprintf(var_t *var, FILE *file){
         case VAR_TYPE_NULL: fputs("null", file); break;
         case VAR_TYPE_BOOL: putc(var->value.b? 'T': 'F', file); break;
         case VAR_TYPE_INT: fprintf(file, "%i", var->value.i); break;
-        case VAR_TYPE_STR: fputs(var->value.s, file); break;
-        case VAR_TYPE_CONST_STR: fputs(var->value.cs, file); break;
+        case VAR_TYPE_STR: fus_write_str(file, var->value.s); break;
+        case VAR_TYPE_CONST_STR: fus_write_str(file, var->value.cs); break;
         default: fputs("???", file); break;
     }
 }

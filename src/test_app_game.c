@@ -268,7 +268,7 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
                         expect! The following is a hack: you must play
                         recordings belonging to your correct map... */
                         err = hexmap_load_recording(body->map,
-                            recording_filename, NULL, true, 0, NULL);
+                            recording_filename, NULL, true, 0, NULL, NULL);
                         if(err)return err;
                     }
                 }

@@ -150,7 +150,8 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
     char *tileset_filename);
 int hexmap_get_submap_index(hexmap_t *map, hexmap_submap_t *submap);
 int hexmap_load_recording(hexmap_t *map, const char *filename,
-    palettemapper_t *palmapper, bool loop, int offset, trf_t *trf);
+    palettemapper_t *palmapper, bool loop, int offset, trf_t *trf,
+    struct body **body_ptr);
 bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf, bool all);
 void hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
