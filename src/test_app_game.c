@@ -277,7 +277,12 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
             for(int i = 0; i < game->players_len; i++){
                 player_t *player = game->players[i];
                 if(player->keymap < 0)continue;
-                hexgame_player_dump(player, 0);
+                if(event->key.keysym.mod & KMOD_CTRL){
+                    if(!player->body)continue;
+                    stateset_dump(&player->body->stateset, stderr, 0);
+                }else{
+                    hexgame_player_dump(player, 0);
+                }
             }
         }else if(!event->key.repeat){
             int keymap = -1;

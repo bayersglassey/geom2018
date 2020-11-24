@@ -13,6 +13,11 @@
 #include "lexer_macros.h"
 
 
+static void _print_tabs(FILE *file, int depth){
+    for(int i = 0; i < depth; i++)fputs("  ", file);
+}
+
+
 static void state_effect_cleanup(state_effect_t *effect);
 void collmsg_handler_cleanup(collmsg_handler_t *handler){
     free(handler->msg);
@@ -29,16 +34,25 @@ void collmsg_handler_init(collmsg_handler_t *handler,
 }
 
 static int _parse_collmsg_handler(fus_lexer_t *lexer,
-    collmsg_handler_t *handler
+    collmsg_handler_t *handler, prismelrenderer_t *prend, vecspace_t *space
 ){
     INIT
     char *msg;
     char *state_name;
 
     GET_STR(msg)
+
     GET("(")
     GET("goto")
     GET_NAME(state_name)
+    /*
+    while(true){
+        if(GOT(")"))break;
+        ARRAY_PUSH_NEW(state_effect_t*, handler->effects, effect)
+        err = _parse_effect(lexer, prend, space, effect);
+        if(err)return err;
+    }
+    */
     GET(")")
 
     collmsg_handler_init(handler, msg, state_name);
@@ -66,6 +80,15 @@ int stateset_init(stateset_t *stateset, char *filename){
     ARRAY_INIT(stateset->states)
     stateset->debug_collision = false;
     return 0;
+}
+
+void stateset_dump(stateset_t *stateset, FILE *file, int depth){
+    _print_tabs(file, depth);
+    fprintf(file, "%s:\n", stateset->filename);
+    for(int i = 0; i < stateset->states_len; i++){
+        state_t *state = stateset->states[i];
+        state_dump(state, file, depth+1);
+    }
 }
 
 int stateset_load(stateset_t *stateset, char *filename, vars_t *vars,
@@ -496,7 +519,7 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
         while(GOT("on")){
             NEXT
             collmsg_handler_t handler;
-            err = _parse_collmsg_handler(lexer, &handler);
+            err = _parse_collmsg_handler(lexer, &handler, prend, space);
             if(err)return err;
             ARRAY_PUSH(collmsg_handler_t, state->collmsg_handlers, handler)
         }
@@ -556,7 +579,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
     while(GOT("on")){
         NEXT
         collmsg_handler_t handler;
-        err = _parse_collmsg_handler(lexer, &handler);
+        err = _parse_collmsg_handler(lexer, &handler, prend, space);
         if(err)return err;
         ARRAY_PUSH(collmsg_handler_t, stateset->collmsg_handlers, handler)
     }
@@ -666,6 +689,19 @@ int state_init(state_t *state, stateset_t *stateset, char *name,
     return 0;
 }
 
+void state_dump(state_t *state, FILE *file, int depth){
+    _print_tabs(file, depth);
+    fprintf(file, "%s:\n", state->name);
+    if(state->rgraph){
+        _print_tabs(file, depth+1);
+        fprintf(file, "rgraph: %s\n", state->rgraph->name);
+    }
+    for(int i = 0; i < state->rules_len; i++){
+        state_rule_t *rule = state->rules[i];
+        state_rule_dump(rule, file, depth+1);
+    }
+}
+
 
 static void state_cond_cleanup(state_cond_t *cond){
     if(cond->type == state_cond_type_coll){
@@ -682,6 +718,21 @@ static void state_cond_cleanup(state_cond_t *cond){
         ARRAY_FREE_PTR(state_cond_t*, cond->u.subconds.conds, state_cond_cleanup)
     }else if(cond->type == state_cond_type_expr){
         free(cond->u.expr.var_name);
+    }
+}
+
+static void state_cond_dump(state_cond_t *cond, FILE *file, int depth){
+    _print_tabs(file, depth);
+    fprintf(file, "%s\n", cond->type);
+    if(
+        cond->type == state_cond_type_any ||
+        cond->type == state_cond_type_all ||
+        cond->type == state_cond_type_not
+    ){
+        for(int i = 0; i < cond->u.subconds.conds_len; i++){
+            state_cond_t *subcond = cond->u.subconds.conds[i];
+            state_cond_dump(subcond, file, depth+1);
+        }
     }
 }
 
@@ -705,6 +756,11 @@ static void state_effect_cleanup(state_effect_t *effect){
     }
 }
 
+static void state_effect_dump(state_effect_t *effect, FILE *file, int depth){
+    _print_tabs(file, depth);
+    fprintf(file, "%s\n", effect->type);
+}
+
 void state_rule_cleanup(state_rule_t *rule){
     ARRAY_FREE_PTR(state_cond_t*, rule->conds, state_cond_cleanup)
     ARRAY_FREE_PTR(state_effect_t*, rule->effects, state_effect_cleanup)
@@ -715,5 +771,21 @@ int state_rule_init(state_rule_t *rule, state_t *state){
     ARRAY_INIT(rule->conds)
     ARRAY_INIT(rule->effects)
     return 0;
+}
+
+void state_rule_dump(state_rule_t *rule, FILE *file, int depth){
+    _print_tabs(file, depth);
+    fprintf(file, "if:\n");
+    for(int i = 0; i < rule->conds_len; i++){
+        state_cond_t *cond = rule->conds[i];
+        state_cond_dump(cond, file, depth+1);
+    }
+
+    _print_tabs(file, depth);
+    fprintf(file, "then:\n");
+    for(int i = 0; i < rule->effects_len; i++){
+        state_effect_t *effect = rule->effects[i];
+        state_effect_dump(effect, file, depth+1);
+    }
 }
 
