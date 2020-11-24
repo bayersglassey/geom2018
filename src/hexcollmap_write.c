@@ -57,6 +57,7 @@ void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
             recording->trf.rot,
             recording->trf.flip? 'y': 'n');
         fprintf(f, "#     frame_offset: %i\n", recording->frame_offset);
+        /* TODO: recording->vars */
     }
 
     if(extra)

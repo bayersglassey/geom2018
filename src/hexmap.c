@@ -189,7 +189,7 @@ int hexmap_init(hexmap_t *map, hexgame_t *game, char *name,
 
 static int hexmap_parse_recording(fus_lexer_t *lexer,
     char **filename_ptr, char **palmapper_name_ptr, int *frame_offset_ptr,
-    trf_t *trf
+    trf_t *trf, vars_t *vars
 ){
     int err;
 
@@ -214,7 +214,7 @@ static int hexmap_parse_recording(fus_lexer_t *lexer,
 
     err = fus_lexer_get_str(lexer, filename_ptr);
     if(err)return err;
-    if(!fus_lexer_got(lexer, ")")){
+    if(!fus_lexer_got(lexer, ")") && !fus_lexer_got(lexer, "vars")){
         if(fus_lexer_got(lexer, "empty")){
             err = fus_lexer_next(lexer);
             if(err)return err;
@@ -226,6 +226,17 @@ static int hexmap_parse_recording(fus_lexer_t *lexer,
             err = fus_lexer_get_int(lexer, frame_offset_ptr);
             if(err)return err;
         }
+    }
+
+    if(fus_lexer_got(lexer, "vars")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = vars_parse(vars, lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, ")");
+        if(err)return err;
     }
 
     err = fus_lexer_get(lexer, ")");
@@ -398,8 +409,10 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, char *name,
         char *palmapper_name = NULL;
         int frame_offset = 0;
         trf_t trf;
+        vars_t vars;
+        vars_init(&vars);
         err = hexmap_parse_recording(lexer,
-            &filename, &palmapper_name, &frame_offset, &trf);
+            &filename, &palmapper_name, &frame_offset, &trf, &vars);
         if(err)return err;
 
         ARRAY_PUSH_NEW(hexmap_recording_t*, map->recordings,
@@ -410,6 +423,7 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, char *name,
         if(err)return err;
 
         recording->trf = trf;
+        recording->vars = vars;
     }
     err = fus_lexer_next(lexer);
     if(err)return err;
@@ -800,8 +814,10 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
             char *palmapper_name = NULL;
             int frame_offset = 0;
             trf_t trf;
+            vars_t vars;
+            vars_init(&vars);
             err = hexmap_parse_recording(lexer,
-                &filename, &palmapper_name, &frame_offset, &trf);
+                &filename, &palmapper_name, &frame_offset, &trf, &vars);
             if(err)return err;
 
             ARRAY_PUSH_NEW(hexmap_recording_t*, map->recordings,
@@ -812,6 +828,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
             if(err)return err;
 
             recording->trf = trf;
+            recording->vars = vars;
         }
         err = fus_lexer_next(lexer);
         if(err)return err;

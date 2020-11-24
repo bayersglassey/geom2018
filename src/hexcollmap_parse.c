@@ -309,6 +309,9 @@ static int hexcollmap_draw(hexcollmap_t *collmap1, hexcollmap_t *collmap2,
             filename, palmapper_name, recording2->frame_offset);
         if(err)return err;
         trf_apply(space, &recording1->trf, trf);
+
+        err = vars_copy(&recording1->vars, &recording2->vars);
+        if(err)return err;
     }
 
     /* "Draw" rendergraphs from collmap2 onto collmap1, in other words copy
