@@ -582,3 +582,31 @@ Oct 11, 2020:
 * Extend trees worldmap at data/maps/trees/bubbles3-1.fus, going below-right, adding right-sloping tree.
     * Also: instead of trying to get this bubbles3-1.fus etc area "right", just copy-paste
     it a bunch (or make a bunch of similar things below it) -- remember why dodecas area is so fun!!
+
+
+Nov 21, 2020:
+-------------
+
+* minieditor: F8 (reload) should *not* reset editor's properties?.. e.g. current rgraph.
+    * ...but that might be hard, e.g. if you were looking at an rgraph who was dynamically
+    generated (e.g. by a mapper being applied to something).
+    At very least, we'd need to worry about rgraph's index changing, so we'd need to save
+    its name, then reload, then look up that name again.
+
+* I want it to be possible for hexmap_submaps (and maybe hexmaps) to change during gameplay.
+    * E.g. switches
+        * Flipped by spitting at them (finally, a use for spit!)
+        * Can have effects on map, like toggling whether a certain submap is present
+            * START WITH THIS, PROBABLY QUICK AND EASY
+        * More interesting effects: editing a submap's tiles
+        * Maybe coins can finally have a purpose?.. just as "keys" to open doors?.. but laaame
+
+        * Example use for switches: in trees/bubbles3-1.fus with the big_roller, would be cool
+        to be able to flip a switch toggling existence of a "bridge" or "door" to some other
+        area, so you can get rid of the big_roller.
+        Except have multiple copies of the current structure (like, the "room" which the big_roller
+        rolls around in and outside of) with slight differences, e.g. first one has 1 big_roller,
+        next one has 2 big_rollers, maybe one has death_rollers, etc.
+        And by flipping switches, you can cause all those enemies to move between the rooms.
+
+
