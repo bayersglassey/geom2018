@@ -17,12 +17,12 @@ void vars_write(vars_t *vars, FILE *file, int indent){
         var_t *var = vars->vars[i];
         _print_tabs(file, indent);
         fprintf(file, "%s: ", var->key);
-        switch(var->type){
+        switch(var->value.type){
             case VAR_TYPE_NULL: fputs("null", file); break;
-            case VAR_TYPE_BOOL: putc(var->value.b? 'T': 'F', file); break;
-            case VAR_TYPE_INT: fprintf(file, "%i", var->value.i); break;
-            case VAR_TYPE_STR: fus_write_str(file, var->value.s); break;
-            case VAR_TYPE_CONST_STR: fus_write_str(file, var->value.cs); break;
+            case VAR_TYPE_BOOL: putc(var->value.u.b? 'T': 'F', file); break;
+            case VAR_TYPE_INT: fprintf(file, "%i", var->value.u.i); break;
+            case VAR_TYPE_STR: fus_write_str(file, var->value.u.s); break;
+            case VAR_TYPE_CONST_STR: fus_write_str(file, var->value.u.cs); break;
             default: fputs("???", file); break;
         }
         fputc('\n', file);

@@ -84,7 +84,7 @@ int testrunner(){
         */
         var_t *var = vars_get(vars, "nothing");
         ASSERT(var != NULL)
-        ASSERT(var->type == VAR_TYPE_NULL)
+        ASSERT(var->value.type == VAR_TYPE_NULL)
 
         vars_cleanup(vars);
     }

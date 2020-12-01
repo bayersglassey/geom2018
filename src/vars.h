@@ -17,15 +17,19 @@ enum var_type {
     VAR_TYPES
 };
 
-typedef struct var {
-    char *key;
+typedef struct val {
     int type; /* enum var_type */
     union {
         bool b;
         int i;
         char *s;
         const char *cs;
-    } value;
+    } u;
+} val_t;
+
+typedef struct var {
+    char *key;
+    val_t value;
 } var_t;
 
 typedef struct vars {
