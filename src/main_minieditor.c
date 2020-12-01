@@ -21,6 +21,7 @@
 
 
 typedef struct options {
+    bool quiet;
     bool gui_mode;
     Uint32 window_flags;
     const char *prend_filename;
@@ -59,6 +60,7 @@ static void print_help(FILE *file){
         "  -h | --help      Print this message and exit\n"
         "  -F               Fullscreen\n"
         "  -FD              Fullscreen Desktop\n"
+        "  -q               Quiet mode (less output to stderr)\n"
         "  -f  FILENAME     Load prend data (default: " DEFAULT_PREND_FILENAME ")\n"
         "  -if FILENAME     Where to save screenshot (default: " DEFAULT_IMAGE_FILENAME ")\n"
         "  -n  NAME         Load rgraph\n"
@@ -88,6 +90,8 @@ static int parse_options(options_t *opts,
             opts->window_flags |= SDL_WINDOW_FULLSCREEN;
         }else if(!strcmp(arg, "-FD")){
             opts->window_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+        }else if(!strcmp(arg, "-q")){
+            opts->quiet = true;
         }else if(!strcmp(arg, "-f")){
             arg_i++;
             if(arg_i >= n_args){
@@ -210,7 +214,7 @@ static int _render(minieditor_t *editor, SDL_Renderer *renderer){
 
 static int _save_image(minieditor_t *editor, options_t *opts){
     const char *filename = opts->image_filename;
-    fprintf(stderr, "Saving image to: %s\n", filename);
+    if(!opts->quiet)fprintf(stderr, "Saving image to: %s\n", filename);
     RET_IF_SDL_NZ(SDL_SaveBMP(editor->surface, filename))
     return 0;
 }
