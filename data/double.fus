@@ -84,3 +84,5 @@ mappers:
             : "dia"  -> "triple_dia"
 
     "quadruple": solid map ("double") ("double")
+
+    "octuple": solid map ("double") ("quadruple")
