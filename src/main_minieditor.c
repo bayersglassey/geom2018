@@ -12,6 +12,9 @@
 
 #define DEFAULT_PREND_FILENAME "data/test.fus"
 #define DEFAULT_IMAGE_FILENAME "screen.bmp"
+#define DEFAULT_PALETTE_FILENAME "data/pal1.fus"
+#define DEFAULT_FONT_FILENAME "data/font.fus"
+#define DEFAULT_FONTS_FILENAME "data/fonts.fus"
 
 #define DEFAULT_SCW 1024
 #define DEFAULT_SCH 768
@@ -27,6 +30,9 @@ typedef struct options {
     const char *prend_filename;
     const char *rgraph_name;
     const char *image_filename;
+    const char *palette_filename;
+    const char *font_filename;
+    const char *fonts_filename;
     int zoom;
     int frame_i;
     rot_t rot;
@@ -44,6 +50,9 @@ void options_init(options_t *opts){
     opts->gui_mode = true;
     opts->window_flags = SDL_WINDOW_SHOWN;
     opts->prend_filename = DEFAULT_PREND_FILENAME;
+    opts->palette_filename = DEFAULT_PALETTE_FILENAME;
+    opts->font_filename = DEFAULT_FONT_FILENAME;
+    opts->fonts_filename = DEFAULT_FONTS_FILENAME;
     opts->image_filename = DEFAULT_IMAGE_FILENAME;
     opts->zoom = 1;
     opts->show_editor_controls = true;
@@ -71,6 +80,9 @@ static void print_help(FILE *file){
         "  --delay TICKS    Set delay goal (default: %i)\n"
         "  -s SCW SCH       Set screen width and height (default: %i %i)\n"
         "  -p X0 Y0         Set screen position\n"
+        "  --pal   FILENAME Load palette (default: " DEFAULT_PALETTE_FILENAME ")\n"
+        "  --font  FILENAME Load font (default: " DEFAULT_FONT_FILENAME ")\n"
+        "  --fonts FILENAME Load fonts (default: " DEFAULT_FONTS_FILENAME ")\n"
         "  --nocontrols     Don't show controls initially\n"
         "  --nogui          Run in pure command mode, save screenshot (see -if)\n"
     , MINIEDITOR_MAX_ZOOM, DEFAULT_DELAY_GOAL, DEFAULT_SCW, DEFAULT_SCH);
@@ -157,6 +169,24 @@ static int parse_options(options_t *opts,
                 return 2;}
             opts->x0 = atoi(args[arg_i - 1]);
             opts->y0 = atoi(args[arg_i]);
+        }else if(!strcmp(arg, "--pal")){
+            arg_i++;
+            if(arg_i >= n_args){
+                fprintf(stderr, "Missing filename after %s\n", arg);
+                return 2;}
+            opts->palette_filename = args[arg_i];
+        }else if(!strcmp(arg, "--font")){
+            arg_i++;
+            if(arg_i >= n_args){
+                fprintf(stderr, "Missing filename after %s\n", arg);
+                return 2;}
+            opts->font_filename = args[arg_i];
+        }else if(!strcmp(arg, "--fonts")){
+            arg_i++;
+            if(arg_i >= n_args){
+                fprintf(stderr, "Missing filename after %s\n", arg);
+                return 2;}
+            opts->fonts_filename = args[arg_i];
         }else if(!strcmp(arg, "--nocontrols")){
             opts->show_editor_controls = false;
         }else if(!strcmp(arg, "--nogui")){
@@ -330,11 +360,11 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
     if(surface == NULL)return 1;
 
     palette_t _palette, *palette = &_palette;
-    err = palette_load(palette, "data/pal1.fus", NULL);
+    err = palette_load(palette, opts->palette_filename, NULL);
     if(err)return err;
 
     font_t _font, *font=&_font;
-    err = font_load(font, strdup("data/font.fus"), NULL);
+    err = font_load(font, strdup(opts->font_filename), NULL);
     if(err)return err;
 
     prismelrenderer_t _prend, *prend = &_prend;
@@ -352,7 +382,7 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
     err = prismelrenderer_init(font_prend, &vec4);
     if(err)return err;
 
-    err = prismelrenderer_load(font_prend, "data/fonts.fus", NULL);
+    err = prismelrenderer_load(font_prend, opts->fonts_filename, NULL);
     if(err)return err;
 
     const char *geomfont_name = "geomfont1";
