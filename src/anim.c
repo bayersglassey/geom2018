@@ -11,6 +11,7 @@
 #include "prismelrenderer.h"
 #include "lexer.h"
 #include "lexer_macros.h"
+#include "var_utils.h"
 
 
 static void _print_tabs(FILE *file, int depth){
@@ -18,15 +19,6 @@ static void _print_tabs(FILE *file, int depth){
 }
 
 
-void collmsg_handler_cleanup(collmsg_handler_t *handler){
-    free(handler->msg);
-    ARRAY_FREE_PTR(state_effect_t*, handler->effects, state_effect_cleanup)
-}
-
-void collmsg_handler_init(collmsg_handler_t *handler, char *msg){
-    handler->msg = msg;
-    ARRAY_INIT(handler->effects)
-}
 
 static int _parse_effect(fus_lexer_t *lexer,
     prismelrenderer_t *prend, vecspace_t *space,
@@ -50,6 +42,69 @@ static int _parse_collmsg_handler(fus_lexer_t *lexer,
     }
     NEXT
 
+    return 0;
+}
+
+
+/******************
+* COLLMSG_HANDLER *
+******************/
+
+void collmsg_handler_cleanup(collmsg_handler_t *handler){
+    free(handler->msg);
+    ARRAY_FREE_PTR(state_effect_t*, handler->effects, state_effect_cleanup)
+}
+
+void collmsg_handler_init(collmsg_handler_t *handler, char *msg){
+    handler->msg = msg;
+    ARRAY_INIT(handler->effects)
+}
+
+
+/**********
+* VALEXPR *
+**********/
+
+void valexpr_cleanup(valexpr_t *expr){
+    switch(expr->type){
+        case VALEXPR_TYPE_LITERAL:
+            val_cleanup(&expr->u.val);
+            break;
+        case VALEXPR_TYPE_MAPVAR:
+        case VALEXPR_TYPE_MYVAR:
+            valexpr_cleanup(expr->u.key_expr);
+            free(expr->u.key_expr);
+            break;
+        default: break;
+    }
+}
+
+int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer){
+    INIT
+    int type =
+        GOT("mapvar")? VALEXPR_TYPE_MAPVAR:
+        GOT("myvar")? VALEXPR_TYPE_MYVAR:
+        VALEXPR_TYPE_LITERAL;
+
+    if(type == VALEXPR_TYPE_MAPVAR || type == VALEXPR_TYPE_MYVAR){
+        NEXT
+        expr->type = type;
+        expr->u.key_expr = NULL;
+        GET("(")
+
+        valexpr_t *key_expr = calloc(1, sizeof(*key_expr));
+        if(!key_expr)return 1;
+
+        err = valexpr_parse(key_expr, lexer);
+        if(err)return err;
+
+        expr->u.key_expr = key_expr;
+        GET(")")
+    }else{
+        expr->type = type;
+        err = val_parse(&expr->u.val, lexer);
+        if(err)return err;
+    }
     return 0;
 }
 
@@ -403,6 +458,18 @@ static int _parse_effect(fus_lexer_t *lexer,
         free(name);
 
         GET(")")
+    }else if(GOT("set")){
+        NEXT
+
+        effect->type = state_effect_type_set;
+
+        err = valexpr_parse(&effect->u.set.var_expr, lexer);
+        if(err)return err;
+
+        GET("(")
+        err = valexpr_parse(&effect->u.set.val_expr, lexer);
+        if(err)return err;
+        GET(")")
     }else if(GOT("play")){
         NEXT
         GET("(")
@@ -641,6 +708,7 @@ const char state_effect_type_inc[] = "inc";
 const char state_effect_type_continue[] = "continue";
 const char state_effect_type_confused[] = "confused";
 const char state_effect_type_key[] = "key";
+const char state_effect_type_set[] = "set";
 const char *state_effect_types[] = {
     state_effect_type_print,
     state_effect_type_print_var,
@@ -658,6 +726,7 @@ const char *state_effect_types[] = {
     state_effect_type_continue,
     state_effect_type_confused,
     state_effect_type_key,
+    state_effect_type_set,
     NULL
 };
 
@@ -702,6 +771,10 @@ void state_dump(state_t *state, FILE *file, int depth){
 }
 
 
+/*******
+* COND *
+*******/
+
 void state_cond_cleanup(state_cond_t *cond){
     if(cond->type == state_cond_type_coll){
         hexcollmap_t *collmap = cond->u.coll.collmap;
@@ -735,6 +808,11 @@ void state_cond_dump(state_cond_t *cond, FILE *file, int depth){
     }
 }
 
+
+/*********
+* EFFECT *
+*********/
+
 void state_effect_cleanup(state_effect_t *effect){
     if(effect->type == state_effect_type_print){
         free(effect->u.msg);
@@ -752,6 +830,8 @@ void state_effect_cleanup(state_effect_t *effect){
         free(effect->u.spawn.palmapper_name);
     }else if(effect->type == state_effect_type_play){
         free(effect->u.play_filename);
+    }else if(effect->type == state_effect_type_set){
+        valexpr_cleanup(&effect->u.set.var_expr);
     }
 }
 
@@ -759,6 +839,11 @@ void state_effect_dump(state_effect_t *effect, FILE *file, int depth){
     _print_tabs(file, depth);
     fprintf(file, "%s\n", effect->type);
 }
+
+
+/*******
+* RULE *
+*******/
 
 void state_rule_cleanup(state_rule_t *rule){
     ARRAY_FREE_PTR(state_cond_t*, rule->conds, state_cond_cleanup)

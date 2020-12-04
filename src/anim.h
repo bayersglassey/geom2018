@@ -55,6 +55,17 @@ enum effect_boolean {
     EFFECT_BOOLEAN_TOGGLE
 };
 
+enum valexpr_type {
+    VALEXPR_TYPE_LITERAL,
+    VALEXPR_TYPE_MAPVAR,
+    VALEXPR_TYPE_MYVAR,
+    VALEXPR_TYPES
+};
+
+
+/******************
+* COLLMSG_HANDLER *
+******************/
 
 typedef struct collmsg_handler {
     /* When colliding with another body who is "sending" the given collmsg,
@@ -72,6 +83,27 @@ int collmsg_handler_apply(collmsg_handler_t *handler,
     bool *continues_ptr);
 
 
+/**********
+* VALEXPR *
+**********/
+
+typedef struct valexpr {
+    /* An expression specifying a val_t */
+    int type; /* enum valexpr_type */
+    union {
+        val_t val;
+        struct valexpr *key_expr;
+    } u;
+} valexpr_t;
+
+void valexpr_cleanup(valexpr_t *expr);
+int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer);
+
+
+/********
+* STATE *
+********/
+
 typedef struct state {
     struct stateset *stateset;
     char *name;
@@ -84,6 +116,11 @@ typedef struct state {
     ARRAY_DECL(struct state_rule*, rules)
 } state_t;
 
+
+/***********
+* STATESET *
+***********/
+
 typedef struct stateset {
     char *filename;
     ARRAY_DECL(char*, collmsgs)
@@ -93,6 +130,11 @@ typedef struct stateset {
     const char *default_state_name; /* stateset->states[i]->name */
 } stateset_t;
 
+
+/*******
+* RULE *
+*******/
+
 typedef struct state_rule {
     struct state *state;
     ARRAY_DECL(struct state_cond*, conds)
@@ -100,6 +142,9 @@ typedef struct state_rule {
 } state_rule_t;
 
 
+/*******
+* COND *
+*******/
 
 enum state_cond_expr_op {
     STATE_COND_EXPR_OP_EQ,
@@ -154,6 +199,9 @@ extern const char state_cond_type_expr[];
 extern const char *state_cond_types[];
 
 
+/*********
+* EFFECT *
+*********/
 
 typedef struct state_effect_goto {
     char *name;
@@ -191,6 +239,10 @@ typedef struct state_effect {
                 */
             char c; /* See: ANIM_KEY_CS */
         } key;
+        struct {
+            valexpr_t var_expr;
+            valexpr_t val_expr;
+        } set;
     } u;
 } state_effect_t;
 
@@ -210,10 +262,13 @@ extern const char state_effect_type_inc[];
 extern const char state_effect_type_continue[];
 extern const char state_effect_type_confused[];
 extern const char state_effect_type_key[];
+extern const char state_effect_type_set[];
 extern const char *state_effect_types[];
 
 
-
+/*************
+* PROTOTYPES *
+*************/
 
 void stateset_cleanup(stateset_t *stateset);
 int stateset_init(stateset_t *stateset, char *filename);

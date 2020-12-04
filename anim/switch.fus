@@ -8,7 +8,7 @@ switch_off:
         ;;     *
         ;;  (.)- .
     on "collect":
-        print_vars
+        set mapvar(myvar("key")): myvar("onval")
         goto: switching_on
         delay: $GET_INT DELAY
 
@@ -28,6 +28,7 @@ switch_on:
         ;;     *
         ;;  (.)- .
     on "collect":
+        set mapvar(myvar("key")): myvar("offval")
         goto: switching_off
         delay: $GET_INT DELAY
 

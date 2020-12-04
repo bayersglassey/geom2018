@@ -13,7 +13,8 @@ parts:
     "s": recording "data/maps/demo/recs/switch.fus"
         vars:
             key: "platform_visible"
-            val: T
+            onval: T
+            offval: F
 
 collmap:
     ;;
