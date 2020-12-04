@@ -85,6 +85,35 @@ void val_set_const_str(val_t *val, const char *cs){
     val->u.cs = cs;
 }
 
+int val_copy(val_t *val1, val_t *val2){
+    int err;
+    switch(val2->type){
+        case VAL_TYPE_NULL:
+            val_set_null(val1);
+            break;
+        case VAL_TYPE_BOOL:
+            val_set_bool(val1, val2->u.b);
+            break;
+        case VAL_TYPE_INT:
+            val_set_int(val1, val2->u.i);
+            break;
+        case VAL_TYPE_STR: {
+            char *s2 = strdup(val2->u.s);
+            if(!s2)return 1;
+            val_set_str(val1, s2);
+            break;
+        }
+        case VAL_TYPE_CONST_STR:
+            val_set_const_str(val1, val2->u.cs);
+            break;
+        default:
+            fprintf(stderr, "Unrecognized var type: %i\n", val2->type);
+            return 2;
+    }
+    return 0;
+}
+
+
 
 /********
  * VARS *
@@ -207,35 +236,13 @@ int vars_copy(vars_t *vars1, vars_t *vars2){
     /* Copies variables from vars2 to vars1 */
     int err;
     for(int i = 0; i < vars2->vars_len; i++){
-        var_t *var = vars2->vars[i];
-        switch(var->value.type){
-            case VAL_TYPE_NULL:
-                err = vars_set_null(vars1, var->key);
-                if(err)return err;
-                break;
-            case VAL_TYPE_BOOL:
-                err = vars_set_bool(vars1, var->key, var->value.u.b);
-                if(err)return err;
-                break;
-            case VAL_TYPE_INT:
-                err = vars_set_int(vars1, var->key, var->value.u.i);
-                if(err)return err;
-                break;
-            case VAL_TYPE_STR: {
-                char *s2 = strdup(var->value.u.s);
-                if(!s2)return 1;
-                err = vars_set_str(vars1, var->key, s2);
-                if(err)return err;
-                break;
-            }
-            case VAL_TYPE_CONST_STR:
-                err = vars_set_const_str(vars1, var->key, var->value.u.cs);
-                if(err)return err;
-                break;
-            default:
-                fprintf(stderr, "Unrecognized var type: %i\n", var->value.type);
-                return 2;
-        }
+        var_t *var2 = vars2->vars[i];
+
+        var_t *var1 = vars_get_or_add(vars1, var2->key);
+        if(!var1)return 1;
+
+        err = val_copy(&var1->value, &var2->value);
+        if(err)return err;
     }
     return 0;
 }

@@ -78,6 +78,9 @@ void val_set_int(val_t *val, int i);
 void val_set_str(val_t *val, char *s);
 void val_set_const_str(val_t *val, const char *cs);
 
+int val_copy(val_t *val1, val_t *val2);
+
+
 void vars_cleanup(vars_t *vars);
 void vars_init(vars_t *vars);
 void vars_dump(vars_t *vars);
