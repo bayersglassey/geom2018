@@ -316,6 +316,40 @@ int state_effect_apply(state_effect_t *effect,
         if(keyup){
             body_keyup(body, key_i);
         }
+    }else if(effect->type == state_effect_type_set){
+        vars_t *myvars;
+        vars_t *mapvars;
+        if(actor){
+            myvars = &actor->vars;
+            body = actor->body;
+            mapvars = !actor->body? NULL: !actor->body->map? NULL:
+                &actor->body->map->vars;
+        }else{
+            CHECK_BODY
+            myvars = &body->vars;
+            mapvars = !body->map? NULL: &body->map->vars;
+        }
+
+        val_t *var_val;
+        err = valexpr_eval(&effect->u.set.var_expr,
+            mapvars, myvars, &var_val, true);
+        if(err)return err;
+        /* When we pass set=true to valexpr_eval, it guarantees that it
+        will find (or create, if necessary) a val, so we don't need to
+        check whether var_val is NULL. */
+
+        val_t *val_val;
+        err = valexpr_eval(&effect->u.set.val_expr,
+            mapvars, myvars, &val_val, false);
+        if(err)return err;
+        if(val_val == NULL){
+            RULE_PERROR()
+            fprintf(stderr, "Couldn't get value for expression\n");
+            return 2;
+        }
+
+        err = val_copy(var_val, val_val);
+        if(err)return err;
     }else{
         fprintf(stderr, "Unrecognized effect: %s\n",
             effect->type);
