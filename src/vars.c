@@ -60,6 +60,20 @@ void val_unset(val_t *val){
     if(val->type == VAL_TYPE_STR)free(val->u.s);
 }
 
+bool val_get_bool(val_t *val){
+    if(val->type != VAL_TYPE_BOOL)return false;
+    return val->u.b;
+}
+int val_get_int(val_t *val){
+    if(val->type != VAL_TYPE_INT)return 0;
+    return val->u.i;
+}
+const char *val_get_str(val_t *val){
+    if(val->type == VAL_TYPE_STR)return val->u.s;
+    if(val->type == VAL_TYPE_CONST_STR)return val->u.cs;
+    return NULL;
+}
+
 void val_set_null(val_t *val){
     val_unset(val);
     val->type = VAL_TYPE_NULL;
@@ -185,20 +199,18 @@ var_t *vars_get_or_add(vars_t *vars, const char *key){
 
 bool vars_get_bool(vars_t *vars, const char *key){
     var_t *var = vars_get(vars, key);
-    if(var == NULL || var->value.type != VAL_TYPE_BOOL)return false;
-    return var->value.u.b;
+    if(var == NULL)return false;
+    return val_get_bool(&var->value);
 }
 int vars_get_int(vars_t *vars, const char *key){
     var_t *var = vars_get(vars, key);
-    if(var == NULL || var->value.type != VAL_TYPE_INT)return 0;
-    return var->value.u.i;
+    if(var == NULL)return 0;
+    return val_get_int(&var->value);
 }
 const char *vars_get_str(vars_t *vars, const char *key){
     var_t *var = vars_get(vars, key);
     if(var == NULL)return NULL;
-    if(var->value.type == VAL_TYPE_STR)return var->value.u.s;
-    if(var->value.type == VAL_TYPE_CONST_STR)return var->value.u.cs;
-    return NULL;
+    return val_get_str(&var->value);
 }
 
 int vars_set_null(vars_t *vars, const char *key){

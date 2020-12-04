@@ -72,6 +72,9 @@ void val_init(val_t *val);
 void val_fprintf(val_t *val, FILE *file);
 
 void val_unset(val_t *val);
+bool val_get_bool(val_t *val);
+int val_get_int(val_t *val);
+const char *val_get_str(val_t *val);
 void val_set_null(val_t *val);
 void val_set_bool(val_t *val, bool b);
 void val_set_int(val_t *val, int i);
