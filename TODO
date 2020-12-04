@@ -600,6 +600,7 @@ Nov 21, 2020:
             * START WITH THIS, PROBABLY QUICK AND EASY
         * More interesting effects: editing a submap's tiles
         * Maybe coins can finally have a purpose?.. just as "keys" to open doors?.. but laaame
+            * Still though, makes sense: "collect all coins in this room to progress" :P
 
         * Example use for switches: in trees/bubbles3-1.fus with the big_roller, would be cool
         to be able to flip a switch toggling existence of a "bridge" or "door" to some other

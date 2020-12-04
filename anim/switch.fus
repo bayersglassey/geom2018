@@ -1,4 +1,9 @@
 
+# Expected vars at runtime:
+# * key (str)
+# * onval (any)
+# * offval (any)
+
 $SET_INT DELAY 2
 
 switch_off:
@@ -7,7 +12,7 @@ switch_off:
         ;;     +
         ;;     *
         ;;  (.)- .
-    on "collect":
+    on "spit":
         set mapvar(myvar("key")): myvar("onval")
         goto: switching_on
         delay: $GET_INT DELAY
@@ -27,7 +32,7 @@ switch_on:
         ;;     .
         ;;     *
         ;;  (.)- .
-    on "collect":
+    on "spit":
         set mapvar(myvar("key")): myvar("offval")
         goto: switching_off
         delay: $GET_INT DELAY
