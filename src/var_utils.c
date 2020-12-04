@@ -12,17 +12,48 @@ static void _print_tabs(FILE *file, int indent){
     for(int i = 0; i < indent; i++)putc(' ', file);
 }
 
+
+
+
+int val_parse(val_t *val, fus_lexer_t *lexer){
+    INIT
+    if(GOT_INT){
+        int i;
+        GET_INT(i)
+        val_set_int(val, i);
+    }else if(GOT_STR){
+        char *s;
+        GET_STR(s)
+        val_set_str(val, s);
+    }else if(GOT("null")){
+        NEXT
+        val_set_null(val);
+    }else if(GOT("T")){
+        NEXT
+        val_set_bool(val, true);
+    }else if(GOT("F")){
+        NEXT
+        val_set_bool(val, false);
+    }else{
+        return UNEXPECTED("an int or str, or one of: null T F");
+    }
+    return 0;
+}
+
+
+
+
 void vars_write(vars_t *vars, FILE *file, int indent){
     for(int i = 0; i < vars->vars_len; i++){
         var_t *var = vars->vars[i];
         _print_tabs(file, indent);
         fprintf(file, "%s: ", var->key);
         switch(var->value.type){
-            case VAR_TYPE_NULL: fputs("null", file); break;
-            case VAR_TYPE_BOOL: putc(var->value.u.b? 'T': 'F', file); break;
-            case VAR_TYPE_INT: fprintf(file, "%i", var->value.u.i); break;
-            case VAR_TYPE_STR: fus_write_str(file, var->value.u.s); break;
-            case VAR_TYPE_CONST_STR: fus_write_str(file, var->value.u.cs); break;
+            case VAL_TYPE_NULL: fputs("null", file); break;
+            case VAL_TYPE_BOOL: putc(var->value.u.b? 'T': 'F', file); break;
+            case VAL_TYPE_INT: fprintf(file, "%i", var->value.u.i); break;
+            case VAL_TYPE_STR: fus_write_str(file, var->value.u.s); break;
+            case VAL_TYPE_CONST_STR: fus_write_str(file, var->value.u.cs); break;
             default: fputs("???", file); break;
         }
         fputc('\n', file);
@@ -42,26 +73,10 @@ int vars_parse(vars_t *vars, fus_lexer_t *lexer){
         char *name;
         GET_NAME(name)
         GET("(")
-        if(GOT_INT){
-            int i;
-            GET_INT(i)
-            DO(vars_set_int(vars, name, i))
-        }else if(GOT_STR){
-            char *s;
-            GET_STR(s)
-            DO(vars_set_str(vars, name, s))
-        }else if(GOT("null")){
-            NEXT
-            DO(vars_set_null(vars, name))
-        }else if(GOT("T")){
-            NEXT
-            DO(vars_set_bool(vars, name, true))
-        }else if(GOT("F")){
-            NEXT
-            DO(vars_set_bool(vars, name, false))
-        }else{
-            return UNEXPECTED("an int or str, or one of: null T F");
-        }
+        var_t *var = vars_get_or_add(vars, name);
+        if(var == NULL)return 2;
+        err = val_parse(&var->value, lexer);
+        if(err)return err;
         GET(")")
 
         free(name);

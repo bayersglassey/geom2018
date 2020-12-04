@@ -9,12 +9,12 @@
 
 
 enum var_type {
-    VAR_TYPE_NULL,
-    VAR_TYPE_BOOL,
-    VAR_TYPE_INT,
-    VAR_TYPE_STR,
-    VAR_TYPE_CONST_STR,
-    VAR_TYPES
+    VAL_TYPE_NULL,
+    VAL_TYPE_BOOL,
+    VAL_TYPE_INT,
+    VAL_TYPE_STR,
+    VAL_TYPE_CONST_STR,
+    VAL_TYPES
 };
 
 typedef struct val {
@@ -66,14 +66,17 @@ typedef struct vars {
 
 void var_cleanup(var_t *var);
 void var_init(var_t *var, char *key);
-void var_fprintf(var_t *var, FILE *file);
 
-void var_unset(var_t *var);
-void var_set_null(var_t *var);
-void var_set_bool(var_t *var, bool b);
-void var_set_int(var_t *var, int i);
-void var_set_str(var_t *var, char *s);
-void var_set_const_str(var_t *var, const char *cs);
+void val_cleanup(val_t *val);
+void val_init(val_t *val);
+void val_fprintf(val_t *val, FILE *file);
+
+void val_unset(val_t *val);
+void val_set_null(val_t *val);
+void val_set_bool(val_t *val, bool b);
+void val_set_int(val_t *val, int i);
+void val_set_str(val_t *val, char *s);
+void val_set_const_str(val_t *val, const char *cs);
 
 void vars_cleanup(vars_t *vars);
 void vars_init(vars_t *vars);

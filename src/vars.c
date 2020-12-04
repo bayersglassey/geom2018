@@ -15,61 +15,74 @@
 
 void var_cleanup(var_t *var){
     free(var->key);
-    var_unset(var);
+    val_cleanup(&var->value);
 }
 
 void var_init(var_t *var, char *key){
     var->key = key;
-    var->value.type = 'n';
+    val_init(&var->value);
 }
 
-void var_fprintf(var_t *var, FILE *file){
-    switch(var->value.type){
-        case VAR_TYPE_NULL: fputs("null", file); break;
-        case VAR_TYPE_BOOL: putc(var->value.u.b? 'T': 'F', file); break;
-        case VAR_TYPE_INT: fprintf(file, "%i", var->value.u.i); break;
-        case VAR_TYPE_STR: fus_write_str(file, var->value.u.s); break;
-        case VAR_TYPE_CONST_STR: fus_write_str(file, var->value.u.cs); break;
+
+/*******
+ * VAL *
+ *******/
+
+void val_cleanup(val_t *val){
+    val_unset(val);
+}
+
+void val_init(val_t *val){
+    val->type = 'n';
+}
+
+void val_fprintf(val_t *val, FILE *file){
+    switch(val->type){
+        case VAL_TYPE_NULL: fputs("null", file); break;
+        case VAL_TYPE_BOOL: putc(val->u.b? 'T': 'F', file); break;
+        case VAL_TYPE_INT: fprintf(file, "%i", val->u.i); break;
+        case VAL_TYPE_STR: fus_write_str(file, val->u.s); break;
+        case VAL_TYPE_CONST_STR: fus_write_str(file, val->u.cs); break;
         default: fputs("???", file); break;
     }
 }
 
-const char *var_type_name(int type){
-    static const char *names[VAR_TYPES] = {
+const char *val_type_name(int type){
+    static const char *names[VAL_TYPES] = {
         "null", "bool", "int", "str", "str"
     };
-    if(type < 0 || type >= VAR_TYPES)return "unknown";
+    if(type < 0 || type >= VAL_TYPES)return "unknown";
     return names[type];
 }
 
 
-void var_unset(var_t *var){
-    if(var->value.type == VAR_TYPE_STR)free(var->value.u.s);
+void val_unset(val_t *val){
+    if(val->type == VAL_TYPE_STR)free(val->u.s);
 }
 
-void var_set_null(var_t *var){
-    var_unset(var);
-    var->value.type = VAR_TYPE_NULL;
+void val_set_null(val_t *val){
+    val_unset(val);
+    val->type = VAL_TYPE_NULL;
 }
-void var_set_bool(var_t *var, bool b){
-    var_unset(var);
-    var->value.type = VAR_TYPE_BOOL;
-    var->value.u.b = b;
+void val_set_bool(val_t *val, bool b){
+    val_unset(val);
+    val->type = VAL_TYPE_BOOL;
+    val->u.b = b;
 }
-void var_set_int(var_t *var, int i){
-    var_unset(var);
-    var->value.type = VAR_TYPE_INT;
-    var->value.u.i = i;
+void val_set_int(val_t *val, int i){
+    val_unset(val);
+    val->type = VAL_TYPE_INT;
+    val->u.i = i;
 }
-void var_set_str(var_t *var, char *s){
-    var_unset(var);
-    var->value.type = VAR_TYPE_STR;
-    var->value.u.s = s;
+void val_set_str(val_t *val, char *s){
+    val_unset(val);
+    val->type = VAL_TYPE_STR;
+    val->u.s = s;
 }
-void var_set_const_str(var_t *var, const char *cs){
-    var_unset(var);
-    var->value.type = VAR_TYPE_CONST_STR;
-    var->value.u.cs = cs;
+void val_set_const_str(val_t *val, const char *cs){
+    val_unset(val);
+    val->type = VAL_TYPE_CONST_STR;
+    val->u.cs = cs;
 }
 
 
@@ -87,8 +100,8 @@ void vars_init(vars_t *vars){
 
 static void _vars_dumpvar(vars_t *vars, var_t *var){
     fprintf(stderr, "%s (%s): ", var->key,
-        var_type_name(var->value.type));
-    var_fprintf(var, stderr);
+        val_type_name(var->value.type));
+    val_fprintf(&var->value, stderr);
     putc('\n', stderr);
 }
 
@@ -143,50 +156,50 @@ var_t *vars_get_or_add(vars_t *vars, const char *key){
 
 bool vars_get_bool(vars_t *vars, const char *key){
     var_t *var = vars_get(vars, key);
-    if(var == NULL || var->value.type != VAR_TYPE_BOOL)return false;
+    if(var == NULL || var->value.type != VAL_TYPE_BOOL)return false;
     return var->value.u.b;
 }
 int vars_get_int(vars_t *vars, const char *key){
     var_t *var = vars_get(vars, key);
-    if(var == NULL || var->value.type != VAR_TYPE_INT)return 0;
+    if(var == NULL || var->value.type != VAL_TYPE_INT)return 0;
     return var->value.u.i;
 }
 const char *vars_get_str(vars_t *vars, const char *key){
     var_t *var = vars_get(vars, key);
     if(var == NULL)return NULL;
-    if(var->value.type == VAR_TYPE_STR)return var->value.u.s;
-    if(var->value.type == VAR_TYPE_CONST_STR)return var->value.u.cs;
+    if(var->value.type == VAL_TYPE_STR)return var->value.u.s;
+    if(var->value.type == VAL_TYPE_CONST_STR)return var->value.u.cs;
     return NULL;
 }
 
 int vars_set_null(vars_t *vars, const char *key){
     var_t *var = vars_get_or_add(vars, key);
     if(var == NULL)return 1;
-    var_set_null(var);
+    val_set_null(&var->value);
     return 0;
 }
 int vars_set_bool(vars_t *vars, const char *key, bool b){
     var_t *var = vars_get_or_add(vars, key);
     if(var == NULL)return 1;
-    var_set_bool(var, b);
+    val_set_bool(&var->value, b);
     return 0;
 }
 int vars_set_int(vars_t *vars, const char *key, int i){
     var_t *var = vars_get_or_add(vars, key);
     if(var == NULL)return 1;
-    var_set_int(var, i);
+    val_set_int(&var->value, i);
     return 0;
 }
 int vars_set_str(vars_t *vars, const char *key, char *s){
     var_t *var = vars_get_or_add(vars, key);
     if(var == NULL)return 1;
-    var_set_str(var, s);
+    val_set_str(&var->value, s);
     return 0;
 }
 int vars_set_const_str(vars_t *vars, const char *key, const char *cs){
     var_t *var = vars_get_or_add(vars, key);
     if(var == NULL)return 1;
-    var_set_const_str(var, cs);
+    val_set_const_str(&var->value, cs);
     return 0;
 }
 
@@ -196,26 +209,26 @@ int vars_copy(vars_t *vars1, vars_t *vars2){
     for(int i = 0; i < vars2->vars_len; i++){
         var_t *var = vars2->vars[i];
         switch(var->value.type){
-            case VAR_TYPE_NULL:
+            case VAL_TYPE_NULL:
                 err = vars_set_null(vars1, var->key);
                 if(err)return err;
                 break;
-            case VAR_TYPE_BOOL:
+            case VAL_TYPE_BOOL:
                 err = vars_set_bool(vars1, var->key, var->value.u.b);
                 if(err)return err;
                 break;
-            case VAR_TYPE_INT:
+            case VAL_TYPE_INT:
                 err = vars_set_int(vars1, var->key, var->value.u.i);
                 if(err)return err;
                 break;
-            case VAR_TYPE_STR: {
+            case VAL_TYPE_STR: {
                 char *s2 = strdup(var->value.u.s);
                 if(!s2)return 1;
                 err = vars_set_str(vars1, var->key, s2);
                 if(err)return err;
                 break;
             }
-            case VAR_TYPE_CONST_STR:
+            case VAL_TYPE_CONST_STR:
                 err = vars_set_const_str(vars1, var->key, var->value.u.cs);
                 if(err)return err;
                 break;

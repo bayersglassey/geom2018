@@ -79,12 +79,12 @@ int testrunner(){
 
         /* Maybe todo: add vars_is_{int,str,bool,null}?..
         Or vars_typeof() and it can be any of:
-            VAR_TYPE_{INT,STR,BOOL,NULL,MISSING}
+            VAL_TYPE_{INT,STR,BOOL,NULL,MISSING}
         ..?
         */
         var_t *var = vars_get(vars, "nothing");
         ASSERT(var != NULL)
-        ASSERT(var->value.type == VAR_TYPE_NULL)
+        ASSERT(var->value.type == VAL_TYPE_NULL)
 
         vars_cleanup(vars);
     }

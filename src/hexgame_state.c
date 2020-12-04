@@ -229,7 +229,7 @@ int state_effect_apply(state_effect_t *effect,
             var_t *var = vars_get(vars, effect->u.var_name);
             if(var){
                 fprintf(stderr, " says: ");
-                var_fprintf(var, stderr);
+                val_fprintf(&var->value, stderr);
                 fprintf(stderr, "\n");
             }else{
                 // :P
