@@ -686,7 +686,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
             if(err)return err;
             submap_visible_not = true;
         }
-        err = fus_lexer_get_name(lexer, &submap_visible_var_name);
+        err = fus_lexer_get_str(lexer, &submap_visible_var_name);
         if(err)return err;
         err = fus_lexer_get(lexer, ")");
         if(err)return err;

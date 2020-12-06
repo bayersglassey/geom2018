@@ -6,9 +6,9 @@ default_palette: "data/pal1.fus"
 default_tileset: "data/tileset1.fus"
 
 vars:
-    x: -99
-    dummy: null
-    platform_visible: F
+    "x": -99
+    "dummy": null
+    "platform_visible": F
 
 submaps:
     :
@@ -34,7 +34,7 @@ submaps:
                         turn: n
             :
                 file: "data/maps/title/platform.fus"
-                visible: platform_visible
+                visible: "platform_visible"
                 pos: (-5 5)
             :
                 file: "data/maps/title/secret.fus"

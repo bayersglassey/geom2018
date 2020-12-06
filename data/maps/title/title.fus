@@ -12,9 +12,9 @@ parts:
 
     "s": recording "data/recs/switch.fus"
         vars:
-            key: "platform_visible"
-            onval: T
-            offval: F
+            "key": "platform_visible"
+            "onval": T
+            "offval": F
 
 collmap:
     ;;

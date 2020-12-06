@@ -47,7 +47,8 @@ void vars_write(vars_t *vars, FILE *file, int indent){
     for(int i = 0; i < vars->vars_len; i++){
         var_t *var = vars->vars[i];
         _print_tabs(file, indent);
-        fprintf(file, "%s: ", var->key);
+        fus_write_str(file, var->key);
+        fputs(": ", file);
         switch(var->value.type){
             case VAL_TYPE_NULL: fputs("null", file); break;
             case VAL_TYPE_BOOL: putc(var->value.u.b? 'T': 'F', file); break;
@@ -71,7 +72,7 @@ int vars_parse(vars_t *vars, fus_lexer_t *lexer){
         if(DONE || GOT(")"))break;
 
         char *name;
-        GET_NAME(name)
+        GET_STR(name)
         GET("(")
         var_t *var = vars_get_or_add(vars, name);
         if(var == NULL)return 2;
