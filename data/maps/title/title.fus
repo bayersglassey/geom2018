@@ -10,7 +10,7 @@ parts:
     "c": recording "data/maps/demo/recs/coin.fus"
     "C": recording "data/maps/demo/recs/coin_crouch.fus"
 
-    "s": recording "data/maps/demo/recs/switch.fus"
+    "s": recording "data/recs/switch.fus"
         vars:
             key: "platform_visible"
             onval: T
