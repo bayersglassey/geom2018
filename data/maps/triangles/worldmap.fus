@@ -3,6 +3,9 @@ unit: 3 2 0 -1
 spawn: (0 0)
 default_palette: "data/maps/demo/pals/tunnels.fus"
 default_tileset: "data/tileset1.fus"
+vars:
+    "start_blocker": F
+    "start2_blocker": F
 
 submaps:
     :
@@ -41,10 +44,18 @@ submaps:
                     #: "data/maps/triangles/recs/bigroller000.fus" "grn" 650
                     #: "data/maps/triangles/recs/bigroller000.fus" "prp" 1110
             :
+                file: "data/maps/triangles/start_blocker.fus"
+                visible: not "start_blocker"
+                pos: (-2 10)
+            :
                 file: "data/maps/triangles/start2.fus"
                 pos: eval: (14 12)
                 camera: (16 6)
                 mapper: ("triple")
+            :
+                file: "data/maps/triangles/start2_blocker.fus"
+                visible: not "start2_blocker"
+                pos: eval: (14 12) + (10 10)
             :
                 file: "data/maps/triangles/start3.fus"
                 pos: eval: (14 12) + (22 15)
