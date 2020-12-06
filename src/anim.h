@@ -187,6 +187,7 @@ typedef struct state_cond {
         struct {
             ARRAY_DECL(struct state_cond*, conds)
         } subconds;
+        valexpr_t valexpr;
     } u;
 } state_cond_t;
 
@@ -198,6 +199,7 @@ extern const char state_cond_type_any[];
 extern const char state_cond_type_all[];
 extern const char state_cond_type_not[];
 extern const char state_cond_type_expr[];
+extern const char state_cond_type_get_bool[];
 extern const char *state_cond_types[];
 
 

@@ -20,14 +20,34 @@
 #define CHECK_BODY \
     if(body == NULL){ \
         RULE_PERROR() \
-        fprintf(stderr, "No body"); \
+        fprintf(stderr, "No body\n"); \
         return 2;}
 
 #define CHECK_ACTOR \
     if(actor == NULL){ \
         RULE_PERROR() \
-        fprintf(stderr, "No actor"); \
+        fprintf(stderr, "No actor\n"); \
         return 2;}
+
+
+static int _get_vars(body_t *body, actor_t *actor,
+    vars_t **mapvars_ptr, vars_t **myvars_ptr
+){
+    if(actor){
+        *myvars_ptr = &actor->vars;
+        body = actor->body;
+        *mapvars_ptr = !actor->body? NULL: !actor->body->map? NULL:
+            &actor->body->map->vars;
+    }else{
+        if(!body){
+            fprintf(stderr, "No body\n"); \
+            return 2;
+        }
+        *myvars_ptr = &body->vars;
+        *mapvars_ptr = !body->map? NULL: &body->map->vars;
+    }
+    return 0;
+}
 
 
 int state_cond_match(state_cond_t *cond,
@@ -59,14 +79,14 @@ int state_cond_match(state_cond_t *cond,
             kstate_i == 2? body->keyinfo.wentdown:
             NULL;
         if(kstate == NULL){
-            fprintf(stderr, "kstate out of range: %i", kstate_i);
+            fprintf(stderr, "kstate out of range: %i\n", kstate_i);
             RULE_PERROR()
             return 2;}
 
         char c = cond->u.key.c;
         int key_i = body_get_key_i(body, c);
         if(key_i == -1){
-            fprintf(stderr, "Unrecognized key char: %c", c);
+            fprintf(stderr, "Unrecognized key char: %c\n", c);
             RULE_PERROR()
             return 2;}
 
@@ -157,8 +177,32 @@ int state_cond_match(state_cond_t *cond,
                 RULE_PERROR()
                 return 2;
         }
+    }else if(cond->type == state_cond_type_get_bool){
+        vars_t *mapvars;
+        vars_t *myvars;
+        err = _get_vars(body, actor, &mapvars, &myvars);
+        if(err)return err;
+
+        val_t *val;
+        err = valexpr_eval(&cond->u.valexpr,
+            mapvars, myvars, &val, false);
+        if(err)return err;
+        if(val == NULL){
+            RULE_PERROR()
+            fprintf(stderr, "Couldn't get value for expression\n");
+            return 2;
+        }
+
+        if(val->type != VAL_TYPE_BOOL){
+            RULE_PERROR()
+            fprintf(stderr, "Expected bool value, got: %s\n",
+                val_type_name(val->type));
+            return 2;
+        }
+
+        matched = val->u.b;
     }else{
-        fprintf(stderr, "Unrecognized condition: %s",
+        fprintf(stderr, "Unrecognized condition: %s\n",
             cond->type);
         RULE_PERROR()
         return 2;
@@ -317,18 +361,10 @@ int state_effect_apply(state_effect_t *effect,
             body_keyup(body, key_i);
         }
     }else if(effect->type == state_effect_type_set){
-        vars_t *myvars;
         vars_t *mapvars;
-        if(actor){
-            myvars = &actor->vars;
-            body = actor->body;
-            mapvars = !actor->body? NULL: !actor->body->map? NULL:
-                &actor->body->map->vars;
-        }else{
-            CHECK_BODY
-            myvars = &body->vars;
-            mapvars = !body->map? NULL: &body->map->vars;
-        }
+        vars_t *myvars;
+        err = _get_vars(body, actor, &mapvars, &myvars);
+        if(err)return err;
 
         val_t *var_val;
         err = valexpr_eval(&effect->u.set.var_expr,

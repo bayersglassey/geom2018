@@ -358,6 +358,11 @@ static int _parse_cond(fus_lexer_t *lexer,
         GET_NAME(cond->u.expr.var_name)
         GET_INT(cond->u.expr.value)
         GET(")")
+    }else if(GOT("get_bool")){
+        cond->type = state_cond_type_get_bool;
+        NEXT
+        err = valexpr_parse(&cond->u.valexpr, lexer);
+        if(err)return err;
     }else{
         return UNEXPECTED(NULL);
     }
@@ -742,6 +747,7 @@ const char state_cond_type_any[] = "any";
 const char state_cond_type_all[] = "all";
 const char state_cond_type_not[] = "not";
 const char state_cond_type_expr[] = "expr";
+const char state_cond_type_get_bool[] = "get_bool";
 const char *state_cond_types[] = {
     state_cond_type_false,
     state_cond_type_key,
@@ -751,6 +757,7 @@ const char *state_cond_types[] = {
     state_cond_type_all,
     state_cond_type_not,
     state_cond_type_expr,
+    state_cond_type_get_bool,
     NULL
 };
 
@@ -853,6 +860,8 @@ void state_cond_cleanup(state_cond_t *cond){
         ARRAY_FREE_PTR(state_cond_t*, cond->u.subconds.conds, state_cond_cleanup)
     }else if(cond->type == state_cond_type_expr){
         free(cond->u.expr.var_name);
+    }else if(cond->type == state_cond_type_get_bool){
+        valexpr_cleanup(&cond->u.valexpr);
     }
 }
 

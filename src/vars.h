@@ -70,6 +70,7 @@ void var_init(var_t *var, char *key);
 void val_cleanup(val_t *val);
 void val_init(val_t *val);
 void val_fprintf(val_t *val, FILE *file);
+const char *val_type_name(int type);
 
 void val_unset(val_t *val);
 bool val_get_bool(val_t *val);
