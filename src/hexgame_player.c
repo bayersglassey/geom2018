@@ -389,7 +389,7 @@ int player_step(player_t *player, hexgame_t *game){
             HACK: we check distance between body's current position and
             player's respawn position. */
             int dist = hexspace_dist(body->loc.pos, player->respawn_location.loc.pos);
-            bool at_respawn = dist <= 5;
+            bool at_respawn = dist <= 2;
             if(at_respawn)savepoint_submap = NULL;
         }
 
