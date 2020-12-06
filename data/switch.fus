@@ -2,12 +2,12 @@ shapes:
 
     "_switch_top_off":
         prismels:
-            : "tri" ( 0  0  0  0)  0 f eval: 5  + 1
-            : "tri" ( 0  0  0  0)  2 f eval: 5  + 1
-            : "tri" ( 0  0  0  0)  4 f eval: 13 + 1
-            : "tri" ( 0  0  0  0)  6 f eval: 13 + 1
+            : "tri" ( 0  0  0  0)  0 f eval: 6  + 1
+            : "tri" ( 0  0  0  0)  2 f eval: 6  + 1
+            : "tri" ( 0  0  0  0)  4 f eval: 14 + 1
+            : "tri" ( 0  0  0  0)  6 f eval: 14 + 1
             : "tri" ( 0  0  0  0)  8 f eval: 15 + 1
-            : "tri" ( 0  0  0  0) 10 f eval: 13 + 1
+            : "tri" ( 0  0  0  0) 10 f eval: 14 + 1
 
     "switch_top_off":
         animation: cycle 12
