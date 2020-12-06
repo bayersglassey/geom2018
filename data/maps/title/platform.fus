@@ -1,5 +1,5 @@
 parts:
-    "c": recording "data/maps/demo/recs/coin.fus"
+    "c": recording "data/recs/coin.fus"
 collmap:
     ;;    ?   ?        [c][c]
     ;;

@@ -2,8 +2,8 @@
 parts:
     "D": "data/maps/demo/tiles/hex_vec4/dodecas.fus"
     "s": "data/maps/demo/tiles/hex_vec4/dodeca_sign.fus"
-    "c": recording "data/maps/demo/recs/coin.fus"
-    "C": recording "data/maps/demo/recs/coin_crouch.fus"
+    "c": recording "data/recs/coin.fus"
+    "C": recording "data/recs/coin_crouch.fus"
     "r": actor "actor/airoller.fus"
 
 collmap:

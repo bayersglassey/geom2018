@@ -1,6 +1,6 @@
 parts:
-    "c": recording "data/maps/demo/recs/coin.fus"
-    "C": recording "data/maps/demo/recs/coin_crouch.fus"
+    "c": recording "data/recs/coin.fus"
+    "C": recording "data/recs/coin_crouch.fus"
 
     "b": "data/maps/demo/bubblecar_ball.fus"
 

@@ -3,8 +3,8 @@ parts:
     "_": empty
     "o": "data/maps/demo/jungle_ball_hollow.fus"
     "O": "data/maps/demo/jungle_ball.fus"
-    "c": recording "data/maps/demo/recs/coin.fus"
-    "C": recording "data/maps/demo/recs/coin_crouch.fus"
+    "c": recording "data/recs/coin.fus"
+    "C": recording "data/recs/coin_crouch.fus"
     "r": actor "actor/airoller.fus"
     "w": actor "actor/aiwater_roller_sneaky.fus"
 

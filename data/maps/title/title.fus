@@ -7,8 +7,8 @@ parts:
     "Z": shape "txt_players"
     "Z": "data/maps/demo/vert.fus"
 
-    "c": recording "data/maps/demo/recs/coin.fus"
-    "C": recording "data/maps/demo/recs/coin_crouch.fus"
+    "c": recording "data/recs/coin.fus"
+    "C": recording "data/recs/coin_crouch.fus"
 
     "s": recording "data/recs/switch.fus"
         vars:

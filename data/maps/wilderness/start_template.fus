@@ -1,6 +1,6 @@
 parts:
-    "c": recording "data/maps/demo/recs/coin.fus"
-    "C": recording "data/maps/demo/recs/coin_crouch.fus"
+    "c": recording "data/recs/coin.fus"
+    "C": recording "data/recs/coin_crouch.fus"
     "l": "data/maps/wilderness/start_line2.fus"
     "L": "data/maps/wilderness/start_line3.fus"
     "m": "data/maps/wilderness/start_line4.fus"

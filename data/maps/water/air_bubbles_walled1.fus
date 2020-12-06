@@ -2,7 +2,7 @@ parts:
     "a": "data/maps/water/air_bubble_walled_sm.fus"
     "b": "data/maps/water/bubble_sm.fus"
     "s": "data/maps/water/save.fus"
-    "c": recording "data/maps/demo/recs/coin.fus"
+    "c": recording "data/recs/coin.fus"
 
 collmap:
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .

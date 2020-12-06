@@ -1,7 +1,7 @@
 parts:
-    "c": recording "data/maps/demo/recs/coin.fus"
-    "C": recording "data/maps/demo/recs/coin_crouch.fus"
-    "D": recording "data/maps/demo/recs/coin_crouch.fus"
+    "c": recording "data/recs/coin.fus"
+    "C": recording "data/recs/coin_crouch.fus"
+    "D": recording "data/recs/coin_crouch.fus"
     "D": "data/maps/demo/vert.fus"
 
 collmap:
