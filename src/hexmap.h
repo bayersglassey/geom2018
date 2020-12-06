@@ -5,7 +5,7 @@
 #include "lexer.h"
 #include "vars.h"
 #include "geom.h"
-#include "hexgame_location.h"
+#include "hexgame_savelocation.h"
 #include "prismelrenderer.h"
 #include "hexcollmap.h"
 

@@ -178,7 +178,8 @@ int player_reload(player_t *player, bool *file_found_ptr){
     hexgame_savelocation_t *location = &player->respawn_location;
 
     /* Attempt to load file */
-    err = hexgame_savelocation_load(player->respawn_filename, location);
+    err = hexgame_savelocation_load(player->respawn_filename, location,
+        player->game);
     bool file_found = err == 0;
 
     /* If we couldn't load it, that's not an "error" per se, we'll just
@@ -318,7 +319,7 @@ int player_use_savepoint(player_t *player){
     /* Save player's new respawn location */
     if(player->respawn_filename != NULL){
         err = hexgame_savelocation_save(player->respawn_filename,
-            &player->respawn_location);
+            &player->respawn_location, player->game);
         if(err)return err;
     }
 

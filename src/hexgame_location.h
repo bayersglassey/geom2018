@@ -6,10 +6,6 @@
 #include "geom.h"
 
 
-/************
- * LOCATION *
- ************/
-
 typedef struct hexgame_location {
     /* Describes the same set of transformations as trf_t, but uses
     a different set of variables, better suited to video game character
@@ -74,24 +70,5 @@ void hexgame_location_init_trf(hexgame_location_t *loc, trf_t *trf);
 void hexgame_location_from_trf(hexgame_location_t *loc, trf_t *trf);
 void hexgame_location_apply(hexgame_location_t *loc, trf_t *trf);
 
-
-/****************
- * SAVELOCATION *
- ****************/
-
-typedef struct hexgame_savelocation {
-    hexgame_location_t loc;
-    char *map_filename;
-    char *stateset_filename;
-    char *state_name;
-} hexgame_savelocation_t;
-
-void hexgame_savelocation_init(hexgame_savelocation_t *location);
-void hexgame_savelocation_cleanup(hexgame_savelocation_t *location);
-void hexgame_savelocation_set(hexgame_savelocation_t *location, vecspace_t *space,
-    vec_t pos, rot_t rot, bool turn, char *map_filename,
-    char *stateset_filename, char *state_name);
-int hexgame_savelocation_save(const char *filename, hexgame_savelocation_t *location);
-int hexgame_savelocation_load(const char *filename, hexgame_savelocation_t *location);
 
 #endif

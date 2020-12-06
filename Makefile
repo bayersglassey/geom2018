@@ -27,6 +27,7 @@ SDL_OFILES = \
  src/hexmap.o src/hexmap_submap_create_rgraph.o \
  src/hexgame.o src/hexgame_body.o src/hexgame_player.o src/hexgame_recording.o \
  src/hexgame_state.o src/hexgame_actor.o \
+ src/hexgame_savelocation.o \
  src/test_app.o src/test_app_console.o src/test_app_game.o src/test_app_editor.o \
  src/test_app_list.o src/test_app_commands.o \
  src/test_app_list_choices.o src/test_app_list_maps.o src/test_app_list_submaps.o \
