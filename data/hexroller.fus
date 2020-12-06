@@ -22,26 +22,52 @@ shapes:
             : "map_face0" (0 0 0 0)  8 f
             : "map_face0" (0 0 0 0) 10 f
 
+    $PREFIX NS "hexroller_foot":
+        prismels:
+            : "tri" ( 0  0  0  0)  0 f eval: 1 + 3
+            : "sq"  ( 1  0  0  0)  1 f eval: 1 + 3
+
+            : "tri" ( 0  0  0  0)  2 f eval: 1 + 3
+            : "sq"  ( 0  0  1  0)  3 f eval: 1 + 3
+
+            : "tri" ( 0  0  0  0)  4 f eval: 1 + 11
+            : "sq"  (-1  0  1  0)  5 f eval: 1 + 11
+
+            : "tri" ( 0  0  0  0)  6 f eval: 1 + 11
+            : "sq"  (-1  0  0  0)  7 f eval: 1 + 11
+
+            : "tri" ( 0  0  0  0)  8 f eval: 1 + 15
+            : "sq"  ( 0  0 -1  0)  9 f eval: 1 + 15
+
+            : "tri" ( 0  0  0  0) 10 f eval: 1 + 11
+            : "sq"  ( 1  0 -1  0) 11 f eval: 1 + 11
+
     $PREFIX NS "hexroller":
         shapes:
             : "hexroller_body" ( 0  1  3  1)  0 f
+            : "hexroller_foot" ( 0  0  0  0)  0 f
 
     $PREFIX NS "hexroller_R1":
         shapes:
             : "hexroller_body" ( 0  1  3  1)  2 f
+            : "hexroller_foot" ( 0  0  0  0)  0 f
 
     $PREFIX NS "hexroller_R2":
         shapes:
             : "hexroller_body" ( 0  1  3  1)  4 f
+            : "hexroller_foot" ( 0  0  0  0)  0 f
 
     $PREFIX NS "hexroller_R3":
         shapes:
             : "hexroller_body" ( 0  1  3  1)  6 f
+            : "hexroller_foot" ( 0  0  0  0)  0 f
 
     $PREFIX NS "hexroller_R4":
         shapes:
             : "hexroller_body" ( 0  1  3  1)  8 f
+            : "hexroller_foot" ( 0  0  0  0)  0 f
 
     $PREFIX NS "hexroller_R5":
         shapes:
             : "hexroller_body" ( 0  1  3  1) 10 f
+            : "hexroller_foot" ( 0  0  0  0)  0 f
