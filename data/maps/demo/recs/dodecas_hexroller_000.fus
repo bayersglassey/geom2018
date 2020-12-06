@@ -5,7 +5,7 @@ rot: 1
 turn: no
 keys:
     u:
-    d:
+    d: is
     l:
     r: is
 nodata
