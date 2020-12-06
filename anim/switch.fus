@@ -1,10 +1,18 @@
 
 # Expected vars at runtime:
 # * key (str)
-# * onval (any)
-# * offval (any)
 
 $SET_INT DELAY 2
+
+init:
+    if:
+        get_bool mapvar(myvar("key"))
+    then:
+        goto immediate: switch_on
+
+    if:
+    then:
+        goto immediate: switch_off
 
 switch_off:
     rgraph: "switch_off"
@@ -13,7 +21,7 @@ switch_off:
         ;;     *
         ;;  (.)- .
     on "spit":
-        set mapvar(myvar("key")): myvar("onval")
+        set mapvar(myvar("key")): T
         goto: switching_on
         delay: $GET_INT DELAY
 
@@ -33,7 +41,7 @@ switch_on:
         ;;     *
         ;;  (.)- .
     on "spit":
-        set mapvar(myvar("key")): myvar("offval")
+        set mapvar(myvar("key")): F
         goto: switching_off
         delay: $GET_INT DELAY
 

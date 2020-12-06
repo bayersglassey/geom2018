@@ -1,5 +1,5 @@
 anim: "anim/switch.fus"
-state: "switch_off"
+state: "init"
 pos: (0 0)
 rot: 0
 turn: no
