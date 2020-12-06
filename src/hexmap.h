@@ -103,6 +103,7 @@ typedef struct hexmap_submap {
             1: follow player
         */
     char *filename;
+    bool visible_not;
     char *visible_var_name;
     hexcollmap_t collmap;
     palette_t palette;
@@ -162,7 +163,7 @@ int hexmap_step(hexmap_t *map);
 void hexmap_door_cleanup(hexmap_door_t *door);
 void hexmap_submap_cleanup(hexmap_submap_t *submap);
 int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
-    char *filename, char *visible_var_name,
+    char *filename, bool visible_not, char *visible_var_name,
     bool solid, vec_t pos, int camera_type, vec_t camera_pos,
     prismelmapper_t *mapper, char *palette_filename, char *tileset_filename);
 bool hexmap_submap_is_visible(hexmap_submap_t *submap);
