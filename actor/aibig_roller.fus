@@ -11,6 +11,8 @@ $SET_INT KDOWN_F 200
 $SET_INT KUP_D 200
 $SET_INT KDOWN_D 200
 
+$SET_INT GRAB 200
+
 $SET_INT TURN 10
 
 import "actor/_airoller.fus"

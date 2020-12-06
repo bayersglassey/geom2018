@@ -5,6 +5,7 @@
 #  int KDOWN_F
 #  int KUP_D
 #  int KDOWN_D
+#  int GRAB
 #  int TURN
 
 mainloop:
@@ -12,6 +13,7 @@ mainloop:
     if:
     then:
         key: up b
+        key: up u
         continue
 
     if:
@@ -31,6 +33,34 @@ mainloop:
     then:
         key: up f
         key: down b
+        continue
+
+    if: all:
+        chance: $GET_INT GRAB/1000
+        coll: all yes
+            $IF BIGROLLER:
+                ;;      .   .   +
+                ;;
+                ;;    .   .   .
+                ;;
+                ;; (.)  .   .
+            $IF !BIGROLLER:
+                ;;    .   +
+                ;;
+                ;; (.)  .
+        coll: all no
+            $IF BIGROLLER:
+                ;;      .   .   .
+                ;;       \*/*\*
+                ;;    .   + - .
+                ;;         \*
+                ;; (.)  .   .
+            $IF !BIGROLLER:
+                ;;    .   +
+                ;;     \*
+                ;; (.)  .
+    then:
+        key: down u
         continue
 
     if: any:
