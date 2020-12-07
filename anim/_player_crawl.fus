@@ -183,7 +183,7 @@ crawl:
     then:
         move: 1 0
         turn
-        goto: crawl_step
+        goto: crawl_turn
         delay: 2
 
     $IF PLAYER_CAN_LOOK_UP:
@@ -227,10 +227,39 @@ crawl_step_down:
     if() then: goto: crawl
 
 crawl_step:
+    # If you make changes to this, you'll probably want to make same
+    # changes to crawl_turn
     rgraph: $PREFIX NS "crawl_step"
     hitbox:
         ;;    .   .
         ;;      */*
+        ;;     (.)  .
+    $IF PLAYER_SPIKEY: on "crush": goto: crawl_shielding
+
+    if:
+        key: wentdown y
+    then:
+        spawn: $GET_STR SPIT_FUS "crouch_fly" (0 0) 0 f
+        goto: crawl_spit
+        delay: 9
+
+    $IF PLAYER_ROLLER:
+        if:
+            key: wentdown x
+        then:
+            goto: roller_stand
+            delay: $GET_INT ROLLER_STAND_DELAY
+
+    if() then: goto: crawl
+
+crawl_turn:
+    # Like crawl_step, but without the extended hitbox
+    # (so you can turn around in-place while crouching, without exposing yourself
+    # to being crushed)
+    rgraph: $PREFIX NS "crawl_step"
+    hitbox:
+        ;;        .
+        ;;        *
         ;;     (.)  .
     $IF PLAYER_SPIKEY: on "crush": goto: crawl_shielding
 
