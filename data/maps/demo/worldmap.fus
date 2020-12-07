@@ -23,6 +23,7 @@ actors:
 submaps:
     :
         file: "data/maps/demo/start.fus"
+        text: "Press Enter to show/hide controls"
         pos: (0 0)
         camera: (5 4)
         mapper: ("quadruple")

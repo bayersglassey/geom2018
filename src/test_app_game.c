@@ -142,25 +142,33 @@ int test_app_render_game(test_app_t *app){
         }
     }
 
-    if(app->show_controls && !app->show_console){
-        test_app_printf(app, 0, line_y * app->font.char_h,
-            "*Controls:\n"
-            "  Left/right  -> Walk\n"
-            "  Up          -> Jump\n"
-            "  Down        -> Crawl\n"
-            "  Spacebar    -> Spit\n"
-            "  Shift       -> Look up\n"
-            "  1           -> Return to checkpoint\n"
-            "  Enter       -> Show/hide this message\n"
-            "  Escape      -> Quit\n"
-            "  F5          -> Pause/unpause\n"
-        );
-        line_y += 10;
-    }
-
     if(app->show_console){
         err = test_app_blit_console(app, 0, line_y * app->font.char_h);
         if(err)return err;
+    }else{
+        if(app->show_controls){
+            test_app_printf(app, 0, line_y * app->font.char_h,
+                "*Controls:\n"
+                "  Left/right  -> Walk\n"
+                "  Up          -> Jump\n"
+                "  Down        -> Crawl\n"
+                "  Spacebar    -> Spit\n"
+                "  Shift       -> Look up\n"
+                "  1           -> Return to checkpoint\n"
+                "  Enter       -> Show/hide this message\n"
+                "  Escape      -> Quit\n"
+                "  F5          -> Pause/unpause\n"
+            );
+            line_y += 10;
+        }else{
+            hexmap_submap_t *submap = app->camera->cur_submap;
+            const char *text = !submap? NULL: submap->text;
+            if(text){
+                test_app_printf(app, 0, line_y * app->font.char_h,
+                    text);
+                line_y += 1;
+            }
+        }
     }
 
     SDL_Texture *render_texture = SDL_CreateTextureFromSurface(

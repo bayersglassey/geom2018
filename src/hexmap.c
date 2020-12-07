@@ -674,6 +674,18 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
         if(err)return err;
     }
 
+    char *submap_text = NULL;
+    if(fus_lexer_got(lexer, "text")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_get_str(lexer, &submap_text);
+        if(err)return err;
+        err = fus_lexer_get(lexer, ")");
+        if(err)return err;
+    }
+
     bool submap_visible_not = false;
     char *submap_visible_var_name = NULL;
     if(fus_lexer_got(lexer, "visible")){
@@ -765,7 +777,8 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
 
         ARRAY_PUSH_NEW(hexmap_submap_t*, map->submaps, submap)
         err = hexmap_submap_init(map, submap,
-            strdup(submap_filename), submap_visible_not, submap_visible_var_name,
+            strdup(submap_filename), submap_text,
+            submap_visible_not, submap_visible_var_name,
             solid, pos, camera_type, camera_pos, mapper,
             palette_filename, tileset_filename);
         if(err)return err;
@@ -1139,6 +1152,7 @@ void hexmap_door_cleanup(hexmap_door_t *door){
 
 void hexmap_submap_cleanup(hexmap_submap_t *submap){
     free(submap->filename);
+    free(submap->text);
     free(submap->visible_var_name);
     hexcollmap_cleanup(&submap->collmap);
     palette_cleanup(&submap->palette);
@@ -1147,7 +1161,8 @@ void hexmap_submap_cleanup(hexmap_submap_t *submap){
 }
 
 int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
-    char *filename, bool visible_not, char *visible_var_name,
+    char *filename, char *text,
+    bool visible_not, char *visible_var_name,
     bool solid, vec_t pos, int camera_type, vec_t camera_pos,
     prismelmapper_t *mapper, char *palette_filename, char *tileset_filename
 ){
@@ -1156,6 +1171,7 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
     submap->map = map;
 
     submap->filename = filename;
+    submap->text = text;
     submap->visible_not = visible_not;
     submap->visible_var_name = visible_var_name;
     vec_cpy(MAX_VEC_DIMS, submap->pos, pos);

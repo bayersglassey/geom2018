@@ -18,6 +18,7 @@ submaps:
         submaps:
             :
                 file: "data/maps/title/title.fus"
+                text: "Press Enter to show/hide controls"
                 doors:
                     :
                         new_game "data/maps/demo/worldmap.fus"
