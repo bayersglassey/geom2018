@@ -611,3 +611,15 @@ Nov 21, 2020:
         And by flipping switches, you can cause all those enemies to move between the rooms.
 
 
+Dec 7, 2020:
+------------
+
+Your fancy setup in data/maps/triangles/start4.fus...
+...is broken.
+First of all you can shoot the topmost blocker from below the start4.fus stuff, don't even need to go in it.
+Second of all... you can't get into the start4.fus stuff!!!!!
+Because of one of the things you're supposed to bank your shot off --- the horizontal one at the bottom.
+
+Also: NOW THAT MAPVARS ARE PART OF WHAT'S SAVED... save points should be activated if you changed
+any mapvars????
+(Not just if "the distance from your last savepoint is more than 3" or whatever we check now)

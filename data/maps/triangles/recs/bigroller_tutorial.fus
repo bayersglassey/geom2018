@@ -1,0 +1,13 @@
+anim: "anim/big_roller.fus"
+state: "stand"
+pos: ( -15 -19)
+rot: 4
+turn: yes
+keys:
+    x:
+    y:
+    u:
+    d: is was
+    l: is was
+    r:
+data: " w71-d w49+d w20-d w52+d w13-d w43+d w10"
