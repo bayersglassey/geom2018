@@ -186,7 +186,7 @@ crawl:
         goto: crawl_turn
         delay: 2
 
-    $IF PLAYER_CAN_LOOK_UP:
+    $IF PLAYER_AIMER:
         if:
             key: not isdown f
             key: isdown x

@@ -107,6 +107,9 @@ shapes:
                 : $PREFIX NS "_head_sixth" (0 0 0 0)  6 f
                 : $PREFIX NS "_head_sixth" (0 0 0 0)  8 f
                 : $PREFIX NS "_head_sixth" (0 0 0 0) 10 f
+            $IF PLAYER_AIMER:
+                prismels:
+                    : "sq"  (-1 -1  0  0)  3 f eval: 1 + 8 + 1
             $IF PLAYER_FLIER:
                 prismels:
                     : "dia" (-1  0  1  1)  6 f eval: 1 + 8 + 1
@@ -115,8 +118,13 @@ shapes:
 
     $PREFIX NS "nose":
         prismels:
-            : "sq"  (0 0 0 0) 0 f eval: 1 + 8 + 1
-            : "tri" (1 0 0 0) 1 f eval: 1 + 8 + 2
+            $IF PLAYER_AIMER:
+                : "sq"  (0 0 0 0) 0 f eval: 1 + 8 + 1
+                : "sq"  (1 0 0 0) 0 f eval: 1 + 8 + 2
+                : "tri" (2 0 0 0) 1 f eval: 1 + 8 + 1
+            $IF !PLAYER_AIMER:
+                : "sq"  (0 0 0 0) 0 f eval: 1 + 8 + 1
+                : "tri" (1 0 0 0) 1 f eval: 1 + 8 + 2
 
     $PREFIX NS "head":
         shapes:

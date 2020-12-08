@@ -73,7 +73,7 @@ stand:
         goto: step
         delay: 2
 
-    $IF PLAYER_CAN_LOOK_UP:
+    $IF PLAYER_AIMER:
         if:
             key: wasdown x
             key: wasdown u
@@ -162,7 +162,7 @@ stand:
         goto: step
         delay: 2
 
-    $IF PLAYER_CAN_LOOK_UP:
+    $IF PLAYER_AIMER:
         if:
             key: isdown x
         then:
