@@ -8,6 +8,7 @@ vars:
     "start_blocker2": F
     "start2_blocker": F
     "start3_blocker": F
+    "start4_blocker": F
 
 submaps:
     :
@@ -91,6 +92,12 @@ submaps:
                 mapper: ("triple")
             :
                 file: "data/maps/triangles/start4.fus"
+                pos: eval: (14 12) + (22 15) + (-4 3)
+                camera: (3 -7)
+                mapper: ("double")
+            :
+                file: "data/maps/triangles/start4_blocker.fus"
+                visible: not "start4_blocker"
                 pos: eval: (14 12) + (22 15) + (-4 3)
                 camera: (3 -7)
                 mapper: ("double")
