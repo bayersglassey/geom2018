@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <math.h>
 
 #include <SDL2/SDL.h>
 
@@ -15,6 +16,8 @@ void show_usage(){
         " -V           Video test\n"
         " -A           Audio test\n"
         " -h --help    Show this help screen\n"
+        "Audio test options:\n"
+        " -p           Play test sound\n"
     );
 }
 
@@ -26,8 +29,43 @@ void print_audio_spec(SDL_AudioSpec *spec){
     printf("  samples = %i\n", spec->samples);
 }
 
+
+/* Right out of: http://rerwarwar.weebly.com/sdl2-audio-sine1.html */
+#define M_PI 3.14159265358979323846
+#define FREQ 200 /* the frequency we want */
+unsigned int audio_pos; /* which sample we are up to */
+int audio_len; /* how many samples left to play, stops when <= 0 */
+float audio_frequency; /* audio frequency in cycles per sample */
+float audio_volume; /* audio volume, 0 - ~32000 */
+
+float get_sample(float t){
+    return sin(2 * M_PI * t);
+}
+
+void audio_callback(void *data, Uint8 *buf, int buf_len){
+    Sint16 *samples = (Sint16*)buf;
+    int samples_len = buf_len / 2; /* 16 bit */
+    for(int i = 0; i < samples_len; i++){
+        samples[i] = audio_volume * get_sample(audio_pos * audio_frequency);
+        audio_pos++;
+    }
+    audio_len -= samples_len;
+    return;
+}
+
 int audio_test(int n_args, char *args[]){
     int err;
+    bool play = false;
+
+    for(int i = 0; i < n_args; i++){
+        char *arg = args[i];
+        if(!strcmp(arg, "-p")){
+            play = true;
+        }else{
+            printf("Unrecognized option: %s\n", arg);
+            return 2;
+        }
+    }
 
     if(SDL_Init(SDL_INIT_AUDIO)){
         fprintf(stderr, "SDL_Init error: %s\n", SDL_GetError());
@@ -53,6 +91,7 @@ int audio_test(int n_args, char *args[]){
     want.format = AUDIO_S16;
     want.channels = 1;
     want.samples = 4096;
+    want.callback = &audio_callback;
     device_id = SDL_OpenAudioDevice(!strcmp(device, "")? NULL: device,
         false, &want, &have, SDL_AUDIO_ALLOW_ANY_CHANGE);
     if(device_id == 0){
@@ -64,6 +103,19 @@ int audio_test(int n_args, char *args[]){
     print_audio_spec(&want);
     printf("GOT:\n");
     print_audio_spec(&have);
+
+    if(play){
+        audio_len = have.freq * 5; /* 5 seconds */
+        audio_pos = 0;
+        audio_frequency = 1.0 * FREQ / have.freq; /* 1.0 to make it a float */
+        audio_volume = 6000; /* ~1/5 max volume */
+
+        SDL_PauseAudioDevice(device_id, 0); /* play! */
+
+        while(audio_len > 0) {
+            SDL_Delay(500);
+        }
+    }
 
     SDL_AudioQuit();
     return 0;

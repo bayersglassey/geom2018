@@ -78,7 +78,7 @@ bin/hexpicturetest: src/main_hexpicture.o src/hexpicture.o
 
 bin/sdltest: src/main_sdltest.o src/util.o src/file_utils.o
 	mkdir -p bin
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -lm -o $@ $^
 
 bin/directorytest: src/main_directorytest.o src/directory.o src/directory_shell.o $(OFILES)
 	mkdir -p bin
