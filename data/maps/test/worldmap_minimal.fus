@@ -3,6 +3,8 @@ unit: 3 2 0 -1
 spawn: (0 0)
 default_palette: "data/maps/demo/pals/water.fus"
 default_tileset: "data/tileset1.fus"
+vars:
+    "map3_end_blocker": F
 
 submaps:
     :
@@ -17,14 +19,22 @@ submaps:
                 rot: 0
                 turn: y
             :
-                anim: "anim/flierplayer.fus"
-                pos: (0 0)
+                anim: "anim/aimerplayer.fus"
+                pos: (-10 -9)
                 rot: 0
                 turn: n
         recordings:
             : "data/maps/test/recs/worldmap_minimal_bird_000.fus"
             : "data/maps/test/recs/worldmap_minimal_bird_001.fus"
     :
-        bg
-        file: "data/maps/demo/end_text.fus"
-
+        file: "data/maps/test/map3_end_puzzle.fus"
+        text: "Press Enter to show/hide controls"
+        pos: (-7 -7)
+        camera: (0 0)
+        mapper: ("triple")
+    :
+        file: "data/maps/test/map3_end_blocker.fus"
+        visible: not "map3_end_blocker"
+        pos: (-7 -7)
+        camera: (0 0)
+        mapper: ("triple")

@@ -377,7 +377,6 @@ Or stateset has a list of variables to be printed, and their labels?..
         on "crush":
             goto immediate: dead
 
-        $SET_BOOL PLAYER_CAN_LOOK_UP
         $SET_STR NS player_
         import "anim/_player.fus"
 
@@ -614,12 +613,10 @@ Nov 21, 2020:
 Dec 7, 2020:
 ------------
 
-Your fancy setup in data/maps/triangles/start4.fus...
-...is broken.
-First of all you can shoot the topmost blocker from below the start4.fus stuff, don't even need to go in it.
-Second of all... you can't get into the start4.fus stuff!!!!!
-Because of one of the things you're supposed to bank your shot off --- the horizontal one at the bottom.
-
-Also: NOW THAT MAPVARS ARE PART OF WHAT'S SAVED... save points should be activated if you changed
+NOW THAT MAPVARS ARE PART OF WHAT'S SAVED... save points should be activated if you changed
 any mapvars????
 (Not just if "the distance from your last savepoint is more than 3" or whatever we check now)
+...so, we want a mapvars_diff function or something?
+...oooof, no, because we're diffing against the contents of respawn_0.txt or whatever. GAH
+
+Respawning still doesn't restore your stateset to what it was?..

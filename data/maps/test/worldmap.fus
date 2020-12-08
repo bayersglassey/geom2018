@@ -3,6 +3,9 @@ unit: 3 2 0 -1
 spawn: (0 0)
 default_palette: "data/maps/demo/pals/tunnels.fus"
 default_tileset: "data/tileset1.fus"
+vars:
+    "map3x_blocker": F
+    "map3x_blocker2": F
 
 submaps:
     :
@@ -35,6 +38,20 @@ submaps:
                         pos: (0 0)
                         rot: 0
                         turn: n
+            :
+                file: "data/maps/test/map3x_blocker.fus"
+                visible: not "map3x_blocker2"
+                pos: eval: (1 10) + (-2 4)
+            :
+                file: "data/maps/test/secret_path.fus"
+                visible: "map3x_blocker"
+                pos: (14 -4)
+                camera: (0 0)
+            :
+                file: "data/maps/test/secret_path2.fus"
+                visible: "map3x_blocker"
+                pos: eval: (14 -4) + (-8 -17)
+                camera: (0 0)
     :
         pos: (-1 -10)
         camera: (4 0)

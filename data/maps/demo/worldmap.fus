@@ -20,6 +20,9 @@ actors:
     # Dodecas:
     : (21 -15) 5 y "actor/airollerplayer.fus" "player_cpu"
 
+vars:
+    "map3x_blocker": F
+
 submaps:
     :
         file: "data/maps/demo/start.fus"
@@ -325,6 +328,10 @@ submaps:
                                 pos: (0 0)
                                 rot: 0
                                 turn: n
+                    :
+                        file: "data/maps/test/map3x_blocker.fus"
+                        visible: not "map3x_blocker"
+                        pos: eval: (1 10) + (-2 4)
             :
                 pos: (-1 -10)
                 camera: (4 0)
