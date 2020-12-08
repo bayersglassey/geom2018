@@ -21,6 +21,7 @@ actors:
     : (21 -15) 5 y "actor/airollerplayer.fus" "player_cpu"
 
 vars:
+    "map3_blocker": F
     "map3x_blocker": F
 
 submaps:
@@ -310,6 +311,9 @@ submaps:
                         rot: 0
                         turn: n
                 submaps:
+                    :
+                        file: "data/maps/test/map3_blocker.fus"
+                        visible: not "map3_blocker"
                     :
                         file: "data/maps/test/map2.fus"
                         pos: (1 10)
