@@ -6,6 +6,7 @@ default_tileset: "data/tileset1.fus"
 
 actors:
     : "actor/guide/actor.fus" "player_cpu"
+    : "actor/hermit/actor.fus" "player_cpu"
 
     # Spidertown:
     : (42 75) 0 y "actor/aiplayer.fus" "player_cpu"

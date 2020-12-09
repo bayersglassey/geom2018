@@ -1,0 +1,13 @@
+anim: "anim/player.fus"
+state: "crawl"
+pos: ( -11 10)
+rot: 0
+turn: yes
+keys:
+    x:
+    y:
+    u:
+    d: is was
+    l:
+    r:
+data: " w20-d w32+r w4-r w28+l w2-l w30+l w1-l w59+l w21-l w17+l w9-l w1+d w3+l w11-l w41+r w17-d w32-r w4+l w2-l w18+r w8-r w25+d w2+l w18-l w14-d w2+r w14-r w43"

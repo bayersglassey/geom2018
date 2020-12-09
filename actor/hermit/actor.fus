@@ -1,0 +1,40 @@
+
+create_body:
+    if() then:
+        play: "actor/hermit/recs/trapped.fus"
+        goto: trapped
+
+trapped:
+    if:
+        coll: any yes
+            ;;  .   .   .
+            ;;           \
+            ;;    .   .   +
+            ;;           /
+            ;; (.)  .   .   .
+    then:
+        play: "actor/hermit/recs/trapped.fus"
+    if() then:
+        play: "actor/hermit/recs/escape1.fus"
+        goto: escape1_wait
+
+escape1_wait:
+    if:
+        # If the bird on jungle5.fus walks to our edge of platform,
+        # he's about to turn and head away, so now's our chance to make
+        # a break for it!..
+        coll: bodies "crush" any yes
+            ;;       .   .   .   .   .   .   .   + - +
+            ;;                                  /*\*/*\
+            ;;     .   .   .   .   .   .   .   + - + - +
+            ;;                                /*\*/*\*/
+            ;;   .   .   .   .   .   .   .   + - + - +
+            ;;                                \*/*\*/
+            ;;    (.)  .   .   .   .   .       + - +
+    then:
+        play: "actor/hermit/recs/escape2.fus"
+        goto: escaped
+    if() then:
+        play: "actor/hermit/recs/escape1_wait.fus"
+
+escaped:
