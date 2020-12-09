@@ -914,7 +914,7 @@ int hexmap_load_recording(hexmap_t *map, const char *filename,
     err = body_play_recording(body);
     if(err)return err;
 
-    *body_ptr = body;
+    if(body_ptr)*body_ptr = body;
     return 0;
 }
 
