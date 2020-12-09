@@ -95,6 +95,15 @@ int test_app_set_players(test_app_t *app, int n_players){
 }
 
 
+static int _count_lines(const char *text){
+    const char *s = text;
+    int lines = 1;
+    char c;
+    while(c = *s++){
+        if(c == '\n')lines++;
+    }
+    return lines;
+}
 int test_app_render_game(test_app_t *app){
     int err;
 
@@ -166,7 +175,7 @@ int test_app_render_game(test_app_t *app){
             if(text){
                 test_app_printf(app, 0, line_y * app->font.char_h,
                     text);
-                line_y += 1;
+                line_y += _count_lines(text);
             }
         }
     }

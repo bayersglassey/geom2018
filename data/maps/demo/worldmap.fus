@@ -39,6 +39,7 @@ submaps:
             #    tileset: "data/tileset1_bg.fus"
     :
         file: "data/maps/demo/start2.fus"
+        text: "Touch the green thing to save.\nPress 1 to restart from last save point."
         pos: (7 11)
         camera: (5 4)
         mapper: ("quadruple")
