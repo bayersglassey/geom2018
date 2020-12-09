@@ -332,10 +332,12 @@ int body_set_stateset(body_t *body, const char *stateset_filename,
     const char *state_name
 ){
     /* Sets body's stateset and state.
+    If stateset_filename is NULL, uses current stateset.
     If state_name is NULL, uses stateset's default state. */
 
     int err;
 
+    if(stateset_filename == NULL)stateset_filename = body->stateset.filename;
     if(stateset_filename == NULL){
         fprintf(stderr, "body_set_stateset: stateset_filename is NULL\n");
         return 2;
