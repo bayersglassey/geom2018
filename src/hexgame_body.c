@@ -261,6 +261,15 @@ int body_add_body(body_t *body, body_t **new_body_ptr,
  * BODY MISC *
  *************/
 
+player_t *body_get_player(body_t *body){
+    hexgame_t *game = body->game;
+    for(int i = 0; i < game->players_len; i++){
+        player_t *player = game->players[i];
+        if(player->body == body)return player;
+    }
+    return NULL;
+}
+
 void body_flash_cameras(body_t *body, Uint8 r, Uint8 g, Uint8 b,
     int percent
 ){
@@ -517,7 +526,13 @@ void body_update_cur_submap(body_t *body){
         }
     }
 
-    if(new_submap != NULL)body->cur_submap = new_submap;
+    if(new_submap != NULL){
+        body->cur_submap = new_submap;
+
+        /* Player-controlled bodies help uncover the minimap */
+        player_t *player = body_get_player(body);
+        if(player)new_submap->visited = true;
+    }
 }
 
 int body_handle_rules(body_t *body){

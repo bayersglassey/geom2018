@@ -190,6 +190,8 @@ int body_add_body(body_t *body, body_t **new_body_ptr,
     palettemapper_t *palmapper,
     vec_t addpos, rot_t addrot, bool turn);
 
+struct player;
+struct player *body_get_player(body_t *body);
 void body_flash_cameras(body_t *body, Uint8 r, Uint8 g, Uint8 b,
     int percent);
 void body_reset_cameras(body_t *body);

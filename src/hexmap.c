@@ -1196,6 +1196,8 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
 
     ARRAY_INIT(submap->doors)
 
+    submap->visited = false;
+
     return 0;
 }
 

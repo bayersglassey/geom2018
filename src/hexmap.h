@@ -111,6 +111,8 @@ typedef struct hexmap_submap {
     hexmap_tileset_t tileset;
     ARRAY_DECL(hexmap_door_t*, doors)
 
+    bool visited; /* Controls whether this submap shows up on minimap */
+
     /* Weakrefs */
     struct hexmap *map;
     rendergraph_t *rgraph_map;

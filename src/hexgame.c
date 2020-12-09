@@ -200,44 +200,33 @@ int camera_step(camera_t *camera){
     return 0;
 }
 
-int camera_render(camera_t *camera,
+static int camera_render_map(camera_t *camera,
+    vec_t camera_renderpos, prismelmapper_t *mapper, bool minimap,
     SDL_Surface *surface,
     SDL_Palette *pal, int x0, int y0, int zoom
 ){
     int err;
 
-    err = update_sdl_palette(pal, camera->colors);
-    if(err)return err;
-
     hexgame_t *game = camera->game;
     hexmap_t *map = camera->map;
     vecspace_t *map_space = map->space; /* hexspace */
-    prismelrenderer_t *prend = game->show_minimap?
+    prismelrenderer_t *prend = minimap?
         game->minimap_prend: game->prend;
     vecspace_t *prend_space = prend->space; /* vec4 or vec4_alt */
-
-    vec_t camera_renderpos;
-    vec4_vec_from_hexspace(camera_renderpos, camera->scrollpos);
-
-    /* Figure out which prismelmapper to use when rendering */
-    prismelmapper_t *mapper = NULL;
-    if(camera->mapper != NULL){
-        mapper = camera->mapper;
-    }else if(camera->cur_submap != NULL){
-        mapper = camera->cur_submap->mapper;
-    }
 
     /* Render map's submaps */
     for(int i = 0; i < map->submaps_len; i++){
         hexmap_submap_t *submap = map->submaps[i];
 
+        if(minimap && !submap->visited)continue;
+
         if(!hexmap_submap_is_visible(submap))continue;
 
 #ifdef GEOM_ONLY_RENDER_CUR_SUBMAP
-        if(submap != camera->cur_submap)continue;
+        if(!minimap && submap != camera->cur_submap)continue;
 #endif
 
-        if(game->show_minimap && !submap->solid)continue;
+        if(minimap && !submap->solid)continue;
 
         vec_t pos;
         vec4_vec_from_hexspace(pos, submap->pos);
@@ -249,7 +238,7 @@ int camera_render(camera_t *camera,
         flip_t flip = false;
         int frame_i = game->frame_i;
 
-        if(game->show_minimap){
+        if(minimap){
             /* rgraph_minimap's unit is the space's actual unit vector */
             err = rendergraph_render(submap->rgraph_minimap, surface,
                 pal, prend,
@@ -266,6 +255,36 @@ int camera_render(camera_t *camera,
             if(err)return err;
         }
     }
+    return 0;
+}
+
+int camera_render(camera_t *camera,
+    SDL_Surface *surface,
+    SDL_Palette *pal, int x0, int y0, int zoom
+){
+    int err;
+
+    err = update_sdl_palette(pal, camera->colors);
+    if(err)return err;
+
+    hexgame_t *game = camera->game;
+    hexmap_t *map = camera->map;
+
+    vec_t camera_renderpos;
+    vec4_vec_from_hexspace(camera_renderpos, camera->scrollpos);
+
+    /* Figure out which prismelmapper to use when rendering */
+    prismelmapper_t *mapper = NULL;
+    if(camera->mapper != NULL){
+        mapper = camera->mapper;
+    }else if(camera->cur_submap != NULL){
+        mapper = camera->cur_submap->mapper;
+    }
+
+    err = camera_render_map(camera,
+        camera_renderpos, mapper, game->show_minimap,
+        surface, pal, x0, y0, zoom);
+    if(err)return err;
 
     if(!game->show_minimap){
         /* Render map's bodies */
