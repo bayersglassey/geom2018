@@ -618,5 +618,38 @@ any mapvars????
 (Not just if "the distance from your last savepoint is more than 3" or whatever we check now)
 ...so, we want a mapvars_diff function or something?
 ...oooof, no, because we're diffing against the contents of respawn_0.txt or whatever. GAH
+...see hexgame_savelocation_{save,load}.
+...properest solution is to add a "dict" of maps and their vars to hexgame_savelocation_t. :P
 
 Respawning still doesn't restore your stateset to what it was?..
+...sometimes it does... maybe I was confused one time?..
+
+Triangles area: the prize is becoming a big_roller???
+(Errrr, big_rollerplayer?..)
+
+
+Dec 8, 2020:
+------------
+
+* Currently we have submap->visible_var_name.
+Could we perhaps have submap->visible_cond instead?..
+That lets us get a bit fancy, like:
+
+    # Basic
+    get_bool mapvar("blocker")
+    not: get_bool mapvar("blocker")
+
+    # Fancy
+    expr: mapvar("lala") < 3
+
+* HERMIT'S HOUSE
+    * We can now have a door "appear" (by using a submap's "visible" thing)
+    * So, in jungle area, let's say you "rescue" a spider from the right side
+    * You lead/follow him back to hermit's entrace
+    * He "opens" the door, goes in, disappears
+    * If you go in, you're in maps/water, inside some stuff that's visible not accessible from outside
+    * It's possible to sneak out of this place into some obstacle courses involving big_rollers and birds (?)
+        * You may need to be spikey to survive this?
+    * There are switches here which open stuff on the outside of the closed-in area
+    * ...in other words, you can unlock a bunch of stuff, then go back into maps/water
+        via the bottom-left part of jungle area
