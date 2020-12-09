@@ -110,6 +110,8 @@ int state_cond_match(state_cond_t *cond,
             bool water = flags & ANIM_COND_FLAGS_WATER;
             bool against_bodies = flags & ANIM_COND_FLAGS_BODIES;
 
+            const char *collmsg = cond->u.coll.collmsg;
+
             if(against_bodies){
                 int n_matches = 0;
                 for(int j = 0; j < map->bodies_len; j++){
@@ -118,6 +120,9 @@ int state_cond_match(state_cond_t *cond,
                     if(body_other->state == NULL)continue;
                     hexcollmap_t *hitbox_other = body_other->state->hitbox;
                     if(hitbox_other == NULL)continue;
+                    if(collmsg &&
+                        !body_sends_collmsg(body_other, collmsg)
+                    )continue;
 
                     trf_t hitbox_other_trf;
                     hexgame_location_init_trf(&body_other->loc, &hitbox_other_trf);

@@ -167,6 +167,9 @@ typedef struct state_cond {
         } expr;
         struct {
             int flags; /* ORed combination of enum anim_cond_flag values */
+            char *collmsg;
+                /* If flags^ANIM_COND_FLAGS_BODIES, collmsg specifies
+                that only bodies with this collmsg should collide */
             hexcollmap_t *collmap;
         } coll;
         struct {

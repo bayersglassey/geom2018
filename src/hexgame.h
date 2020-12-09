@@ -209,6 +209,8 @@ int state_handle_rules(state_t *state,
 void body_update_cur_submap(body_t *body);
 int body_handle_rules(body_t *body);
 int body_step(body_t *body, struct hexgame *game);
+bool body_sends_collmsg(body_t *body, const char *msg);
+collmsg_handler_t *body_get_collmsg_handler(body_t *body, const char *msg);
 int body_collide_against_body(body_t *body, body_t *body_other);
 int body_render(body_t *body,
     SDL_Surface *surface,

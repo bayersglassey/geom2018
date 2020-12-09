@@ -578,7 +578,24 @@ int body_step(body_t *body, hexgame_t *game){
     return 0;
 }
 
-static collmsg_handler_t *_body_handle_collmsg(body_t *body, const char *msg){
+bool body_sends_collmsg(body_t *body, const char *msg){
+    /* Returns whether body is sending given msg */
+    state_t *state = body->state;
+    for(int i = 0; i < state->collmsgs_len; i++){
+        const char *state_msg = state->collmsgs[i];
+        if(!strcmp(state_msg, msg))return true;
+    }
+    stateset_t *stateset = &body->stateset;
+    for(int i = 0; i < stateset->collmsgs_len; i++){
+        const char *stateset_msg = stateset->collmsgs[i];
+        if(!strcmp(stateset_msg, msg))return true;
+    }
+    return false;
+}
+
+collmsg_handler_t *body_get_collmsg_handler(body_t *body, const char *msg){
+    /* Returns the handler body uses to handle given msg (or NULL if not
+    found) */
     state_t *state = body->state;
     for(int j = 0; j < state->collmsg_handlers_len; j++){
         collmsg_handler_t *handler = &state->collmsg_handlers[j];
@@ -602,7 +619,9 @@ static collmsg_handler_t *_body_handle_collmsg(body_t *body, const char *msg){
     return NULL;
 }
 
-static collmsg_handler_t *_body_handle_other_bodies_collmsgs(body_t *body, body_t *body_other){
+collmsg_handler_t *_body_handle_other_bodies_collmsgs(body_t *body, body_t *body_other){
+    /* Checks all msgs being sent by body_other, and the handlers body uses
+    to handle them, and returns the first handler found */
     collmsg_handler_t *handler = NULL;
     state_t *state = body_other->state;
     for(int i = 0; i < state->collmsgs_len; i++){
@@ -610,7 +629,7 @@ static collmsg_handler_t *_body_handle_other_bodies_collmsgs(body_t *body, body_
         if(body->stateset.debug_collision){
             fprintf(stderr, "  -> state collmsg: %s\n", msg);
         }
-        handler = _body_handle_collmsg(body, msg);
+        handler = body_get_collmsg_handler(body, msg);
         if(handler)return handler;
     }
     stateset_t *stateset = &body_other->stateset;
@@ -619,7 +638,7 @@ static collmsg_handler_t *_body_handle_other_bodies_collmsgs(body_t *body, body_
         if(body->stateset.debug_collision){
             fprintf(stderr, "  -> stateset collmsg: %s\n", msg);
         }
-        handler = _body_handle_collmsg(body, msg);
+        handler = body_get_collmsg_handler(body, msg);
         if(handler)return handler;
     }
     return NULL;

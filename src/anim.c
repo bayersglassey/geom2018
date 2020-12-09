@@ -279,6 +279,7 @@ static int _parse_cond(fus_lexer_t *lexer,
         GET("(")
 
         int flags = 0;
+        char *collmsg = NULL;
 
         if(GOT("water")){
             NEXT
@@ -286,6 +287,9 @@ static int _parse_cond(fus_lexer_t *lexer,
         }else if(GOT("bodies")){
             NEXT
             flags ^= ANIM_COND_FLAGS_BODIES;
+            if(GOT_STR){
+                GET_STR(collmsg)
+            }
         }
 
         if(GOT("all"))flags ^= ANIM_COND_FLAGS_ALL;
@@ -310,6 +314,7 @@ static int _parse_cond(fus_lexer_t *lexer,
         cond->type = state_cond_type_coll;
         cond->u.coll.collmap = collmap;
         cond->u.coll.flags = flags;
+        cond->u.coll.collmsg = collmsg;
     }else if(GOT("chance")){
         NEXT
         GET("(")
@@ -847,6 +852,7 @@ void state_dump(state_t *state, FILE *file, int depth){
 
 void state_cond_cleanup(state_cond_t *cond){
     if(cond->type == state_cond_type_coll){
+        free(cond->u.coll.collmsg);
         hexcollmap_t *collmap = cond->u.coll.collmap;
         if(collmap != NULL){
             hexcollmap_cleanup(collmap);
