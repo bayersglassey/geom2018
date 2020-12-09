@@ -1,0 +1,54 @@
+# Expected vars:
+# * PREFIX (str) e.g. "switch_", "switch_oneway_"
+
+shapes:
+
+    $PREFIX PREFIX "_top_off":
+        prismels:
+            : "tri" ( 0  0  0  0)  0 f eval: 6  + 1
+            : "tri" ( 0  0  0  0)  2 f eval: 6  + 1
+            : "tri" ( 0  0  0  0)  4 f eval: 14 + 1
+            : "tri" ( 0  0  0  0)  6 f eval: 14 + 1
+            : "tri" ( 0  0  0  0)  8 f eval: 15 + 1
+            : "tri" ( 0  0  0  0) 10 f eval: 14 + 1
+
+    $PREFIX PREFIX "top_off":
+        animation: cycle 12
+        shapes:
+            : $PREFIX PREFIX "_top_off" (0 0 0 0)  0 f  0 ( 0 1)
+            : $PREFIX PREFIX "_top_off" (0 0 0 0)  1 f  0 ( 1 1)
+            : $PREFIX PREFIX "_top_off" (0 0 0 0)  2 f  0 ( 2 1)
+            : $PREFIX PREFIX "_top_off" (0 0 0 0)  3 f  0 ( 3 1)
+            : $PREFIX PREFIX "_top_off" (0 0 0 0)  4 f  0 ( 4 1)
+            : $PREFIX PREFIX "_top_off" (0 0 0 0)  5 f  0 ( 5 1)
+            : $PREFIX PREFIX "_top_off" (0 0 0 0)  6 f  0 ( 6 1)
+            : $PREFIX PREFIX "_top_off" (0 0 0 0)  7 f  0 ( 7 1)
+            : $PREFIX PREFIX "_top_off" (0 0 0 0)  8 f  0 ( 8 1)
+            : $PREFIX PREFIX "_top_off" (0 0 0 0)  9 f  0 ( 9 1)
+            : $PREFIX PREFIX "_top_off" (0 0 0 0) 10 f  0 (10 1)
+            : $PREFIX PREFIX "_top_off" (0 0 0 0) 11 f  0 (11 1)
+
+    $PREFIX PREFIX "top_on":
+        prismels:
+            : "tri" ( 0  0  0  0)  0 f eval: 8  + 1
+            : "tri" ( 0  0  0  0)  2 f eval: 8  + 1
+            : "tri" ( 0  0  0  0)  4 f eval: 7  + 1
+            : "tri" ( 0  0  0  0)  6 f eval: 7  + 1
+            : "tri" ( 0  0  0  0)  8 f eval: 15 + 1
+            : "tri" ( 0  0  0  0) 10 f eval: 7  + 1
+
+    $PREFIX PREFIX "off":
+        animation: cycle 12
+        prismels:
+            : "sq" ( 1  1  0  0)  0 f eval: 7 + 1
+            : "sq" ( 1  1  0  1)  0 f eval: 8 + 1
+            : "sq" ( 1  1  0  2)  0 f eval: 7 + 1
+        shapes:
+            : $PREFIX PREFIX "top_off" (1 1 1 3) 0 f
+
+    $PREFIX PREFIX "on":
+        animation: cycle 12
+        prismels:
+            : "sq" ( 1  1  0  0)  0 f eval: 8 + 1
+        shapes:
+            : $PREFIX PREFIX "top_on" (1 1 1 1) 0 f

@@ -1,0 +1,4 @@
+
+$SET_STR RGRAPH_PREFIX "switch_oneway_"
+$SET_BOOL ONEWAY
+import "anim/_switch.fus"
