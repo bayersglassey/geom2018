@@ -83,13 +83,22 @@ int hexgame_savelocation_save(const char *filename,
 }
 
 int hexgame_savelocation_load(const char *filename,
-    hexgame_savelocation_t *location, hexgame_t *game
+    hexgame_savelocation_t *location, hexgame_t *game,
+    bool *file_found_ptr
 ){
     int err = 0;
 
     char *text = load_file(filename);
+    if(file_found_ptr)*file_found_ptr = true;
     if(text == NULL){
         fprintf(stderr, "Couldn't load location from %s: ", filename);
+
+        /* Indicate to caller that reason for returning a failure code
+        of 2 is missing file.
+        So caller can choose to treat that situation as something other
+        than an outright error. */
+        if(file_found_ptr)*file_found_ptr = false;
+
         return 2;
     }
 

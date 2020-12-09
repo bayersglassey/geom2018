@@ -254,7 +254,7 @@ int player_init(player_t *player, struct hexgame *game, int keymap,
 void player_set_body(player_t *player, body_t *body);
 int player_get_index(player_t *player);
 void hexgame_player_dump(player_t *player, int depth);
-int player_reload(player_t *player, bool *file_found_ptr);
+int player_reload(player_t *player);
 int player_reload_from_location(player_t *player,
     hexgame_savelocation_t *location);
 int player_process_event(player_t *player, SDL_Event *event);

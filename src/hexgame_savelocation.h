@@ -23,6 +23,7 @@ void hexgame_savelocation_set(hexgame_savelocation_t *location, vecspace_t *spac
 int hexgame_savelocation_save(const char *filename,
     hexgame_savelocation_t *location, struct hexgame *game);
 int hexgame_savelocation_load(const char *filename,
-    hexgame_savelocation_t *location, struct hexgame *game);
+    hexgame_savelocation_t *location, struct hexgame *game,
+    bool *file_found_ptr);
 
 #endif

@@ -26,13 +26,15 @@ int test_app_continue_callback(hexgame_t *game, player_t *player){
     int err;
     for(int i = 0; i < game->players_len; i++){
         player_t *player = game->players[i];
-        bool file_found;
-        err = player_reload(player, &file_found);
-        if(err)return err;
-        if(!file_found){
-            err = hexgame_reset_player(game, player, RESET_SOFT, NULL);
-            if(err)return err;
+        if(!player->body){
+            /* This can definitely happen, e.g. generally 2 players are
+            created at start of game, but only player 0 has a body...
+            unless "--players 2" is supplied at commandline, or player
+            0 touches the 2-player door, etc). */
+            continue;
         }
+        err = player_reload(player);
+        if(err)return err;
     }
     return 0;
 }

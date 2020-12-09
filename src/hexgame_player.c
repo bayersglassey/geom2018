@@ -164,28 +164,28 @@ static int player_set_safe_location(player_t *player){
         body->stateset.filename, body->state->name);
 }
 
-int player_reload(player_t *player, bool *file_found_ptr){
+int player_reload(player_t *player){
     /* Reload player's location from file */
     int err;
 
     if(!player->body){
-        /* Could this ever happen?.. maybe. Should we... create a body
-        for player in this case?.. maybe. */
         fprintf(stderr, "%s: no body\n", __func__);
-        return 0;
+        return 2;
     }
 
     hexgame_savelocation_t *location = &player->respawn_location;
 
     /* Attempt to load file */
+    bool file_found;
     err = hexgame_savelocation_load(player->respawn_filename, location,
-        player->game);
-    bool file_found = err == 0;
+        player->game, &file_found);
+    if(err && file_found)return err;
 
-    /* If we couldn't load it, that's not an "error" per se, we'll just
-    report to caller that file wasn't found. */
-    *file_found_ptr = file_found;
-    if(!file_found)return 0;
+    /* If save file doesn't exist, just reset player.
+    (This is what happens if you press "1" at start of game.) */
+    if(!file_found){
+        return hexgame_reset_player(player->game, player, RESET_SOFT, NULL);
+    }
 
     return player_reload_from_location(player, location);
 }
@@ -345,7 +345,8 @@ int player_step(player_t *player, hexgame_t *game){
         /* Soft reset */
         int reset_level =
             body->dead == BODY_ALL_DEAD? RESET_SOFT: RESET_TO_SAFETY;
-        hexgame_reset_player(game, player, reset_level, NULL);
+        err = hexgame_reset_player(game, player, reset_level, NULL);
+        if(err)return err;
 
         /* Player may have gotten a new body object */
         body = player->body;
