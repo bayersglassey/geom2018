@@ -1,10 +1,6 @@
 
 unit: 3 2 0 -1
 spawn: "data/maps/demo/start.fus"
-#spawn: "data/maps/demo/pebbles3.fus"
-#spawn: "data/maps/demo/jungle.fus"
-#spawn: "data/maps/demo/jungle2.fus"
-#spawn: "data/maps/demo/big.fus"
 default_palette: "data/pal1.fus"
 default_tileset: "data/tileset1.fus"
 
@@ -23,6 +19,7 @@ actors:
 vars:
     "map3_blocker": F
     "map3x_blocker": F
+    "jungle_cage": F
 
 submaps:
     :
@@ -32,11 +29,6 @@ submaps:
         camera: (5 4)
         mapper: ("quadruple")
         palette: "data/maps/demo/pals/start.fus"
-        submaps:
-            #:
-            #    bg
-            #    file: "data/maps/demo/keys_text.fus"
-            #    tileset: "data/tileset1_bg.fus"
     :
         file: "data/maps/demo/start2.fus"
         text: "Touch the green thing to save.\nPress 1 to restart from last save point."
@@ -98,10 +90,7 @@ submaps:
                                         camera: (0 -8)
                                         mapper: ("triple")
                                         palette: "data/maps/demo/pals/vines.fus"
-                                        #palette: "data/maps/demo/pals/tunnels.fus"
-                                        #palette: "data/maps/demo/pals/water.fus"
                                         tileset: "data/tileset1.fus"
-                                        #tileset: "data/maps/demo/tilesets/water.fus"
                                         recordings:
                                             : "data/maps/demo/recs/jungle2_bird000.fus"
                                             : "data/maps/demo/recs/jungle3_bird000.fus" "player_cpu"
@@ -125,29 +114,20 @@ submaps:
                                         camera: (6 0)
                                         mapper: ("triple")
                                         palette: "data/maps/demo/pals/vines.fus"
-                                        #palette: "data/maps/demo/pals/tunnels.fus"
-                                        #palette: "data/maps/demo/pals/water.fus"
                                         tileset: "data/maps/demo/tilesets/water.fus"
-                                        #tileset: "data/tileset1.fus"
                                     :
                                         file: "data/maps/demo/jungle4.fus"
                                         pos: eval: (-40 4) + (-6 -18) + (10 -16)
                                         camera: (0 0)
                                         mapper: ("triple")
                                         palette: "data/maps/demo/pals/vines.fus"
-                                        #palette: "data/maps/demo/pals/tunnels.fus"
-                                        #palette: "data/maps/demo/pals/water.fus"
                                         tileset: "data/maps/demo/tilesets/water.fus"
-                                        #tileset: "data/tileset1.fus"
                                     :
                                         pos: eval: (-40 4) + (-6 -18) + (15 -8) + (24 7)
                                         camera: follow
                                         mapper: ("solid_curvy")
                                         palette: "data/maps/demo/pals/vines.fus"
-                                        #palette: "data/maps/demo/pals/tunnels.fus"
-                                        #palette: "data/maps/demo/pals/water.fus"
                                         tileset: "data/maps/demo/tilesets/water.fus"
-                                        #tileset: "data/tileset1.fus"
                                         submaps:
                                             :
                                                 bg
@@ -155,12 +135,10 @@ submaps:
                                                 tileset: "data/tileset1_bg.fus"
                                             :
                                                 file: "data/maps/demo/jungle5.fus"
-                                                doors:
-                                                    :
-                                                        anim: "anim/spikeyplayer.fus"
-                                                        pos: (-14 8)
-                                                        rot: 0
-                                                        turn: y
+                                            :
+                                                file: "data/maps/demo/jungle_cage.fus"
+                                                visible: not "jungle_cage"
+                                                pos: (15 2)
             :
                 file: "data/maps/demo/pebbles.fus"
                 pos: (15 -2)
@@ -294,9 +272,6 @@ submaps:
         pos: (40 60)
         camera: (0 0)
         recordings:
-            #: "data/maps/demo/recs/test_000.fus" "player_cpu"
-            #: "data/maps/demo/recs/test_001.fus" "player_cpu"
-            #: "data/maps/demo/recs/test_002.fus" "player_cpu"
             : "data/maps/demo/recs/test_003.fus" "player_cpu"
             : "data/maps/demo/recs/test_flier_000.fus"
         submaps:

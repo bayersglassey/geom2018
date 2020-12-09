@@ -1,12 +1,10 @@
 parts:
     "c": recording "data/recs/coin.fus"
     "C": recording "data/recs/coin_crouch.fus"
-    "D": recording "data/recs/coin_crouch.fus"
-    "D": "data/maps/demo/vert.fus"
 
 collmap:
     ;;
-    ;;                                                                       ?   ? - ? - +    [C][C][D]
+    ;;                                                                       ?   ? - ! - +    [C][C][C]
     ;;                                                                      /* * * * * */
     ;;                                                                     +           +
     ;;                                                                      \* * * * * *\
