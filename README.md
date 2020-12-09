@@ -1,7 +1,7 @@
-# DEPTHS OF UO
+# SPIDER GAME
 
 
-## What is "Depths of Uo"?
+## What is "Spider Game"?
 
 A game in development, a kind of puzzly arcadey look at the triangular grid.
 
@@ -30,7 +30,7 @@ Press Spacebar to spit harmless balls.
 Their only use is to look cool, and help you judge your jumps.
 
 
-## "Depths of Uo" screenshots
+## Spider Game screenshots
 
 ### Why hello.
 ![](/img/start_0.gif)

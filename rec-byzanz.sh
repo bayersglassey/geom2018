@@ -2,7 +2,7 @@ set -e
 
 OUTFILE="out.gif"
 
-WININFO=`xwininfo -name "Depths of Uo"`
+WININFO=`xwininfo -name "Spider Game"`
 echo "$WININFO"
 WIX=`echo "$WININFO" | sed -nr -e 's/^.*Absolute upper-left X: +([0-9]+).*$/\1/p'`
 WIY=`echo "$WININFO" | sed -nr -e 's/^.*Absolute upper-left Y: +([0-9]+).*$/\1/p'`

@@ -1,1 +1,1 @@
-xwininfo -name "Depths of Uo" | sed -E -n -e 's/^.*Window id: ([^ ]+).*/\1/p'
+xwininfo -name "Spider Game" | sed -E -n -e 's/^.*Window id: ([^ ]+).*/\1/p'

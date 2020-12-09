@@ -100,7 +100,7 @@ int main(int n_args, char *args[]){
         e = 1;
         fprintf(stderr, "SDL_Init error: %s\n", SDL_GetError());
     }else{
-        SDL_Window *window = SDL_CreateWindow("Depths of Uo",
+        SDL_Window *window = SDL_CreateWindow("Spider Game",
             SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
             SCW, SCH, window_flags);
 
