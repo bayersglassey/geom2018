@@ -50,6 +50,15 @@ Their only use is to look cool, and help you judge your jumps.
 ### Your useless bouncing spit
 ![](/img/map1_0.gif)
 
+### A mysterious place
+![](/img/screen7.png)
+
+### An untimely end
+![](/img/screen8.png)
+
+## Title screen
+![](/img/screens2020/title.png)
+
 
 ## "geom2018" screenshots
 
