@@ -653,3 +653,17 @@ That lets us get a bit fancy, like:
     * There are switches here which open stuff on the outside of the closed-in area
     * ...in other words, you can unlock a bunch of stuff, then go back into maps/water
         via the bottom-left part of jungle area
+
+Ummmmmmmm you can shoot switches through walls?? Dang.
+
+
+Dec 10, 2020:
+-------------
+
+Spidertown: current one is small -- "spider fort"?
+Anyway, the real one should be similar but composed of maany of those circular structures
+(see data/maps/test/map1.fus). But like... a whole field of them.
+Randomize it?
+Enhance collmaptool (or add hexmaptool, submaptool)?
+Then we can use current random generation stuff, but then *save* the results,
+and edit them by hand. Hand-curate, if you will.
