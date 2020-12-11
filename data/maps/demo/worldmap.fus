@@ -21,6 +21,7 @@ vars:
     "map3_blocker": F
     "map3x_blocker": F
     "jungle_cage": F
+    "vines3_door": F
 
 submaps:
     :
@@ -71,6 +72,17 @@ submaps:
                                         camera: (-6 7)
                                         mapper: ("quadruple")
                                         palette: "data/maps/demo/pals/water.fus"
+                                        submaps:
+                                            :
+                                                file: "data/maps/demo/vines3_door.fus"
+                                                visible: "vines3_door"
+                                                pos: (-11 8)
+                                                doors:
+                                                    :
+                                                        map: "data/maps/water/worldmap.fus"
+                                                        pos: (1 8)
+                                                        rot: 0
+                                                        turn: n
                                     :
                                         file: "data/maps/demo/vines4.fus"
                                         pos: (-40 4)

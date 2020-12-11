@@ -33,8 +33,13 @@ escape1_wait:
             ;;    (.)  .   .   .   .   .       + - +
     then:
         play: "actor/hermit/recs/escape2.fus"
-        goto: escaped
+        goto: open_door
     if() then:
         play: "actor/hermit/recs/escape1_wait.fus"
+
+open_door:
+    if() then:
+        set mapvar("vines3_door"): T
+        goto: escaped
 
 escaped:
