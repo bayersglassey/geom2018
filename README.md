@@ -4,16 +4,16 @@
 ## What is "Spider Game"?
 
 A game in development, a kind of puzzly arcadey look at the triangular grid.
+You play as a spider... robot?..
+There are screenshots below.
+
+![A spider... robot](/www/img/player.png)
 
 It [has a website](http://depths.bayersglassey.com) which may or may not be up at the moment.
-If it's up, you should be able to play it online, thanks to the wonders of
+If it's up, you should be able to play an old version of it online, thanks to the wonders of
 [Emscripten](https://emscripten.org/).
-
-
-## What is "geom2018"?
-
-A graphics library for tesselating the plane with squares & triangles.
-The game demo has sprouted from it, and come to overshadow the library...
+The Emscripten version is from an old build, and seems to run into some nasty lag, so if you
+like it whatsoever, consider cloning this repo and attempting to build it locally!
 
 
 ## How to compile & run the game
@@ -26,11 +26,20 @@ Once the game is running, use the arrow keys to move, Escape to quit.
 If you die or get stuck, press '1' to respawn at the last save point you touched.
 (Save points are the glowing rotating green things.)
 
-Press Spacebar to spit harmless balls.
-Their only use is to look cool, and help you judge your jumps.
+Press Spacebar to spit little balls, like a real spider.
+They mostly just help you judge your jumps, but you may find... other uses for them also.
+
+
+## What is "geom2018"?
+
+A graphics library for tesselating the plane with squares & triangles.
+The game demo has sprouted from it, and come to overshadow the library...
 
 
 ## Spider Game screenshots
+
+### I know you want to play this
+![](/img/title.png)
 
 ### Why hello.
 ![](/img/start_0.gif)
@@ -55,9 +64,6 @@ Their only use is to look cool, and help you judge your jumps.
 
 ### An untimely end
 ![](/img/screen8.png)
-
-## Title screen
-![](/img/screens2020/title.png)
 
 
 ## "geom2018" screenshots
