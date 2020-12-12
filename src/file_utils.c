@@ -39,7 +39,7 @@ char *load_file(const char *filename){
     if(f_buffer == NULL){
         perror("calloc");
         fprintf(stderr,
-            "Could not allocate buffer for file: %s (%zu bytes)\n",
+            "Could not allocate buffer for file: %s (%li bytes)\n",
             filename, f_size);
         fclose(f);
         return NULL;
@@ -48,7 +48,7 @@ char *load_file(const char *filename){
     if(n_read_bytes < f_size){
         perror("fread");
         fprintf(stderr,
-            "Could not read (all of) file: %s (%zu bytes)\n",
+            "Could not read (all of) file: %s (%li bytes)\n",
             filename, f_size);
         free(f_buffer);
         fclose(f);
