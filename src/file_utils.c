@@ -39,7 +39,7 @@ char *load_file(const char *filename){
     if(f_buffer == NULL){
         perror("calloc");
         fprintf(stderr,
-            "Could not allocate buffer for file: %s (%li bytes)\n",
+            "Could not allocate buffer for file: %s (%zu bytes)\n",
             filename, f_size);
         fclose(f);
         return NULL;
@@ -48,7 +48,7 @@ char *load_file(const char *filename){
     if(n_read_bytes < f_size){
         perror("fread");
         fprintf(stderr,
-            "Could not read (all of) file: %s (%li bytes)\n",
+            "Could not read (all of) file: %s (%zu bytes)\n",
             filename, f_size);
         free(f_buffer);
         fclose(f);
@@ -68,7 +68,7 @@ char *read_stream(FILE *file, const char *filename){
         if(!buffer){
             perror("realloc");
             fprintf(stderr,
-                "Could not allocate %li-byte buffer for stream: %s\n",
+                "Could not allocate %zu-byte buffer for stream: %s\n",
                 bufsize, filename);
             return NULL;
         }
@@ -81,7 +81,7 @@ char *read_stream(FILE *file, const char *filename){
                 free(buffer);
                 perror("fread");
                 fprintf(stderr,
-                    "Failed read (%li/%li bytes) from stream: %s\n",
+                    "Failed read (%zu/%zu bytes) from stream: %s\n",
                     n_read_bytes, CHUNK_SIZE, filename);
                 return NULL;
             }
