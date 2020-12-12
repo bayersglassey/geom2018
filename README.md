@@ -10,10 +10,13 @@ There are screenshots below.
 ![A spider... robot](/www/img/player.png)
 
 It [has a website](http://depths.bayersglassey.com) which may or may not be up at the moment.
-If it's up, you should be able to play an old version of it online, thanks to the wonders of
+If it's up, you should be able to play it online, thanks to the wonders of
 [Emscripten](https://emscripten.org/).
-The Emscripten version is from an old build, and seems to run into some nasty lag, so if you
-like it whatsoever, consider cloning this repo and attempting to build it locally!
+The Emscripten version may be from an older build, and seems to run into some nasty lag,
+probably because this game eats RAM like mad: the more you explore the map, the more stuff
+is rendered, and cached for the lifetime of the running executable.
+
+So if you enjoy playing it at all, consider cloning this repo and attempting to build it locally! :)
 
 
 ## How to compile & run the game
