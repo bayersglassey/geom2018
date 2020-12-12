@@ -1,4 +1,4 @@
-#include "lexer.h"
+#include "../lexer.h"
 
 static bool token_cmp(
     size_t len1, const char *token1,

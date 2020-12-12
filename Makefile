@@ -39,59 +39,59 @@ SDL_OFILES = \
 all: $(PROGS)
 
 clean:
-	rm -f src/*.o $(PROGS)
+	rm -f src/*.o src/main/*.o $(PROGS)
 
 check: $(TESTS)
 	./runtests.sh $(TESTS)
 
-bin/collmaptool: src/main_collmaptool.o $(OFILES)
+bin/collmaptool: src/main/collmaptool.o $(OFILES)
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^
 
-bin/lexertest: src/main_lexertest.o $(OFILES)
+bin/lexertest: src/main/lexertest.o $(OFILES)
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^
 
-bin/lexertool: src/main_lexertool.o $(OFILES)
+bin/lexertool: src/main/lexertool.o $(OFILES)
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^
 
-bin/frozenstringtest: src/main_frozen_string_test.o src/frozen_string.o
+bin/frozenstringtest: src/main/frozen_string_test.o src/frozen_string.o
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^
 
-bin/geomtest: src/main_geomtest.o $(OFILES)
+bin/geomtest: src/main/geomtest.o $(OFILES)
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^
 
-bin/stringstoretest: src/main_stringstoretest.o src/stringstore.o
+bin/stringstoretest: src/main/stringstoretest.o src/stringstore.o
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^
 
-bin/varstest: src/main_varstest.o src/vars.o src/lexer.o src/write.o src/str_utils.o src/file_utils.o src/var_utils.o
+bin/varstest: src/main/varstest.o src/vars.o src/lexer.o src/write.o src/str_utils.o src/file_utils.o src/var_utils.o
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^
 
-bin/hexpicturetest: src/main_hexpicture.o src/hexpicture.o
+bin/hexpicturetest: src/main/hexpicture.o src/hexpicture.o
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^
 
-bin/sdltest: src/main_sdltest.o src/util.o src/file_utils.o
+bin/sdltest: src/main/sdltest.o src/util.o src/file_utils.o
 	mkdir -p bin
 	$(CC) $(CFLAGS) -lm -o $@ $^
 
-bin/directorytest: src/main_directorytest.o src/directory.o src/directory_shell.o $(OFILES)
+bin/directorytest: src/main/directorytest.o src/directory.o src/directory_shell.o $(OFILES)
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^
 
-bin/prendtool: src/main_prendtool.o $(OFILES) $(SDL_OFILES)
+bin/prendtool: src/main/prendtool.o $(OFILES) $(SDL_OFILES)
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^
 
-bin/demo: src/main_demo.o $(OFILES) $(SDL_OFILES)
+bin/demo: src/main/demo.o $(OFILES) $(SDL_OFILES)
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^
 
-bin/minieditor: src/main_minieditor.o $(OFILES) $(SDL_OFILES)
+bin/minieditor: src/main/minieditor.o $(OFILES) $(SDL_OFILES)
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^

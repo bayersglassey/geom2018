@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "vars.h"
-#include "var_utils.h"
+#include "../vars.h"
+#include "../var_utils.h"
 
 
 #define ASSERT(COND) n_tests++; if(COND){ \

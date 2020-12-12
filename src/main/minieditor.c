@@ -5,9 +5,9 @@
 #include <time.h>
 #include <SDL2/SDL.h>
 
-#include "util.h"
-#include "vec4.h"
-#include "minieditor.h"
+#include "../util.h"
+#include "../vec4.h"
+#include "../minieditor.h"
 
 
 #define DEFAULT_PREND_FILENAME "data/test.fus"

@@ -1,9 +1,8 @@
 # executables
-/main
 /bin/*
 
 # gcc stuff
-/src/*.o
+*.o
 
 # demo stuff
 /respawn*.txt

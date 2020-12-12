@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stringstore.h"
+#include "../stringstore.h"
 
 
 #define ASSERT(COND) n_tests++; if(COND){ \

@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "hexpicture.h"
+#include "../hexpicture.h"
 
 
 #define LINE_LEN 200

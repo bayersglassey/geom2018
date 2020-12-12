@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "lexer.h"
-#include "write.h"
-#include "file_utils.h"
+#include "../lexer.h"
+#include "../write.h"
+#include "../file_utils.h"
 
 
 #define COLORS 16

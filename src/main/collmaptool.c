@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "str_utils.h"
-#include "file_utils.h"
-#include "hexspace.h"
-#include "hexcollmap.h"
+#include "../str_utils.h"
+#include "../file_utils.h"
+#include "../hexspace.h"
+#include "../hexcollmap.h"
 
 
 static hexcollmap_t *load_collmap(FILE *file, const char *filename,

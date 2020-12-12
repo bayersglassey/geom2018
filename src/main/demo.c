@@ -5,7 +5,7 @@
 #include <time.h>
 #include <SDL2/SDL.h>
 
-#include "test_app.h"
+#include "../test_app.h"
 
 
 #define SCW 1024
@@ -16,7 +16,7 @@
 
 
 #ifdef __EMSCRIPTEN__
-#include "emscripten.h"
+#include "../emscripten.h"
 static void test_app_mainloop_emcc(void *arg){
     test_app_t *app = arg;
     int e = test_app_mainloop_step(app);

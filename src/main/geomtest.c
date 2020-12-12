@@ -1,10 +1,10 @@
 
 #include <stdio.h>
 
-#include "vec4.h"
-#include "hexspace.h"
-#include "hexbox.h"
-#include "bounds.h"
+#include "../vec4.h"
+#include "../hexspace.h"
+#include "../hexbox.h"
+#include "../bounds.h"
 
 
 char ok_char(bool ok){

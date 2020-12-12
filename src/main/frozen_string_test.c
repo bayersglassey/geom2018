@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "frozen_string.h"
+#include "../frozen_string.h"
 
 
 #define ASSERT(COND) fprintf(stderr, "T%i: ", n_tests); n_tests++; if(COND){ \

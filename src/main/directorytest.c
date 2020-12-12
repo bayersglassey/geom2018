@@ -4,13 +4,13 @@
 #include <limits.h>
 
 
-#include "file_utils.h"
-#include "str_utils.h"
-#include "array.h"
-#include "lexer.h"
-#include "lexer_macros.h"
-#include "directory.h"
-#include "directory_shell.h"
+#include "../file_utils.h"
+#include "../str_utils.h"
+#include "../array.h"
+#include "../lexer.h"
+#include "../lexer_macros.h"
+#include "../directory.h"
+#include "../directory_shell.h"
 
 
 

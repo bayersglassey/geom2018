@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "prismelrenderer.h"
-#include "directory.h"
-#include "directory_shell.h"
-#include "vec4.h"
+#include "../prismelrenderer.h"
+#include "../directory.h"
+#include "../directory_shell.h"
+#include "../vec4.h"
 
 
 const char *DEFAULT_PREND_FILENAME = "data/test.fus";
