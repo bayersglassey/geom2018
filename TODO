@@ -667,3 +667,16 @@ Randomize it?
 Enhance collmaptool (or add hexmaptool, submaptool)?
 Then we can use current random generation stuff, but then *save* the results,
 and edit them by hand. Hand-curate, if you will.
+
+
+Dec 11, 2020:
+-------------
+
+Currently impossible to return from vines area??
+
+LOOK FURTHER INTO EMSCRIPTEN!!!
+It actually seems to work really well.
+But how can we e.g. stop window from scrolling when player hits arrow keys?..
+And can we map the F* keys to something else?..
+
+The big_roller who guards the entrance to maps/triangles tends to camp on the door. :P
