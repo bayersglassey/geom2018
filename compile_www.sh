@@ -26,7 +26,7 @@ CFLAGS+=" -s ALLOW_MEMORY_GROWTH=1"
 
 if [ "$RELEASE" = 1 ]
 then
-    CFLAGS+=" -O2"
+    CFLAGS+=" -O2 -g"
 else
     CFLAGS+=" -O0 -g"
 fi
