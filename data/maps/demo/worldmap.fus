@@ -28,7 +28,7 @@ submaps:
         file: "data/maps/demo/start.fus"
         text: "Press Enter to show/hide controls"
         pos: (0 0)
-        camera: (5 4)
+        camera: (6 4)
         mapper: ("quadruple")
         palette: "data/maps/demo/pals/start.fus"
     :
