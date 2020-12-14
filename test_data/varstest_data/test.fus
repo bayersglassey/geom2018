@@ -1,5 +1,5 @@
-x: 3
-hello: "world"
-yes: T
-no: F
-nothing: null
+"x": 3
+"hello": "world"
+"yes": T
+"no": F
+"nothing": null
