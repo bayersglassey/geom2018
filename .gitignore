@@ -15,6 +15,9 @@
 # gprof stuff
 /gmon.out
 
+# www stuff
+/www/
+
 # EMCC files (should be removed by _compile_demo)
 #/main.js
 #/main.html
