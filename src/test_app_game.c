@@ -126,11 +126,13 @@ int test_app_render_game(test_app_t *app){
 
     int line_y = 0;
 
+    bool showed_dead_msg = false;
     for(int i = 0; i < game->players_len; i++){
         player_t *player = game->players[i];
         body_t *body = player->body;
         if(!body)continue;
         if(body->dead == BODY_MOSTLY_DEAD){
+            showed_dead_msg = true;
             test_app_printf(app, 0, line_y * app->font.char_h,
                 "You ran into a wall!\n"
                 "Press jump to retry from where you jumped.\n"
@@ -138,12 +140,14 @@ int test_app_render_game(test_app_t *app){
                 i+1);
             line_y += 3;
         }else if(body->dead == BODY_ALL_DEAD){
+            showed_dead_msg = true;
             test_app_printf(app, 0, line_y * app->font.char_h,
                 "You were crushed!\n"
                 "Press jump or %i to retry from last save point.\n",
                 i+1);
             line_y += 2;
         }else if(body->out_of_bounds && !body->state->flying){
+            showed_dead_msg = true;
             test_app_printf(app, 0, line_y * app->font.char_h,
                 "You jumped off the map!\n"
                 "Press jump to retry from where you jumped.\n"
@@ -156,7 +160,7 @@ int test_app_render_game(test_app_t *app){
     if(app->show_console){
         err = test_app_blit_console(app, 0, line_y * app->font.char_h);
         if(err)return err;
-    }else{
+    }else if(!showed_dead_msg){
         if(app->show_controls){
             test_app_printf(app, 0, line_y * app->font.char_h,
                 "*Controls:\n"
