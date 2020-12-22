@@ -4,10 +4,11 @@ spawn: "data/maps/tutorial/start.fus"
 default_palette: "data/pal1.fus"
 default_tileset: "data/tileset1.fus"
 
-$SET_STR TUT1 "Welcome to Crawl Space!\nUse the left+right arrow keys to move."
-$SET_STR TUT2 "Keep going!\n\nSometimes you'll be upside down.\nSometimes you'll jump over things.\n\nDon't worry about it!"
+$SET_STR TUT1 "\n\n   Welcome to Crawl Space!\n\n  Use the left & right arrow keys to move."
+$SET_STR TUT2 "Keep going!\n\nSometimes you'll be upside down.\nDon't worry about it!\nThere is no gravity here."
 $SET_STR TUT_LOOP "\n      BE BRAVE!!!"
-$SET_STR TUT3 "Sometimes you'll need to jump.\n\nPress the up arrow key to jump!"
+$SET_STR TUT3 "Sometimes you'll need to jump.\n\nPress the up arrow key to leap forwards!"
+$SET_STR TUT4 "    Welcome to your first puzzle.\n      Where haven't you been yet?.."
 
 submaps:
     :
@@ -41,6 +42,6 @@ submaps:
                 camera: (9 -2)
             :
                 file: "data/maps/tutorial/start5.fus"
-                text: $GET_STR TUT3
+                text: $GET_STR TUT4
                 pos: eval: (19 0) + (19 -1) + (19 -6) + (19 -3) + (19 -5)
                 camera: (3 0)
