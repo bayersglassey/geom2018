@@ -3,41 +3,49 @@ unit: 3 2 0 -1
 spawn: "data/maps/tutorial/start.fus"
 default_palette: "data/pal1.fus"
 default_tileset: "data/tileset1.fus"
+vars:
+    "solved_puzzle": F
 
 $SET_STR TUT1 "\n\n   Welcome to Crawl Space!\n\n  Use the left & right arrow keys to move."
 $SET_STR TUT2 "Keep going!\n\nSometimes you'll be upside down.\nDon't worry about it!\nThere is no gravity here."
 $SET_STR TUT_LOOP "\n      BE BRAVE!!!"
 $SET_STR TUT3 "Sometimes you'll need to jump.\n\nPress the up arrow key to leap forwards!"
 $SET_STR TUT4 "    Welcome to your first puzzle.\n      Where haven't you been yet?.."
+$SET_STR TUT_SOLVED_PUZZLE "        Remember, sometimes you'll be upside down.\n    Don't worry about it!\n   Keep going."
+$SET_STR TUT_GO "      Keep going."
+$SET_STR TUT_GO2 "\n         Keeeep going."
+$SET_STR TUT_GO3 "\n\n            Almost there."
+
+$SET_STR TUT_CRAWL "Yyyyyyyeaaaaaaaaaaah!!!"
 
 submaps:
     :
         pos: (0 0)
-        camera: (0 0)
         mapper: ("triple")
         submaps:
             :
                 file: "data/maps/tutorial/start.fus"
-                text: $GET_STR TUT1
+                text: if mapvar("solved_puzzle") then $GET_STR TUT_GO3 else $GET_STR TUT1
                 pos: eval: (0 0)
                 camera: (9 0)
             :
                 file: "data/maps/tutorial/start2.fus"
+                text: if mapvar("solved_puzzle") then $GET_STR TUT_GO2 else null
                 pos: eval: (19 0)
                 camera: (9 0)
             :
                 file: "data/maps/tutorial/start3.fus"
-                text: $GET_STR TUT2
+                text: if mapvar("solved_puzzle") then $GET_STR TUT_GO else $GET_STR TUT2
                 pos: eval: (19 0) + (19 -1)
                 camera: (9 -2)
             :
                 file: "data/maps/tutorial/loop.fus"
-                text: $GET_STR TUT_LOOP
+                text: if mapvar("solved_puzzle") then null else $GET_STR TUT_LOOP
                 pos: eval: (19 0) + (19 -1) + (19 -6)
-                camera: (9 -2)
+                camera: (9 0)
             :
                 file: "data/maps/tutorial/start4.fus"
-                text: $GET_STR TUT3
+                text: if mapvar("solved_puzzle") then $GET_STR TUT_SOLVED_PUZZLE else $GET_STR TUT3
                 pos: eval: (19 0) + (19 -1) + (19 -6) + (19 -3)
                 camera: (9 -2)
             :
@@ -45,3 +53,12 @@ submaps:
                 text: $GET_STR TUT4
                 pos: eval: (19 0) + (19 -1) + (19 -6) + (19 -3) + (19 -5)
                 camera: (3 0)
+    :
+        pos: (0 0)
+        mapper: ("quadruple")
+        submaps:
+            :
+                file: "data/maps/tutorial/crawl.fus"
+                text: $GET_STR TUT_CRAWL
+                pos: eval: (26 10)
+                camera: (9 0)
