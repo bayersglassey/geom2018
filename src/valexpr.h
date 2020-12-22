@@ -11,6 +11,7 @@ enum valexpr_type {
     VALEXPR_TYPE_LITERAL,
     VALEXPR_TYPE_MAPVAR,
     VALEXPR_TYPE_MYVAR,
+    VALEXPR_TYPE_IF,
     VALEXPR_TYPES
 };
 
@@ -19,6 +20,7 @@ static const char *valexpr_type_msg(int type){
         case VALEXPR_TYPE_LITERAL: return "literal";
         case VALEXPR_TYPE_MAPVAR: return "mapvar";
         case VALEXPR_TYPE_MYVAR: return "myvar";
+        case VALEXPR_TYPE_IF: return "if";
         default: return "unknown";
     }
 }
@@ -30,6 +32,11 @@ typedef struct valexpr {
     union {
         val_t val;
         struct valexpr *key_expr;
+        struct {
+            struct valexpr *cond_expr;
+            struct valexpr *then_expr;
+            struct valexpr *else_expr;
+        } if_expr;
     } u;
 } valexpr_t;
 
