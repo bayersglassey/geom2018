@@ -7,6 +7,15 @@
 #include "../bounds.h"
 
 
+void dump_vec(int dims, vec_t v){
+    FILE *f = stdout;
+    fprintf(f, "[% i", v[0]);
+    for(int i = 1; i < dims; i++){
+        fprintf(f, " % i", v[i]);
+    }
+    fprintf(f, "]");
+}
+
 char ok_char(bool ok){
     return ok? '.': 'X';
 }
@@ -15,8 +24,8 @@ int hexspace_test(vec_t v, int x, int y){
     vec_t w;
     hexspace_set(w, x, y);
     bool ok = vec_eq(HEXSPACE_DIMS, v, w);
-    printf("%c ", ok_char(ok)); vec_printf(HEXSPACE_DIMS, v);
-    printf(" == "); vec_printf(HEXSPACE_DIMS, w); printf("\n");
+    printf("%c ", ok_char(ok)); dump_vec(HEXSPACE_DIMS, v);
+    printf(" == "); dump_vec(HEXSPACE_DIMS, w); printf("\n");
     return ok? 0: 1;
 }
 
@@ -31,7 +40,7 @@ int hexspace_test_angle(vec_t v, rot_t rot_expected,
         (rot == rot_expected) &&
         (dist == dist_expected) &&
         (angle == angle_expected);
-    printf("%c ", ok_char(ok)); vec_printf(HEXSPACE_DIMS, v);
+    printf("%c ", ok_char(ok)); dump_vec(HEXSPACE_DIMS, v);
     printf(" -> (%i, %i, %i) == (%i, %i, %i)\n",
         rot, dist, angle,
         rot_expected, dist_expected, angle_expected);
@@ -42,8 +51,8 @@ int vec4_test(vec_t v, int a, int b, int c, int d){
     vec_t w;
     vec4_set(w, a, b, c, d);
     bool ok = vec_eq(VEC4_DIMS, v, w);
-    printf("%c ", ok_char(ok)); vec_printf(VEC4_DIMS, v);
-    printf(" == "); vec_printf(VEC4_DIMS, w); printf("\n");
+    printf("%c ", ok_char(ok)); dump_vec(VEC4_DIMS, v);
+    printf(" == "); dump_vec(VEC4_DIMS, w); printf("\n");
     return ok? 0: 1;
 }
 

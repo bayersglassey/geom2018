@@ -63,11 +63,11 @@ void vec_neg(int dims, vec_t v){
 }
 
 void vec_fprintf(FILE *f, int dims, vec_t v){
-    fprintf(f, "[% i", v[0]);
+    fprintf(f, "(% i", v[0]);
     for(int i = 1; i < dims; i++){
         fprintf(f, " % i", v[i]);
     }
-    fprintf(f, "]");
+    fprintf(f, ")");
 }
 
 void vec_printf(int dims, vec_t v){
@@ -262,16 +262,8 @@ static int fus_lexer_get_vec_simple(fus_lexer_t *lexer,
     return 0;
 }
 
-int fus_lexer_get_vec(fus_lexer_t *lexer, vecspace_t *space, vec_t vec){
+int fus_lexer_eval_vec(fus_lexer_t *lexer, vecspace_t *space, vec_t vec){
     int err;
-
-    if(fus_lexer_got(lexer, "(")){
-        return fus_lexer_get_vec_simple(lexer, space, vec);}
-
-    err = fus_lexer_get(lexer, "eval");
-    if(err)return err;
-    err = fus_lexer_get(lexer, "(");
-    if(err)return err;
 
     vec_zero(vec);
     while(1){
@@ -292,13 +284,28 @@ int fus_lexer_get_vec(fus_lexer_t *lexer, vecspace_t *space, vec_t vec){
 
         vec_add(space->dims, vec, add);
 
-        if(fus_lexer_got(lexer, ")"))break;
+        if(fus_lexer_done(lexer) || fus_lexer_got(lexer, ")"))break;
 
         err = fus_lexer_get(lexer, "+");
         if(err)return err;
     }
-    err = fus_lexer_next(lexer);
-    if(err)return err;
 
+    return 0;
+}
+
+int fus_lexer_get_vec(fus_lexer_t *lexer, vecspace_t *space, vec_t vec){
+    int err;
+
+    if(fus_lexer_got(lexer, "(")){
+        return fus_lexer_get_vec_simple(lexer, space, vec);}
+
+    err = fus_lexer_get(lexer, "eval");
+    if(err)return err;
+    err = fus_lexer_get(lexer, "(");
+    if(err)return err;
+    err = fus_lexer_eval_vec(lexer, space, vec);
+    if(err)return err;
+    err = fus_lexer_get(lexer, ")");
+    if(err)return err;
     return 0;
 }
