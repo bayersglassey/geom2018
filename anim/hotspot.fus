@@ -1,0 +1,34 @@
+
+# Expected vars at runtime:
+# * key (str)
+
+init:
+    if:
+        get_bool mapvar(myvar("key"))
+    then:
+        goto immediate: touched
+
+    if:
+    then:
+        goto immediate: waiting
+
+waiting:
+    rgraph: "hotspot_waiting"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . -(+)- .
+        ;;   */*\*
+        ;;   .   .
+    on "touch":
+        set mapvar(myvar("key")): T
+        goto: touched
+
+touched:
+    rgraph: "hotspot_touched"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . -(+)- .
+        ;;   */*\*
+        ;;   .   .

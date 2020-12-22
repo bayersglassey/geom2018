@@ -1,0 +1,60 @@
+
+#$SET_BOOL HOTSPOT_VISIBLE
+
+shapes:
+
+    "_hotspot_vertex":
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 0
+            : "tri" (0 0 0 0)  2 f eval: 1 + 8 + 0
+            : "tri" (0 0 0 0)  4 f eval: 1 + 8 + 0
+            : "tri" (0 0 0 0)  6 f eval: 1 + 8 + 0
+            : "tri" (0 0 0 0)  8 f eval: 1 + 8 + 0
+            : "tri" (0 0 0 0) 10 f eval: 1 + 8 + 0
+
+    "_hotspot_edge":
+        prismels:
+            : "tri" (1 0 0  0) 11 f eval: 1 + 8 + 0
+            : "sq"  (1 1 0 -1)  0 f eval: 1 + 8 + 0
+            : "tri" (2 2 0 -1)  5 f eval: 1 + 8 + 0
+
+    ####################################################
+    # WAITING
+
+    "_hotspot_waiting_sixth":
+        shapes:
+            : "_hotspot_vertex" (3 2 0 -1) 0 f
+            : "_hotspot_edge"   (3 2 0 -1) 4 f
+
+    "_hotspot_waiting":
+        shapes:
+            : "_hotspot_waiting_sixth" (0 0 0 0)  0 f
+            : "_hotspot_waiting_sixth" (0 0 0 0)  2 f
+            : "_hotspot_waiting_sixth" (0 0 0 0)  4 f
+            : "_hotspot_waiting_sixth" (0 0 0 0)  6 f
+            : "_hotspot_waiting_sixth" (0 0 0 0)  8 f
+            : "_hotspot_waiting_sixth" (0 0 0 0) 10 f
+
+    "hotspot_waiting":
+        $IF HOTSPOT_VISIBLE: shapes:
+            : "_hotspot_waiting" (0 0 0 0)  0 f
+
+    ####################################################
+    # TOUCHED
+
+    "_hotspot_touched_sixth":
+        shapes:
+            : "_hotspot_vertex" (3 2 0 -1) 0 f
+
+    "_hotspot_touched":
+        shapes:
+            : "_hotspot_touched_sixth" (0 0 0 0)  0 f
+            : "_hotspot_touched_sixth" (0 0 0 0)  2 f
+            : "_hotspot_touched_sixth" (0 0 0 0)  4 f
+            : "_hotspot_touched_sixth" (0 0 0 0)  6 f
+            : "_hotspot_touched_sixth" (0 0 0 0)  8 f
+            : "_hotspot_touched_sixth" (0 0 0 0) 10 f
+
+    "hotspot_touched":
+        $IF HOTSPOT_VISIBLE: shapes:
+            : "_hotspot_touched" (0 0 0 0)  0 f
