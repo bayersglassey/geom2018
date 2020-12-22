@@ -290,7 +290,7 @@ int fus_lexer_eval_vec(fus_lexer_t *lexer, vecspace_t *space, vec_t vec){
 
                 rot_t rot = rot_contain(space->rot_max, n);
                 space->vec_rot(add, n);
-            }else if(fus_lexer_got(lexer, "!")){
+            }else if(fus_lexer_got(lexer, "~")){
                 err = fus_lexer_next(lexer);
                 if(err)return err;
                 space->vec_flip(add, true);
