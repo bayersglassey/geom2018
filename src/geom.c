@@ -272,14 +272,31 @@ int fus_lexer_eval_vec(fus_lexer_t *lexer, vecspace_t *space, vec_t vec){
         err = fus_lexer_get_vec_simple(lexer, space, add);
         if(err)return err;
 
-        if(fus_lexer_got(lexer, "*")){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
-            int n;
-            err = fus_lexer_get_int(lexer, &n);
-            if(err)return err;
+        while(1){
+            if(fus_lexer_got(lexer, "*")){
+                err = fus_lexer_next(lexer);
+                if(err)return err;
+                int n;
+                err = fus_lexer_get_int(lexer, &n);
+                if(err)return err;
 
-            vec_nmul(space->dims, add, n);
+                vec_nmul(space->dims, add, n);
+            }else if(fus_lexer_got(lexer, "^")){
+                err = fus_lexer_next(lexer);
+                if(err)return err;
+                int n;
+                err = fus_lexer_get_int(lexer, &n);
+                if(err)return err;
+
+                rot_t rot = rot_contain(space->rot_max, n);
+                space->vec_rot(add, n);
+            }else if(fus_lexer_got(lexer, "!")){
+                err = fus_lexer_next(lexer);
+                if(err)return err;
+                space->vec_flip(add, true);
+            }else{
+                break;
+            }
         }
 
         vec_add(space->dims, vec, add);
