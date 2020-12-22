@@ -7,6 +7,7 @@
 #include "geom.h"
 #include "lexer.h"
 #include "hexmap.h"
+#include "valexpr.h"
 #include "prismelrenderer.h"
 
 #define ANIM_KEY_CS "xyudlrfb"
@@ -55,13 +56,6 @@ enum effect_boolean {
     EFFECT_BOOLEAN_TOGGLE
 };
 
-enum valexpr_type {
-    VALEXPR_TYPE_LITERAL,
-    VALEXPR_TYPE_MAPVAR,
-    VALEXPR_TYPE_MYVAR,
-    VALEXPR_TYPES
-};
-
 
 /******************
 * COLLMSG_HANDLER *
@@ -81,25 +75,6 @@ struct state_effect_goto;
 int collmsg_handler_apply(collmsg_handler_t *handler,
     struct hexgame *game, struct body *body, struct actor *actor,
     bool *continues_ptr);
-
-
-/**********
-* VALEXPR *
-**********/
-
-typedef struct valexpr {
-    /* An expression specifying a val_t */
-    int type; /* enum valexpr_type */
-    union {
-        val_t val;
-        struct valexpr *key_expr;
-    } u;
-} valexpr_t;
-
-void valexpr_cleanup(valexpr_t *expr);
-int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer);
-int valexpr_eval(valexpr_t *expr, vars_t *mapvars, vars_t *myvars,
-    val_t **result_ptr, bool set);
 
 
 /********
