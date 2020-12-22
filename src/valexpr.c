@@ -67,6 +67,15 @@ int valexpr_eval(valexpr_t *expr, vars_t *mapvars, vars_t *myvars,
         }
         case VALEXPR_TYPE_MAPVAR:
         case VALEXPR_TYPE_MYVAR: {
+            vars_t *vars = expr->type == VALEXPR_TYPE_MAPVAR?
+                mapvars: myvars;
+
+            if(!vars){
+                fprintf(stderr, "valexpr_eval: No \"%s\" vars provided\n",
+                    valexpr_type_msg(expr->type));
+                return 2;
+            }
+
             val_t *key_val;
             err = valexpr_eval(expr->u.key_expr,
                 mapvars, myvars, &key_val, false);
@@ -86,9 +95,6 @@ int valexpr_eval(valexpr_t *expr, vars_t *mapvars, vars_t *myvars,
                 fputc('\n', stderr);
                 return 2;
             }
-
-            vars_t *vars = expr->type == VALEXPR_TYPE_MAPVAR?
-                mapvars: myvars;
 
             var_t *var;
             if(set){
@@ -118,3 +124,40 @@ int valexpr_eval(valexpr_t *expr, vars_t *mapvars, vars_t *myvars,
     return 0;
 }
 
+
+int valexpr_get(valexpr_t *expr, vars_t *mapvars, vars_t *myvars,
+    val_t **result_ptr
+){
+    /* NOTE: Caller needs to check whether *result_ptr is NULL. */
+    return valexpr_eval(expr, mapvars, myvars, result_ptr, false);
+}
+
+int valexpr_set(valexpr_t *expr, vars_t *mapvars, vars_t *myvars,
+    val_t **result_ptr
+){
+    /* NOTE: valexpr_set guarantees that we find (or create, if necessary)
+    a val, so caller doesn't need to check whether *result_ptr is NULL. */
+    return valexpr_eval(expr, mapvars, myvars, result_ptr, true);
+}
+
+
+
+#define VALEXPR_GET_TYPE(TYPE, VAL_TYPE) \
+TYPE valexpr_get_##VAL_TYPE(valexpr_t *expr, \
+    vars_t *mapvars, vars_t *myvars \
+){ \
+    val_t *result; \
+    int err = valexpr_get(expr, mapvars, myvars, &result); \
+    if(err){ \
+        fprintf(stderr, "Error while getting int from valexpr\n"); \
+        return 0; \
+    }else if(!result){ \
+        fprintf(stderr, "Val not found while getting int from valexpr\n"); \
+        return 0; \
+    } \
+    return val_get_##VAL_TYPE(result); \
+}
+VALEXPR_GET_TYPE(bool, bool)
+VALEXPR_GET_TYPE(int, int)
+VALEXPR_GET_TYPE(const char *, str)
+#undef VALEXPR_GET_TYPE

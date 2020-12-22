@@ -11,6 +11,7 @@
 #include "prismelrenderer.h"
 #include "array.h"
 #include "util.h"
+#include "valexpr.h"
 #include "var_utils.h"
 #include "write.h"
 
@@ -189,8 +190,8 @@ int state_cond_match(state_cond_t *cond,
         if(err)return err;
 
         val_t *val;
-        err = valexpr_eval(&cond->u.valexpr,
-            mapvars, myvars, &val, false);
+        err = valexpr_get(&cond->u.valexpr,
+            mapvars, myvars, &val);
         if(err)return err;
         if(val == NULL){
             RULE_PERROR()
@@ -372,16 +373,16 @@ int state_effect_apply(state_effect_t *effect,
         if(err)return err;
 
         val_t *var_val;
-        err = valexpr_eval(&effect->u.set.var_expr,
-            mapvars, myvars, &var_val, true);
+        err = valexpr_set(&effect->u.set.var_expr,
+            mapvars, myvars, &var_val);
         if(err)return err;
-        /* When we pass set=true to valexpr_eval, it guarantees that it
-        will find (or create, if necessary) a val, so we don't need to
-        check whether var_val is NULL. */
+        /* NOTE: valexpr_set guarantees that we find (or create, if
+        necessary) a val, so we don't need to check whether var_val is
+        NULL. */
 
         val_t *val_val;
-        err = valexpr_eval(&effect->u.set.val_expr,
-            mapvars, myvars, &val_val, false);
+        err = valexpr_get(&effect->u.set.val_expr,
+            mapvars, myvars, &val_val);
         if(err)return err;
         if(val_val == NULL){
             RULE_PERROR()
