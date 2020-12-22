@@ -23,7 +23,7 @@ submaps:
         submaps:
             :
                 file: "data/maps/test/map3_blocker.fus"
-                visible: not "map3_blocker"
+                visible: not mapvar("map3_blocker")
             :
                 file: "data/maps/test/map2.fus"
                 pos: (1 10)
@@ -44,16 +44,16 @@ submaps:
                         turn: n
             :
                 file: "data/maps/test/map3x_blocker.fus"
-                visible: not "map3x_blocker2"
+                visible: not mapvar("map3x_blocker2")
                 pos: eval: (1 10) + (-2 4)
             :
                 file: "data/maps/test/secret_path.fus"
-                visible: "map3x_blocker"
+                visible: mapvar("map3x_blocker")
                 pos: (14 -4)
                 camera: (0 0)
             :
                 file: "data/maps/test/secret_path2.fus"
-                visible: "map3x_blocker"
+                visible: mapvar("map3x_blocker")
                 pos: eval: (14 -4) + (-8 -17)
                 camera: (0 0)
     :

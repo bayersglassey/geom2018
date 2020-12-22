@@ -4,6 +4,7 @@
 #include "array.h"
 #include "lexer.h"
 #include "vars.h"
+#include "valexpr.h"
 #include "geom.h"
 #include "hexgame_savelocation.h"
 #include "prismelrenderer.h"
@@ -103,9 +104,9 @@ typedef struct hexmap_submap {
             1: follow player
         */
     char *filename;
-    char *text; /* Text displayed at top-left when camera is on this submap */
-    bool visible_not;
-    char *visible_var_name;
+    valexpr_t *text_expr; /* Text displayed at top-left when camera is on this submap */
+    valexpr_t *visible_expr; /* Whether this submap is visible */
+    bool visible_expr_not; /* Whether to invert the result of visible_expr */
     hexcollmap_t collmap;
     palette_t palette;
     hexmap_tileset_t tileset;
@@ -166,12 +167,13 @@ int hexmap_step(hexmap_t *map);
 void hexmap_door_cleanup(hexmap_door_t *door);
 void hexmap_submap_cleanup(hexmap_submap_t *submap);
 int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
-    char *filename, char *text,
-    bool visible_not, char *visible_var_name,
+    char *filename, valexpr_t *text_expr,
+    valexpr_t *visible_expr, bool visible_expr_not,
     bool solid, vec_t pos, int camera_type, vec_t camera_pos,
     prismelmapper_t *mapper, char *palette_filename, char *tileset_filename);
 bool hexmap_submap_is_visible(hexmap_submap_t *submap);
 bool hexmap_submap_is_solid(hexmap_submap_t *submap);
+const char *hexmap_submap_get_text(hexmap_submap_t *submap);
 int hexmap_submap_create_rgraph_map(hexmap_submap_t *submap);
 int hexmap_submap_create_rgraph_minimap(hexmap_submap_t *submap);
 hexmap_door_t *hexmap_submap_get_door(hexmap_submap_t *submap,

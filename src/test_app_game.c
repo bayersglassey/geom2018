@@ -177,7 +177,8 @@ int test_app_render_game(test_app_t *app){
             line_y += 10;
         }else{
             hexmap_submap_t *submap = app->camera->cur_submap;
-            const char *text = !submap? NULL: submap->text;
+            const char *text = !submap? NULL:
+                hexmap_submap_get_text(submap);
             if(text){
                 test_app_printf(app, 0, line_y * app->font.char_h,
                     text);

@@ -68,12 +68,12 @@ submaps:
                     #: "data/maps/triangles/recs/bigroller000.fus" "prp" 1110
             :
                 file: "data/maps/triangles/start_blocker.fus"
-                visible: not "start_blocker"
+                visible: not mapvar("start_blocker")
                 pos: (-2 10)
                 mapper: ("triple")
             :
                 file: "data/maps/triangles/start_blocker2.fus"
-                visible: not "start_blocker2"
+                visible: not mapvar("start_blocker2")
                 pos: (0 9)
                 mapper: ("triple")
             :
@@ -83,7 +83,7 @@ submaps:
                 mapper: ("triple")
             :
                 file: "data/maps/triangles/start2_blocker.fus"
-                visible: not "start2_blocker"
+                visible: not mapvar("start2_blocker")
                 pos: eval: (14 12) + (10 10)
             :
                 file: "data/maps/triangles/start3.fus"
@@ -97,7 +97,7 @@ submaps:
                 mapper: ("double")
             :
                 file: "data/maps/triangles/start4_blocker.fus"
-                visible: not "start4_blocker"
+                visible: not mapvar("start4_blocker")
                 pos: eval: (14 12) + (22 15) + (-4 3)
                 camera: (3 -7)
                 mapper: ("double")

@@ -75,7 +75,7 @@ submaps:
                                         submaps:
                                             :
                                                 file: "data/maps/demo/vines3_door.fus"
-                                                visible: "vines3_door"
+                                                visible: mapvar("vines3_door")
                                                 pos: (-11 8)
                                                 doors:
                                                     :
@@ -150,7 +150,7 @@ submaps:
                                                 file: "data/maps/demo/jungle5.fus"
                                             :
                                                 file: "data/maps/demo/jungle_cage.fus"
-                                                visible: not "jungle_cage"
+                                                visible: not mapvar("jungle_cage")
                                                 pos: (15 2)
             :
                 file: "data/maps/demo/pebbles.fus"
@@ -302,7 +302,7 @@ submaps:
                 submaps:
                     :
                         file: "data/maps/test/map3_blocker.fus"
-                        visible: not "map3_blocker"
+                        visible: not mapvar("map3_blocker")
                     :
                         file: "data/maps/test/map2.fus"
                         pos: (1 10)
@@ -323,7 +323,7 @@ submaps:
                                 turn: n
                     :
                         file: "data/maps/test/map3x_blocker.fus"
-                        visible: not "map3x_blocker"
+                        visible: not mapvar("map3x_blocker")
                         pos: eval: (1 10) + (-2 4)
             :
                 pos: (-1 -10)

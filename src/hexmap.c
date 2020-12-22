@@ -10,6 +10,7 @@
 #include "lexer.h"
 #include "vars.h"
 #include "var_utils.h"
+#include "valexpr.h"
 #include "util.h"
 #include "mathutil.h"
 #include "geom.h"
@@ -674,20 +675,25 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
         if(err)return err;
     }
 
-    char *submap_text = NULL;
+    valexpr_t *submap_text_expr = NULL;
     if(fus_lexer_got(lexer, "text")){
         err = fus_lexer_next(lexer);
         if(err)return err;
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
-        err = fus_lexer_get_str(lexer, &submap_text);
+
+        submap_text_expr = calloc(1, sizeof(*submap_text_expr));
+        if(!submap_text_expr)return 1;
+
+        err = valexpr_parse(submap_text_expr, lexer);
         if(err)return err;
+
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
     }
 
-    bool submap_visible_not = false;
-    char *submap_visible_var_name = NULL;
+    valexpr_t *submap_visible_expr = NULL;
+    bool submap_visible_expr_not = false;
     if(fus_lexer_got(lexer, "visible")){
         err = fus_lexer_next(lexer);
         if(err)return err;
@@ -696,10 +702,15 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
         if(fus_lexer_got(lexer, "not")){
             err = fus_lexer_next(lexer);
             if(err)return err;
-            submap_visible_not = true;
+            submap_visible_expr_not = true;
         }
-        err = fus_lexer_get_str(lexer, &submap_visible_var_name);
+
+        submap_visible_expr = calloc(1, sizeof(*submap_visible_expr));
+        if(!submap_visible_expr)return 1;
+
+        err = valexpr_parse(submap_visible_expr, lexer);
         if(err)return err;
+
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
     }
@@ -777,15 +788,11 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
 
         ARRAY_PUSH_NEW(hexmap_submap_t*, map->submaps, submap)
         err = hexmap_submap_init(map, submap,
-            strdup(submap_filename), submap_text,
-            submap_visible_not, submap_visible_var_name,
+            strdup(submap_filename), submap_text_expr,
+            submap_visible_expr, submap_visible_expr_not,
             solid, pos, camera_type, camera_pos, mapper,
             palette_filename, tileset_filename);
         if(err)return err;
-
-        /* We just took ownership of this string, so make sure we don't
-        free it later */
-        submap_visible_var_name = NULL;
 
         /* load collmap */
         err = hexcollmap_load(&submap->collmap, submap_filename,
@@ -825,8 +832,6 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
             if(err)return err;
         }
     }
-
-    free(submap_visible_var_name);
 
     if(fus_lexer_got(lexer, "recordings")){
         err = fus_lexer_next(lexer);
@@ -1152,8 +1157,14 @@ void hexmap_door_cleanup(hexmap_door_t *door){
 
 void hexmap_submap_cleanup(hexmap_submap_t *submap){
     free(submap->filename);
-    free(submap->text);
-    free(submap->visible_var_name);
+    if(submap->text_expr){
+        valexpr_cleanup(submap->text_expr);
+        free(submap->text_expr);
+    }
+    if(submap->visible_expr){
+        valexpr_cleanup(submap->visible_expr);
+        free(submap->visible_expr);
+    }
     hexcollmap_cleanup(&submap->collmap);
     palette_cleanup(&submap->palette);
     hexmap_tileset_cleanup(&submap->tileset);
@@ -1161,8 +1172,8 @@ void hexmap_submap_cleanup(hexmap_submap_t *submap){
 }
 
 int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
-    char *filename, char *text,
-    bool visible_not, char *visible_var_name,
+    char *filename, valexpr_t *text_expr,
+    valexpr_t *visible_expr, bool visible_expr_not,
     bool solid, vec_t pos, int camera_type, vec_t camera_pos,
     prismelmapper_t *mapper, char *palette_filename, char *tileset_filename
 ){
@@ -1171,9 +1182,9 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
     submap->map = map;
 
     submap->filename = filename;
-    submap->text = text;
-    submap->visible_not = visible_not;
-    submap->visible_var_name = visible_var_name;
+    submap->text_expr = text_expr;
+    submap->visible_expr = visible_expr;
+    submap->visible_expr_not = visible_expr_not;
     vec_cpy(MAX_VEC_DIMS, submap->pos, pos);
 
     submap->solid = solid;
@@ -1202,9 +1213,27 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
 }
 
 bool hexmap_submap_is_visible(hexmap_submap_t *submap){
-    if(submap->visible_var_name == NULL)return true;
-    bool visible = vars_get_bool(&submap->map->vars, submap->visible_var_name);
-    if(submap->visible_not)visible = !visible;
+    /* NOTE: submaps are visible by default. */
+    if(submap->visible_expr == NULL)return true;
+    bool visible = true;
+
+    val_t *result;
+    int err = valexpr_get(submap->visible_expr, &submap->map->vars, NULL,
+        &result);
+    if(err){
+        fprintf(stderr,
+            "Error while evaluating visibility for submap: %s\n",
+            submap->filename);
+        /* MAYBE TODO: we're swallowing this error and just using a default
+        value... maybe better to exit(err) or *gag* change this function to
+        return an error value and take a bool *visible_ptr argument?.. */
+    }else if(!result){
+        /* Val not found: use default visible value */
+    }else{
+        visible = val_get_bool(result);
+    }
+
+    if(submap->visible_expr_not)visible = !visible;
     return visible;
 }
 
@@ -1212,6 +1241,27 @@ bool hexmap_submap_is_solid(hexmap_submap_t *submap){
     if(!submap->solid)return false;
     if(!hexmap_submap_is_visible(submap))return false;
     return true;
+}
+
+const char *hexmap_submap_get_text(hexmap_submap_t *submap){
+    /* May return NULL if submap doesn't have associated text. */
+    if(submap->text_expr == NULL)return NULL;
+
+    val_t *result;
+    int err = valexpr_get(submap->text_expr, &submap->map->vars, NULL,
+        &result);
+    if(err){
+        fprintf(stderr,
+            "Error while evaluating text for submap: %s\n",
+            submap->filename);
+        /* MAYBE TODO: we're swallowing this error and just using a default
+        value... maybe better to exit(err) or *gag* change this function to
+        return an error value and take a const char **text_ptr argument?.. */
+        return NULL;
+    }else if(!result){
+        return NULL;
+    }
+    return val_get_str(result);
 }
 
 hexmap_door_t *hexmap_submap_get_door(hexmap_submap_t *submap,
