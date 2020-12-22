@@ -453,6 +453,35 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
     prismelrenderer_t *prend, vecspace_t *space
 ){
     INIT
+
+    if(GOT("debug_collision")){
+        NEXT
+        stateset->debug_collision = true;
+    }
+    if(GOT("collmsgs")){
+        NEXT
+        GET("(")
+        while(!GOT(")")){
+            char *msg;
+            GET_STR(msg)
+            ARRAY_PUSH(char*, stateset->collmsgs, msg)
+        }
+        NEXT
+    }
+    while(GOT("on")){
+        NEXT
+        collmsg_handler_t handler;
+        err = _parse_collmsg_handler(lexer, &handler, prend, space);
+        if(err)return err;
+        ARRAY_PUSH(collmsg_handler_t, stateset->collmsg_handlers, handler)
+    }
+    if(GOT("end_headers")){
+        /* This weird thing is just so, theoretically, you could use a
+        "reserved keyword" like "collmsgs" or "on" as a state name.
+        Although that would be an awful idea. Please don't do that. */
+        NEXT
+    }
+
     while(1){
         if(DONE)break;
 
@@ -587,28 +616,6 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
     prismelrenderer_t *prend, vecspace_t *space
 ){
     INIT
-
-    if(GOT("debug_collision")){
-        NEXT
-        stateset->debug_collision = true;
-    }
-    if(GOT("collmsgs")){
-        NEXT
-        GET("(")
-        while(!GOT(")")){
-            char *msg;
-            GET_STR(msg)
-            ARRAY_PUSH(char*, stateset->collmsgs, msg)
-        }
-        NEXT
-    }
-    while(GOT("on")){
-        NEXT
-        collmsg_handler_t handler;
-        err = _parse_collmsg_handler(lexer, &handler, prend, space);
-        if(err)return err;
-        ARRAY_PUSH(collmsg_handler_t, stateset->collmsg_handlers, handler)
-    }
 
     err = _stateset_parse(stateset, lexer, prend, space);
     if(err)return err;

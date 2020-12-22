@@ -1,6 +1,3 @@
 
-collmsgs: "collect"
-on "crush": goto: dead
-
 $SET_STR NS player_
 import "anim/_player.fus"

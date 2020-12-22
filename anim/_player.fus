@@ -14,6 +14,10 @@ $IF !PLAYER_SPIKEY:
 $SET_INT ROLLER_STAND_DELAY 0
 
 
+collmsgs: "collect" "touch"
+on "crush": goto: dead
+
+
 stand:
     rgraph: $PREFIX NS "stand"
 

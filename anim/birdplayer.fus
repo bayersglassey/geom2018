@@ -1,7 +1,4 @@
 
-collmsgs: "collect"
-on "crush": goto: dead
-
 $SET_STR NS birdplayer_
 $SET_BOOL PLAYER_BIRD
 import "anim/_player.fus"

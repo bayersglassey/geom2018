@@ -1,7 +1,4 @@
 
-collmsgs: "collect"
-on "crush": goto: dead
-
 $SET_BOOL PLAYER_AIMER
 $SET_STR NS aimerplayer_
 import "anim/_player.fus"
