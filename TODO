@@ -680,3 +680,48 @@ But how can we e.g. stop window from scrolling when player hits arrow keys?..
 And can we map the F* keys to something else?..
 
 The big_roller who guards the entrance to maps/triangles tends to camp on the door. :P
+
+
+Dec 21, 2020:
+-------------
+
+TINY GIF WRITERS!!!
+Get yourself some viiiiideoooo
+https://github.com/nothings/single_file_libs#images
+* https://github.com/charlietangora/gif-h
+* https://www.jonolick.com/home/gif-writer
+
+Some kind of hexcollmap transformations... similar to mappers for rgraphs:
+    "double":
+        unit: 2 0 0 0
+        entries:
+            : vert -> collmap: ;; (+)
+            : edge -> collmap: ;; (.)- + - .
+            : face -> collmap:
+                ;;      .
+                ;;      *
+                ;;    . - .
+                ;;    *\*/*
+                ;; (.)  .   .
+...can we also map tile_c or whatever?.. the "colours"?..
+Maybe:
+    entries:
+        : vert ->
+            collmap: ;; (+)
+            tiles:
+                : "0" -> "1"
+                ...etc...
+...?
+
+
+TIG FEEDBACK:
+* "When your character is upside down the buttons don't flip so you can press left and move right,
+press up and jump down. Also the goal wasn't clear: I was sort of chasing the other character that
+was there at the beginning for a while and then I gave up on that b/c there was very little feedback."
+    * So, maybe we need more standard menus including options for controls, including an option to
+    flip controls based on your orientation?..
+        * Could that even work?.. I think the best we could do would be to map jump/crouch to
+        something other than up/down, to avoid confusion.
+        * Maybe what we need is more of a tutorial.
+
+collmaptool has --rot but no --flip!.. add it plz!
