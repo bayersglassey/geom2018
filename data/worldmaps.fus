@@ -1,4 +1,5 @@
 worldmaps:
+    : "data/maps/tutorial/worldmap.fus"
     : "data/maps/wastes/worldmap.fus"
     : "data/maps/crazyspidertown/worldmap.fus"
     : "data/maps/demo/worldmap.fus"

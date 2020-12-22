@@ -1,7 +1,7 @@
 
 shapes:
     "_txt_title":
-        text: "geomfont1" "Spider\n Game" (3 1)
+        text: "geomfont1" "Crawl\n Space" (3 1)
     "txt_title":
         shapes:
             : "_txt_title" (0 0 0 0)  0 f

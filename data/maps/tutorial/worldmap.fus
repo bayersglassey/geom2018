@@ -1,0 +1,46 @@
+
+unit: 3 2 0 -1
+spawn: "data/maps/tutorial/start.fus"
+default_palette: "data/pal1.fus"
+default_tileset: "data/tileset1.fus"
+
+$SET_STR TUT1 "Welcome to Crawl Space!\nUse the left+right arrow keys to move."
+$SET_STR TUT2 "Keep going!\n\nSometimes you'll be upside down.\nSometimes you'll jump over things.\n\nDon't worry about it!"
+$SET_STR TUT_LOOP "\n      BE BRAVE!!!"
+$SET_STR TUT3 "Sometimes you'll need to jump.\n\nPress the up arrow key to jump!"
+
+submaps:
+    :
+        pos: (0 0)
+        camera: (0 0)
+        mapper: ("triple")
+        submaps:
+            :
+                file: "data/maps/tutorial/start.fus"
+                text: $GET_STR TUT1
+                pos: eval: (0 0)
+                camera: (9 0)
+            :
+                file: "data/maps/tutorial/start2.fus"
+                pos: eval: (19 0)
+                camera: (9 0)
+            :
+                file: "data/maps/tutorial/start3.fus"
+                text: $GET_STR TUT2
+                pos: eval: (19 0) + (19 -1)
+                camera: (9 -2)
+            :
+                file: "data/maps/tutorial/loop.fus"
+                text: $GET_STR TUT_LOOP
+                pos: eval: (19 0) + (19 -1) + (19 -6)
+                camera: (9 -2)
+            :
+                file: "data/maps/tutorial/start4.fus"
+                text: $GET_STR TUT3
+                pos: eval: (19 0) + (19 -1) + (19 -6) + (19 -3)
+                camera: (9 -2)
+            :
+                file: "data/maps/tutorial/start5.fus"
+                text: $GET_STR TUT3
+                pos: eval: (19 0) + (19 -1) + (19 -6) + (19 -3) + (19 -5)
+                camera: (3 0)
