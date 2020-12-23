@@ -1,4 +1,5 @@
 worldmaps:
+    : "data/maps/title/worldmap.fus"
     : "data/maps/tutorial/worldmap.fus"
     : "data/maps/wastes/worldmap.fus"
     : "data/maps/crazyspidertown/worldmap.fus"
@@ -8,6 +9,5 @@ worldmaps:
     : "data/maps/wilderness/worldmap.fus"
     : "data/maps/test/worldmap.fus"
     : "data/maps/test/worldmap_minimal.fus"
-    : "data/maps/title/worldmap.fus"
     : "data/maps/trees/worldmap.fus"
     : "data/maps/spidertown/worldmap.fus"
