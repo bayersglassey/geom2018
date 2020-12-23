@@ -8,6 +8,7 @@ vars:
     "solved_puzzle2": F
 
 $SET_STR TUT1 "\n\n   Welcome to Crawl Space!\n\n  Use the left & right arrow keys to move."
+$SET_STR TUT1b "\n  Touch the shiny green thing to save."
 $SET_STR TUT2 "Keep going!"
 $SET_STR TUT_LOOP "\n             BE BRAVE!!!"
 $SET_STR TUT3 "Sometimes you'll need to jump.\n\nPress the up arrow key to leap forwards!"
@@ -32,7 +33,7 @@ submaps:
                 mapper: ("quadruple")
             :
                 file: "data/maps/tutorial/start2.fus"
-                text: if mapvar("solved_puzzle") then $GET_STR TUT_GO2 else null
+                text: if mapvar("solved_puzzle") then $GET_STR TUT_GO2 else $GET_STR TUT1b
                 pos: eval: (19 0)
                 camera: (9 0)
             :
