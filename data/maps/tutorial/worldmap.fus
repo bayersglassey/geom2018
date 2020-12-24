@@ -17,7 +17,7 @@ $SET_STR TUT_GO2 "\n         Almost there..."
 $SET_STR TUT_GO3 "\n\n            Too far!"
 $SET_STR TUT_GO4 "Onward and upward!"
 
-$SET_STR TUT_GAPS "\n\n\n\n\n\n\nDon't mind the gaps.\nYou jump right over them."
+$SET_STR TUT_GAPS "\n\n\n\n\n\n\nDon't worry about small gaps\n   in the floor.\n\nYou can walk\n   right over them."
 $SET_STR TUT_CRAWL "  Press the down arrow key to crouch.\n   While crouching, use the left & right arrow keys to crawl."
 
 $SET_STR TUT_END "\n\nYou've learned enough to make it on your own.\n\n\nGo through the door and enjoy the game."
