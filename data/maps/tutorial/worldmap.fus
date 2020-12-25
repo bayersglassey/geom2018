@@ -93,4 +93,4 @@ submaps:
                 pos: eval: (19 0) + (19 -1) + (24 17) + (28 12) + (27 10) + (25 3)
                 camera: (10 0)
                 doors:
-                    : new_game "data/maps/demo/worldmap.fus"
+                    : new_game "data/maps/title/worldmap.fus"

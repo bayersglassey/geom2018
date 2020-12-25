@@ -13,10 +13,12 @@ submaps:
         submaps:
             :
                 file: "data/maps/title/title.fus"
-                text: "Press Enter to show/hide controls"
+                text: "\n\n     Hey!\n   Heeey!\n  New to the game? Hold left to start the tutorial!"
                 doors:
                     :
                         new_game "data/maps/demo/worldmap.fus"
+                    :
+                        new_game "data/maps/tutorial/worldmap.fus"
                     :
                         continue
                     :

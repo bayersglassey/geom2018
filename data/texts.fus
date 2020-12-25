@@ -28,5 +28,11 @@ shapes:
         text: "geomfont1" "Quit"
     "txt_players":
         text: "geomfont1" "Players"
+    "txt_tutorial1":
+        text: "geomfont1" "Tu"
+    "txt_tutorial2":
+        text: "geomfont1" "to"
+    "txt_tutorial3":
+        text: "geomfont1" "rial"
     "txt_secret":
         text: "geomfont1" "Secret Room..."
