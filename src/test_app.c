@@ -187,7 +187,6 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 
     app->loop = true;
     app->hexgame_running = true;
-    app->show_controls = false;
     app->show_console = false;
     app->process_console = false;
     app->mode = TEST_APP_MODE_GAME;

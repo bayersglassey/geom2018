@@ -161,29 +161,13 @@ int test_app_render_game(test_app_t *app){
         err = test_app_blit_console(app, 0, line_y * app->font.char_h);
         if(err)return err;
     }else if(!showed_dead_msg){
-        if(app->show_controls){
+        hexmap_submap_t *submap = app->camera->cur_submap;
+        const char *text = !submap? NULL:
+            hexmap_submap_get_text(submap);
+        if(text){
             test_app_printf(app, 0, line_y * app->font.char_h,
-                "*Controls:\n"
-                "  Left/right  -> Walk\n"
-                "  Up          -> Jump\n"
-                "  Down        -> Crawl\n"
-                "  Spacebar    -> Spit\n"
-                "  Shift       -> Look up\n"
-                "  1           -> Return to checkpoint\n"
-                "  Enter       -> Show/hide this message\n"
-                "  Escape      -> Quit\n"
-                "  F5          -> Pause/unpause\n"
-            );
-            line_y += 10;
-        }else{
-            hexmap_submap_t *submap = app->camera->cur_submap;
-            const char *text = !submap? NULL:
-                hexmap_submap_get_text(submap);
-            if(text){
-                test_app_printf(app, 0, line_y * app->font.char_h,
-                    text);
-                line_y += _count_lines(text);
-            }
+                text);
+            line_y += _count_lines(text);
         }
     }
 
@@ -204,9 +188,7 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
     hexgame_t *game = &app->hexgame;
 
     if(event->type == SDL_KEYDOWN){
-        if(event->key.keysym.sym == SDLK_RETURN){
-            app->show_controls = !app->show_controls;
-        }else if(event->key.keysym.sym == SDLK_PAGEUP){
+        if(event->key.keysym.sym == SDLK_PAGEUP){
             if(!app->hexgame_running){
                 /* Do 1 step */
                 err = hexgame_step(&app->hexgame);
