@@ -432,6 +432,9 @@ int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     rendergraph_bitmap_t *bitmap = rendergraph_get_bitmap(rendergraph,
         rot, flip, frame_i);
 
+    /* Increment prend's count of bitmaps rendered so far */
+    rendergraph->prend->bitmaps_rendered++;
+
     /* Calculate our bounds */
     err = rendergraph_calculate_bitmap_bounds(rendergraph,
         rot, flip, frame_i);

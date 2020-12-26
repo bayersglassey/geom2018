@@ -257,15 +257,31 @@ static int test_app_render(test_app_t *app){
         return 2;
     }
 
-    if(app->took > app->delay_goal){
-        /* Hardcoded here just to remind us why we're dividing by it below */
-        int geomfont_prismel_height = 2;
-        test_app_printf(app, 0,
-            (
-                app->sch / geomfont_prismel_height // bottom of screen
-                - 2 * app->font.char_h // minus 2 lines
-            ),
-            "Time to render (in ticks): goal=%i, actual=%i", app->delay_goal, app->took);
+    {
+        /* Dump some info to bottom of screen */
+
+        int geomfont_prismel_height = 2; /* Hardcoded, actually depends on the geomfont */
+        int bottom_of_screen_in_prismels = app->sch / geomfont_prismel_height;
+
+        {
+            int max_bitmaps = 0;
+            prismelrenderer_t *prend = &app->prend;
+            for(int i = 0; i < prend->rendergraphs_len; i++){
+                rendergraph_t *rgraph = prend->rendergraphs[i];
+                max_bitmaps += rgraph->n_bitmaps;
+            }
+            test_app_printf(app, 0,
+                bottom_of_screen_in_prismels - 3 * app->font.char_h,
+                "Bitmaps rendered: %i / %i",
+                app->prend.bitmaps_rendered, max_bitmaps);
+        }
+
+        if(app->took > app->delay_goal){
+            test_app_printf(app, 0,
+                bottom_of_screen_in_prismels - 2 * app->font.char_h,
+                "Time to render (in ticks): goal=%i, actual=%i",
+                app->delay_goal, app->took);
+        }
     }
 
     SDL_Texture *render_texture = SDL_CreateTextureFromSurface(

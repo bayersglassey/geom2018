@@ -45,25 +45,25 @@ typedef struct rendergraph_bitmap {
 } rendergraph_bitmap_t;
 
 typedef struct rendergraph {
-    struct prismelrenderer *prend;
     char *name;
-    vecspace_t *space;
     ARRAY_DECL(struct prismel_trf*, prismel_trfs)
     ARRAY_DECL(struct rendergraph_trf*, rendergraph_trfs)
 
-    struct rendergraph *copy_of;
-        /* If not NULL, this rendergraph is a copy of another one.
-        In particular, it does *NOT* own its prismel_trfs and
-        rendergraph_trfs, so should *NOT* modify or free them. */
-
-    struct palettemapper *palmapper;
-
-    const char *animation_type;
     int n_frames;
 
     int n_bitmaps;
     struct rendergraph_bitmap *bitmaps;
     boundbox_t boundbox;
+
+    /* Weakrefs: */
+    struct prismelrenderer *prend;
+    vecspace_t *space;
+    const char *animation_type;
+    struct palettemapper *palmapper;
+    struct rendergraph *copy_of;
+        /* If not NULL, this rendergraph is a copy of another one.
+        In particular, it does *NOT* own its prismel_trfs and
+        rendergraph_trfs, so should *NOT* modify or free them. */
 } rendergraph_t;
 
 

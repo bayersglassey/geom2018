@@ -446,6 +446,7 @@ void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box,
 
 int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space){
     renderer->cache_bitmaps = true;
+    renderer->bitmaps_rendered = 0;
     renderer->space = space;
     stringstore_init(&renderer->stringstore);
     ARRAY_INIT(renderer->fonts)

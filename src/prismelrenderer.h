@@ -99,6 +99,7 @@ void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box,
 
 typedef struct prismelrenderer {
     bool cache_bitmaps;
+    int bitmaps_rendered; /* Number of bitmaps rendered */
     vecspace_t *space;
     stringstore_t stringstore;
     ARRAY_DECL(struct font*, fonts)
