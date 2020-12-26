@@ -19,7 +19,7 @@ $SET_STR TUT_GO4 "Onward and upward!\n"
 
 $SET_STR TUT_GAPS "\n\n\n\n\n\n\nDon't worry about small gaps\n   in the floor.\n\nYou can walk\n   right over them.\n"
 $SET_STR TUT_CRAWL "  Press the down arrow key to crouch.\n   While crouching, use the left & right arrow keys to crawl.\n"
-
+$SET_STR TUT_DOOR "\n\nThe shiny blue thing is a door.\n\n\nGo through it to continue to the next area.\n"
 $SET_STR TUT_END "\n\nYou've learned enough to make it on your own.\n\n\nGo through the door and enjoy the game.\n"
 
 submaps:
@@ -89,8 +89,19 @@ submaps:
                 camera: (9 0)
             :
                 file: "data/maps/tutorial/skypipes4.fus"
-                text: $GET_STR TUT_END
+                text: $GET_STR TUT_DOOR
                 pos: eval: (19 0) + (19 -1) + (24 17) + (28 12) + (27 10) + (25 3)
                 camera: (10 0)
                 doors:
-                    : new_game "data/maps/title/worldmap.fus"
+                    :
+                        pos: (-30 0)
+                        rot: 0
+                        turn: n
+    :
+        pos: (0 0)
+        mapper: ("triple")
+        submaps:
+            :
+                file: "data/maps/tutorial/safari.fus"
+                pos: eval: (-30 0)
+                camera: (8 0)
