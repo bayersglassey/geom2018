@@ -4,6 +4,10 @@
 #include "generic_printf.h"
 
 
+/* This external variable "returns" the number of newline characters encountered */
+int generic_printf_lines_counted;
+
+
 int generic_printf(generic_putc_callback_t *callback, void *callback_data,
     const char *msg, ...
 ){
@@ -17,10 +21,19 @@ done:
     return err;
 }
 
+static int _call_callback(generic_putc_callback_t *callback, void *callback_data, char c){
+    if(c == '\n')generic_printf_lines_counted++;
+    int err = callback(callback_data, c);
+    if(err)return err;
+    return 0;
+}
 int generic_vprintf(generic_putc_callback_t *callback, void *callback_data,
     const char *msg, va_list vlist
 ){
     int err;
+
+    /* No newlines encountered thus far */
+    generic_printf_lines_counted = 0;
 
     char c;
     while(c = *msg, c != '\0'){
@@ -41,7 +54,7 @@ int generic_vprintf(generic_putc_callback_t *callback, void *callback_data,
 
                     if(i < 0){
                         i = -i;
-                        err = callback(callback_data, '-');
+                        err = _call_callback(callback, callback_data, '-');
                         if(err)return err;
                     }
 
@@ -54,28 +67,28 @@ int generic_vprintf(generic_putc_callback_t *callback, void *callback_data,
                     if(digit_i > 0)digit_i--;
                     while(digit_i >= 0){
                         char c = '0' + digits[digit_i];
-                        err = callback(callback_data, c);
+                        err = _call_callback(callback, callback_data, c);
                         if(err)return err;
                         digit_i--;
                     }
                 }else if(c == 'c'){
                     char c = va_arg(vlist, int);
-                    err = callback(callback_data, c);
+                    err = _call_callback(callback, callback_data, c);
                     if(err)return err;
                 }else if(c == 's'){
                     char *s = va_arg(vlist, char *);
                     char c;
                     while(c = *s, c != '\0'){
-                        err = callback(callback_data, c);
+                        err = _call_callback(callback, callback_data, c);
                         if(err)return err;
                         s++;
                     }
                 }else{
                     /* Unsupported percent+character, so just output them
                     back as-is */
-                    err = callback(callback_data, '%');
+                    err = _call_callback(callback, callback_data, '%');
                     if(err)return err;
-                    err = callback(callback_data, c);
+                    err = _call_callback(callback, callback_data, c);
                     if(err)return err;
                 }
                 msg++;
@@ -83,7 +96,7 @@ int generic_vprintf(generic_putc_callback_t *callback, void *callback_data,
             }
         }
 
-        err = callback(callback_data, c);
+        err = _call_callback(callback, callback_data, c);
         if(err)return err;
         msg++;
     }

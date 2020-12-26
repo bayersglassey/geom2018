@@ -5,6 +5,8 @@
 
 typedef int generic_putc_callback_t(void *data, char c);
 
+extern int generic_printf_lines_counted;
+
 int generic_printf(generic_putc_callback_t *callback, void *callback_data,
     const char *msg, ...);
 int generic_vprintf(generic_putc_callback_t *callback, void *callback_data,
