@@ -28,7 +28,7 @@ submaps:
             : "data/maps/test/recs/worldmap_minimal_bird_001.fus"
     :
         file: "data/maps/test/map3_end_puzzle.fus"
-        text: "Press Enter to show/hide controls"
+        text: "Hold the right Shift key to aim upwards!\n"
         pos: (-7 -7)
         camera: (0 0)
         mapper: ("triple")

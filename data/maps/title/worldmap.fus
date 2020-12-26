@@ -13,7 +13,7 @@ submaps:
         submaps:
             :
                 file: "data/maps/title/title.fus"
-                text: "\n\n     Hey!\n   Heeey!\n  New to the game? Hold left to start the tutorial!"
+                text: "\n\n     Hey!\n   Heeey!\n  New to the game? Hold left to start the tutorial!\n"
                 doors:
                     :
                         new_game "data/maps/demo/worldmap.fus"

@@ -7,20 +7,20 @@ vars:
     "solved_puzzle": F
     "solved_puzzle2": F
 
-$SET_STR TUT1 "\n\n   Welcome to Crawl Space!\n\n  Use the left & right arrow keys to move."
-$SET_STR TUT1b "\n  Touch the shiny green thing to save."
-$SET_STR TUT2 "Keep going!"
-$SET_STR TUT_LOOP "\n             BE BRAVE!!!"
-$SET_STR TUT3 "Sometimes you'll need to jump.\n\nPress the up arrow key to leap forwards!"
-$SET_STR TUT_SOLVED_PUZZLE "    Sometimes you'll need to travel upside down.\n    Don't worry about it!\n   Keep going."
-$SET_STR TUT_GO2 "\n         Almost there..."
-$SET_STR TUT_GO3 "\n\n            Too far!"
-$SET_STR TUT_GO4 "Onward and upward!"
+$SET_STR TUT1 "\n\n   Welcome to Crawl Space!\n\n  Use the left & right arrow keys to move.\n"
+$SET_STR TUT1b "\n  Touch the shiny green thing to save.\n"
+$SET_STR TUT2 "Keep going!\n"
+$SET_STR TUT_LOOP "\n             BE BRAVE!!!\n"
+$SET_STR TUT3 "Sometimes you'll need to jump.\n\nPress the up arrow key to leap forwards!\n"
+$SET_STR TUT_SOLVED_PUZZLE "    Sometimes you'll need to travel upside down.\n    Don't worry about it!\n   Keep going.\n"
+$SET_STR TUT_GO2 "\n         Almost there...\n"
+$SET_STR TUT_GO3 "\n\n            Too far!\n"
+$SET_STR TUT_GO4 "Onward and upward!\n"
 
-$SET_STR TUT_GAPS "\n\n\n\n\n\n\nDon't worry about small gaps\n   in the floor.\n\nYou can walk\n   right over them."
-$SET_STR TUT_CRAWL "  Press the down arrow key to crouch.\n   While crouching, use the left & right arrow keys to crawl."
+$SET_STR TUT_GAPS "\n\n\n\n\n\n\nDon't worry about small gaps\n   in the floor.\n\nYou can walk\n   right over them.\n"
+$SET_STR TUT_CRAWL "  Press the down arrow key to crouch.\n   While crouching, use the left & right arrow keys to crawl.\n"
 
-$SET_STR TUT_END "\n\nYou've learned enough to make it on your own.\n\n\nGo through the door and enjoy the game."
+$SET_STR TUT_END "\n\nYou've learned enough to make it on your own.\n\n\nGo through the door and enjoy the game.\n"
 
 submaps:
     :

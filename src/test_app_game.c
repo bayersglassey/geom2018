@@ -97,15 +97,6 @@ int test_app_set_players(test_app_t *app, int n_players){
 }
 
 
-static int _count_lines(const char *text){
-    const char *s = text;
-    int lines = 1;
-    char c;
-    while(c = *s++){
-        if(c == '\n')lines++;
-    }
-    return lines;
-}
 int test_app_render_game(test_app_t *app){
     int err;
 
@@ -124,8 +115,6 @@ int test_app_render_game(test_app_t *app){
         1 /* app->zoom */);
     if(err)return err;
 
-    int line_y = 0;
-
     bool showed_dead_msg = false;
     for(int i = 0; i < game->players_len; i++){
         player_t *player = game->players[i];
@@ -133,51 +122,40 @@ int test_app_render_game(test_app_t *app){
         if(!body)continue;
         if(body->dead == BODY_MOSTLY_DEAD){
             showed_dead_msg = true;
-            test_app_printf(app, 0, line_y * app->font.char_h,
+            test_app_printf(app, 0, app->lines_printed * app->font.char_h,
                 "You ran into a wall!\n"
                 "Press jump to retry from where you jumped.\n"
                 "Press %i to retry from last save point.\n",
                 i+1);
-            line_y += 3;
         }else if(body->dead == BODY_ALL_DEAD){
             showed_dead_msg = true;
-            test_app_printf(app, 0, line_y * app->font.char_h,
+            test_app_printf(app, 0, app->lines_printed * app->font.char_h,
                 "You were crushed!\n"
                 "Press jump or %i to retry from last save point.\n",
                 i+1);
-            line_y += 2;
         }else if(body->out_of_bounds && !body->state->flying){
             showed_dead_msg = true;
-            test_app_printf(app, 0, line_y * app->font.char_h,
+            test_app_printf(app, 0, app->lines_printed * app->font.char_h,
                 "You jumped off the map!\n"
                 "Press jump to retry from where you jumped.\n"
                 "Press %i to retry from last save point.\n",
                 i+1);
-            line_y += 3;
         }
     }
 
     if(app->show_console){
-        err = test_app_blit_console(app, 0, line_y * app->font.char_h);
+        err = test_app_blit_console(app, 0, app->lines_printed * app->font.char_h);
         if(err)return err;
     }else if(!showed_dead_msg){
         hexmap_submap_t *submap = app->camera->cur_submap;
         const char *text = !submap? NULL:
             hexmap_submap_get_text(submap);
         if(text){
-            test_app_printf(app, 0, line_y * app->font.char_h,
+            test_app_printf(app, 0, app->lines_printed * app->font.char_h,
                 text);
-            line_y += _count_lines(text);
         }
     }
 
-    SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
-        app->renderer, app->surface);
-    RET_IF_SDL_NULL(render_texture);
-    SDL_RenderCopy(app->renderer, render_texture, NULL, NULL);
-    SDL_DestroyTexture(render_texture);
-
-    SDL_RenderPresent(app->renderer);
     return 0;
 }
 

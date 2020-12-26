@@ -24,15 +24,6 @@ int test_app_render_editor(test_app_t *app){
     err = test_app_blit_console(app, 0, line_y * app->font.char_h);
     if(err)return 2;
 
-    {
-        SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
-            app->renderer, app->surface);
-        RET_IF_SDL_NULL(render_texture);
-        SDL_RenderCopy(app->renderer, render_texture, NULL, NULL);
-        SDL_DestroyTexture(render_texture);
-    }
-
-    SDL_RenderPresent(app->renderer);
     return 0;
 }
 

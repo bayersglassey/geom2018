@@ -240,15 +240,42 @@ int test_app_mainloop(test_app_t *app){
 }
 
 static int test_app_render(test_app_t *app){
+    int err;
+
+    /* We haven't printed any lines so far this frame... */
+    app->lines_printed = 0;
+
     if(app->mode == TEST_APP_MODE_GAME){
-        return test_app_render_game(app);
+        err = test_app_render_game(app);
+        if(err)return err;
     }else if(app->mode == TEST_APP_MODE_EDITOR){
-        return test_app_render_editor(app);
+        err = test_app_render_editor(app);
+        if(err)return err;
     }else{
         fprintf(stderr, "%s: Unrecognized app mode: %i\n",
             __func__, app->mode);
         return 2;
     }
+
+    if(app->took > app->delay_goal){
+        /* Hardcoded here just to remind us why we're dividing by it below */
+        int geomfont_prismel_height = 2;
+        test_app_printf(app, 0,
+            (
+                app->sch / geomfont_prismel_height // bottom of screen
+                - 2 * app->font.char_h // minus 2 lines
+            ),
+            "Time to render (in ticks): goal=%i, actual=%i", app->delay_goal, app->took);
+    }
+
+    SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
+        app->renderer, app->surface);
+    RET_IF_SDL_NULL(render_texture);
+    SDL_RenderCopy(app->renderer, render_texture, NULL, NULL);
+    SDL_DestroyTexture(render_texture);
+
+    SDL_RenderPresent(app->renderer);
+    return 0;
 }
 
 static int test_app_poll_events(test_app_t *app){
@@ -407,6 +434,7 @@ const char *test_app_get_next_recording_filename(test_app_t *app){
     return test_app_get_last_or_next_recording_filename(app, true);
 }
 
+
 int test_app_printf(test_app_t *app, int col, int row, const char *msg, ...){
     int err = 0;
     va_list vlist;
@@ -418,6 +446,10 @@ int test_app_printf(test_app_t *app, int col, int row, const char *msg, ...){
         0, 0, col, row, 1, NULL, NULL);
     err = generic_vprintf(&geomfont_blitter_putc_callback, &blitter,
         msg, vlist);
+
+    /* Use the external variable (ooh ganky) generic_printf_lines_counted
+    which counts the number of newline characters printed */
+    app->lines_printed += generic_printf_lines_counted;
 
     va_end(vlist);
     return err;
