@@ -336,13 +336,6 @@ static int _mainloop(minieditor_t *editor, options_t *opts,
         Uint32 tick1 = SDL_GetTicks();
         Uint32 took = tick1 - tick0;
         if(took < editor->delay_goal)SDL_Delay(editor->delay_goal - took);
-#ifdef GEOM_HEXGAME_DEBUG_FRAMERATE
-        if(took > editor->delay_goal){
-            fprintf(stderr, "WARNING: Frame rendered in %i ms "
-                "(aiming for sub-%i ms)\n",
-                took, editor->delay_goal);
-        }
-#endif
     }
 
     SDL_StopTextInput();

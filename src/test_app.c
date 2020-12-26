@@ -362,13 +362,6 @@ int test_app_mainloop_step(test_app_t *app){
     Uint32 tick1 = SDL_GetTicks();
     app->took = tick1 - tick0;
     if(app->took < app->delay_goal)SDL_Delay(app->delay_goal - app->took);
-#ifdef GEOM_HEXGAME_DEBUG_FRAMERATE
-    if(app->took > app->delay_goal){
-        fprintf(stderr, "WARNING: Frame rendered in %i ms "
-            "(aiming for sub-%i ms)\n",
-            app->took, app->delay_goal);
-    }
-#endif
 
     return 0;
 }

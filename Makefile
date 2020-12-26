@@ -1,8 +1,7 @@
 
 CFLAGS += -O2 -g -rdynamic -std=c99 \
  `sdl2-config --libs --cflags` \
- -Wall -Werror -Wno-unused -Wno-missing-braces -Wno-tautological-compare -Wno-parentheses \
- -DGEOM_HEXGAME_DEBUG_FRAMERATE
+ -Wall -Werror -Wno-unused -Wno-missing-braces -Wno-tautological-compare -Wno-parentheses
 
 PROGS = \
  bin/lexertool bin/collmaptool bin/hexpicturetest bin/sdltest bin/directorytest \
