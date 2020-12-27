@@ -778,3 +778,9 @@ Dec 25, 2020:
     * Add a struct prismelrenderer_stats?..
 
 * Add a door_t property like "noscroll" so camera jumps along with your body!
+
+* One palette instance per filename!
+
+* As well as "on" events, add an "always" handler which runs every frame?
+* Use for things like e.g. affecting the "lighting" (palette) based on distance from camera?..
+* Use for things like heat, thirst, etc?..
