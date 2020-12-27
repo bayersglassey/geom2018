@@ -1,5 +1,17 @@
 
-on "collect": goto: collected
+on "collect":
+    if: exists myvar("collected_key")
+    then: set mapvar(myvar("collected_key")): T
+
+    goto: collected
+
+init:
+    if() then:
+        if: exists myvar("key")
+        then:
+            if: get_bool mapvar(myvar("key"))
+            then: goto immediate: stand
+        else: goto immediate: stand
 
 stand:
     rgraph: "coin"

@@ -3,9 +3,17 @@ unit: 3 2 0 -1
 spawn: "data/maps/tutorial2/start.fus"
 default_palette: "data/maps/trees/pals/realistic.fus"
 default_tileset: "data/tileset1.fus"
+vars:
+    "coin_a": F
+    "coin_b": F
+    "coin_c": F
+    "coin_d": F
+    "coin_e": F
+    "coin_f": F
+    "coin_g": F
 
 $SET_STR TUT_ONWARDS "Straight onwards, fear not!\n"
-$SET_STR TUT_DISTRACTIONS "Don't be distracted!\n"
+$SET_STR TUT_COINS "\nCollect shiny purple things by running into them,\nor by spitting at them using Spacebar.\n"
 $SET_STR TUT_END "\n\nYou've learned enough to make it on your own.\n\n\nGo through the door and enjoy the game.\n"
 
 submaps:
@@ -21,7 +29,7 @@ submaps:
                     tileset: "data/tileset1_bg.fus"
                 :
                     file: "data/maps/tutorial2/start.fus"
-                    text: $GET_STR TUT_ONWARDS
+                    text: if mapvar("coin_e") then if mapvar("coin_g") then "THAT'S ALL FOR NOW!\n" else null else $GET_STR TUT_ONWARDS
                     pos: eval: (0 0)
                     camera: (13 -2)
             : submaps:
@@ -32,5 +40,6 @@ submaps:
                     tileset: "data/tileset1_bg.fus"
                 :
                     file: "data/maps/tutorial2/start2.fus"
+                    text: $GET_STR TUT_COINS
                     pos: eval: (28 0)
                     camera: (8 -2)

@@ -1,5 +1,5 @@
 anim: "anim/coin.fus"
-state: "stand"
+state: "init"
 pos: (0 0)
 rot: 0
 turn: no

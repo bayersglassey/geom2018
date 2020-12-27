@@ -482,6 +482,42 @@ int state_effect_apply(state_effect_t *effect,
         if(err)return err;
         break;
     }
+    case STATE_EFFECT_TYPE_IF: {
+        vars_t *mapvars;
+        vars_t *myvars;
+        err = _get_vars(body, actor, &mapvars, &myvars);
+        if(err)return err;
+
+        state_effect_ite_t *ite = effect->u.ite;
+
+        bool matched = true;
+        for(int i = 0; i < ite->conds_len; i++){
+            state_cond_t *cond = ite->conds[i];
+            err = state_cond_match(cond, game, body, actor,
+                &matched);
+            if(err)return err;
+            if(matched)break;
+        }
+
+        state_effect_t **effects = matched?
+            ite->then_effects: ite->else_effects;
+        int effects_len = matched?
+            ite->then_effects_len: ite->else_effects_len;
+
+        for(int i = 0; i < effects_len; i++){
+            state_effect_t *effect = effects[i];
+            if(DEBUG_RULES)printf("  %s: %s\n", matched? "then": "else", state_effect_type_name(effect->type));
+            err = state_effect_apply(effect, game, body, actor,
+                gotto_ptr, continues_ptr);
+            if(err){
+                if(err == 2){
+                    fprintf(stderr, "...in \"if\" statement\n");
+                }
+                return err;
+            }
+        }
+        break;
+    }
     default: {
         fprintf(stderr, "Unrecognized effect: %s\n",
             state_effect_type_name(effect->type));
