@@ -731,9 +731,50 @@ Dec 22, 2020:
 -------------
 
 TUTORIAL:
-* crawling
 * spitting
+* switches
 * other creatures
 * transformations
 * coins (?.. what are they for?.. do we even bother to say?..)
 * swimming (?.. or leave it a secret?..)
+
+
+Dec 24, 2020:
+-------------
+
+* SAVING & LOADING THE GAME -- OVERHAUL:
+    * The thing you save/load is called a "game"
+        * Except we need a better technical term for it :P
+    * Touching a save point saves the current game
+    * Touching a door of type "new_game" starts a new game (so e.g. if you go to "NEW" on the title screen after having
+        saved during the tutorial, you can't reload back into the tutorial)
+    * The number of players is part of the game?..
+    * In any case, only player 0 can use savepoints?.. other players respawn at player 0's location (or... last save point)?..
+
+
+Dec 25, 2020:
+-------------
+
+* A system for changing the tile_c of entire swaths of tiles in a hexcollmap at the same time.
+    * So, continue to create hexcollmaps as we do now, based on how they'll affect collisions...
+    ...but have an easy way to add variety and colour to portions of the map, *independent* of its
+    "shape" (collisionarily speaking).
+
+* Have sections which use their own special states based on classic games??? "quote" those games?
+    * Sonic
+        * springs (both which send you jumping up -- where in our case "up" is subjective -- and which send you rolling sideways)
+        * loop-the-loops etc -- can just use the kind already possible in geom
+    * Mario: ???
+    * Metroid: ???
+    * Cave Story: ???
+
+* Present the game as a series of puzzles, similar to tutorial
+* Overlay that sequence with an open world, totally unexplained, like current demo map
+* Some interaction between the "two games" (puzzler and open exploration)
+    * E.g. a switch is part of a simple puzzle, but also opens a door in the open world
+    * Or turning into a rollerplayer in open world, using that to blow past a numer of puzzles
+
+* Add more prend stats besides just bitmaps_rendered!..
+    * Add a struct prismelrenderer_stats?..
+
+* Add a door_t property like "noscroll" so camera jumps along with your body!
