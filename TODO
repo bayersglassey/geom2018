@@ -779,8 +779,30 @@ Dec 25, 2020:
 
 * Add a door_t property like "noscroll" so camera jumps along with your body!
 
+
+Dec 26, 2020:
+-------------
+
 * One palette instance per filename!
 
 * As well as "on" events, add an "always" handler which runs every frame?
-* Use for things like e.g. affecting the "lighting" (palette) based on distance from camera?..
-* Use for things like heat, thirst, etc?..
+    * Use for things like e.g. affecting the "lighting" (palette) based on distance from camera?..
+    * Use for things like heat, thirst, etc?..
+
+* Now that we have coins whose number is counted, how do we save this stuff?..
+    * E.g. if there are 5 coins using same "num_key", and its value is 3, then what does coin's "init" state do with that?..
+    * Do we want to do something like... save *all* bodies?.. (in the same way we currently save player's)
+        * That's interesting, actually.
+        * We would need to stop those bodies from being recreated on map load... so, ignore map recordings
+        * We would need to save actors and players as well, and match them up to their bodies
+        * We would need to save which maps are loaded
+    * Short term solution is to do something clever in the "init" state
+        * Could add individual bools for each coin
+        * Could mark some vars as non-saveable???????
+            vars:
+                "coin_a": F
+                "coin_b": F
+                "coin_c": F
+                "num_coin_c": 5
+            var_props:
+                "num_coin_c": nosave
