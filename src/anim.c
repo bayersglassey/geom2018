@@ -123,7 +123,7 @@ static int _parse_cond(fus_lexer_t *lexer,
     INIT
     if(GOT("false")){
         NEXT
-        cond->type = state_cond_type_false;
+        cond->type = STATE_COND_TYPE_FALSE;
     }else if(GOT("key")){
         NEXT
         GET("(")
@@ -156,7 +156,7 @@ static int _parse_cond(fus_lexer_t *lexer,
                 "one of the characters: " ANIM_KEY_CS);
         }
 
-        cond->type = state_cond_type_key;
+        cond->type = STATE_COND_TYPE_KEY;
         cond->u.key.kstate = kstate;
         cond->u.key.c = c;
         cond->u.key.yes = yes;
@@ -200,7 +200,7 @@ static int _parse_cond(fus_lexer_t *lexer,
 
         GET(")")
 
-        cond->type = state_cond_type_coll;
+        cond->type = STATE_COND_TYPE_COLL;
         cond->u.coll.collmap = collmap;
         cond->u.coll.flags = flags;
         cond->u.coll.collmsg = collmsg;
@@ -217,14 +217,14 @@ static int _parse_cond(fus_lexer_t *lexer,
             GET_INT(b)
         }
         GET(")")
-        cond->type = state_cond_type_chance;
+        cond->type = STATE_COND_TYPE_CHANCE;
         cond->u.ratio.a = a;
         cond->u.ratio.b = b;
     }else if(GOT("any") || GOT("all") || GOT("not")){
         cond->type =
-            GOT("any")? state_cond_type_any:
-            GOT("all")? state_cond_type_all:
-            state_cond_type_not;
+            GOT("any")? STATE_COND_TYPE_ANY:
+            GOT("all")? STATE_COND_TYPE_ALL:
+            STATE_COND_TYPE_NOT;
         ARRAY_INIT(cond->u.subconds.conds)
 
         NEXT
@@ -237,7 +237,7 @@ static int _parse_cond(fus_lexer_t *lexer,
         }
         NEXT
     }else if(GOT("expr")){
-        cond->type = state_cond_type_expr;
+        cond->type = STATE_COND_TYPE_EXPR;
         cond->u.expr.var_name = NULL;
         NEXT
         GET("(")
@@ -253,7 +253,7 @@ static int _parse_cond(fus_lexer_t *lexer,
         GET_INT(cond->u.expr.value)
         GET(")")
     }else if(GOT("get_bool")){
-        cond->type = state_cond_type_get_bool;
+        cond->type = STATE_COND_TYPE_GET_BOOL;
         NEXT
         err = valexpr_parse(&cond->u.valexpr, lexer);
         if(err)return err;
@@ -271,22 +271,22 @@ static int _parse_effect(fus_lexer_t *lexer,
     if(GOT("print")){
         NEXT
         GET("(")
-        effect->type = state_effect_type_print;
+        effect->type = STATE_EFFECT_TYPE_PRINT;
         GET_STR(effect->u.msg)
         GET(")")
     }else if(GOT("print_var")){
         NEXT
         GET("(")
-        effect->type = state_effect_type_print_var;
+        effect->type = STATE_EFFECT_TYPE_PRINT_VAR;
         GET_NAME(effect->u.var_name)
         GET(")")
     }else if(GOT("print_vars")){
         NEXT
-        effect->type = state_effect_type_print_vars;
+        effect->type = STATE_EFFECT_TYPE_PRINT_VARS;
     }else if(GOT("move")){
         NEXT
         GET("(")
-        effect->type = state_effect_type_move;
+        effect->type = STATE_EFFECT_TYPE_MOVE;
         for(int i = 0; i < space->dims; i++){
             GET_INT(effect->u.vec[i]);
         }
@@ -296,12 +296,12 @@ static int _parse_effect(fus_lexer_t *lexer,
         GET("(")
         int rot;
         GET_INT(rot)
-        effect->type = state_effect_type_rot;
+        effect->type = STATE_EFFECT_TYPE_ROT;
         effect->u.rot = rot_contain(space->rot_max, rot);
         GET(")")
     }else if(GOT("turn")){
         NEXT
-        effect->type = state_effect_type_turn;
+        effect->type = STATE_EFFECT_TYPE_TURN;
     }else if(GOT("goto")){
         NEXT
 
@@ -316,7 +316,7 @@ static int _parse_effect(fus_lexer_t *lexer,
         char *goto_name;
         GET_NAME(goto_name)
 
-        effect->type = state_effect_type_goto;
+        effect->type = STATE_EFFECT_TYPE_GOTO;
         effect->u.gotto.name = goto_name;
         effect->u.gotto.immediate = immediate;
 
@@ -328,7 +328,7 @@ static int _parse_effect(fus_lexer_t *lexer,
         int delay;
         GET_INT(delay)
 
-        effect->type = state_effect_type_delay;
+        effect->type = STATE_EFFECT_TYPE_DELAY;
         effect->u.delay = delay;
 
         GET(")")
@@ -346,33 +346,33 @@ static int _parse_effect(fus_lexer_t *lexer,
         GET_INT(spawn.loc.rot)
         GET_BOOL(spawn.loc.turn)
 
-        effect->type = state_effect_type_spawn;
+        effect->type = STATE_EFFECT_TYPE_SPAWN;
         effect->u.spawn = spawn;
 
         GET(")")
     }else if(GOT("die")){
         NEXT
-        effect->type = state_effect_type_die;
+        effect->type = STATE_EFFECT_TYPE_DIE;
         if(GOT("mostly")){
             NEXT
             effect->u.dead = BODY_MOSTLY_DEAD;
         }else effect->u.dead = BODY_ALL_DEAD;
     }else if(GOT("zero")){
-        effect->type = state_effect_type_zero;
+        effect->type = STATE_EFFECT_TYPE_ZERO;
         effect->u.var_name = NULL;
         NEXT
         GET("(")
         GET_NAME(effect->u.var_name)
         GET(")")
     }else if(GOT("inc")){
-        effect->type = state_effect_type_inc;
+        effect->type = STATE_EFFECT_TYPE_INC;
         effect->u.var_name = NULL;
         NEXT
         GET("(")
         GET_NAME(effect->u.var_name)
         GET(")")
     }else if(GOT("continue")){
-        effect->type = state_effect_type_continue;
+        effect->type = STATE_EFFECT_TYPE_CONTINUE;
         NEXT
     }else if(GOT("confused")){
         NEXT
@@ -385,7 +385,7 @@ static int _parse_effect(fus_lexer_t *lexer,
             return UNEXPECTED("yes or no or toggle");
         }
         NEXT
-        effect->type = state_effect_type_confused;
+        effect->type = STATE_EFFECT_TYPE_CONFUSED;
         effect->u.boolean = boolean;
         GET(")")
     }else if(GOT("key")){
@@ -414,7 +414,7 @@ static int _parse_effect(fus_lexer_t *lexer,
                 "one of the characters: " ANIM_KEY_CS);
         }
 
-        effect->type = state_effect_type_key;
+        effect->type = STATE_EFFECT_TYPE_KEY;
         effect->u.key.action = action;
         effect->u.key.c = c;
         free(name);
@@ -423,7 +423,7 @@ static int _parse_effect(fus_lexer_t *lexer,
     }else if(GOT("set")){
         NEXT
 
-        effect->type = state_effect_type_set;
+        effect->type = STATE_EFFECT_TYPE_SET;
 
         err = valexpr_parse(&effect->u.set.var_expr, lexer);
         if(err)return err;
@@ -439,7 +439,7 @@ static int _parse_effect(fus_lexer_t *lexer,
         char *play_filename;
         GET_STR(play_filename)
 
-        effect->type = state_effect_type_play;
+        effect->type = STATE_EFFECT_TYPE_PLAY;
         effect->u.play_filename = play_filename;
 
         GET(")")
@@ -639,69 +639,6 @@ state_t *stateset_get_state(stateset_t *stateset, const char *name){
  * STATE *
  *********/
 
-
-const char state_cond_type_false[] = "false";
-const char state_cond_type_key[] = "key";
-const char state_cond_type_coll[] = "coll";
-const char state_cond_type_chance[] = "chance";
-const char state_cond_type_any[] = "any";
-const char state_cond_type_all[] = "all";
-const char state_cond_type_not[] = "not";
-const char state_cond_type_expr[] = "expr";
-const char state_cond_type_get_bool[] = "get_bool";
-const char *state_cond_types[] = {
-    state_cond_type_false,
-    state_cond_type_key,
-    state_cond_type_coll,
-    state_cond_type_chance,
-    state_cond_type_any,
-    state_cond_type_all,
-    state_cond_type_not,
-    state_cond_type_expr,
-    state_cond_type_get_bool,
-    NULL
-};
-
-
-const char state_effect_type_print[] = "print";
-const char state_effect_type_print_var[] = "print_var";
-const char state_effect_type_print_vars[] = "print_vars";
-const char state_effect_type_move[] = "move";
-const char state_effect_type_rot[] = "rot";
-const char state_effect_type_turn[] = "turn";
-const char state_effect_type_goto[] = "goto";
-const char state_effect_type_delay[] = "delay";
-const char state_effect_type_spawn[] = "spawn";
-const char state_effect_type_play[] = "play";
-const char state_effect_type_die[] = "die";
-const char state_effect_type_zero[] = "zero";
-const char state_effect_type_inc[] = "inc";
-const char state_effect_type_continue[] = "continue";
-const char state_effect_type_confused[] = "confused";
-const char state_effect_type_key[] = "key";
-const char state_effect_type_set[] = "set";
-const char *state_effect_types[] = {
-    state_effect_type_print,
-    state_effect_type_print_var,
-    state_effect_type_print_vars,
-    state_effect_type_move,
-    state_effect_type_rot,
-    state_effect_type_turn,
-    state_effect_type_goto,
-    state_effect_type_delay,
-    state_effect_type_spawn,
-    state_effect_type_play,
-    state_effect_type_die,
-    state_effect_type_zero,
-    state_effect_type_inc,
-    state_effect_type_continue,
-    state_effect_type_confused,
-    state_effect_type_key,
-    state_effect_type_set,
-    NULL
-};
-
-
 void state_cleanup(state_t *state){
     free(state->name);
     if(state->hitbox != NULL){
@@ -747,33 +684,38 @@ void state_dump(state_t *state, FILE *file, int depth){
 *******/
 
 void state_cond_cleanup(state_cond_t *cond){
-    if(cond->type == state_cond_type_coll){
-        free(cond->u.coll.collmsg);
-        hexcollmap_t *collmap = cond->u.coll.collmap;
-        if(collmap != NULL){
-            hexcollmap_cleanup(collmap);
-            free(collmap);
+    switch(cond->type){
+        case STATE_COND_TYPE_COLL: {
+            free(cond->u.coll.collmsg);
+            hexcollmap_t *collmap = cond->u.coll.collmap;
+            if(collmap != NULL){
+                hexcollmap_cleanup(collmap);
+                free(collmap);
+            }
+            break;
         }
-    }else if(
-        cond->type == state_cond_type_any ||
-        cond->type == state_cond_type_all ||
-        cond->type == state_cond_type_not
-    ){
-        ARRAY_FREE_PTR(state_cond_t*, cond->u.subconds.conds, state_cond_cleanup)
-    }else if(cond->type == state_cond_type_expr){
-        free(cond->u.expr.var_name);
-    }else if(cond->type == state_cond_type_get_bool){
-        valexpr_cleanup(&cond->u.valexpr);
+        case STATE_COND_TYPE_ANY:
+        case STATE_COND_TYPE_ALL:
+        case STATE_COND_TYPE_NOT:
+            ARRAY_FREE_PTR(state_cond_t*, cond->u.subconds.conds, state_cond_cleanup)
+            break;
+        case STATE_COND_TYPE_EXPR:
+            free(cond->u.expr.var_name);
+            break;
+        case STATE_COND_TYPE_GET_BOOL:
+            valexpr_cleanup(&cond->u.valexpr);
+            break;
+        default: break;
     }
 }
 
 void state_cond_dump(state_cond_t *cond, FILE *file, int depth){
     _print_tabs(file, depth);
-    fprintf(file, "%s\n", cond->type);
+    fprintf(file, "%s\n", state_cond_type_name(cond->type));
     if(
-        cond->type == state_cond_type_any ||
-        cond->type == state_cond_type_all ||
-        cond->type == state_cond_type_not
+        cond->type == STATE_COND_TYPE_ANY ||
+        cond->type == STATE_COND_TYPE_ALL ||
+        cond->type == STATE_COND_TYPE_NOT
     ){
         for(int i = 0; i < cond->u.subconds.conds_len; i++){
             state_cond_t *subcond = cond->u.subconds.conds[i];
@@ -788,30 +730,36 @@ void state_cond_dump(state_cond_t *cond, FILE *file, int depth){
 *********/
 
 void state_effect_cleanup(state_effect_t *effect){
-    if(effect->type == state_effect_type_print){
-        free(effect->u.msg);
-    }else if(
-        effect->type == state_effect_type_print_var ||
-        effect->type == state_effect_type_zero ||
-        effect->type == state_effect_type_inc
-    ){
-        free(effect->u.var_name);
-    }else if(effect->type == state_effect_type_goto){
-        free(effect->u.gotto.name);
-    }else if(effect->type == state_effect_type_spawn){
-        free(effect->u.spawn.stateset_filename);
-        free(effect->u.spawn.state_name);
-        free(effect->u.spawn.palmapper_name);
-    }else if(effect->type == state_effect_type_play){
-        free(effect->u.play_filename);
-    }else if(effect->type == state_effect_type_set){
-        valexpr_cleanup(&effect->u.set.var_expr);
+    switch(effect->type){
+        case STATE_EFFECT_TYPE_PRINT:
+            free(effect->u.msg);
+            break;
+        case STATE_EFFECT_TYPE_PRINT_VAR:
+        case STATE_EFFECT_TYPE_ZERO:
+        case STATE_EFFECT_TYPE_INC:
+            free(effect->u.var_name);
+            break;
+        case STATE_EFFECT_TYPE_GOTO:
+            free(effect->u.gotto.name);
+            break;
+        case STATE_EFFECT_TYPE_SPAWN:
+            free(effect->u.spawn.stateset_filename);
+            free(effect->u.spawn.state_name);
+            free(effect->u.spawn.palmapper_name);
+            break;
+        case STATE_EFFECT_TYPE_PLAY:
+            free(effect->u.play_filename);
+            break;
+        case STATE_EFFECT_TYPE_SET:
+            valexpr_cleanup(&effect->u.set.var_expr);
+            break;
+        default: break;
     }
 }
 
 void state_effect_dump(state_effect_t *effect, FILE *file, int depth){
     _print_tabs(file, depth);
-    fprintf(file, "%s\n", effect->type);
+    fprintf(file, "%s\n", state_effect_type_name(effect->type));
 }
 
 

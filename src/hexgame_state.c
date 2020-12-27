@@ -65,13 +65,17 @@ int state_cond_match(state_cond_t *cond,
     it may make use of "body-oriented" rules. */
 
     #define RULE_PERROR() \
-        fprintf(stderr, "Error in condition: %s\n", cond->type);
+        fprintf(stderr, "Error in condition: %s\n", \
+            state_cond_type_name(cond->type));
 
     bool matched = false;
 
-    if(cond->type == state_cond_type_false){
+    switch(cond->type){
+    case STATE_COND_TYPE_FALSE: {
         matched = false;
-    }else if(cond->type == state_cond_type_key){
+        break;
+    }
+    case STATE_COND_TYPE_KEY: {
         CHECK_BODY
         int kstate_i = cond->u.key.kstate;
         bool *kstate =
@@ -93,7 +97,9 @@ int state_cond_match(state_cond_t *cond,
 
         matched = kstate[key_i];
         if(!cond->u.key.yes)matched = !matched;
-    }else if(cond->type == state_cond_type_coll){
+        break;
+    }
+    case STATE_COND_TYPE_COLL: {
         CHECK_BODY
         if(body->state == NULL){
             matched = false;
@@ -146,15 +152,17 @@ int state_cond_match(state_cond_t *cond,
                 matched = yes? collide: !collide;
             }
         }
-    }else if(cond->type == state_cond_type_chance){
+        break;
+    }
+    case STATE_COND_TYPE_CHANCE: {
         int n = rand() % cond->u.ratio.b;
         matched = n <= cond->u.ratio.a;
-    }else if(
-        cond->type == state_cond_type_any ||
-        cond->type == state_cond_type_all ||
-        cond->type == state_cond_type_not
-    ){
-        bool all = cond->type == state_cond_type_all;
+        break;
+    }
+    case STATE_COND_TYPE_ANY:
+    case STATE_COND_TYPE_ALL:
+    case STATE_COND_TYPE_NOT: {
+        bool all = cond->type == STATE_COND_TYPE_ALL;
         matched = all? true: false;
         for(int i = 0; i < cond->u.subconds.conds_len; i++){
             state_cond_t *subcond = cond->u.subconds.conds[i];
@@ -163,10 +171,12 @@ int state_cond_match(state_cond_t *cond,
             if(err)return err;
             if((all && !matched) || (!all && matched))break;
         }
-        if(cond->type == state_cond_type_not){
+        if(cond->type == STATE_COND_TYPE_NOT){
             matched = !matched;
         }
-    }else if(cond->type == state_cond_type_expr){
+        break;
+    }
+    case STATE_COND_TYPE_EXPR: {
         CHECK_BODY
         int value = vars_get_int(&body->vars, cond->u.expr.var_name);
         int cond_value = cond->u.expr.value;
@@ -183,7 +193,9 @@ int state_cond_match(state_cond_t *cond,
                 RULE_PERROR()
                 return 2;
         }
-    }else if(cond->type == state_cond_type_get_bool){
+        break;
+    }
+    case STATE_COND_TYPE_GET_BOOL: {
         vars_t *mapvars;
         vars_t *myvars;
         err = _get_vars(body, actor, &mapvars, &myvars);
@@ -207,11 +219,14 @@ int state_cond_match(state_cond_t *cond,
         }
 
         matched = val->u.b;
-    }else{
+        break;
+    }
+    default: {
         fprintf(stderr, "Unrecognized condition: %s\n",
-            cond->type);
+            state_cond_type_name(cond->type));
         RULE_PERROR()
         return 2;
+    }
     }
     #undef RULE_PERROR
 
@@ -228,7 +243,7 @@ static int state_rule_match(state_rule_t *rule,
     bool matched = true;
     for(int i = 0; i < rule->conds_len; i++){
         state_cond_t *cond = rule->conds[i];
-        if(DEBUG_RULES)printf("  if: %s\n", cond->type);
+        if(DEBUG_RULES)printf("  if: %s\n", state_cond_type_name(cond->type));
         err = state_cond_match(cond, game, body, actor,
             &matched);
         if(err){
@@ -258,24 +273,23 @@ int state_effect_apply(state_effect_t *effect,
     state_effect_goto_t **gotto_ptr, bool *continues_ptr
 ){
     #define RULE_PERROR() \
-        fprintf(stderr, "Error in effect: %s\n", effect->type);
+        fprintf(stderr, "Error in effect: %s\n", state_effect_type_name(effect->type));
 
     int err;
 
-    if(
-        effect->type == state_effect_type_print ||
-        effect->type == state_effect_type_print_var ||
-        effect->type == state_effect_type_print_vars
-    ){
+    switch(effect->type){
+    case STATE_EFFECT_TYPE_PRINT:
+    case STATE_EFFECT_TYPE_PRINT_VAR:
+    case STATE_EFFECT_TYPE_PRINT_VARS: {
         if(body != NULL)fprintf(stderr, "body %p", body);
         else fprintf(stderr, "unknown body");
         if(actor != NULL)fprintf(stderr, " (actor %p)", actor);
 
         vars_t *vars = actor? &actor->vars: &body->vars;
-        if(effect->type == state_effect_type_print_vars){
+        if(effect->type == STATE_EFFECT_TYPE_PRINT_VARS){
             fprintf(stderr, " vars:\n");
             vars_write(vars, stderr, 1);
-        }else if(effect->type == state_effect_type_print_var){
+        }else if(effect->type == STATE_EFFECT_TYPE_PRINT_VAR){
             var_t *var = vars_get(vars, effect->u.var_name);
             if(var){
                 fprintf(stderr, " says: ");
@@ -288,7 +302,9 @@ int state_effect_apply(state_effect_t *effect,
         }else{
             fprintf(stderr, " says: %s\n", effect->u.msg);
         }
-    }else if(effect->type == state_effect_type_move){
+        break;
+    }
+    case STATE_EFFECT_TYPE_MOVE: {
         CHECK_BODY
         vecspace_t *space = body->map->space;
         vec_t vec;
@@ -297,27 +313,37 @@ int state_effect_apply(state_effect_t *effect,
         space->vec_flip(vec, body->loc.turn);
         space->vec_rot(vec, rot);
         vec_add(space->dims, body->loc.pos, vec);
-    }else if(effect->type == state_effect_type_rot){
+        break;
+    }
+    case STATE_EFFECT_TYPE_ROT: {
         CHECK_BODY
         vecspace_t *space = body->map->space;
         rot_t effect_rot = effect->u.rot;
         body->loc.rot = rot_rot(space->rot_max,
             body->loc.rot, effect_rot);
-    }else if(effect->type == state_effect_type_turn){
+        break;
+    }
+    case STATE_EFFECT_TYPE_TURN: {
         CHECK_BODY
         vecspace_t *space = body->map->space;
         body->loc.turn = !body->loc.turn;
         body->loc.rot = rot_flip(space->rot_max, body->loc.rot, true);
-    }else if(effect->type == state_effect_type_goto){
+        break;
+    }
+    case STATE_EFFECT_TYPE_GOTO: {
         *gotto_ptr = &effect->u.gotto;
-    }else if(effect->type == state_effect_type_delay){
+        break;
+    }
+    case STATE_EFFECT_TYPE_DELAY: {
         if(actor){
             actor->wait = effect->u.delay;
         }else{
             CHECK_BODY
             body->cooldown = effect->u.delay;
         }
-    }else if(effect->type == state_effect_type_spawn){
+        break;
+    }
+    case STATE_EFFECT_TYPE_SPAWN: {
         CHECK_BODY
         state_effect_spawn_t *spawn = &effect->u.spawn;
 
@@ -330,7 +356,9 @@ int state_effect_apply(state_effect_t *effect,
             spawn->state_name, palmapper,
             spawn->loc.pos, spawn->loc.rot, spawn->loc.turn);
         if(err)return err;
-    }else if(effect->type == state_effect_type_play){
+        break;
+    }
+    case STATE_EFFECT_TYPE_PLAY: {
         CHECK_ACTOR
         const char *play_filename = effect->u.play_filename;
         err = body_load_recording(body, play_filename, false);
@@ -338,24 +366,36 @@ int state_effect_apply(state_effect_t *effect,
         hexgame_location_apply(&body->recording.loc0, &actor->trf);
         err = body_play_recording(body);
         if(err)return err;
-    }else if(effect->type == state_effect_type_die){
+        break;
+    }
+    case STATE_EFFECT_TYPE_DIE: {
         CHECK_BODY
         body->dead = effect->u.dead;
-    }else if(effect->type == state_effect_type_zero){
+        break;
+    }
+    case STATE_EFFECT_TYPE_ZERO: {
         CHECK_BODY
         err = vars_set_int(&body->vars, effect->u.var_name, 0);
         if(err)return err;
-    }else if(effect->type == state_effect_type_inc){
+        break;
+    }
+    case STATE_EFFECT_TYPE_INC: {
         CHECK_BODY
         int value = vars_get_int(&body->vars, effect->u.var_name);
         err = vars_set_int(&body->vars, effect->u.var_name, value + 1);
         if(err)return err;
-    }else if(effect->type == state_effect_type_continue){
+        break;
+    }
+    case STATE_EFFECT_TYPE_CONTINUE: {
         *continues_ptr = true;
-    }else if(effect->type == state_effect_type_confused){
+        break;
+    }
+    case STATE_EFFECT_TYPE_CONFUSED: {
         CHECK_BODY
         effect_apply_boolean(effect->u.boolean, &body->confused);
-    }else if(effect->type == state_effect_type_key){
+        break;
+    }
+    case STATE_EFFECT_TYPE_KEY: {
         CHECK_BODY
         int key_i = body_get_key_i(body, effect->u.key.c);
         bool keydown = effect->u.key.action & 0x1;
@@ -366,7 +406,9 @@ int state_effect_apply(state_effect_t *effect,
         if(keyup){
             body_keyup(body, key_i);
         }
-    }else if(effect->type == state_effect_type_set){
+        break;
+    }
+    case STATE_EFFECT_TYPE_SET: {
         vars_t *mapvars;
         vars_t *myvars;
         err = _get_vars(body, actor, &mapvars, &myvars);
@@ -392,10 +434,13 @@ int state_effect_apply(state_effect_t *effect,
 
         err = val_copy(var_val, val_val);
         if(err)return err;
-    }else{
+        break;
+    }
+    default: {
         fprintf(stderr, "Unrecognized effect: %s\n",
-            effect->type);
+            state_effect_type_name(effect->type));
         return 2;
+    }
     }
 
     return 0;
@@ -413,7 +458,7 @@ static int state_rule_apply(state_rule_t *rule,
 
     for(int i = 0; i < rule->effects_len; i++){
         state_effect_t *effect = rule->effects[i];
-        if(DEBUG_RULES)printf("  then: %s\n", effect->type);
+        if(DEBUG_RULES)printf("  then: %s\n", state_effect_type_name(effect->type));
         err = state_effect_apply(effect, game, body, actor,
             gotto_ptr, continues_ptr);
         if(err){

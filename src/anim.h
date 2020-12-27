@@ -123,6 +123,34 @@ typedef struct state_rule {
 * COND *
 *******/
 
+enum state_cond_type {
+    STATE_COND_TYPE_FALSE,
+    STATE_COND_TYPE_KEY,
+    STATE_COND_TYPE_COLL,
+    STATE_COND_TYPE_CHANCE,
+    STATE_COND_TYPE_ANY,
+    STATE_COND_TYPE_ALL,
+    STATE_COND_TYPE_NOT,
+    STATE_COND_TYPE_EXPR,
+    STATE_COND_TYPE_GET_BOOL,
+    STATE_COND_TYPES
+};
+
+static const char *state_cond_type_name(int type){
+    switch(type){
+        case STATE_COND_TYPE_FALSE: return "false";
+        case STATE_COND_TYPE_KEY: return "key";
+        case STATE_COND_TYPE_COLL: return "coll";
+        case STATE_COND_TYPE_CHANCE: return "chance";
+        case STATE_COND_TYPE_ANY: return "any";
+        case STATE_COND_TYPE_ALL: return "all";
+        case STATE_COND_TYPE_NOT: return "not";
+        case STATE_COND_TYPE_EXPR: return "expr";
+        case STATE_COND_TYPE_GET_BOOL: return "get_bool";
+        default: return "unknown";
+    }
+}
+
 enum state_cond_expr_op {
     STATE_COND_EXPR_OP_EQ,
     STATE_COND_EXPR_OP_NE,
@@ -133,7 +161,7 @@ enum state_cond_expr_op {
 };
 
 typedef struct state_cond {
-    const char *type;
+    int type; /* enum state_cond_type */
     union {
         struct {
             char *var_name;
@@ -169,21 +197,54 @@ typedef struct state_cond {
     } u;
 } state_cond_t;
 
-extern const char state_cond_type_false[];
-extern const char state_cond_type_key[];
-extern const char state_cond_type_coll[];
-extern const char state_cond_type_chance[];
-extern const char state_cond_type_any[];
-extern const char state_cond_type_all[];
-extern const char state_cond_type_not[];
-extern const char state_cond_type_expr[];
-extern const char state_cond_type_get_bool[];
-extern const char *state_cond_types[];
-
 
 /*********
 * EFFECT *
 *********/
+
+enum state_effect_type {
+    STATE_EFFECT_TYPE_PRINT,
+    STATE_EFFECT_TYPE_PRINT_VAR,
+    STATE_EFFECT_TYPE_PRINT_VARS,
+    STATE_EFFECT_TYPE_MOVE,
+    STATE_EFFECT_TYPE_ROT,
+    STATE_EFFECT_TYPE_TURN,
+    STATE_EFFECT_TYPE_GOTO,
+    STATE_EFFECT_TYPE_DELAY,
+    STATE_EFFECT_TYPE_SPAWN,
+    STATE_EFFECT_TYPE_PLAY,
+    STATE_EFFECT_TYPE_DIE,
+    STATE_EFFECT_TYPE_ZERO,
+    STATE_EFFECT_TYPE_INC,
+    STATE_EFFECT_TYPE_CONTINUE,
+    STATE_EFFECT_TYPE_CONFUSED,
+    STATE_EFFECT_TYPE_KEY,
+    STATE_EFFECT_TYPE_SET,
+    STATE_EFFECT_TYPES
+};
+
+static const char *state_effect_type_name(int type){
+    switch(type){
+        case STATE_EFFECT_TYPE_PRINT: return "print";
+        case STATE_EFFECT_TYPE_PRINT_VAR: return "print_var";
+        case STATE_EFFECT_TYPE_PRINT_VARS: return "print_vars";
+        case STATE_EFFECT_TYPE_MOVE: return "move";
+        case STATE_EFFECT_TYPE_ROT: return "rot";
+        case STATE_EFFECT_TYPE_TURN: return "turn";
+        case STATE_EFFECT_TYPE_GOTO: return "goto";
+        case STATE_EFFECT_TYPE_DELAY: return "delay";
+        case STATE_EFFECT_TYPE_SPAWN: return "spawn";
+        case STATE_EFFECT_TYPE_PLAY: return "play";
+        case STATE_EFFECT_TYPE_DIE: return "die";
+        case STATE_EFFECT_TYPE_ZERO: return "zero";
+        case STATE_EFFECT_TYPE_INC: return "inc";
+        case STATE_EFFECT_TYPE_CONTINUE: return "continue";
+        case STATE_EFFECT_TYPE_CONFUSED: return "confused";
+        case STATE_EFFECT_TYPE_KEY: return "key";
+        case STATE_EFFECT_TYPE_SET: return "set";
+        default: return "unknown";
+    }
+}
 
 typedef struct state_effect_goto {
     char *name;
@@ -198,7 +259,7 @@ typedef struct state_effect_spawn {
 } state_effect_spawn_t;
 
 typedef struct state_effect {
-    const char *type;
+    int type; /* enum state_effect_type */
     union {
         char *msg;
         char *var_name;
@@ -228,24 +289,6 @@ typedef struct state_effect {
     } u;
 } state_effect_t;
 
-extern const char state_effect_type_print[];
-extern const char state_effect_type_print_var[];
-extern const char state_effect_type_print_vars[];
-extern const char state_effect_type_move[];
-extern const char state_effect_type_rot[];
-extern const char state_effect_type_turn[];
-extern const char state_effect_type_goto[];
-extern const char state_effect_type_delay[];
-extern const char state_effect_type_spawn[];
-extern const char state_effect_type_play[];
-extern const char state_effect_type_die[];
-extern const char state_effect_type_zero[];
-extern const char state_effect_type_inc[];
-extern const char state_effect_type_continue[];
-extern const char state_effect_type_confused[];
-extern const char state_effect_type_key[];
-extern const char state_effect_type_set[];
-extern const char *state_effect_types[];
 
 
 /*************
