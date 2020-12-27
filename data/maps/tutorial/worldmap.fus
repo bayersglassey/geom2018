@@ -94,14 +94,7 @@ submaps:
                 camera: (10 0)
                 doors:
                     :
-                        pos: (-30 0)
+                        map: "data/maps/tutorial2/worldmap.fus"
+                        pos: (0 0)
                         rot: 0
                         turn: n
-    :
-        pos: (0 0)
-        mapper: ("triple")
-        submaps:
-            :
-                file: "data/maps/tutorial/safari.fus"
-                pos: eval: (-30 0)
-                camera: (8 0)

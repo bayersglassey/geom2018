@@ -1,0 +1,36 @@
+
+unit: 3 2 0 -1
+spawn: "data/maps/tutorial2/start.fus"
+default_palette: "data/maps/trees/pals/realistic.fus"
+default_tileset: "data/tileset1.fus"
+
+$SET_STR TUT_ONWARDS "Straight onwards, fear not!\n"
+$SET_STR TUT_DISTRACTIONS "Don't be distracted!\n"
+$SET_STR TUT_END "\n\nYou've learned enough to make it on your own.\n\n\nGo through the door and enjoy the game.\n"
+
+submaps:
+    :
+        pos: (0 0)
+        mapper: ("triple")
+        submaps:
+            : submaps:
+                :
+                    bg
+                    file: "data/maps/tutorial2/start_bg.fus"
+                    pos: eval: (0 0)
+                    tileset: "data/tileset1_bg.fus"
+                :
+                    file: "data/maps/tutorial2/start.fus"
+                    text: $GET_STR TUT_ONWARDS
+                    pos: eval: (0 0)
+                    camera: (13 -2)
+            : submaps:
+                :
+                    bg
+                    file: "data/maps/tutorial2/start2_bg.fus"
+                    pos: eval: (28 0)
+                    tileset: "data/tileset1_bg.fus"
+                :
+                    file: "data/maps/tutorial2/start2.fus"
+                    pos: eval: (28 0)
+                    camera: (8 -2)
