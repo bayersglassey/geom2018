@@ -1,7 +1,13 @@
 
 on "collect":
     if: exists myvar("collected_key")
-    then: set mapvar(myvar("collected_key")): T
+    then:
+        if: exists myvar("num_collected")
+        then:
+            dec mapvar(myvar("num_collected"))
+            if: expr: <= mapvar(myvar("num_collected")) 0
+            then: set mapvar(myvar("collected_key")): T
+        else: set mapvar(myvar("collected_key")): T
 
     goto: collected
 
