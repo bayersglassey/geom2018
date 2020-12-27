@@ -288,7 +288,6 @@ typedef struct state_effect {
                 */
             char c; /* See: ANIM_KEY_CS */
         } key;
-        valexpr_t valexpr;
         struct {
             valexpr_t var_expr;
             valexpr_t val_expr;

@@ -371,8 +371,19 @@ static int _parse_effect(fus_lexer_t *lexer,
     }else if(GOT("inc")){
         NEXT
         effect->type = STATE_EFFECT_TYPE_INC;
-        err = valexpr_parse(&effect->u.valexpr, lexer);
+
+        err = valexpr_parse(&effect->u.set.var_expr, lexer);
         if(err)return err;
+
+        if(GOT("(")){
+            NEXT
+            err = valexpr_parse(&effect->u.set.val_expr, lexer);
+            if(err)return err;
+            GET(")")
+        }else{
+            /* Default: increment by 1 */
+            valexpr_set_literal_int(&effect->u.set.val_expr, 1);
+        }
     }else if(GOT("continue")){
         effect->type = STATE_EFFECT_TYPE_CONTINUE;
         NEXT
@@ -792,8 +803,6 @@ void state_effect_cleanup(state_effect_t *effect){
             free(effect->u.play_filename);
             break;
         case STATE_EFFECT_TYPE_INC:
-            valexpr_cleanup(&effect->u.valexpr);
-            break;
         case STATE_EFFECT_TYPE_SET:
             valexpr_cleanup(&effect->u.set.var_expr);
             valexpr_cleanup(&effect->u.set.val_expr);

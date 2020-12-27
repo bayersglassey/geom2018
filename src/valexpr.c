@@ -32,6 +32,11 @@ void valexpr_cleanup(valexpr_t *expr){
     }
 }
 
+void valexpr_set_literal_int(valexpr_t *expr, int i){
+    expr->type = VALEXPR_TYPE_LITERAL;
+    expr->u.val.type = VAL_TYPE_INT;
+    expr->u.val.u.i = i;
+}
 
 int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer){
     INIT

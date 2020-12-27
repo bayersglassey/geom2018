@@ -11,6 +11,7 @@ vars:
     "coin_e": F
     "coin_f": F
     "coin_g": F
+    "num_coin_g": 5
 
 $SET_STR TUT_ONWARDS "Straight onwards, fear not!\n"
 $SET_STR TUT_COINS "\nCollect shiny purple things by running into them,\nor by spitting at them using Spacebar.\n"

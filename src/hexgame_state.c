@@ -414,24 +414,6 @@ int state_effect_apply(state_effect_t *effect,
         body->dead = effect->u.dead;
         break;
     }
-    case STATE_EFFECT_TYPE_INC: {
-        vars_t *mapvars;
-        vars_t *myvars;
-        err = _get_vars(body, actor, &mapvars, &myvars);
-        if(err)return err;
-
-        val_t *val;
-        err = valexpr_set(&effect->u.valexpr,
-            mapvars, myvars, &val);
-        if(err)return err;
-        /* NOTE: valexpr_set guarantees that we find (or create, if
-        necessary) a val, so we don't need to check whether var_val is
-        NULL. */
-
-        /* We don't check type or nuthin, just set to int */
-        val_set_int(val, val_get_int(val) + 1);
-        break;
-    }
     case STATE_EFFECT_TYPE_CONTINUE: {
         *continues_ptr = true;
         break;
@@ -454,6 +436,7 @@ int state_effect_apply(state_effect_t *effect,
         }
         break;
     }
+    case STATE_EFFECT_TYPE_INC:
     case STATE_EFFECT_TYPE_SET: {
         vars_t *mapvars;
         vars_t *myvars;
@@ -478,8 +461,19 @@ int state_effect_apply(state_effect_t *effect,
             return 2;
         }
 
-        err = val_copy(var_val, val_val);
-        if(err)return err;
+        if(effect->type == STATE_EFFECT_TYPE_INC){
+            if(val_val->type != VAL_TYPE_INT){
+                RULE_PERROR()
+                fprintf(stderr, "Increment expects RHS to be int. Got: %s\n",
+                    val_type_name(val_val->type));
+                return 2;
+            }
+            val_set_int(var_val, val_get_int(var_val) + val_get_int(val_val));
+        }else{
+            /* STATE_EFFECT_TYPE_SET */
+            err = val_copy(var_val, val_val);
+            if(err)return err;
+        }
         break;
     }
     case STATE_EFFECT_TYPE_IF: {
