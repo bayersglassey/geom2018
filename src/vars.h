@@ -30,6 +30,7 @@ typedef struct val {
 typedef struct var {
     char *key;
     val_t value;
+    unsigned props; /* Bit array */
 } var_t;
 
 typedef struct vars {
@@ -66,6 +67,7 @@ typedef struct vars {
 
 void var_cleanup(var_t *var);
 void var_init(var_t *var, char *key);
+void var_set_prop(var_t *var, unsigned i);
 
 void val_cleanup(val_t *val);
 void val_init(val_t *val);

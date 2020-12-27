@@ -20,7 +20,12 @@ void var_cleanup(var_t *var){
 
 void var_init(var_t *var, char *key){
     var->key = key;
+    var->props = 0; /* Empty bit array */
     val_init(&var->value);
+}
+
+void var_set_prop(var_t *var, unsigned i){
+    var->props |= 1 << i;
 }
 
 
