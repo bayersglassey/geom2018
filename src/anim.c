@@ -124,6 +124,9 @@ static int _parse_cond(fus_lexer_t *lexer,
     if(GOT("false")){
         NEXT
         cond->type = STATE_COND_TYPE_FALSE;
+    }else if(GOT("true")){
+        NEXT
+        cond->type = STATE_COND_TYPE_TRUE;
     }else if(GOT("key")){
         NEXT
         GET("(")
@@ -229,8 +232,7 @@ static int _parse_cond(fus_lexer_t *lexer,
 
         NEXT
         GET("(")
-        while(1){
-            if(GOT(")"))break;
+        while(!GOT(")")){
             ARRAY_PUSH_NEW(state_cond_t*, cond->u.subconds.conds, subcond)
             err = _parse_cond(lexer, prend, space, subcond);
             if(err)return err;
@@ -238,7 +240,6 @@ static int _parse_cond(fus_lexer_t *lexer,
         NEXT
     }else if(GOT("expr")){
         cond->type = STATE_COND_TYPE_EXPR;
-        cond->u.expr.var_name = NULL;
         NEXT
         GET("(")
         if(GOT("=="))cond->u.expr.op = STATE_COND_EXPR_OP_EQ;
@@ -249,11 +250,18 @@ static int _parse_cond(fus_lexer_t *lexer,
         else if(GOT(">="))cond->u.expr.op = STATE_COND_EXPR_OP_GE;
         else return UNEXPECTED("== or != or < or <= or > or >=");
         NEXT
-        GET_NAME(cond->u.expr.var_name)
-        GET_INT(cond->u.expr.value)
+        err = valexpr_parse(&cond->u.expr.val1_expr, lexer);
+        if(err)return err;
+        err = valexpr_parse(&cond->u.expr.val2_expr, lexer);
+        if(err)return err;
         GET(")")
     }else if(GOT("get_bool")){
         cond->type = STATE_COND_TYPE_GET_BOOL;
+        NEXT
+        err = valexpr_parse(&cond->u.valexpr, lexer);
+        if(err)return err;
+    }else if(GOT("exists")){
+        cond->type = STATE_COND_TYPE_EXISTS;
         NEXT
         err = valexpr_parse(&cond->u.valexpr, lexer);
         if(err)return err;
@@ -268,7 +276,10 @@ static int _parse_effect(fus_lexer_t *lexer,
     state_effect_t *effect
 ){
     INIT
-    if(GOT("print")){
+    if(GOT("noop")){
+        NEXT
+        effect->type = STATE_EFFECT_TYPE_NOOP;
+    }else if(GOT("print")){
         NEXT
         GET("(")
         effect->type = STATE_EFFECT_TYPE_PRINT;
@@ -357,20 +368,11 @@ static int _parse_effect(fus_lexer_t *lexer,
             NEXT
             effect->u.dead = BODY_MOSTLY_DEAD;
         }else effect->u.dead = BODY_ALL_DEAD;
-    }else if(GOT("zero")){
-        effect->type = STATE_EFFECT_TYPE_ZERO;
-        effect->u.var_name = NULL;
-        NEXT
-        GET("(")
-        GET_NAME(effect->u.var_name)
-        GET(")")
     }else if(GOT("inc")){
-        effect->type = STATE_EFFECT_TYPE_INC;
-        effect->u.var_name = NULL;
         NEXT
-        GET("(")
-        GET_NAME(effect->u.var_name)
-        GET(")")
+        effect->type = STATE_EFFECT_TYPE_INC;
+        err = valexpr_parse(&effect->u.valexpr, lexer);
+        if(err)return err;
     }else if(GOT("continue")){
         effect->type = STATE_EFFECT_TYPE_CONTINUE;
         NEXT
@@ -432,6 +434,45 @@ static int _parse_effect(fus_lexer_t *lexer,
         err = valexpr_parse(&effect->u.set.val_expr, lexer);
         if(err)return err;
         GET(")")
+    }else if(GOT("if")){
+        NEXT
+        effect->type = STATE_EFFECT_TYPE_IF;
+
+        state_effect_ite_t *ite = calloc(1, sizeof(*ite));
+        if(!ite)return 1;
+        effect->u.ite = ite;
+
+        ARRAY_INIT(ite->conds)
+        ARRAY_INIT(ite->then_effects)
+        ARRAY_INIT(ite->else_effects)
+
+        GET("(")
+        while(!GOT(")")){
+            ARRAY_PUSH_NEW(state_cond_t*, ite->conds, cond)
+            err = _parse_cond(lexer, prend, space, cond);
+            if(err)return err;
+        }
+        NEXT
+
+        GET("then")
+        GET("(")
+        while(!GOT(")")){
+            ARRAY_PUSH_NEW(state_effect_t*, ite->then_effects, effect)
+            err = _parse_effect(lexer, prend, space, effect);
+            if(err)return err;
+        }
+        NEXT
+
+        if(GOT("else")){
+            NEXT
+            GET("(")
+            while(!GOT(")")){
+                ARRAY_PUSH_NEW(state_effect_t*, ite->else_effects, effect)
+                err = _parse_effect(lexer, prend, space, effect);
+                if(err)return err;
+            }
+            NEXT
+        }
     }else if(GOT("play")){
         NEXT
         GET("(")
@@ -700,9 +741,11 @@ void state_cond_cleanup(state_cond_t *cond){
             ARRAY_FREE_PTR(state_cond_t*, cond->u.subconds.conds, state_cond_cleanup)
             break;
         case STATE_COND_TYPE_EXPR:
-            free(cond->u.expr.var_name);
+            valexpr_cleanup(&cond->u.expr.val1_expr);
+            valexpr_cleanup(&cond->u.expr.val2_expr);
             break;
         case STATE_COND_TYPE_GET_BOOL:
+        case STATE_COND_TYPE_EXISTS:
             valexpr_cleanup(&cond->u.valexpr);
             break;
         default: break;
@@ -735,8 +778,6 @@ void state_effect_cleanup(state_effect_t *effect){
             free(effect->u.msg);
             break;
         case STATE_EFFECT_TYPE_PRINT_VAR:
-        case STATE_EFFECT_TYPE_ZERO:
-        case STATE_EFFECT_TYPE_INC:
             free(effect->u.var_name);
             break;
         case STATE_EFFECT_TYPE_GOTO:
@@ -750,9 +791,23 @@ void state_effect_cleanup(state_effect_t *effect){
         case STATE_EFFECT_TYPE_PLAY:
             free(effect->u.play_filename);
             break;
+        case STATE_EFFECT_TYPE_INC:
+            valexpr_cleanup(&effect->u.valexpr);
+            break;
         case STATE_EFFECT_TYPE_SET:
             valexpr_cleanup(&effect->u.set.var_expr);
+            valexpr_cleanup(&effect->u.set.val_expr);
             break;
+        case STATE_EFFECT_TYPE_IF: {
+            state_effect_ite_t *ite = effect->u.ite;
+            if(ite){
+                ARRAY_FREE_PTR(state_cond_t*, ite->conds, state_cond_cleanup)
+                ARRAY_FREE_PTR(state_effect_t*, ite->then_effects, state_effect_cleanup)
+                ARRAY_FREE_PTR(state_effect_t*, ite->else_effects, state_effect_cleanup)
+                free(ite);
+            }
+            break;
+        }
         default: break;
     }
 }

@@ -25,47 +25,85 @@ int testrunner(){
     int n_tests = 0;
     int n_fails = 0;
 
-    vars_t _vars, *vars=&_vars;
-    vars_init(vars);
+    {
+        val_t val1 = {.type = VAL_TYPE_INT, .u.i = 2};
+        val_t val2 = {.type = VAL_TYPE_CONST_STR, .u.cs = "HELLO"};
+        ASSERT(!val_eq(&val1, &val2));
+        ASSERT(val_ne(&val1, &val2));
+    }
 
-    ASSERT(vars->vars_len == 0)
+    {
+        val_t val1 = {.type = VAL_TYPE_NULL};
+        val_t val2 = {.type = VAL_TYPE_NULL};
+        ASSERT(val_eq(&val1, &val2));
+        ASSERT(!val_ne(&val1, &val2));
+    }
 
-    ASSERT(!vars_set_null(vars, "x"))
-    ASSERT(vars->vars_len == 1)
+    {
+        val_t val1 = {.type = VAL_TYPE_INT, .u.i = 1};
+        val_t val2 = {.type = VAL_TYPE_INT, .u.i = 2};
+        ASSERT(!val_eq(&val1, &val2));
+        ASSERT(val_ne(&val1, &val2));
+        ASSERT(val_lt(&val1, &val2));
+        ASSERT(val_le(&val1, &val2));
+        ASSERT(!val_gt(&val1, &val2));
+        ASSERT(!val_ge(&val1, &val2));
+    }
 
-    ASSERT(!vars_set_null(vars, "x"))
-    ASSERT(vars->vars_len == 1)
+    {
+        val_t val1 = {.type = VAL_TYPE_CONST_STR, .u.cs = "AAA"};
+        val_t val2 = {.type = VAL_TYPE_CONST_STR, .u.cs = "BBB"};
+        ASSERT(!val_eq(&val1, &val2));
+        ASSERT(val_ne(&val1, &val2));
+        ASSERT(val_lt(&val1, &val2));
+        ASSERT(val_le(&val1, &val2));
+        ASSERT(!val_gt(&val1, &val2));
+        ASSERT(!val_ge(&val1, &val2));
+    }
 
-    ASSERT(!vars_set_int(vars, "x", 3))
-    ASSERT(vars->vars_len == 1)
-    ASSERT(vars_get_int(vars, "x") == 3)
+    {
+        vars_t _vars, *vars=&_vars;
+        vars_init(vars);
 
-    ASSERT(!vars_set_const_str(vars, "y", "HAHA"))
-    ASSERT(vars->vars_len == 2)
-    ASSERT(!strcmp(vars_get_str(vars, "y"), "HAHA"))
+        ASSERT(vars->vars_len == 0)
 
-    ASSERT(!vars_set_str(vars, "z", strdup("LAWL")))
-    ASSERT(vars->vars_len == 3)
-    ASSERT(!strcmp(vars_get_str(vars, "z"), "LAWL"))
+        ASSERT(!vars_set_null(vars, "x"))
+        ASSERT(vars->vars_len == 1)
 
-    ASSERT(!vars_set_bool(vars, "yes", true))
-    ASSERT(vars->vars_len == 4)
-    ASSERT(vars_get_bool(vars, "yes"))
+        ASSERT(!vars_set_null(vars, "x"))
+        ASSERT(vars->vars_len == 1)
 
-    ASSERT(!vars_set_bool(vars, "no", false))
-    ASSERT(vars->vars_len == 5)
-    ASSERT(!vars_get_bool(vars, "no"))
+        ASSERT(!vars_set_int(vars, "x", 3))
+        ASSERT(vars->vars_len == 1)
+        ASSERT(vars_get_int(vars, "x") == 3)
 
-    ASSERT(!vars_set_null(vars, "nothing"))
-    ASSERT(vars->vars_len == 6)
+        ASSERT(!vars_set_const_str(vars, "y", "HAHA"))
+        ASSERT(vars->vars_len == 2)
+        ASSERT(!strcmp(vars_get_str(vars, "y"), "HAHA"))
 
-    ASSERT(!vars_get_bool(vars, "fake"))
-    ASSERT(vars_get_int(vars, "fake") == 0)
-    ASSERT(vars_get_str(vars, "fake") == NULL)
+        ASSERT(!vars_set_str(vars, "z", strdup("LAWL")))
+        ASSERT(vars->vars_len == 3)
+        ASSERT(!strcmp(vars_get_str(vars, "z"), "LAWL"))
 
-    vars_dump(vars);
-    vars_write_simple(vars, stderr);
-    vars_cleanup(vars);
+        ASSERT(!vars_set_bool(vars, "yes", true))
+        ASSERT(vars->vars_len == 4)
+        ASSERT(vars_get_bool(vars, "yes"))
+
+        ASSERT(!vars_set_bool(vars, "no", false))
+        ASSERT(vars->vars_len == 5)
+        ASSERT(!vars_get_bool(vars, "no"))
+
+        ASSERT(!vars_set_null(vars, "nothing"))
+        ASSERT(vars->vars_len == 6)
+
+        ASSERT(!vars_get_bool(vars, "fake"))
+        ASSERT(vars_get_int(vars, "fake") == 0)
+        ASSERT(vars_get_str(vars, "fake") == NULL)
+
+        vars_dump(vars);
+        vars_write_simple(vars, stderr);
+        vars_cleanup(vars);
+    }
 
     {
         vars_t _vars, *vars=&_vars;

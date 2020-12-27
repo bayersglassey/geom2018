@@ -127,6 +127,82 @@ int val_copy(val_t *val1, val_t *val2){
     return 0;
 }
 
+static int val_type_normalized(int type){
+    return  type == VAL_TYPE_STR? VAL_TYPE_CONST_STR: type;
+}
+
+bool val_type_eq(val_t *val1, val_t *val2){
+    int type1 = val_type_normalized(val1->type);
+    int type2 = val_type_normalized(val2->type);
+    return type1 == type2;
+}
+
+bool val_eq(val_t *val1, val_t *val2){
+    if(!val_type_eq(val1, val2))return false;
+    switch(val_type_normalized(val1->type)){
+        case VAL_TYPE_NULL: return true;
+        case VAL_TYPE_BOOL: return val1->u.b == val2->u.b;
+        case VAL_TYPE_INT: return val1->u.i == val2->u.i;
+        case VAL_TYPE_CONST_STR: return !strcmp(val1->u.cs, val2->u.cs);
+        default: return false;
+    }
+}
+
+bool val_ne(val_t *val1, val_t *val2){
+    if(!val_type_eq(val1, val2))return true;
+    switch(val_type_normalized(val1->type)){
+        case VAL_TYPE_NULL: return false;
+        case VAL_TYPE_BOOL: return val1->u.b != val2->u.b;
+        case VAL_TYPE_INT: return val1->u.i != val2->u.i;
+        case VAL_TYPE_CONST_STR: return strcmp(val1->u.cs, val2->u.cs);
+        default: return true;
+    }
+}
+
+bool val_lt(val_t *val1, val_t *val2){
+    if(!val_type_eq(val1, val2))return false;
+    switch(val_type_normalized(val1->type)){
+        case VAL_TYPE_NULL: return false;
+        case VAL_TYPE_BOOL: return val1->u.b < val2->u.b;
+        case VAL_TYPE_INT: return val1->u.i < val2->u.i;
+        case VAL_TYPE_CONST_STR: return strcmp(val1->u.cs, val2->u.cs) < 0;
+        default: return false;
+    }
+}
+
+bool val_le(val_t *val1, val_t *val2){
+    if(!val_type_eq(val1, val2))return false;
+    switch(val_type_normalized(val1->type)){
+        case VAL_TYPE_NULL: return true;
+        case VAL_TYPE_BOOL: return val1->u.b <= val2->u.b;
+        case VAL_TYPE_INT: return val1->u.i <= val2->u.i;
+        case VAL_TYPE_CONST_STR: return strcmp(val1->u.cs, val2->u.cs) <= 0;
+        default: return false;
+    }
+}
+
+bool val_gt(val_t *val1, val_t *val2){
+    if(!val_type_eq(val1, val2))return false;
+    switch(val_type_normalized(val1->type)){
+        case VAL_TYPE_NULL: return false;
+        case VAL_TYPE_BOOL: return val1->u.b > val2->u.b;
+        case VAL_TYPE_INT: return val1->u.i > val2->u.i;
+        case VAL_TYPE_CONST_STR: return strcmp(val1->u.cs, val2->u.cs) > 0;
+        default: return false;
+    }
+}
+
+bool val_ge(val_t *val1, val_t *val2){
+    if(!val_type_eq(val1, val2))return false;
+    switch(val_type_normalized(val1->type)){
+        case VAL_TYPE_NULL: return true;
+        case VAL_TYPE_BOOL: return val1->u.b >= val2->u.b;
+        case VAL_TYPE_INT: return val1->u.i >= val2->u.i;
+        case VAL_TYPE_CONST_STR: return strcmp(val1->u.cs, val2->u.cs) >= 0;
+        default: return false;
+    }
+}
+
 
 
 /********

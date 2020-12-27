@@ -75,6 +75,10 @@ int state_cond_match(state_cond_t *cond,
         matched = false;
         break;
     }
+    case STATE_COND_TYPE_TRUE: {
+        matched = true;
+        break;
+    }
     case STATE_COND_TYPE_KEY: {
         CHECK_BODY
         int kstate_i = cond->u.key.kstate;
@@ -177,17 +181,46 @@ int state_cond_match(state_cond_t *cond,
         break;
     }
     case STATE_COND_TYPE_EXPR: {
-        CHECK_BODY
-        int value = vars_get_int(&body->vars, cond->u.expr.var_name);
-        int cond_value = cond->u.expr.value;
+        vars_t *mapvars;
+        vars_t *myvars;
+        err = _get_vars(body, actor, &mapvars, &myvars);
+        if(err)return err;
+
+        val_t *val1;
+        err = valexpr_get(&cond->u.expr.val1_expr,
+            mapvars, myvars, &val1);
+        if(err)return err;
+        if(val1 == NULL){
+            RULE_PERROR()
+            fprintf(stderr, "Couldn't get value for LHS\n");
+            return 2;
+        }
+
+        val_t *val2;
+        err = valexpr_get(&cond->u.expr.val2_expr,
+            mapvars, myvars, &val2);
+        if(err)return err;
+        if(val2 == NULL){
+            RULE_PERROR()
+            fprintf(stderr, "Couldn't get value for RHS\n");
+            return 2;
+        }
+
+        if(val1->type != val2->type){
+            RULE_PERROR()
+            fprintf(stderr, "Type mismatch between LHS, RHS: %s, %s\n",
+                val_type_name(val1->type), val_type_name(val2->type));
+            return 2;
+        }
+
         int op = cond->u.expr.op;
         switch(op){
-            case STATE_COND_EXPR_OP_EQ: matched = value == cond_value; break;
-            case STATE_COND_EXPR_OP_NE: matched = value != cond_value; break;
-            case STATE_COND_EXPR_OP_LT: matched = value  < cond_value; break;
-            case STATE_COND_EXPR_OP_LE: matched = value <= cond_value; break;
-            case STATE_COND_EXPR_OP_GT: matched = value  > cond_value; break;
-            case STATE_COND_EXPR_OP_GE: matched = value >= cond_value; break;
+            case STATE_COND_EXPR_OP_EQ: matched = val_eq(val1, val2); break;
+            case STATE_COND_EXPR_OP_NE: matched = val_ne(val1, val2); break;
+            case STATE_COND_EXPR_OP_LT: matched = val_lt(val1, val2); break;
+            case STATE_COND_EXPR_OP_LE: matched = val_le(val1, val2); break;
+            case STATE_COND_EXPR_OP_GT: matched = val_gt(val1, val2); break;
+            case STATE_COND_EXPR_OP_GE: matched = val_ge(val1, val2); break;
             default:
                 fprintf(stderr, "Bad expr op: %i\n", op);
                 RULE_PERROR()
@@ -195,7 +228,8 @@ int state_cond_match(state_cond_t *cond,
         }
         break;
     }
-    case STATE_COND_TYPE_GET_BOOL: {
+    case STATE_COND_TYPE_GET_BOOL:
+    case STATE_COND_TYPE_EXISTS: {
         vars_t *mapvars;
         vars_t *myvars;
         err = _get_vars(body, actor, &mapvars, &myvars);
@@ -205,6 +239,13 @@ int state_cond_match(state_cond_t *cond,
         err = valexpr_get(&cond->u.valexpr,
             mapvars, myvars, &val);
         if(err)return err;
+
+        if(cond->type == STATE_COND_TYPE_EXISTS){
+            matched = val != NULL;
+            break;
+        }
+        /* ...otherwise, cond->type == STATE_COND_TYPE_GET_BOOL... */
+
         if(val == NULL){
             RULE_PERROR()
             fprintf(stderr, "Couldn't get value for expression\n");
@@ -373,17 +414,22 @@ int state_effect_apply(state_effect_t *effect,
         body->dead = effect->u.dead;
         break;
     }
-    case STATE_EFFECT_TYPE_ZERO: {
-        CHECK_BODY
-        err = vars_set_int(&body->vars, effect->u.var_name, 0);
-        if(err)return err;
-        break;
-    }
     case STATE_EFFECT_TYPE_INC: {
-        CHECK_BODY
-        int value = vars_get_int(&body->vars, effect->u.var_name);
-        err = vars_set_int(&body->vars, effect->u.var_name, value + 1);
+        vars_t *mapvars;
+        vars_t *myvars;
+        err = _get_vars(body, actor, &mapvars, &myvars);
         if(err)return err;
+
+        val_t *val;
+        err = valexpr_set(&effect->u.valexpr,
+            mapvars, myvars, &val);
+        if(err)return err;
+        /* NOTE: valexpr_set guarantees that we find (or create, if
+        necessary) a val, so we don't need to check whether var_val is
+        NULL. */
+
+        /* We don't check type or nuthin, just set to int */
+        val_set_int(val, val_get_int(val) + 1);
         break;
     }
     case STATE_EFFECT_TYPE_CONTINUE: {

@@ -111,7 +111,7 @@ mainloop:
     then:
         key: up f
         key: down d
-        zero: crawl_time
+        set myvar("crawl_time"): 0
         goto: mainloop_crawl
 
 
@@ -207,13 +207,13 @@ mainloop_crawl:
 
     if() then:
         key: up b
-        inc: crawl_time
+        inc myvar("crawl_time")
         continue
 
 
     # Sometimes, stand!
     if:
-        expr: > crawl_time 7 # Don't just stand up right after crouching...
+        expr: > myvar("crawl_time") 7 # Don't just stand up right after crouching...
         chance: 25%
         coll: all no
             ;;    *\*/*

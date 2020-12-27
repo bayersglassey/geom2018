@@ -84,6 +84,14 @@ void val_set_const_str(val_t *val, const char *cs);
 
 int val_copy(val_t *val1, val_t *val2);
 
+bool val_type_eq(val_t *val1, val_t *val2);
+bool val_eq(val_t *val1, val_t *val2);
+bool val_ne(val_t *val1, val_t *val2);
+bool val_lt(val_t *val1, val_t *val2);
+bool val_le(val_t *val1, val_t *val2);
+bool val_gt(val_t *val1, val_t *val2);
+bool val_ge(val_t *val1, val_t *val2);
+
 
 void vars_cleanup(vars_t *vars);
 void vars_init(vars_t *vars);

@@ -18,11 +18,11 @@ fly:
 
     if:
     then:
-        inc: age
+        inc myvar("age")
         continue
 
     if: any:
-        expr: > age $GET_INT MAX_AGE
+        expr: > myvar("age") $GET_INT MAX_AGE
         coll: any yes
             ;;   .   .
             ;;   *\*
@@ -59,11 +59,11 @@ crouch_fly:
 
     if:
     then:
-        inc: age
+        inc myvar("age")
         continue
 
     if: any:
-        expr: > age $GET_INT MAX_AGE
+        expr: > myvar("age") $GET_INT MAX_AGE
         coll: any yes
             ;;    .   .
             ;;    *\*

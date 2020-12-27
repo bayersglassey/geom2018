@@ -125,6 +125,7 @@ typedef struct state_rule {
 
 enum state_cond_type {
     STATE_COND_TYPE_FALSE,
+    STATE_COND_TYPE_TRUE,
     STATE_COND_TYPE_KEY,
     STATE_COND_TYPE_COLL,
     STATE_COND_TYPE_CHANCE,
@@ -133,12 +134,14 @@ enum state_cond_type {
     STATE_COND_TYPE_NOT,
     STATE_COND_TYPE_EXPR,
     STATE_COND_TYPE_GET_BOOL,
+    STATE_COND_TYPE_EXISTS,
     STATE_COND_TYPES
 };
 
 static const char *state_cond_type_name(int type){
     switch(type){
         case STATE_COND_TYPE_FALSE: return "false";
+        case STATE_COND_TYPE_TRUE: return "true";
         case STATE_COND_TYPE_KEY: return "key";
         case STATE_COND_TYPE_COLL: return "coll";
         case STATE_COND_TYPE_CHANCE: return "chance";
@@ -147,6 +150,7 @@ static const char *state_cond_type_name(int type){
         case STATE_COND_TYPE_NOT: return "not";
         case STATE_COND_TYPE_EXPR: return "expr";
         case STATE_COND_TYPE_GET_BOOL: return "get_bool";
+        case STATE_COND_TYPE_EXISTS: return "exists";
         default: return "unknown";
     }
 }
@@ -164,9 +168,9 @@ typedef struct state_cond {
     int type; /* enum state_cond_type */
     union {
         struct {
-            char *var_name;
             int op; /* enum state_cond_expr_op */
-            int value;
+            valexpr_t val1_expr;
+            valexpr_t val2_expr;
         } expr;
         struct {
             int flags; /* ORed combination of enum anim_cond_flag values */
@@ -203,6 +207,7 @@ typedef struct state_cond {
 *********/
 
 enum state_effect_type {
+    STATE_EFFECT_TYPE_NOOP,
     STATE_EFFECT_TYPE_PRINT,
     STATE_EFFECT_TYPE_PRINT_VAR,
     STATE_EFFECT_TYPE_PRINT_VARS,
@@ -214,17 +219,18 @@ enum state_effect_type {
     STATE_EFFECT_TYPE_SPAWN,
     STATE_EFFECT_TYPE_PLAY,
     STATE_EFFECT_TYPE_DIE,
-    STATE_EFFECT_TYPE_ZERO,
     STATE_EFFECT_TYPE_INC,
     STATE_EFFECT_TYPE_CONTINUE,
     STATE_EFFECT_TYPE_CONFUSED,
     STATE_EFFECT_TYPE_KEY,
     STATE_EFFECT_TYPE_SET,
+    STATE_EFFECT_TYPE_IF,
     STATE_EFFECT_TYPES
 };
 
 static const char *state_effect_type_name(int type){
     switch(type){
+        case STATE_EFFECT_TYPE_NOOP: return "noop";
         case STATE_EFFECT_TYPE_PRINT: return "print";
         case STATE_EFFECT_TYPE_PRINT_VAR: return "print_var";
         case STATE_EFFECT_TYPE_PRINT_VARS: return "print_vars";
@@ -236,12 +242,12 @@ static const char *state_effect_type_name(int type){
         case STATE_EFFECT_TYPE_SPAWN: return "spawn";
         case STATE_EFFECT_TYPE_PLAY: return "play";
         case STATE_EFFECT_TYPE_DIE: return "die";
-        case STATE_EFFECT_TYPE_ZERO: return "zero";
         case STATE_EFFECT_TYPE_INC: return "inc";
         case STATE_EFFECT_TYPE_CONTINUE: return "continue";
         case STATE_EFFECT_TYPE_CONFUSED: return "confused";
         case STATE_EFFECT_TYPE_KEY: return "key";
         case STATE_EFFECT_TYPE_SET: return "set";
+        case STATE_EFFECT_TYPE_IF: return "if";
         default: return "unknown";
     }
 }
@@ -282,12 +288,21 @@ typedef struct state_effect {
                 */
             char c; /* See: ANIM_KEY_CS */
         } key;
+        valexpr_t valexpr;
         struct {
             valexpr_t var_expr;
             valexpr_t val_expr;
         } set;
+        struct state_effect_ite *ite;
     } u;
 } state_effect_t;
+
+typedef struct state_effect_ite {
+    /* ite: if-then-else */
+    ARRAY_DECL(struct state_cond*, conds)
+    ARRAY_DECL(struct state_effect*, then_effects)
+    ARRAY_DECL(struct state_effect*, else_effects)
+} state_effect_ite_t;
 
 
 
