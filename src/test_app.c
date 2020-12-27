@@ -230,12 +230,10 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 
 
 int test_app_mainloop(test_app_t *app){
-    SDL_StartTextInput();
     while(app->loop){
         int err = test_app_mainloop_step(app);
         if(err)return err;
     }
-    SDL_StopTextInput();
     return 0;
 }
 

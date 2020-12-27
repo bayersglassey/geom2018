@@ -127,7 +127,6 @@ int main(int n_args, char *args[]){
                     fprintf(stderr, "Couldn't init test app\n");
                 }else{
 #ifdef __EMSCRIPTEN__
-                    SDL_StartTextInput();
                     emscripten_set_main_loop_arg(&test_app_mainloop_emcc,
                         &app, 0, true);
 #else

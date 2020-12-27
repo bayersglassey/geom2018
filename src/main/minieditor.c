@@ -316,8 +316,6 @@ static int _mainloop(minieditor_t *editor, options_t *opts,
 ){
     int err;
 
-    SDL_StartTextInput();
-
     bool loop = true;
     while(loop){
         Uint32 tick0 = SDL_GetTicks();
@@ -338,7 +336,6 @@ static int _mainloop(minieditor_t *editor, options_t *opts,
         if(took < editor->delay_goal)SDL_Delay(editor->delay_goal - took);
     }
 
-    SDL_StopTextInput();
     return 0;
 }
 
