@@ -12,6 +12,12 @@ on "collect":
     goto immediate: collected
 
 init:
+    if:
+        exists myvar("collected_key")
+        get_bool mapvar(myvar("collected_key"))
+    then:
+        goto immediate: collected
+
     if() then:
         if: exists myvar("key")
         then:
