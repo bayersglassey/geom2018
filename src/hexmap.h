@@ -11,6 +11,13 @@
 #include "hexcollmap.h"
 
 
+#define HEXMAP_VARS_PROP_NAMES "nosave"
+enum hexmap_vars_props {
+    HEXMAP_VARS_PROP_NOSAVE,
+    HEXMAP_VARS_PROPS
+};
+
+
 /******************
  * HEXMAP TILESET *
  ******************/

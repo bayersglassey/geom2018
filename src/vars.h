@@ -27,10 +27,12 @@ typedef struct val {
     } u;
 } val_t;
 
+typedef unsigned var_props_t;
+
 typedef struct var {
     char *key;
     val_t value;
-    unsigned props; /* Bit array */
+    var_props_t props; /* Bit array */
 } var_t;
 
 typedef struct vars {
@@ -62,6 +64,17 @@ typedef struct vars {
     */
 
     ARRAY_DECL(var_t*, vars)
+
+    /* Weakrefs: */
+    const char **prop_names;
+    int prop_names_len;
+        /* prop_names: NULL-terminated array of strings representing
+        possible variable "properties".
+        These can be whatever you like, for example if you're using vars_t
+        to model a C-like language, you might have "static", "const", etc.
+        The index of each prop in this array corresponds to a bit in the
+        var->props bit array.
+        (So, for each var, each prop can be either active or not.) */
 } vars_t;
 
 
@@ -97,11 +110,13 @@ bool val_ge(val_t *val1, val_t *val2);
 
 void vars_cleanup(vars_t *vars);
 void vars_init(vars_t *vars);
+void vars_init_with_props(vars_t *vars, const char **prop_names);
 void vars_dump(vars_t *vars);
 void vars_dumpvar(vars_t *vars, const char *key);
 int vars_add(vars_t *vars, char *key, var_t **var_ptr);
 var_t *vars_get(vars_t *vars, const char *key);
 var_t *vars_get_or_add(vars_t *vars, const char *key);
+int vars_get_prop_i(vars_t *vars, const char *prop_name);
 
 bool vars_get_bool(vars_t *vars, const char *key);
 int vars_get_int(vars_t *vars, const char *key);

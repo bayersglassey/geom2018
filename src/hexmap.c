@@ -180,7 +180,9 @@ int hexmap_init(hexmap_t *map, hexgame_t *game, char *name,
     map->prend = prend;
     vec_cpy(prend->space->dims, map->unit, unit);
 
-    vars_init(&map->vars);
+    static const char *prop_names[HEXMAP_VARS_PROPS + 1] =
+        {HEXMAP_VARS_PROP_NAMES, NULL};
+    vars_init_with_props(&map->vars, prop_names);
 
     ARRAY_INIT(map->bodies)
     ARRAY_INIT(map->submaps)

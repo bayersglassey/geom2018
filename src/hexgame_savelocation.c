@@ -84,7 +84,10 @@ int hexgame_savelocation_save(const char *filename,
         fus_write_str(f, map->name);
         fprintf(f, ":\n");
         fprintf(f, "        vars:\n");
-        vars_write(&map->vars, f, 4*3);
+
+        /* Don't write the vars which say they shouldn't be saved. */
+        var_props_t nowrite_props_mask = 1 << HEXMAP_VARS_PROP_NOSAVE;
+        vars_write_with_mask(&map->vars, f, 4*3, nowrite_props_mask);
     }
 
     fclose(f);

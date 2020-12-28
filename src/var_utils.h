@@ -8,6 +8,8 @@
 
 int val_parse(val_t *val, fus_lexer_t *lexer);
 
+void vars_write_with_mask(vars_t *vars, FILE *file, int indent,
+    var_props_t nowrite_props_mask);
 void vars_write(vars_t *vars, FILE *file, int indent);
 void vars_write_simple(vars_t *vars, FILE *file);
 int vars_parse(vars_t *vars, fus_lexer_t *lexer);

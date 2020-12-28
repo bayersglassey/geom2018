@@ -219,13 +219,42 @@ void vars_cleanup(vars_t *vars){
 }
 
 void vars_init(vars_t *vars){
+    vars_init_with_props(vars, NULL);
+}
+
+void vars_init_with_props(vars_t *vars, const char **prop_names){
     ARRAY_INIT(vars->vars)
+
+    int prop_names_len = 0;
+    if(prop_names)while(prop_names[prop_names_len] != NULL)prop_names_len++;
+    vars->prop_names = prop_names;
+    vars->prop_names_len = prop_names_len;
 }
 
 static void _vars_dumpvar(vars_t *vars, var_t *var){
+
+    /* Iterate over the bits in the var->props bit array */
+    var_props_t props = var->props;
+    int prop_i = 0;
+    while(props){
+        bool prop = props & 1;
+        if(prop){
+            /* Look up corresponding prop name & display it before the
+            var's key */
+            const char *prop_name = vars->prop_names[prop_i];
+            fprintf(stderr, "%s ", prop_name);
+        }
+        props >>= 1;
+        prop_i++;
+    }
+
+    /* Print var's key */
     fprintf(stderr, "%s (%s): ", var->key,
         val_type_name(var->value.type));
+
+    /* Print var's value */
     val_fprintf(&var->value, stderr);
+
     putc('\n', stderr);
 }
 
@@ -275,6 +304,13 @@ var_t *vars_get_or_add(vars_t *vars, const char *key){
         if(err)return NULL;
     }
     return var;
+}
+
+int vars_get_prop_i(vars_t *vars, const char *prop_name){
+    if(vars->prop_names)for(int i = 0; i < vars->prop_names_len; i++){
+        if(!strcmp(vars->prop_names[i], prop_name))return i;
+    }
+    return -1;
 }
 
 
@@ -336,6 +372,8 @@ int vars_copy(vars_t *vars1, vars_t *vars2){
 
         err = val_copy(&var1->value, &var2->value);
         if(err)return err;
+
+        var1->props = var2->props;
     }
     return 0;
 }
