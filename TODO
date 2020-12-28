@@ -727,18 +727,6 @@ was there at the beginning for a while and then I gave up on that b/c there was 
 collmaptool has --rot but no --flip!.. add it plz!
 
 
-Dec 22, 2020:
--------------
-
-TUTORIAL:
-* spitting
-* switches
-* other creatures
-* transformations
-* coins (?.. what are they for?.. do we even bother to say?..)
-* swimming (?.. or leave it a secret?..)
-
-
 Dec 24, 2020:
 -------------
 
@@ -788,3 +776,13 @@ Dec 26, 2020:
 * As well as "on" events, add an "always" handler which runs every frame?
     * Use for things like e.g. affecting the "lighting" (palette) based on distance from camera?..
     * Use for things like heat, thirst, etc?..
+
+
+Dec 27, 2020 (moved up from Dec 22, 2020):
+------------------------------------------
+
+TUTORIAL:
+* switches
+* other creatures
+* transformations
+* swimming (?.. or leave it a secret?..)

@@ -14,7 +14,7 @@ vars:
     nosave "num_coin_g": 5
 
 $SET_STR TUT_ONWARDS "Straight onwards, fear not!\n"
-$SET_STR TUT_COINS "\nCollect shiny purple things by running into them,\nor by spitting at them using Spacebar.\n"
+$SET_STR TUT_COINS "Spit with Spacebar.\nIt may help you judge your jumps.\n\nCollect shiny purple things\n   with your body or spit.\n"
 $SET_STR TUT_END "\n\nYou've learned enough to make it on your own.\n\n\nGo through the door and enjoy the game.\n"
 
 submaps:
@@ -41,6 +41,6 @@ submaps:
                     tileset: "data/tileset1_bg.fus"
                 :
                     file: "data/maps/tutorial2/start2.fus"
-                    text: $GET_STR TUT_COINS
+                    text: if mapvar("coin_f") then null else $GET_STR TUT_COINS
                     pos: eval: (28 0)
                     camera: (8 -2)
