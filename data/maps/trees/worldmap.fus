@@ -1,7 +1,7 @@
 
 unit: 3 2 0 -1
 spawn: (-1 0)
-default_palette: "data/maps/trees/pals/realistic.fus"
+default_palette: "data/maps/trees/pals/trees.fus"
 default_tileset: "data/maps/trees/tilesets/trees.fus"
 
 submaps:
