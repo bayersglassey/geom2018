@@ -1,0 +1,11 @@
+anim: "anim/hexroller.fus"
+state: "stand"
+pos: (0 0)
+rot: 0
+turn: no
+keys:
+    u:
+    d: is
+    l:
+    r: is
+nodata

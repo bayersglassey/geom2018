@@ -10,7 +10,7 @@ vars:
     "coin_d": F
     "coin_e": F
     "coin_f": F
-    "coin_g": F
+    "start_solved": F
     nosave "num_coin_g": 5
 
 $SET_STR TUT_COINS "Spit with Spacebar.\nIt may help you judge your jumps.\n\nCollect shiny purple things\n   with your body or spit.\n"
@@ -29,9 +29,17 @@ submaps:
                     tileset: "data/tileset1_bg.fus"
                 :
                     file: "data/maps/tutorial2/start.fus"
-                    text: if mapvar("coin_g") then "THAT'S ALL FOR NOW!\n" else null
                     pos: eval: (0 0)
-                    camera: (13 -2)
+                    camera: (15 0)
+                    submaps:
+                        :
+                            file: "data/maps/tutorial2/start_blocker.fus"
+                            visible: not mapvar("start_solved")
+                            pos: eval: (0 0) + (13 -7)
+                :
+                    file: "data/maps/tutorial2/start_save.fus"
+                    visible: mapvar("start_solved")
+                    pos: eval: (0 0) + (10 -7)
             : submaps:
                 :
                     bg
@@ -43,3 +51,12 @@ submaps:
                     text: if mapvar("coin_f") then null else $GET_STR TUT_COINS
                     pos: eval: (28 0)
                     camera: (8 -2)
+            :
+                file: "data/maps/tutorial2/start3.fus"
+                pos: eval: (0 0) + (13 -9)
+                camera: (-4 -8)
+            :
+                file: "data/maps/tutorial2/start3b.fus"
+                pos: eval: (0 0) + (13 -9) + (-1 -11)
+                camera: (-4 -6)
+
