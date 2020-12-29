@@ -29,6 +29,13 @@ stand:
         ;;  (.)  .
 
     if:
+        coll: any no
+            ;;  (+)- +
+    then:
+        move: 1 0
+        goto immediate: start_jump
+
+    if:
         key: wentdown y
     then:
         spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f
