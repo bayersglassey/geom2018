@@ -1,7 +1,7 @@
 
 shapes:
 
-    "dead_particle":
+    "_dead_particle":
         animation: cycle 6
         prismels:
             : "tri" (1 0 0 0)  0 f eval(1 + 8 + 3)  (0 1)
@@ -11,29 +11,46 @@ shapes:
             : "tri" (5 0 0 0)  8 f eval(1 + 8 + 4)  (4 1)
             : "tri" (6 0 0 0) 10 f eval(1 + 8 + 5)  (5 1)
 
+    "_dead_cycle":
+        animation: cycle 6
+        shapes:
+            : "_dead_particle" (0 0 0 0) 1 f  0+
+            : "_dead_particle" (0 0 0 0) 3 f  2+
+            : "_dead_particle" (0 0 0 0) 6 f  3+
+            : "_dead_particle" (0 0 0 0) 9 f  5+
+
+    "_dead_once":
+        animation: once 12
+        shapes:
+            : "_dead_particle" (0 0 0 0) 1 f  0+ (0 6)
+            : "_dead_particle" (0 0 0 0) 3 f -2+ (2 6)
+            : "_dead_particle" (0 0 0 0) 6 f -3+ (3 6)
+            : "_dead_particle" (0 0 0 0) 9 f -5+ (5 6)
+
     "dead_cycle":
         animation: cycle 6
         shapes:
-            : "dead_particle" (0 1 3 1) 1 f  0+
-            : "dead_particle" (0 1 3 1) 3 f  2+
-            : "dead_particle" (0 1 3 1) 6 f  3+
-            : "dead_particle" (0 1 3 1) 9 f  5+
+            : "_dead_cycle" (0 1 3 1) 0 f  0+
 
     "dead_once":
         animation: once 12
         shapes:
-            : "dead_particle" (0 1 3 1) 1 f  0+ (0 6)
-            : "dead_particle" (0 1 3 1) 3 f -2+ (2 6)
-            : "dead_particle" (0 1 3 1) 6 f -3+ (3 6)
-            : "dead_particle" (0 1 3 1) 9 f -5+ (5 6)
+            : "_dead_once" (0 1 3 1) 0 f  0+
+
+    "dead_once_centered_reversed":
+        animation: once 12
+        shapes:
+            : "_dead_once" (0 0 0 0) 0 f 0+r
 
     "dead_once_crouch":
         animation: once 12
         shapes:
-            : "dead_particle" (1 1 2 0) 1 f  0+ (0 6)
-            : "dead_particle" (1 1 2 0) 3 f -2+ (2 6)
-            : "dead_particle" (1 1 2 0) 6 f -3+ (3 6)
-            : "dead_particle" (1 1 2 0) 9 f -5+ (5 6)
+            : "_dead_once" (1 1 2 0) 0 f  0+
+
+    "dead_once_crouch_reversed":
+        animation: once 12
+        shapes:
+            : "_dead_once" (1 1 2 0) 0 f 0+r
 
 $SET_STR NS ""
 $UNSET_BOOL SPIKEY

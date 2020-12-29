@@ -30,6 +30,3 @@ shapes:
         animation: cycle 12
         shapes:
             : "coin" (1 1 1 0)  0 f
-
-    "coin_collected":
-        # Empty!.. when you pick up a coin, it "disappears"...

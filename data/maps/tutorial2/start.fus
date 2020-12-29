@@ -1,10 +1,12 @@
 parts:
     "f": recording "data/recs/coin.fus"
         vars:
+            "appear": T
             "key": "coin_e"
             "collected_key": "coin_f"
     "g": recording "data/recs/coin.fus"
         vars:
+            "appear": T
             "key": "coin_f"
             "collected_key": "coin_g"
             "num_key": "num_coin_g"

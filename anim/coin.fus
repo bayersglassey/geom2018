@@ -22,13 +22,40 @@ init:
         if: exists myvar("key")
         then:
             if: get_bool mapvar(myvar("key"))
-            then: goto immediate: stand
-        else: goto immediate: stand
+            then: goto immediate: _appear
+        else: goto immediate: _appear
+
+_appear:
+    if:
+        exists myvar("appear")
+        get_bool myvar("appear")
+    then:
+        if:
+            exists myvar("crouch")
+            get_bool myvar("crouch")
+        then: goto: appear_crouch
+        else: goto: appear
+        delay: 11
+
+    if() then:
+        if:
+            exists myvar("crouch")
+            get_bool myvar("crouch")
+        then: goto: crouch
+        else: goto: stand
+
+appear:
+    rgraph: "dead_once_centered_reversed"
+    if() then: goto: stand
 
 stand:
     rgraph: "coin"
     hitbox:
         ;;  (+)
+
+appear_crouch:
+    rgraph: "dead_once_crouch_reversed"
+    if() then: goto: crouch
 
 crouch:
     rgraph: "coin_crouch"
@@ -38,4 +65,4 @@ crouch:
         ;;  (.)  .
 
 collected:
-    rgraph: "coin_collected"
+    rgraph: "empty"

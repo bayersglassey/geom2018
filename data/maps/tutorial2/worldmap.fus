@@ -13,7 +13,6 @@ vars:
     "coin_g": F
     nosave "num_coin_g": 5
 
-$SET_STR TUT_ONWARDS "Straight onwards, fear not!\n"
 $SET_STR TUT_COINS "Spit with Spacebar.\nIt may help you judge your jumps.\n\nCollect shiny purple things\n   with your body or spit.\n"
 $SET_STR TUT_END "\n\nYou've learned enough to make it on your own.\n\n\nGo through the door and enjoy the game.\n"
 
@@ -30,7 +29,7 @@ submaps:
                     tileset: "data/tileset1_bg.fus"
                 :
                     file: "data/maps/tutorial2/start.fus"
-                    text: if mapvar("coin_e") then if mapvar("coin_g") then "THAT'S ALL FOR NOW!\n" else null else $GET_STR TUT_ONWARDS
+                    text: if mapvar("coin_g") then "THAT'S ALL FOR NOW!\n" else null
                     pos: eval: (0 0)
                     camera: (13 -2)
             : submaps:

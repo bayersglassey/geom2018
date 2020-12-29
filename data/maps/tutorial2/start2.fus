@@ -1,21 +1,26 @@
 parts:
     "a": recording "data/recs/coin.fus"
         vars:
+            "appear": T
             "collected_key": "coin_a"
     "b": recording "data/recs/coin.fus"
         vars:
+            "appear": T
             "key": "coin_a"
             "collected_key": "coin_b"
     "c": recording "data/recs/coin.fus"
         vars:
+            "appear": T
             "key": "coin_b"
             "collected_key": "coin_c"
     "d": recording "data/recs/coin.fus"
         vars:
+            "appear": T
             "key": "coin_c"
             "collected_key": "coin_d"
     "e": recording "data/recs/coin.fus"
         vars:
+            "appear": T
             "key": "coin_d"
             "collected_key": "coin_e"
 collmap:
@@ -46,13 +51,13 @@ collmap:
     ;;                            \ / \*  \                   \*/     \  * */
     ;;             .   .   .   .   +   +   +   .   .   .   +   +   .   +   +   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                                  \ /               / \           \*/
-    ;;               ?   .   .   .   .   +   .   .   .   +   +   .   ?   +   .   .   .   .   .   .   .   .   .   .   .   .      [b]  [a]
-    ;;                                                    \  *\
-    ;;             + - + - +   .   .   .   .   .   .   .   +   +   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;             *\*/    *\                               \*/   /  * *\
-    ;;           .   +   .   +   .   .   .   .   .   .   .   +   +   .   +   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;               .   .   .   .   .   +   .   .   .   +   +   .   ?   +   +   .   .   .   .   .   .   .   .   .   .   .           [a]
+    ;;                                                    \  *\             /*\
+    ;;             + - + - +   .   .   .   .   .   .   .   +   +   + - +   +   +   .   .   .   .   .   .   .   .   .   .   .
+    ;;             *\*/    *\                               \*/   /  * *\   \*/
+    ;;           .   +   .   +   .   .   .   .   .   .   .   +   +   .   +   +   .   .   .   .   .   .   .   .   .   .   .
     ;;           * * *\  * */                                     \  * */
-    ;;         .   .   +   +   .   .   .   .   .   .   .   .   .   +   +   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;         .   .   +   +   ?   .   .   .   .   .   .   .   .   +   +   .   .   .   .   .   .   .   .   .   .   .   .   .         [b]
     ;;           * * * *\*/ \                                       \*/
     ;;               .   +   +   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   + - +   .   .   .   .   .
     ;;                    \  *\                                                                     /     \
