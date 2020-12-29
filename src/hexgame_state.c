@@ -490,7 +490,7 @@ int state_effect_apply(state_effect_t *effect,
             err = state_cond_match(cond, game, body, actor,
                 &matched);
             if(err)return err;
-            if(matched)break;
+            if(!matched)break;
         }
 
         state_effect_t **effects = matched?
