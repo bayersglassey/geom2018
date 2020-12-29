@@ -111,6 +111,7 @@ void hexcollmap_init_clone(hexcollmap_t *collmap,
     hexcollmap_t *from_collmap, char *name
 ){
     hexcollmap_init(collmap, from_collmap->space, name);
+    collmap->spawn = from_collmap->spawn;
     collmap->hexbox = from_collmap->hexbox;
 }
 

@@ -8,6 +8,7 @@
 #include "vars.h"
 #include "geom.h"
 #include "hexbox.h"
+#include "hexgame_location.h"
 
 
 
@@ -148,6 +149,7 @@ typedef struct hexcollmap_part {
 
 typedef struct hexcollmap {
     char *name;
+    hexgame_location_t spawn;
     hexbox_t hexbox;
     int w;
     int h;

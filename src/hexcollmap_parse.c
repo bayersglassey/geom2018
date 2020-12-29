@@ -865,6 +865,17 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
     ARRAY_INIT(parts)
 
     if(!just_coll){
+        if(fus_lexer_got(lexer, "spawn")){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            err = fus_lexer_get(lexer, "(");
+            if(err)return err;
+            err = hexgame_location_parse(&collmap->spawn, lexer);
+            if(err)return err;
+            err = fus_lexer_get(lexer, ")");
+            if(err)return err;
+        }
+
         if(fus_lexer_got(lexer, "parts")){
             err = fus_lexer_next(lexer);
             if(err)return err;

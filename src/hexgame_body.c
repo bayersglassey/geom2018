@@ -176,13 +176,7 @@ void hexgame_body_dump(body_t *body, int depth){
     print_tabs(stderr, depth);
     fprintf(stderr, "state: %s\n",
         body->state->name);
-    print_tabs(stderr, depth);
-    fprintf(stderr, "pos: (%i %i)\n",
-        body->loc.pos[0], body->loc.pos[1]);
-    print_tabs(stderr, depth);
-    fprintf(stderr, "rot: %i\n", body->loc.rot);
-    print_tabs(stderr, depth);
-    fprintf(stderr, "turn: %s\n", body->loc.turn? "yes": "no");
+    hexgame_location_write(&body->loc, stderr, TAB_SPACES * depth);
     print_tabs(stderr, depth);
     fprintf(stderr, "body vars:\n");
     vars_write(&body->vars, stderr, TAB_SPACES * (depth + 1));

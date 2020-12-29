@@ -7,7 +7,12 @@
 #include "geom.h"
 #include "hexgame_location.h"
 #include "hexspace.h"
+#include "lexer.h"
 
+
+static void _print_tabs(FILE *file, int indent){
+    for(int i = 0; i < indent; i++)putc(' ', file);
+}
 
 
 rot_t hexgame_location_get_rot(hexgame_location_t *loc){
@@ -54,3 +59,24 @@ void hexgame_location_apply(hexgame_location_t *loc, trf_t *trf){
     hexgame_location_from_trf(loc, &loctrf);
 }
 
+
+void hexgame_location_write(hexgame_location_t *loc, FILE *file, int indent){
+    _print_tabs(stderr, indent);
+    fprintf(stderr, "pos: (%i %i)\n",
+        loc->pos[0], loc->pos[1]);
+    _print_tabs(stderr, indent);
+    fprintf(stderr, "rot: %i\n", loc->rot);
+    _print_tabs(stderr, indent);
+    fprintf(stderr, "turn: %c\n", loc->turn? 'y': 'n');
+}
+
+int hexgame_location_parse(hexgame_location_t *loc, fus_lexer_t *lexer){
+    int err;
+    err = fus_lexer_get_vec(lexer, &hexspace, loc->pos);
+    if(err)return err;
+    err = fus_lexer_get_int(lexer, &loc->rot);
+    if(err)return err;
+    err = fus_lexer_get_yn(lexer, &loc->turn);
+    if(err)return err;
+    return 0;
+}

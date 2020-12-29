@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include "geom.h"
+#include "lexer.h"
 
 
 typedef struct hexgame_location {
@@ -70,5 +71,7 @@ void hexgame_location_init_trf(hexgame_location_t *loc, trf_t *trf);
 void hexgame_location_from_trf(hexgame_location_t *loc, trf_t *trf);
 void hexgame_location_apply(hexgame_location_t *loc, trf_t *trf);
 
+void hexgame_location_write(hexgame_location_t *loc, FILE *file, int indent);
+int hexgame_location_parse(hexgame_location_t *loc, fus_lexer_t *lexer);
 
 #endif

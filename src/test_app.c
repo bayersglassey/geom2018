@@ -161,7 +161,10 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 
         ARRAY_PUSH_NEW(player_t*, game->players, player)
 
-        vec_t *respawn_pos = &map->spawn;
+        vec_t respawn_pos;
+        vec_cpy(space->dims, respawn_pos, map->spawn);
+        rot_t respawn_rot = 0;
+        bool respawn_turn = false;
 
         /* Maybe get respawn_pos from a submap */
         const char *submap_filename = app->submap_filename;
@@ -173,14 +176,22 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
                     spawn_submap = submap; break;}
             }
             if(spawn_submap == NULL){
-            fprintf(stderr, "Couldn't find submap with filename: %s\n",
+                fprintf(stderr, "Couldn't find submap with filename: %s\n",
                     submap_filename);
                 return 2;}
-            respawn_pos = &spawn_submap->pos;
+
+            hexgame_location_t *spawn_submap_spawn =
+                &spawn_submap->collmap.spawn;
+
+            vec_cpy(space->dims, respawn_pos, spawn_submap->pos);
+            vec_add(space->dims,
+                respawn_pos, spawn_submap_spawn->pos);
+            respawn_rot = spawn_submap_spawn->rot;
+            respawn_turn = spawn_submap_spawn->turn;
         }
 
         err = player_init(player, game, i,
-            *respawn_pos, 0, false,
+            respawn_pos, respawn_rot, respawn_turn,
             respawn_map_filename, respawn_filename);
         if(err)return err;
     }

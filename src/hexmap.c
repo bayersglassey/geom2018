@@ -204,13 +204,7 @@ static int hexmap_parse_recording(fus_lexer_t *lexer,
     and use it directly in maps. */
     hexgame_location_t loc = {0};
     if(fus_lexer_got(lexer, "(")){
-        err = fus_lexer_get_vec(lexer, &hexspace, loc.pos);
-        if(err)return err;
-
-        err = fus_lexer_get_int(lexer, &loc.rot);
-        if(err)return err;
-
-        err = fus_lexer_get_yn(lexer, &loc.turn);
+        err = hexgame_location_parse(&loc, lexer);
         if(err)return err;
     }
     hexgame_location_init_trf(&loc, trf);
