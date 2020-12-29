@@ -746,10 +746,11 @@ int prismelrenderer_write(prismelrenderer_t *prend, FILE *f){
             for(int i = 1; i < prend->space->dims; i++){
                 fprintf(f, " % 3i", trf->add[i]);
             }
-            fprintf(f, ") %2i %c %2i%c (%2i %2i)\n",
+            fprintf(f, ") %2i %c %2i%c%c (%2i %2i)\n",
                 trf->rot, trf->flip? 't': 'f',
                 rendergraph_trf->frame_i,
                 rendergraph_trf->frame_i_additive? '+': ' ',
+                rendergraph_trf->frame_i_reversed? 'r': ' ',
                 rendergraph_trf->frame_start,
                 rendergraph_trf->frame_len);
         }
@@ -1007,6 +1008,8 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
             rendergraph_trf->frame_i;
         new_rendergraph_trf->frame_i_additive =
             rendergraph_trf->frame_i_additive;
+        new_rendergraph_trf->frame_i_reversed =
+            rendergraph_trf->frame_i_reversed;
         new_rendergraph_trf->frame_start =
             rendergraph_trf->frame_start;
         new_rendergraph_trf->frame_len =

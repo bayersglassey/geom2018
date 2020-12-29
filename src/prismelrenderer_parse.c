@@ -319,6 +319,7 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
         int frame_len = -1;
         int frame_i = 0;
         bool frame_i_additive = true;
+        bool frame_i_reversed = false;
 
         GET("(")
         {
@@ -346,6 +347,10 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
                 if(GOT("+")){
                     NEXT
                     frame_i_additive = true;
+                }
+                if(GOT("r")){
+                    NEXT
+                    frame_i_reversed = true;
                 }
                 if(GOT("(")){
                     NEXT
@@ -384,6 +389,7 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
         rendergraph_trf->frame_len = frame_len;
         rendergraph_trf->frame_i = frame_i;
         rendergraph_trf->frame_i_additive = frame_i_additive;
+        rendergraph_trf->frame_i_reversed = frame_i_reversed;
         vec_cpy(prend->space->dims, rendergraph_trf->trf.add, v);
     }
     NEXT

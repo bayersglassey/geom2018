@@ -174,8 +174,9 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces,
         trf_fprintf(f, rendergraph->space->dims, &rendergraph_trf->trf);
         if(rendergraph_trf->palmapper != NULL){
             fprintf(f, " %s", rendergraph_trf->palmapper->name);}
-        fprintf(f, " % 3i%c [% 3i % 3i]\n", rendergraph_trf->frame_i,
+        fprintf(f, " % 3i%c%c [% 3i % 3i]\n", rendergraph_trf->frame_i,
             rendergraph_trf->frame_i_additive? '+': ' ',
+            rendergraph_trf->frame_i_reversed? 'r': ' ',
             rendergraph_trf->frame_start, rendergraph_trf->frame_len);
     }
 
@@ -213,6 +214,7 @@ int rendergraph_push_rendergraph_trf(rendergraph_t *rendergraph,
     rendergraph_trf->frame_len = -1;
     rendergraph_trf->frame_i = 0;
     rendergraph_trf->frame_i_additive = true;
+    rendergraph_trf->frame_i_reversed = false;
     rendergraph_trf->palmapper_n_applications = 1;
     *rendergraph_trf_ptr = rendergraph_trf;
     return 0;
@@ -270,6 +272,9 @@ int rendergraph_trf_get_frame_i(rendergraph_trf_t *rendergraph_trf,
     int frame_i = rendergraph_trf->frame_i;
     rendergraph_t *rgraph = rendergraph_trf->rendergraph;
     if(rendergraph_trf->frame_i_additive)frame_i += parent_frame_i;
+    if(rendergraph_trf->frame_i_reversed){
+        frame_i = rgraph->n_frames - frame_i - 1;
+    }
     return get_animated_frame_i(rgraph->animation_type,
         rgraph->n_frames, frame_i);
 }

@@ -30,6 +30,7 @@ typedef struct rendergraph_trf {
     trf_t trf;
     int frame_i;
     bool frame_i_additive;
+    bool frame_i_reversed;
 
     struct palettemapper *palmapper;
     int palmapper_n_applications;
