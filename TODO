@@ -131,9 +131,6 @@ behind camera pos by 1 frame.
 Dec 24, 2018:
 -------------
 
-Hardcoded "dead" anim: each stateset should be able to specify its
-dead_anim_name, and if NULL, body can't die.
-
 Currently spider -> roller transformation is kinda hacky
 
     * Can we make doors which are only visible to rollers? Too hacky!
@@ -203,7 +200,7 @@ vars:
             where: get his "crushable"
             coll: ...
         do:
-            set his state: "dead"
+            set his state: "dead_cycle"
 
     We could implement "pickups" too, e.g.:
         for bodies:

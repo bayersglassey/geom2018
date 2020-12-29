@@ -281,7 +281,7 @@ crawl_turn:
 
 $IF PLAYER_SPIKEY: crawl_shielding:
     #rgraph: $PREFIX NS "crawl_shielding"
-    #rgraph: "dead"
+    #rgraph: "dead_cycle"
     if:
     then:
         delay: 4

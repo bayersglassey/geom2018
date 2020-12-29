@@ -7,5 +7,5 @@ $SET_BOOL WATER_ROLLER
 import "anim/_roller.fus"
 
 dead:
-    rgraph: "dead"
+    rgraph: "dead_cycle"
     if() then: die

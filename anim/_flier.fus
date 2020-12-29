@@ -36,5 +36,5 @@ born:
 import "anim/_flier_core.fus"
 
 dead:
-    rgraph: "dead"
+    rgraph: "dead_cycle"
     if() then: die

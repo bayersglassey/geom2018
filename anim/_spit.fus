@@ -85,11 +85,11 @@ crouch_fly:
         move: 1 0
 
 dead:
-    rgraph: "spit_dead"
+    rgraph: "dead_once"
     if() then: die
 
 crouch_dead:
-    rgraph: "spit_crouch_dead"
+    rgraph: "dead_once_crouch"
     if() then: die
 
 

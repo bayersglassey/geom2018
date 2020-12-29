@@ -409,12 +409,12 @@ sleep:
     then: goto: crawl
 
 mostly_dead:
-    rgraph: "dead"
+    rgraph: "dead_cycle"
     unsafe
     if() then: die mostly
 
 dead:
-    rgraph: "dead"
+    rgraph: "dead_cycle"
     unsafe
     if() then: die
 

@@ -6,5 +6,5 @@ $SET_STR RGRAPH_NS ""
 import "anim/_roller.fus"
 
 dead:
-    rgraph: "dead"
+    rgraph: "dead_cycle"
     if() then: die
