@@ -415,6 +415,19 @@ lexer_err:
     return 0;
 }
 
+static int _test_app_command_visit_all(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
+    int err;
+    hexgame_t *game = &app->hexgame;
+    for(int i = 0; i < game->maps_len; i++){
+        hexmap_t *map = game->maps[i];
+        for(int j = 0; j < map->submaps_len; j++){
+            hexmap_submap_t *submap = map->submaps[j];
+            submap->visited = true;
+        }
+    }
+    return 0;
+}
+
 
 #define COMMAND(NAME, ALT_NAME, PARAMS) (test_app_command_t){ \
     .name = #NAME, \
@@ -442,6 +455,7 @@ test_app_command_t _test_app_commands[] = {
     COMMAND(renderall, NULL, NULL),
     COMMAND(get_shape, NULL, "SHAPE"),
     COMMAND(mode, "m", "(game | g | editor | e)"),
+    COMMAND(visit_all, "va", NULL),
     NULLCOMMAND
 };
 
