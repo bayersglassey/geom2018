@@ -36,10 +36,6 @@ submaps:
                             file: "data/maps/tutorial2/start_blocker.fus"
                             visible: not mapvar("start_solved")
                             pos: eval: (0 0) + (13 -7)
-                :
-                    file: "data/maps/tutorial2/start_save.fus"
-                    visible: mapvar("start_solved")
-                    pos: eval: (0 0) + (10 -7)
             : submaps:
                 :
                     bg
@@ -50,13 +46,19 @@ submaps:
                     file: "data/maps/tutorial2/start2.fus"
                     text: if mapvar("coin_f") then null else $GET_STR TUT_COINS
                     pos: eval: (28 0)
-                    camera: (8 -2)
-            :
-                file: "data/maps/tutorial2/start3.fus"
-                pos: eval: (0 0) + (13 -9)
-                camera: (-4 -8)
-            :
-                file: "data/maps/tutorial2/start3b.fus"
-                pos: eval: (0 0) + (13 -9) + (-1 -11)
-                camera: (-4 -6)
+                    camera: (8 0)
+            : submaps:
+                :
+                    bg
+                    file: "data/maps/tutorial2/start3b_bg.fus"
+                    pos: eval: (0 0) + (13 -9) + (-1 -12)
+                    tileset: "data/tileset1_bg.fus"
+                :
+                    file: "data/maps/tutorial2/start3.fus"
+                    pos: eval: (0 0) + (13 -9)
+                    camera: (-4 -8)
+                :
+                    file: "data/maps/tutorial2/start3b.fus"
+                    pos: eval: (0 0) + (13 -9) + (-1 -12)
+                    camera: (-4 -6)
 
