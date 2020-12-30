@@ -759,9 +759,6 @@ Dec 25, 2020:
     * E.g. a switch is part of a simple puzzle, but also opens a door in the open world
     * Or turning into a rollerplayer in open world, using that to blow past a numer of puzzles
 
-* Add more prend stats besides just bitmaps_rendered!..
-    * Add a struct prismelrenderer_stats?..
-
 * Add a door_t property like "noscroll" so camera jumps along with your body!
 
 
@@ -783,3 +780,12 @@ TUTORIAL:
 * other creatures
 * transformations
 * swimming (?.. or leave it a secret?..)
+
+
+Dec 30, 2020:
+-------------
+
+* Currently in test_app_game.c we check if (body->out_of_bounds && !body->state->flying), and
+display the "You jumped off the map!" message.
+Instead, maybe add a new value for body->dead?..
+(currently there is MOSTLY_DEAD and ALL_DEAD, maybe we want OUT_OF_BOUNDS)
