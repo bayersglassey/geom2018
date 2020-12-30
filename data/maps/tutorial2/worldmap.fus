@@ -13,7 +13,22 @@ vars:
     "start_solved": F
     nosave "num_coin_g": 5
 
+    "start3b_coin_a": F
+    "start3b_coin_b": F
+    "start3b_coin_c": F
+    "start3b_coin_d": F
+    "start3b_solved": F
+    nosave "start3b_num_coin_a": 3
+    nosave "start3b_num_coin_b": 3
+    nosave "start3b_num_coin_c": 3
+    nosave "start3b_num_coin_d": 2
+    nosave "start3b_num_coin_e": 4
+
 $SET_STR TUT_COINS "Spit with Spacebar.\nIt may help you judge your jumps.\n\nCollect shiny purple things\n   with your body or spit.\n"
+$SET_STR TUT_DANGER
+    "\n\n\n\n\n\n\n\n\n\n\n\n\nSomething dangerous is\nrolling around down there.\nHit it with your spit to\nchange its direction.\n\n\n\nEverything with be okay.\n   Keep going.\n"
+$SET_STR TUT_DANGER_PASSED "Nicely done. Keep going!\n"
+
 $SET_STR TUT_END "\n\nYou've learned enough to make it on your own.\n\n\nGo through the door and enjoy the game.\n"
 
 submaps:
@@ -55,10 +70,12 @@ submaps:
                     tileset: "data/tileset1_bg.fus"
                 :
                     file: "data/maps/tutorial2/start3.fus"
+                    text: $GET_STR TUT_DANGER
                     pos: eval: (0 0) + (13 -9)
                     camera: (-4 -8)
                 :
                     file: "data/maps/tutorial2/start3b.fus"
+                    text: if mapvar("start3b_solved") then $GET_STR TUT_DANGER_PASSED else null
                     pos: eval: (0 0) + (13 -9) + (-1 -12)
                     camera: (-4 -6)
 

@@ -1,7 +1,6 @@
 parts:
     "a": recording "data/recs/coin.fus"
         vars:
-            "appear": T
             "collected_key": "coin_a"
     "b": recording "data/recs/coin.fus"
         vars:
