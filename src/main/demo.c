@@ -17,6 +17,7 @@
 
 const char* DEFAULT_PREND_FILENAME = "data/test.fus";
 const char* DEFAULT_STATESET_FILENAME = "anim/player.fus";
+const char* ENV_DEVEL = "HEXGAME_DEVEL";
 const int DEFAULT_PLAYERS = 2;
 const int DEFAULT_PLAYERS_PLAYING = 1;
 
@@ -45,12 +46,19 @@ void print_help(FILE *file){
         "   -m   --map    FILE    Map filename (default: NULL)\n"
         "   -sm  --submap FILE    Submap filename (default: NULL)\n"
         "   -d   --devel          Developer mode\n"
+        "                         (You can also use env var %s)\n"
         "   -p   --players   N    Number of players (default: %i)\n"
         "        --minimap_alt    Use alternate minimap\n"
         "        --dont_cache_bitmaps\n"
         "                         ...low-level hokey-pokery, should probably get rid of this option\n"
-        , DEFAULT_PREND_FILENAME, DEFAULT_STATESET_FILENAME, DEFAULT_PLAYERS_PLAYING
+        , DEFAULT_PREND_FILENAME, DEFAULT_STATESET_FILENAME, ENV_DEVEL, DEFAULT_PLAYERS_PLAYING
     );
+}
+
+bool get_bool_env(const char *name){
+    /* Is indicated environment variable defined and nonempty? */
+    const char *value = getenv(name);
+    return value && strcmp(value, "");
 }
 
 
@@ -63,7 +71,7 @@ int main(int n_args, char *args[]){
     const char *submap_filename = NULL;
     bool minimap_alt = true;
     bool cache_bitmaps = true;
-    bool developer_mode = false;
+    bool developer_mode = get_bool_env(ENV_DEVEL);
     int n_players = DEFAULT_PLAYERS;
     int n_players_playing = DEFAULT_PLAYERS_PLAYING;
 
@@ -169,8 +177,9 @@ int main(int n_args, char *args[]){
                 test_app_t app;
                 if(test_app_init(&app, SCW, SCH, DELAY_GOAL,
                     window, renderer, prend_filename, stateset_filename,
-                    hexmap_filename, submap_filename, minimap_alt,
-                    cache_bitmaps, n_players, n_players_playing)
+                    hexmap_filename, submap_filename, developer_mode,
+                    minimap_alt, cache_bitmaps,
+                    n_players, n_players_playing)
                 ){
                     e = 1;
                     fprintf(stderr, "Couldn't init test app\n");

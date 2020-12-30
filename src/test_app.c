@@ -72,14 +72,16 @@ void test_app_cleanup(test_app_t *app){
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
     const char *stateset_filename, const char *hexmap_filename,
-    const char *submap_filename, bool minimap_alt,
-    bool cache_bitmaps, int n_players, int n_players_playing
+    const char *submap_filename, bool developer_mode,
+    bool minimap_alt, bool cache_bitmaps,
+    int n_players, int n_players_playing
 ){
     int err;
 
     app->scw = scw;
     app->sch = sch;
     app->delay_goal = delay_goal;
+    app->developer_mode = developer_mode;
 
     app->window = window;
     app->renderer = renderer;
@@ -322,9 +324,9 @@ static int test_app_poll_events(test_app_t *app){
             if(event->key.keysym.sym == SDLK_ESCAPE){
                 app->loop = false;
                 break;
-            }else if(event->key.keysym.sym == SDLK_F5){
+            }else if(event->key.keysym.sym == SDLK_F5 && app->developer_mode){
                 app->hexgame_running = !app->hexgame_running;
-            }else if(event->key.keysym.sym == SDLK_BACKQUOTE){
+            }else if(event->key.keysym.sym == SDLK_BACKQUOTE && app->developer_mode){
                 dont_process_console_this_frame = true;
                 if(event->key.keysym.mod & KMOD_CTRL){
                     if(app->show_console){
@@ -341,7 +343,7 @@ static int test_app_poll_events(test_app_t *app){
                     if(app->show_console)test_app_hide_console(app);
                     else test_app_show_console(app);
                 }
-            }else if(event->key.keysym.sym == SDLK_F11){
+            }else if(event->key.keysym.sym == SDLK_F11 && app->developer_mode){
                 printf("Frame rendered in: %i ms\n", app->took);
                 printf("  (Aiming for sub-%i ms)\n", app->delay_goal);
 

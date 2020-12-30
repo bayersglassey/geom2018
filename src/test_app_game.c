@@ -166,7 +166,7 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
     hexgame_t *game = &app->hexgame;
 
     if(event->type == SDL_KEYDOWN){
-        if(event->key.keysym.sym == SDLK_PAGEUP){
+        if(event->key.keysym.sym == SDLK_PAGEUP && app->developer_mode){
             if(!app->hexgame_running){
                 /* Do 1 step */
                 err = hexgame_step(&app->hexgame);
@@ -174,7 +174,7 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
             }
         }else if(event->key.keysym.sym == SDLK_TAB){
             game->show_minimap = true;
-        }else if(event->key.keysym.sym == SDLK_F6){
+        }else if(event->key.keysym.sym == SDLK_F6 && app->developer_mode){
             /* Hack, we really want to force camera->mapper to NULL, but
             instead we assume the existence of this mapper called "single" */
             const char *mapper_name = "single";
@@ -184,11 +184,11 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
                     __func__, mapper_name);
                 return 2;
             }
-        }else if(event->key.keysym.sym == SDLK_F7){
+        }else if(event->key.keysym.sym == SDLK_F7 && app->developer_mode){
             app->camera->follow = !app->camera->follow;
-        }else if(event->key.keysym.sym == SDLK_F8){
+        }else if(event->key.keysym.sym == SDLK_F8 && app->developer_mode){
             app->camera->smooth_scroll = !app->camera->smooth_scroll;
-        }else if(event->key.keysym.sym == SDLK_F9){
+        }else if(event->key.keysym.sym == SDLK_F9 && app->developer_mode){
             /* save recording */
             for(int i = 0; i < game->players_len; i++){
                 player_t *player = game->players[i];
@@ -213,7 +213,7 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
                     if(err)return err;
                 }
             }
-        }else if(event->key.keysym.sym == SDLK_F10){
+        }else if(event->key.keysym.sym == SDLK_F10 && app->developer_mode){
             /* load recording */
             bool shift = event->key.keysym.mod & KMOD_SHIFT;
             const char *recording_filename =
@@ -257,7 +257,7 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
                     }
                 }
             }
-        }else if(event->key.keysym.sym == SDLK_F12){
+        }else if(event->key.keysym.sym == SDLK_F12 && app->developer_mode){
             for(int i = 0; i < game->players_len; i++){
                 player_t *player = game->players[i];
                 if(player->keymap < 0)continue;
@@ -281,7 +281,7 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
     }else if(event->type == SDL_KEYUP){
         if(event->key.keysym.sym == SDLK_TAB){
             game->show_minimap = false;
-        }if(event->key.keysym.sym == SDLK_F6){
+        }if(event->key.keysym.sym == SDLK_F6 && app->developer_mode){
             app->camera_mapper = NULL;
         }
     }
