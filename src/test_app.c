@@ -268,7 +268,7 @@ static int test_app_render(test_app_t *app){
         return 2;
     }
 
-    {
+    if(app->developer_mode){
         /* Dump some info to bottom of screen */
 
         int geomfont_prismel_height = 2; /* Hardcoded, actually depends on the geomfont */
