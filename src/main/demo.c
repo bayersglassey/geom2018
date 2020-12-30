@@ -48,6 +48,7 @@ void print_help(FILE *file){
         "   -d   --devel          Developer mode\n"
         "                         (You can also use env var %s)\n"
         "   -p   --players   N    Number of players (default: %i)\n"
+        "   -l   --load           Load/continue game immediately (skip title screen)\n"
         "        --minimap_alt    Use alternate minimap\n"
         "        --dont_cache_bitmaps\n"
         "                         ...low-level hokey-pokery, should probably get rid of this option\n"
@@ -74,6 +75,7 @@ int main(int n_args, char *args[]){
     bool developer_mode = get_bool_env(ENV_DEVEL);
     int n_players = DEFAULT_PLAYERS;
     int n_players_playing = DEFAULT_PLAYERS_PLAYING;
+    bool load_game = false;
 
     /* The classic */
     srand(time(0));
@@ -137,6 +139,8 @@ int main(int n_args, char *args[]){
                 goto parse_failure;
             }
             fprintf(stderr, "Number of players set to %i\n", n_players);
+        }else if(!strcmp(arg, "-l") || !strcmp(arg, "--load")){
+            load_game = true;
         }else if(!strcmp(arg, "--minimap_alt")){
             minimap_alt = !minimap_alt;
         }else if(!strcmp(arg, "--dont_cache_bitmaps")){
@@ -179,7 +183,7 @@ int main(int n_args, char *args[]){
                     window, renderer, prend_filename, stateset_filename,
                     hexmap_filename, submap_filename, developer_mode,
                     minimap_alt, cache_bitmaps,
-                    n_players, n_players_playing)
+                    n_players, n_players_playing, load_game)
                 ){
                     e = 1;
                     fprintf(stderr, "Couldn't init test app\n");

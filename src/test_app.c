@@ -74,7 +74,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     const char *stateset_filename, const char *hexmap_filename,
     const char *submap_filename, bool developer_mode,
     bool minimap_alt, bool cache_bitmaps,
-    int n_players, int n_players_playing
+    int n_players, int n_players_playing, bool load_game
 ){
     int err;
 
@@ -210,19 +210,23 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     err = test_app_set_players(app, n_players_playing);
     if(err)return err;
 
-    {
-        /* Find first body for player 0 (going to point camera at it) */
-        body_t *body = NULL;
-        for(int i = 0; i < game->players_len; i++){
-            player_t *player = game->players[i];
-            if(player->keymap != 0)continue;
-            body = player->body;
-            break;
-        }
+    /* Find player0 */
+    player_t *player0 = NULL;
+    for(int i = 0; i < game->players_len; i++){
+        player_t *player = game->players[i];
+        if(player->keymap != 0)continue;
+        player0 = player;
+        break;
+    }
+    if(player0 == NULL){
+        fprintf(stderr, "Couldn't find player 0\n");
+        return 2;
+    }
 
+    {
         /* Create camera */
         ARRAY_PUSH_NEW(camera_t*, game->cameras, camera)
-        err = camera_init(camera, game, map, body);
+        err = camera_init(camera, game, map, player0->body);
         if(err)return err;
 
         app->camera = camera;
@@ -237,6 +241,13 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         app->delay_goal, app->scw, app->sch);
 
     app->list = NULL;
+
+    if(load_game){
+        /* Load game immediately, instead of starting at title screen and
+        having to jump into the "LOAD" door or whatever. */
+        err = test_app_continue_callback(game, player0);
+        if(err)return err;
+    }
 
     return 0;
 }
