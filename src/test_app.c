@@ -274,20 +274,7 @@ static int test_app_render(test_app_t *app){
         int geomfont_prismel_height = 2; /* Hardcoded, actually depends on the geomfont */
         int bottom_of_screen_in_prismels = app->sch / geomfont_prismel_height;
 
-        {
-            int max_bitmaps = 0;
-            prismelrenderer_t *prend = &app->prend;
-            for(int i = 0; i < prend->rendergraphs_len; i++){
-                rendergraph_t *rgraph = prend->rendergraphs[i];
-                max_bitmaps += rgraph->n_bitmaps;
-            }
-            test_app_printf(app, 0,
-                bottom_of_screen_in_prismels - 3 * app->font.char_h,
-                "Bitmaps rendered: %i / %i",
-                app->prend.bitmaps_rendered, max_bitmaps);
-        }
-
-        if(app->took > app->delay_goal){
+        if(app->took > app->delay_goal && app->developer_mode){
             test_app_printf(app, 0,
                 bottom_of_screen_in_prismels - 2 * app->font.char_h,
                 "Time to render (in ticks): goal=%i, actual=%i",

@@ -446,7 +446,6 @@ void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box,
 
 int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space){
     renderer->cache_bitmaps = true;
-    renderer->bitmaps_rendered = 0;
     renderer->space = space;
     stringstore_init(&renderer->stringstore);
     ARRAY_INIT(renderer->fonts)
@@ -547,10 +546,10 @@ void prismelrenderer_dump_stats(prismelrenderer_t *prend, FILE *f){
 
     for(int i = 0; i < prend->rendergraphs_len; i++){
         rendergraph_t *rgraph = prend->rendergraphs[i];
+        n_bitmaps += rgraph->n_bitmaps;
         for(int i = 0; i < rgraph->n_bitmaps; i++){
             rendergraph_bitmap_t *bitmap = &rgraph->bitmaps[i];
             SDL_Surface *surface = bitmap->surface;
-            n_bitmaps++;
             if(surface != NULL){
                 n_surfaces++;
                 surfaces_size += surface->h * surface->pitch;
