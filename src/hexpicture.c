@@ -164,6 +164,20 @@ static hexpicture_vert_t *_get_vert(hexpicture_part_t *parts,
     return part->part.vert;
 }
 
+static void _dump_lines(FILE *file, const char **lines, size_t lines_len,
+    size_t max_line_len
+){
+    fputs("     ", file);
+    for(int i = 0; i < max_line_len; i++){
+        fputc('0' + i % 10, file);
+    }
+    fputc('\n', file);
+
+    for(int i = 0; i < lines_len; i++){
+        fprintf(file, "% 3i: %s\n", i, lines[i]);
+    }
+}
+
 
 /* HEXPICTURE PARSE */
 
@@ -629,6 +643,10 @@ int hexpicture_parse(
     *return_faces_len_ptr = faces_len;
 
     end:
+    if(err){
+        fprintf(stderr, "Error in hexpicture:\n");
+        _dump_lines(stderr, lines, lines_len, max_line_len);
+    }
     free(parts);
     free(verts);
     return err;

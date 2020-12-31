@@ -601,6 +601,7 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
         }else if(GOT("hexpicture")){
             NEXT
             err = parse_shape_hexpicture(prend, lexer, rgraph);
+            if(err == 2)fprintf(stderr, "While parsing shape: %s\n", name);
             if(err)return err;
         }else if(GOT("text")){
             NEXT
