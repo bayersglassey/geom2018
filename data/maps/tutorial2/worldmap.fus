@@ -26,7 +26,7 @@ vars:
 
 $SET_STR TUT_COINS "Spit with Spacebar.\nIt may help you judge your jumps.\n\nCollect shiny purple things\n   with your body or spit.\n"
 $SET_STR TUT_DANGER
-    "\n\n\n\n\n\n\n\n\n\n\n\n\nSomething dangerous is\nrolling around down there.\nHit it with your spit to\nchange its direction.\n\n\n\nEverything with be okay.\n   Keep going.\n"
+    "\n\n\n\n\n\n\n\n\n\n\n\n\nSomething dangerous is\nrolling around down there.\n\nHit it with your spit to\nchange its direction.\nFollow the purple things\nand be careful.\n\nEverything with be okay.\n   Keep going.\n"
 $SET_STR TUT_DANGER_PASSED "Nicely done. Keep going!\n"
 
 $SET_STR TUT_END "\n\nYou've learned enough to make it on your own.\n\n\nGo through the door and enjoy the game.\n"
@@ -77,5 +77,18 @@ submaps:
                     file: "data/maps/tutorial2/start3b.fus"
                     text: if mapvar("start3b_solved") then $GET_STR TUT_DANGER_PASSED else null
                     pos: eval: (0 0) + (13 -9) + (-1 -12)
-                    camera: (-4 -6)
-
+                    camera: (-5 -6)
+                :
+                    file: "data/maps/tutorial2/start3b_blocker.fus"
+                    visible: not mapvar("start3b_solved")
+                    pos: eval: (0 0) + (13 -9) + (-1 -12) + (-22 -17)
+            : submaps:
+                :
+                    bg
+                    file: "data/maps/tutorial2/start4_bg.fus"
+                    pos: eval: (0 0) + (13 -9) + (-1 -12) + (-29 -19)
+                    tileset: "data/tileset1_bg.fus"
+                :
+                    file: "data/maps/tutorial2/start4.fus"
+                    pos: eval: (0 0) + (13 -9) + (-1 -12) + (-29 -19)
+                    camera: (-8 6)
