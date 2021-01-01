@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include "hexgame.h"
+#include "hexgame_state.h"
 #include "anim.h"
 #include "hexmap.h"
 #include "hexspace.h"
@@ -81,7 +82,7 @@ int actor_handle_rules(actor_t *actor){
             actor->body, actor, &gotto);
         if(err)return err;
         if(gotto != NULL){
-            err = actor_set_state(actor, gotto->name);
+            err = state_effect_goto_apply_to_actor(gotto, actor);
             if(err)return err;
 
             if(gotto->immediate)goto handle;

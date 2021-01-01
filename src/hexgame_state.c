@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include "hexgame.h"
+#include "hexgame_state.h"
 #include "anim.h"
 #include "hexmap.h"
 #include "hexspace.h"
@@ -47,6 +48,25 @@ static int _get_vars(body_t *body, actor_t *actor,
         *myvars_ptr = &body->vars;
         *mapvars_ptr = !body->map? NULL: &body->map->vars;
     }
+    return 0;
+}
+
+
+int state_effect_goto_apply_to_body(state_effect_goto_t *gotto,
+    body_t *body
+){
+    int err;
+    err = body_set_state(body, gotto->name, false);
+    if(err)return err;
+    return 0;
+}
+
+int state_effect_goto_apply_to_actor(state_effect_goto_t *gotto,
+    actor_t *actor
+){
+    int err;
+    err = actor_set_state(actor, gotto->name);
+    if(err)return err;
     return 0;
 }
 
@@ -594,7 +614,7 @@ int collmsg_handler_apply(collmsg_handler_t *handler,
         if(gotto != NULL){
             if(actor != NULL){
                 /* ACTOR */
-                err = actor_set_state(actor, gotto->name);
+                err = state_effect_goto_apply_to_actor(gotto, actor);
                 if(err)return err;
                 if(gotto->immediate){
                     /* If there was an "immediate goto" effect,
@@ -604,7 +624,7 @@ int collmsg_handler_apply(collmsg_handler_t *handler,
                 }
             }else{
                 /* BODY */
-                err = body_set_state(body, gotto->name, false);
+                err = state_effect_goto_apply_to_body(gotto, body);
                 if(err)return err;
                 if(gotto->immediate){
                     /* If there was an "immediate goto" effect,

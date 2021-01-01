@@ -24,13 +24,6 @@ Meaning of each character:
 */
 
 
-/* Need these declarations for state_cond_match, state_effect_apply,
-collmsg_handler_apply */
-struct hexgame;
-struct body;
-struct actor;
-
-
 enum anim_cond_flag {
     ANIM_COND_FLAGS_ALL    = 1,
     ANIM_COND_FLAGS_YES    = 2,
@@ -72,9 +65,6 @@ typedef struct collmsg_handler {
 void collmsg_handler_cleanup(collmsg_handler_t *handler);
 void collmsg_handler_init(collmsg_handler_t *handler, char *msg);
 struct state_effect_goto;
-int collmsg_handler_apply(collmsg_handler_t *handler,
-    struct hexgame *game, struct body *body, struct actor *actor,
-    bool *continues_ptr);
 
 
 /********
@@ -330,14 +320,8 @@ void state_rule_dump(state_rule_t *rule, FILE *file, int depth);
 
 void state_cond_cleanup(state_cond_t *cond);
 void state_cond_dump(state_cond_t *cond, FILE *file, int depth);
-int state_cond_match(state_cond_t *cond,
-    struct hexgame *game, struct body *body, struct actor *actor,
-    bool *matched_ptr);
 
 void state_effect_cleanup(state_effect_t *effect);
 void state_effect_dump(state_effect_t *effect, FILE *file, int depth);
-int state_effect_apply(state_effect_t *effect,
-    struct hexgame *game, struct body *body, struct actor *actor,
-    state_effect_goto_t **gotto_ptr, bool *continues_ptr);
 
 #endif

@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include "hexgame.h"
+#include "hexgame_state.h"
 #include "anim.h"
 #include "hexmap.h"
 #include "hexspace.h"
@@ -537,7 +538,7 @@ int body_handle_rules(body_t *body){
             &gotto);
         if(err)return err;
         if(gotto != NULL){
-            err = body_set_state(body, gotto->name, false);
+            err = state_effect_goto_apply_to_body(gotto, body);
             if(err)return err;
 
             if(gotto->immediate)goto handle;
