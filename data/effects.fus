@@ -37,6 +37,11 @@ shapes:
         shapes:
             : "_dead_once" (0 1 3 1) 0 f  0+
 
+    "dead_once_reversed":
+        animation: once 12
+        shapes:
+            : "_dead_once" (0 1 3 1) 0 f 0+r
+
     "dead_once_centered_reversed":
         animation: once 12
         shapes:

@@ -1,0 +1,60 @@
+
+import "anim/_coin.fus"
+
+appear:
+    rgraph: "dead_once_reversed"
+    if() then: goto: stand
+
+stand:
+    rgraph: "coin_beast_stand"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+
+    if:
+        key: isdown f
+    then:
+        move: 1 0
+        goto delay: step
+
+    if:
+        key: isdown b
+    then:
+        turn
+        goto delay: step
+
+    if:
+        key: isdown d
+    then:
+        goto: crouch
+
+step:
+    rgraph: "coin_beast_step"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: stand
+
+appear_crouch:
+    rgraph: "dead_once_crouch_reversed"
+    if() then: goto: crouch
+
+crouch:
+    rgraph: "coin_beast_crouch"
+    hitbox:
+        ;;     .
+        ;;     *
+        ;;  (.)  .
+    if:
+        key: not isdown d
+    then:
+        goto: stand
+
+collected:
+    rgraph: "empty"
