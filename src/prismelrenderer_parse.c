@@ -570,10 +570,17 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
             animation_type_ptr++;
         }
         NEXT
-        if(*animation_type_ptr == NULL){
-            return UNEXPECTED("<animation_type>");}
+        if(*animation_type_ptr == NULL)return UNEXPECTED("<animation_type>");
         animation_type = *animation_type_ptr;
-        GET_INT(n_frames)
+        if(GOT_STR){
+            char *name;
+            GET_STR(name)
+            rendergraph_t *rgraph = prismelrenderer_get_rgraph(prend, name);
+            if(!rgraph)return UNEXPECTED("shape name");
+            n_frames = rgraph->n_frames;
+        }else{
+            GET_INT(n_frames)
+        }
         GET(")")
     }
 
