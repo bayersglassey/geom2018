@@ -29,7 +29,7 @@ stand:
     if:
         key: isdown d
     then:
-        goto: crouch
+        goto delay: crouching
 
 step:
     rgraph: "coin_beast_step"
@@ -45,6 +45,16 @@ appear_crouch:
     rgraph: "dead_once_crouch_reversed"
     if() then: goto: crouch
 
+crouching:
+    rgraph: "coin_beast_crouching"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: crouch
+
 crouch:
     rgraph: "coin_beast_crouch"
     hitbox:
@@ -54,7 +64,17 @@ crouch:
     if:
         key: not isdown d
     then:
-        goto: stand
+        goto delay: uncrouching
+
+uncrouching:
+    rgraph: "coin_beast_uncrouching"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: stand
 
 collected:
     rgraph: "empty"

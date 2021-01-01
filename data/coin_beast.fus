@@ -26,7 +26,7 @@ shapes:
             ;;     -- | | | | | | --
             ;;    +   |8|.|.|.|8|   +
             ;;   | |   +---+---+   | |
-            ;;   |5|5--        |--5|5|
+            ;;   |5|5--         --5|5|
             ;;  +---+             +---+
             ;;  |   |             |   |
             ;;  |   |             |   |
@@ -35,6 +35,22 @@ shapes:
             ;;   | | |           | | |
             ;;   |F|F|           |F|F|
             ;;    *---+         +---+
+
+    "_coin_beast_legs_crouching":
+        hexpicture:
+            ;;             +---+
+            ;;           --|   |--
+            ;;  +---+---+ 8|   |8 +---+---+
+            ;;  |   |   |--|.  |--|   |   |
+            ;;  |   |   |8 +---+ 8|   |   |
+            ;;  |5  |5  |--     --|5  |5  |
+            ;;  +---+---+         +---+---+
+            ;;   | | | |           | | | |
+            ;;   |D|D|.|           |.|D|D|
+            ;;    +---+             +---+
+            ;;     | | |           | | |
+            ;;     |F|F|           |F|F|
+            ;;      *---+         +---+
 
     "_coin_beast_legs_crouch":
         hexpicture:
@@ -61,6 +77,18 @@ shapes:
             : "_coin_beast_legs_stand" (0 0 0 0)  0 f
             : "_coin_beast_body" (0 1 3 1)  0 f
             : "coin" (0 1 3 1)  0 f
+
+    "coin_beast_crouching":
+        animation: cycle 1
+        shapes:
+            : "_coin_beast_legs_crouching" (0 0 0 0)  0 f
+            : "_coin_beast_body" (0 1 3 0)  0 f
+            : "coin" (0 1 3 0)  0 f
+
+    "coin_beast_uncrouching":
+        animation: cycle "coin_beast_crouching"
+        shapes:
+            : "coin_beast_crouching" (0 0 0 0)  0 f 0+r
 
     "coin_beast_crouch":
         animation: cycle 12
