@@ -1,0 +1,45 @@
+
+on "collect":
+    if: exists myvar("collected_key")
+    then:
+        if: exists myvar("num_key")
+        then:
+            inc mapvar(myvar("num_key")): -1
+            if: expr: <= mapvar(myvar("num_key")) 0
+            then: set mapvar(myvar("collected_key")): T
+        else: set mapvar(myvar("collected_key")): T
+
+    goto: collected
+
+init:
+    if:
+        exists myvar("collected_key")
+        get_bool mapvar(myvar("collected_key"))
+    then:
+        goto immediate: collected
+
+    if() then:
+        if: exists myvar("key")
+        then:
+            if: get_bool mapvar(myvar("key"))
+            then: goto immediate: _appear
+        else: goto immediate: _appear
+
+_appear:
+    if:
+        exists myvar("appear")
+        get_bool myvar("appear")
+    then:
+        if:
+            exists myvar("crouch")
+            get_bool myvar("crouch")
+        then: goto: appear_crouch
+        else: goto: appear
+        delay: 11
+
+    if() then:
+        if:
+            exists myvar("crouch")
+            get_bool myvar("crouch")
+        then: goto: crouch
+        else: goto: stand
