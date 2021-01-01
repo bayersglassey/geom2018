@@ -322,6 +322,12 @@ static int _parse_effect(fus_lexer_t *lexer,
             immediate = true;
         }
 
+        bool delay = false;
+        if(GOT("delay")){
+            NEXT
+            delay = true;
+        }
+
         GET("(")
 
         char *goto_name;
@@ -330,6 +336,7 @@ static int _parse_effect(fus_lexer_t *lexer,
         effect->type = STATE_EFFECT_TYPE_GOTO;
         effect->u.gotto.name = goto_name;
         effect->u.gotto.immediate = immediate;
+        effect->u.gotto.delay = delay;
 
         GET(")")
     }else if(GOT("delay")){

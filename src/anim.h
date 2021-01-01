@@ -245,6 +245,7 @@ static const char *state_effect_type_name(int type){
 typedef struct state_effect_goto {
     char *name;
     bool immediate;
+    bool delay;
 } state_effect_goto_t;
 
 typedef struct state_effect_spawn {

@@ -55,18 +55,30 @@ static int _get_vars(body_t *body, actor_t *actor,
 int state_effect_goto_apply_to_body(state_effect_goto_t *gotto,
     body_t *body
 ){
+    /* NOTE: Caller guarantees body != NULL */
     int err;
     err = body_set_state(body, gotto->name, false);
     if(err)return err;
+    if(gotto->delay && body->state){
+        rendergraph_t *rgraph = body->state->rgraph;
+        int delay = rgraph? rgraph->n_frames - 1: 0;
+        body->cooldown = delay;
+    }
     return 0;
 }
 
 int state_effect_goto_apply_to_actor(state_effect_goto_t *gotto,
     actor_t *actor
 ){
+    /* NOTE: Caller guarantees actor != NULL */
     int err;
     err = actor_set_state(actor, gotto->name);
     if(err)return err;
+    if(gotto->delay && actor->state){
+        rendergraph_t *rgraph = actor->state->rgraph;
+        int delay = rgraph? rgraph->n_frames - 1: 0;
+        actor->wait = delay;
+    }
     return 0;
 }
 
