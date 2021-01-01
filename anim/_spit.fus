@@ -30,8 +30,7 @@ fly:
             ;;
             ;;  ( )  .
     then:
-        goto: dead
-        delay: 11
+        goto delay: dead
 
     if:
         coll: all yes
@@ -69,8 +68,7 @@ crouch_fly:
             ;;    *\*
             ;; ( )  .
     then:
-        goto: crouch_dead
-        delay: 11
+        goto delay: crouch_dead
 
     if:
         coll: all yes

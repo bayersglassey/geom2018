@@ -120,8 +120,7 @@ swim:
         key: wentdown y
     then:
         spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f
-        goto: swim_spit
-        delay: 9
+        goto delay: swim_spit
 
     if:
         any:

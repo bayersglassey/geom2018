@@ -39,8 +39,7 @@ stand:
         key: wentdown y
     then:
         spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f
-        goto: spit
-        delay: 9
+        goto delay: spit
 
     $IF PLAYER_ROLLER:
         if:
@@ -202,8 +201,7 @@ looking_up:
         key: wentdown y
     then:
         spawn: $GET_STR SPIT_FUS "fly" (1 0) 1 f
-        goto: looking_up_spit
-        delay: 9
+        goto delay: looking_up_spit
 
     if:
         key: wasdown u
@@ -349,8 +347,7 @@ jump:
         goto immediate: start_jump
 
     if() then:
-        goto: mostly_dead
-        delay: 11
+        goto delay: mostly_dead
 
 step_down:
     rgraph: $PREFIX NS "step"
@@ -365,8 +362,7 @@ step_down:
         key: wentdown y
     then:
         spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f
-        goto: spit
-        delay: 9
+        goto delay: spit
 
     $IF PLAYER_ROLLER:
         if:
@@ -390,8 +386,7 @@ step:
         key: wentdown y
     then:
         spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f
-        goto: spit
-        delay: 9
+        goto delay: spit
 
     $IF PLAYER_ROLLER:
         if:

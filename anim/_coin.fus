@@ -33,9 +33,8 @@ _appear:
         if:
             exists myvar("crouch")
             get_bool myvar("crouch")
-        then: goto: appear_crouch
-        else: goto: appear
-        delay: 11
+        then: goto delay: appear_crouch
+        else: goto delay: appear
 
     if() then:
         if:
