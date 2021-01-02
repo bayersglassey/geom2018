@@ -266,11 +266,15 @@ int fus_lexer_eval_vec(fus_lexer_t *lexer, vecspace_t *space, vec_t vec){
     int err;
 
     vec_zero(vec);
+    bool neg = false;
     while(1){
         vec_t add;
 
         err = fus_lexer_get_vec_simple(lexer, space, add);
         if(err)return err;
+
+        if(neg)vec_neg(space->dims, add);
+        neg = false;
 
         while(1){
             if(fus_lexer_got(lexer, "*")){
@@ -303,8 +307,14 @@ int fus_lexer_eval_vec(fus_lexer_t *lexer, vecspace_t *space, vec_t vec){
 
         if(fus_lexer_done(lexer) || fus_lexer_got(lexer, ")"))break;
 
-        err = fus_lexer_get(lexer, "+");
-        if(err)return err;
+        if(fus_lexer_got(lexer, "-")){
+            neg = true;
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+        }else{
+            err = fus_lexer_get(lexer, "+");
+            if(err)return err;
+        }
     }
 
     return 0;
