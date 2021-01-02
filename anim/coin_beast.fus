@@ -260,6 +260,7 @@ jump:
 collected:
     rgraph: "dead_once"
     unsafe
+    if() then: die
 
 mostly_dead:
     rgraph: "dead_cycle"
