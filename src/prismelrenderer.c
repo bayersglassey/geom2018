@@ -122,6 +122,13 @@ int get_bitmap_i(vecspace_t *space, rot_t rot, flip_t flip,
     int n_bitmaps = get_n_bitmaps(space, n_frames);
     rot = rot_contain(space->rot_max, rot);
     rot = rot_flip(space->rot_max, rot, flip);
+
+    if(n_frames == 0)frame_i = 0;
+    else{
+        while(frame_i < 0)frame_i += n_frames;
+        while(frame_i >= n_frames)frame_i -= n_frames;
+    }
+
     int bitmap_i = (frame_i * 2 + (flip? 1: 0)) * space->rot_max + rot;
     return bitmap_i;
 }
