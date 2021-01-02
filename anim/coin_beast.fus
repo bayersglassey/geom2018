@@ -98,10 +98,19 @@ crouch:
         ;;     .
         ;;     *
         ;;  (.)  .
+
     if:
         key: not isdown d
     then:
         goto delay: uncrouching
+
+    if:
+        key: isdown b
+    then:
+        move: 1 0
+        turn
+        goto: crouch
+        delay: 1
 
 uncrouching:
     rgraph: "coin_beast_uncrouching"

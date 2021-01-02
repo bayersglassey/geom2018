@@ -36,67 +36,137 @@ shapes:
             ;;     |F|F|           |F|F|
             ;;      *---+         +---+
 
-    "_coin_beast_legs_step1":
-        hexpicture:
-            ;;             +
-            ;;            | |
-            ;;            |8|     +
-            ;;           +---+   | |
-            ;;         -- | |    |5|
-            ;;        +   |8|   +---+
-            ;;       | |   +     | | |
-            ;;       |5|5--      |5|5|
-            ;;      +---+         +---+
-            ;;      |   |         |   |
-            ;;      |   |         |   |
-            ;;      |D  |         |D  |
-            ;;      +---+         +---+
-            ;;      |   |--     --|   |
-            ;;      |   |. +---+ .|   |
-            ;;      |F  |--     --|F  |
-            ;;      *---+         +---+
-
     "_coin_beast_legs_step_bleg1":
         hexpicture:
-            ;;              +
-            ;;              |--
-            ;;              |8 +
-            ;;              |--|
-            ;;          +---+ 5|
-            ;;          |   |--|
-            ;;          |   |5 +
-            ;;          |5  |--
-            ;;          +---+
-            ;;         | | |
-            ;;         |D|D|
-            ;;        +---+
-            ;;       | | |
-            ;;       |F|F|
-            ;;      *---+
+            ;;                    +
+            ;;                   | |
+            ;;                   |5|
+            ;;                  +---+
+            ;;                   | | |
+            ;;                   |5|5|
+            ;;                    +---+
+            ;;                    |   |
+            ;;                    |   |
+            ;;                    |D  |
+            ;;                    +---+
+            ;;                    |   |
+            ;;                    |   |
+            ;;                    |F  |
+            ;;                    +---*
 
     "_coin_beast_legs_step_bleg2":
         hexpicture:
-            ;;
-            ;;          +
-            ;;         | |
-            ;;         |8|
-            ;;        +---+
-            ;;         | | |
-            ;;         | | |
-            ;;         |5|5|
-            ;;          +---+
-            ;;          |   |
-            ;;          |   |
-            ;;          |5  |
-            ;;          +---+
-            ;;         | | |
-            ;;         |D|D|
-            ;;        +---+
-            ;;       | | |
-            ;;       |F|F|
-            ;;      *---+
+            ;;                        +
+            ;;                       | |
+            ;;                       |5|
+            ;;                      +---+
+            ;;                     | | |
+            ;;                     |5|5|
+            ;;                    +---+
+            ;;                    |   |
+            ;;                    |   |
+            ;;                    |D  |
+            ;;                    +---+
+            ;;                    |   |
+            ;;                    |   |
+            ;;                    |F  |
+            ;;                    +---*
 
     "_coin_beast_legs_step_fleg1":
+        hexpicture:
+            ;;             +
+            ;;            | |
+            ;;            |8|
+            ;;           +---+
+            ;;         -- | |
+            ;;        +   |8|
+            ;;       | |   +
+            ;;       |5|5--
+            ;;      +---+
+            ;;      |   |
+            ;;      |   |
+            ;;      |D  |
+            ;;      +---+
+            ;;      |   |
+            ;;      |   |
+            ;;      |F  |
+            ;;      *---+
+
+    "_coin_beast_legs_step_fleg2":
+        hexpicture:
+            ;;             +
+            ;;            | |
+            ;;            |5|
+            ;;           +---+
+            ;;         -- | |
+            ;;        +   |5|
+            ;;       | |   +
+            ;;       |D|D--
+            ;;      +---+
+            ;;      |   |
+            ;;      |   |
+            ;;      |F  |
+            ;;      +---+
+            ;;      |   |
+            ;;      |   |
+            ;;      |.  |
+            ;;      *---+
+
+    "_coin_beast_legs_step_fleg3":
+        hexpicture:
+            ;;             +
+            ;;            | |
+            ;;            |5|
+            ;;           +---+
+            ;;         -- | |
+            ;;        +   |5|
+            ;;       | |   +
+            ;;       |F|D--
+            ;;      +---+
+            ;;      |   |
+            ;;      |   |
+            ;;      |.  |
+            ;;      +---+
+            ;;      |   |
+            ;;      |   |
+            ;;      |.  |
+            ;;      *---+
+
+    "_coin_beast_legs_step_fleg_coming_down1":
+        hexpicture:
+            ;;                  +
+            ;;                 | |
+            ;;                 |D|
+            ;;                +---+
+            ;;                 | | |
+            ;;                 |D|F|
+            ;;                  +---+
+            ;;                  |   |
+            ;;                  |   |
+            ;;                  |.  |
+            ;;                  +---+
+            ;;                   | | |
+            ;;                   |.|.|
+            ;;                    +---*
+
+    "_coin_beast_legs_step_fleg_coming_down2":
+        hexpicture:
+            ;;                  +
+            ;;                 | |
+            ;;                 |5|
+            ;;                +---+
+            ;;                 | | |
+            ;;                 |5|D|
+            ;;                  +---+
+            ;;                  |   |
+            ;;                  |   |
+            ;;                  |F  |
+            ;;                  +---+
+            ;;                   | | |
+            ;;                   |.|.|
+            ;;                    +---*
+
+    "_coin_beast_legs_step_fleg_coming_down3":
         hexpicture:
             ;;                  +
             ;;                 | |
@@ -112,43 +182,6 @@ shapes:
             ;;                   | | |
             ;;                   |F|F|
             ;;                    +---*
-
-    "_coin_beast_legs_step_fleg2":
-        hexpicture:
-            ;;                      +
-            ;;                     | |
-            ;;                     |8|
-            ;;                    +---+
-            ;;                     | | |
-            ;;                     |8|5|
-            ;;                      +---+
-            ;;                      |   |
-            ;;                      |   |
-            ;;                      |D  |
-            ;;                      +---+
-            ;;                       | |
-            ;;                       |F|
-            ;;                        *
-
-    "_coin_beast_legs_step2":
-        shapes:
-            : "_coin_beast_legs_step_fleg1" (3 2 0 -1) 0 f
-            : "_coin_beast_legs_step_bleg1" (0 0 0  0) 0 f
-
-    "_coin_beast_legs_step3":
-        shapes:
-            : "_coin_beast_legs_step_fleg1" (3 2 0 -1) 0 f
-            : "_coin_beast_legs_step_bleg1" (2 0 0  0) 0 f
-
-    "_coin_beast_legs_step4":
-        shapes:
-            : "_coin_beast_legs_step_fleg1" (3 2 0 -1) 0 f
-            : "_coin_beast_legs_step_bleg2" (5 0 0  0) 0 f
-
-    "_coin_beast_legs_step5":
-        shapes:
-            : "_coin_beast_legs_step_fleg2" (3 2 0 -1) 0 f
-            : "_coin_beast_legs_step_bleg2" (7 0 0  0) 0 f
 
     "_coin_beast_legs_crouching":
         hexpicture:
@@ -186,13 +219,17 @@ shapes:
             : "coin" (0 1 3 1)  0 f
 
     "coin_beast_step":
-        animation: cycle 5
+        animation: cycle 6
         shapes:
-            : "_coin_beast_legs_step1" eval((0 0 0 0) - (3 2 0 -1))  0 f 0 (0 1)
-            : "_coin_beast_legs_step2" eval((0 0 0 0) - (3 2 0 -1))  0 f 0 (1 1)
-            : "_coin_beast_legs_step3" eval((0 0 0 0) - (3 2 0 -1))  0 f 0 (2 1)
-            : "_coin_beast_legs_step4" eval((0 0 0 0) - (3 2 0 -1))  0 f 0 (3 1)
-            : "_coin_beast_legs_step5" eval((0 0 0 0) - (3 2 0 -1))  0 f 0 (4 1)
+            : "_coin_beast_legs_step_bleg1" (0 0 0  0) 0 f 0 (0 2)
+            : "_coin_beast_legs_step_bleg2" (0 0 0  0) 0 f 0 (2 4)
+
+            : "_coin_beast_legs_step_fleg1" eval((0 0 0 0) - (3 2 0 -1)) 0 f 0 (0 1)
+            : "_coin_beast_legs_step_fleg2" eval((1 0 0 0) - (3 2 0 -1)) 0 f 0 (1 1)
+            : "_coin_beast_legs_step_fleg3" eval((2 0 0 0) - (3 2 0 -1)) 0 f 0 (2 1)
+            : "_coin_beast_legs_step_fleg_coming_down1" eval((-2 0 0 0) + (3 2 0 -1)) 0 f 0 (3 1)
+            : "_coin_beast_legs_step_fleg_coming_down2" eval((-1 0 0 0) + (3 2 0 -1)) 0 f 0 (4 1)
+            : "_coin_beast_legs_step_fleg_coming_down3" eval(( 0 0 0 0) + (3 2 0 -1)) 0 f 0 (5 1)
 
             : "_coin_beast_body" eval((0 1 3 1) - (3 2 0 -1))  0 f 0 (0 1)
             : "coin" eval((1 1 3 1) - (3 2 0 -1))  0 f 0 (0 1)
@@ -200,14 +237,11 @@ shapes:
             : "_coin_beast_body" eval((1 1 3 1) - (3 2 0 -1))  0 f 0 (1 1)
             : "coin" eval((2 1 3 1) - (3 2 0 -1))  0 f 0 (1 1)
 
-            : "_coin_beast_body" eval((2 1 3 1) - (3 2 0 -1))  0 f 0 (2 1)
-            : "coin" eval((3 1 3 1) - (3 2 0 -1))  0 f 0 (2 1)
+            : "_coin_beast_body" eval((3 1 3 1) - (3 2 0 -1))  0 f 0 (2 1)
+            : "coin" eval((4 1 3 1) - (3 2 0 -1))  0 f 0 (2 1)
 
-            : "_coin_beast_body" eval((3 1 3 1) - (3 2 0 -1))  0 f 0 (3 1)
-            : "coin" eval((4 1 3 1) - (3 2 0 -1))  0 f 0 (3 1)
-
-            : "_coin_beast_body" eval((4 1 3 1) - (3 2 0 -1))  0 f 0 (4 1)
-            : "coin" eval((5 1 3 1) - (3 2 0 -1))  0 f 0 (4 1)
+            : "_coin_beast_body" eval((4 1 3 1) - (3 2 0 -1))  0 f 0 (3 3)
+            : "coin" eval((5 1 3 1) - (3 2 0 -1))  0 f 0 (3 3)
 
     "coin_beast_crouching":
         animation: cycle 1
