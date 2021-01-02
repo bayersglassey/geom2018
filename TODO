@@ -789,3 +789,12 @@ Dec 30, 2020:
 display the "You jumped off the map!" message.
 Instead, maybe add a new value for body->dead?..
 (currently there is MOSTLY_DEAD and ALL_DEAD, maybe we want OUT_OF_BOUNDS)
+
+* ROLLERS CARRYING COINS!..
+    * Can be extended to death_rollers carrying coins.
+        * big_rollers?.. hexrollers?..
+    * How do we implement it?
+        * Requires state->rgraph to depend on a myvar... use state->rgraph_name_expr?..
+        * Take a different approach and attach a coin to a roller?..
+            * Attach where?.. would probably want "bindpoints" or something, i.e. named points within an rgraph...
+    * For now, instead of rollers carrying coins, can just have a "coin creature", which can run around, and be collected.
