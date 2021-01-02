@@ -22,4 +22,4 @@ crouch:
         ;;  (.)  .
 
 collected:
-    rgraph: "empty"
+    rgraph: "dead_once_centered"

@@ -258,7 +258,7 @@ jump:
 
 
 collected:
-    rgraph: "empty"
+    rgraph: "dead_once"
     unsafe
 
 mostly_dead:
