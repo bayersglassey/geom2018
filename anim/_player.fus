@@ -80,8 +80,7 @@ stand:
     then:
         move: 1 0
         rot: 1
-        goto: step
-        delay: 2
+        goto delay: step
 
     $IF PLAYER_AIMER:
         if:
@@ -121,8 +120,7 @@ stand:
             ;; ( )
     then:
         move: 1 0
-        goto: step
-        delay: 2
+        goto delay: step
 
     if:
         key: isdown f
@@ -139,8 +137,7 @@ stand:
     then:
         move: 1 0
         rot: -1
-        goto: step_down
-        delay: 2
+        goto delay: step_down
 
     if:
         key: isdown f
@@ -169,8 +166,7 @@ stand:
     then:
         move: 1 0
         turn
-        goto: step
-        delay: 2
+        goto delay: step
 
     $IF PLAYER_AIMER:
         if:
@@ -275,12 +271,10 @@ start_jump:
             ;;   */*\*
             ;;  (.)  .
     then:
-        goto: swim_jump
-        delay: 4
+        goto delay: swim_jump
 
     if() then:
-        goto: jump
-        delay: 2
+        goto delay: jump
 
 jump:
     # NOTE: the only "goto: jump" is in "start_jump", which checks whether
@@ -307,8 +301,7 @@ jump:
     then:
         move: 1 0
         rot: 1
-        goto: step
-        delay: 2
+        goto delay: step
 
     if:
         coll: all yes
@@ -333,8 +326,7 @@ jump:
             ;; ( )  + - +
     then:
         move: 1 0
-        goto: step
-        delay: 2
+        goto delay: step
 
     if:
         coll: all no

@@ -44,8 +44,7 @@ swim_jump:
     then:
         move: 1 0
         rot: 1
-        goto: step
-        delay: 2
+        goto delay: step
 
     if:
         any:
@@ -134,8 +133,7 @@ swim:
     then:
         move: 1 0
         rot: 1
-        goto: step
-        delay: 2
+        goto delay: step
 
     if:
         any:
