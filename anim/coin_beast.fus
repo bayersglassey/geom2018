@@ -1,4 +1,6 @@
 
+on "crush": goto: dead
+
 import "anim/_coin.fus"
 
 appear:
@@ -15,6 +17,13 @@ stand:
         ;;  (.)  .
 
     if:
+        coll: any no
+            ;;  (+)- +
+    then:
+        move: 1 0
+        goto immediate: start_jump
+
+    if:
         key: isdown d
     then:
         goto delay: crouching
@@ -29,6 +38,17 @@ stand:
         move: 1 0
         rot: 1
         goto delay: step_up
+
+    if:
+        key: wasdown u
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        move: 1 0
+        goto immediate: start_jump
 
     if:
         key: isdown f
@@ -61,12 +81,43 @@ stand:
         goto delay: step_down
 
     if:
+        key: isdown f
+        coll: any yes
+            ;;        +
+            ;;       /
+            ;; ( )
+    then:
+        move: 1 0
+        rot: 1
+        goto immediate: start_jump
+
+    if:
+        key: isdown f
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        move: 1 0
+        goto immediate: start_jump
+
+    if:
         key: isdown b
     then:
         move: 1 0
         turn
-        goto: stand
-        delay: 1
+        goto delay: turn
+
+turn:
+    rgraph: "coin_beast_turn"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto immediate: stand
 
 step:
     rgraph: "coin_beast_step"
@@ -142,5 +193,80 @@ uncrouching:
         ;;  (.)  .
     if() then: goto: stand
 
+start_jump:
+    if() then:
+        goto: jump
+        delay: 2
+
+jump:
+    rgraph: "coin_beast_jump"
+    unsafe
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+
+    if:
+        coll: all yes
+            ;;        +
+            ;;       /
+            ;; ( )  +
+    then:
+        move: 1 0
+        rot: 1
+        goto delay: step_up
+
+    if:
+        coll: all yes
+            ;; ( )  +
+        coll: any yes
+            ;;        +
+            ;;       /
+            ;; ( )
+    then:
+        move: 1 0
+        rot: 1
+        goto immediate: start_jump
+
+    if:
+        key: not isdown u
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+        coll: all yes
+            ;; ( )  + - +
+    then:
+        move: 1 0
+        goto delay: step
+
+    if:
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        move: 1 0
+        goto immediate: start_jump
+
+    if() then:
+        goto delay: mostly_dead
+
+
 collected:
     rgraph: "empty"
+    unsafe
+
+mostly_dead:
+    rgraph: "dead_cycle"
+    unsafe
+    if() then: die mostly
+
+dead:
+    rgraph: "dead_cycle"
+    unsafe
+    if() then: die
