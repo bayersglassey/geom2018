@@ -28,7 +28,7 @@ stand:
     then:
         move: 1 0
         rot: 1
-        goto delay: step
+        goto delay: step_up
 
     if:
         key: isdown f
@@ -58,7 +58,7 @@ stand:
     then:
         move: 1 0
         rot: -1
-        goto delay: step
+        goto delay: step_down
 
     if:
         key: isdown b
@@ -76,6 +76,26 @@ step:
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
+    if() then: goto immediate: stand
+
+step_up:
+    rgraph: "coin_beast_step_up"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto immediate: stand
+
+step_down:
+    rgraph: "coin_beast_step_down"
+    hitbox:
+        ;;   .   .   .
+        ;;   *\*/*\*/*
+        ;; . - + - . - .
+        ;;   */*\*/*\*
+        ;;   .  (.)  .
     if() then: goto immediate: stand
 
 appear_crouch:
