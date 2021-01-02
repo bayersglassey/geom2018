@@ -1,0 +1,14 @@
+reacts: yes
+anim: "anim/coin_beast.fus"
+state: "stand"
+pos: ( -35 -38)
+rot: 4
+turn: no
+keys:
+    x:
+    y:
+    u:
+    d:
+    l:
+    r:
+data: " w6+l w54-l w3+r w26-r w8+l w3-l w1+u w2-u w10+l w9-l w2+r w33-r w5+r w8-r w2+l w5-l w8+d w11+r w9-d w19-r w1+l w8-l w2+r w47-r w1+l w38+d w6-l w16+r w8-r w8+l w6-d w16+d w1-l w4+l w2-l w11+l w6-d w6+d w10-d w41+d w2-l w37+l w2-d w20-l w4+r w8-r w19+l w22-l w5+r w47-r w1+u w3-u w11+r w73-r w3+l w3+d w1-l w45-d w1+r w16-r w2+l w13-l w2+d w1+r w1-r w23+r w1-d w72-r w3+l w3-l w5+d w12-d w2+r w33-r w24+l w2-l w37+r w16-r w22+l w3-l w18+r w49-r w17+r w15-r w6+l w3+u w1-l w2-u w15+r w7-r w30"

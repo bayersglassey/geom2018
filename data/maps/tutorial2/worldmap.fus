@@ -92,3 +92,7 @@ submaps:
                     file: "data/maps/tutorial2/start4.fus"
                     pos: eval: (0 0) + (13 -9) + (-1 -12) + (-29 -19)
                     camera: (-8 6)
+                    recordings:
+                        : "data/maps/tutorial2/recs/start4_coin_beast000.fus"
+                        : "data/maps/tutorial2/recs/start4_coin_beast001.fus"
+                        : "data/maps/tutorial2/recs/start4_coin_beast002.fus"
