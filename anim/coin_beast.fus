@@ -65,17 +65,8 @@ stand:
     then:
         move: 1 0
         turn
-        goto delay: turn
-
-turn:
-    rgraph: "coin_beast_turn"
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
-    if() then: goto: stand
+        goto: stand
+        delay: 1
 
 step:
     rgraph: "coin_beast_step"
