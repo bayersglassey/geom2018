@@ -15,21 +15,67 @@ stand:
         ;;  (.)  .
 
     if:
+        key: isdown d
+    then:
+        goto delay: crouching
+
+    if:
         key: isdown f
+        coll: all yes
+            ;;        +
+            ;;       /
+            ;; ( )  +
+    then:
+        move: 1 0
+        rot: 1
+        goto delay: step
+
+    if:
+        key: isdown f
+        coll: all yes
+            ;; ( )  + - +
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
     then:
         move: 1 0
         goto delay: step
 
     if:
-        key: isdown b
+        key: isdown f
+        coll: all yes
+            ;; ( )  +
+            ;;       \
+            ;;        +
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*/*
+            ;; ( )    - + -
+            ;;        */*\*
     then:
-        turn
+        move: 1 0
+        rot: -1
         goto delay: step
 
     if:
-        key: isdown d
+        key: isdown b
     then:
-        goto delay: crouching
+        move: 1 0
+        turn
+        goto delay: turn
+
+turn:
+    rgraph: "coin_beast_turn"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: stand
 
 step:
     rgraph: "coin_beast_step"
@@ -39,7 +85,7 @@ step:
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto: stand
+    if() then: goto immediate: stand
 
 appear_crouch:
     rgraph: "dead_once_crouch_reversed"
