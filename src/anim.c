@@ -508,9 +508,44 @@ static int _parse_effect(fus_lexer_t *lexer,
     return 0;
 }
 
+static int _state_parse_rule(state_t *state, fus_lexer_t *lexer,
+    prismelrenderer_t *prend, vecspace_t *space
+){
+    INIT
+
+    ARRAY_PUSH_NEW(state_rule_t*, state->rules, rule)
+    err = state_rule_init(rule, state);
+    if(err)return err;
+
+    GET("if")
+    GET("(")
+    while(1){
+        if(GOT(")"))break;
+        ARRAY_PUSH_NEW(state_cond_t*, rule->conds, cond)
+        err = _parse_cond(lexer, prend, space, cond);
+        if(err)return err;
+    }
+    NEXT
+
+    GET("then")
+    GET("(")
+    while(1){
+        if(GOT(")"))break;
+        ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
+        err = _parse_effect(lexer, prend, space, effect);
+        if(err)return err;
+    }
+    NEXT
+
+    return 0;
+}
+
 static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
     prismelrenderer_t *prend, vecspace_t *space
 ){
+    /* NOTE: This function may be called recursively! (If an "import"
+    token is encountered.) */
+
     INIT
 
     if(GOT("debug_collision")){
@@ -572,6 +607,7 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
 
             fus_lexer_cleanup(&sublexer);
             free(filename);
+            free(text);
             continue;
         }
 
@@ -641,29 +677,42 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
         while(1){
             if(GOT(")"))break;
 
-            ARRAY_PUSH_NEW(state_rule_t*, state->rules, rule)
-            err = state_rule_init(rule, state);
+            if(GOT("import")){
+                NEXT
+
+                /* We use _fus_lexer_get_str to avoid calling fus_lexer_next until after
+                the call to fus_lexer_init_with_vars is done, to make sure we don't modify
+                lexer->vars first */
+                char *filename;
+                err = _fus_lexer_get_str(lexer, &filename);
+                if(err)return err;
+
+                char *text = load_file(filename);
+                if(text == NULL)return 1;
+
+                fus_lexer_t sublexer;
+                err = fus_lexer_init_with_vars(&sublexer, text, filename,
+                    lexer->vars);
+                if(err)return err;
+
+                while(!fus_lexer_done(&sublexer)){
+                    err = _state_parse_rule(state, &sublexer, prend, space);
+                    if(err)return err;
+                }
+
+                /* We now call fus_lexer_next manually, see call to _fus_lexer_get_str
+                above */
+                err = fus_lexer_next(lexer);
+                if(err)return err;
+
+                fus_lexer_cleanup(&sublexer);
+                free(filename);
+                free(text);
+                continue;
+            }
+
+            err = _state_parse_rule(state, lexer, prend, space);
             if(err)return err;
-
-            GET("if")
-            GET("(")
-            while(1){
-                if(GOT(")"))break;
-                ARRAY_PUSH_NEW(state_cond_t*, rule->conds, cond)
-                err = _parse_cond(lexer, prend, space, cond);
-                if(err)return err;
-            }
-            NEXT
-
-            GET("then")
-            GET("(")
-            while(1){
-                if(GOT(")"))break;
-                ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
-                err = _parse_effect(lexer, prend, space, effect);
-                if(err)return err;
-            }
-            NEXT
         }
         NEXT
     }
