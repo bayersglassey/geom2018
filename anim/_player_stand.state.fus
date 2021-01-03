@@ -38,7 +38,7 @@ if:
 then:
     move: 1 0
     rot: 1
-    goto delay: step
+    goto delay: $GET_SYM STATE_STEP_UP
 
 # Step
 if:

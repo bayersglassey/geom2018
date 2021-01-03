@@ -1,4 +1,8 @@
 
+$SET_STR STATE_STEP_UP step_up
+$SET_STR STATE_LAND step_up
+
+
 on "crush": goto: dead
 
 import "anim/_coin.fus"
@@ -28,79 +32,8 @@ stand:
     then:
         goto delay: crouching
 
-    if:
-        key: isdown f
-        coll: all yes
-            ;;        +
-            ;;       /
-            ;; ( )  +
-    then:
-        move: 1 0
-        rot: 1
-        goto delay: step_up
-
-    if:
-        key: wasdown u
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*
-            ;; ( )
-    then:
-        move: 1 0
-        goto immediate: start_jump
-
-    if:
-        key: isdown f
-        coll: all yes
-            ;; ( )  + - +
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*
-            ;; ( )
-    then:
-        move: 1 0
-        goto delay: step
-
-    if:
-        key: isdown f
-        coll: all yes
-            ;; ( )  +
-            ;;       \
-            ;;        +
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*/*
-            ;; ( )    - + -
-            ;;        */*\*
-    then:
-        move: 1 0
-        rot: -1
-        goto delay: step_down
-
-    if:
-        key: isdown f
-        coll: any yes
-            ;;        +
-            ;;       /
-            ;; ( )
-    then:
-        move: 1 0
-        rot: 1
-        goto immediate: start_jump
-
-    if:
-        key: isdown f
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*
-            ;; ( )
-    then:
-        move: 1 0
-        goto immediate: start_jump
+    # Stepping and jumping
+    import "anim/_player_stand.state.fus"
 
     if:
         key: isdown b
@@ -208,54 +141,8 @@ jump:
         ;;   */*\*
         ;;  (.)  .
 
-    if:
-        coll: all yes
-            ;;        +
-            ;;       /
-            ;; ( )  +
-    then:
-        move: 1 0
-        rot: 1
-        goto delay: step_up
-
-    if:
-        coll: all yes
-            ;; ( )  +
-        coll: any yes
-            ;;        +
-            ;;       /
-            ;; ( )
-    then:
-        move: 1 0
-        rot: 1
-        goto immediate: start_jump
-
-    if:
-        key: not isdown u
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*
-            ;; ( )
-        coll: all yes
-            ;; ( )  + - +
-    then:
-        move: 1 0
-        goto delay: step
-
-    if:
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*
-            ;; ( )
-    then:
-        move: 1 0
-        goto immediate: start_jump
-
-    if() then:
-        goto delay: mostly_dead
-
+    # Landing, jumping, crashing
+    import "anim/_player_jump.state.fus"
 
 collected:
     rgraph: "dead_once"
