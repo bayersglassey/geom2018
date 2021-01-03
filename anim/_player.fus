@@ -28,6 +28,7 @@ stand:
         ;;   */*\*
         ;;  (.)  .
 
+    # Can't stand on nothing
     if:
         coll: any no
             ;;  (+)- +
@@ -35,12 +36,14 @@ stand:
         move: 1 0
         goto immediate: start_jump
 
+    # Spit
     if:
         key: wentdown y
     then:
         spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f
         goto delay: spit
 
+    # Turn into roller
     $IF PLAYER_ROLLER:
         if:
             key: wentdown x
@@ -48,6 +51,7 @@ stand:
             goto: roller_stand
             delay: $GET_INT ROLLER_STAND_DELAY
 
+    # Turn into bird
     $IF PLAYER_BIRD:
         if:
             key: wentdown x
@@ -65,23 +69,14 @@ stand:
             goto: bird_crawl
             delay: 1
 
+    # Crawl
     if:
         key: isdown d
     then:
         goto: crawl
         delay: 2
 
-    if:
-        key: isdown f
-        coll: all yes
-            ;;        +
-            ;;       /
-            ;; ( )  +
-    then:
-        move: 1 0
-        rot: 1
-        goto delay: step
-
+    # Jump up
     $IF PLAYER_AIMER:
         if:
             key: wasdown x
@@ -98,6 +93,7 @@ stand:
             rot: 1
             goto immediate: start_jump
 
+    # Jump
     if:
         key: wasdown u
         coll: all no
@@ -109,6 +105,19 @@ stand:
         move: 1 0
         goto immediate: start_jump
 
+    # Step up
+    if:
+        key: isdown f
+        coll: all yes
+            ;;        +
+            ;;       /
+            ;; ( )  +
+    then:
+        move: 1 0
+        rot: 1
+        goto delay: step
+
+    # Step
     if:
         key: isdown f
         coll: all yes
@@ -122,6 +131,7 @@ stand:
         move: 1 0
         goto delay: step
 
+    # Step down
     if:
         key: isdown f
         coll: all yes
@@ -139,6 +149,7 @@ stand:
         rot: -1
         goto delay: step_down
 
+    # Forced jump up
     if:
         key: isdown f
         coll: any yes
@@ -150,6 +161,7 @@ stand:
         rot: 1
         goto immediate: start_jump
 
+    # Forced jump
     if:
         key: isdown f
         coll: all no
@@ -161,6 +173,7 @@ stand:
         move: 1 0
         goto immediate: start_jump
 
+    # Turn
     if:
         key: isdown b
     then:
@@ -168,6 +181,7 @@ stand:
         turn
         goto delay: step
 
+    # Look up
     $IF PLAYER_AIMER:
         if:
             key: isdown x
@@ -293,6 +307,7 @@ jump:
         ;;   */*\*
         ;;  (.)  .
 
+    # Land up
     if:
         coll: all yes
             ;;        +
@@ -303,6 +318,7 @@ jump:
         rot: 1
         goto delay: step
 
+    # Forced jump up
     if:
         coll: all yes
             ;; ( )  +
@@ -315,6 +331,7 @@ jump:
         rot: 1
         goto immediate: start_jump
 
+    # Land
     if:
         key: not isdown u
         coll: all no
@@ -328,6 +345,7 @@ jump:
         move: 1 0
         goto delay: step
 
+    # Continue jump
     if:
         coll: all no
             ;;       \*/*
@@ -338,6 +356,7 @@ jump:
         move: 1 0
         goto immediate: start_jump
 
+    # Crash
     if() then:
         goto delay: mostly_dead
 
