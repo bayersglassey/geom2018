@@ -42,7 +42,7 @@ clean:
 	rm -f src/*.o src/main/*.o $(PROGS)
 
 check: $(TESTS)
-	./runtests.sh $(TESTS)
+	./runtests.sh $(TESTS) tests/*.sh
 
 bin/collmaptool: src/main/collmaptool.o $(OFILES)
 	mkdir -p bin
