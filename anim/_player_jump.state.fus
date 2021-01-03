@@ -1,0 +1,53 @@
+
+# Land up
+if:
+    coll: all yes
+        ;;        +
+        ;;       /
+        ;; ( )  +
+then:
+    move: 1 0
+    rot: 1
+    goto delay: $GET_SYM STATE_LAND
+
+# Forced jump up
+if:
+    coll: all yes
+        ;; ( )  +
+    coll: any yes
+        ;;        +
+        ;;       /
+        ;; ( )
+then:
+    move: 1 0
+    rot: 1
+    goto immediate: start_jump
+
+# Land
+if:
+    key: not isdown u
+    coll: all no
+        ;;       \*/*
+        ;;        + -
+        ;;       /*\*
+        ;; ( )
+    coll: all yes
+        ;; ( )  + - +
+then:
+    move: 1 0
+    goto delay: $GET_SYM STATE_LAND
+
+# Continue jump
+if:
+    coll: all no
+        ;;       \*/*
+        ;;        + -
+        ;;       /*\*
+        ;; ( )
+then:
+    move: 1 0
+    goto immediate: start_jump
+
+# Crash
+if() then:
+    goto delay: mostly_dead

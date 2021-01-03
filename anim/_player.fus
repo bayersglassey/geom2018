@@ -13,6 +13,9 @@ $IF !PLAYER_SPIKEY:
 
 $SET_INT ROLLER_STAND_DELAY 0
 
+# When player lands from a jump, this state is used
+$SET_STR STATE_LAND step
+
 
 collmsgs: "collect" "touch"
 on "crush": goto: dead
@@ -76,102 +79,8 @@ stand:
         goto: crawl
         delay: 2
 
-    # Jump up
-    $IF PLAYER_AIMER:
-        if:
-            key: wasdown x
-            key: wasdown u
-            coll: all no
-                ;;    *\*/*
-                ;;    - + -
-                ;;       \*
-                ;;
-                ;;
-                ;; ( )
-        then:
-            move: 1 0
-            rot: 1
-            goto immediate: start_jump
-
-    # Jump
-    if:
-        key: wasdown u
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*
-            ;; ( )
-    then:
-        move: 1 0
-        goto immediate: start_jump
-
-    # Step up
-    if:
-        key: isdown f
-        coll: all yes
-            ;;        +
-            ;;       /
-            ;; ( )  +
-    then:
-        move: 1 0
-        rot: 1
-        goto delay: step
-
-    # Step
-    if:
-        key: isdown f
-        coll: all yes
-            ;; ( )  + - +
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*
-            ;; ( )
-    then:
-        move: 1 0
-        goto delay: step
-
-    # Step down
-    if:
-        key: isdown f
-        coll: all yes
-            ;; ( )  +
-            ;;       \
-            ;;        +
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*/*
-            ;; ( )    - + -
-            ;;        */*\*
-    then:
-        move: 1 0
-        rot: -1
-        goto delay: step_down
-
-    # Forced jump up
-    if:
-        key: isdown f
-        coll: any yes
-            ;;        +
-            ;;       /
-            ;; ( )
-    then:
-        move: 1 0
-        rot: 1
-        goto immediate: start_jump
-
-    # Forced jump
-    if:
-        key: isdown f
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*
-            ;; ( )
-    then:
-        move: 1 0
-        goto immediate: start_jump
+    # Stepping and jumping
+    import "anim/_player_stand.state.fus"
 
     # Turn
     if:
@@ -307,58 +216,8 @@ jump:
         ;;   */*\*
         ;;  (.)  .
 
-    # Land up
-    if:
-        coll: all yes
-            ;;        +
-            ;;       /
-            ;; ( )  +
-    then:
-        move: 1 0
-        rot: 1
-        goto delay: step
-
-    # Forced jump up
-    if:
-        coll: all yes
-            ;; ( )  +
-        coll: any yes
-            ;;        +
-            ;;       /
-            ;; ( )
-    then:
-        move: 1 0
-        rot: 1
-        goto immediate: start_jump
-
-    # Land
-    if:
-        key: not isdown u
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*
-            ;; ( )
-        coll: all yes
-            ;; ( )  + - +
-    then:
-        move: 1 0
-        goto delay: step
-
-    # Continue jump
-    if:
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*
-            ;; ( )
-    then:
-        move: 1 0
-        goto immediate: start_jump
-
-    # Crash
-    if() then:
-        goto delay: mostly_dead
+    # Landing, jumping, crashing
+    import "anim/_player_jump.state.fus"
 
 step_down:
     rgraph: $PREFIX NS "step"
