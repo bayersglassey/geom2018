@@ -128,7 +128,7 @@ static void _print_token_end(FILE *file, format_t format,
     }
 }
 
-static int mainloop_raw_tokens(fus_lexer_t *lexer, FILE *file, bool use_vars){
+static int mainloop_raw_tokens(fus_lexer_t *lexer, FILE *file){
     int err;
     int depth = 0;
     while(!fus_lexer_done(lexer)){
@@ -175,6 +175,7 @@ static int mainloop(fus_lexer_t *lexer, FILE *file){
     int err;
     int depth = 0;
     while(!fus_lexer_done(lexer)){
+        int print_depth = depth;
         const char *token = NULL;
         int token_len = 0;
         switch(lexer->token_type){
@@ -199,6 +200,7 @@ static int mainloop(fus_lexer_t *lexer, FILE *file){
                 break;
             case FUS_LEXER_TOKEN_CLOSE:
                 depth--;
+                print_depth--;
                 break;
             default:
                 fprintf(stderr, "Unrecognized token type: %i\n",
@@ -206,7 +208,7 @@ static int mainloop(fus_lexer_t *lexer, FILE *file){
                 return 2;
         }
         if(token){
-            _print_tabs(file, depth);
+            _print_tabs(file, print_depth);
             _print_token_start(file, format, lexer->token_type);
             if(
                 lexer->token_type == FUS_LEXER_TOKEN_STR ||
@@ -262,7 +264,7 @@ int main(int n_args, char **args){
     }
 
     if(raw_tokens){
-        err = mainloop_raw_tokens(&lexer, stdout, use_vars);
+        err = mainloop_raw_tokens(&lexer, stdout);
         if(err)return err;
     }else{
         err = mainloop(&lexer, stdout);
