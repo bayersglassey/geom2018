@@ -8,7 +8,7 @@ if:
 then:
     move: 1 0
     rot: 1
-    goto delay: $GET_SYM STATE_LAND
+    goto delay: $GET_SYM STATE_LAND_UP
 
 # Forced jump up
 if:

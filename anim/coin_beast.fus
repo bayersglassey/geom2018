@@ -1,6 +1,7 @@
 
 $SET_STR STATE_STEP_UP step_up
-$SET_STR STATE_LAND step_up
+$SET_STR STATE_LAND step
+$SET_STR STATE_LAND_UP step_up
 
 
 on "crush": goto: dead
@@ -109,17 +110,44 @@ crawl:
         ;;     *
         ;;  (.)  .
 
+    # Uncrawl
     if:
         key: not isdown d
+        coll: all no
+            ;;   .   .
+            ;;   *\*/*
+            ;; . - + - .
+            ;;   */ \*
+            ;;  (.)  .
     then:
         goto delay: uncrawling
 
+    # Crawling
+    import "anim/_player_crawl.anim.fus"
+
+    # Turn
     if:
         key: isdown b
     then:
         move: 1 0
         turn
         delay: 1
+
+crawl_step:
+    rgraph: "coin_beast_crawl_step"
+    hitbox:
+        ;;    .   .
+        ;;      */*
+        ;;     (.)  .
+    if() then: goto: crawl
+
+crawl_step_down:
+    rgraph: "coin_beast_crawl_step_down"
+    hitbox:
+        ;;    .   .
+        ;;    *\*/*
+        ;;  . -(.)  .
+    if() then: goto: crawl
 
 uncrawling:
     rgraph: "coin_beast_uncrawling"

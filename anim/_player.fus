@@ -15,6 +15,7 @@ $SET_INT ROLLER_STAND_DELAY 0
 
 $SET_STR STATE_STEP_UP step
 $SET_STR STATE_LAND step
+$SET_STR STATE_LAND_UP step
 
 
 collmsgs: "collect" "touch"
