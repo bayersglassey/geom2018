@@ -7,6 +7,12 @@ on "crush": goto: dead
 
 import "anim/_coin.fus"
 
+_crouch:
+    if() then: goto: crawl
+
+_stand:
+    if() then: goto: stand
+
 appear:
     rgraph: "dead_once_reversed"
     if() then: goto: stand
@@ -30,7 +36,7 @@ stand:
     if:
         key: isdown d
     then:
-        goto delay: crouching
+        goto delay: crawling
 
     # Stepping and jumping
     import "anim/_player_stand.state.fus"
@@ -84,20 +90,20 @@ step_down:
 
 appear_crouch:
     rgraph: "dead_once_crouch_reversed"
-    if() then: goto: crouch
+    if() then: goto: crawl
 
-crouching:
-    rgraph: "coin_beast_crouching"
+crawling:
+    rgraph: "coin_beast_crawling"
     hitbox:
         ;;   .   .
         ;;   *\*/*
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto: crouch
+    if() then: goto: crawl
 
-crouch:
-    rgraph: "coin_beast_crouch"
+crawl:
+    rgraph: "coin_beast_crawl"
     hitbox:
         ;;     .
         ;;     *
@@ -106,18 +112,17 @@ crouch:
     if:
         key: not isdown d
     then:
-        goto delay: uncrouching
+        goto delay: uncrawling
 
     if:
         key: isdown b
     then:
         move: 1 0
         turn
-        goto: crouch
         delay: 1
 
-uncrouching:
-    rgraph: "coin_beast_uncrouching"
+uncrawling:
+    rgraph: "coin_beast_uncrawling"
     hitbox:
         ;;   .   .
         ;;   *\*/*

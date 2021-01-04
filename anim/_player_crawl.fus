@@ -66,12 +66,14 @@ crawl:
 
     $IF PLAYER_SPIKEY: on "crush": goto: crawl_shielding
 
+    # Spit
     if:
         key: wentdown y
     then:
         spawn: $GET_STR SPIT_FUS "crouch_fly" (0 0) 0 f
         goto delay: crawl_spit
 
+    # Turn into roller
     $IF PLAYER_ROLLER:
         if:
             key: wentdown x
@@ -79,6 +81,7 @@ crawl:
             goto: roller_stand
             delay: $GET_INT ROLLER_STAND_DELAY
 
+    # Turn into bird
     $IF PLAYER_BIRD:
         if:
             key: wentdown x
@@ -96,6 +99,7 @@ crawl:
             goto: bird_crawl
             delay: 1
 
+    # Uncrouch
     if:
         key: not isdown d
         coll: all no
@@ -107,6 +111,7 @@ crawl:
         goto: stand
         delay: 3
 
+    # Crawl up
     if:
         key: isdown f
         coll: all no
@@ -122,6 +127,7 @@ crawl:
         goto: crawl_step
         delay: 2
 
+    # Crawl
     if:
         key: isdown f
         coll: all yes
@@ -134,6 +140,7 @@ crawl:
         goto: crawl_step
         delay: 2
 
+    # Crawl down
     if:
         key: isdown f
         coll: all yes
@@ -150,6 +157,7 @@ crawl:
         goto: crawl_step_down
         delay: 2
 
+    # Roll over a gap
     $IF PLAYER_ROLLER:
         if:
             key: isdown f
@@ -163,6 +171,7 @@ crawl:
             rot: 1
             delay: $GET_INT ROLLER_STAND_DELAY
 
+    # Roll into a corner
     $IF PLAYER_ROLLER:
         if:
             key: isdown f
@@ -176,6 +185,7 @@ crawl:
             rot: 2
             delay: 2
 
+    # Turn
     if:
         key: isdown b
     then:
@@ -184,6 +194,7 @@ crawl:
         goto: crawl_turn
         delay: 2
 
+    # Look up
     $IF PLAYER_AIMER:
         if:
             key: not isdown f

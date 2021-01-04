@@ -1,18 +1,24 @@
 
 import "anim/_coin.fus"
 
+_crouch:
+    if() then: goto: crouch
+
+_stand:
+    if() then: goto: stand
+
 appear:
     rgraph: "dead_once_centered_reversed"
     if() then: goto: stand
+
+appear_crouch:
+    rgraph: "dead_once_crouch_reversed"
+    if() then: goto: crouch
 
 stand:
     rgraph: "coin"
     hitbox:
         ;;  (+)
-
-appear_crouch:
-    rgraph: "dead_once_crouch_reversed"
-    if() then: goto: crouch
 
 crouch:
     rgraph: "coin_crouch"

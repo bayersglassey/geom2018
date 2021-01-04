@@ -11,6 +11,7 @@ on "collect":
 
     goto: collected
 
+# Default anim: init
 init:
     if:
         exists myvar("collected_key")
@@ -40,5 +41,5 @@ _appear:
         if:
             exists myvar("crouch")
             get_bool myvar("crouch")
-        then: goto: crouch
-        else: goto: stand
+        then: goto immediate: _crouch
+        else: goto immediate: _stand

@@ -207,7 +207,7 @@ shapes:
             ;;                   |F|F|
             ;;                    +---*
 
-    "_coin_beast_leg_crouching":
+    "_coin_beast_leg_crawling":
         hexpicture:
             ;;             +
             ;;           --|
@@ -223,12 +223,12 @@ shapes:
             ;;     |F|F|
             ;;      *---+
 
-    "_coin_beast_legs_crouching":
+    "_coin_beast_legs_crawling":
         shapes:
-            : "_coin_beast_leg_crouching" (0 0 0  0) 0 f
-            : "_coin_beast_leg_crouching" (3 2 0 -1) 6 t
+            : "_coin_beast_leg_crawling" (0 0 0  0) 0 f
+            : "_coin_beast_leg_crawling" (3 2 0 -1) 6 t
 
-    "_coin_beast_leg_crouch":
+    "_coin_beast_leg_crawl":
         hexpicture:
             ;;   +---+---+
             ;;  | | | | |
@@ -262,10 +262,10 @@ shapes:
             : "_coin_beast_leg_jump" eval((0 1 3 1) + (-1 0 0 0)) 10 f
             : "_coin_beast_leg_jump" eval((0 1 3 1) + ( 0 0 0 0)) 1  f
 
-    "_coin_beast_legs_crouch":
+    "_coin_beast_legs_crawl":
         shapes:
-            : "_coin_beast_leg_crouch" (0 0 0  0) 0 f
-            : "_coin_beast_leg_crouch" (3 2 0 -1) 6 t
+            : "_coin_beast_leg_crawl" (0 0 0  0) 0 f
+            : "_coin_beast_leg_crawl" (3 2 0 -1) 6 t
 
     "_coin_beast_body_and_head":
         animation: cycle "coin"
@@ -335,21 +335,21 @@ shapes:
         shapes:
             : "coin_beast_step" (0 0 0 0) 0 f
 
-    "coin_beast_crouching":
+    "coin_beast_crawling":
         animation: cycle 1
         shapes:
-            : "_coin_beast_legs_crouching" (0 0 0 0)  0 f
+            : "_coin_beast_legs_crawling" (0 0 0 0)  0 f
             : "_coin_beast_body_and_head" (0 1 3 0)  0 f
 
-    "coin_beast_uncrouching":
-        animation: cycle "coin_beast_crouching"
+    "coin_beast_uncrawling":
+        animation: cycle "coin_beast_crawling"
         shapes:
-            : "coin_beast_crouching" (0 0 0 0)  0 f 0+r
+            : "coin_beast_crawling" (0 0 0 0)  0 f 0+r
 
-    "coin_beast_crouch":
+    "coin_beast_crawl":
         animation: cycle "_coin_beast_body_and_head"
         shapes:
-            : "_coin_beast_legs_crouch" (0 0 0 0)  0 f
+            : "_coin_beast_legs_crawl" (0 0 0 0)  0 f
             : "_coin_beast_body_and_head" (1 1 1 0)  0 f
 
     "_coin_beast_jump":
