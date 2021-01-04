@@ -1,15 +1,6 @@
 
-on "collect":
-    if: exists myvar("collected_key")
-    then:
-        if: exists myvar("num_key")
-        then:
-            inc mapvar(myvar("num_key")): -1
-            if: expr: <= mapvar(myvar("num_key")) 0
-            then: set mapvar(myvar("collected_key")): T
-        else: set mapvar(myvar("collected_key")): T
-
-    goto: collected
+$IF !NO_COLLECT_ON_SPIT: on "spit": goto immediate: _collected
+$IF !NO_COLLECT_ON_TOUCH: on "touch": goto immediate: _collected
 
 # Default anim: init
 init:
@@ -17,7 +8,7 @@ init:
         exists myvar("collected_key")
         get_bool mapvar(myvar("collected_key"))
     then:
-        goto immediate: collected
+        goto: collected
 
     if() then:
         if: exists myvar("key")
@@ -43,3 +34,16 @@ _appear:
             get_bool myvar("crouch")
         then: goto immediate: _crouch
         else: goto immediate: _stand
+
+_collected:
+    if() then:
+        if: exists myvar("collected_key")
+        then:
+            if: exists myvar("num_key")
+            then:
+                inc mapvar(myvar("num_key")): -1
+                if: expr: <= mapvar(myvar("num_key")) 0
+                then: set mapvar(myvar("collected_key")): T
+            else: set mapvar(myvar("collected_key")): T
+
+        goto: collected

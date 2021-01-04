@@ -3,6 +3,8 @@ $SET_STR STATE_STEP_UP step_up
 $SET_STR STATE_LAND step
 $SET_STR STATE_LAND_UP step_up
 
+$SET_BOOL NO_COLLECT_ON_TOUCH
+
 
 on "crush": goto: dead
 

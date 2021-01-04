@@ -18,7 +18,7 @@ $SET_STR STATE_LAND step
 $SET_STR STATE_LAND_UP step
 
 
-collmsgs: "collect" "touch"
+collmsgs: "touch"
 on "crush": goto: dead
 
 

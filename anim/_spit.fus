@@ -6,7 +6,7 @@ $SET_INT MAX_AGE 100
 
 fly:
     rgraph: $PREFIX RGRAPH_NS "spit_fly"
-    collmsgs: "collect" "spit" $IF SPIKEY("spikeyspit")
+    collmsgs: "spit" $IF SPIKEY("spikeyspit")
     hitbox:
         ;;   .   .
         ;;   *\*/*\*/
@@ -48,7 +48,7 @@ fly:
 
 crouch_fly:
     rgraph: $PREFIX RGRAPH_NS "spit_crouch_fly"
-    collmsgs: "collect" "spit" $IF SPIKEY("spikeyspit")
+    collmsgs: "spit" $IF SPIKEY("spikeyspit")
     hitbox:
         ;;    .   .
         ;;  */*\*/*\
@@ -89,41 +89,3 @@ dead:
 crouch_dead:
     rgraph: "dead_once_crouch"
     if() then: die
-
-
-
-
-
-##############################
-# UNUSED:
-crouch_fly_bouncy:
-    rgraph: $PREFIX RGRAPH_NS "spit_crouch_fly"
-    collmsgs: "collect" "spit" $IF SPIKEY("spikeyspit")
-    hitbox:
-        ;;    .
-        ;;    *
-        ;; ( )  .
-
-
-    if:
-        coll: all yes
-            ;;    .
-            ;;     \
-            ;; ( )  .
-    then:
-        move: 1 1
-        rot: 2
-        turn
-
-    if:
-        coll: any yes
-            ;;    .
-            ;;    *
-            ;; ( )  .
-    then:
-        goto: dead
-
-    if() then:
-        move: 1 1
-        rot: 3
-        turn
