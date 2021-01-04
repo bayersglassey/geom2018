@@ -364,6 +364,26 @@ shapes:
             : $PREFIX NS "bleg"  ( 1  1  1  1)  0 f
             : $PREFIX NS "fleg"  ( 4  2  0  0)  5 t
 
+    $PREFIX NS "crawling":
+        animation: cycle 2
+        shapes:
+            : $PREFIX NS "crawl" (0 0 0 0) 0 f
+
+    $PREFIX NS "crawling_looking_up":
+        animation: cycle $PREFIX NS "crawling"
+        shapes:
+            : $PREFIX NS "crawl_looking_up" (0 0 0 0) 0 f
+
+    $PREFIX NS "uncrawling":
+        animation: cycle 3
+        shapes:
+            : $PREFIX NS "stand" (0 0 0 0) 0 f
+
+    $PREFIX NS "uncrawling_looking_up":
+        animation: cycle $PREFIX NS "uncrawling"
+        shapes:
+            : $PREFIX NS "looking_up" (0 0 0 0) 0 f
+
 
     $PREFIX NS "crawl_step":
         animation: cycle 3

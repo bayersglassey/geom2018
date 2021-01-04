@@ -4,6 +4,46 @@
 # Expected vars:
 # NS (str), e.g. "player_"
 
+crawling:
+    rgraph: $PREFIX NS "crawling"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: crawl
+
+uncrawling:
+    rgraph: $PREFIX NS "uncrawling"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: stand
+
+crawling_looking_up:
+    rgraph: $PREFIX NS "crawling_looking_up"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: crawl_looking_up
+
+uncrawling_looking_up:
+    rgraph: $PREFIX NS "uncrawling_looking_up"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: looking_up
+
 crawl_looking_up:
     rgraph: $PREFIX NS "crawl_looking_up"
     hitbox:
@@ -26,8 +66,7 @@ crawl_looking_up:
             ;;  */ \*
             ;; ( )
     then:
-        goto: looking_up
-        delay: 3
+        goto delay: uncrawling_looking_up
 
     if: key: isdown f
     then: goto immediate: crawl
@@ -99,7 +138,7 @@ crawl:
             goto: bird_crawl
             delay: 1
 
-    # Uncrouch
+    # Uncrawl
     if:
         key: not isdown d
         coll: all no
@@ -108,54 +147,10 @@ crawl:
             ;;  */ \*
             ;; ( )
     then:
-        goto: stand
-        delay: 3
+        goto delay: uncrawling
 
-    # Crawl up
-    if:
-        key: isdown f
-        coll: all no
-            ;;     \*
-            ;; ( )
-        coll: all yes
-            ;;        +
-            ;;       /
-            ;; ( )  +
-    then:
-        move: 1 0
-        rot: 1
-        goto: crawl_step
-        delay: 2
-
-    # Crawl
-    if:
-        key: isdown f
-        coll: all yes
-            ;; ( )  + - +
-        coll: all no
-            ;;     \*/*
-            ;; (.)  .
-    then:
-        move: 1 0
-        goto: crawl_step
-        delay: 2
-
-    # Crawl down
-    if:
-        key: isdown f
-        coll: all yes
-            ;; ( )  +
-            ;;       \
-            ;;        +
-        coll: all no
-            ;;     \*/*
-            ;; (.)  . -
-            ;;        *
-    then:
-        move: 1 0
-        rot: -1
-        goto: crawl_step_down
-        delay: 2
+    # Crawling
+    import "anim/_player_crawl.anim.fus"
 
     # Roll over a gap
     $IF PLAYER_ROLLER:

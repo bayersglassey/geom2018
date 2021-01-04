@@ -76,8 +76,7 @@ stand:
     if:
         key: isdown d
     then:
-        goto: crawl
-        delay: 2
+        goto delay: crawling
 
     # Stepping and jumping
     import "anim/_player_stand.state.fus"
@@ -145,8 +144,7 @@ looking_up:
     if:
         key: isdown d
     then:
-        goto: crawl_looking_up
-        delay: 2
+        goto delay: crawling_looking_up
 
     if: key: not isdown x
     then: goto: stand
