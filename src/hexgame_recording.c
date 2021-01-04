@@ -270,6 +270,9 @@ static int recording_step_play_reverse(recording_t *rec){
 int recording_step(recording_t *recording){
     int rec_action = recording->action;
 
+    /* No recording loaded: early exit */
+    if(rec_action == 0)return 0;
+
     if(rec_action == 1){
         /* play */
         int err = recording_step_play(recording);
@@ -279,7 +282,7 @@ int recording_step(recording_t *recording){
         recording->wait++;
     }
 
-    if(rec_action != 0 && DEBUG_RECORDINGS){
+    if(DEBUG_RECORDINGS){
         printf("KEYS: ");
         #define DEBUG_PRINT_KEYS(keys) { \
             printf("["); \

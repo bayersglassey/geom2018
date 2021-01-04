@@ -126,6 +126,8 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
 
     vars_init(&body->vars);
 
+    body->recording.action = 0; /* No recording loaded */
+
     body->state = NULL;
     body->frame_i = 0;
     body->cooldown = 0;

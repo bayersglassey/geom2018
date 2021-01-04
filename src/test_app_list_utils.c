@@ -103,6 +103,12 @@ void _console_write_keyinfo(console_t *console, body_t *body, keyinfo_t *keyinfo
 }
 
 void _console_write_recording(console_t *console, recording_t *rec, bool show_data){
+    if(rec->action == 0 /* No recording loaded */){
+        console_printf(console, "action=%s\n",
+            recording_action_msg(rec->action));
+        return;
+    }
+
     console_printf(console, "%name=%s, action=%s\n",
         rec->name, recording_action_msg(rec->action));
     console_printf(console, "reacts=%c, loop=%c, resets_position=%c\n",
