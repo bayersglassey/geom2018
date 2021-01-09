@@ -8,9 +8,9 @@ static bool token_cmp(
 }
 
 static void print_lexer(fus_lexer_t *lexer, const char *msg){
-    fprintf(stderr, msg);
+    fputs(msg, stderr);
     fus_lexer_show(lexer, stderr);
-    fprintf(stderr, "\n");
+    fputc('\n', stderr);
 }
 
 static int _run_test(const char *test_text, const char *expected_text){

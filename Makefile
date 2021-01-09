@@ -1,7 +1,9 @@
 
 CFLAGS += -O2 -g -rdynamic -std=c99 \
- `sdl2-config --libs --cflags` \
+ $(shell sdl2-config --cflags) \
  -Wall -Werror -Wno-unused -Wno-missing-braces -Wno-tautological-compare -Wno-parentheses
+
+LIBS += $(shell sdl2-config --libs) -lm
 
 PROGS = \
  bin/lexertool bin/collmaptool bin/hexpicturetest bin/sdltest bin/directorytest \
@@ -46,56 +48,56 @@ check: $(TESTS)
 
 bin/collmaptool: src/main/collmaptool.o $(OFILES)
 	mkdir -p bin
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 bin/lexertest: src/main/lexertest.o $(OFILES)
 	mkdir -p bin
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 bin/lexertool: src/main/lexertool.o $(OFILES)
 	mkdir -p bin
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 bin/frozenstringtest: src/main/frozen_string_test.o src/frozen_string.o
 	mkdir -p bin
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 bin/geomtest: src/main/geomtest.o $(OFILES)
 	mkdir -p bin
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 bin/stringstoretest: src/main/stringstoretest.o src/stringstore.o
 	mkdir -p bin
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 bin/varstest: src/main/varstest.o src/vars.o src/lexer.o src/write.o src/str_utils.o src/file_utils.o src/var_utils.o
 	mkdir -p bin
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 bin/hexpicturetest: src/main/hexpicture.o src/hexpicture.o
 	mkdir -p bin
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 bin/sdltest: src/main/sdltest.o src/util.o src/file_utils.o
 	mkdir -p bin
-	$(CC) $(CFLAGS) -lm -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 bin/directorytest: src/main/directorytest.o src/directory.o src/directory_shell.o $(OFILES)
 	mkdir -p bin
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 bin/prendtool: src/main/prendtool.o $(OFILES) $(SDL_OFILES)
 	mkdir -p bin
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 bin/demo: src/main/demo.o $(OFILES) $(SDL_OFILES)
 	mkdir -p bin
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 bin/minieditor: src/main/minieditor.o $(OFILES) $(SDL_OFILES)
 	mkdir -p bin
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 bin/geomtool: src/main/geomtool.o $(OFILES)
 	mkdir -p bin
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
