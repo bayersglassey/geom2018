@@ -50,7 +50,7 @@ crawl_looking_up:
         ;;     .
         ;;     *
         ;;  (.)  .
-    $IF PLAYER_SPIKEY: on "crush": goto: crawl_shielding
+    $IF PLAYER_SPIKEY: on "crush": goto delay: crawl_shielding
 
     if:
         key: wentdown y
@@ -83,7 +83,7 @@ crawl_spit:
         ;;     .
         ;;     *
         ;;  (.)  .
-    $IF PLAYER_SPIKEY: on "crush": goto: crawl_shielding
+    $IF PLAYER_SPIKEY: on "crush": goto delay: crawl_shielding
     if() then: goto: crawl
 
 crawl_looking_up_spit:
@@ -92,7 +92,7 @@ crawl_looking_up_spit:
         ;;     .
         ;;     *
         ;;  (.)  .
-    $IF PLAYER_SPIKEY: on "crush": goto: crawl_shielding
+    $IF PLAYER_SPIKEY: on "crush": goto delay: crawl_shielding
     if() then: goto: crawl_looking_up
 
 crawl:
@@ -103,7 +103,7 @@ crawl:
         ;;     *
         ;;  (.)  .
 
-    $IF PLAYER_SPIKEY: on "crush": goto: crawl_shielding
+    $IF PLAYER_SPIKEY: on "crush": goto delay: crawl_shielding
 
     # Spit
     if:
@@ -203,7 +203,7 @@ crawl_look_up:
         ;;     .
         ;;     *
         ;;  (.)  .
-    $IF PLAYER_SPIKEY: on "crush": goto: crawl_shielding
+    $IF PLAYER_SPIKEY: on "crush": goto delay: crawl_shielding
     if() then: goto: crawl_looking_up
 
 crawl_step_down:
@@ -212,7 +212,7 @@ crawl_step_down:
         ;;    .   .
         ;;    *\*/*
         ;;  . -(.)  .
-    $IF PLAYER_SPIKEY: on "crush": goto: crawl_shielding
+    $IF PLAYER_SPIKEY: on "crush": goto delay: crawl_shielding
 
     if:
         key: wentdown y
@@ -237,7 +237,7 @@ crawl_step:
         ;;    .   .
         ;;      */*
         ;;     (.)  .
-    $IF PLAYER_SPIKEY: on "crush": goto: crawl_shielding
+    $IF PLAYER_SPIKEY: on "crush": goto delay: crawl_shielding
 
     if:
         key: wentdown y
@@ -263,7 +263,7 @@ crawl_turn:
         ;;        .
         ;;        *
         ;;     (.)  .
-    $IF PLAYER_SPIKEY: on "crush": goto: crawl_shielding
+    $IF PLAYER_SPIKEY: on "crush": goto delay: crawl_shielding
 
     if:
         key: wentdown y
@@ -281,15 +281,6 @@ crawl_turn:
     if() then: goto: crawl
 
 $IF PLAYER_SPIKEY: crawl_shielding:
-    #rgraph: $PREFIX NS "crawl_shielding"
-    #rgraph: "dead_cycle"
-    if:
-    then:
-        delay: 4
-        goto: _crawl_shielding
-
-$IF PLAYER_SPIKEY: _crawl_shielding:
     rgraph: $PREFIX NS "crawl_shielding"
-    # No hitbox!..
     if:
     then: goto: crawl
