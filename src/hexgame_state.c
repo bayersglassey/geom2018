@@ -351,6 +351,7 @@ int state_effect_apply(state_effect_t *effect,
     int err;
 
     switch(effect->type){
+    case STATE_EFFECT_TYPE_NOOP: break;
     case STATE_EFFECT_TYPE_PRINT:
     case STATE_EFFECT_TYPE_PRINT_VAR:
     case STATE_EFFECT_TYPE_PRINT_VARS: {
