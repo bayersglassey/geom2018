@@ -2,75 +2,57 @@
 # Expected vars:
 # ANIM_NS (str), e.g. "hexroller_", ""
 # RGRAPH_NS (str), e.g. "hexrollerplayer_", ""
-# R0, R1, R4, R5 (str), e.g. "", "_R1", ..., "_R5"
 
 
+$PREFIX ANIM_NS init:
+    if() then:
+        set myvar("u"): F
+        set myvar("d"): F
+        set myvar("f"): F
+        set myvar("b"): F
+        set myvar("speed"): 0
+        goto immediate: $PREFIX ANIM_NS stand
 
-$SUFFIX R0 $PREFIX ANIM_NS stand:
-    rgraph: $SUFFIX R0 $PREFIX RGRAPH_NS "hexroller"
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
 
-    if:
-        key: isdown u
-        key: not isdown b
-        key: isdown f
-        coll: any yes
-            ;;      +
-            ;;
-            ;;        .
-            ;;
-            ;; ( )  .
-    then:
-        move: 2 2
-        rot: 2
-        goto: $SUFFIX R3 $PREFIX ANIM_NS stand
-        delay: $GET_INT DELAY
-
-    if:
-        key: not isdown d
-        key: not isdown b
-        key: isdown f
-        coll: any yes
-            ;;        +
-            ;;
-            ;; ( )  .
-    then:
-        move: 2 1
-        rot: 2
-        goto: $SUFFIX R4 $PREFIX ANIM_NS stand
-
-    if:
-        key: not isdown b
-        key: isdown f
-        coll: any yes
-            ;; ( )  +
-    then:
-        move: 1 0
-        rot: 1
-        goto: $SUFFIX R5 $PREFIX ANIM_NS stand
-
-    if:
-        key: not isdown b
-        key: isdown f
-        coll: all no
-            ;;        .
-            ;;       /*
-            ;; ( )- + - .
-            ;;    */*\*
-            ;;    .   .
-    then:
-        rot: -1
-        delay: $GET_INT DELAY
-
-    if:
-        key: not isdown f
-        key: isdown b
-    then:
-        rot: -1
-        turn
-        delay: $GET_INT DELAY
+$SET_STR R0 ""
+$SET_STR R1 "_R1"
+$SET_STR R2 "_R2"
+$SET_STR R3 "_R3"
+$SET_STR R4 "_R4"
+$SET_STR R5 "_R5"
+import "anim/_hexroller.roll.fus"
+$SET_STR R0 "_R1"
+$SET_STR R1 "_R2"
+$SET_STR R2 "_R3"
+$SET_STR R3 "_R4"
+$SET_STR R4 "_R5"
+$SET_STR R5 ""
+import "anim/_hexroller.roll.fus"
+$SET_STR R0 "_R2"
+$SET_STR R1 "_R3"
+$SET_STR R2 "_R4"
+$SET_STR R3 "_R5"
+$SET_STR R4 ""
+$SET_STR R5 "_R1"
+import "anim/_hexroller.roll.fus"
+$SET_STR R0 "_R3"
+$SET_STR R1 "_R4"
+$SET_STR R2 "_R5"
+$SET_STR R3 ""
+$SET_STR R4 "_R1"
+$SET_STR R5 "_R2"
+import "anim/_hexroller.roll.fus"
+$SET_STR R0 "_R4"
+$SET_STR R1 "_R5"
+$SET_STR R2 ""
+$SET_STR R3 "_R1"
+$SET_STR R4 "_R2"
+$SET_STR R5 "_R3"
+import "anim/_hexroller.roll.fus"
+$SET_STR R0 "_R5"
+$SET_STR R1 ""
+$SET_STR R2 "_R1"
+$SET_STR R3 "_R2"
+$SET_STR R4 "_R3"
+$SET_STR R5 "_R4"
+import "anim/_hexroller.roll.fus"

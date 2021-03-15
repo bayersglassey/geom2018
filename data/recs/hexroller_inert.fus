@@ -1,11 +1,11 @@
-anim: "anim/hexroller.fus"
+anim: "anim/hexroller_inert.fus"
 state: "init"
 pos: (0 0)
 rot: 0
 turn: no
 keys:
     u:
-    d: is
+    d:
     l:
-    r: is
+    r:
 nodata

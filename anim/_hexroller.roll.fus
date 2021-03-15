@@ -1,0 +1,101 @@
+
+# Expected vars:
+# ANIM_NS (str), e.g. "hexroller_", ""
+# RGRAPH_NS (str), e.g. "hexrollerplayer_", ""
+# R0, R1, R4, R5 (str), e.g. "", "_R1", ..., "_R5"
+
+
+$SUFFIX R0 $PREFIX ANIM_NS stand:
+    rgraph: $SUFFIX R0 $PREFIX RGRAPH_NS "hexroller"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+
+    $IF INERT:
+        if() then:
+            set myvar("f"): F
+            continue
+        if:
+            expr: > myvar("speed") 0
+        then:
+            inc myvar("speed"): -1
+            set myvar("f"): T
+            continue
+    $IF !INERT:
+        if() then:
+            set myvar("u"): F
+            set myvar("d"): F
+            set myvar("f"): F
+            set myvar("b"): F
+            if: key: isdown u
+            then: set myvar("u"): T
+            if: key: isdown d
+            then: set myvar("d"): T
+            if: key: isdown f
+            then: set myvar("f"): T
+            if: key: isdown b
+            then: set myvar("b"): T
+            continue
+
+    if:
+        get_bool myvar("u")
+        not: get_bool myvar("b")
+        get_bool myvar("f")
+        coll: any yes
+            ;;      +
+            ;;
+            ;;        .
+            ;;
+            ;; ( )  .
+    then:
+        move: 2 2
+        rot: 2
+        goto: $SUFFIX R3 $PREFIX ANIM_NS stand
+        delay: $GET_INT DELAY
+
+    if:
+        not: get_bool myvar("d")
+        not: get_bool myvar("b")
+        get_bool myvar("f")
+        coll: any yes
+            ;;        +
+            ;;
+            ;; ( )  .
+    then:
+        move: 2 1
+        rot: 2
+        goto: $SUFFIX R4 $PREFIX ANIM_NS stand
+
+    if:
+        not: get_bool myvar("b")
+        get_bool myvar("f")
+        coll: any yes
+            ;; ( )  +
+    then:
+        move: 1 0
+        rot: 1
+        goto: $SUFFIX R5 $PREFIX ANIM_NS stand
+
+    if:
+        not: get_bool myvar("b")
+        get_bool myvar("f")
+        coll: all no
+            ;;        .
+            ;;       /*
+            ;; ( )- + - .
+            ;;    */*\*
+            ;;    .   .
+    then:
+        rot: -1
+        delay: $GET_INT DELAY
+
+    if:
+        not: get_bool myvar("f")
+        get_bool myvar("b")
+    then:
+        rot: -1
+        turn
+        delay: $GET_INT DELAY
