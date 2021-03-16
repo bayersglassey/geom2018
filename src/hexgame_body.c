@@ -535,9 +535,12 @@ void body_update_cur_submap(body_t *body){
 int body_handle_rules(body_t *body){
     int err;
     handle: {
+        hexgame_state_context_t context = {
+            .game = body->game,
+            .body = body,
+        };
         state_effect_goto_t *gotto = NULL;
-        err = state_handle_rules(body->state, body->game, body, NULL,
-            &gotto);
+        err = state_handle_rules(body->state, &context, &gotto);
         if(err)return err;
         if(gotto != NULL){
             err = state_effect_goto_apply_to_body(gotto, body);
@@ -700,8 +703,12 @@ int body_collide_against_body(body_t *body, body_t *body_other){
             one".
             But here, we are only applying a series of effects. */
 
-        err = collmsg_handler_apply(handler, body->game, body, NULL,
-            &continues);
+        hexgame_state_context_t context = {
+            .game = body->game,
+            .body = body,
+            .your_body = body_other,
+        };
+        err = collmsg_handler_apply(handler, &context, &continues);
         if(err)return err;
     }
 

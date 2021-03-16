@@ -77,9 +77,13 @@ int actor_set_state(actor_t *actor, const char *state_name){
 int actor_handle_rules(actor_t *actor){
     int err;
     handle: {
+        hexgame_state_context_t context = {
+            .game = actor->game,
+            .actor = actor,
+            .body = actor->body,
+        };
         state_effect_goto_t *gotto = NULL;
-        err = state_handle_rules(actor->state, actor->game,
-            actor->body, actor, &gotto);
+        err = state_handle_rules(actor->state, &context, &gotto);
         if(err)return err;
         if(gotto != NULL){
             err = state_effect_goto_apply_to_actor(gotto, actor);

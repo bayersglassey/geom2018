@@ -32,19 +32,29 @@
         return 2;}
 
 
-static int _get_vars(body_t *body, actor_t *actor, valexpr_context_t *context){
+static int _get_vars(hexgame_state_context_t *context,
+    valexpr_context_t *valexpr_context
+){
+    actor_t *actor = context->actor;
+    body_t *body = context->body;
+    body_t *your_body = context->your_body;
+
+    /* PROBABLY TODO: distinguish between "my actor vars" vs "my body vars"... */
+
     if(actor){
-        context->myvars = &actor->vars;
-        body = actor->body;
-        context->mapvars = !actor->body? NULL: !actor->body->map? NULL:
+        valexpr_context->myvars = &actor->vars;
+        valexpr_context->mapvars = !actor->body? NULL: !actor->body->map? NULL:
             &actor->body->map->vars;
     }else{
         if(!body){
             fprintf(stderr, "No body\n"); \
             return 2;
         }
-        context->myvars = &body->vars;
-        context->mapvars = !body->map? NULL: &body->map->vars;
+        valexpr_context->myvars = &body->vars;
+        valexpr_context->mapvars = !body->map? NULL: &body->map->vars;
+    }
+    if(your_body){
+        valexpr_context->yourvars = &your_body->vars;
     }
     return 0;
 }
@@ -82,7 +92,7 @@ int state_effect_goto_apply_to_actor(state_effect_goto_t *gotto,
 
 
 int state_cond_match(state_cond_t *cond,
-    hexgame_t *game, body_t *body, actor_t *actor,
+    hexgame_state_context_t *context,
     bool *matched_ptr
 ){
     int err;
@@ -99,6 +109,10 @@ int state_cond_match(state_cond_t *cond,
             state_cond_type_name(cond->type));
 
     bool matched = false;
+
+    hexgame_t *game = context->game;
+    actor_t *actor = context->actor;
+    body_t *body = context->body;
 
     switch(cond->type){
     case STATE_COND_TYPE_FALSE: {
@@ -200,8 +214,7 @@ int state_cond_match(state_cond_t *cond,
         matched = all? true: false;
         for(int i = 0; i < cond->u.subconds.conds_len; i++){
             state_cond_t *subcond = cond->u.subconds.conds[i];
-            err = state_cond_match(subcond, game, body, actor,
-                &matched);
+            err = state_cond_match(subcond, context, &matched);
             if(err)return err;
             if((all && !matched) || (!all && matched))break;
         }
@@ -211,13 +224,13 @@ int state_cond_match(state_cond_t *cond,
         break;
     }
     case STATE_COND_TYPE_EXPR: {
-        valexpr_context_t context = {0};
-        err = _get_vars(body, actor, &context);
+        valexpr_context_t valexpr_context = {0};
+        err = _get_vars(context, &valexpr_context);
         if(err)return err;
 
         val_t *val1;
         err = valexpr_get(&cond->u.expr.val1_expr,
-            &context, &val1);
+            &valexpr_context, &val1);
         if(err)return err;
         if(val1 == NULL){
             RULE_PERROR()
@@ -227,7 +240,7 @@ int state_cond_match(state_cond_t *cond,
 
         val_t *val2;
         err = valexpr_get(&cond->u.expr.val2_expr,
-            &context, &val2);
+            &valexpr_context, &val2);
         if(err)return err;
         if(val2 == NULL){
             RULE_PERROR()
@@ -259,13 +272,13 @@ int state_cond_match(state_cond_t *cond,
     }
     case STATE_COND_TYPE_GET_BOOL:
     case STATE_COND_TYPE_EXISTS: {
-        valexpr_context_t context = {0};
-        err = _get_vars(body, actor, &context);
+        valexpr_context_t valexpr_context = {0};
+        err = _get_vars(context, &valexpr_context);
         if(err)return err;
 
         val_t *val;
         err = valexpr_get(&cond->u.valexpr,
-            &context, &val);
+            &valexpr_context, &val);
         if(err)return err;
 
         if(cond->type == STATE_COND_TYPE_EXISTS){
@@ -304,7 +317,7 @@ int state_cond_match(state_cond_t *cond,
 }
 
 static int state_rule_match(state_rule_t *rule,
-    hexgame_t *game, body_t *body, actor_t *actor,
+    hexgame_state_context_t *context,
     bool *matched_ptr
 ){
     int err;
@@ -313,8 +326,7 @@ static int state_rule_match(state_rule_t *rule,
     for(int i = 0; i < rule->conds_len; i++){
         state_cond_t *cond = rule->conds[i];
         if(DEBUG_RULES)printf("  if: %s\n", state_cond_type_name(cond->type));
-        err = state_cond_match(cond, game, body, actor,
-            &matched);
+        err = state_cond_match(cond, context, &matched);
         if(err){
             if(err == 2){
                 fprintf(stderr, "...in: state=%s, stateset=%s\n",
@@ -338,13 +350,18 @@ static void effect_apply_boolean(int boolean, bool *b_ptr){
 }
 
 int state_effect_apply(state_effect_t *effect,
-    hexgame_t *game, body_t *body, actor_t *actor,
+    hexgame_state_context_t *context,
     state_effect_goto_t **gotto_ptr, bool *continues_ptr
 ){
     #define RULE_PERROR() \
         fprintf(stderr, "Error in effect: %s\n", state_effect_type_name(effect->type));
 
     int err;
+
+    hexgame_t *game = context->game;
+    actor_t *actor = context->actor;
+    body_t *body = context->body;
+    body_t *your_body = context->your_body;
 
     switch(effect->type){
     case STATE_EFFECT_TYPE_NOOP: break;
@@ -467,12 +484,12 @@ int state_effect_apply(state_effect_t *effect,
     }
     case STATE_EFFECT_TYPE_INC:
     case STATE_EFFECT_TYPE_SET: {
-        valexpr_context_t context = {0};
-        err = _get_vars(body, actor, &context);
+        valexpr_context_t valexpr_context = {0};
+        err = _get_vars(context, &valexpr_context);
         if(err)return err;
 
         val_t *var_val;
-        err = valexpr_set(&effect->u.set.var_expr, &context, &var_val);
+        err = valexpr_set(&effect->u.set.var_expr, &valexpr_context, &var_val);
         if(err)return err;
         /* NOTE: valexpr_set guarantees that we find (or create, if
         necessary) a val, so we don't need to check whether var_val is
@@ -480,7 +497,7 @@ int state_effect_apply(state_effect_t *effect,
 
         val_t *val_val;
         err = valexpr_get(&effect->u.set.val_expr,
-            &context, &val_val);
+            &valexpr_context, &val_val);
         if(err)return err;
         if(val_val == NULL){
             RULE_PERROR()
@@ -504,8 +521,8 @@ int state_effect_apply(state_effect_t *effect,
         break;
     }
     case STATE_EFFECT_TYPE_IF: {
-        valexpr_context_t context = {0};
-        err = _get_vars(body, actor, &context);
+        valexpr_context_t valexpr_context = {0};
+        err = _get_vars(context, &valexpr_context);
         if(err)return err;
 
         state_effect_ite_t *ite = effect->u.ite;
@@ -513,8 +530,7 @@ int state_effect_apply(state_effect_t *effect,
         bool matched = true;
         for(int i = 0; i < ite->conds_len; i++){
             state_cond_t *cond = ite->conds[i];
-            err = state_cond_match(cond, game, body, actor,
-                &matched);
+            err = state_cond_match(cond, context, &matched);
             if(err)return err;
             if(!matched)break;
         }
@@ -527,8 +543,7 @@ int state_effect_apply(state_effect_t *effect,
         for(int i = 0; i < effects_len; i++){
             state_effect_t *effect = effects[i];
             if(DEBUG_RULES)printf("  %s: %s\n", matched? "then": "else", state_effect_type_name(effect->type));
-            err = state_effect_apply(effect, game, body, actor,
-                gotto_ptr, continues_ptr);
+            err = state_effect_apply(effect, context, gotto_ptr, continues_ptr);
             if(err){
                 if(err == 2){
                     fprintf(stderr, "...in \"if\" statement\n");
@@ -550,7 +565,7 @@ int state_effect_apply(state_effect_t *effect,
 }
 
 static int state_rule_apply(state_rule_t *rule,
-    hexgame_t *game, body_t *body, actor_t *actor,
+    hexgame_state_context_t *context,
     state_effect_goto_t **gotto_ptr, bool *continues_ptr
 ){
     int err;
@@ -561,8 +576,7 @@ static int state_rule_apply(state_rule_t *rule,
     for(int i = 0; i < rule->effects_len; i++){
         state_effect_t *effect = rule->effects[i];
         if(DEBUG_RULES)printf("  then: %s\n", state_effect_type_name(effect->type));
-        err = state_effect_apply(effect, game, body, actor,
-            gotto_ptr, continues_ptr);
+        err = state_effect_apply(effect, context, gotto_ptr, continues_ptr);
         if(err){
             if(err == 2){
                 fprintf(stderr, "...in: state=%s, stateset=%s\n",
@@ -575,7 +589,7 @@ static int state_rule_apply(state_rule_t *rule,
 }
 
 int state_handle_rules(state_t *state,
-    hexgame_t *game, body_t *body, actor_t *actor,
+    hexgame_state_context_t *context,
     state_effect_goto_t **gotto_ptr
 ){
     int err;
@@ -584,17 +598,15 @@ int state_handle_rules(state_t *state,
         state_rule_t *rule = state->rules[i];
 
         if(DEBUG_RULES){printf("body %p, actor %p, rule %i:\n",
-            body, actor, i);}
+            context->body, context->actor, i);}
 
         bool matched;
-        err = state_rule_match(rule, game, body, actor,
-            &matched);
+        err = state_rule_match(rule, context, &matched);
         if(err)return err;
 
         if(matched){
             bool continues = false;
-            err = state_rule_apply(rule, game, body, actor,
-                gotto_ptr, &continues);
+            err = state_rule_apply(rule, context, gotto_ptr, &continues);
             if(err)return err;
             if(!continues)break;
         }
@@ -604,7 +616,7 @@ int state_handle_rules(state_t *state,
 }
 
 int collmsg_handler_apply(collmsg_handler_t *handler,
-    struct hexgame *game, struct body *body, struct actor *actor,
+    hexgame_state_context_t *context,
     bool *continues_ptr
 ){
     int err;
@@ -613,9 +625,11 @@ int collmsg_handler_apply(collmsg_handler_t *handler,
         state_effect_t *effect = handler->effects[i];
 
         state_effect_goto_t *gotto = NULL;
-        err = state_effect_apply(effect, game, body, actor,
-            &gotto, continues_ptr);
+        err = state_effect_apply(effect, context, &gotto, continues_ptr);
         if(err)return err;
+
+        actor_t *actor = context->actor;
+        body_t *body = context->body;
 
         if(gotto != NULL){
             if(actor != NULL){
