@@ -15,6 +15,7 @@ void valexpr_cleanup(valexpr_t *expr){
         case VALEXPR_TYPE_LITERAL:
             val_cleanup(&expr->u.val);
             break;
+        case VALEXPR_TYPE_YOURVAR:
         case VALEXPR_TYPE_MAPVAR:
         case VALEXPR_TYPE_MYVAR:
             valexpr_cleanup(expr->u.key_expr);
@@ -41,12 +42,17 @@ void valexpr_set_literal_int(valexpr_t *expr, int i){
 int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer){
     INIT
     int type =
+        GOT("yourvar")? VALEXPR_TYPE_YOURVAR:
         GOT("mapvar")? VALEXPR_TYPE_MAPVAR:
         GOT("myvar")? VALEXPR_TYPE_MYVAR:
         GOT("if")? VALEXPR_TYPE_IF:
         VALEXPR_TYPE_LITERAL;
 
-    if(type == VALEXPR_TYPE_MAPVAR || type == VALEXPR_TYPE_MYVAR){
+    if(
+        type == VALEXPR_TYPE_YOURVAR ||
+        type == VALEXPR_TYPE_MAPVAR ||
+        type == VALEXPR_TYPE_MYVAR
+    ){
         NEXT
         expr->type = type;
         expr->u.key_expr = NULL;
@@ -97,7 +103,7 @@ int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer){
 }
 
 
-int valexpr_eval(valexpr_t *expr, vars_t *mapvars, vars_t *myvars,
+int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
     val_t **result_ptr, bool set
 ){
     int err;
@@ -107,10 +113,13 @@ int valexpr_eval(valexpr_t *expr, vars_t *mapvars, vars_t *myvars,
             result = &expr->u.val;
             break;
         }
+        case VALEXPR_TYPE_YOURVAR:
         case VALEXPR_TYPE_MAPVAR:
         case VALEXPR_TYPE_MYVAR: {
-            vars_t *vars = expr->type == VALEXPR_TYPE_MAPVAR?
-                mapvars: myvars;
+            vars_t *vars =
+                expr->type == VALEXPR_TYPE_YOURVAR? context->yourvars:
+                expr->type == VALEXPR_TYPE_MAPVAR? context->mapvars:
+                context->myvars;
 
             if(!vars){
                 fprintf(stderr, "valexpr_eval: No \"%s\" vars provided\n",
@@ -119,8 +128,7 @@ int valexpr_eval(valexpr_t *expr, vars_t *mapvars, vars_t *myvars,
             }
 
             val_t *key_val;
-            err = valexpr_get(expr->u.key_expr,
-                mapvars, myvars, &key_val);
+            err = valexpr_get(expr->u.key_expr, context, &key_val);
             if(err)return err;
             if(!key_val){
                 fprintf(stderr,
@@ -159,7 +167,7 @@ int valexpr_eval(valexpr_t *expr, vars_t *mapvars, vars_t *myvars,
         case VALEXPR_TYPE_IF: {
             val_t *cond_val;
             err = valexpr_get(expr->u.if_expr.cond_expr,
-                mapvars, myvars, &cond_val);
+                context, &cond_val);
             if(err)return err;
             if(!cond_val){
                 fprintf(stderr,
@@ -170,11 +178,11 @@ int valexpr_eval(valexpr_t *expr, vars_t *mapvars, vars_t *myvars,
             bool cond = val_get_bool(cond_val);
             if(cond){
                 err = valexpr_eval(expr->u.if_expr.then_expr,
-                    mapvars, myvars, &result, set);
+                    context, &result, set);
                 if(err)return err;
             }else{
                 err = valexpr_eval(expr->u.if_expr.else_expr,
-                    mapvars, myvars, &result, set);
+                    context, &result, set);
                 if(err)return err;
             }
             break;
@@ -190,29 +198,29 @@ int valexpr_eval(valexpr_t *expr, vars_t *mapvars, vars_t *myvars,
 }
 
 
-int valexpr_get(valexpr_t *expr, vars_t *mapvars, vars_t *myvars,
+int valexpr_get(valexpr_t *expr, valexpr_context_t *context,
     val_t **result_ptr
 ){
     /* NOTE: Caller needs to check whether *result_ptr is NULL. */
-    return valexpr_eval(expr, mapvars, myvars, result_ptr, false);
+    return valexpr_eval(expr, context, result_ptr, false);
 }
 
-int valexpr_set(valexpr_t *expr, vars_t *mapvars, vars_t *myvars,
+int valexpr_set(valexpr_t *expr, valexpr_context_t *context,
     val_t **result_ptr
 ){
     /* NOTE: valexpr_set guarantees that we find (or create, if necessary)
     a val, so caller doesn't need to check whether *result_ptr is NULL. */
-    return valexpr_eval(expr, mapvars, myvars, result_ptr, true);
+    return valexpr_eval(expr, context, result_ptr, true);
 }
 
 
 
 #define VALEXPR_GET_TYPE(TYPE, VAL_TYPE) \
 TYPE valexpr_get_##VAL_TYPE(valexpr_t *expr, \
-    vars_t *mapvars, vars_t *myvars \
+    valexpr_context_t *context \
 ){ \
     val_t *result; \
-    int err = valexpr_get(expr, mapvars, myvars, &result); \
+    int err = valexpr_get(expr, context, &result); \
     if(err){ \
         fprintf(stderr, "Error while getting int from valexpr\n"); \
         return 0; \

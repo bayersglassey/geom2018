@@ -32,21 +32,19 @@
         return 2;}
 
 
-static int _get_vars(body_t *body, actor_t *actor,
-    vars_t **mapvars_ptr, vars_t **myvars_ptr
-){
+static int _get_vars(body_t *body, actor_t *actor, valexpr_context_t *context){
     if(actor){
-        *myvars_ptr = &actor->vars;
+        context->myvars = &actor->vars;
         body = actor->body;
-        *mapvars_ptr = !actor->body? NULL: !actor->body->map? NULL:
+        context->mapvars = !actor->body? NULL: !actor->body->map? NULL:
             &actor->body->map->vars;
     }else{
         if(!body){
             fprintf(stderr, "No body\n"); \
             return 2;
         }
-        *myvars_ptr = &body->vars;
-        *mapvars_ptr = !body->map? NULL: &body->map->vars;
+        context->myvars = &body->vars;
+        context->mapvars = !body->map? NULL: &body->map->vars;
     }
     return 0;
 }
@@ -213,14 +211,13 @@ int state_cond_match(state_cond_t *cond,
         break;
     }
     case STATE_COND_TYPE_EXPR: {
-        vars_t *mapvars;
-        vars_t *myvars;
-        err = _get_vars(body, actor, &mapvars, &myvars);
+        valexpr_context_t context = {0};
+        err = _get_vars(body, actor, &context);
         if(err)return err;
 
         val_t *val1;
         err = valexpr_get(&cond->u.expr.val1_expr,
-            mapvars, myvars, &val1);
+            &context, &val1);
         if(err)return err;
         if(val1 == NULL){
             RULE_PERROR()
@@ -230,7 +227,7 @@ int state_cond_match(state_cond_t *cond,
 
         val_t *val2;
         err = valexpr_get(&cond->u.expr.val2_expr,
-            mapvars, myvars, &val2);
+            &context, &val2);
         if(err)return err;
         if(val2 == NULL){
             RULE_PERROR()
@@ -262,14 +259,13 @@ int state_cond_match(state_cond_t *cond,
     }
     case STATE_COND_TYPE_GET_BOOL:
     case STATE_COND_TYPE_EXISTS: {
-        vars_t *mapvars;
-        vars_t *myvars;
-        err = _get_vars(body, actor, &mapvars, &myvars);
+        valexpr_context_t context = {0};
+        err = _get_vars(body, actor, &context);
         if(err)return err;
 
         val_t *val;
         err = valexpr_get(&cond->u.valexpr,
-            mapvars, myvars, &val);
+            &context, &val);
         if(err)return err;
 
         if(cond->type == STATE_COND_TYPE_EXISTS){
@@ -471,14 +467,12 @@ int state_effect_apply(state_effect_t *effect,
     }
     case STATE_EFFECT_TYPE_INC:
     case STATE_EFFECT_TYPE_SET: {
-        vars_t *mapvars;
-        vars_t *myvars;
-        err = _get_vars(body, actor, &mapvars, &myvars);
+        valexpr_context_t context = {0};
+        err = _get_vars(body, actor, &context);
         if(err)return err;
 
         val_t *var_val;
-        err = valexpr_set(&effect->u.set.var_expr,
-            mapvars, myvars, &var_val);
+        err = valexpr_set(&effect->u.set.var_expr, &context, &var_val);
         if(err)return err;
         /* NOTE: valexpr_set guarantees that we find (or create, if
         necessary) a val, so we don't need to check whether var_val is
@@ -486,7 +480,7 @@ int state_effect_apply(state_effect_t *effect,
 
         val_t *val_val;
         err = valexpr_get(&effect->u.set.val_expr,
-            mapvars, myvars, &val_val);
+            &context, &val_val);
         if(err)return err;
         if(val_val == NULL){
             RULE_PERROR()
@@ -510,9 +504,8 @@ int state_effect_apply(state_effect_t *effect,
         break;
     }
     case STATE_EFFECT_TYPE_IF: {
-        vars_t *mapvars;
-        vars_t *myvars;
-        err = _get_vars(body, actor, &mapvars, &myvars);
+        valexpr_context_t context = {0};
+        err = _get_vars(body, actor, &context);
         if(err)return err;
 
         state_effect_ite_t *ite = effect->u.ite;

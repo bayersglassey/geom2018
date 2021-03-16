@@ -1214,8 +1214,8 @@ bool hexmap_submap_is_visible(hexmap_submap_t *submap){
     bool visible = true;
 
     val_t *result;
-    int err = valexpr_get(submap->visible_expr, &submap->map->vars, NULL,
-        &result);
+    valexpr_context_t context = {.mapvars = &submap->map->vars};
+    int err = valexpr_get(submap->visible_expr, &context, &result);
     if(err){
         fprintf(stderr,
             "Error while evaluating visibility for submap: %s\n",
@@ -1244,8 +1244,8 @@ const char *hexmap_submap_get_text(hexmap_submap_t *submap){
     if(submap->text_expr == NULL)return NULL;
 
     val_t *result;
-    int err = valexpr_get(submap->text_expr, &submap->map->vars, NULL,
-        &result);
+    valexpr_context_t context = {.mapvars = &submap->map->vars};
+    int err = valexpr_get(submap->text_expr, &context, &result);
     if(err){
         fprintf(stderr,
             "Error while evaluating text for submap: %s\n",
