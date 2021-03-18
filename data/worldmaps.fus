@@ -3,7 +3,6 @@ worldmaps:
     : "data/maps/tutorial/worldmap.fus"
     : "data/maps/tutorial2/worldmap.fus"
     : "data/maps/wastes/worldmap.fus"
-    : "data/maps/crazyspidertown/worldmap.fus"
     : "data/maps/demo/worldmap.fus"
     : "data/maps/triangles/worldmap.fus"
     : "data/maps/water/worldmap.fus"
