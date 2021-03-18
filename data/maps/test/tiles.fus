@@ -191,8 +191,7 @@ shapes:
             : "sq"  ( 0 0 0 0)  0 f eval(1 + 8 + 1) (3 1)
             : "sq"  ( 0 0 0 0)  0 f eval(1 + 0 + 1) (4 2)
 
-    "map_door_sixth":
-        animation: cycle 12
+    "map_doorframe_sixth":
         prismels:
             : "tri" ( 1 1 1 0) 10 f eval(1 + 8 + 4)
             : "tri" ( 1 1 1 0)  0 f eval(1 + 8 + 4)
@@ -200,6 +199,19 @@ shapes:
             #: "sq"  ( 2 1 0 0) 11 f eval(1 + 0 + 4)
             #: "sq"  ( 0 1 2 0)  0 f eval(1 + 0 + 4)
             #: "tri" ( 0 1 2 0)  3 f eval(1 + 0 + 4)
+
+    "map_doorframe":
+        # The frame around the door
+        shapes:
+            : "map_doorframe_sixth" (0 1 3 1)  0 f
+            : "map_doorframe_sixth" (0 1 3 1)  2 f
+            : "map_doorframe_sixth" (0 1 3 1)  4 f
+            : "map_doorframe_sixth" (0 1 3 1)  6 f
+            : "map_doorframe_sixth" (0 1 3 1)  8 f
+            : "map_doorframe_sixth" (0 1 3 1) 10 f
+
+    "map_doorstuff_sixth":
+        animation: cycle 12
         shapes:
             : "map_door_tri" ( 0 0 0 0)  0 f 0+
             : "map_door_tri" ( 0 0 0 0)  2 f 0+
@@ -223,15 +235,22 @@ shapes:
             ##: "map_door_sq"  ( 0 1 2 0)  0 f 3+
             ##: "map_door_tri" ( 0 1 2 0)  3 f 3+
 
+    "map_doorstuff":
+        # The glowing stuff in the middle of the door
+        animation: cycle 12
+        shapes:
+            : "map_doorstuff_sixth" (0 1 3 1)  0 f
+            : "map_doorstuff_sixth" (0 1 3 1)  2 f
+            : "map_doorstuff_sixth" (0 1 3 1)  4 f
+            : "map_doorstuff_sixth" (0 1 3 1)  6 f
+            : "map_doorstuff_sixth" (0 1 3 1)  8 f
+            : "map_doorstuff_sixth" (0 1 3 1) 10 f
+
     "map_door":
         animation: cycle 12
         shapes:
-            : "map_door_sixth" (0 1 3 1)  0 f
-            : "map_door_sixth" (0 1 3 1)  2 f
-            : "map_door_sixth" (0 1 3 1)  4 f
-            : "map_door_sixth" (0 1 3 1)  6 f
-            : "map_door_sixth" (0 1 3 1)  8 f
-            : "map_door_sixth" (0 1 3 1) 10 f
+            : "map_doorframe" (0 0 0 0)  0 f
+            : "map_doorstuff" (0 0 0 0)  0 f
 
     "_map_water_sixth":
         animation: oscillate 6
