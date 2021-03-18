@@ -7,7 +7,7 @@ default_tileset: "data/tileset1.fus"
 
 actors:
     #: (0 0) 0 n "actor/aiplayer.fus" "player_cpu"
-    : (14 1) 1 n "actor/aibird.fus" "player_cpu"
+    #: (14 1) 1 n "actor/aibird.fus" "player_cpu"
     #: (-6 -11) 4 y "actor/aibig_roller.fus" "player_cpu"
 
 submaps:
@@ -16,17 +16,6 @@ submaps:
         pos: (0 0)
         camera: (5 -5)
         mapper: ("triple")
-        recordings:
-            : "data/maps/wastes/rec/rec038.fus"
-            : "data/maps/wastes/rec/rec039.fus"
-            : "data/maps/wastes/rec/rec040.fus"
-            : "data/maps/wastes/rec/rec041.fus"
-            : "data/maps/wastes/rec/rec042.fus"
-            : "data/maps/wastes/rec/rec043.fus"
-            #: "data/maps/wastes/rec/player000.fus" "player_cpu"
-            #: "data/maps/wastes/rec/player001.fus" "player_cpu"
-            #: "data/maps/wastes/rec/big_roller000.fus" "player_cpu"
-            #: "data/maps/wastes/rec/big_roller001.fus" "player_cpu"
     :
         file: "data/maps/wastes/start2.fus"
         pos: (18 5)
