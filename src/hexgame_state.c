@@ -35,27 +35,44 @@
 static int _get_vars(hexgame_state_context_t *context,
     valexpr_context_t *valexpr_context
 ){
+    /* NOTE: caller promises that valexpr_context is zeroed out */
+    int err;
+
     actor_t *actor = context->actor;
     body_t *body = context->body;
     body_t *your_body = context->your_body;
+    hexmap_t *map = body? body->map: NULL;
 
-    /* PROBABLY TODO: distinguish between "my actor vars" vs "my body vars"... */
+    /* PROBABLY TODO: distinguish between "my actor vars" vs "my body vars"...
+    Also, doesn't caller guarantee that if actor!=NULL, then body == actor->body?.. */
 
+    /* "refresh" all vars (e.g. body's ".turn" var is set to body->turn, etc) */
     if(actor){
-        valexpr_context->myvars = &actor->vars;
-        valexpr_context->mapvars = !actor->body? NULL: !actor->body->map? NULL:
-            &actor->body->map->vars;
-    }else{
-        if(!body){
-            fprintf(stderr, "No body\n"); \
-            return 2;
-        }
-        valexpr_context->myvars = &body->vars;
-        valexpr_context->mapvars = !body->map? NULL: &body->map->vars;
+        err = actor_refresh_vars(actor);
+        if(err)return err;
+    }
+    if(body){
+        err = body_refresh_vars(body);
+        if(err)return err;
     }
     if(your_body){
-        valexpr_context->yourvars = &your_body->vars;
+        err = body_refresh_vars(your_body);
+        if(err)return err;
     }
+    if(map){
+        err = hexmap_refresh_vars(map);
+        if(err)return err;
+    }
+
+    /* This "if actor" behaviour is ganky beyond belief :( */
+    if(actor){
+        valexpr_context->myvars = &actor->vars;
+    }else{
+        valexpr_context->myvars = body? &body->vars: NULL;
+    }
+    valexpr_context->yourvars = your_body? &your_body->vars: NULL;
+    valexpr_context->mapvars = map? &map->vars: NULL;
+
     return 0;
 }
 

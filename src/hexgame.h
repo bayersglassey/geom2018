@@ -197,6 +197,7 @@ void body_flash_cameras(body_t *body, Uint8 r, Uint8 g, Uint8 b,
 void body_reset_cameras(body_t *body);
 int body_remove(body_t *body);
 int body_move_to_map(body_t *body, hexmap_t *map);
+int body_refresh_vars(body_t *body);
 
 int body_set_stateset(body_t *body, const char *stateset_filename,
     const char *state_name);
@@ -290,6 +291,7 @@ int actor_init_stateset(actor_t *actor, const char *stateset_filename,
 int actor_set_state(actor_t *actor, const char *state_name);
 int actor_handle_rules(actor_t *actor);
 int actor_step(actor_t *actor, struct hexgame *game);
+int actor_refresh_vars(actor_t *actor);
 
 
 

@@ -1123,6 +1123,14 @@ int hexmap_step(hexmap_t *map){
     return 0;
 }
 
+int hexmap_refresh_vars(hexmap_t *map){
+    int err;
+    vars_t *vars = &map->vars;
+
+    /* At the moment, we don't set any special vars... */
+
+    return 0;
+}
 
 
 /*****************

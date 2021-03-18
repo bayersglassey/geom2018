@@ -329,6 +329,16 @@ int body_move_to_map(body_t *body, hexmap_t *map){
     return 0;
 }
 
+int body_refresh_vars(body_t *body){
+    int err;
+    vars_t *vars = &body->vars;
+
+    err = vars_set_bool(vars, ".turn", body->loc.turn);
+    if(err)return err;
+
+    return 0;
+}
+
 
 /**************
  * BODY STATE *

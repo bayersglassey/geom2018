@@ -170,6 +170,7 @@ void hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf,
     hexmap_collision_t *collision);
 int hexmap_step(hexmap_t *map);
+int hexmap_refresh_vars(hexmap_t *map);
 
 void hexmap_door_cleanup(hexmap_door_t *door);
 void hexmap_submap_cleanup(hexmap_submap_t *submap);

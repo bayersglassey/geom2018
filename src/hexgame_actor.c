@@ -115,3 +115,12 @@ int actor_step(actor_t *actor, struct hexgame *game){
     }
     return 0;
 }
+
+int actor_refresh_vars(actor_t *actor){
+    int err;
+    vars_t *vars = &actor->vars;
+
+    /* At the moment, actor doesn't set any special vars... */
+
+    return 0;
+}
