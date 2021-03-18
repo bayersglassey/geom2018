@@ -3,6 +3,8 @@
 # ANIM_NS (str), e.g. "hexroller_", ""
 # RGRAPH_NS (str), e.g. "hexrollerplayer_", ""
 
+collmsgs: "solid"
+
 
 $PREFIX ANIM_NS init:
     if() then:
