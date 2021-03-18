@@ -3,10 +3,6 @@
 # ANIM_NS (str), e.g. "hexroller_", ""
 # RGRAPH_NS (str), e.g. "hexrollerplayer_", ""
 
-on "spit":
-   set myvar("speed"): 6
-
-
 $SET_STR ANIM_NS ""
 $SET_STR RGRAPH_NS ""
 
@@ -14,6 +10,17 @@ $SET_STR RGRAPH_NS ""
 $SET_BOOL INERT
 
 $SET_INT DELAY 2
+
+
+on "spit":
+    if:
+        expr: != myvar(".turn") yourvar(".turn")
+    then:
+        rot: -1
+        turn
+        delay: $GET_INT DELAY
+    set myvar("speed"): 7
+
 
 
 import "anim/_hexroller.fus"
