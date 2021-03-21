@@ -9,6 +9,7 @@
 #include "file_utils.h"
 #include "hexcollmap.h"
 #include "lexer.h"
+#include "lexer_macros.h"
 #include "vars.h"
 #include "var_utils.h"
 #include "mathutil.h"
@@ -762,8 +763,7 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
     int err;
 
     char part_c;
-    err = fus_lexer_get_chr(lexer, &part_c);
-    if(err)return err;
+    GET_CHR(part_c)
 
     int type = HEXCOLLMAP_PART_TYPE_HEXCOLLMAP;
     char *filename = NULL;
@@ -775,73 +775,56 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
     vars_t vars;
     vars_init(&vars);
 
-    err = fus_lexer_get(lexer, "(");
-    if(err)return err;
+    GET("(")
     {
-        if(fus_lexer_got(lexer, "recording")){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
+        if(GOT("recording")){
+            NEXT
             type = HEXCOLLMAP_PART_TYPE_RECORDING;
-        }else if(fus_lexer_got(lexer, "actor")){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
+        }else if(GOT("actor")){
+            NEXT
             type = HEXCOLLMAP_PART_TYPE_ACTOR;
-        }else if(fus_lexer_got(lexer, "shape")){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
+        }else if(GOT("shape")){
+            NEXT
             type = HEXCOLLMAP_PART_TYPE_RENDERGRAPH;
         }
 
-        if(fus_lexer_got(lexer, "empty")){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
+        if(GOT("empty")){
+            NEXT
         }else{
-            err = fus_lexer_get_str(lexer, &filename);
-            if(err)return err;
+            GET_STR(filename)
             while(1){
-                if(fus_lexer_got(lexer, "^")){
-                    err = fus_lexer_next(lexer);
-                    if(err)return err;
-                    err = fus_lexer_get_int(lexer, &trf.rot);
-                    if(err)return err;
-                }else if(fus_lexer_got(lexer, "~")){
+                if(GOT("^")){
+                    NEXT
+                    GET_INT(trf.rot)
+                }else if(GOT("~")){
                     trf.flip = !trf.flip;
-                }else if(fus_lexer_got(lexer, "|")){
-                    err = fus_lexer_next(lexer);
-                    if(err)return err;
-                    err = fus_lexer_get_int(lexer, &draw_z);
-                    if(err)return err;
+                }else if(GOT("|")){
+                    NEXT
+                    GET_INT(draw_z)
                 }else break;
             }
         }
 
-        if(!fus_lexer_got(lexer, ")") && !fus_lexer_got(lexer, "vars")){
-            if(fus_lexer_got(lexer, "empty")){
-                err = fus_lexer_next(lexer);
-                if(err)return err;
+        if(!GOT(")") && !GOT("vars")){
+            if(GOT("empty")){
+                NEXT
             }else{
-                err = fus_lexer_get_str(lexer, &palmapper_name);
-                if(err)return err;
+                GET_STR(palmapper_name)
             }
-            if(fus_lexer_got_int(lexer)){
-                err = fus_lexer_get_int(lexer, &frame_offset);
-                if(err)return err;
+            if(GOT_INT){
+                GET_INT(frame_offset)
             }
         }
 
-        if(fus_lexer_got(lexer, "vars")){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
-            err = fus_lexer_get(lexer, "(");
-            if(err)return err;
+        if(GOT("vars")){
+            NEXT
+            GET("(")
             err = vars_parse(&vars, lexer);
             if(err)return err;
-            err = fus_lexer_get(lexer, ")");
-            if(err)return err;
+            GET(")")
         }
     }
-    err = fus_lexer_get(lexer, ")");
-    if(err)return err;
+    GET(")")
 
     err = hexcollmap_part_init(part, type, part_c,
         filename, palmapper_name, frame_offset, &vars);
@@ -865,72 +848,48 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
     ARRAY_INIT(parts)
 
     if(!just_coll){
-        if(fus_lexer_got(lexer, "spawn")){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
-            err = fus_lexer_get(lexer, "(");
-            if(err)return err;
+        if(GOT("spawn")){
+            NEXT
+            GET("(")
             err = hexgame_location_parse(&collmap->spawn, lexer);
             if(err)return err;
-            err = fus_lexer_get(lexer, ")");
-            if(err)return err;
+            GET(")")
         }
 
-        if(fus_lexer_got(lexer, "parts")){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
-
-            err = fus_lexer_get(lexer, "(");
-            if(err)return err;
-            while(1){
-                if(fus_lexer_got(lexer, ")"))break;
-
+        if(GOT("parts")){
+            NEXT
+            GET("(")
+            while(!GOT(")")){
                 ARRAY_PUSH_NEW(hexcollmap_part_t*, parts, part)
-
                 err = _hexcollmap_parse_part(collmap, part, lexer);
                 if(err)return err;
             }
-            err = fus_lexer_next(lexer);
-            if(err)return err;
+            NEXT
         }
 
-        if(fus_lexer_got(lexer, "default_vert")){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
-            err = fus_lexer_get(lexer, "(");
-            if(err)return err;
-            err = fus_lexer_get_chr(lexer, &default_vert_c);
-            if(err)return err;
-            err = fus_lexer_get(lexer, ")");
-            if(err)return err;
+        if(GOT("default_vert")){
+            NEXT
+            GET("(")
+            GET_CHR(default_vert_c)
+            GET(")")
         }
 
-        if(fus_lexer_got(lexer, "default_edge")){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
-            err = fus_lexer_get(lexer, "(");
-            if(err)return err;
-            err = fus_lexer_get_chr(lexer, &default_edge_c);
-            if(err)return err;
-            err = fus_lexer_get(lexer, ")");
-            if(err)return err;
+        if(GOT("default_edge")){
+            NEXT
+            GET("(")
+            GET_CHR(default_edge_c)
+            GET(")")
         }
 
-        if(fus_lexer_got(lexer, "default_face")){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
-            err = fus_lexer_get(lexer, "(");
-            if(err)return err;
-            err = fus_lexer_get_chr(lexer, &default_face_c);
-            if(err)return err;
-            err = fus_lexer_get(lexer, ")");
-            if(err)return err;
+        if(GOT("default_face")){
+            NEXT
+            GET("(")
+            GET_CHR(default_face_c)
+            GET(")")
         }
 
-        err = fus_lexer_get(lexer, "collmap");
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
+        GET("collmap")
+        GET("(")
     }
 
     /* set up dynamic array of lines */
@@ -941,9 +900,7 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
     if(collmap_lines == NULL)return 1;
 
     /* read in lines */
-    while(1){
-        if(fus_lexer_got(lexer, ")"))break;
-
+    while(!GOT(")")){
         /* resize array of lines, if necessary */
         if(collmap_lines_len >= collmap_lines_size){
             int new_lines_size = collmap_lines_size * 2;
@@ -959,10 +916,10 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
 
         /* get new line from lexer */
         collmap_lines_len++;
-        err = fus_lexer_get_str(lexer,
-            &collmap_lines[collmap_lines_len - 1]);
-        if(err)return err;
+        GET_STR(collmap_lines[collmap_lines_len - 1])
     }
+    /* NOTE: we do NOT get ")" here, it will either be gotten below, *or*
+    by caller, depending on whether just_coll is true. */
 
     /* parse lines */
     err = hexcollmap_parse_lines(collmap,
@@ -974,8 +931,7 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
         return err;}
 
     if(!just_coll){
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
+        GET(")")
     }
 
     /* free lines and dynamic array thereof */

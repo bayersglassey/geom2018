@@ -9,6 +9,7 @@
 #define GOT_STR fus_lexer_got_str(lexer)
 #define GOT_INT fus_lexer_got_int(lexer)
 #define GET_NAME(P) DO(fus_lexer_get_name(lexer, (&P)))
+#define GET_CHR(P) DO(fus_lexer_get_chr(lexer, (&P)))
 #define GET_STR(P) DO(fus_lexer_get_str(lexer, (&P)))
 #define GET_NAME_OR_STR(P) DO(fus_lexer_get_name_or_str(lexer, (&P)))
 #define GET_INT(P) DO(fus_lexer_get_int_fancy(lexer, (&P)))
