@@ -15,6 +15,10 @@ init:
         then:
             if: get_bool mapvar(myvar("key"))
             then: goto immediate: _appear
+            else:
+                # Do nothing; so, our state will remain "init",
+                # so we will be invisible, and each frame we will
+                # retry all these checks.
         else: goto immediate: _appear
 
 _appear:

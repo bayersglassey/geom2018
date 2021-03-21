@@ -1,0 +1,6 @@
+create_body:
+    if() then:
+        play: "actor/rec/aicoin_beast.fus"
+        goto: mainloop
+
+import "actor/_aiplayer.fus"

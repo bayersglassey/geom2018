@@ -25,10 +25,14 @@ vars:
     nosave "start3b_num_coin_d": 2
     nosave "start3b_num_coin_e": 4
 
+    "start4_solved": F
+    nosave "start4_num_coin": (6 + 13)
+
 $SET_STR TUT_COINS "Spit with Spacebar.\nIt may help you judge your jumps.\n\nCollect shiny purple things\n   with your body or spit.\n"
 $SET_STR TUT_DANGER
     "\n\n\n\n\n\n\n\n\n\n\n\n\n Something dangerous is\n rolling around down there.\n\n  Hit it with your spit to\n  change its direction.\n  Follow the purple things\n  and be careful.\n\n Everything with be okay.\n   Keep going.\n"
 $SET_STR TUT_DANGER_PASSED "Nicely done. Keep going!\n"
+$SET_STR TUT_COIN_BEASTS "\n\n The purple people cannot hurt you.\n   You must... collect them... to continue.\n"
 
 $SET_STR TUT_END "\n\nYou've learned enough to make it on your own.\n\n\nGo through the door and enjoy the game.\n"
 
@@ -95,9 +99,6 @@ submaps:
                     tileset: "data/tileset1_bg.fus"
                 :
                     file: "data/maps/tutorial2/start4.fus"
+                    text: $GET_STR TUT_COIN_BEASTS
                     pos: eval: (0 0) + (13 -9) + (-1 -12) + (-29 -19)
                     camera: (-8 6)
-                    recordings:
-                        : "data/maps/tutorial2/recs/start4_coin_beast000.fus"
-                        : "data/maps/tutorial2/recs/start4_coin_beast001.fus"
-                        : "data/maps/tutorial2/recs/start4_coin_beast002.fus"
