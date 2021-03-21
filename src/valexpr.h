@@ -50,6 +50,7 @@ typedef struct valexpr_context {
 
 
 void valexpr_cleanup(valexpr_t *expr);
+void valexpr_fprintf(valexpr_t *expr, FILE *file);
 void valexpr_set_literal_int(valexpr_t *expr, int i);
 int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer);
 int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,

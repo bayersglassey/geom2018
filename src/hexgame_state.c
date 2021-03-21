@@ -251,7 +251,9 @@ int state_cond_match(state_cond_t *cond,
         if(err)return err;
         if(val1 == NULL){
             RULE_PERROR()
-            fprintf(stderr, "Couldn't get value for LHS\n");
+            fprintf(stderr, "Couldn't get value for LHS: ");
+            valexpr_fprintf(&cond->u.expr.val1_expr, stderr);
+            fputc('\n', stderr);
             return 2;
         }
 
@@ -261,14 +263,26 @@ int state_cond_match(state_cond_t *cond,
         if(err)return err;
         if(val2 == NULL){
             RULE_PERROR()
-            fprintf(stderr, "Couldn't get value for RHS\n");
+            fprintf(stderr, "Couldn't get value for RHS: ");
+            valexpr_fprintf(&cond->u.expr.val2_expr, stderr);
+            fputc('\n', stderr);
             return 2;
         }
 
         if(val1->type != val2->type){
             RULE_PERROR()
-            fprintf(stderr, "Type mismatch between LHS, RHS: %s, %s\n",
-                val_type_name(val1->type), val_type_name(val2->type));
+            fprintf(stderr, "Type mismatch between LHS, RHS: ");
+            val_fprintf(val1, stderr);
+            fputc('\n', stderr);
+            fputs(", ", stderr);
+            val_fprintf(val2, stderr);
+            fputc('\n', stderr);
+            fprintf(stderr, "...LHS was: ");
+            valexpr_fprintf(&cond->u.expr.val1_expr, stderr);
+            fputc('\n', stderr);
+            fprintf(stderr, "...RHS was: ");
+            valexpr_fprintf(&cond->u.expr.val2_expr, stderr);
+            fputc('\n', stderr);
             return 2;
         }
 
@@ -306,14 +320,17 @@ int state_cond_match(state_cond_t *cond,
 
         if(val == NULL){
             RULE_PERROR()
-            fprintf(stderr, "Couldn't get value for expression\n");
+            fprintf(stderr, "Couldn't get value for expression: ");
+            valexpr_fprintf(&cond->u.valexpr, stderr);
+            fputc('\n', stderr);
             return 2;
         }
 
         if(val->type != VAL_TYPE_BOOL){
             RULE_PERROR()
-            fprintf(stderr, "Expected bool value, got: %s\n",
-                val_type_name(val->type));
+            fprintf(stderr, "Expected bool value, got: ");
+            val_fprintf(val, stderr);
+            fputc('\n', stderr);
             return 2;
         }
 
@@ -518,15 +535,21 @@ int state_effect_apply(state_effect_t *effect,
         if(err)return err;
         if(val_val == NULL){
             RULE_PERROR()
-            fprintf(stderr, "Couldn't get value for expression\n");
+            fprintf(stderr, "Couldn't get value for expression: ");
+            valexpr_fprintf(&effect->u.set.val_expr, stderr);
+            fputc('\n', stderr);
             return 2;
         }
 
         if(effect->type == STATE_EFFECT_TYPE_INC){
             if(val_val->type != VAL_TYPE_INT){
                 RULE_PERROR()
-                fprintf(stderr, "Increment expects RHS to be int. Got: %s\n",
-                    val_type_name(val_val->type));
+                fprintf(stderr, "Increment expects RHS to be int. Got: ");
+                val_fprintf(val_val, stderr);
+                fputc('\n', stderr);
+                fprintf(stderr, "...expression was: ");
+                valexpr_fprintf(&effect->u.set.val_expr, stderr);
+                fputc('\n', stderr);
                 return 2;
             }
             val_set_int(var_val, val_get_int(var_val) + val_get_int(val_val));

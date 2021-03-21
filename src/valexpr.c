@@ -33,6 +33,35 @@ void valexpr_cleanup(valexpr_t *expr){
     }
 }
 
+void valexpr_fprintf(valexpr_t *expr, FILE *file){
+    switch(expr->type){
+        case VALEXPR_TYPE_LITERAL:
+            val_fprintf(&expr->u.val, file);
+            break;
+        case VALEXPR_TYPE_YOURVAR:
+        case VALEXPR_TYPE_MAPVAR:
+        case VALEXPR_TYPE_MYVAR:
+            fprintf(file,
+                expr->type == VALEXPR_TYPE_YOURVAR? "yourvar(":
+                expr->type == VALEXPR_TYPE_MAPVAR? "mapvar(":
+                "myvar(");
+            valexpr_fprintf(expr->u.key_expr, file);
+            fputc(')', file);
+            break;
+        case VALEXPR_TYPE_IF:
+            fprintf(file, "if ");
+            valexpr_fprintf(expr->u.if_expr.cond_expr, file);
+            fprintf(file, "then ");
+            valexpr_fprintf(expr->u.if_expr.then_expr, file);
+            fprintf(file, "else ");
+            valexpr_fprintf(expr->u.if_expr.else_expr, file);
+            break;
+        default:
+            fprintf(file, "<unknown>");
+            break;
+    }
+}
+
 void valexpr_set_literal_int(valexpr_t *expr, int i){
     expr->type = VALEXPR_TYPE_LITERAL;
     expr->u.val.type = VAL_TYPE_INT;
