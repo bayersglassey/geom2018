@@ -197,7 +197,7 @@ int hexmap_init(hexmap_t *map, hexgame_t *game, char *name,
 
 static int hexmap_parse_recording(fus_lexer_t *lexer,
     char **filename_ptr, char **palmapper_name_ptr, int *frame_offset_ptr,
-    trf_t *trf, vars_t *vars
+    trf_t *trf, vars_t *vars, vars_t *bodyvars
 ){
     int err;
 
@@ -241,6 +241,17 @@ static int hexmap_parse_recording(fus_lexer_t *lexer,
         if(err)return err;
     }
 
+    if(fus_lexer_got(lexer, "bodyvars")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = vars_parse(bodyvars, lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, ")");
+        if(err)return err;
+    }
+
     err = fus_lexer_get(lexer, ")");
     if(err)return err;
     return 0;
@@ -276,6 +287,8 @@ static int hexmap_load_hexmap_recording(
             palmapper, true, recording->frame_offset, &trf, &body);
         if(err)return err;
 
+        /* We uhhhh, don't do anything with recording->bodyvars,
+        interestingly enough. */
         err = vars_copy(&body->vars, &recording->vars);
         if(err)return err;
     }else if(recording->type == HEXMAP_RECORDING_TYPE_ACTOR){
@@ -293,6 +306,8 @@ static int hexmap_load_hexmap_recording(
 
         actor->trf = trf;
 
+        err = vars_copy(&body->vars, &recording->bodyvars);
+        if(err)return err;
         err = vars_copy(&actor->vars, &recording->vars);
         if(err)return err;
     }else{
@@ -420,8 +435,11 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, char *name,
         trf_t trf;
         vars_t vars;
         vars_init(&vars);
+        vars_t bodyvars;
+        vars_init(&bodyvars);
         err = hexmap_parse_recording(lexer,
-            &filename, &palmapper_name, &frame_offset, &trf, &vars);
+            &filename, &palmapper_name, &frame_offset, &trf,
+            &vars, &bodyvars);
         if(err)return err;
 
         ARRAY_PUSH_NEW(hexmap_recording_t*, map->recordings,
@@ -433,6 +451,7 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, char *name,
 
         recording->trf = trf;
         recording->vars = vars;
+        recording->bodyvars = bodyvars;
     }
     err = fus_lexer_next(lexer);
     if(err)return err;
@@ -848,8 +867,11 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
             trf_t trf;
             vars_t vars;
             vars_init(&vars);
+            vars_t bodyvars;
+            vars_init(&bodyvars);
             err = hexmap_parse_recording(lexer,
-                &filename, &palmapper_name, &frame_offset, &trf, &vars);
+                &filename, &palmapper_name, &frame_offset, &trf,
+                &vars, &bodyvars);
             if(err)return err;
 
             ARRAY_PUSH_NEW(hexmap_recording_t*, map->recordings,
@@ -861,6 +883,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
 
             recording->trf = trf;
             recording->vars = vars;
+            recording->bodyvars = bodyvars;
         }
         err = fus_lexer_next(lexer);
         if(err)return err;

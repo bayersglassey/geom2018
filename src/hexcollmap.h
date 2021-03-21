@@ -43,6 +43,7 @@ typedef struct hexmap_recording {
     trf_t trf;
     int frame_offset;
     vars_t vars;
+    vars_t bodyvars;
 } hexmap_recording_t;
 
 void hexmap_recording_cleanup(hexmap_recording_t *recording);
@@ -145,6 +146,7 @@ typedef struct hexcollmap_part {
     int draw_z;
 
     vars_t vars;
+    vars_t bodyvars;
 } hexcollmap_part_t;
 
 typedef struct hexcollmap {
@@ -195,7 +197,7 @@ static bool hexcollmap_elem_is_special(hexcollmap_elem_t *elem){
 
 int hexcollmap_part_init(hexcollmap_part_t *part, int type,
     char part_c, char *filename, char *palmapper_name, int frame_offset,
-    vars_t *vars);
+    vars_t *vars, vars_t *bodyvars);
 void hexcollmap_part_cleanup(hexcollmap_part_t *part);
 
 void hexcollmap_cleanup(hexcollmap_t *collmap);

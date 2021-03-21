@@ -385,6 +385,8 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
 
         err = vars_copy(&recording->vars, &part->vars);
         if(err)return err;
+        err = vars_copy(&recording->bodyvars, &part->bodyvars);
+        if(err)return err;
     }else if(part->type == HEXCOLLMAP_PART_TYPE_RENDERGRAPH){
         char *filename = part->filename?
             strdup(part->filename): NULL;
@@ -774,6 +776,8 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
 
     vars_t vars;
     vars_init(&vars);
+    vars_t bodyvars;
+    vars_init(&bodyvars);
 
     GET("(")
     {
@@ -805,7 +809,7 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
             }
         }
 
-        if(!GOT(")") && !GOT("vars")){
+        if(!GOT(")") && !GOT("vars") && !GOT("bodyvars")){
             if(GOT("empty")){
                 NEXT
             }else{
@@ -823,11 +827,19 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
             if(err)return err;
             GET(")")
         }
+
+        if(GOT("bodyvars")){
+            NEXT
+            GET("(")
+            err = vars_parse(&bodyvars, lexer);
+            if(err)return err;
+            GET(")")
+        }
     }
     GET(")")
 
     err = hexcollmap_part_init(part, type, part_c,
-        filename, palmapper_name, frame_offset, &vars);
+        filename, palmapper_name, frame_offset, &vars, &bodyvars);
     if(err)return err;
     trf_cpy(collmap->space, &part->trf, &trf);
     part->draw_z = draw_z;

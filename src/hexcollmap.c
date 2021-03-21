@@ -22,6 +22,7 @@ void hexmap_recording_cleanup(hexmap_recording_t *recording){
     free(recording->filename);
     free(recording->palmapper_name);
     vars_cleanup(&recording->vars);
+    vars_cleanup(&recording->bodyvars);
 }
 
 int hexmap_recording_init(hexmap_recording_t *recording, int type,
@@ -33,6 +34,7 @@ int hexmap_recording_init(hexmap_recording_t *recording, int type,
     recording->frame_offset = frame_offset;
     trf_zero(&recording->trf);
     vars_init(&recording->vars);
+    vars_init(&recording->bodyvars);
     return 0;
 }
 
@@ -62,7 +64,7 @@ int hexmap_rendergraph_init(hexmap_rendergraph_t *rendergraph,
 
 int hexcollmap_part_init(hexcollmap_part_t *part, int type,
     char part_c, char *filename, char *palmapper_name, int frame_offset,
-    vars_t *vars
+    vars_t *vars, vars_t *bodyvars
 ){
     part->type = type;
     part->part_c = part_c;
@@ -77,6 +79,7 @@ int hexcollmap_part_init(hexcollmap_part_t *part, int type,
     /* vars_t must guarantee that it can be freely copied.
     Which it does. (See the comment in definition of vars_t.) */
     part->vars = *vars;
+    part->bodyvars = *bodyvars;
 
     return 0;
 }
@@ -85,6 +88,7 @@ void hexcollmap_part_cleanup(hexcollmap_part_t *part){
     free(part->filename);
     free(part->palmapper_name);
     vars_cleanup(&part->vars);
+    vars_cleanup(&part->bodyvars);
 }
 
 
