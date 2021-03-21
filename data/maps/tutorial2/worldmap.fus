@@ -11,6 +11,7 @@ vars:
     "coin_e": F
     "coin_f": F
     "start_solved": F
+    "start_solved2": F
     nosave "num_coin_g": 5
 
     "start3b_coin_a": F
@@ -26,7 +27,7 @@ vars:
 
 $SET_STR TUT_COINS "Spit with Spacebar.\nIt may help you judge your jumps.\n\nCollect shiny purple things\n   with your body or spit.\n"
 $SET_STR TUT_DANGER
-    "\n\n\n\n\n\n\n\n\n\n\n\n\nSomething dangerous is\nrolling around down there.\n\nHit it with your spit to\nchange its direction.\nFollow the purple things\nand be careful.\n\nEverything with be okay.\n   Keep going.\n"
+    "\n\n\n\n\n\n\n\n\n\n\n\n\n Something dangerous is\n rolling around down there.\n\n  Hit it with your spit to\n  change its direction.\n  Follow the purple things\n  and be careful.\n\n Everything with be okay.\n   Keep going.\n"
 $SET_STR TUT_DANGER_PASSED "Nicely done. Keep going!\n"
 
 $SET_STR TUT_END "\n\nYou've learned enough to make it on your own.\n\n\nGo through the door and enjoy the game.\n"
@@ -50,6 +51,10 @@ submaps:
                         :
                             file: "data/maps/tutorial2/start_blocker.fus"
                             visible: not mapvar("start_solved")
+                            pos: eval: (0 0) + (13 -7)
+                        :
+                            file: "data/maps/tutorial2/start_unblocked.fus"
+                            visible: mapvar("start_solved")
                             pos: eval: (0 0) + (13 -7)
             : submaps:
                 :

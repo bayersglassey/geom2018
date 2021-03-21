@@ -3,6 +3,11 @@ parts:
     "h": recording "data/recs/hotspot.fus"
         vars:
             "key": "start_solved"
+    "c": recording "data/recs/coin.fus"
+        vars:
+            "appear": T
+            "key": "start_solved"
+            "collected_key": "start_solved2"
 collmap:
     ;;         .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                            /
@@ -14,7 +19,7 @@ collmap:
     ;;                         * *    \*     * *
     ;;     .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                                  \* *
-    ;;       .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;       .   .   .   .   .   .   ?   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .      [c]
     ;;
     ;;         .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
