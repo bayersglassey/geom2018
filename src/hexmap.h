@@ -115,8 +115,6 @@ typedef struct hexmap_submap {
     valexpr_t *visible_expr; /* Whether this submap is visible */
     bool visible_expr_not; /* Whether to invert the result of visible_expr */
     hexcollmap_t collmap;
-    palette_t palette;
-    hexmap_tileset_t tileset;
     ARRAY_DECL(hexmap_door_t*, doors)
 
     bool visited; /* Controls whether this submap shows up on minimap */
@@ -126,6 +124,8 @@ typedef struct hexmap_submap {
     rendergraph_t *rgraph_map;
     rendergraph_t *rgraph_minimap;
     prismelmapper_t *mapper;
+    palette_t *palette;
+    hexmap_tileset_t *tileset;
 } hexmap_submap_t;
 
 const char *submap_camera_type_msg(int camera_type);
@@ -141,6 +141,8 @@ typedef struct hexmap {
     ARRAY_DECL(struct body*, bodies)
     ARRAY_DECL(hexmap_submap_t*, submaps)
     ARRAY_DECL(hexmap_recording_t*, recordings)
+    ARRAY_DECL(palette_t*, palettes)
+    ARRAY_DECL(hexmap_tileset_t*, tilesets)
 
     /* Weakrefs */
     struct hexgame *game;
@@ -161,6 +163,10 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
     prismelmapper_t *parent_mapper, char *palette_filename,
     char *tileset_filename);
 int hexmap_get_submap_index(hexmap_t *map, hexmap_submap_t *submap);
+int hexmap_get_or_create_palette(hexmap_t *map, const char *name,
+    palette_t **palette_ptr);
+int hexmap_get_or_create_tileset(hexmap_t *map, const char *name,
+    hexmap_tileset_t **tileset_ptr);
 int hexmap_load_recording(hexmap_t *map, const char *filename,
     palettemapper_t *palmapper, bool loop, int offset, trf_t *trf,
     struct body **body_ptr);

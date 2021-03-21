@@ -63,8 +63,8 @@ int test_app_list_submaps_render(test_app_list_t *list){
         WRITE_FIELD_VEC(submap, space->dims, camera_pos)
         _console_write_field(console, "camera_type",
             submap_camera_type_msg(submap->camera_type));
-        WRITE_FIELD(submap, palette.name)
-        WRITE_FIELD(submap, tileset.name)
+        WRITE_FIELD(submap, palette->name)
+        WRITE_FIELD(submap, tileset->name)
         WRITE_FIELD(submap, mapper->name)
         for(int i = 0; i < submap->doors_len; i++){
             hexmap_door_t *door = submap->doors[i];

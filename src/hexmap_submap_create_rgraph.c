@@ -215,7 +215,7 @@ int hexmap_submap_create_rgraph_map(hexmap_submap_t *submap){
     if(err)return err;
 
     err = rendergraph_add_rgraphs_from_collmap(
-        rgraph, &submap->collmap, &submap->tileset,
+        rgraph, &submap->collmap, submap->tileset,
         map->unit, true);
     if(err)return err;
 

@@ -160,6 +160,9 @@ void hexmap_cleanup(hexmap_t *map){
     ARRAY_FREE_PTR(hexmap_submap_t*, map->submaps, hexmap_submap_cleanup)
     ARRAY_FREE_PTR(hexmap_recording_t*, map->recordings,
         hexmap_recording_cleanup)
+    ARRAY_FREE_PTR(palette_t*, map->palettes, palette_cleanup)
+    ARRAY_FREE_PTR(hexmap_tileset_t*, map->tilesets,
+        hexmap_tileset_cleanup)
 
     vars_cleanup(&map->vars);
 }
@@ -187,6 +190,8 @@ int hexmap_init(hexmap_t *map, hexgame_t *game, char *name,
     ARRAY_INIT(map->bodies)
     ARRAY_INIT(map->submaps)
     ARRAY_INIT(map->recordings)
+    ARRAY_INIT(map->palettes)
+    ARRAY_INIT(map->tilesets)
     return 0;
 }
 
@@ -891,6 +896,54 @@ int hexmap_get_submap_index(hexmap_t *map, hexmap_submap_t *submap){
     return -1;
 }
 
+static palette_t *hexmap_get_palette(hexmap_t *map, const char *name){
+    for(int i = 0; i < map->palettes_len; i++){
+        palette_t *palette = map->palettes[i];
+        if(!strcmp(palette->name, name))return palette;
+    }
+    return NULL;
+}
+
+int hexmap_get_or_create_palette(hexmap_t *map, const char *name,
+    palette_t **palette_ptr
+){
+    int err;
+    palette_t *palette = hexmap_get_palette(map, name);
+    if(palette == NULL){
+        ARRAY_PUSH_NEW(palette_t*, map->palettes, _palette);
+        palette = _palette;
+
+        err = palette_load(palette, name, NULL);
+        if(err)return err;
+    }
+    *palette_ptr = palette;
+    return 0;
+}
+
+static hexmap_tileset_t *hexmap_get_tileset(hexmap_t *map, const char *name){
+    for(int i = 0; i < map->tilesets_len; i++){
+        hexmap_tileset_t *tileset = map->tilesets[i];
+        if(!strcmp(tileset->name, name))return tileset;
+    }
+    return NULL;
+}
+
+int hexmap_get_or_create_tileset(hexmap_t *map, const char *name,
+    hexmap_tileset_t **tileset_ptr
+){
+    int err;
+    hexmap_tileset_t *tileset = hexmap_get_tileset(map, name);
+    if(tileset == NULL){
+        ARRAY_PUSH_NEW(hexmap_tileset_t*, map->tilesets, _tileset);
+        tileset = _tileset;
+
+        err = hexmap_tileset_load(tileset, map->prend, name, NULL);
+        if(err)return err;
+    }
+    *tileset_ptr = tileset;
+    return 0;
+}
+
 int hexmap_load_recording(hexmap_t *map, const char *filename,
     palettemapper_t *palmapper, bool loop, int offset, trf_t *trf,
     body_t **body_ptr
@@ -1170,8 +1223,6 @@ void hexmap_submap_cleanup(hexmap_submap_t *submap){
         free(submap->visible_expr);
     }
     hexcollmap_cleanup(&submap->collmap);
-    palette_cleanup(&submap->palette);
-    hexmap_tileset_cleanup(&submap->tileset);
     ARRAY_FREE_PTR(hexmap_door_t*, submap->doors, hexmap_door_cleanup)
 }
 
@@ -1202,11 +1253,12 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
     submap->rgraph_minimap = NULL;
     submap->mapper = mapper;
 
-    err = palette_load(&submap->palette, palette_filename, NULL);
+    err = hexmap_get_or_create_palette(map, palette_filename,
+        &submap->palette);
     if(err)return err;
 
-    err = hexmap_tileset_load(&submap->tileset, map->prend,
-        tileset_filename, NULL);
+    err = hexmap_get_or_create_tileset(map, tileset_filename,
+        &submap->tileset);
     if(err)return err;
 
     ARRAY_INIT(submap->doors)

@@ -602,6 +602,7 @@ DICT_IMPLEMENT(prismel, prismel, prismels, name)
 DICT_IMPLEMENT(rendergraph, rendergraph, rendergraphs, name)
 DICT_IMPLEMENT(prismelmapper, mapper, mappers, name)
 DICT_IMPLEMENT(palettemapper, palmapper, palmappers, name)
+#undef DICT_IMPLEMENT
 
 
 int prismelrenderer_get_or_create_font(

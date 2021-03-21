@@ -93,8 +93,19 @@ int camera_step(camera_t *camera){
     /* Figure out camera's current submap */
     if(body != NULL){
         camera->map = body->map;
-        if(camera->cur_submap != body->cur_submap){
-            camera->cur_submap = body->cur_submap;
+        hexmap_submap_t *old_submap = camera->cur_submap;
+        hexmap_submap_t *new_submap = body->cur_submap;
+        if(new_submap != old_submap){
+            camera->cur_submap = new_submap;
+
+            /* NOTE: body and camera can have NULL cur_submap, e.g. if body
+            (or camera->body) is a coin... */
+            palette_t *old_palette = old_submap? old_submap->palette: NULL;
+            palette_t *new_palette = new_submap? new_submap->palette: NULL;
+            if(new_palette != NULL && new_palette != old_palette){
+                err = palette_reset(new_palette);
+                if(err)return err;
+            }
 
 #ifndef DONT_ANIMATE_PALETTE
             if(camera->smooth_scroll && !camera->should_reset){
@@ -102,13 +113,6 @@ int camera_step(camera_t *camera){
                 camera->colors_fade = 0;
             }
 #endif
-
-            /* camera->cur_submap could be NULL if it's following a weird
-            body like a coin... */
-            if(camera->cur_submap != NULL){
-                err = palette_reset(&camera->cur_submap->palette);
-                if(err)return err;
-            }
         }
     }
 
@@ -127,13 +131,13 @@ int camera_step(camera_t *camera){
     at them, which makes no sense, but will work ok so long as we only
     have 1 camera. */
     if(camera->cur_submap != NULL){
-        err = palette_step(&camera->cur_submap->palette);
+        err = palette_step(camera->cur_submap->palette);
         if(err)return err;
     }
 #endif
 
     if(camera->cur_submap != NULL){
-        err = camera_colors_step(camera, &camera->cur_submap->palette);
+        err = camera_colors_step(camera, camera->cur_submap->palette);
         if(err)return err;
     }
 

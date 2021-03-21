@@ -127,6 +127,7 @@ DICT_DECL(prismel, prismel, prismels, name)
 DICT_DECL(rendergraph, rendergraph, rendergraphs, name)
 DICT_DECL(prismelmapper, mapper, mappers, name)
 DICT_DECL(palettemapper, palmapper, palmappers, name)
+#undef DICT_DECL
 int prismelrenderer_get_or_create_font(
     prismelrenderer_t *prend, const char *filename,
     font_t **font_ptr);
