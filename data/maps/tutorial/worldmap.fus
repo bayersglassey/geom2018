@@ -7,20 +7,62 @@ vars:
     "solved_puzzle": F
     "solved_puzzle2": F
 
-$SET_STR TUT1 "\n\n   Welcome to Crawl Space!\n\n  Use the left & right arrow keys to move.\n"
-$SET_STR TUT1b "\n  Touch the shiny green thing to save.\n"
-$SET_STR TUT2 "Keep going!\n"
-$SET_STR TUT_LOOP "\n             BE BRAVE!!!\n"
-$SET_STR TUT3 "Sometimes you'll need to jump.\n\nPress the up arrow key to leap forwards!\n"
-$SET_STR TUT_SOLVED_PUZZLE "    Sometimes you'll need to travel upside down.\n    Don't worry about it!\n   Keep going.\n"
-$SET_STR TUT_GO2 "\n         Almost there...\n"
-$SET_STR TUT_GO3 "\n\n            Too far!\n"
-$SET_STR TUT_GO4 "Onward and upward!\n"
+$SET_STR TUT1: lines:
+    ;;
+    ;;
+    ;;   Welcome to Crawl Space!
+    ;;
+    ;;  Use the left & right arrow keys to move.
+$SET_STR TUT1b: lines:
+    ;;
+    ;;  Touch the shiny green thing to save.
+    ;;    You will reappear there if you... run into trouble.
+    ;;
+    ;;  You can also press "1" to return there
+    ;;    if you feel you are stuck.
+$SET_STR TUT2: lines:
+    ;;Keep going!
+$SET_STR TUT_LOOP: lines:
+    ;;
+    ;;             BE BRAVE!!!
+$SET_STR TUT3: lines:
+    ;;Sometimes you'll need to jump.
+    ;;
+    ;;Press the up arrow key to leap forwards!
+$SET_STR TUT_SOLVED_PUZZLE: lines:
+    ;;    Sometimes you'll need to travel upside down.
+    ;;    Don't worry about it!
+    ;;   Keep going.
+$SET_STR TUT_GO2: lines:
+    ;;         Almost there...
+$SET_STR TUT_GO3: lines:
+    ;;
+    ;;            Too far!
+$SET_STR TUT_GO4: lines:
+    ;;Onward and upward!
 
-$SET_STR TUT_GAPS "\n\n\n\n\n\n\nDon't worry about small gaps\n   in the floor.\n\nYou can walk\n   right over them.\n"
-$SET_STR TUT_CRAWL "  Press the down arrow key to crouch.\n   While crouching, use the left & right arrow keys to crawl.\n"
-$SET_STR TUT_DOOR "\n\nThe shiny blue thing is a door.\n\n\nGo through it to continue to the next area.\n"
-$SET_STR TUT_END "\n\nYou've learned enough to make it on your own.\n\n\nGo through the door and enjoy the game.\n"
+$SET_STR TUT_GAPS: lines:
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;Don't worry about small gaps
+    ;;   in the floor.
+    ;;
+    ;;You can walk
+    ;;   right over them.
+$SET_STR TUT_CRAWL: lines:
+    ;;  Press the down arrow key to crouch.
+    ;;   While crouching, use the left & right arrow keys to crawl.
+$SET_STR TUT_DOOR: lines:
+    ;;
+    ;;The shiny blue thing is a door.
+    ;;
+    ;;
+    ;;Go through it to continue to the next area.
 
 submaps:
     :
