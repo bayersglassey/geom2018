@@ -26,7 +26,7 @@ vars:
     nosave "start3b_num_coin_e": 4
 
     "start4_solved": F
-    nosave "start4_num_coin": (6 + 13)
+    nosave "start4_num_coin": (6 + 19)
 
 $SET_STR TUT_COINS: lines:
     ;;Spit with Spacebar.
@@ -63,8 +63,21 @@ $SET_STR TUT_DANGER_PASSED: lines:
 $SET_STR TUT_COIN_BEASTS: lines:
     ;;
     ;;
-    ;; The purple people cannot hurt you.
-    ;;   You must... collect them... to continue.
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;; The purple people
+    ;; cannot hurt you.
+    ;;
+    ;;   You must...
+    ;;   collect them...
+    ;;   to continue.
 
 
 submaps:
@@ -130,6 +143,22 @@ submaps:
                     tileset: "data/tileset1_bg.fus"
                 :
                     file: "data/maps/tutorial2/start4.fus"
-                    text: $GET_STR TUT_COIN_BEASTS
+                    text: if mapvar("start4_solved") then null else $GET_STR TUT_COIN_BEASTS
                     pos: eval: (0 0) + (13 -9) + (-1 -12) + (-29 -19)
                     camera: (-8 6)
+                    submaps:
+                        :
+                            file: "data/maps/tutorial2/start4_door_closed.fus"
+                            text: if mapvar("start4_solved") then null else $GET_STR TUT_COIN_BEASTS
+                            visible: not mapvar("start4_solved")
+                            pos: (-11 -4)
+                        :
+                            file: "data/maps/tutorial2/start4_door_open.fus"
+                            visible: mapvar("start4_solved")
+                            pos: (-11 -4)
+                            doors:
+                                :
+                                    map: "data/maps/tutorial3/worldmap.fus"
+                                    pos: (0 0)
+                                    rot: 0
+                                    turn: n
