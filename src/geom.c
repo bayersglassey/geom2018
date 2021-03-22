@@ -336,3 +336,14 @@ int fus_lexer_get_vec(fus_lexer_t *lexer, vecspace_t *space, vec_t vec){
     if(err)return err;
     return 0;
 }
+
+int fus_lexer_get_trf(fus_lexer_t *lexer, vecspace_t *space, trf_t *trf){
+    int err;
+    err = fus_lexer_get_vec(lexer, space, trf->add);
+    if(err)return err;
+    err = fus_lexer_get_int_fancy(lexer, &trf->rot);
+    if(err)return err;
+    err = fus_lexer_get_bool(lexer, &trf->flip);
+    if(err)return err;
+    return 0;
+}

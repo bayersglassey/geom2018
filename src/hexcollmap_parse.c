@@ -27,6 +27,29 @@ static void _debug_print_line(const char *line, int x, int y){
     fprintf(stderr, "hexcollmap_parse: [line=%i char=%i] ", y+1, x+1);
 }
 
+static int _parse_trf(fus_lexer_t *lexer, vecspace_t *space,
+    trf_t *trf, int *draw_z_ptr
+){
+    /* NOTE: Caller guarantees trf is zeroed */
+    /* TODO: use trf_rot, trf_flip, etc -- instead of just twiddling trf's
+    fields directly as we currently do... */
+    INIT
+    while(1){
+        if(GOT("^")){
+            NEXT
+            GET_INT(trf->rot)
+        }else if(GOT("~")){
+            trf->flip = !trf->flip;
+        }else if(GOT("|")){
+            NEXT
+            GET_INT(*draw_z_ptr)
+        }else if(GOT("move")){
+            GET_VEC(space, trf->add)
+        }else break;
+    }
+    return 0;
+}
+
 static void hexcollmap_edge_rot(
     int *x_ptr, int *y_ptr, int *i_ptr, rot_t addrot
 ){
@@ -796,17 +819,8 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
             NEXT
         }else{
             GET_STR(filename)
-            while(1){
-                if(GOT("^")){
-                    NEXT
-                    GET_INT(trf.rot)
-                }else if(GOT("~")){
-                    trf.flip = !trf.flip;
-                }else if(GOT("|")){
-                    NEXT
-                    GET_INT(draw_z)
-                }else break;
-            }
+            err = _parse_trf(lexer, collmap->space, &trf, &draw_z);
+            if(err)return err;
         }
 
         if(!GOT(")") && !GOT("vars") && !GOT("bodyvars")){
@@ -944,6 +958,44 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
 
     if(!just_coll){
         GET(")")
+
+        if(GOT("draw")){
+            NEXT
+            GET("(")
+            while(!GOT(")")){
+                GET("(")
+
+                char part_c;
+                GET_CHR(part_c)
+                trf_t trf = {0};
+                GET_TRF(collmap->space, trf)
+
+                int draw_z = 0;
+                if(GOT("|")){
+                    NEXT
+                    GET_INT(draw_z)
+                }
+
+                /* Find and draw parts with given part_c */
+                bool found = false;
+                for(int i = 0; i < parts_len; i++){
+                    hexcollmap_part_t *part = parts[i];
+                    if(part->part_c != part_c)continue;
+                    found = true;
+                    err = hexcollmap_draw_part(collmap,
+                        part, &trf, draw_z);
+                    if(err)return err;
+                }
+                if(!found){
+                    fus_lexer_err_info(lexer);
+                    fprintf(stderr, "part not found: %c\n", part_c);
+                    return 2;
+                }
+
+                GET(")")
+            }
+            NEXT
+        }
     }
 
     /* free lines and dynamic array thereof */

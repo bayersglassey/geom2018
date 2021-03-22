@@ -312,9 +312,7 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
         char *name;
         char *palmapper_name = NULL;
         palettemapper_t *palmapper = NULL;
-        vec_t v;
-        int rot;
-        bool flip;
+        trf_t trf = {0};
         int frame_start = 0;
         int frame_len = -1;
         int frame_i = 0;
@@ -323,17 +321,8 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
 
         GET("(")
         {
-            /* name */
             GET_STR(name)
-
-            /* trf.add */
-            GET_VEC(prend->space, v)
-
-            /* trf.rot */
-            GET_INT(rot)
-
-            /* trf.flip */
-            GET_BOOL(flip)
+            GET_TRF(prend->space, trf)
 
             /* palmapper */
             if(GOT_STR){
@@ -383,14 +372,12 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
         if(err)return err;
         rendergraph_trf->rendergraph = found;
         rendergraph_trf->palmapper = palmapper;
-        rendergraph_trf->trf.rot = rot;
-        rendergraph_trf->trf.flip = flip;
+        rendergraph_trf->trf = trf;
         rendergraph_trf->frame_start = frame_start;
         rendergraph_trf->frame_len = frame_len;
         rendergraph_trf->frame_i = frame_i;
         rendergraph_trf->frame_i_additive = frame_i_additive;
         rendergraph_trf->frame_i_reversed = frame_i_reversed;
-        vec_cpy(prend->space->dims, rendergraph_trf->trf.add, v);
     }
     NEXT
     return 0;

@@ -85,5 +85,6 @@ void trf_apply_separately(const vecspace_t *space, trf_t *t,
 
 int fus_lexer_eval_vec(fus_lexer_t *lexer, vecspace_t *space, vec_t vec);
 int fus_lexer_get_vec(fus_lexer_t *lexer, vecspace_t *space, vec_t vec);
+int fus_lexer_get_trf(fus_lexer_t *lexer, vecspace_t *space, trf_t *trf);
 
 #endif
