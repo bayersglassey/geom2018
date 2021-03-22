@@ -125,6 +125,8 @@ int _fus_lexer_get_name(fus_lexer_t *lexer, char **name);
 int fus_lexer_get_name(fus_lexer_t *lexer, char **name);
 int _fus_lexer_get_str(fus_lexer_t *lexer, char **s);
 int fus_lexer_get_str(fus_lexer_t *lexer, char **s);
+int _fus_lexer_get_str_fancy(fus_lexer_t *lexer, char **s);
+int fus_lexer_get_str_fancy(fus_lexer_t *lexer, char **s);
 int _fus_lexer_get_name_or_str(fus_lexer_t *lexer, char **s);
 int fus_lexer_get_name_or_str(fus_lexer_t *lexer, char **s);
 int fus_lexer_get_chr(fus_lexer_t *lexer, char *c);

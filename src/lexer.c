@@ -5,6 +5,8 @@
 #include "lexer.h"
 
 
+/* HELPER FUNCTIONS */
+
 static char *strdup_quoted(const char *s1){
     size_t s1_len = strlen(s1);
     size_t s2_len = 1 + s1_len + 1;
@@ -36,9 +38,14 @@ static char *strdupcat_quoted(const char *s1, const char *s2){
 }
 
 
-
+/* LEXER FUNCTION PROTOTYPES */
 
 static int fus_lexer_get_indent(fus_lexer_t *lexer);
+static int _fus_lexer_next(fus_lexer_t *lexer);
+
+
+
+/* LEXER FUNCTIONS */
 
 static void fus_lexer_free_frame_list(fus_lexer_frame_t *frame_list){
     while(frame_list){
@@ -627,6 +634,132 @@ int fus_lexer_get_str(fus_lexer_t *lexer, char **s){
     return fus_lexer_next(lexer);
 }
 
+static int _fus_lexer_get_lines(fus_lexer_t *lexer, char **s){
+    int err;
+
+    /* The string we use for newline.
+    We don't use raw newlines, because the thing we generate will
+    be wrapped in '"' characters and passed through
+    _fus_lexer_extract_str. */
+    const char *newline = "\\n";
+    size_t newline_len = strlen(newline);
+
+    /* Set up an array of strings */
+    int max_lines = 16;
+    int n_lines = 0;
+    char **lines = malloc(sizeof(*lines) * max_lines);
+    if(!lines)return 1;
+
+    /* Parse in a bunch of strings */
+    while(!fus_lexer_got(lexer, ")")){
+        char *s2;
+
+        /* We are careful to use the "underscored" versions of these
+        functions, because we may be called inside of a lexer macro.
+        (See the comment on _fus_lexer_get_str_fancy) */
+        err = _fus_lexer_get_str(lexer, &s2);
+        if(err)return err;
+        err = _fus_lexer_next(lexer);
+        if(err)return err;
+
+        if(n_lines >= max_lines){
+            max_lines *= 2;
+            lines = realloc(lines, sizeof(*lines) * max_lines);
+            if(!lines)return 1;
+        }
+        lines[n_lines] = s2;
+        n_lines++;
+    }
+
+    /* Calculate length of final string */
+    size_t final_len = 0;
+    for(int i = 0; i < n_lines; i++){
+        final_len += strlen(lines[i]) + newline_len;
+    }
+
+    /* Build final string */
+    char *final_s0 = malloc(sizeof(*final_s0) * (final_len + 1));
+    char *final_s = final_s0;
+    for(int i = 0; i < n_lines; i++){
+        char *line = lines[i];
+        size_t line_len = strlen(line);
+        strcpy(final_s, line);
+        final_s += line_len;
+        strcpy(final_s, newline);
+        final_s += newline_len;
+    }
+
+    /* Add that terminating NUL, wot */
+    final_s[0] = '\0';
+
+    /* Cleanup and return */
+    for(int i = 0; i < n_lines; i++){
+        free(lines[i]);
+    }
+    free(lines);
+    *s = final_s0;
+    return 0;
+}
+
+int _fus_lexer_get_str_fancy(fus_lexer_t *lexer, char **s){
+
+    /* NOTE: this function is used inside lexer macros!.. e.g. in $SET_STR.
+    So we MUST NOT call fus_lexer_next or anything which calls it.
+    The underscore versions of most functions are safe, e.g.
+    _fus_lexer_get_str as opposed to fus_lexer_get_str.
+
+    A common pattern we will use here is e.g.:
+        _fus_lexer_get_str(...)
+        _fus_lexer_next(...)
+    ...in place of a single call to fus_lexer_get_str (with no underscore).
+
+    This lexer's code is becoming a bit of a mess, eh? Wheee! */
+
+    if(fus_lexer_got(lexer, "(")){
+        int err;
+        err = _fus_lexer_next(lexer);
+        if(err)return err;
+        if(fus_lexer_got_str(lexer)){
+            /* Just a regular string */
+            err = _fus_lexer_get_str(lexer, s);
+            if(err)return err;
+            err = _fus_lexer_next(lexer);
+            if(err)return err;
+        }else if(fus_lexer_got(lexer, "lines")){
+            /* Get a series of strings, add a newline to the end of each,
+            and return their concatenation. */
+            err = _fus_lexer_next(lexer);
+            if(err)return err;
+
+            err = _fus_lexer_get(lexer, "(");
+            if(err)return err;
+            err = _fus_lexer_next(lexer);
+            if(err)return err;
+
+            err = _fus_lexer_get_lines(lexer, s);
+            if(err)return err;
+
+            err = _fus_lexer_get(lexer, ")");
+            if(err)return err;
+            err = _fus_lexer_next(lexer);
+            if(err)return err;
+        }else{
+            return fus_lexer_unexpected(lexer, "\"...\" or lines");
+        }
+        err = _fus_lexer_get(lexer, ")");
+        if(err)return err;
+        return 0;
+    }else{
+        return _fus_lexer_get_str(lexer, s);
+    }
+}
+
+int fus_lexer_get_str_fancy(fus_lexer_t *lexer, char **s){
+    int err = _fus_lexer_get_str_fancy(lexer, s);
+    if(err)return err;
+    return fus_lexer_next(lexer);
+}
+
 int _fus_lexer_get_name_or_str(fus_lexer_t *lexer, char **s){
     if(lexer->token_type == FUS_LEXER_TOKEN_SYM){
         return _fus_lexer_extract_name(lexer, s);
@@ -1131,8 +1264,13 @@ static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
         if(err)return err;
 
         char *val;
-        err = _fus_lexer_get_name_or_str(lexer, &val);
-        if(err)return err;
+        if(fus_lexer_got_name(lexer)){
+            err = _fus_lexer_get_name(lexer, &val);
+            if(err)return err;
+        }else{
+            err = _fus_lexer_get_str_fancy(lexer, &val);
+            if(err)return err;
+        }
 
         err = vars_set_str(lexer->vars, name, val);
         if(err)return err;

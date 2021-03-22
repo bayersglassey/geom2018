@@ -78,10 +78,13 @@ static int run_test(const char *test_text, const char *expected_text){
 static int _run_tests(){
     int err;
 
+    /* Basics */
     err = run_test(
         "1 2 (3 4) 5 6",
         "1 2 (3 4) 5 6");
     if(err)return err;
+
+    /* BOOL macros */
     err = run_test(
         "$UNSET_BOOL COND 1 2 $IF COND(3 4) 5 6",
         "1 2 5 6");
@@ -98,6 +101,16 @@ static int _run_tests(){
         "1 2 $SET_BOOL COND $IF COND(3 4) 5 6",
         "1 2 3 4 5 6");
     if(err)return err;
+    err = run_test(
+        "$UNSET_BOOL A 1 $IF A($SET_BOOL B) 2 $IF B(3)",
+        "1 2");
+    if(err)return err;
+    err = run_test(
+        "$SET_BOOL A 1 $IF A($SET_BOOL B) 2 $IF B(3)",
+        "1 2 3");
+    if(err)return err;
+
+    /* STR macros */
     err = run_test(
         "$SET_STR X xx 1 2 $GET_STR X 3 4",
         "1 2 \"xx\" 3 4");
@@ -127,6 +140,16 @@ static int _run_tests(){
         "1 2 \"lalaxx\" 5 6");
     if(err)return err;
     err = run_test(
+        "$SET_STR A (\"lala\") $GET_STR A",
+        "\"lala\"");
+    if(err)return err;
+    err = run_test(
+        "$SET_STR A (lines (\"a\" \"b\")) $GET_STR A",
+        "\"a\\nb\\n\"");
+    if(err)return err;
+
+    /* INT macros */
+    err = run_test(
         "$SET_INT X 10 1 2 $GET_INT X 3 4",
         "1 2 10 3 4");
     if(err)return err;
@@ -134,6 +157,8 @@ static int _run_tests(){
         "1 2 $SET_INT X 10 $GET_INT X 3 4",
         "1 2 10 3 4");
     if(err)return err;
+
+    /* PRINT macros */
     err = run_test(
         "$SET_STR A aa $PRINTVAR A $SET_STR A aaaa",
         "");
@@ -145,14 +170,6 @@ static int _run_tests(){
     err = run_test(
         "$PRINTVARS $SET_STR A aa $PRINTVARS $PRINTVAR A $PRINTVARS $SET_STR A aaaa $PRINTVARS",
         "");
-    if(err)return err;
-    err = run_test(
-        "$UNSET_BOOL A 1 $IF A($SET_BOOL B) 2 $IF B(3)",
-        "1 2");
-    if(err)return err;
-    err = run_test(
-        "$SET_BOOL A 1 $IF A($SET_BOOL B) 2 $IF B(3)",
-        "1 2 3");
     if(err)return err;
 
     return 0;
