@@ -5,6 +5,14 @@
 
 #$SET_BOOL CRAWL_MOVE
 
+$SET_INT TURN_DELAY 1
+$SET_INT FLY_DELAY 2
+
+
+on "spikeyspit":
+    goto: $PREFIX ANIM_NS turn
+    delay: $GET_INT TURN_DELAY
+
 
 $PREFIX ANIM_NS stand:
     rgraph: $PREFIX RGRAPH_NS "bird_stand"
@@ -22,6 +30,11 @@ $PREFIX ANIM_NS stand:
         ;;  (.)  .
 
     if:
+        key: isdown u
+    then:
+        goto: $PREFIX ANIM_NS stand_wings
+
+    if:
         key: isdown d
     then:
         goto: $PREFIX ANIM_NS crawl_arrive
@@ -37,7 +50,7 @@ $PREFIX ANIM_NS stand:
         key: isdown b
     then:
         goto: $PREFIX ANIM_NS turn
-        delay: 1
+        delay: $GET_INT TURN_DELAY
 
 $PREFIX ANIM_NS turn:
     rgraph: $PREFIX RGRAPH_NS "bird_turn"
@@ -386,7 +399,7 @@ $PREFIX ANIM_NS crawl:
         key: isdown b
     then:
         goto: $PREFIX ANIM_NS crawl_turn
-        delay: 1
+        delay: $GET_INT TURN_DELAY
 
 $PREFIX ANIM_NS crawl_turn:
     rgraph: $PREFIX RGRAPH_NS "bird_crawl_turn"
@@ -428,3 +441,169 @@ $PREFIX ANIM_NS crawl_stand:
 
     if:
     then: goto: $PREFIX ANIM_NS stand
+
+
+####################
+# WINGS AND FLYING #
+####################
+
+$PREFIX ANIM_NS stand_wings:
+    rgraph: $PREFIX RGRAPH_NS "bird_stand_wings"
+
+    if:
+        key: not isdown u
+    then:
+        goto: $PREFIX ANIM_NS stand
+
+    if:
+        key: isdown f
+    then:
+        goto: $PREFIX ANIM_NS fly
+        move: 1 0
+        delay: $GET_INT FLY_DELAY
+
+    if:
+        key: isdown b
+    then:
+        goto: $PREFIX ANIM_NS turn_wings
+        delay: $GET_INT TURN_DELAY
+
+$PREFIX ANIM_NS turn_wings:
+    rgraph: $PREFIX RGRAPH_NS "bird_turn_wings"
+    collmsgs: "crush"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;   . - .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then:
+        move: 1 0
+        turn
+        goto: $PREFIX ANIM_NS turn_arrive_wings
+        delay: 1
+
+$PREFIX ANIM_NS turn_arrive_wings:
+    rgraph: $PREFIX RGRAPH_NS "bird_turn_arrive_wings"
+    collmsgs: "crush"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;   . - .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+    if() then: goto: $PREFIX ANIM_NS stand_wings
+
+$PREFIX ANIM_NS fly:
+    rgraph: $PREFIX RGRAPH_NS "bird_fly"
+    unsafe
+    collmsgs: "crush"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;   .   .
+        ;;
+        ;; .   .   .
+        ;;
+        ;;  (.)  .
+    if() then:
+        goto: $PREFIX ANIM_NS flying
+
+$PREFIX ANIM_NS flying:
+    rgraph: $PREFIX RGRAPH_NS "bird_flying"
+    unsafe
+    collmsgs: "crush"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)- .
+
+    if:
+        key: wentdown u
+    then:
+        rot: 1
+        continue
+
+    if:
+        key: wentdown d
+    then:
+        rot: -1
+        continue
+
+    if:
+        key: not isdown u
+        coll: all yes
+            ;;   .   .
+            ;;
+            ;; .   .   .
+            ;;
+            ;;  (+)  +
+        coll: all no
+            ;;   . - .
+            ;;   *\*/*
+            ;; . - + - .
+            ;;   */*\*
+            ;;  (.)  .
+    then:
+        goto: $PREFIX ANIM_NS stand_wings
+
+    if:
+        key: isdown f
+    then:
+        goto: $PREFIX ANIM_NS fly
+        move: 1 0
+        delay: $GET_INT FLY_DELAY
+
+    if:
+        key: isdown b
+    then:
+        goto: $PREFIX ANIM_NS turn_flying
+        delay: $GET_INT TURN_DELAY
+
+$PREFIX ANIM_NS turn_flying:
+    rgraph: $PREFIX RGRAPH_NS "bird_turn_flying"
+    unsafe
+    collmsgs: "crush"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;   .   .
+        ;;
+        ;; .   .   .
+        ;;
+        ;;  (.)  .
+    if() then:
+        move: 1 0
+        turn
+        goto: $PREFIX ANIM_NS turn_arrive_flying
+        delay: 1
+
+$PREFIX ANIM_NS turn_arrive_flying:
+    rgraph: $PREFIX RGRAPH_NS "bird_turn_arrive_flying"
+    unsafe
+    collmsgs: "crush"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;   .   .
+        ;;
+        ;; .   .   .
+        ;;
+        ;;  (.)  .
+    if() then: goto: $PREFIX ANIM_NS flying

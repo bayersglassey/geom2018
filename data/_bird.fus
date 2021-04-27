@@ -260,7 +260,6 @@ shapes:
             : $PREFIX NS "_bird_beak" eval((0 1 3 1) + (1 0 -2 0) + (1 1 -1 -1)) 11 f 0 (0 1)
             : $PREFIX NS "_bird_beak" eval((0 1 3 1) + (1 0 -2 0) + (0 1 -1 -1)) 11 f 0 (1 1)
 
-
     $PREFIX NS "bird_turn_arrive":
         animation: cycle 2
         shapes:
@@ -401,3 +400,112 @@ shapes:
         shapes:
             : $PREFIX NS "bird_head_turn" ( 0 0 0  0)  0 f 1 (0 1)
             : $PREFIX NS "bird_head_turn" ( 0 0 0  0)  0 f 0 (1 1)
+
+
+    ###############
+    # BIRD WINGED #
+    ###############
+
+    $PREFIX NS "bird_wing": map("double"):
+        hexpicture:
+            ;;
+            ;;   +---+---+---+---+---+
+            ;;   |   |   |   |   |   |
+            ;;   |   |   |   |   |   |
+            ;;   |B  |C  |D  |E  |F  |
+            ;;   +---+---+---+---+---+
+            ;;  | | | | | | | | | | | |
+            ;;  |0|1|2|3|4|5|6|7|8|9|A|
+            ;; *---+---+---+---+---+---+
+            ;;
+
+    $PREFIX NS "bird_stand_wings":
+        shapes:
+            : $PREFIX NS "bird_legs_stand" (0 0 0 0) 0 f
+            : $PREFIX NS "bird_wing" (-3 0 6  3)  0 f
+            : $PREFIX NS "bird_head" (-3 0 6  3)  0 f
+            : $PREFIX NS "bird_wing" (-3 0 6  3)  6 t
+
+    $PREFIX NS "bird_turn_arrive_wings":
+        animation: cycle 2
+        shapes:
+            : $PREFIX NS "bird_wing" (-3 0 6  3)  0 f
+            : $PREFIX NS "bird_wing" (-3 0 6  3)  6 t
+
+            : $PREFIX NS "bird_legs_stand" (0 0 0 0) 0 f
+            : $PREFIX NS "bird_head_turn" (-3 0 6  3)  0 f 1 (0 1)
+            : $PREFIX NS "bird_head_turn" (-3 0 6  3)  0 f 0 (1 1)
+
+    $PREFIX NS "bird_turn_wings":
+        animation: cycle 4
+        shapes:
+            : $PREFIX NS "bird_wing" (-3 0 6  3)  0 f
+            : $PREFIX NS "bird_wing" (-3 0 6  3)  6 t
+
+            # back/front calves
+            #: $PREFIX NS "bird_leg_calf"  ( 0  0 0  0) 4 f
+            #: $PREFIX NS "bird_leg_calf"  ( 3  2 0 -1) 4 f
+
+            : $PREFIX NS "bird_leg_calf"  ( 0  0 0  0) 3 f 0 (0 1)
+            : $PREFIX NS "bird_leg_calf"  ( 3  2 0 -1) 3 f 0 (0 1)
+
+            : $PREFIX NS "bird_leg_calf"  ( 0  0 0  0) 2 f 0 (1 1)
+            : $PREFIX NS "bird_leg_calf"  ( 3  2 0 -1) 2 f 0 (1 1)
+
+            # back/front thighs
+            #: $PREFIX NS "bird_leg_thigh" (-3 -1 3  2) 2 f
+            #: $PREFIX NS "bird_leg_thigh" ( 0  1 3  1) 4 f
+
+            : $PREFIX NS "bird_leg_thigh" (-1 -1 3  2) 2 f 0 (0 1)
+            : $PREFIX NS "bird_leg_thigh" ( 2  1 3  1) 4 f 0 (0 1)
+
+            : $PREFIX NS "bird_leg_thigh" ( 1 -1 3  2) 2 f 0 (1 1)
+            : $PREFIX NS "bird_leg_thigh" ( 4  1 3  1) 4 f 0 (1 1)
+
+            # head
+            : $PREFIX NS "bird_head_turn" (-3 0 6  3)  0 f 0+ (0 2)
+
+            ############
+            # frames 3, 4 are turn_arrive for debugging purposes
+            : $PREFIX NS "bird_turn_arrive" (3 2 0 -1) 6 t 2+ (2 2)
+
+    $PREFIX NS "_bird_fly":
+        shapes:
+            : $PREFIX NS "bird_wing" (-3 0 6  3)  0 f
+            : $PREFIX NS "bird_head" (-3 0 6  3)  0 f
+            : $PREFIX NS "bird_wing" (-3 0 6  3)  6 t
+
+    $PREFIX NS "bird_fly":
+        animation: cycle 3
+        shapes:
+            : $PREFIX NS "_bird_fly" (-3 0 0 0)  0 f  0 (0 1)
+            : $PREFIX NS "_bird_fly" (-2 0 0 0)  0 f  0 (1 1)
+            : $PREFIX NS "_bird_fly" (-1 0 0 0)  0 f  0 (2 1)
+
+    $PREFIX NS "bird_flying":
+        shapes:
+            : $PREFIX NS "bird_wing" (-3 0 6  3)  0 f
+            : $PREFIX NS "bird_head" (-3 0 6  3)  0 f
+            : $PREFIX NS "bird_wing" (-3 0 6  3)  6 t
+
+    $PREFIX NS "bird_turn_arrive_flying":
+        animation: cycle 2
+        shapes:
+            : $PREFIX NS "bird_wing" (-3 0 6  3)  0 f
+            : $PREFIX NS "bird_wing" (-3 0 6  3)  6 t
+
+            : $PREFIX NS "bird_head_turn" (-3 0 6  3)  0 f 1 (0 1)
+            : $PREFIX NS "bird_head_turn" (-3 0 6  3)  0 f 0 (1 1)
+
+    $PREFIX NS "bird_turn_flying":
+        animation: cycle 4
+        shapes:
+            : $PREFIX NS "bird_wing" (-3 0 6  3)  0 f
+            : $PREFIX NS "bird_wing" (-3 0 6  3)  6 t
+
+            # head
+            : $PREFIX NS "bird_head_turn" (-3 0 6  3)  0 f 0+ (0 2)
+
+            ############
+            # frames 3, 4 are turn_arrive for debugging purposes
+            : $PREFIX NS "bird_turn_arrive" (3 2 0 -1) 6 t 2+ (2 2)
