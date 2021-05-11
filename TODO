@@ -799,4 +799,27 @@ Instead, maybe add a new value for body->dead?..
             * Attach where?.. would probably want "bindpoints" or something, i.e. named points within an rgraph...
     * For now, instead of rollers carrying coins, can just have a "coin creature", which can run around, and be collected.
 
+
+Mar 20, 2021:
+-------------
+
+* finish tutorial2. Where do you go after it?..
+* When actor dies (or flies off map), should respawn itself after a second or two.
+  (E.g. coin beasts killing themselves by running into walls :P)
+    * player_t has these fields:
+
+        hexgame_savelocation_t respawn_location;
+        hexgame_savelocation_t safe_location;
+        char *respawn_filename;
+
+        ...we could maybe move safe_location from player to body?..
+        ...or we could move {respawn,safe}_location into a new struct, and
+        player & actor can both have one of these structs?..
+        ...or we could use actor->trf as the place to "reset" an actor to,
+        when body_is_done_for(actor->body).
+            => THIS PROBABLY MAKES THE MOST SENSE.
+
+* Add a "gamma" setting or something, so that palette colours are brighter by default.
+
 * TWO BODIES CAN COLLECT THE SAME COIN!!!!
+
