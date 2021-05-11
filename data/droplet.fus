@@ -1,0 +1,37 @@
+
+shapes:
+
+    "_droplet_sixth":
+        animation: oscillate 6
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval(1 + 0 + 1) (1 2)
+            : "tri" (0 0 0 0)  0 f eval(1 + 0 + 3) (3 2)
+            : "tri" (0 0 0 0)  0 f eval(1 + 8 + 1) (5 1)
+            #: "tri" (0 0 0 0)  0 f eval(1 + 8 + 3) (4 1)
+            #: "tri" (0 0 0 0)  0 f eval(1 + 8 + 7) (5 1)
+
+    "_droplet":
+        animation: cycle 12
+        shapes:
+            : "_droplet_sixth" (0 0 0 0)  0 f 0+
+            : "_droplet_sixth" (0 0 0 0)  2 f 1+
+            : "_droplet_sixth" (0 0 0 0)  4 f 2+
+            : "_droplet_sixth" (0 0 0 0)  6 f 3+
+            : "_droplet_sixth" (0 0 0 0)  8 f 4+
+            : "_droplet_sixth" (0 0 0 0) 10 f 5+
+
+    "droplet":
+        animation: cycle 24
+        shapes:
+            : "_droplet" ( 1 1 1 0) 0 f  0 ( 0 2)
+            : "_droplet" ( 1 1 1 0) 0 f  1 ( 2 2)
+            : "_droplet" ( 1 1 1 0) 0 f  2 ( 4 2)
+            : "_droplet" ( 1 1 1 0) 0 f  3 ( 6 2)
+            : "_droplet" ( 1 1 1 0) 0 f  4 ( 8 2)
+            : "_droplet" ( 1 1 1 0) 0 f  5 (10 2)
+            : "_droplet" ( 1 1 1 0) 0 f  6 (12 2)
+            : "_droplet" ( 1 1 1 0) 0 f  7 (14 2)
+            : "_droplet" ( 1 1 1 0) 0 f  8 (16 2)
+            : "_droplet" ( 1 1 1 0) 0 f  9 (18 2)
+            : "_droplet" ( 1 1 1 0) 0 f 10 (20 2)
+            : "_droplet" ( 1 1 1 0) 0 f 11 (22 2)
