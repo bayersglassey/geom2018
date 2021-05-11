@@ -1,0 +1,23 @@
+
+unit: 3 2 0 -1
+spawn: "data/maps/tutorial3/start.fus"
+default_palette: "data/maps/trees/pals/trees.fus"
+default_tileset: "data/tileset1.fus"
+vars:
+
+submaps:
+    :
+        file: "data/maps/tutorial3/start.fus"
+        pos: eval: (0 0)
+        camera: (6 0)
+        mapper: ("triple")
+    :
+        file: "data/maps/tutorial3/start2.fus"
+        pos: eval: (0 0) + (16 -4)
+        camera: (0 0)
+        mapper: ("triple")
+    :
+        file: "data/maps/tutorial3/start3.fus"
+        pos: eval: (0 0) + (20 0) + (15 5)
+        camera: (0 0)
+        mapper: ("triple")
