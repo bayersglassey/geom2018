@@ -115,6 +115,7 @@ void fus_lexer_set_pos(fus_lexer_t *lexer, int pos);
 int fus_lexer_next(fus_lexer_t *lexer);
 bool fus_lexer_done(fus_lexer_t *lexer);
 bool fus_lexer_got(fus_lexer_t *lexer, const char *text);
+bool fus_lexer_got_chr(fus_lexer_t *lexer);
 bool fus_lexer_got_name(fus_lexer_t *lexer);
 bool fus_lexer_got_str(fus_lexer_t *lexer);
 bool fus_lexer_got_int(fus_lexer_t *lexer);

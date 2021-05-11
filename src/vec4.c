@@ -7,15 +7,47 @@
 
 /*
 
-      D
-        C
-      +
-      . +
-      .. + B
-      ...
-      *...+ A
+Units:
+
+       D
+         C
+       +
+       . +
+       .. + B
+       ...
+       *...+ A
+
+
+Extended units:
+(E and above can be derived from A through D, but they're
+handy to express units without an explicit addition, e.g.
+you can write "E" instead of "C - A")
+
+       D
+     E   C
+       +
+   F + . +
+  G + ... + B
+     .....
+       *...+ A
 
 */
+
+
+vec_t vec4_units[12] = {
+    { 1,  0,  0,  0},
+    { 0,  1,  0,  0},
+    { 0,  0,  1,  0},
+    { 0,  0,  0,  1},
+    {-1,  0,  1,  0},
+    { 0, -1,  0,  1},
+    {-1,  0,  0,  0},
+    { 0, -1,  0,  0},
+    { 0,  0, -1,  0},
+    { 0,  0,  0, -1},
+    { 1,  0, -1,  0},
+    { 0,  1,  0, -1}
+};
 
 
 vecspace_t vec4 = {

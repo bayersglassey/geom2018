@@ -28,6 +28,7 @@ void vec4_flip(vec_t v, flip_t flip);
 void vec4_render(vec_t v, int *x, int *y);
 void vec4_render_alt(vec_t v, int *x, int *y);
 
+extern vec_t vec4_units[12];
 extern vecspace_t vec4;
 extern vecspace_t vec4_alt;
 

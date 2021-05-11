@@ -499,6 +499,11 @@ bool fus_lexer_got(fus_lexer_t *lexer, const char *text){
     ;
 }
 
+bool fus_lexer_got_chr(fus_lexer_t *lexer){
+    return lexer->token_len == 1
+        && lexer->token[0] != '(' && lexer->token[0] != ')';
+}
+
 bool fus_lexer_got_name(fus_lexer_t *lexer){
     return lexer->token_type == FUS_LEXER_TOKEN_SYM;
 }
@@ -785,7 +790,7 @@ int fus_lexer_get_name_or_str(fus_lexer_t *lexer, char **s){
 int fus_lexer_get_chr(fus_lexer_t *lexer, char *c){
     int err;
     char *s;
-    err = fus_lexer_get_str(lexer, &s);
+    err = fus_lexer_get_name_or_str(lexer, &s);
     if(err)return err;
     if(strlen(s) != 1){
         fus_lexer_err_info(lexer); fprintf(stderr,

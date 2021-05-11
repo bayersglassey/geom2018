@@ -5,6 +5,7 @@
 #define GET(S) DO(fus_lexer_get(lexer, S))
 #define NEXT DO(fus_lexer_next(lexer))
 #define DONE fus_lexer_done(lexer)
+#define GOT_CHR fus_lexer_got_chr(lexer)
 #define GOT_NAME fus_lexer_got_name(lexer)
 #define GOT_STR fus_lexer_got_str(lexer)
 #define GOT_INT fus_lexer_got_int(lexer)

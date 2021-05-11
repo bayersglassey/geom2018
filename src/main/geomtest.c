@@ -7,6 +7,12 @@
 #include "../bounds.h"
 
 
+/* MAYBE TODO: ADD VEC PARSING TESTS (for fus_lexer_eval_vec)
+...although frankly, it's easy enough to test vec parsing with
+geomtool.
+Maybe write some tests as a shell script using geomtool? */
+
+
 void dump_vec(int dims, vec_t v){
     FILE *f = stdout;
     fprintf(f, "[% i", v[0]);

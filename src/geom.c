@@ -21,6 +21,7 @@
 #include <stdbool.h>
 
 #include "geom.h"
+#include "vec4.h"
 #include "lexer.h"
 
 
@@ -268,10 +269,42 @@ int fus_lexer_eval_vec(fus_lexer_t *lexer, vecspace_t *space, vec_t vec){
     vec_zero(vec);
     bool neg = false;
     while(1){
-        vec_t add;
 
-        err = fus_lexer_get_vec_simple(lexer, space, add);
-        if(err)return err;
+        if(fus_lexer_got(lexer, "-")){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            neg = true;
+        }
+
+        vec_t add;
+        if(fus_lexer_got(lexer, "0")){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            vec_zero(add);
+        }else if(fus_lexer_got(lexer, "eval")){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            err = fus_lexer_get(lexer, "(");
+            if(err)return err;
+            err = fus_lexer_eval_vec(lexer, space, add);
+            if(err)return err;
+            err = fus_lexer_get(lexer, ")");
+            if(err)return err;
+        }else if(space == &vec4 && fus_lexer_got_chr(lexer)){
+            /* Maybe TODO: have a generic space->get_unit(rot) ?.. */
+            char c;
+            err = fus_lexer_get_chr(lexer, &c);
+            if(err)return err;
+            if(c >= 'A' && c <= 'G'){
+                rot_t rot = c - 'A';
+                vec_cpy(space->dims, add, vec4_units[rot]);
+            }else{
+                return fus_lexer_unexpected(lexer, "A - G");
+            }
+        }else{
+            err = fus_lexer_get_vec_simple(lexer, space, add);
+            if(err)return err;
+        }
 
         if(neg)vec_neg(space->dims, add);
         neg = false;
@@ -311,9 +344,11 @@ int fus_lexer_eval_vec(fus_lexer_t *lexer, vecspace_t *space, vec_t vec){
             neg = true;
             err = fus_lexer_next(lexer);
             if(err)return err;
-        }else{
+        }else if(fus_lexer_got(lexer, "+")){
             err = fus_lexer_get(lexer, "+");
             if(err)return err;
+        }else{
+            return fus_lexer_unexpected(lexer, "+ or -");
         }
     }
 
