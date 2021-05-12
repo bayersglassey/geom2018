@@ -149,16 +149,12 @@ static int _test_app_command_add_player(test_app_t *app, fus_lexer_t *lexer, boo
     hexgame_t *game = &app->hexgame;
     /* HACK: we just grab maps[0] */
     hexmap_t *map = game->maps[0];
-    vec_ptr_t respawn_pos = map->spawn;
-    rot_t respawn_rot = 0;
-    bool respawn_turn = false;
+    hexgame_location_t spawn = map->spawn;
     char *respawn_map_filename = NULL;
     if(game->players_len > 0){
         /* HACK: we just grab players[0] */
         player_t *player = game->players[0];
-        respawn_pos = player->respawn_location.loc.pos;
-        respawn_rot = player->respawn_location.loc.rot;
-        respawn_turn = player->respawn_location.loc.turn;
+        spawn = player->respawn_location.loc;
         respawn_map_filename = strdup(player->respawn_location.map_filename);
         if(!respawn_map_filename)return 1;
     }else{
@@ -185,7 +181,7 @@ static int _test_app_command_add_player(test_app_t *app, fus_lexer_t *lexer, boo
 
     ARRAY_PUSH_NEW(player_t*, game->players, player)
     err = player_init(player, game, keymap,
-        respawn_pos, respawn_rot, respawn_turn, respawn_map_filename,
+        spawn.pos, spawn.rot, spawn.turn, respawn_map_filename,
         NULL);
     if(err)return err;
 
@@ -193,7 +189,7 @@ static int _test_app_command_add_player(test_app_t *app, fus_lexer_t *lexer, boo
     player_set_body(player, body);
 
     /* Move body to the respawn location */
-    err = body_respawn(body, respawn_pos, respawn_rot, respawn_turn, map);
+    err = body_respawn(body, spawn.pos, spawn.rot, spawn.turn, map);
     if(err)return err;
 
     return 0;

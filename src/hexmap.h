@@ -135,7 +135,7 @@ typedef struct hexmap {
 
     vars_t vars;
 
-    vec_t spawn;
+    hexgame_location_t spawn;
     vec_t unit;
 
     ARRAY_DECL(struct body*, bodies)

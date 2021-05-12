@@ -67,6 +67,7 @@ typedef struct hexgame_location {
 } hexgame_location_t;
 
 rot_t hexgame_location_get_rot(hexgame_location_t *loc);
+void hexgame_location_zero(hexgame_location_t *loc);
 void hexgame_location_init_trf(hexgame_location_t *loc, trf_t *trf);
 void hexgame_location_from_trf(hexgame_location_t *loc, trf_t *trf);
 void hexgame_location_apply(hexgame_location_t *loc, trf_t *trf);

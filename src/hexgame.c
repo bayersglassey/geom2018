@@ -504,7 +504,8 @@ int hexgame_reset_player(hexgame_t *game, player_t *player,
         want to turn this into a separate function controlled by
         test_app.) */
         hexmap_t *map = reset_map? reset_map: game->maps[0];
-        err = body_respawn(body, map->spawn, 0, false, map);
+        hexgame_location_t *spawn = &map->spawn;
+        err = body_respawn(body, spawn->pos, spawn->rot, spawn->turn, map);
         if(err)return err;
     }else{
         hexgame_savelocation_t *location = reset_level == RESET_SOFT?

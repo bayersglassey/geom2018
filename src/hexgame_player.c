@@ -57,7 +57,12 @@ int player_init(player_t *player, hexgame_t *game, int keymap,
     err = hexgame_get_or_load_map(game, respawn_map_filename, &map);
     if(err)return err;
     vecspace_t *space = map->space;
-    if(respawn_pos == NULL)respawn_pos = map->spawn;
+    if(respawn_pos == NULL){
+        hexgame_location_t *spawn = &map->spawn;
+        respawn_pos = spawn->pos;
+        respawn_rot = spawn->rot;
+        respawn_turn = spawn->turn;
+    }
 
     hexgame_savelocation_init(&player->respawn_location);
     hexgame_savelocation_set(&player->respawn_location, space,

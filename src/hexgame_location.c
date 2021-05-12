@@ -37,6 +37,12 @@ rot_t hexgame_location_get_rot(hexgame_location_t *loc){
     return rot;
 }
 
+void hexgame_location_zero(hexgame_location_t *loc){
+    vec_zero(loc->pos);
+    loc->rot = 0;
+    loc->turn = false;
+}
+
 void hexgame_location_init_trf(hexgame_location_t *loc, trf_t *trf){
     /* Converts loc to a trf_t. */
     vec_cpy(HEXSPACE_DIMS, trf->add, loc->pos);

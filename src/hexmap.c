@@ -178,7 +178,7 @@ int hexmap_init(hexmap_t *map, hexgame_t *game, char *name,
     map->name = name;
     map->game = game;
     map->space = space;
-    vec_zero(map->spawn);
+    hexgame_location_zero(&map->spawn);
 
     map->prend = prend;
     vec_cpy(prend->space->dims, map->unit, unit);
@@ -391,7 +391,7 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, char *name,
         err = fus_lexer_get_str(lexer, &spawn_filename);
         if(err)return err;
     }else{
-        err = fus_lexer_get_vec(lexer, map->space, map->spawn);
+        err = fus_lexer_get_vec(lexer, map->space, map->spawn.pos);
         if(err)return err;
     }
     err = fus_lexer_get(lexer, ")");
@@ -505,7 +505,8 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, char *name,
             fprintf(stderr, "Couldn't find submap with filename: %s\n",
                 spawn_filename);
             return 2;}
-        vec_cpy(map->space->dims, map->spawn, spawn_submap->pos);
+        map->spawn = spawn_submap->collmap.spawn;
+        vec_add(map->space->dims, map->spawn.pos, spawn_submap->pos);
         free(spawn_filename);
     }
 
