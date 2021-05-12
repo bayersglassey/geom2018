@@ -760,7 +760,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
         if(fus_lexer_got(lexer, "follow")){
             err = fus_lexer_next(lexer);
             if(err)return err;
-            camera_type = 1;
+            camera_type = CAMERA_TYPE_FOLLOW;
         }else{
             err = fus_lexer_get_vec(lexer, space, camera_pos);
             if(err)return err;
@@ -1216,8 +1216,8 @@ int hexmap_refresh_vars(hexmap_t *map){
 
 const char *submap_camera_type_msg(int camera_type){
     switch(camera_type){
-        case 0: return "Use camera_pos";
-        case 1: return "Follow player";
+        case CAMERA_TYPE_STATIC: return "Use camera_pos";
+        case CAMERA_TYPE_FOLLOW: return "Follow player";
         default: return "Unkown";
     }
 }

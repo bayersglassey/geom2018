@@ -186,8 +186,6 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
             }
         }else if(event->key.keysym.sym == SDLK_F7 && app->developer_mode){
             app->camera->follow = !app->camera->follow;
-        }else if(event->key.keysym.sym == SDLK_F8 && app->developer_mode){
-            app->camera->smooth_scroll = !app->camera->smooth_scroll;
         }else if(event->key.keysym.sym == SDLK_F9 && app->developer_mode){
             /* save recording */
             for(int i = 0; i < game->players_len; i++){

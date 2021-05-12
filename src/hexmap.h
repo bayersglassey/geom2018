@@ -105,11 +105,7 @@ typedef struct hexmap_submap {
     bool solid;
     vec_t pos;
     vec_t camera_pos;
-    int camera_type;
-        /*
-            0: use camera_pos
-            1: follow player
-        */
+    int camera_type; /* enum camera_type */
     char *filename;
     valexpr_t *text_expr; /* Text displayed at top-left when camera is on this submap */
     valexpr_t *visible_expr; /* Whether this submap is visible */

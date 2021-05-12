@@ -299,9 +299,20 @@ int actor_refresh_vars(actor_t *actor);
  * CAMERA *
  **********/
 
+enum camera_type {
+    CAMERA_TYPE_STATIC,
+    CAMERA_TYPE_FOLLOW,
+    CAMERA_TYPES,
+};
+
+enum {
+    /* Distance after which camera of type CAMERA_TYPE_FOLLOW will
+    move to catch up to its target. */
+    CAMERA_FOLLOW_MAX_DIST=10
+};
+
 typedef struct camera {
     bool follow;
-    bool smooth_scroll;
 
     SDL_Color colors[256];
     int colors_fade;

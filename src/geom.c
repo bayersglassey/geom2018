@@ -277,7 +277,7 @@ int fus_lexer_eval_vec(fus_lexer_t *lexer, vecspace_t *space, vec_t vec){
         }
 
         vec_t add;
-        if(fus_lexer_got(lexer, "0")){
+        if(fus_lexer_got(lexer, "0") || fus_lexer_got(lexer, "-0")){
             err = fus_lexer_next(lexer);
             if(err)return err;
             vec_zero(add);
