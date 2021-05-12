@@ -344,7 +344,7 @@ int player_step(player_t *player, hexgame_t *game){
 
     /* Respawn body if player hit the right key while dead */
     if(
-        (body->dead || (body->out_of_bounds && !body->state->flying)) &&
+        body_is_done_for(body) &&
         body->keyinfo.wasdown[KEYINFO_KEY_U]
     ){
         /* Soft reset */

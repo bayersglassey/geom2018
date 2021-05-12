@@ -153,6 +153,10 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
     return 0;
 }
 
+bool body_is_done_for(body_t *body){
+    return body->dead || (body->out_of_bounds && !body->state->flying);
+}
+
 int body_get_index(body_t *body){
     hexmap_t *map = body->map;
     for(int i = 0; i < map->bodies_len; i++){

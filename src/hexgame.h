@@ -183,6 +183,7 @@ int body_init(body_t *body, struct hexgame *game, hexmap_t *map,
     palettemapper_t *palmapper);
 void hexgame_body_dump(body_t *body, int depth);
 int body_get_index(body_t *body);
+bool body_is_done_for(body_t *body);
 int body_respawn(body_t *body, vec_t pos, rot_t rot, bool turn,
     hexmap_t *map);
 int body_add_body(body_t *body, body_t **new_body_ptr,
