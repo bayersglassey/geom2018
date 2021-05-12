@@ -505,6 +505,7 @@ $PREFIX ANIM_NS turn_arrive_wings:
 $PREFIX ANIM_NS fly:
     rgraph: $PREFIX RGRAPH_NS "bird_fly"
     unsafe
+    flying
     collmsgs: "crush"
     hitbox:
         ;;   .   .
@@ -522,6 +523,7 @@ $PREFIX ANIM_NS fly:
 $PREFIX ANIM_NS flying:
     rgraph: $PREFIX RGRAPH_NS "bird_flying"
     unsafe
+    flying
     collmsgs: "crush"
     hitbox:
         ;;   .   .
@@ -575,6 +577,7 @@ $PREFIX ANIM_NS flying:
 $PREFIX ANIM_NS turn_flying:
     rgraph: $PREFIX RGRAPH_NS "bird_turn_flying"
     unsafe
+    flying
     collmsgs: "crush"
     hitbox:
         ;;   .   .
@@ -595,6 +598,7 @@ $PREFIX ANIM_NS turn_flying:
 $PREFIX ANIM_NS turn_arrive_flying:
     rgraph: $PREFIX RGRAPH_NS "bird_turn_arrive_flying"
     unsafe
+    flying
     collmsgs: "crush"
     hitbox:
         ;;   .   .

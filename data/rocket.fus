@@ -1,0 +1,86 @@
+
+shapes:
+
+    "rocket_body":
+        hexpicture:
+            ;;
+            ;;
+            ;;
+            ;;
+            ;;           +---+---+
+            ;;           |   |   |--
+            ;;           |   |   |C +---+
+            ;;           |9  |9  |--|   |--
+            ;;           +---+---* C|   |C +
+            ;;           |   |   |--|9  |--
+            ;;           |   |   |4 +---+
+            ;;           |1  |1  |--
+            ;;           +---+---+
+            ;;
+            ;;
+            ;;
+            ;;
+
+    "rocket_flame":
+        animation: cycle 6
+        prismels:
+            : "tri" ( 0  0  0  0)  5 f eval(1 + 8 + 7) (0 1)
+            : "tri" ( 0 -1  0  0)  3 f eval(1 + 8 + 7) (0 1)
+            : "tri" ( 0  0  0  0)  5 f eval(1 + 8 + 6) (1 1)
+            : "tri" ( 0 -1  0  0)  3 f eval(1 + 8 + 6) (1 1)
+            : "tri" ( 0  0  0  0)  5 f eval(1 + 8 + 4) (2 1)
+            : "tri" ( 0 -1  0  0)  3 f eval(1 + 8 + 4) (2 1)
+            : "tri" ( 0  0  0  0)  5 f eval(1 + 0 + 4) (3 1)
+            : "tri" ( 0 -1  0  0)  3 f eval(1 + 0 + 4) (3 1)
+
+    "rocket_fire":
+        animation: cycle 6
+        shapes:
+            : "rocket_flame" eval(0)  0 f  0+
+
+            : "rocket_flame" eval( F    )  0 f -1+
+            : "rocket_flame" eval(   - B)  0 f -1+
+
+            : "rocket_flame" eval( F - B)  0 f -2+
+
+            : "rocket_flame" eval( F*2 - B  )  0 f -3+
+            : "rocket_flame" eval( F   - B*2)  0 f -3+
+
+            #: "rocket_flame" eval( F*2      )  0 f -4+
+            #: "rocket_flame" eval(     - B*2)  0 f -4+
+            : "rocket_flame" eval( F*2 - B*2)  0 f -4+
+
+    "rocket":
+        animation: cycle 6
+        shapes:
+            : "rocket_body" ( 0 0 0 0) 0 f
+            : "rocket_fire" (-2 0 0 0) 0 f
+
+    "rocket_forward":
+        animation: once 2
+        shapes:
+            : "rocket_body" (-4  0  0  0)  0 f 0+ (0 1)
+            : "rocket_fire" (-4  0  0  0)  0 f 0+ (0 1)
+
+            : "rocket_body" (-2  0  0  0)  0 f 0+ (1 1)
+            : "rocket_fire" (-2  0  0  0)  0 f 0+ (1 1)
+
+    "rocket_turn_up":
+        animation: once 2
+        shapes:
+            : "rocket_body" eval( E*4) -2 f 0+ (0 1)
+            : "rocket_fire" eval( E*4) -2 f 0+ (0 1)
+            : "rocket_fire" eval( E*4)  0 f 0+ (0 1)
+
+            : "rocket_body" eval( E*2) -1 f 0+ (1 1)
+            : "rocket_fire" eval( E*2) -1 f 0+ (1 1)
+
+    "rocket_turn_down":
+        animation: once 2
+        shapes:
+            : "rocket_body" eval(-C*4)  2 f 0+ (0 1)
+            : "rocket_fire" eval(-C*4)  2 f 0+ (0 1)
+            : "rocket_fire" eval(-C*4)  0 f 0+ (0 1)
+
+            : "rocket_body" eval(-C*2)  1 f 0+ (1 1)
+            : "rocket_fire" eval(-C*2)  1 f 0+ (1 1)

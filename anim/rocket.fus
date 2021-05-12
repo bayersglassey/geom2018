@@ -1,0 +1,42 @@
+
+
+$SET_INT DELAY 2
+
+stand:
+    rgraph: "rocket"
+    unsafe flying
+
+    if:
+        key: wasdown u
+    then:
+        move: 1 0
+        rot: 1
+        goto delay: turn_up
+
+    if:
+        key: wasdown d
+    then:
+        move: 1 0
+        rot: -1
+        goto delay: turn_down
+
+    if:
+        key: isdown f
+    then:
+        move: 1 0
+        goto delay: forward
+
+forward:
+    rgraph: "rocket_forward"
+    unsafe flying
+    if() then: goto: stand
+
+turn_up:
+    rgraph: "rocket_turn_up"
+    unsafe flying
+    if() then: goto: stand
+
+turn_down:
+    rgraph: "rocket_turn_down"
+    unsafe flying
+    if() then: goto: stand
