@@ -1,5 +1,5 @@
 parts:
-    "h": "data/tests/draw_realloc/hexagon.fus"
+    "h": "hexagon.fus"
 
 collmap:
     ;;

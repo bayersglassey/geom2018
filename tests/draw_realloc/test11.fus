@@ -1,9 +1,9 @@
 parts:
-    "h": "data/tests/draw_realloc/hexagon2.fus"
+    "h": "hexagon2.fus"
 
 collmap:
     ;;
-    ;;     +   .   ?   +     [h^2]
+    ;;     +   .   ?   +     [h^1]
     ;;
     ;;   +  (.)  .   .   +
     ;;

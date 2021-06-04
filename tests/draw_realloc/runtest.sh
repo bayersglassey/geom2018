@@ -1,8 +1,11 @@
-for f in data/tests/draw_realloc/test*.fus
+collmaptool="$PWD/bin/collmaptool"
+cd "$(dirname "$0")"
+
+for f in test*.fus
 do
     echo
     echo "============================================"
     echo "== $f:"
     cat "$f"
-    bin/collmaptool < "$f"
+    "$collmaptool" < "$f"
 done
