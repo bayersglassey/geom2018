@@ -55,8 +55,10 @@ static void print_help(){
         "Output extra info as fus comments (e.g. recordings, rendergraphs)\n");
     fprintf(stderr, " -d --nodots         "
         "Invisible verts are displayed as ' ' not '.'\n");
+    fprintf(stderr, " -t --show_tiles     "
+        "Tiles are shown\n");
     fprintf(stderr, " -e --eol_semicolons "
-        "Semicolons written to end of each line marking end of tile data.\n");
+        "Semicolons written to end of each line marking end of tile data\n");
     fprintf(stderr, " -r --rot ROT        "
         "Rotate collmap by ROT (an integer modulo 6)\n");
     fprintf(stderr, " -h --help           "
@@ -69,6 +71,7 @@ int main(int n_args, char **args){
     bool dump = false;
     bool extra = false;
     bool nodots = false;
+    bool show_tiles = false;
     bool eol_semicolons = false;
     rot_t rot = -1;
 
@@ -83,6 +86,8 @@ int main(int n_args, char **args){
             extra = true;
         }else if(!strcmp(arg, "-d") || !strcmp(arg, "--nodots")){
             nodots = true;
+        }else if(!strcmp(arg, "-t") || !strcmp(arg, "--show_tiles")){
+            show_tiles = true;
         }else if(!strcmp(arg, "-e") || !strcmp(arg, "--eol_semicolons")){
             eol_semicolons = true;
         }else if(!strcmp(arg, "-r") || !strcmp(arg, "--rot")){
@@ -131,7 +136,7 @@ int main(int n_args, char **args){
         hexcollmap_dump(collmap, stdout);
     }else{
         hexcollmap_write_with_parts(collmap, stdout,
-            just_coll, extra, nodots, eol_semicolons,
+            just_coll, extra, nodots, show_tiles, eol_semicolons,
             parts, parts_len);
     }
 
