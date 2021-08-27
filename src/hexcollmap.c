@@ -124,8 +124,14 @@ int hexcollmap_init_tiles_from_hexbox(hexcollmap_t *collmap){
     int map_r = collmap->hexbox.values[HEXBOX_INDEX(HEXBOX_X, HEXBOX_MAX)];
     int map_t = -collmap->hexbox.values[HEXBOX_INDEX(HEXBOX_Y, HEXBOX_MAX)];
     int map_b = -collmap->hexbox.values[HEXBOX_INDEX(HEXBOX_Y, HEXBOX_MIN)];
+
+    /* The "+1" here are because e.g. map_r - map_l gives the map's width
+    in *edges*, but we want to know the number of *vertices* we need.
+    For instance, a map consisting of a single vertex only has a "width"
+    of 0, yet we still need to allocate a vertex for it. */
     int map_w = map_r - map_l + 1;
     int map_h = map_b - map_t + 1;
+
     int map_size = map_w * map_h;
 
     /* ...Allocate map data */

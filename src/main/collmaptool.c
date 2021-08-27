@@ -57,8 +57,8 @@ static void print_help(){
         "Invisible verts are displayed as ' ' not '.'\n");
     fprintf(stderr, " -e --eol_semicolons "
         "Semicolons written to end of each line marking end of tile data.\n");
-    fprintf(stderr, "    --rot            "
-        "Rotate collmap\n");
+    fprintf(stderr, " -r --rot ROT        "
+        "Rotate collmap by ROT (an integer modulo 6)\n");
     fprintf(stderr, " -h --help           "
         "Show this message\n");
 }
@@ -85,7 +85,7 @@ int main(int n_args, char **args){
             nodots = true;
         }else if(!strcmp(arg, "-e") || !strcmp(arg, "--eol_semicolons")){
             eol_semicolons = true;
-        }else if(!strcmp(arg, "--rot")){
+        }else if(!strcmp(arg, "-r") || !strcmp(arg, "--rot")){
             i++;
             if(i >= n_args)goto arg_missing_value;
             rot = rot_contain(HEXSPACE_ROT_MAX, atoi(args[i]));
@@ -122,7 +122,7 @@ int main(int n_args, char **args){
             return 1;
         }
         hexcollmap_init_clone(collmap, from_collmap, "<clone>");
-        int err = hexcollmap_parse_clone(collmap, from_collmap, rot);
+        int err = hexcollmap_clone(collmap, from_collmap, rot);
         if(err)return err;
     }
 

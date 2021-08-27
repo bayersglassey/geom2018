@@ -150,6 +150,40 @@ typedef struct hexcollmap_part {
 } hexcollmap_part_t;
 
 typedef struct hexcollmap {
+    /*
+    Hexcollmap's dimensions are:
+
+        Y
+         +
+          \
+          (.)- + X
+
+    A hexcollmap with (w, h) = (1, 1) and (ox, oy) = (0, 0) looks like this:
+
+         + - +
+          \   \
+          (+)- +
+
+    A hexcollmap with (w, h) = (2, 2) and (ox, oy) = (1, 1) looks like this:
+
+       + - + - +
+        \       \
+         +  (.)  +
+          \       \
+           + - + - +
+
+    The array of tiles is actually stored with (0, 0) in the top-left, though.
+
+    The hexbox's dimensions are like this:
+
+             Y
+           + - +
+          /     \ X
+         +  (.)  +
+          \     / Z
+           + - +
+
+    */
     char *name;
     hexgame_location_t spawn;
     hexbox_t hexbox;
@@ -218,7 +252,7 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
     hexcollmap_part_t ***parts_ptr, int *parts_len_ptr);
 int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
     bool just_coll);
-int hexcollmap_parse_clone(hexcollmap_t *collmap,
+int hexcollmap_clone(hexcollmap_t *collmap,
     hexcollmap_t *collmap_from, rot_t rot);
 int hexcollmap_load(hexcollmap_t *collmap, const char *filename,
     vars_t *vars);
