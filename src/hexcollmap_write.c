@@ -33,13 +33,69 @@ static bool out_of_bounds_z(hexcollmap_t *collmap, int x, int y){
         z > collmap->hexbox.values[HEXBOX_INDEX(HEXBOX_Z, HEXBOX_MAX)];
 }
 
+static void _hexcollmap_write(hexcollmap_t *collmap, FILE *f,
+    const char *tabs, bool nodots, bool eol_semicolons
+){
+    char vert_default = nodots? ' ': '.';
+
+    for(int y = 0; y < collmap->h; y++){
+        // \ /
+        //  . -
+
+        int _y = collmap->oy - y;
+
+        // \ /
+        fputs(tabs, f);
+        fputs(";; ", f);
+        for(int x = 0; x < y; x++){
+            fputs("  ", f);
+        }
+        for(int x = 0; x < collmap->w; x++){
+            int _x = x - collmap->ox;
+            if(out_of_bounds_z(collmap, _x, _y)){
+                fputs("    ", f);
+                continue;
+            }
+            hexcollmap_tile_t *tile = &collmap->tiles[y * collmap->w + x];
+            fprintf(f, "%c%c%c%c",
+                _write_edge(tile->edge[2].tile_c, '\\'),
+                _write_face(tile->face[1].tile_c),
+                _write_edge(tile->edge[1].tile_c, '/'),
+                _write_face(tile->face[0].tile_c));
+        }
+        if(eol_semicolons)fputc(';', f);
+        fputc('\n', f);
+
+        //  . -
+        fputs(tabs, f);
+        fputs(";; ", f);
+        for(int x = 0; x < y; x++){
+            fputs("  ", f);
+        }
+        for(int x = 0; x < collmap->w; x++){
+            int _x = x - collmap->ox;
+            if(out_of_bounds_z(collmap, _x, _y)){
+                fputs("    ", f);
+                continue;
+            }
+            bool is_origin = x == collmap->ox && y == collmap->oy;
+            hexcollmap_tile_t *tile = &collmap->tiles[y * collmap->w + x];
+            fprintf(f, "%c%c%c%c",
+                is_origin? '(': ' ',
+                _write_vert(tile->vert[0].tile_c, vert_default),
+                is_origin? ')': ' ',
+                _write_edge(tile->edge[0].tile_c, '-'));
+        }
+        if(eol_semicolons)fputc(';', f);
+        fputc('\n', f);
+    }
+}
+
 void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
     bool just_coll, bool extra, bool nodots, bool eol_semicolons,
     hexcollmap_part_t **parts, int parts_len
 ){
     /* Writes it so you can hopefully more or less read it back again */
-
-    char vert_default = nodots? ' ': '.';
 
     if(extra)
     for(int i = 0; i < collmap->recordings_len; i++){
@@ -137,57 +193,7 @@ void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
         collmap->hexbox.values[2], collmap->hexbox.values[3],
         collmap->hexbox.values[4], collmap->hexbox.values[5]);
 
-    for(int y = 0; y < collmap->h; y++){
-        // \ /
-        //  . -
-
-        int _y = collmap->oy - y;
-
-        // \ /
-        fputs(tabs, f);
-        fputs(";; ", f);
-        for(int x = 0; x < y; x++){
-            fputs("  ", f);
-        }
-        for(int x = 0; x < collmap->w; x++){
-            int _x = x - collmap->ox;
-            if(out_of_bounds_z(collmap, _x, _y)){
-                fputs("    ", f);
-                continue;
-            }
-            hexcollmap_tile_t *tile = &collmap->tiles[y * collmap->w + x];
-            fprintf(f, "%c%c%c%c",
-                _write_edge(tile->edge[2].tile_c, '\\'),
-                _write_face(tile->face[1].tile_c),
-                _write_edge(tile->edge[1].tile_c, '/'),
-                _write_face(tile->face[0].tile_c));
-        }
-        if(eol_semicolons)fputc(';', f);
-        fputc('\n', f);
-
-        //  . -
-        fputs(tabs, f);
-        fputs(";; ", f);
-        for(int x = 0; x < y; x++){
-            fputs("  ", f);
-        }
-        for(int x = 0; x < collmap->w; x++){
-            int _x = x - collmap->ox;
-            if(out_of_bounds_z(collmap, _x, _y)){
-                fputs("    ", f);
-                continue;
-            }
-            bool is_origin = x == collmap->ox && y == collmap->oy;
-            hexcollmap_tile_t *tile = &collmap->tiles[y * collmap->w + x];
-            fprintf(f, "%c%c%c%c",
-                is_origin? '(': ' ',
-                _write_vert(tile->vert[0].tile_c, vert_default),
-                is_origin? ')': ' ',
-                _write_edge(tile->edge[0].tile_c, '-'));
-        }
-        if(eol_semicolons)fputc(';', f);
-        fputc('\n', f);
-    }
+    _hexcollmap_write(collmap, f, tabs, nodots, eol_semicolons);
 }
 
 void hexcollmap_write(hexcollmap_t *collmap, FILE *f,
