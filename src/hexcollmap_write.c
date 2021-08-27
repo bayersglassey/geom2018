@@ -26,11 +26,11 @@ static char _write_face(char tile_c, char empty){
         (tile_c_is_special(tile_c)? tile_c: '*'): empty;
 }
 
-static bool out_of_bounds_z(hexcollmap_t *collmap, int x, int y){
+static bool out_of_bounds_z(hexbox_t *hexbox, int x, int y){
     int z = x - y;
     return
-        z < collmap->hexbox.values[HEXBOX_INDEX(HEXBOX_Z, HEXBOX_MIN)] ||
-        z > collmap->hexbox.values[HEXBOX_INDEX(HEXBOX_Z, HEXBOX_MAX)];
+        z < hexbox->values[HEXBOX_INDEX(HEXBOX_Z, HEXBOX_MIN)] ||
+        z > hexbox->values[HEXBOX_INDEX(HEXBOX_Z, HEXBOX_MAX)];
 }
 
 static void _hexcollmap_write(hexcollmap_t *collmap, FILE *f,
@@ -50,7 +50,7 @@ static void _hexcollmap_write(hexcollmap_t *collmap, FILE *f,
         }
         for(int x = 0; x < collmap->w; x++){
             int _x = x - collmap->ox;
-            if(out_of_bounds_z(collmap, _x, _y)){
+            if(out_of_bounds_z(&collmap->hexbox, _x, _y)){
                 fputs(show_tiles? "[XX]": "    ", f);
                 continue;
             }
@@ -72,7 +72,7 @@ static void _hexcollmap_write(hexcollmap_t *collmap, FILE *f,
         }
         for(int x = 0; x < collmap->w; x++){
             int _x = x - collmap->ox;
-            if(out_of_bounds_z(collmap, _x, _y)){
+            if(out_of_bounds_z(&collmap->hexbox, _x, _y)){
                 fputs(show_tiles? "[XX]": "    ", f);
                 continue;
             }

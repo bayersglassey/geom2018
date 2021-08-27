@@ -50,6 +50,15 @@ static int _parse_trf(fus_lexer_t *lexer, vecspace_t *space,
     return 0;
 }
 
+static void hexcollmap_vert_rot(
+    int *x_ptr, int *y_ptr, int *i_ptr, rot_t addrot
+){
+    /* Does nothing!.. unlike hexcollmap_edge/face_rot, leaves its inputs
+    unchaged.
+    But we include this function so we can refer to hexcollmap_##PART##_rot
+    in a macro, even when PART is "vert". */
+}
+
 static void hexcollmap_edge_rot(
     int *x_ptr, int *y_ptr, int *i_ptr, rot_t addrot
 ){
@@ -189,14 +198,11 @@ static bool represents_face(char c){return get_elem_type(c) == '*';}
 
 static char get_map_elem_type(int x, int y){
     /* A poorly-named function which figures out whether a vert, edge, or
-    face is at the given hexcollmap coordinates */
-
-    /*
+    face is at the given hexcollmap coordinates.
     This is what a tile looks like in the hexcollmap text format:
          .   .
-          \#/#
+          \1/0
           (+)- .
-    ...where ( ) indicates the origin (x=0, y=0)
     */
 
     /* apply the formula for a vertex */
@@ -220,14 +226,17 @@ static char get_map_elem_type(int x, int y){
 static void get_map_coords(int x, int y, char elem_type,
     int *mx_ptr, int *my_ptr, bool *is_face1_ptr
 ){
-    /* Given (x, y) coords within the text representation (lines, etc)
-    of a collmap, return the map coords (mx, my) of the corresponding
-    vertex.
+    /* Given (x, y) coords and elem_type (one of '+' '-' '/' '\\') within
+    the text representation (lines, etc) of a collmap, return the map coords
+    (mx, my) of the corresponding tile's vertex.
     This is what a tile looks like in the hexcollmap text format:
          .   .
-          \#/#
+          \1/0
           (+)- .
-    ...where ( ) indicates the origin (x=0, y=0)
+
+    ...where 0 and 1 represent the faces (which have index 0 and 1).
+    If elem_type == '*', we set *is_face1_ptr to true if the face in
+    question was face 1, else false.
     */
 
     /* NOTE: elem_type must be one of: '+' '-' '/' '\\' */
@@ -259,6 +268,49 @@ static void get_map_coords(int x, int y, char elem_type,
     *mx_ptr = _div(x - y, 4);
     *my_ptr = _div(y, 2);
     if(is_face1_ptr != NULL)*is_face1_ptr = is_face1;
+}
+
+static void update_hexbox(hexbox_t *hexbox, int x, int y, char elem_type) {
+    /* Given (x, y) coords and elem_type (one of '+' '-' '/' '\\') within
+    the text representation (lines, etc) of a collmap, update the given
+    hexbox to contain the indicated element (vert/edge/face).
+    This is what a tile looks like in the hexcollmap text format:
+         .   .
+          \1/0
+          (+)- .
+    */
+
+    int mx, my;
+    bool is_face1;
+    get_map_coords(x, y, elem_type, &mx, &my, &is_face1);
+
+    /* We were fools: tile coords have Y flipped compared
+    to vecspaces... thus, vy = -my */
+    int vx =  mx;
+    int vy = -my;
+
+    if(elem_type == '+'){
+        hexbox_point_union(hexbox, vx    , vy    );
+    }else if(elem_type == '-'){
+        hexbox_point_union(hexbox, vx    , vy    );
+        hexbox_point_union(hexbox, vx + 1, vy    );
+    }else if(elem_type == '/'){
+        hexbox_point_union(hexbox, vx    , vy    );
+        hexbox_point_union(hexbox, vx + 1, vy + 1);
+    }else if(elem_type == '\\'){
+        hexbox_point_union(hexbox, vx    , vy    );
+        hexbox_point_union(hexbox, vx    , vy + 1);
+    }else if(elem_type == '*'){
+        if(!is_face1){
+            hexbox_point_union(hexbox, vx    , vy    );
+            hexbox_point_union(hexbox, vx + 1, vy    );
+            hexbox_point_union(hexbox, vx + 1, vy + 1);
+        }else{
+            hexbox_point_union(hexbox, vx    , vy    );
+            hexbox_point_union(hexbox, vx + 1, vy + 1);
+            hexbox_point_union(hexbox, vx    , vy + 1);
+        }
+    }
 }
 
 static int hexcollmap_draw(hexcollmap_t *collmap1, hexcollmap_t *collmap2,
@@ -486,6 +538,8 @@ static int _hexcollmap_parse_lines_hexbox(
     char **lines, int lines_len, int ox, int oy,
     hexbox_t *hexbox
 ){
+    /* Sets the values of hexbox */
+
     int err;
     hexbox_zero(hexbox);
     for(int y = 0; y < lines_len; y++){
@@ -504,13 +558,7 @@ static int _hexcollmap_parse_lines_hexbox(
                         c, elem_type, map_elem_type);
                     return 2;}
 
-                int mx, my; bool is_face1;
-                get_map_coords(x-ox, y-oy, elem_type,
-                    &mx, &my, &is_face1);
-
-                /* We were fools: tile coords have Y flipped compared
-                to vecspaces... thus, -my here */
-                hexbox_point_union(hexbox, mx, -my);
+                update_hexbox(hexbox, x-ox, y-oy, elem_type);
             }else if(c == '[' || c == ';'){
                 /* next line plz, "tilebuckets" don't affect bounds */
                 break;
@@ -1065,7 +1113,13 @@ int hexcollmap_clone(hexcollmap_t *collmap,
 #           define _PARSE_PART(PART, MAX_I) \
             for(int i = 0; i < MAX_I; i++){ \
                 int to_x = x, to_y = y, to_i = i; \
-                hexcollmap_edge_rot(&to_x, &to_y, &to_i, rot); \
+                hexcollmap_##PART##_rot(&to_x, &to_y, &to_i, rot); \
+                if( \
+                    to_x < 0 || to_x >= collmap->w || \
+                    to_y < 0 || to_y >= collmap->h \
+                ){ \
+                    continue; \
+                } \
                 int to_tile_i = to_y * collmap->w + to_x; \
                 hexcollmap_tile_t *tile = &collmap->tiles[to_tile_i]; \
                 tile->PART[to_i] = from_tile->PART[i]; \

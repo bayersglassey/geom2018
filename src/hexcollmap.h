@@ -191,7 +191,7 @@ typedef struct hexcollmap {
     int h;
     int ox;
     int oy;
-    hexcollmap_tile_t *tiles;
+    hexcollmap_tile_t *tiles; /* array of length w * h */
     ARRAY_DECL(hexmap_recording_t*, recordings)
     ARRAY_DECL(hexmap_rendergraph_t*, rendergraphs)
 
