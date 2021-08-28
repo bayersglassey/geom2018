@@ -44,10 +44,17 @@ typedef hexcollmap_elem_t *hexcollmap_tile_get_part(
         for(int i = 0; i < tileset->TYPE##_entries_len; i++){ \
             hexmap_tileset_entry_t *entry = tileset->TYPE##_entries[i]; \
             if(entry->tile_c != tile_c)continue; \
-            if(entry->n_rgraphs > rot){ \
-                rot_ok = true; \
-                rgraph = entry->rgraphs[rot]; \
-            }else rgraph = entry->rgraphs[0]; \
+            rgraph = entry->rgraphs[0]; \
+            if(entry->type == HEXMAP_TILESET_ENTRY_TYPE_ROTS){ \
+                if(rot < entry->n_rgraphs){ \
+                    rot_ok = true; \
+                    rgraph = entry->rgraphs[rot]; \
+                } \
+            }else if( \
+                entry->type == HEXMAP_TILESET_ENTRY_TYPE_WHEN_FACES_SOLID \
+            ){ \
+                /* int rgraph_i = _get_rgraph_i_##TYPE( ??? ); */ \
+            } \
             frame_offset = entry->frame_offset; \
             break; \
         } \

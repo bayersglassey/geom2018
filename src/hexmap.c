@@ -56,12 +56,18 @@ int hexmap_tileset_init(hexmap_tileset_t *tileset, char *name){
 static const char VERTS[] = "verts";
 static const char EDGES[] = "edges";
 static const char FACES[] = "faces";
+static const char *WHEN_FACES_SOLID_RGRAPH_KEYS_VERT[] = {
+    "none", "some", "all", NULL};
+static const char *WHEN_FACES_SOLID_RGRAPH_KEYS_EDGE[] = {
+    "neither", "bottom", "top", "both", NULL};
 static int _hexmap_tileset_parse_part(
     const char *part_name /* one of VERTS, EDGES, or FACES */,
     hexmap_tileset_entry_t ***entries_ptr,
     int *entries_len_ptr, int *entries_size_ptr,
     prismelrenderer_t *prend, fus_lexer_t *lexer
 ){
+    /* WELCOME TO THE FUNCTION FROM HELL
+    AREN'T WE GLAD WE ROLLED OUR OWN DATA FORMAT? */
     int err;
 
     /* The following hack is an indication that our array.h system
@@ -90,9 +96,11 @@ static int _hexmap_tileset_parse_part(
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
         ARRAY_PUSH_NEW(hexmap_tileset_entry_t*, entries, entry)
+        entry->type = HEXMAP_TILESET_ENTRY_TYPE_ROTS;
         entry->n_rgraphs = 0;
         entry->tile_c = tile_c;
         entry->frame_offset = 0;
+
         if(fus_lexer_got(lexer, "frame_offset")){
             err = fus_lexer_next(lexer);
             if(err)return err;
@@ -103,8 +111,52 @@ static int _hexmap_tileset_parse_part(
             err = fus_lexer_get(lexer, ")");
             if(err)return err;
         }
+
+        const char **rgraph_keys = NULL;
+        if(fus_lexer_got(lexer, "when_faces_solid")){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+
+            if(part_name == VERTS){
+                rgraph_keys = WHEN_FACES_SOLID_RGRAPH_KEYS_VERT;
+            }else if(part_name == EDGES){
+                rgraph_keys = WHEN_FACES_SOLID_RGRAPH_KEYS_EDGE;
+            }else{
+                fus_lexer_err_info(lexer);
+                fprintf(stderr, "when_faces_solid only makes sense for "
+                    "verts and edges!\n");
+                return 2;
+            }
+
+            entry->type = HEXMAP_TILESET_ENTRY_TYPE_WHEN_FACES_SOLID;
+
+            err = fus_lexer_get(lexer, "(");
+            if(err)return err;
+        }
+
         while(1){
-            if(!fus_lexer_got_str(lexer))break;
+            if(rgraph_keys){
+                if(!fus_lexer_got_name(lexer))break;
+                const char *rgraph_key = rgraph_keys[entry->n_rgraphs];
+                if(rgraph_key == NULL){
+                    fus_lexer_err_info(lexer);
+                    fprintf(stderr,
+                        "Too many entries for when_faces_solid.\n");
+                    return 2;
+                }
+                err = fus_lexer_get(lexer, rgraph_key);
+                if(err)return err;
+                err = fus_lexer_get(lexer, "(");
+                if(err)return err;
+            }else{
+                if(!fus_lexer_got_str(lexer))break;
+            }
+            if(entry->n_rgraphs == HEXMAP_TILESET_ENTRY_RGRAPHS) {
+                fus_lexer_err_info(lexer);
+                fprintf(stderr, "Already parsed max rgraphs (%i)!\n",
+                    HEXMAP_TILESET_ENTRY_RGRAPHS);
+                return 2;
+            }
             char *rgraph_name;
             err = fus_lexer_get_str(lexer, &rgraph_name);
             if(err)return err;
@@ -118,9 +170,30 @@ static int _hexmap_tileset_parse_part(
             free(rgraph_name);
             entry->rgraphs[entry->n_rgraphs] = rgraph;
             entry->n_rgraphs++;
+            if(rgraph_keys){
+                err = fus_lexer_get(lexer, ")");
+                if(err)return err;
+            }
         }
+
         if(entry->n_rgraphs == 0){
-            return fus_lexer_unexpected(lexer, "str");}
+            return fus_lexer_unexpected(lexer, "str");
+        }
+        if(rgraph_keys){
+            const char *rgraph_key = rgraph_keys[entry->n_rgraphs];
+            if(rgraph_key != NULL){
+                fus_lexer_err_info(lexer);
+                fprintf(stderr, "Missing an entry for when_faces_solid. "
+                    "Expected entries:");
+                for(int i = 0; rgraph_keys[i]; i++){
+                    fprintf(stderr, " %s", rgraph_keys[i]);
+                }
+                fputc('\n', stderr);
+                return 2;
+            }
+            err = fus_lexer_get(lexer, ")");
+            if(err)return err;
+        }
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
     }
@@ -169,6 +242,8 @@ int hexmap_tileset_load(hexmap_tileset_t *tileset,
 ){
     int err;
     fus_lexer_t lexer;
+
+    fprintf(stderr, "Loading tileset: %s\n", filename);
 
     char *text = load_file(filename);
     if(text == NULL)return 1;

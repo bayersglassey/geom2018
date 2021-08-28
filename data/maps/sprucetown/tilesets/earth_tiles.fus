@@ -1,0 +1,106 @@
+
+shapes:
+
+    ##########
+    # VERTEX #
+    ##########
+
+    "earth_vert0":
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval: 1 + 0 + 5
+            : "tri" (0 0 0 0)  2 f eval: 1 + 0 + 4
+            : "tri" (0 0 0 0)  4 f eval: 1 + 0 + 5
+            : "tri" (0 0 0 0)  6 f eval: 1 + 0 + 4
+            : "tri" (0 0 0 0)  8 f eval: 1 + 0 + 5
+            : "tri" (0 0 0 0) 10 f eval: 1 + 0 + 4
+
+    "earth_vert0_grass":
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 2
+            : "tri" (0 0 0 0)  2 f eval: 1 + 8 + 2
+            : "tri" (0 0 0 0)  4 f eval: 1 + 8 + 2
+            : "tri" (0 0 0 0)  6 f eval: 1 + 8 + 2
+            : "tri" (0 0 0 0)  8 f eval: 1 + 8 + 2
+            : "tri" (0 0 0 0) 10 f eval: 1 + 8 + 2
+
+    "_earth_vert0_flower_third":
+        prismels:
+            : "tri" (-1 0 1 0)  2 f eval: 1 + 8 + 5
+            : "tri" (-1 0 1 0)  0 f eval: 1 + 8 + 5
+
+            : "tri" ( 1 0 0 0)  0 f eval: 1 + 8 + 4
+            : "tri" ( 1 0 0 0)  2 f eval: 1 + 8 + 4
+
+    "earth_vert0_flower":
+        shapes:
+            : "earth_vert0_grass"         (0 0 0 0)  0 f
+            : "_earth_vert0_flower_third" (0 0 0 0)  0 f
+            : "_earth_vert0_flower_third" (0 0 0 0)  4 f
+            : "_earth_vert0_flower_third" (0 0 0 0)  8 f
+
+    ########
+    # EDGE #
+    ########
+
+    "earth_edge0":
+        #         +---+
+        #      ---|   |---
+        # *---+   |   |   +
+        #      ---|   |---
+        #         +---+
+        prismels:
+            : "tri" (1 0 0  0) 11 f eval: 1 + 0 + 5
+            : "sq"  (1 1 0 -1)  0 f eval: 1 + 0 + 4
+            : "tri" (2 2 0 -1)  5 f eval: 1 + 0 + 5
+
+    "_earth_edge0_grass_top":
+        #         +---+---+
+        #      --- | | | | ---
+        #     +    | | | |    +
+        #      |   | | | |   |
+        #      |    +---+    |
+        #      | ---     --- |
+        #   *---+           +
+        prismels:
+            : "sq"  (1 0 0 0)  1 f eval: 1 + 8 + 6
+            : "tri" (1 1 0 0)  2 f eval: 1 + 8 + 2
+            : "tri" (1 1 0 0)  0 f eval: 1 + 8 + 2
+            : "tri" (2 1 0 0)  2 f eval: 1 + 8 + 2
+            : "sq"  (2 1 0 0) 11 f eval: 1 + 8 + 6
+
+    "earth_edge0_grass_top":
+        shapes:
+            : "earth_edge0"            (0 0 0 0) 0 f
+            : "_earth_edge0_grass_top" (0 0 0 0) 0 f
+
+    "earth_edge0_grass_bottom":
+        shapes:
+            : "earth_edge0"            (0 0 0 0) 0 f
+            : "_earth_edge0_grass_top" (0 0 0 0) 0 t
+
+    "earth_edge0_grass_both":
+        shapes:
+            #: "earth_edge0"            (0 0 0 0) 0 f
+            : "_earth_edge0_grass_top" (0 0 0 0) 0 f
+            : "_earth_edge0_grass_top" (0 0 0 0) 0 t
+        prismels:
+            # Like "earth_edge0" but with different colours
+            : "tri" (1 0 0  0) 11 f eval: 1 + 0 + 2
+            : "sq"  (1 1 0 -1)  0 f eval: 1 + 0 + 6
+            : "tri" (2 2 0 -1)  5 f eval: 1 + 0 + 2
+
+    ########
+    # FACE #
+    ########
+
+    "earth_face0_third":
+        prismels:
+            : "tri" ( 0 0 0 0)  0 f eval: 1 + 0 + 5
+            : "tri" ( 0 0 0 0)  2 f eval: 1 + 0 + 4
+            : "sq"  (-1 0 1 0)  0 f eval: 1 + 0 + 5
+
+    "earth_face0":
+        shapes:
+            : "earth_face0_third" (1 1 1 0)  0 f
+            : "earth_face0_third" (1 1 1 0)  4 f
+            : "earth_face0_third" (1 1 1 0)  8 f

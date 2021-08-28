@@ -12,3 +12,4 @@ worldmaps:
     : "data/maps/test/worldmap_minimal.fus"
     : "data/maps/trees/worldmap.fus"
     : "data/maps/spidertown/worldmap.fus"
+    : "data/maps/sprucetown/worldmap.fus"

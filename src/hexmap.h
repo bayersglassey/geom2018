@@ -22,18 +22,27 @@ enum hexmap_vars_props {
  * HEXMAP TILESET *
  ******************/
 
+#define HEXMAP_TILESET_ENTRY_RGRAPHS 4
+
+enum hexmap_tileset_entry_type {
+    HEXMAP_TILESET_ENTRY_TYPE_ROTS,
+    HEXMAP_TILESET_ENTRY_TYPE_WHEN_FACES_SOLID,
+    HEXMAP_TILESET_ENTRY_TYPES
+};
+
 typedef struct hexmap_tileset_entry {
+    int type; /* enum hexmap_tileset_entry_type */
     char tile_c;
         /* see hexcollmap_elem->tile_c */
     int n_rgraphs;
-        /* Between 1 and 3 (index is a rot_t value). */
+        /* Between 1 and HEXMAP_TILESET_ENTRY_RGRAPHS */
     int frame_offset;
         /* How tiles' positions should affect the frame offset of
         their animation.
         For now, should basically be treated as a bool (0/1). */
 
     /* Weakrefs */
-    rendergraph_t *rgraphs[3];
+    rendergraph_t *rgraphs[HEXMAP_TILESET_ENTRY_RGRAPHS];
 } hexmap_tileset_entry_t;
 
 typedef struct hexmap_tileset {

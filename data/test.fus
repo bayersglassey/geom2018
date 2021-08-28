@@ -13,6 +13,8 @@ import "data/texts.fus"
 import "data/maps/test/tiles.fus"
 import "data/maps/demo/tilesets/water_tiles.fus"
 import "data/maps/trees/tilesets/bark_tiles.fus"
+import "data/maps/sprucetown/tilesets/earth_tiles.fus"
+
 import "data/effects.fus"
 import "data/coin.fus"
 import "data/coin_beast.fus"

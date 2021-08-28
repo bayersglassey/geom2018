@@ -1,0 +1,12 @@
+
+unit: 3 2 0 -1
+spawn: "data/maps/sprucetown/start.fus"
+default_palette: "data/pal1.fus"
+default_tileset: "data/maps/sprucetown/tilesets/earth.fus"
+
+submaps:
+    :
+        file: "data/maps/sprucetown/start.fus"
+        pos: (0 0)
+        camera: (6 4)
+        mapper: ("triple")
