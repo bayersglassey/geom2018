@@ -53,6 +53,86 @@ int hexmap_tileset_init(hexmap_tileset_t *tileset, char *name){
     return 0;
 }
 
+static const char VERTS[] = "verts";
+static const char EDGES[] = "edges";
+static const char FACES[] = "faces";
+static int _hexmap_tileset_parse_part(
+    const char *part_name /* one of VERTS, EDGES, or FACES */,
+    hexmap_tileset_entry_t ***entries_ptr,
+    int *entries_len_ptr, int *entries_size_ptr,
+    prismelrenderer_t *prend, fus_lexer_t *lexer
+){
+    int err;
+
+    /* The following hack is an indication that our array.h system
+    of doing things was itself a hack.
+    That is, we will use ARRAY_PUSH_NEW below, passing it the token
+    "entries", and it expects the tokens "entries_len" and "entries_size"
+    to also exist.
+    So we create them here and populate them from pointers, then assign
+    their values back through the pointers at end of function.
+    It's weird, man... but it works! */
+    hexmap_tileset_entry_t **entries = *entries_ptr;
+    int entries_len = *entries_len_ptr;
+    int entries_size = *entries_size_ptr;
+
+    err = fus_lexer_get(lexer, part_name);
+    if(err)return err;
+    err = fus_lexer_get(lexer, "(");
+    if(err)return err;
+    while(1){
+        if(fus_lexer_got(lexer, ")"))break;
+
+        char tile_c;
+        err = fus_lexer_get_chr(lexer, &tile_c);
+        if(err)return err;
+
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        ARRAY_PUSH_NEW(hexmap_tileset_entry_t*, entries, entry)
+        entry->n_rgraphs = 0;
+        entry->tile_c = tile_c;
+        entry->frame_offset = 0;
+        if(fus_lexer_got(lexer, "frame_offset")){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            err = fus_lexer_get(lexer, "(");
+            if(err)return err;
+            err = fus_lexer_get_int(lexer, &entry->frame_offset);
+            if(err)return err;
+            err = fus_lexer_get(lexer, ")");
+            if(err)return err;
+        }
+        while(1){
+            if(!fus_lexer_got_str(lexer))break;
+            char *rgraph_name;
+            err = fus_lexer_get_str(lexer, &rgraph_name);
+            if(err)return err;
+            rendergraph_t *rgraph =
+                prismelrenderer_get_rendergraph(prend, rgraph_name);
+            if(rgraph == NULL){
+                fus_lexer_err_info(lexer);
+                fprintf(stderr, "Couldn't find shape: %s\n",
+                    rgraph_name);
+                free(rgraph_name); return 2;}
+            free(rgraph_name);
+            entry->rgraphs[entry->n_rgraphs] = rgraph;
+            entry->n_rgraphs++;
+        }
+        if(entry->n_rgraphs == 0){
+            return fus_lexer_unexpected(lexer, "str");}
+        err = fus_lexer_get(lexer, ")");
+        if(err)return err;
+    }
+    err = fus_lexer_next(lexer);
+    if(err)return err;
+
+    *entries_ptr = entries;
+    *entries_len_ptr = entries_len;
+    *entries_size_ptr = entries_size;
+    return 0;
+}
+
 static int hexmap_tileset_parse(hexmap_tileset_t *tileset,
     prismelrenderer_t *prend, char *name,
     fus_lexer_t *lexer
@@ -62,64 +142,24 @@ static int hexmap_tileset_parse(hexmap_tileset_t *tileset,
     err = hexmap_tileset_init(tileset, name);
     if(err)return err;
 
-    /* parse vert, edge, face, rgraphs */
-    #define GET_RGRAPH(TYPE) { \
-        err = fus_lexer_get(lexer, #TYPE"s"); \
-        if(err)return err; \
-        err = fus_lexer_get(lexer, "("); \
-        if(err)return err; \
-        while(1){ \
-            if(fus_lexer_got(lexer, ")"))break; \
-            \
-            char tile_c; \
-            err = fus_lexer_get_chr(lexer, &tile_c); \
-            if(err)return err; \
-            \
-            err = fus_lexer_get(lexer, "("); \
-            if(err)return err; \
-            ARRAY_PUSH_NEW(hexmap_tileset_entry_t*, \
-                tileset->TYPE##_entries, entry) \
-            entry->n_rgraphs = 0; \
-            entry->tile_c = tile_c; \
-            entry->frame_offset = 0; \
-            if(fus_lexer_got(lexer, "frame_offset")){ \
-                err = fus_lexer_next(lexer); \
-                if(err)return err; \
-                err = fus_lexer_get(lexer, "("); \
-                if(err)return err; \
-                err = fus_lexer_get_int(lexer, &entry->frame_offset); \
-                if(err)return err; \
-                err = fus_lexer_get(lexer, ")"); \
-                if(err)return err; \
-            } \
-            while(1){ \
-                if(!fus_lexer_got_str(lexer))break; \
-                char *rgraph_name; \
-                err = fus_lexer_get_str(lexer, &rgraph_name); \
-                if(err)return err; \
-                rendergraph_t *rgraph = \
-                    prismelrenderer_get_rendergraph(prend, rgraph_name); \
-                if(rgraph == NULL){ \
-                    fus_lexer_err_info(lexer); \
-                    fprintf(stderr, "Couldn't find shape: %s\n", \
-                        rgraph_name); \
-                    free(rgraph_name); return 2;} \
-                free(rgraph_name); \
-                entry->rgraphs[entry->n_rgraphs] = rgraph; \
-                entry->n_rgraphs++; \
-            } \
-            if(entry->n_rgraphs == 0){ \
-                return fus_lexer_unexpected(lexer, "str");} \
-            err = fus_lexer_get(lexer, ")"); \
-            if(err)return err; \
-        } \
-        err = fus_lexer_next(lexer); \
-        if(err)return err; \
-    }
-    GET_RGRAPH(vert)
-    GET_RGRAPH(edge)
-    GET_RGRAPH(face)
-    #undef GET_RGRAPH
+    err = _hexmap_tileset_parse_part(VERTS,
+        &tileset->vert_entries,
+        &tileset->vert_entries_len,
+        &tileset->vert_entries_size,
+        prend, lexer);
+    if(err)return err;
+    err = _hexmap_tileset_parse_part(EDGES,
+        &tileset->edge_entries,
+        &tileset->edge_entries_len,
+        &tileset->edge_entries_size,
+        prend, lexer);
+    if(err)return err;
+    err = _hexmap_tileset_parse_part(FACES,
+        &tileset->face_entries,
+        &tileset->face_entries_len,
+        &tileset->face_entries_size,
+        prend, lexer);
+    if(err)return err;
 
     return 0;
 }
