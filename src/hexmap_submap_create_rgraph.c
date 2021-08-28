@@ -21,27 +21,47 @@ should disable bitmap caching for it (somehow). */
 #define HEXMAP_SUBMAP_RGRAPH_N_FRAMES 24
 
 
+static int _get_rgraph_i_when_faces_solid_vert(int n_faces_solid) {
+    if(n_faces_solid == 0)return 0;
+    if(n_faces_solid == 6)return 2;
+    return 1;
+}
+static int _get_rgraph_i_when_faces_solid_edge(int n_faces_solid) {
+    /* n_faces_solid:
+        0 if neither face is solid
+        1 if bottom face (face 0) is solid
+        2 if top face (face 1) is solid
+        3 if both faces are solid
+    */
+    return n_faces_solid;
+}
+static int _get_rgraph_i_when_faces_solid_face(int n_faces_solid) {
+    /* Should never be called. hexmap_tileset_entry_t's type should
+    never be HEXMAP_TILESET_ENTRY_TYPE_WHEN_FACES_SOLID for a face. */
+    return 0;
+}
 
 typedef void hexmap_tileset_get_rgraph(hexmap_tileset_t *tileset,
-    char tile_c, rot_t rot,
+    char tile_c, rot_t rot, int n_faces_solid,
     rendergraph_t **rgraph_ptr, bool *rot_ok_ptr,
     int *frame_offset_ptr);
 typedef hexcollmap_elem_t *hexcollmap_tile_get_part(
     hexcollmap_tile_t *tile, int i);
 #define HEXMAP_TILESET_DEFINE_HELPERS(TYPE) \
     static void hexmap_tileset_get_rgraph_##TYPE(hexmap_tileset_t *tileset, \
-        char tile_c, rot_t rot, \
+        char tile_c, rot_t rot, int n_faces_solid, \
         rendergraph_t **rgraph_ptr, bool *rot_ok_ptr, \
         int *frame_offset_ptr \
     ){ \
         /* rgraph: non-NULL if we found an entry with matching tile_c */ \
         /* rot_ok: whether the entry we found had an rgraph for the */ \
-        /* requested rot; if false, rgraph is the entry's rgraph for */ \
-        /* rot=0 and caller should rotate the rgraph manually */ \
+        /* requested rot; if false, caller should rotate the rgraph */ \
+        /* manually */ \
         bool rot_ok = false; \
         int frame_offset = 0; \
         rendergraph_t *rgraph = NULL; \
         for(int i = 0; i < tileset->TYPE##_entries_len; i++){ \
+            /* This loop searches for the entry with given tile_c. */ \
             hexmap_tileset_entry_t *entry = tileset->TYPE##_entries[i]; \
             if(entry->tile_c != tile_c)continue; \
             rgraph = entry->rgraphs[0]; \
@@ -53,7 +73,9 @@ typedef hexcollmap_elem_t *hexcollmap_tile_get_part(
             }else if( \
                 entry->type == HEXMAP_TILESET_ENTRY_TYPE_WHEN_FACES_SOLID \
             ){ \
-                /* int rgraph_i = _get_rgraph_i_##TYPE( ??? ); */ \
+                int rgraph_i = _get_rgraph_i_when_faces_solid_##TYPE( \
+                    n_faces_solid); \
+                rgraph = entry->rgraphs[rgraph_i]; \
             } \
             frame_offset = entry->frame_offset; \
             break; \
@@ -107,7 +129,9 @@ static int rendergraph_add_rgraph_from_tile(
     hexmap_tileset_t *tileset, int x,
     vecspace_t *space, vec_t v,
     hexmap_tileset_get_rgraph *get_rgraph,
-    hexcollmap_tile_get_part *tile_get_part
+    hexcollmap_tile_get_part *tile_get_part,
+    int *n_faces_solid
+        /* array of length rot, or NULL if this call is for a face */
 ){
     int err;
     for(int i = 0; i < rot; i++){
@@ -118,6 +142,7 @@ static int rendergraph_add_rgraph_from_tile(
         int frame_offset;
         get_rgraph(tileset,
                 elem->tile_c, i,
+                n_faces_solid? n_faces_solid[i]: 0,
                 &rgraph_tile, &rot_ok, &frame_offset);
         int frame_i = frame_offset? x: 0;
         if(rgraph_tile == NULL){
@@ -131,6 +156,97 @@ static int rendergraph_add_rgraph_from_tile(
         if(err)return err;
     }
     return 0;
+}
+
+static void _init_n_faces_solid_vert(int *n_faces_solid,
+    hexcollmap_t *collmap
+){
+    for(int y = 0; y < collmap->h; y++){
+        for(int x = 0; x < collmap->w; x++){
+            int n_faces = 0;
+            for(int rot = 0; rot < 6; rot++){
+                int face_x = x;
+                int face_y = y;
+                int face_i = 0;
+                hexcollmap_face_rot(&face_x, &face_y, &face_i, rot);
+
+                hexcollmap_tile_t *face_tile = hexcollmap_get_tile_xy(
+                    collmap, face_x, face_y);
+                if(face_tile){
+                    hexcollmap_elem_t *elem = &face_tile->face[face_i];
+                    if(hexcollmap_elem_is_visible(elem))n_faces++;
+                }
+            }
+
+            int tile_i = y * collmap->w + x;
+            n_faces_solid[tile_i] = n_faces;
+        }
+    }
+}
+
+static void _init_n_faces_solid_edge(int *n_faces_solid,
+    hexcollmap_t *collmap
+){
+    for(int y = 0; y < collmap->h; y++){
+        for(int x = 0; x < collmap->w; x++){
+            for(int i = 0; i < 3; i++){
+
+                /* n_faces: a bit array, where:
+                    if(n_faces & 1) bottom face solid
+                    if(n_faces & 2) top face solid
+
+                    ...where "bottom" and "top" faces are relative to current
+                    edge, as indicated by B and T in the following diagram:
+                          T
+                       (.)- .
+                          B
+                */
+                int n_faces = 0;
+
+                {
+                    /*
+                       .   .
+                           0
+                        (+)  .
+                    */
+                    int face_x = x;
+                    int face_y = y;
+                    int face_i = 0;
+                    hexcollmap_face_rot(&face_x, &face_y, &face_i, i);
+
+                    hexcollmap_tile_t *face_tile = hexcollmap_get_tile_xy(
+                        collmap, face_x, face_y);
+                    if(face_tile){
+                        // top face is solid
+                        hexcollmap_elem_t *elem = &face_tile->face[face_i];
+                        if(hexcollmap_elem_is_visible(elem))n_faces |= 2;
+                    }
+                }
+                {
+                    /*
+                        (+)  .
+                           0
+                           .   .
+                    */
+                    int face_x = x;
+                    int face_y = y;
+                    int face_i = 0;
+                    hexcollmap_face_rot(&face_x, &face_y, &face_i, i + 5);
+
+                    hexcollmap_tile_t *face_tile = hexcollmap_get_tile_xy(
+                        collmap, face_x, face_y);
+                    if(face_tile){
+                        // bottom face is solid
+                        hexcollmap_elem_t *elem = &face_tile->face[face_i];
+                        if(hexcollmap_elem_is_visible(elem))n_faces |= 1;
+                    }
+                }
+
+                int tile_i = y * collmap->w + x;
+                n_faces_solid[tile_i * 3 + i] = n_faces;
+            }
+        }
+    }
 }
 
 static int rendergraph_add_rgraphs_from_collmap(
@@ -147,6 +263,25 @@ static int rendergraph_add_rgraphs_from_collmap(
     prismelrenderer_t *prend = rgraph->prend;
     vecspace_t *space = prend->space;
 
+    int collmap_size = collmap->w * collmap->h;
+
+    /* Allocate the array backing n_faces_solid_{vert,edge} */
+    int *_n_faces_solid = calloc(
+        collmap_size * 4,
+            /* one set of collmap_size for vert, another 3 for edges */
+        sizeof(*_n_faces_solid));
+    if(!_n_faces_solid)return 1;
+
+    /* Arrays storing the number of solid faces neighbouring a given vert
+    or edge */
+    int *n_faces_solid_vert = _n_faces_solid;
+    int *n_faces_solid_edge = _n_faces_solid + collmap_size;
+    int *n_faces_solid_face = NULL;
+
+    /* Initialize the arrays by calculating number of solid neighbours */
+    _init_n_faces_solid_vert(n_faces_solid_vert, collmap);
+    _init_n_faces_solid_edge(n_faces_solid_edge, collmap);
+
     for(int y = 0; y < collmap->h; y++){
         for(int x = 0; x < collmap->w; x++){
             vec_t v;
@@ -157,11 +292,17 @@ static int rendergraph_add_rgraphs_from_collmap(
                 &collmap->tiles[y * collmap->w + x];
 
             #define ADD_RGRAPH_FROM_TILE(PART, ROT) { \
+                int *n_faces_solid = NULL; \
+                if(n_faces_solid_##PART){ \
+                    n_faces_solid = &n_faces_solid_##PART[ \
+                        (y * collmap->w + x) * ROT]; \
+                } \
                 err = rendergraph_add_rgraph_from_tile( \
                     rgraph, tile, ROT, #PART, \
                     tileset, x, space, v, \
                     hexmap_tileset_get_rgraph_##PART, \
-                    hexcollmap_tile_get_##PART); \
+                    hexcollmap_tile_get_##PART, \
+                    n_faces_solid); \
                 if(err)return err; \
             }
             ADD_RGRAPH_FROM_TILE(vert, 1)
@@ -170,6 +311,8 @@ static int rendergraph_add_rgraphs_from_collmap(
             #undef HEXMAP_ADD_TILE
         }
     }
+
+    free(_n_faces_solid);
 
     /* A better name for collmap->rendergraphs might be collmap->decals...
     They are rendergraphs attached to collmap for purely visual reasons,

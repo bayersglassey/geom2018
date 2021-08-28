@@ -190,7 +190,7 @@ int hexcollmap_union_hexbox(hexcollmap_t *collmap, hexbox_t *hexbox){
             hexcollmap_tile_t *old_tile =
                 &old_tiles[old_w * y + x];
             hexcollmap_tile_t *new_tile =
-                &collmap->tiles[collmap->w * new_y + new_x];
+                &collmap->tiles[new_y * collmap->w + new_x];
             *new_tile = *old_tile;
         }
     }
@@ -281,11 +281,17 @@ void hexcollmap_normalize_face(trf_t *index){
     }
 }
 
+hexcollmap_tile_t *hexcollmap_get_tile_xy(hexcollmap_t *collmap,
+    int x, int y
+){
+    if(x < 0 || x >= collmap->w || y < 0 || y >= collmap->h)return NULL;
+    return &collmap->tiles[y * collmap->w + x];
+}
+
 hexcollmap_tile_t *hexcollmap_get_tile(hexcollmap_t *collmap, trf_t *index){
     int x = collmap->ox + index->add[0];
     int y = collmap->oy + index->add[1];
-    if(x < 0 || x >= collmap->w || y < 0 || y >= collmap->h)return NULL;
-    return &collmap->tiles[y * collmap->w + x];
+    return hexcollmap_get_tile_xy(collmap, x, y);
 }
 
 hexcollmap_elem_t *hexcollmap_get_vert(hexcollmap_t *collmap, trf_t *index){

@@ -50,7 +50,7 @@ static int _parse_trf(fus_lexer_t *lexer, vecspace_t *space,
     return 0;
 }
 
-static void hexcollmap_vert_rot(
+void hexcollmap_vert_rot(
     int *x_ptr, int *y_ptr, int *i_ptr, rot_t addrot
 ){
     /* Does nothing!.. unlike hexcollmap_edge/face_rot, leaves its inputs
@@ -59,7 +59,7 @@ static void hexcollmap_vert_rot(
     in a macro, even when PART is "vert". */
 }
 
-static void hexcollmap_edge_rot(
+void hexcollmap_edge_rot(
     int *x_ptr, int *y_ptr, int *i_ptr, rot_t addrot
 ){
     int x = *x_ptr;
@@ -110,7 +110,7 @@ static void hexcollmap_edge_rot(
     *i_ptr = leupsticoedophum_to[2];
 }
 
-static void hexcollmap_face_rot(
+void hexcollmap_face_rot(
     int *x_ptr, int *y_ptr, int *i_ptr, rot_t addrot
 ){
     int x = *x_ptr;
@@ -1114,14 +1114,9 @@ int hexcollmap_clone(hexcollmap_t *collmap,
             for(int i = 0; i < MAX_I; i++){ \
                 int to_x = x, to_y = y, to_i = i; \
                 hexcollmap_##PART##_rot(&to_x, &to_y, &to_i, rot); \
-                if( \
-                    to_x < 0 || to_x >= collmap->w || \
-                    to_y < 0 || to_y >= collmap->h \
-                ){ \
-                    continue; \
-                } \
-                int to_tile_i = to_y * collmap->w + to_x; \
-                hexcollmap_tile_t *tile = &collmap->tiles[to_tile_i]; \
+                hexcollmap_tile_t *tile = hexcollmap_get_tile_xy( \
+                    collmap, to_x, to_y); \
+                if(!tile)continue; \
                 tile->PART[to_i] = from_tile->PART[i]; \
             }
             _PARSE_PART(vert, 1)

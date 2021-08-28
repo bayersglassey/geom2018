@@ -1,7 +1,7 @@
 
 verts:
     "0": when_faces_solid:
-        none: "earth_vert0_flower"
+        none: "earth_vert0_grass"
         some: "earth_vert0_grass"
         all:  "earth_vert0"
     "1": "map_vert0"

@@ -251,6 +251,12 @@ void hexcollmap_write(hexcollmap_t *collmap, FILE *f,
 int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
     bool just_coll,
     hexcollmap_part_t ***parts_ptr, int *parts_len_ptr);
+void hexcollmap_vert_rot(
+    int *x_ptr, int *y_ptr, int *i_ptr, rot_t addrot);
+void hexcollmap_edge_rot(
+    int *x_ptr, int *y_ptr, int *i_ptr, rot_t addrot);
+void hexcollmap_face_rot(
+    int *x_ptr, int *y_ptr, int *i_ptr, rot_t addrot);
 int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
     bool just_coll);
 int hexcollmap_clone(hexcollmap_t *collmap,
@@ -260,6 +266,8 @@ int hexcollmap_load(hexcollmap_t *collmap, const char *filename,
 void hexcollmap_normalize_vert(trf_t *index);
 void hexcollmap_normalize_edge(trf_t *index);
 void hexcollmap_normalize_face(trf_t *index);
+hexcollmap_tile_t *hexcollmap_get_tile_xy(hexcollmap_t *collmap,
+    int x, int y);
 hexcollmap_tile_t *hexcollmap_get_tile(hexcollmap_t *collmap, trf_t *index);
 hexcollmap_elem_t *hexcollmap_get_vert(hexcollmap_t *collmap, trf_t *index);
 hexcollmap_elem_t *hexcollmap_get_edge(hexcollmap_t *collmap, trf_t *index);
