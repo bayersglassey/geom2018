@@ -137,7 +137,7 @@ int fus_lexer_get_bool(fus_lexer_t *lexer, bool *b);
 int fus_lexer_get_yn(fus_lexer_t *lexer, bool *b);
 int fus_lexer_get_yesno(fus_lexer_t *lexer, bool *b);
 int fus_lexer_get_int_fancy(fus_lexer_t *lexer, int *i_ptr);
-int fus_lexer_get_int_range(fus_lexer_t *lexer, int maxlen,
+int fus_lexer_get_int_range(fus_lexer_t *lexer, int min_i, int max_len,
     int *i_ptr, int *len_ptr);
 int fus_lexer_get_attr_int(fus_lexer_t *lexer, const char *attr, int *i,
     bool optional);

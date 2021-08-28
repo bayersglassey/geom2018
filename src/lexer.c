@@ -923,26 +923,32 @@ err:
     return err;
 }
 
-int fus_lexer_get_int_range(fus_lexer_t *lexer, int maxlen,
+int fus_lexer_get_int_range(fus_lexer_t *lexer, int min_i, int max_len,
     int *i_ptr, int *len_ptr
 ){
+    /* Ranges have the following syntax:
+        "*"      -> i = min_i, len = max_len
+        "I"      -> i = I, len = 1
+        "I, LEN" -> i = I, len = LEN
+    */
     int err;
 
-    int i = 0;
+    int i = min_i;
     int len = 1;
+    int max_i = min_i + max_len - 1;
 
     if(fus_lexer_got(lexer, "*")){
         err = fus_lexer_next(lexer);
         if(err)return err;
-        len = maxlen;
+        len = max_len;
     }else{
         err = fus_lexer_get_int(lexer, &i);
         if(err)return err;
-        if(i < 0 || i > maxlen){
+        if(i < min_i || i > max_i){
             fus_lexer_err_info(lexer);
             fprintf(stderr,
-                "Expected int within 0..%i, got: %.*s\n",
-                maxlen, lexer->token_len, lexer->token);
+                "Expected int \"i\" within %i..%i, got: %.*s\n",
+                min_i, max_i, lexer->token_len, lexer->token);
             return 2;}
 
         if(fus_lexer_got(lexer, ",")){
@@ -950,11 +956,11 @@ int fus_lexer_get_int_range(fus_lexer_t *lexer, int maxlen,
             if(err)return err;
             err = fus_lexer_get_int(lexer, &len);
             if(err)return err;
-            if(len < 0 || i + len > maxlen){
+            if(len < 0 || len > max_len){
                 fus_lexer_err_info(lexer);
                 fprintf(stderr,
-                    "Expected int within 0..%i, got: %.*s\n",
-                    maxlen-i, lexer->token_len, lexer->token);
+                    "Expected int \"len\" within 0..%i, got: %.*s\n",
+                    max_len, lexer->token_len, lexer->token);
                 return 2;}
         }
     }

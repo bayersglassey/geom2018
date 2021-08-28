@@ -87,7 +87,8 @@ int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
         int n_colors = 1;
 
         if(!GOT("(")){
-            err = fus_lexer_get_int_range(lexer, 256, &color_i, &n_colors);
+            err = fus_lexer_get_int_range(lexer, 0, 256,
+                &color_i, &n_colors);
             if(err)return err;
         }
 
