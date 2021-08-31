@@ -2,8 +2,8 @@
 verts:
     "0": when_faces_solid:
         none: "earth_vert0_grass"
-        some: "earth_vert0_grass"
-        all:  "earth_vert0"
+        some: "earth_vert0"
+        all:  "earth_vert0_dirt"
     "1": "map_vert0"
     "2": "map_vert1"
 edges:
@@ -11,11 +11,11 @@ edges:
         neither: "earth_edge0_grass_both"
         bottom:  "earth_edge0_grass_top"
         top:     "earth_edge0_grass_bottom"
-        both:    "earth_edge0"
+        both:    "earth_edge0_dirt"
     "1": "map_edge0"
     "2": "map_edge1"
 faces:
-    "0": "earth_face0"
+    "0": "earth_face0" "earth_face0_r1"
     "1": "map_face0"
     "2": "map_face1"
     "S": "map_savepoint"
