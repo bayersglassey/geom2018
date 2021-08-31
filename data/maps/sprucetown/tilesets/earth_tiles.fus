@@ -7,10 +7,10 @@ shapes:
 
     "earth_vert0":
         prismels:
-            : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 2
-            : "tri" (0 0 0 0)  2 f eval: 1 + 8 + 2
-            : "tri" (0 0 0 0)  4 f eval: 1 + 8 + 6
-            : "tri" (0 0 0 0)  6 f eval: 1 + 8 + 6
+            : "tri" (0 0 0 0)  0 f eval: 1 + 0 + 2
+            : "tri" (0 0 0 0)  2 f eval: 1 + 0 + 2
+            : "tri" (0 0 0 0)  4 f eval: 1 + 0 + 6
+            : "tri" (0 0 0 0)  6 f eval: 1 + 0 + 6
             : "tri" (0 0 0 0)  8 f eval: 1 + 8 + 4
             : "tri" (0 0 0 0) 10 f eval: 1 + 8 + 4
 
@@ -25,12 +25,12 @@ shapes:
 
     "earth_vert0_grass":
         prismels:
-            : "tri" (0 0 0 0)  0 f eval: 1 + 0 + 2
-            : "tri" (0 0 0 0)  2 f eval: 1 + 0 + 2
-            : "tri" (0 0 0 0)  4 f eval: 1 + 0 + 6
-            : "tri" (0 0 0 0)  6 f eval: 1 + 0 + 6
-            : "tri" (0 0 0 0)  8 f eval: 1 + 8 + 4
-            : "tri" (0 0 0 0) 10 f eval: 1 + 8 + 4
+            : "tri" (0 0 0 0)  0 f eval: 1 + 0 + 7
+            : "tri" (0 0 0 0)  2 f eval: 1 + 0 + 7
+            : "tri" (0 0 0 0)  4 f eval: 1 + 0 + 7
+            : "tri" (0 0 0 0)  6 f eval: 1 + 0 + 7
+            : "tri" (0 0 0 0)  8 f eval: 1 + 8 + 7
+            : "tri" (0 0 0 0) 10 f eval: 1 + 8 + 7
 
     "_earth_vert0_flower_third":
         prismels:
@@ -58,9 +58,9 @@ shapes:
         #      ---|   |---
         #         +---+
         prismels:
-            : "tri" (1 0 0  0) 11 f eval: 1 + 0 + 5
-            : "sq"  (1 1 0 -1)  0 f eval: 1 + 0 + 4
-            : "tri" (2 2 0 -1)  5 f eval: 1 + 0 + 5
+            : "tri" (1 0 0  0) 11 f eval: 1 + 8 + 1
+            : "sq"  (1 1 0 -1)  0 f eval: 1 + 0 + 1
+            : "tri" (2 2 0 -1)  5 f eval: 1 + 8 + 1
 
     "_earth_edge0_grass_top":
         #         +---+---+
@@ -113,9 +113,9 @@ shapes:
 
     "_earth_face0a_third":
         prismels:
-            : "tri" ( 0 0 0 0)  0 f eval: 1 + 0 + 4
-            : "tri" ( 0 0 0 0)  2 f eval: 1 + 0 + 5
-            : "sq"  (-1 0 1 0)  0 f eval: 1 + 0 + 4
+            : "tri" ( 0 0 0 0)  0 f eval: 1 + 0 + 1
+            : "tri" ( 0 0 0 0)  2 f eval: 1 + 8 + 1
+            : "sq"  (-1 0 1 0)  0 f eval: 1 + 0 + 1
 
     "_earth_face0a":
         shapes:
@@ -125,9 +125,9 @@ shapes:
 
     "_earth_face0b_third":
         prismels:
-            : "tri" ( 0 0 0 0)  0 f eval: 1 + 0 + 5
-            : "tri" ( 0 0 0 0)  2 f eval: 1 + 0 + 4
-            : "sq"  (-1 0 1 0)  0 f eval: 1 + 0 + 5
+            : "tri" ( 0 0 0 0)  0 f eval: 1 + 8 + 1
+            : "tri" ( 0 0 0 0)  2 f eval: 1 + 0 + 1
+            : "sq"  (-1 0 1 0)  0 f eval: 1 + 8 + 1
 
     "_earth_face0b":
         shapes:
