@@ -146,6 +146,7 @@ static int rendergraph_add_rgraph_from_tile(
                 &rgraph_tile, &rot_ok, &frame_offset);
         int frame_i = frame_offset? x: 0;
         if(rgraph_tile == NULL){
+            fprintf(stderr, "In tileset: %s\n", tileset->name);
             fprintf(stderr,
                 "Couldn't find %s tile for character: %c\n",
                 part_name, elem->tile_c);
