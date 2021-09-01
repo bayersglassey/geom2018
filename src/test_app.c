@@ -183,7 +183,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
                 &spawn_submap->collmap.spawn;
 
             spawn = *spawn_submap_spawn;
-            vec_add(space->dims, spawn.pos, spawn_submap_spawn->pos);
+            vec_add(space->dims, spawn.pos, spawn_submap->pos);
         }
 
         err = player_init(player, game, i,
