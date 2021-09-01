@@ -1,13 +1,15 @@
 
 verts:
-    "0": when_faces_solid:
+    "0": "water_vert"
+    "s": when_faces_solid:
         none: "water_vert"
         some: "map_vert1"
         all:  "map_vert1"
     "1": "map_vert1"
     "2": "map_vert0"
 edges:
-    "0": when_faces_solid:
+    "0": "water_edge"
+    "s": when_faces_solid:
         neither: "water_edge"
         bottom:  "map_edge1"
         top:     "map_edge1"

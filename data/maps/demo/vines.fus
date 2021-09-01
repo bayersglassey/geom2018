@@ -1,4 +1,5 @@
-
+default_vert: "s"
+default_edge: "s"
 collmap:
     ;;
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .
