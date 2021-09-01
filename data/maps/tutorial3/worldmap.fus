@@ -12,12 +12,36 @@ submaps:
         camera: (6 0)
         mapper: ("triple")
     :
-        file: "data/maps/tutorial3/start2.fus"
-        pos: eval: (0 0) + (16 -4)
-        camera: (0 0)
+        file: "data/maps/tutorial3/start.fus"
+        pos: eval: (0 0) + (11 -14)
+        rot: 1
+        camera: (9 3)
         mapper: ("triple")
+        tileset: "data/maps/sprucetown/tilesets/earth.fus"
     :
-        file: "data/maps/tutorial3/start3.fus"
-        pos: eval: (0 0) + (20 0) + (15 5)
+        file: "data/maps/tutorial3/start.fus"
+        pos: eval: (0 0) + (11 -14) + (7 -16)
+        rot: 2
+        camera: (6 9)
+        mapper: ("triple")
+        tileset: "data/maps/demo/tilesets/water.fus"
+    :
+        file: "data/maps/tutorial3/start.fus"
+        pos: eval: (0 0) + (11 -14) + (7 -16) + (0 -12)
+        rot: 3
+        camera: (-5 3)
+        mapper: ("triple")
+        tileset: "data/maps/trees/tilesets/trees.fus"
+    :
+        file: "data/maps/tutorial3/start.fus"
+        pos: eval: (0 0) + (11 -14) + (7 -16) + (0 -12) + (-10 -8)
+        rot: 4
+        camera: (-5 0)
+        mapper: ("triple")
+        tileset: "data/maps/sprucetown/tilesets/earth.fus"
+    :
+        file: "data/maps/tutorial3/start_door.fus"
+        pos: eval: (0 0) + (11 -14) + (7 -16) + (0 -12) + (-10 -8) + (2 -7)
         camera: (0 0)
         mapper: ("triple")
+        tileset: "data/maps/sprucetown/tilesets/earth.fus"
