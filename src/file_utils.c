@@ -64,14 +64,16 @@ char *read_stream(FILE *file, const char *filename){
 
     while(1){
         bufsize += CHUNK_SIZE;
-        buffer = realloc(buffer, bufsize);
-        if(!buffer){
+        char *new_buffer = realloc(buffer, bufsize);
+        if(!new_buffer){
             perror("realloc");
             fprintf(stderr,
                 "Could not allocate %zu-byte buffer for stream: %s\n",
                 bufsize, filename);
+            free(buffer);
             return NULL;
         }
+        buffer = new_buffer;
 
         char *chunk = buffer + (bufsize - CHUNK_SIZE);
 

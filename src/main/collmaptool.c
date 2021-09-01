@@ -41,6 +41,7 @@ static hexcollmap_t *load_collmap(FILE *file, const char *filename,
         fus_lexer_cleanup(&lexer);
     }
 
+    free(buffer);
     return collmap;
 }
 
@@ -129,6 +130,9 @@ int main(int n_args, char **args){
         hexcollmap_init_clone(collmap, from_collmap, "<clone>");
         int err = hexcollmap_clone(collmap, from_collmap, rot);
         if(err)return err;
+
+        hexcollmap_cleanup(from_collmap);
+        free(from_collmap);
     }
 
     /* Write collmap */
@@ -146,6 +150,8 @@ int main(int n_args, char **args){
         free(parts[i]);
     }
     free(parts);
+    hexcollmap_cleanup(collmap);
+    free(collmap);
 
     return 0;
 }
