@@ -864,6 +864,18 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
     }
     vec_add(space->dims, pos, parent_pos);
 
+    rot_t rot = 0;
+    if(fus_lexer_got(lexer, "rot")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_get_int(lexer, &rot);
+        if(err)return err;
+        err = fus_lexer_get(lexer, ")");
+        if(err)return err;
+    }
+
     int camera_type = parent_camera_type;
     vec_t camera_pos;
     vec_cpy(space->dims, camera_pos, parent_camera_pos);
@@ -930,10 +942,25 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
             palette_filename, tileset_filename);
         if(err)return err;
 
-        /* load collmap */
-        err = hexcollmap_load(&submap->collmap, submap_filename,
-            lexer->vars);
-        if(err)return err;
+        if(rot){
+            /* load & transform collmap */
+
+            hexcollmap_t *collmap = calloc(1, sizeof(*collmap));
+            if(!collmap)return 1;
+            err = hexcollmap_load(collmap, submap_filename, lexer->vars);
+            if(err)return err;
+
+            hexcollmap_init_clone(&submap->collmap, collmap, submap_filename);
+            int err = hexcollmap_clone(&submap->collmap, collmap, rot);
+            if(err)return err;
+
+            hexcollmap_cleanup(collmap);
+            free(collmap);
+        }else{
+            /* load collmap */
+            err = hexcollmap_load(&submap->collmap, submap_filename, lexer->vars);
+            if(err)return err;
+        }
 
         /* render submap->rgraph_map, submap->rgraph_minimap */
         err = hexmap_submap_create_rgraph_map(submap);
