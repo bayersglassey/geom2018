@@ -765,8 +765,6 @@ Dec 25, 2020:
 Dec 26, 2020:
 -------------
 
-* One palette instance per filename!
-
 * As well as "on" events, add an "always" handler which runs every frame?
     * Use for things like e.g. affecting the "lighting" (palette) based on distance from camera?..
     * Use for things like heat, thirst, etc?..
@@ -819,7 +817,9 @@ Mar 20, 2021:
         when body_is_done_for(actor->body).
             => THIS PROBABLY MAKES THE MOST SENSE.
 
+    * body_remove is only ever called in test_app_set_players, sooooo I suspect that your
+      bouncing spit will live forever.
+
 * Add a "gamma" setting or something, so that palette colours are brighter by default.
 
 * TWO BODIES CAN COLLECT THE SAME COIN!!!!
-
