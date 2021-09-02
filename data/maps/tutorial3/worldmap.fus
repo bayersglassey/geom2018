@@ -1,46 +1,168 @@
 
 unit: 3 2 0 -1
 spawn: "data/maps/tutorial3/start.fus"
-default_palette: "data/maps/trees/pals/trees.fus"
+default_palette: "data/pal1.fus"
 default_tileset: "data/tileset1.fus"
 vars:
+
+$SET_STR GROUND: lines:
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;         Even if the ground looks different,
+    ;;
+    ;;
+    ;;      it's all the same.
+
+$SET_STR CREATURES: lines:
+    ;;
+    ;;
+    ;;
+    ;;     Most small creatures you meet here are tame,
+    ;;                                          and harmless.
+
+$SET_STR DEATH_CREATURES: lines:
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;     ...however,
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;       bright red
+    ;;      creatures
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;       are death
+    ;;     to touch.
+
+$SET_STR DEATH_CREATURES_REVERSE: lines:
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;; Interestingly, your spit
+    ;; can reverse the direction
+    ;; in which some creatures move.
+    ;;
+    ;; (You might have to crouch
+    ;; to hit the smaller ones.)
+
+$SET_STR HOORAY: lines:
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;                                              Hooray.
 
 submaps:
     :
         file: "data/maps/tutorial3/start.fus"
+        text: $GET_STR GROUND
         pos: eval: (0 0)
         camera: (6 0)
         mapper: ("triple")
     :
         file: "data/maps/tutorial3/start.fus"
+        text: $GET_STR CREATURES
         pos: eval: (0 0) + (11 -14)
         rot: 1
         camera: (9 3)
         mapper: ("triple")
-        tileset: "data/maps/sprucetown/tilesets/earth.fus"
+        tileset: "data/tileset2.fus"
+        recs:
+            : relative (-1 -3) 0 n "data/recs/roller_r.fus"
+            : relative ( 8 -9) 0 n "data/recs/roller_l.fus"
     :
         file: "data/maps/tutorial3/start.fus"
         pos: eval: (0 0) + (11 -14) + (7 -16)
         rot: 2
         camera: (6 9)
         mapper: ("triple")
-        tileset: "data/maps/demo/tilesets/water.fus"
+        tileset: "data/maps/sprucetown/tilesets/earth.fus"
     :
         file: "data/maps/tutorial3/start.fus"
+        text: $GET_STR DEATH_CREATURES
         pos: eval: (0 0) + (11 -14) + (7 -16) + (0 -12)
         rot: 3
         camera: (-5 3)
         mapper: ("triple")
-        tileset: "data/maps/trees/tilesets/trees.fus"
+        tileset: "data/maps/demo/tilesets/water.fus"
+        recs:
+            : relative (-1 -3) 0 n "data/recs/water_roller_r.fus"
     :
         file: "data/maps/tutorial3/start.fus"
+        text: $GET_STR DEATH_CREATURES_REVERSE
         pos: eval: (0 0) + (11 -14) + (7 -16) + (0 -12) + (-10 -8)
         rot: 4
         camera: (-5 0)
         mapper: ("triple")
         tileset: "data/maps/sprucetown/tilesets/earth.fus"
+        recs:
+            : relative (-1 -3) 0 n "data/recs/death_roller_r.fus"
+            : relative (11 -2) 0 n "data/recs/death_roller_l.fus"
     :
         file: "data/maps/tutorial3/start_door.fus"
+        text: $GET_STR HOORAY
         pos: eval: (0 0) + (11 -14) + (7 -16) + (0 -12) + (-10 -8) + (2 -7)
         camera: (0 0)
         mapper: ("triple")

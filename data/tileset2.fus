@@ -1,0 +1,19 @@
+# Like data/tileset1.fus, but with "0" defaulting to different things...
+# Basically just a cheapo way to quickly change the tiles of a submap.
+# Maybe there's a better way to do that... e.g. can submap specify
+# default_vert, default_edge, etc?
+
+verts:
+    "0": "map_vert1"
+    "1": "map_vert1"
+edges:
+    "0": "map_edge1"
+    "1": "map_edge1"
+    "2": "map_edge2"
+faces:
+    "0": "map_face1"
+    "1": "map_face1"
+    "2": "map_face2"
+    "S": "map_savepoint"
+    "D": "map_door"
+    "w": frame_offset(1) "map_water"
