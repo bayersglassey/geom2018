@@ -122,11 +122,16 @@ submaps:
         camera: (6 0)
         mapper: ("triple")
     :
+        file: "data/maps/tutorial3/blocker.fus"
+        pos: eval: (0 0) + (-8 -20)
+        rot: 3
+        mapper: ("triple")
+    :
         file: "data/maps/tutorial3/start.fus"
         text: $GET_STR CREATURES
         pos: eval: (0 0) + (11 -14)
         rot: 1
-        camera: (9 3)
+        camera: (11 3)
         mapper: ("triple")
         tileset: "data/tileset2.fus"
         recs:
@@ -149,6 +154,11 @@ submaps:
         tileset: "data/maps/demo/tilesets/water.fus"
         recs:
             : relative (-1 -3) 0 n "data/recs/water_roller_r.fus"
+    :
+        file: "data/maps/tutorial3/blocker.fus"
+        pos: eval: (0 0) + (11 -14) + (7 -16) + (0 -12) + (-30 0)
+        rot: 4
+        mapper: ("triple")
     :
         file: "data/maps/tutorial3/start.fus"
         text: $GET_STR DEATH_CREATURES_REVERSE
