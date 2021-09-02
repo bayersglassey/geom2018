@@ -312,12 +312,20 @@ int hexmap_init(hexmap_t *map, hexgame_t *game, char *name,
 
 static int hexmap_parse_recording(fus_lexer_t *lexer,
     char **filename_ptr, char **palmapper_name_ptr, int *frame_offset_ptr,
-    trf_t *trf, vars_t *vars, vars_t *bodyvars
+    trf_t *trf, vars_t *vars, vars_t *bodyvars, bool *relative_ptr
 ){
     int err;
 
     err = fus_lexer_get(lexer, "(");
     if(err)return err;
+
+    bool relative = false;
+    if(fus_lexer_got(lexer, "relative")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        relative = true;
+    }
+    *relative_ptr = relative;
 
     /* NOTE: we are initializing a trf_t, but the fus format is that of a
     hexgame_location_t, so that we can e.g. dump player's current location
@@ -552,9 +560,10 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, char *name,
         vars_init(&vars);
         vars_t bodyvars;
         vars_init(&bodyvars);
+        bool relative; /* unused here -- only used when parsing submaps */
         err = hexmap_parse_recording(lexer,
             &filename, &palmapper_name, &frame_offset, &trf,
-            &vars, &bodyvars);
+            &vars, &bodyvars, &relative);
         if(err)return err;
 
         ARRAY_PUSH_NEW(hexmap_recording_t*, map->recordings,
@@ -1012,10 +1021,16 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
             vars_init(&vars);
             vars_t bodyvars;
             vars_init(&bodyvars);
+            bool relative;
             err = hexmap_parse_recording(lexer,
                 &filename, &palmapper_name, &frame_offset, &trf,
-                &vars, &bodyvars);
+                &vars, &bodyvars, &relative);
             if(err)return err;
+
+            if(relative){
+                trf_rot(space, &trf, rot);
+                vec_add(space->dims, trf.add, pos);
+            }
 
             ARRAY_PUSH_NEW(hexmap_recording_t*, map->recordings,
                 recording)

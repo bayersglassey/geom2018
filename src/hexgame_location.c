@@ -77,6 +77,7 @@ void hexgame_location_write(hexgame_location_t *loc, FILE *file, int indent){
 }
 
 int hexgame_location_parse(hexgame_location_t *loc, fus_lexer_t *lexer){
+    /* Example input: "(0 0) 0 n" */
     int err;
     err = fus_lexer_get_vec(lexer, &hexspace, loc->pos);
     if(err)return err;
