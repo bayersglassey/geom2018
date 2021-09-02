@@ -38,6 +38,6 @@ shapes:
     # DEATH FLIER #
     ###############
 
-    "death_flier": map ("l.blu") ("flier")
-    "death_flier_fly": map ("l.blu") ("flier_fly")
-    #"death_flier_born": map ("l.blu") ("flier_born")
+    "death_flier": map ("l.red") ("flier")
+    "death_flier_fly": map ("l.red") ("flier_fly")
+    #"death_flier_born": map ("l.red") ("flier_born")
