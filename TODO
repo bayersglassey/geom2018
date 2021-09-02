@@ -625,35 +625,6 @@ Triangles area: the prize is becoming a big_roller???
 (Errrr, big_rollerplayer?..)
 
 
-Dec 8, 2020:
-------------
-
-* Currently we have submap->visible_var_name.
-Could we perhaps have submap->visible_cond instead?..
-That lets us get a bit fancy, like:
-
-    # Basic
-    get_bool mapvar("blocker")
-    not: get_bool mapvar("blocker")
-
-    # Fancy
-    expr: mapvar("lala") < 3
-
-* HERMIT'S HOUSE
-    * We can now have a door "appear" (by using a submap's "visible" thing)
-    * So, in jungle area, let's say you "rescue" a spider from the right side
-    * You lead/follow him back to hermit's entrace
-    * He "opens" the door, goes in, disappears
-    * If you go in, you're in maps/water, inside some stuff that's visible not accessible from outside
-    * It's possible to sneak out of this place into some obstacle courses involving big_rollers and birds (?)
-        * You may need to be spikey to survive this?
-    * There are switches here which open stuff on the outside of the closed-in area
-    * ...in other words, you can unlock a bunch of stuff, then go back into maps/water
-        via the bottom-left part of jungle area
-
-Ummmmmmmm you can shoot switches through walls?? Dang.
-
-
 Dec 10, 2020:
 -------------
 
@@ -741,17 +712,10 @@ Dec 25, 2020:
 -------------
 
 * A system for changing the tile_c of entire swaths of tiles in a hexcollmap at the same time.
+    * (other than "tilebuckets")
     * So, continue to create hexcollmaps as we do now, based on how they'll affect collisions...
     ...but have an easy way to add variety and colour to portions of the map, *independent* of its
     "shape" (collisionarily speaking).
-
-* Have sections which use their own special states based on classic games??? "quote" those games?
-    * Sonic
-        * springs (both which send you jumping up -- where in our case "up" is subjective -- and which send you rolling sideways)
-        * loop-the-loops etc -- can just use the kind already possible in geom
-    * Mario: ???
-    * Metroid: ???
-    * Cave Story: ???
 
 * Present the game as a series of puzzles, similar to tutorial
 * Overlay that sequence with an open world, totally unexplained, like current demo map
@@ -768,16 +732,6 @@ Dec 26, 2020:
 * As well as "on" events, add an "always" handler which runs every frame?
     * Use for things like e.g. affecting the "lighting" (palette) based on distance from camera?..
     * Use for things like heat, thirst, etc?..
-
-
-Dec 27, 2020 (moved up from Dec 22, 2020):
-------------------------------------------
-
-TUTORIAL:
-* switches
-* other creatures
-* transformations
-* swimming (?.. or leave it a secret?..)
 
 
 Dec 30, 2020:
@@ -801,7 +755,6 @@ Instead, maybe add a new value for body->dead?..
 Mar 20, 2021:
 -------------
 
-* finish tutorial2. Where do you go after it?..
 * When actor dies (or flies off map), should respawn itself after a second or two.
   (E.g. coin beasts killing themselves by running into walls :P)
     * player_t has these fields:
@@ -823,3 +776,22 @@ Mar 20, 2021:
 * Add a "gamma" setting or something, so that palette colours are brighter by default.
 
 * TWO BODIES CAN COLLECT THE SAME COIN!!!!
+
+
+Aug 31, 2021:
+------------------------------------------
+
+* finish tutorial.
+    * switches
+    * other creatures
+    * transformations
+    * other tilesets (e.g. wavy fronds of water tileset, and spiky grass of earth, don't hurt you...)
+    * swimming (?.. or leave it a secret?..)
+* Where do you go after it?..
+    * demo.
+
+* The new camera scrolling doesn't work so well for certain areas (e.g. zoomed-in portions
+  around jungle5) -- either "fix" those areas (by zooming them out a bit) or allow them to
+  opt into the old scrolling behaviour?.. (or is that behaviour always broken if you fly?..)
+
+* Ummmmmmmm you can shoot switches through walls
