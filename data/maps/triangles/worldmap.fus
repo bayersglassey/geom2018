@@ -45,7 +45,7 @@ submaps:
                 pos: (-10 -6)
                 camera: (-5 -10)
                 mapper: ("triple")
-                recordings:
+                recs:
                     : "data/maps/triangles/recs/bigroller_tutorial.fus"
             :
                 #########
@@ -61,7 +61,7 @@ submaps:
                         pos: (38 -80)
                         rot: 1
                         turn: n
-                recordings:
+                recs:
                     : "data/maps/triangles/recs/bigroller000.fus"
                     #: "data/maps/triangles/recs/bigroller000.fus" "cya"
                     #: "data/maps/triangles/recs/bigroller000.fus" "grn" 650

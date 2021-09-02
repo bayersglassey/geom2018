@@ -23,7 +23,7 @@ submaps:
                 pos: (-10 -9)
                 rot: 0
                 turn: n
-        recordings:
+        recs:
             : "data/maps/test/recs/worldmap_minimal_bird_000.fus"
             : "data/maps/test/recs/worldmap_minimal_bird_001.fus"
     :

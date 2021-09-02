@@ -60,7 +60,7 @@ submaps:
         pos: (-1 -10)
         camera: (4 0)
         mapper: ("triple")
-        recordings:
+        recs:
             : "data/maps/test/recs/rec010.fus"
             : "data/maps/test/recs/rec011.fus"
             : "data/maps/test/recs/rec012.fus"

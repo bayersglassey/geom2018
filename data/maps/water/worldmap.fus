@@ -11,7 +11,7 @@ submaps:
         pos: (0 0)
         camera: (3 2)
         mapper: ("triple")
-        recordings:
+        recs:
             : "data/maps/water/recs/water_roller_000.fus"
             : "data/maps/water/recs/water_roller_001.fus"
             : "data/maps/water/recs/water_roller_002.fus"
@@ -71,7 +71,7 @@ submaps:
                 file: "data/maps/water/air_bubbles_walled1.fus"
                 pos: eval: (42 0) + (29 10)
                 camera: (-1 -4)
-                recordings:
+                recs:
                     : "data/maps/water/recs/air_bubbles_walled1_roller_000.fus" empty 0
                     : "data/maps/water/recs/air_bubbles_walled1_roller_000.fus" empty 1000
                     : "data/maps/water/recs/air_bubbles_walled1_roller_000.fus" empty 2000

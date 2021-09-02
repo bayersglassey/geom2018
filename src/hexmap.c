@@ -996,7 +996,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
         }
     }
 
-    if(fus_lexer_got(lexer, "recordings")){
+    if(fus_lexer_got(lexer, "recs")){
         err = fus_lexer_next(lexer);
         if(err)return err;
         err = fus_lexer_get(lexer, "(");

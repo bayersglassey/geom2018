@@ -102,7 +102,7 @@ submaps:
                                         mapper: ("triple")
                                         palette: "data/maps/demo/pals/vines.fus"
                                         tileset: "data/tileset1.fus"
-                                        recordings:
+                                        recs:
                                             : "data/maps/demo/recs/jungle2_bird000.fus"
                                             : "data/maps/demo/recs/jungle3_bird000.fus" "player_cpu"
                                             : "data/maps/demo/recs/jungle5_bird000.fus"
@@ -161,7 +161,7 @@ submaps:
                         pos: (1 -9)
                         camera: (0 -4)
                         mapper: ("triple")
-                        recordings:
+                        recs:
                             : "data/maps/demo/recs/dodecas_000.fus" "player_cpu"
                             : "data/maps/demo/recs/dodecas_001.fus" "player_cpu"
                             : "data/maps/demo/recs/dodecas_hexroller_000.fus"
@@ -203,7 +203,7 @@ submaps:
                                     :
                                         pos: (0 -28)
                                         camera: (0 0)
-                                        recordings:
+                                        recs:
                                             : "data/maps/demo/recs/big_000.fus"
                                         submaps:
                                             :
@@ -282,7 +282,7 @@ submaps:
     :
         pos: (40 60)
         camera: (0 0)
-        recordings:
+        recs:
             : "data/maps/demo/recs/test_003.fus" "player_cpu"
             : "data/maps/demo/recs/test_flier_000.fus"
         submaps:
