@@ -35,6 +35,7 @@ typedef struct valexpr {
         val_t val;
         struct valexpr *key_expr;
         struct {
+            bool cond_not; /* Inverts cond_expr's value */
             struct valexpr *cond_expr;
             struct valexpr *then_expr;
             struct valexpr *else_expr;

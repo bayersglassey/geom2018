@@ -50,6 +50,7 @@ void valexpr_fprintf(valexpr_t *expr, FILE *file){
             break;
         case VALEXPR_TYPE_IF:
             fprintf(file, "if ");
+            if(expr->u.if_expr.cond_not)fprintf(file, "not ");
             valexpr_fprintf(expr->u.if_expr.cond_expr, file);
             fprintf(file, "then ");
             valexpr_fprintf(expr->u.if_expr.then_expr, file);
@@ -98,9 +99,15 @@ int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer){
     }else if(type == VALEXPR_TYPE_IF){
         NEXT
         expr->type = type;
+        expr->u.if_expr.cond_not = false;
         expr->u.if_expr.cond_expr = NULL;
         expr->u.if_expr.then_expr = NULL;
         expr->u.if_expr.else_expr = NULL;
+
+        if(GOT("not")){
+            NEXT
+            expr->u.if_expr.cond_not = true;
+        }
 
         valexpr_t *cond_expr = calloc(1, sizeof(*cond_expr));
         if(!cond_expr)return 1;
@@ -205,6 +212,8 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
             }
 
             bool cond = val_get_bool(cond_val);
+            if(expr->u.if_expr.cond_not)cond = !cond;
+
             if(cond){
                 err = valexpr_eval(expr->u.if_expr.then_expr,
                     context, &result, set);
