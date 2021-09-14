@@ -392,7 +392,13 @@ static int hexcollmap_draw(hexcollmap_t *collmap1, hexcollmap_t *collmap2,
         if(err)return err;
         trf_apply(space, &recording1->trf, trf);
 
+        err = valexpr_copy(&recording1->visible_expr, &recording2->visible_expr);
+        if(err)return err;
+        recording1->visible_not = recording2->visible_not;
+
         err = vars_copy(&recording1->vars, &recording2->vars);
+        if(err)return err;
+        err = vars_copy(&recording1->bodyvars, &recording2->bodyvars);
         if(err)return err;
     }
 
@@ -463,6 +469,10 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
         /* hexmap_recording_init set up recording->trf already, and now
         we modify it by applying trf2 to it */
         trf_apply(space, &recording->trf, &trf2);
+
+        err = valexpr_copy(&recording->visible_expr, &part->visible_expr);
+        if(err)return err;
+        recording->visible_not = part->visible_not;
 
         err = vars_copy(&recording->vars, &part->vars);
         if(err)return err;
@@ -851,6 +861,10 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
     trf_t trf = {0};
     int draw_z = 0;
 
+    valexpr_t visible_expr;
+    valexpr_set_literal_bool(&visible_expr, true);
+    bool visible_not = false;
+
     vars_t vars;
     vars_init(&vars);
     vars_t bodyvars;
@@ -877,7 +891,7 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
             if(err)return err;
         }
 
-        if(!GOT(")") && !GOT("vars") && !GOT("bodyvars")){
+        if(!GOT(")") && !GOT("visible") && !GOT("vars") && !GOT("bodyvars")){
             if(GOT("empty")){
                 NEXT
             }else{
@@ -886,6 +900,18 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
             if(GOT_INT){
                 GET_INT(frame_offset)
             }
+        }
+
+        if(GOT("visible")){
+            NEXT
+            GET("(")
+            if(GOT("not")){
+                NEXT
+                visible_not = true;
+            }
+            err = valexpr_parse(&visible_expr, lexer);
+            if(err)return err;
+            GET(")")
         }
 
         if(GOT("vars")){
@@ -907,7 +933,8 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
     GET(")")
 
     err = hexcollmap_part_init(part, type, part_c,
-        filename, palmapper_name, frame_offset, &vars, &bodyvars);
+        filename, palmapper_name, frame_offset,
+        &visible_expr, visible_not, &vars, &bodyvars);
     if(err)return err;
     trf_cpy(collmap->space, &part->trf, &trf);
     part->draw_z = draw_z;

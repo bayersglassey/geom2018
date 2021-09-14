@@ -33,6 +33,46 @@ void valexpr_cleanup(valexpr_t *expr){
     }
 }
 
+int valexpr_copy(valexpr_t *expr1, valexpr_t *expr2){
+    int err;
+    expr1->type = expr2->type;
+    switch(expr2->type){
+        case VALEXPR_TYPE_LITERAL:
+            err = val_copy(&expr1->u.val, &expr2->u.val);
+            if(err)return err;
+            break;
+        case VALEXPR_TYPE_YOURVAR:
+        case VALEXPR_TYPE_MAPVAR:
+        case VALEXPR_TYPE_MYVAR:
+            expr1->u.key_expr = calloc(1, sizeof(valexpr_t));
+            if(!expr1->u.key_expr)return 1;
+
+            err = valexpr_copy(expr1->u.key_expr, expr2->u.key_expr);
+            if(err)return err;
+            break;
+        case VALEXPR_TYPE_IF:
+            expr1->u.if_expr.cond_expr = calloc(1, sizeof(valexpr_t));
+            if(!expr1->u.if_expr.cond_expr)return 1;
+            expr1->u.if_expr.then_expr = calloc(1, sizeof(valexpr_t));
+            if(!expr1->u.if_expr.then_expr)return 1;
+            expr1->u.if_expr.else_expr = calloc(1, sizeof(valexpr_t));
+            if(!expr1->u.if_expr.else_expr)return 1;
+
+            err = valexpr_copy(expr1->u.if_expr.cond_expr,
+                expr2->u.if_expr.cond_expr);
+            if(err)return err;
+            err = valexpr_copy(expr1->u.if_expr.then_expr,
+                expr2->u.if_expr.then_expr);
+            if(err)return err;
+            err = valexpr_copy(expr1->u.if_expr.else_expr,
+                expr2->u.if_expr.else_expr);
+            if(err)return err;
+            break;
+        default: break;
+    }
+    return 0;
+}
+
 void valexpr_fprintf(valexpr_t *expr, FILE *file){
     switch(expr->type){
         case VALEXPR_TYPE_LITERAL:
@@ -61,6 +101,12 @@ void valexpr_fprintf(valexpr_t *expr, FILE *file){
             fprintf(file, "<unknown>");
             break;
     }
+}
+
+void valexpr_set_literal_bool(valexpr_t *expr, bool b){
+    expr->type = VALEXPR_TYPE_LITERAL;
+    expr->u.val.type = VAL_TYPE_BOOL;
+    expr->u.val.u.b = b;
 }
 
 void valexpr_set_literal_int(valexpr_t *expr, int i){

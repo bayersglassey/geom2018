@@ -21,6 +21,7 @@
 void hexmap_recording_cleanup(hexmap_recording_t *recording){
     free(recording->filename);
     free(recording->palmapper_name);
+    valexpr_cleanup(&recording->visible_expr);
     vars_cleanup(&recording->vars);
     vars_cleanup(&recording->bodyvars);
 }
@@ -33,6 +34,10 @@ int hexmap_recording_init(hexmap_recording_t *recording, int type,
     recording->palmapper_name = palmapper_name;
     recording->frame_offset = frame_offset;
     trf_zero(&recording->trf);
+
+    valexpr_set_literal_bool(&recording->visible_expr, true);
+    recording->visible_not = false;
+
     vars_init(&recording->vars);
     vars_init(&recording->bodyvars);
     return 0;
@@ -64,6 +69,7 @@ int hexmap_rendergraph_init(hexmap_rendergraph_t *rendergraph,
 
 int hexcollmap_part_init(hexcollmap_part_t *part, int type,
     char part_c, char *filename, char *palmapper_name, int frame_offset,
+    valexpr_t *visible_expr, bool visible_not,
     vars_t *vars, vars_t *bodyvars
 ){
     part->type = type;
@@ -76,6 +82,10 @@ int hexcollmap_part_init(hexcollmap_part_t *part, int type,
     part->trf.rot = 0;
     part->trf.flip = false;
 
+    /* NOTE: we take ownership of *visible_expr from caller */
+    part->visible_expr = *visible_expr;
+    part->visible_not = visible_not;
+
     /* vars_t must guarantee that it can be freely copied.
     Which it does. (See the comment in definition of vars_t.) */
     part->vars = *vars;
@@ -87,6 +97,7 @@ int hexcollmap_part_init(hexcollmap_part_t *part, int type,
 void hexcollmap_part_cleanup(hexcollmap_part_t *part){
     free(part->filename);
     free(part->palmapper_name);
+    valexpr_cleanup(&part->visible_expr);
     vars_cleanup(&part->vars);
     vars_cleanup(&part->bodyvars);
 }

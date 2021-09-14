@@ -175,6 +175,8 @@ void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
                     fprintf(f, " %i", part->frame_offset);
                 }
 
+                /* TODO: part->{visible_{expr,not},bodyvars,vars} */
+
                 fputc('\n', f);
             }
         }

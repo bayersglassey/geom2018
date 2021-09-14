@@ -6,6 +6,7 @@
 #include "array.h"
 #include "lexer.h"
 #include "vars.h"
+#include "valexpr.h"
 #include "geom.h"
 #include "hexbox.h"
 #include "hexgame_location.h"
@@ -42,6 +43,10 @@ typedef struct hexmap_recording {
     char *palmapper_name;
     trf_t trf;
     int frame_offset;
+
+    valexpr_t visible_expr;
+    bool visible_not;
+
     vars_t vars;
     vars_t bodyvars;
 } hexmap_recording_t;
@@ -145,6 +150,9 @@ typedef struct hexcollmap_part {
     trf_t trf;
     int draw_z;
 
+    valexpr_t visible_expr;
+    bool visible_not;
+
     vars_t vars;
     vars_t bodyvars;
 } hexcollmap_part_t;
@@ -231,6 +239,7 @@ static bool hexcollmap_elem_is_special(hexcollmap_elem_t *elem){
 
 int hexcollmap_part_init(hexcollmap_part_t *part, int type,
     char part_c, char *filename, char *palmapper_name, int frame_offset,
+    valexpr_t *visible_expr, bool visible_not,
     vars_t *vars, vars_t *bodyvars);
 void hexcollmap_part_cleanup(hexcollmap_part_t *part);
 
