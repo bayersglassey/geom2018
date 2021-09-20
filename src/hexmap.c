@@ -410,6 +410,10 @@ static int hexmap_load_hexmap_recording(
             palmapper, true, recording->frame_offset, &trf, &body);
         if(err)return err;
 
+        err = valexpr_copy(&body->visible_expr, &recording->visible_expr);
+        if(err)return err;
+        body->visible_not = recording->visible_not;
+
         /* We uhhhh, don't do anything with recording->bodyvars,
         interestingly enough. */
         err = vars_copy(&body->vars, &recording->vars);
@@ -428,6 +432,10 @@ static int hexmap_load_hexmap_recording(
         if(err)return err;
 
         actor->trf = trf;
+
+        err = valexpr_copy(&body->visible_expr, &recording->visible_expr);
+        if(err)return err;
+        body->visible_not = recording->visible_not;
 
         err = vars_copy(&body->vars, &recording->bodyvars);
         if(err)return err;
@@ -1159,10 +1167,13 @@ static int hexmap_collide_elem(hexmap_t *map, int all_type,
     void (*normalize_elem)(trf_t *index),
     hexcollmap_elem_t *(get_elem)(
         hexcollmap_t *collmap, trf_t *index),
-    hexmap_collision_t *collision
-){
-    /* Returns true (1) or false (0), or 2 if caller should continue
+    hexmap_collision_t *collision,
+
+    /* *collide_ptr: true (1) or false (0), or 2 if caller should continue
     checking for a collision. */
+    int *collide_ptr
+){
+    int err;
 
     vecspace_t *space = map->space;
 
@@ -1187,7 +1198,11 @@ static int hexmap_collide_elem(hexmap_t *map, int all_type,
         bool collide = false;
         for(int i = 0; i < map->submaps_len; i++){
             hexmap_submap_t *submap = map->submaps[i];
-            if(!hexmap_submap_is_solid(submap))continue;
+
+            bool solid;
+            err = hexmap_submap_is_solid(submap, &solid);
+            if(err)return err;
+            if(!solid)continue;
 
             hexcollmap_t *collmap1 = &submap->collmap;
 
@@ -1216,12 +1231,17 @@ static int hexmap_collide_elem(hexmap_t *map, int all_type,
         }
         if(all_type != 2){
             bool all = all_type;
-            if((all && !collide) || (!all && collide))return collide;
+            if((all && !collide) || (!all && collide)){
+                *collide_ptr = collide;
+                return 0;
+            }
         }else{
             /* Just looking for savepoints & doors... */
         }
     }
-    return 2; /* Caller should keep looking for a collision */
+
+    *collide_ptr = 2; /* Caller should keep looking for a collision */
+    return 0;
 }
 
 static void hexmap_collision_elem_init(hexmap_collision_elem_t *elem){
@@ -1235,9 +1255,12 @@ static void hexmap_collision_init(hexmap_collision_t *collision){
     hexmap_collision_elem_init(&collision->door);
 }
 
-static bool _hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
-    trf_t *trf, int all_type, hexmap_collision_t *collision
+static int _hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
+    trf_t *trf, int all_type, hexmap_collision_t *collision, bool *collide_ptr
 ){
+#   define _RETURN(_collide) {*collide_ptr = _collide; return 0;}
+    int err;
+
     hexmap_collision_init(collision);
 
     int ox2 = collmap2->ox;
@@ -1254,55 +1277,70 @@ static bool _hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
         for(int x2 = 0; x2 < w2; x2++){
             hexcollmap_tile_t *tile2 = &collmap2->tiles[y2 * w2 + x2];
 
+            /* collide: true (1) or false (0), or 2 if we should continue
+            checking for a collision. */
             int collide;
+
             int x = x2 - ox2;
             int y = y2 - oy2;
-            collide = hexmap_collide_elem(map, all_type,
+            err = hexmap_collide_elem(map, all_type,
                 x, y, trf,
                 tile2->vert, 1,
                 hexcollmap_normalize_vert,
                 hexcollmap_get_vert,
-                collision);
-            if(collide != 2)return collide;
-            collide = hexmap_collide_elem(map, all_type,
+                collision, &collide);
+            if(err)return err;
+            if(collide != 2)_RETURN(collide)
+            err = hexmap_collide_elem(map, all_type,
                 x, y, trf,
                 tile2->edge, 3,
                 hexcollmap_normalize_edge,
                 hexcollmap_get_edge,
-                collision);
-            if(collide != 2)return collide;
-            collide = hexmap_collide_elem(map, all_type,
+                collision, &collide);
+            if(err)return err;
+            if(collide != 2)_RETURN(collide)
+            err = hexmap_collide_elem(map, all_type,
                 x, y, trf,
                 tile2->face, 2,
                 hexcollmap_normalize_face,
                 hexcollmap_get_face,
-                collision);
-            if(collide != 2)return collide;
+                collision, &collide);
+            if(err)return err;
+            if(collide != 2)_RETURN(collide)
         }
     }
-    if(all_type == 2){
-        /* Return value doesn't matter, we were just looking for
-        savepoints & doors */
-        return false;
-    }else{
-        bool all = all_type;
-        if(all)return true;
-        else return false;
+
+    {
+        bool collide;
+        if(all_type == 2){
+            /* Return value doesn't matter, we were just looking for
+            savepoints & doors */
+            collide = false;
+        }else{
+            bool all = all_type;
+            if(all)collide = true;
+            else collide = false;
+        }
+
+        *collide_ptr = collide;
+        return 0;
     }
+#   undef _RETURN
 }
 
-bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
-    trf_t *trf, bool all
+int hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
+    trf_t *trf, bool all, bool *collide_ptr
 ){
     hexmap_collision_t collision;
-    return _hexmap_collide(map, collmap2, trf, all, &collision);
+    return _hexmap_collide(map, collmap2, trf, all, &collision, collide_ptr);
 }
 
-void hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
+int hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf, hexmap_collision_t *collision
 ){
     int all_type = 2;
-    _hexmap_collide(map, collmap2, trf, all_type, collision);
+    bool collide; /* unused */
+    return _hexmap_collide(map, collmap2, trf, all_type, collision, &collide);
 }
 
 
@@ -1319,6 +1357,11 @@ int hexmap_step(hexmap_t *map){
         hexcollmap_t *hitbox = body->state->hitbox;
         if(hitbox == NULL)continue;
 
+        bool visible;
+        err = body_is_visible(body, &visible);
+        if(err)return err;
+        if(!visible)continue;
+
         trf_t hitbox_trf;
         hexgame_location_init_trf(&body->loc, &hitbox_trf);
 
@@ -1329,6 +1372,11 @@ int hexmap_step(hexmap_t *map){
             if(body_other->state == NULL)continue;
             hexcollmap_t *hitbox_other = body_other->state->hitbox;
             if(hitbox_other == NULL)continue;
+
+            bool visible_other;
+            err = body_is_visible(body_other, &visible_other);
+            if(err)return err;
+            if(!visible_other)continue;
 
             trf_t hitbox_other_trf;
             hexgame_location_init_trf(&body_other->loc, &hitbox_other_trf);
@@ -1350,6 +1398,12 @@ int hexmap_step(hexmap_t *map){
     /* Do 1 gameplay step for each body */
     for(int i = 0; i < map->bodies_len; i++){
         body_t *body = map->bodies[i];
+
+        bool visible;
+        err = body_is_visible(body, &visible);
+        if(err)return err;
+        if(!visible)continue;
+
         err = body_step(body, game);
         if(err)return err;
     }
@@ -1449,35 +1503,46 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
     return 0;
 }
 
-bool hexmap_submap_is_visible(hexmap_submap_t *submap){
-    /* NOTE: submaps are visible by default. */
-    if(submap->visible_expr == NULL)return true;
-    bool visible = true;
+int hexmap_submap_is_visible(hexmap_submap_t *submap, bool *visible_ptr){
+    int err;
 
-    val_t *result;
-    valexpr_context_t context = {.mapvars = &submap->map->vars};
-    int err = valexpr_get(submap->visible_expr, &context, &result);
-    if(err){
-        fprintf(stderr,
-            "Error while evaluating visibility for submap: %s\n",
-            submap->filename);
-        /* MAYBE TODO: we're swallowing this error and just using a default
-        value... maybe better to exit(err) or *gag* change this function to
-        return an error value and take a bool *visible_ptr argument?.. */
-    }else if(!result){
-        /* Val not found: use default visible value */
-    }else{
-        visible = val_get_bool(result);
+    /* NOTE: visible by default. */
+    bool visible = true;
+    if(submap->visible_expr != NULL){
+        val_t *result;
+        valexpr_context_t context = {.mapvars = &submap->map->vars};
+        err = valexpr_get(submap->visible_expr, &context, &result);
+        if(err){
+            fprintf(stderr,
+                "Error while evaluating visibility for submap: %s\n",
+                submap->filename);
+            return err;
+        }else if(!result){
+            /* Val not found: use default visible value */
+        }else{
+            visible = val_get_bool(result);
+        }
     }
 
     if(submap->visible_expr_not)visible = !visible;
-    return visible;
+    *visible_ptr = visible;
+    return 0;
 }
 
-bool hexmap_submap_is_solid(hexmap_submap_t *submap){
-    if(!submap->solid)return false;
-    if(!hexmap_submap_is_visible(submap))return false;
-    return true;
+int hexmap_submap_is_solid(hexmap_submap_t *submap, bool *solid_ptr){
+    int err;
+    bool solid = true;
+    if(!submap->solid){
+        solid = false;
+        goto done;
+    }
+
+    err = hexmap_submap_is_visible(submap, &solid);
+    if(err)return err;
+
+done:
+    *solid_ptr = solid;
+    return 0;
 }
 
 const char *hexmap_submap_get_text(hexmap_submap_t *submap){

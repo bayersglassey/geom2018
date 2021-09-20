@@ -104,6 +104,7 @@ int fus_lexer_get_keyinfo(fus_lexer_t *lexer,
  *********************/
 
 void body_cleanup(body_t *body){
+    valexpr_cleanup(&body->visible_expr);
     vars_cleanup(&body->vars);
     stateset_cleanup(&body->stateset);
     recording_cleanup(&body->recording);
@@ -123,6 +124,9 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
     body->out_of_bounds = false;
     body->map = map;
     body->cur_submap = NULL;
+
+    valexpr_set_literal_bool(&body->visible_expr, true);
+    body->visible_not = false;
 
     vars_init(&body->vars);
 
@@ -187,6 +191,34 @@ void hexgame_body_dump(body_t *body, int depth){
     print_tabs(stderr, depth);
     fprintf(stderr, "body vars:\n");
     vars_write(&body->vars, stderr, TAB_SPACES * (depth + 1));
+}
+
+int body_is_visible(body_t *body, bool *visible_ptr){
+    int err;
+
+    /* NOTE: visible by default. */
+    bool visible = true;
+
+    val_t *result;
+    valexpr_context_t context = {
+        .myvars = &body->vars,
+        .mapvars = &body->map->vars
+    };
+    err = valexpr_get(&body->visible_expr, &context, &result);
+    if(err){
+        fprintf(stderr,
+            "Error while evaluating visibility for body:\n");
+        hexgame_body_dump(body, 0);
+        return err;
+    }else if(!result){
+        /* Val not found: use default visible value */
+    }else{
+        visible = val_get_bool(result);
+    }
+
+    if(body->visible_not)visible = !visible;
+    *visible_ptr = visible;
+    return 0;
 }
 
 int body_respawn(body_t *body, vec_t pos, rot_t rot, bool turn,
@@ -323,7 +355,8 @@ int body_move_to_map(body_t *body, hexmap_t *map){
     ARRAY_PUSH(body_t*, map->bodies, body)
 
     /* Update body->cur_submap */
-    body_update_cur_submap(body);
+    err = body_update_cur_submap(body);
+    if(err)return err;
 
     /* Update any cameras following this body */
     FOREACH_BODY_CAMERA(body, camera, {
@@ -487,9 +520,10 @@ char body_get_key_c(body_t *body, int key_i, bool absolute){
  * BODY STEP *
  *************/
 
-void body_update_cur_submap(body_t *body){
+int body_update_cur_submap(body_t *body){
     /* Sets body->cur_submap, body->out_of_bounds by colliding body
     against body->map */
+    int err;
 
     hexmap_t *map = body->map;
     vecspace_t *space = map->space;
@@ -500,7 +534,10 @@ void body_update_cur_submap(body_t *body){
     bool out_of_bounds = true;
     for(int i = 0; i < map->submaps_len; i++){
         hexmap_submap_t *submap = map->submaps[i];
-        if(!hexmap_submap_is_solid(submap))continue;
+        bool solid;
+        err = hexmap_submap_is_solid(submap, &solid);
+        if(err)return err;
+        if(!solid)continue;
 
         hexcollmap_t *collmap = &submap->collmap;
 
@@ -530,7 +567,9 @@ void body_update_cur_submap(body_t *body){
             hexgame_location_init_trf(&body->loc, &hitbox_trf);
 
             hexmap_collision_t collision;
-            hexmap_collide_special(map, hitbox, &hitbox_trf, &collision);
+            err = hexmap_collide_special(map, hitbox, &hitbox_trf,
+                &collision);
+            if(err)return err;
 
             hexmap_submap_t *water_submap = collision.water.submap;
             if(water_submap)new_submap = water_submap;
@@ -544,6 +583,8 @@ void body_update_cur_submap(body_t *body){
         player_t *player = body_get_player(body);
         if(player)new_submap->visited = true;
     }
+
+    return 0;
 }
 
 int body_handle_rules(body_t *body){
@@ -602,7 +643,8 @@ int body_step(body_t *body, hexgame_t *game){
     }
 
     /* Figure out current submap */
-    body_update_cur_submap(body);
+    err = body_update_cur_submap(body);
+    if(err)return err;
 
     return 0;
 }

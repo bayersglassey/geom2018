@@ -227,7 +227,10 @@ static int camera_render_map(camera_t *camera,
 
         if(minimap && !submap->visited)continue;
 
-        if(!hexmap_submap_is_visible(submap))continue;
+        bool visible;
+        err = hexmap_submap_is_visible(submap, &visible);
+        if(err)return err;
+        if(!visible)continue;
 
 #ifdef GEOM_ONLY_RENDER_CUR_SUBMAP
         if(!minimap && submap != camera->cur_submap)continue;
@@ -301,6 +304,11 @@ int camera_render(camera_t *camera,
 #ifdef GEOM_ONLY_RENDER_CUR_SUBMAP
             if(body->cur_submap != camera->cur_submap)continue;
 #endif
+
+            bool visible;
+            err = body_is_visible(body, &visible);
+            if(err)return err;
+            if(!visible)continue;
 
             err = body_render(body,
                 surface,

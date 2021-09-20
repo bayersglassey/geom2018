@@ -175,9 +175,9 @@ int hexmap_get_or_create_tileset(hexmap_t *map, const char *name,
 int hexmap_load_recording(hexmap_t *map, const char *filename,
     palettemapper_t *palmapper, bool loop, int offset, trf_t *trf,
     struct body **body_ptr);
-bool hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
-    trf_t *trf, bool all);
-void hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
+int hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
+    trf_t *trf, bool all, bool *collide_ptr);
+int hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf,
     hexmap_collision_t *collision);
 int hexmap_step(hexmap_t *map);
@@ -190,8 +190,8 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
     valexpr_t *visible_expr, bool visible_expr_not,
     bool solid, vec_t pos, int camera_type, vec_t camera_pos,
     prismelmapper_t *mapper, char *palette_filename, char *tileset_filename);
-bool hexmap_submap_is_visible(hexmap_submap_t *submap);
-bool hexmap_submap_is_solid(hexmap_submap_t *submap);
+int hexmap_submap_is_visible(hexmap_submap_t *submap, bool *visible_ptr);
+int hexmap_submap_is_solid(hexmap_submap_t *submap, bool *solid_ptr);
 const char *hexmap_submap_get_text(hexmap_submap_t *submap);
 int hexmap_submap_create_rgraph_map(hexmap_submap_t *submap);
 int hexmap_submap_create_rgraph_minimap(hexmap_submap_t *submap);

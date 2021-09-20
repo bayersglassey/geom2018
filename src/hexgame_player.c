@@ -378,7 +378,8 @@ int player_step(player_t *player, hexgame_t *game){
         hexgame_location_init_trf(&body->loc, &hitbox_trf);
 
         hexmap_collision_t collision;
-        hexmap_collide_special(map, hitbox, &hitbox_trf, &collision);
+        err = hexmap_collide_special(map, hitbox, &hitbox_trf, &collision);
+        if(err)return err;
 
         hexmap_submap_t *savepoint_submap = collision.savepoint.submap;
         hexmap_submap_t *door_submap = collision.door.submap;

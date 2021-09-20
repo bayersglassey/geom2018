@@ -192,6 +192,12 @@ int state_cond_match(state_cond_t *cond,
                     if(body_other->state == NULL)continue;
                     hexcollmap_t *hitbox_other = body_other->state->hitbox;
                     if(hitbox_other == NULL)continue;
+
+                    bool visible;
+                    err = body_is_visible(body_other, &visible);
+                    if(err)return err;
+                    if(!visible)continue;
+
                     if(collmsg &&
                         !body_sends_collmsg(body_other, collmsg)
                     )continue;
@@ -208,12 +214,16 @@ int state_cond_match(state_cond_t *cond,
                 matched = n_matches > 0;
             }else if(water){
                 hexmap_collision_t collision;
-                hexmap_collide_special(map, hitbox, &hitbox_trf, &collision);
+                err = hexmap_collide_special(map, hitbox, &hitbox_trf,
+                    &collision);
+                if(err)return err;
                 bool collide = collision.water.submap != NULL;
                 matched = yes? collide: !collide;
             }else{
-                bool collide = hexmap_collide(map,
-                    hitbox, &hitbox_trf, yes? all: !all);
+                bool collide;
+                err = hexmap_collide(map, hitbox, &hitbox_trf,
+                    yes? all: !all, &collide);
+                if(err)return err;
                 matched = yes? collide: !collide;
             }
         }

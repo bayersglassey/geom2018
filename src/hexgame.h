@@ -127,6 +127,8 @@ int recording_step(recording_t *rec);
 typedef struct body {
     hexgame_location_t loc;
     keyinfo_t keyinfo;
+    valexpr_t visible_expr;
+    bool visible_not;
     vars_t vars;
 
     recording_t recording;
@@ -182,6 +184,7 @@ int body_init(body_t *body, struct hexgame *game, hexmap_t *map,
     const char *stateset_filename, const char *state_name,
     palettemapper_t *palmapper);
 void hexgame_body_dump(body_t *body, int depth);
+int body_is_visible(body_t *body, bool *visible_ptr);
 int body_get_index(body_t *body);
 bool body_is_done_for(body_t *body);
 int body_respawn(body_t *body, vec_t pos, rot_t rot, bool turn,
@@ -207,7 +210,7 @@ int body_set_state(body_t *body, const char *state_name,
 
 struct actor;
 struct hexgame;
-void body_update_cur_submap(body_t *body);
+int body_update_cur_submap(body_t *body);
 int body_handle_rules(body_t *body);
 int body_step(body_t *body, struct hexgame *game);
 bool body_sends_collmsg(body_t *body, const char *msg);
