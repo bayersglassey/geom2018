@@ -48,16 +48,21 @@ $SET_STR TUT_DANGER: lines:
     ;;
     ;;
     ;;
+    ;;
     ;;Something dangerous is
     ;; rolling around down there.
     ;;
-    ;;  Hit it with your spit to
-    ;;  change its direction.
-    ;;  Follow the purple things
-    ;;  and be careful.
+    ;;
     ;;
     ;; Everything with be okay.
     ;;   Keep going.
+$SET_STR TUT_DANGER2: lines:
+    ;;
+    ;;  That thing is scary!
+    ;;  Hit it with your spit to
+    ;;  change its direction.
+    ;;
+    ;;  Follow the purple things...
 $SET_STR TUT_DANGER_PASSED: lines:
     ;;Nicely done. Keep going!
 $SET_STR TUT_COIN_BEASTS: lines:
@@ -128,7 +133,7 @@ submaps:
                     camera: (-4 -8)
                 :
                     file: "data/maps/tutorial2/start3b.fus"
-                    text: if mapvar("start3b_solved") then $GET_STR TUT_DANGER_PASSED else null
+                    text: if mapvar("start3b_solved") then $GET_STR TUT_DANGER_PASSED else $GET_STR TUT_DANGER2
                     pos: eval: (0 0) + (13 -9) + (-1 -12)
                     camera: (-5 -6)
                 :
