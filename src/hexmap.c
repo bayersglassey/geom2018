@@ -312,9 +312,13 @@ int hexmap_init(hexmap_t *map, hexgame_t *game, char *name,
 
 static int hexmap_parse_recording(fus_lexer_t *lexer,
     char **filename_ptr, char **palmapper_name_ptr, int *frame_offset_ptr,
-    trf_t *trf, vars_t *vars, vars_t *bodyvars, bool *relative_ptr
+    trf_t *trf, vars_t *vars, vars_t *bodyvars, bool *relative_ptr,
+    valexpr_t *visible_expr, bool *visible_not_ptr
 ){
     int err;
+
+    valexpr_set_literal_bool(visible_expr, true);
+    bool visible_not = false;
 
     err = fus_lexer_get(lexer, "(");
     if(err)return err;
@@ -339,7 +343,12 @@ static int hexmap_parse_recording(fus_lexer_t *lexer,
 
     err = fus_lexer_get_str(lexer, filename_ptr);
     if(err)return err;
-    if(!fus_lexer_got(lexer, ")") && !fus_lexer_got(lexer, "vars")){
+    if(
+        !fus_lexer_got(lexer, ")") &&
+        !fus_lexer_got(lexer, "visible") &&
+        !fus_lexer_got(lexer, "vars") &&
+        !fus_lexer_got(lexer, "bodyvars")
+    ){
         if(fus_lexer_got(lexer, "empty")){
             err = fus_lexer_next(lexer);
             if(err)return err;
@@ -351,6 +360,22 @@ static int hexmap_parse_recording(fus_lexer_t *lexer,
             err = fus_lexer_get_int(lexer, frame_offset_ptr);
             if(err)return err;
         }
+    }
+
+    if(fus_lexer_got(lexer, "visible")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        if(fus_lexer_got(lexer, "not")){
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+            visible_not = true;
+        }
+        err = valexpr_parse(visible_expr, lexer);
+        if(err)return err;
+        err = fus_lexer_get(lexer, ")");
+        if(err)return err;
     }
 
     if(fus_lexer_got(lexer, "vars")){
@@ -377,6 +402,8 @@ static int hexmap_parse_recording(fus_lexer_t *lexer,
 
     err = fus_lexer_get(lexer, ")");
     if(err)return err;
+
+    *visible_not_ptr = visible_not;
     return 0;
 }
 
@@ -569,9 +596,11 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, char *name,
         vars_t bodyvars;
         vars_init(&bodyvars);
         bool relative; /* unused here -- only used when parsing submaps */
+        valexpr_t visible_expr;
+        bool visible_not;
         err = hexmap_parse_recording(lexer,
             &filename, &palmapper_name, &frame_offset, &trf,
-            &vars, &bodyvars, &relative);
+            &vars, &bodyvars, &relative, &visible_expr, &visible_not);
         if(err)return err;
 
         ARRAY_PUSH_NEW(hexmap_recording_t*, map->recordings,
@@ -584,6 +613,8 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, char *name,
         recording->trf = trf;
         recording->vars = vars;
         recording->bodyvars = bodyvars;
+        recording->visible_expr = visible_expr;
+        recording->visible_not = visible_not;
     }
     err = fus_lexer_next(lexer);
     if(err)return err;
@@ -1030,9 +1061,11 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
             vars_t bodyvars;
             vars_init(&bodyvars);
             bool relative;
+            valexpr_t visible_expr;
+            bool visible_not;
             err = hexmap_parse_recording(lexer,
                 &filename, &palmapper_name, &frame_offset, &trf,
-                &vars, &bodyvars, &relative);
+                &vars, &bodyvars, &relative, &visible_expr, &visible_not);
             if(err)return err;
 
             if(relative){
@@ -1050,6 +1083,8 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
             recording->trf = trf;
             recording->vars = vars;
             recording->bodyvars = bodyvars;
+            recording->visible_expr = visible_expr;
+            recording->visible_not = visible_not;
         }
         err = fus_lexer_next(lexer);
         if(err)return err;
