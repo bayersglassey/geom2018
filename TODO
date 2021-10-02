@@ -779,14 +779,14 @@ Mar 20, 2021:
 
 
 Aug 31, 2021:
-------------------------------------------
+-------------
 
 * finish tutorial.
-    * switches
-    * other creatures
-    * transformations
-    * other tilesets (e.g. wavy fronds of water tileset, and spiky grass of earth, don't hurt you...)
-    * swimming (?.. or leave it a secret?..)
+    [*] other tilesets (e.g. wavy fronds of water tileset, and spiky grass of earth, don't hurt you...)
+    [*] other creatures
+    [*] switches
+    [ ] transformations
+    [ ] swimming (?.. or leave it a secret?..)
 * Where do you go after it?..
     * demo.
 
@@ -795,3 +795,29 @@ Aug 31, 2021:
   opt into the old scrolling behaviour?.. (or is that behaviour always broken if you fly?..)
 
 * Ummmmmmmm you can shoot switches through walls
+
+
+Sep 19, 2021:
+-------------
+
+* The tutorial section: instead of text just explaining stuff, have eyes which open and watch
+  you, and the text only appears while they're open, so it's like some crazy god is speaking
+  to you.
+
+* After tutorial, we are dropped into "demo" worldmap.
+  Crazy god no longer speaks to us directly -- we have been told as much at end of tutorial,
+  something like "you won't hear from me again... if you're lucky" -- and now we meet other
+  spiders, and learn what our "goals" are.
+  First spider we meet says what... "ah, someone new!"
+  And we imply... what, that we have all been reborn as spider robots?
+  Or that we are a newly born spider?
+  In any case, the spiders' goals are... to find spidertown again? Or what?
+
+* In a few out-of-the-way places in demo worldmap, we see the eyes from the tutorial...
+  but they don't speak to you.
+  Maybe they only appear in quiet places you're guaranteed to pass through?..
+  Until somewhere near the end of the game, one finally speaks to you again?..
+  Something simple like "Good to see you again".
+  ......nahhhhh.
+
+* Hmmmmm.
