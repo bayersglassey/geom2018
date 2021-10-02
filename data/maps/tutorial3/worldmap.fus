@@ -4,23 +4,103 @@ spawn: "data/maps/tutorial3/start.fus"
 default_palette: "data/pal1.fus"
 default_tileset: "data/tileset1.fus"
 vars:
+    "switch1": F
+    "switch2": F
+    "switch3": F
 
-$SET_STR GROUND: lines:
+$SET_STR LAST_ONE: lines:
     ;;
     ;;
     ;;
     ;;
-    ;;         Even if the ground looks different,
     ;;
     ;;
-    ;;      it's all the same.
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;                         Almost finished
+    ;;                           the tutorial!
+
+$SET_STR LOCKED_OUT: lines:
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;                         You're locked out!
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;                              Better
+    ;;                              look around
+    ;;                              for a way to
+    ;;                              open it.
 
 $SET_STR CREATURES: lines:
     ;;
     ;;
     ;;
-    ;;     Most small creatures you meet here are tame,
-    ;;                                          and harmless.
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;                These
+    ;;                   rolling blue
+    ;;                         creatures
+    ;;
+    ;;                           are tame,
+    ;;
+    ;;
+    ;;                     and harmless.
 
 $SET_STR DEATH_CREATURES: lines:
     ;;
@@ -36,15 +116,6 @@ $SET_STR DEATH_CREATURES: lines:
     ;;
     ;;
     ;;
-    ;;     ...however,
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;       bright red
-    ;;      creatures
     ;;
     ;;
     ;;
@@ -52,13 +123,30 @@ $SET_STR DEATH_CREATURES: lines:
     ;;
     ;;
     ;;
+    ;;                     ....however,
     ;;
     ;;
     ;;
-    ;;       are death
-    ;;     to touch.
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;                      bright red
+    ;;                    creatures
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;                                      are death
+    ;;                                         to touch.
 
-$SET_STR DEATH_CREATURES_REVERSE: lines:
+$SET_STR HIT_THE_SWITCH: lines:
     ;;
     ;;
     ;;
@@ -69,14 +157,69 @@ $SET_STR DEATH_CREATURES_REVERSE: lines:
     ;;
     ;;
     ;;
-    ;; Interestingly, your spit
-    ;; can reverse the direction
-    ;; in which some creatures move.
     ;;
-    ;; (You might have to crouch
-    ;; to hit the smaller ones.)
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;                                              Hit the switch
+    ;;                                               with your spit.
+    ;;
 
-$SET_STR HOORAY: lines:
+$SET_STR WHAT_ELSE: lines:
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;       What else
+    ;;         has changed?
+    ;;
+
+$SET_STR START3_SWITCHED: lines:
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;                          You can
+    ;;                          hit this
+    ;;                          switch!
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;                    ...it's tricky
+    ;;                              though.
+
+$SET_STR START3_SWITCHED_HINT: lines:
     ;;
     ;;
     ;;
@@ -92,35 +235,45 @@ $SET_STR HOORAY: lines:
     ;;
     ;;
     ;;
+    ;;                             Hit it
+    ;;                                     from
+    ;;                                            here
     ;;
     ;;
     ;;
     ;;
     ;;
     ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;                                              Hooray.
+    ;;                     (Remember:
+    ;;                       your spit
+    ;;                        bounces)
 
 submaps:
     :
         file: "data/maps/tutorial3/start.fus"
-        text: $GET_STR GROUND
+        text: if mapvar("switch1") then null else $GET_STR LAST_ONE
         pos: eval: (0 0)
         camera: (6 0)
         mapper: ("triple")
+        tileset: "data/tileset1.fus"
+        submaps:
+            :
+                file: "data/maps/tutorial3/start_exit.fus"
+                text: if mapvar("switch3") then null else $GET_STR LOCKED_OUT
+                pos: (3 -5)
+                tileset: "data/tileset2.fus"
+                doors:
+                    :
+                        map: "data/maps/demo/worldmap.fus"
+                        pos: (-19 -5)
+                        rot: 0
+                        turn: n
+            :
+                file: "data/maps/tutorial3/start_exit_blocker.fus"
+                text: if mapvar("switch3") then null else $GET_STR LOCKED_OUT
+                visible: not mapvar("switch3")
+                pos: (3 -5)
+                tileset: "data/tileset2.fus"
     :
         file: "data/maps/tutorial3/blocker.fus"
         pos: eval: (0 0) + (-8 -20)
@@ -128,32 +281,71 @@ submaps:
         mapper: ("triple")
     :
         file: "data/maps/tutorial3/start.fus"
-        text: $GET_STR CREATURES
+        text: if mapvar("switch1") then null else $GET_STR CREATURES
         pos: eval: (0 0) + (11 -14)
         rot: 1
         camera: (11 3)
         mapper: ("triple")
         tileset: "data/tileset2.fus"
         recs:
-            : relative (-1 -3) 0 n "data/recs/roller_r.fus"
+            : relative (-1 -4) 0 n "data/recs/roller_r.fus"
             : relative ( 8 -9) 0 n "data/recs/roller_l.fus"
+            : relative (11 -2) 0 n "data/recs/death_roller_r.fus"
+                visible: mapvar("switch3")
+            : relative ( 0  0) 0 n "data/recs/death_roller_l.fus"
+                visible: mapvar("switch3")
+            : relative ( 4  4) 0 n "data/recs/death_roller_r.fus"
+                visible: mapvar("switch3")
+            : relative (10  4) 0 n "data/recs/death_roller_l.fus"
+                visible: mapvar("switch3")
     :
         file: "data/maps/tutorial3/start.fus"
+        text:
+            if mapvar("switch1") then
+                if mapvar("switch2") then
+                    if not mapvar("switch3") then $GET_STR START3_SWITCHED else null
+                else null
+            else $GET_STR DEATH_CREATURES
         pos: eval: (0 0) + (11 -14) + (7 -16)
         rot: 2
         camera: (6 9)
         mapper: ("triple")
-        tileset: "data/maps/sprucetown/tilesets/earth.fus"
+        tileset: "data/tileset1.fus"
+        submaps:
+            :
+                file: "data/maps/tutorial3/start3_switched.fus"
+                text:
+                    if mapvar("switch2") then
+                        if not mapvar("switch3") then $GET_STR START3_SWITCHED_HINT else null
+                    else null
+                visible: mapvar("switch2")
+                pos: (0 10)
+            :
+                file: "data/maps/tutorial3/start3_switched_blocker.fus"
+
+                # This monstrosity of a conditional is an indicator that our valexpr system is a giant hack
+                visible: if mapvar("switch2") then if not mapvar("switch3") then T else F else F
+
+                pos: (0 10)
+                camera: (2 0)
+            :
+                file: "data/maps/tutorial3/miniblocker_line.fus"
+                visible: if mapvar("switch1") then if not mapvar("switch2") then T else F else F
+                pos: (-1 4)
     :
         file: "data/maps/tutorial3/start.fus"
-        text: $GET_STR DEATH_CREATURES
         pos: eval: (0 0) + (11 -14) + (7 -16) + (0 -12)
         rot: 3
         camera: (-5 3)
         mapper: ("triple")
-        tileset: "data/maps/demo/tilesets/water.fus"
+        tileset: "data/tileset2.fus"
         recs:
-            : relative (-1 -3) 0 n "data/recs/water_roller_r.fus"
+            : relative (-1 -4) 0 n "data/recs/death_roller_r.fus"
+        submaps:
+            :
+                file: "data/maps/tutorial3/start4_switched.fus"
+                visible: mapvar("switch1")
+                pos: (-5 -2)
     :
         file: "data/maps/tutorial3/blocker.fus"
         pos: eval: (0 0) + (11 -14) + (7 -16) + (0 -12) + (-30 0)
@@ -161,19 +353,22 @@ submaps:
         mapper: ("triple")
     :
         file: "data/maps/tutorial3/start.fus"
-        text: $GET_STR DEATH_CREATURES_REVERSE
+        text: if mapvar("switch1") then $GET_STR WHAT_ELSE else $GET_STR HIT_THE_SWITCH
         pos: eval: (0 0) + (11 -14) + (7 -16) + (0 -12) + (-10 -8)
         rot: 4
         camera: (-5 0)
         mapper: ("triple")
-        tileset: "data/maps/sprucetown/tilesets/earth.fus"
+        tileset: "data/tileset1.fus"
         recs:
-            : relative (-1 -3) 0 n "data/recs/death_roller_r.fus"
+            : relative (-1 -4) 0 n "data/recs/death_roller_r.fus"
             : relative (11 -2) 0 n "data/recs/death_roller_l.fus"
-    :
-        file: "data/maps/tutorial3/start_door.fus"
-        text: $GET_STR HOORAY
-        pos: eval: (0 0) + (11 -14) + (7 -16) + (0 -12) + (-10 -8) + (2 -7)
-        camera: (0 0)
-        mapper: ("triple")
-        tileset: "data/maps/sprucetown/tilesets/earth.fus"
+        submaps:
+            :
+                file: "data/maps/tutorial3/start5.fus"
+                text: if mapvar("switch1") then $GET_STR WHAT_ELSE else $GET_STR HIT_THE_SWITCH
+                pos: (2 -7)
+            :
+                file: "data/maps/tutorial3/start5_switched.fus"
+                text: $GET_STR WHAT_ELSE
+                visible: mapvar("switch1")
+                pos: (-9 -11)
