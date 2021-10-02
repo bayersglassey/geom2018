@@ -74,13 +74,17 @@ submaps:
                                             :
                                                 file: "data/maps/demo/vines3_door.fus"
                                                 visible: mapvar("vines3_door")
-                                                pos: (-11 8)
+                                                pos: (-8 13)
                                                 doors:
                                                     :
                                                         map: "data/maps/water/worldmap.fus"
                                                         pos: (1 8)
                                                         rot: 0
                                                         turn: n
+                                            :
+                                                file: "data/maps/demo/vines3_door_blocker.fus"
+                                                visible: not mapvar("vines3_door")
+                                                pos: (-8 13)
                                     :
                                         file: "data/maps/demo/vines4.fus"
                                         pos: (-40 4)
