@@ -821,3 +821,18 @@ Sep 19, 2021:
   ......nahhhhh.
 
 * Hmmmmm.
+
+
+Oct 2, 2021:
+------------
+
+* The current end of water area: this is where the door in hermit's house leads.
+    * He unlocks one side, you unlock the other -- that is, he causes the door to be opened,
+      and you need to travel through water area the regular way to hit a switch, removing
+      some stuff blocking the door.
+
+* Add some kind of water animal which chases spiders.
+    * It's slow enough that you can get away, and/or shooting it makes it pause for a second.
+
+* Right side of data/maps/demo/jungle5.fus: flierplayer can get trapped in a circle
+  if he flies+lands in from the top-right of the circle O_o
