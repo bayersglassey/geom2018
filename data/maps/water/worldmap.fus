@@ -6,6 +6,10 @@ default_palette: "data/maps/water/pals/deeps.fus"
 #default_palette: "data/maps/demo/pals/light_dark_cycle.fus"
 default_tileset: "data/tileset1.fus"
 
+vars:
+    nosave "num_coins_a": 10
+    "coins_a": F
+
 submaps:
     :
         pos: (0 0)
@@ -68,6 +72,11 @@ submaps:
                 pos: eval: (42 0) + (10 -9)
                 camera: (0 0)
             :
+                bg
+                file: "data/maps/water/air_bubbles_walled1_bg.fus"
+                pos: eval: (42 0) + (29 10) + (0 -12)
+                tileset: "data/tileset1_bg.fus"
+            :
                 file: "data/maps/water/air_bubbles_walled1.fus"
                 pos: eval: (42 0) + (29 10)
                 camera: (-1 -4)
@@ -87,6 +96,17 @@ submaps:
                         pos: (24 7)
                         camera: (0 0)
                         mapper: ("quadruple")
+                        doors:
+                            :
+                                map: "data/maps/demo/worldmap.fus"
+                                pos: (-51 29)
+                                rot: 0
+                                turn: y
+                        submaps:
+                            :
+                                file: "data/maps/water/air_bubbles_walled1_tunnel_blocker.fus"
+                                visible: not mapvar("coins_a")
+                                pos: (-7 -1)
             :
                 file: "data/maps/water/room_sm_bubble2.fus"
                 pos: eval: (42 0) + (20 -19)
