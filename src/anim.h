@@ -88,11 +88,20 @@ typedef struct state {
 * STATESET *
 ***********/
 
+typedef struct stateset_collmap_entry {
+    /* Key/value pair in the array stateset->collmaps.
+    The key is an arbitrary string (whereas collmap->name is supposed to be
+    the filename it was parsed from). */
+    char *name;
+    struct hexcollmap *collmap;
+} stateset_collmap_entry_t;
+
 typedef struct stateset {
     char *filename;
     ARRAY_DECL(char*, collmsgs)
     ARRAY_DECL(struct collmsg_handler, collmsg_handlers)
     ARRAY_DECL(struct state*, states)
+    ARRAY_DECL(stateset_collmap_entry_t*, collmaps)
     bool debug_collision;
     const char *default_state_name; /* stateset->states[i]->name */
 } stateset_t;
@@ -167,7 +176,12 @@ typedef struct state_cond {
             char *collmsg;
                 /* If flags^ANIM_COND_FLAGS_BODIES, collmsg specifies
                 that only bodies with this collmsg should collide */
+            hexcollmap_t *own_collmap;
+                /* own_collmap is for if we own the collmap, as opposed to
+                just pointing to one from stateset->collmaps. */
             hexcollmap_t *collmap;
+                /* Cannot be NULL. If own_collmap != NULL, then
+                collmap == own_collmap */
         } coll;
         struct {
             bool yes;
@@ -300,9 +314,12 @@ typedef struct state_effect_ite {
 * PROTOTYPES *
 *************/
 
+void stateset_collmap_entry_cleanup(stateset_collmap_entry_t *entry);
+
 void stateset_cleanup(stateset_t *stateset);
 int stateset_init(stateset_t *stateset, char *filename);
 void stateset_dump(stateset_t *stateset, FILE *file, int depth);
+hexcollmap_t *stateset_get_collmap(stateset_t *stateset, const char *name);
 int stateset_load(stateset_t *stateset, char *filename, vars_t *vars,
     prismelrenderer_t *prend, vecspace_t *space);
 int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,

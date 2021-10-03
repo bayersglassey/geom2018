@@ -20,11 +20,26 @@ static void _print_tabs(FILE *file, int depth){
 }
 
 
+static int _parse_trf(fus_lexer_t *lexer, vecspace_t *space, rot_t *rot_ptr){
+    rot_t rot = 0;
+    INIT
+    while(1){
+        if(GOT("^")){
+            NEXT
+            int addrot;
+            GET_INT(addrot)
+            rot = rot_contain(space->rot_max, rot + addrot);
+        }else break;
+    }
+    *rot_ptr = rot;
+    return 0;
+}
 
-static int _parse_effect(fus_lexer_t *lexer,
+
+static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
     prismelrenderer_t *prend, vecspace_t *space,
     state_effect_t *effect);
-static int _parse_collmsg_handler(fus_lexer_t *lexer,
+static int _parse_collmsg_handler(stateset_t *stateset, fus_lexer_t *lexer,
     collmsg_handler_t *handler, prismelrenderer_t *prend, vecspace_t *space
 ){
     INIT
@@ -38,7 +53,7 @@ static int _parse_collmsg_handler(fus_lexer_t *lexer,
     while(true){
         if(GOT(")"))break;
         ARRAY_PUSH_NEW(state_effect_t*, handler->effects, effect)
-        err = _parse_effect(lexer, prend, space, effect);
+        err = _parse_effect(stateset, lexer, prend, space, effect);
         if(err)return err;
     }
     NEXT
@@ -66,12 +81,19 @@ void collmsg_handler_init(collmsg_handler_t *handler, char *msg){
  * STATESET *
  ************/
 
+void stateset_collmap_entry_cleanup(stateset_collmap_entry_t *entry){
+    free(entry->name);
+    hexcollmap_cleanup(entry->collmap);
+}
+
 void stateset_cleanup(stateset_t *stateset){
     free(stateset->filename);
     ARRAY_FREE_PTR(char*, stateset->collmsgs, (void))
     ARRAY_FREE(collmsg_handler_t, stateset->collmsg_handlers,
         collmsg_handler_cleanup)
     ARRAY_FREE_PTR(state_t*, stateset->states, state_cleanup)
+    ARRAY_FREE_PTR(stateset_collmap_entry_t*, stateset->collmaps,
+        stateset_collmap_entry_cleanup)
 }
 
 int stateset_init(stateset_t *stateset, char *filename){
@@ -79,6 +101,7 @@ int stateset_init(stateset_t *stateset, char *filename){
     ARRAY_INIT(stateset->collmsgs)
     ARRAY_INIT(stateset->collmsg_handlers)
     ARRAY_INIT(stateset->states)
+    ARRAY_INIT(stateset->collmaps)
     stateset->debug_collision = false;
     return 0;
 }
@@ -90,6 +113,14 @@ void stateset_dump(stateset_t *stateset, FILE *file, int depth){
         state_t *state = stateset->states[i];
         state_dump(state, file, depth+1);
     }
+}
+
+hexcollmap_t *stateset_get_collmap(stateset_t *stateset, const char *name){
+    for(int i = 0; i < stateset->collmaps_len; i++){
+        stateset_collmap_entry_t *entry = stateset->collmaps[i];
+        if(!strcmp(entry->name, name))return entry->collmap;
+    }
+    return NULL;
 }
 
 int stateset_load(stateset_t *stateset, char *filename, vars_t *vars,
@@ -116,7 +147,7 @@ int stateset_load(stateset_t *stateset, char *filename, vars_t *vars,
     return 0;
 }
 
-static int _parse_cond(fus_lexer_t *lexer,
+static int _parse_cond(stateset_t *stateset, fus_lexer_t *lexer,
     prismelrenderer_t *prend, vecspace_t *space,
     state_cond_t *cond
 ){
@@ -194,16 +225,55 @@ static int _parse_cond(fus_lexer_t *lexer,
         else return UNEXPECTED("yes or no");
         NEXT
 
-        hexcollmap_t *collmap = calloc(1, sizeof(*collmap));
-        if(collmap == NULL)return 1;
-        hexcollmap_init(collmap, space,
-            strdup(lexer->filename));
-        err = hexcollmap_parse(collmap, lexer, true);
-        if(err)return err;
+        hexcollmap_t *own_collmap = NULL;
+        hexcollmap_t *collmap;
+
+        if(GOT("collmap")){
+            NEXT
+            GET("(")
+            char *name;
+            GET_STR(name)
+
+            hexcollmap_t *found_collmap = stateset_get_collmap(
+                stateset, name);
+            if(!found_collmap){
+                fus_lexer_err_info(lexer);
+                fprintf(stderr, "Couldn't find collmap: %s\n", name);
+                free(name); return 2;
+            }
+            free(name);
+            GET(")")
+
+            rot_t rot;
+            err = _parse_trf(lexer, space, &rot);
+            if(err)return err;
+
+            if(rot != 0){
+                own_collmap = calloc(1, sizeof(*own_collmap));
+                if(!own_collmap)return 1;
+                hexcollmap_init_clone(own_collmap, found_collmap,
+                    strdup(lexer->filename));
+                int err = hexcollmap_clone(own_collmap, found_collmap, rot);
+                if(err)return err;
+
+                collmap = own_collmap;
+            }else{
+                collmap = found_collmap;
+            }
+        }else{
+            own_collmap = calloc(1, sizeof(*collmap));
+            if(own_collmap == NULL)return 1;
+            hexcollmap_init(own_collmap, space,
+                strdup(lexer->filename));
+            err = hexcollmap_parse(own_collmap, lexer, true);
+            if(err)return err;
+            collmap = own_collmap;
+        }
 
         GET(")")
 
         cond->type = STATE_COND_TYPE_COLL;
+        cond->u.coll.own_collmap = own_collmap;
         cond->u.coll.collmap = collmap;
         cond->u.coll.flags = flags;
         cond->u.coll.collmsg = collmsg;
@@ -234,7 +304,7 @@ static int _parse_cond(fus_lexer_t *lexer,
         GET("(")
         while(!GOT(")")){
             ARRAY_PUSH_NEW(state_cond_t*, cond->u.subconds.conds, subcond)
-            err = _parse_cond(lexer, prend, space, subcond);
+            err = _parse_cond(stateset, lexer, prend, space, subcond);
             if(err)return err;
         }
         NEXT
@@ -271,7 +341,7 @@ static int _parse_cond(fus_lexer_t *lexer,
     return 0;
 }
 
-static int _parse_effect(fus_lexer_t *lexer,
+static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
     prismelrenderer_t *prend, vecspace_t *space,
     state_effect_t *effect
 ){
@@ -467,7 +537,7 @@ static int _parse_effect(fus_lexer_t *lexer,
         GET("(")
         while(!GOT(")")){
             ARRAY_PUSH_NEW(state_cond_t*, ite->conds, cond)
-            err = _parse_cond(lexer, prend, space, cond);
+            err = _parse_cond(stateset, lexer, prend, space, cond);
             if(err)return err;
         }
         NEXT
@@ -476,7 +546,7 @@ static int _parse_effect(fus_lexer_t *lexer,
         GET("(")
         while(!GOT(")")){
             ARRAY_PUSH_NEW(state_effect_t*, ite->then_effects, effect)
-            err = _parse_effect(lexer, prend, space, effect);
+            err = _parse_effect(stateset, lexer, prend, space, effect);
             if(err)return err;
         }
         NEXT
@@ -486,7 +556,7 @@ static int _parse_effect(fus_lexer_t *lexer,
             GET("(")
             while(!GOT(")")){
                 ARRAY_PUSH_NEW(state_effect_t*, ite->else_effects, effect)
-                err = _parse_effect(lexer, prend, space, effect);
+                err = _parse_effect(stateset, lexer, prend, space, effect);
                 if(err)return err;
             }
             NEXT
@@ -513,6 +583,8 @@ static int _state_parse_rule(state_t *state, fus_lexer_t *lexer,
 ){
     INIT
 
+    stateset_t *stateset = state->stateset;
+
     ARRAY_PUSH_NEW(state_rule_t*, state->rules, rule)
     err = state_rule_init(rule, state);
     if(err)return err;
@@ -522,7 +594,7 @@ static int _state_parse_rule(state_t *state, fus_lexer_t *lexer,
     while(1){
         if(GOT(")"))break;
         ARRAY_PUSH_NEW(state_cond_t*, rule->conds, cond)
-        err = _parse_cond(lexer, prend, space, cond);
+        err = _parse_cond(stateset, lexer, prend, space, cond);
         if(err)return err;
     }
     NEXT
@@ -532,7 +604,7 @@ static int _state_parse_rule(state_t *state, fus_lexer_t *lexer,
     while(1){
         if(GOT(")"))break;
         ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
-        err = _parse_effect(lexer, prend, space, effect);
+        err = _parse_effect(stateset, lexer, prend, space, effect);
         if(err)return err;
     }
     NEXT
@@ -548,32 +620,88 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
 
     INIT
 
-    if(GOT("debug_collision")){
-        NEXT
-        stateset->debug_collision = true;
-    }
-    if(GOT("collmsgs")){
-        NEXT
-        GET("(")
-        while(!GOT(")")){
-            char *msg;
-            GET_STR(msg)
-            ARRAY_PUSH(char*, stateset->collmsgs, msg)
+    while(true){
+        if(GOT("debug_collision")){
+            NEXT
+            stateset->debug_collision = true;
+            continue;
         }
-        NEXT
-    }
-    while(GOT("on")){
-        NEXT
-        collmsg_handler_t handler;
-        err = _parse_collmsg_handler(lexer, &handler, prend, space);
-        if(err)return err;
-        ARRAY_PUSH(collmsg_handler_t, stateset->collmsg_handlers, handler)
-    }
-    if(GOT("end_headers")){
-        /* This weird thing is just so, theoretically, you could use a
-        "reserved keyword" like "collmsgs" or "on" as a state name.
-        Although that would be an awful idea. Please don't do that. */
-        NEXT
+        if(GOT("collmsgs")){
+            NEXT
+            GET("(")
+            while(!GOT(")")){
+                char *msg;
+                GET_STR(msg)
+                ARRAY_PUSH(char*, stateset->collmsgs, msg)
+            }
+            NEXT
+            continue;
+        }
+        if(GOT("on")){
+            NEXT
+            collmsg_handler_t handler;
+            err = _parse_collmsg_handler(stateset, lexer, &handler,
+                prend, space);
+            if(err)return err;
+            ARRAY_PUSH(collmsg_handler_t, stateset->collmsg_handlers, handler)
+            continue;
+        }
+        if(GOT("collmap")){
+            NEXT
+            char *name;
+            GET_STR(name)
+            GET("(")
+
+            hexcollmap_t *collmap;
+            if(GOT("collmap")){
+                NEXT
+                GET("(")
+                char *name;
+                GET_STR(name)
+
+                hexcollmap_t *found_collmap = stateset_get_collmap(
+                    stateset, name);
+                if(!found_collmap){
+                    fus_lexer_err_info(lexer);
+                    fprintf(stderr, "Couldn't find collmap: %s\n", name);
+                    free(name); return 2;
+                }
+                free(name);
+                GET(")")
+
+                rot_t rot;
+                err = _parse_trf(lexer, space, &rot);
+                if(err)return err;
+
+                collmap = calloc(1, sizeof(*collmap));
+                if(!collmap)return 1;
+                hexcollmap_init_clone(collmap, found_collmap,
+                    strdup(lexer->filename));
+                int err = hexcollmap_clone(collmap, found_collmap, rot);
+                if(err)return err;
+            }else{
+                collmap = calloc(1, sizeof(*collmap));
+                if(!collmap)return 1;
+                hexcollmap_init(collmap, space, strdup(lexer->filename));
+                err = hexcollmap_parse(collmap, lexer, true);
+                if(err)return err;
+            }
+            GET(")")
+
+            ARRAY_PUSH_NEW(stateset_collmap_entry_t*, stateset->collmaps,
+                entry)
+            entry->collmap = collmap;
+            entry->name = name;
+            continue;
+        }
+        if(GOT("end_headers")){
+            /* This weird thing is just so, theoretically, you could use a
+            "reserved keyword" like "collmsgs" or "on" as a state name.
+            Although that would be an awful idea. Please don't do that. */
+            NEXT
+            break;
+        }
+        break;
     }
 
     while(1){
@@ -625,6 +753,7 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             rgraph = prismelrenderer_get_rendergraph(
                 prend, rgraph_name);
             if(rgraph == NULL){
+                fus_lexer_err_info(lexer);
                 fprintf(stderr, "Couldn't find shape: %s\n", rgraph_name);
                 free(rgraph_name); return 2;}
             free(rgraph_name);
@@ -669,7 +798,8 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
         while(GOT("on")){
             NEXT
             collmsg_handler_t handler;
-            err = _parse_collmsg_handler(lexer, &handler, prend, space);
+            err = _parse_collmsg_handler(stateset, lexer, &handler,
+                prend, space);
             if(err)return err;
             ARRAY_PUSH(collmsg_handler_t, state->collmsg_handlers, handler)
         }
@@ -795,7 +925,7 @@ void state_cond_cleanup(state_cond_t *cond){
     switch(cond->type){
         case STATE_COND_TYPE_COLL: {
             free(cond->u.coll.collmsg);
-            hexcollmap_t *collmap = cond->u.coll.collmap;
+            hexcollmap_t *collmap = cond->u.coll.own_collmap;
             if(collmap != NULL){
                 hexcollmap_cleanup(collmap);
                 free(collmap);

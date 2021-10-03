@@ -127,7 +127,7 @@ int main(int n_args, char **args){
             perror("calloc collmap");
             return 1;
         }
-        hexcollmap_init_clone(collmap, from_collmap, "<clone>");
+        hexcollmap_init_clone(collmap, from_collmap, strdup("<clone>"));
         int err = hexcollmap_clone(collmap, from_collmap, rot);
         if(err)return err;
 
