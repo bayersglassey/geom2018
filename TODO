@@ -857,7 +857,5 @@ Oct 2, 2021:
   ...this can be weird when a door/savepoint looks like it's "on the ceiling".
   Then you can't get into it if you're crouching on the ceiling.
 
-* Add globalvars("blabla")
-
 * Hermit enters the door he opens, appearing at end of water area, where he waits
   if necessary for that side of the door to be unblocked. Then... dunno what happens next.

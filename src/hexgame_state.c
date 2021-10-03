@@ -42,6 +42,12 @@ static int _get_vars(hexgame_state_context_t *context,
     body_t *body = context->body;
     body_t *your_body = context->your_body;
     hexmap_t *map = body? body->map: NULL;
+    hexgame_t *game =
+        actor? actor->game:
+        body? body->game:
+        your_body? your_body->game:
+        map? map->game:
+        NULL;
 
     /* PROBABLY TODO: distinguish between "my actor vars" vs "my body vars"...
     Also, doesn't caller guarantee that if actor!=NULL, then body == actor->body?.. */
@@ -72,6 +78,7 @@ static int _get_vars(hexgame_state_context_t *context,
     }
     valexpr_context->yourvars = your_body? &your_body->vars: NULL;
     valexpr_context->mapvars = map? &map->vars: NULL;
+    valexpr_context->globalvars = game? &game->vars: NULL;
 
     return 0;
 }

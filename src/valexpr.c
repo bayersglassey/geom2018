@@ -17,6 +17,7 @@ void valexpr_cleanup(valexpr_t *expr){
             break;
         case VALEXPR_TYPE_YOURVAR:
         case VALEXPR_TYPE_MAPVAR:
+        case VALEXPR_TYPE_GLOBALVAR:
         case VALEXPR_TYPE_MYVAR:
             valexpr_cleanup(expr->u.key_expr);
             free(expr->u.key_expr);
@@ -43,6 +44,7 @@ int valexpr_copy(valexpr_t *expr1, valexpr_t *expr2){
             break;
         case VALEXPR_TYPE_YOURVAR:
         case VALEXPR_TYPE_MAPVAR:
+        case VALEXPR_TYPE_GLOBALVAR:
         case VALEXPR_TYPE_MYVAR:
             expr1->u.key_expr = calloc(1, sizeof(valexpr_t));
             if(!expr1->u.key_expr)return 1;
@@ -80,11 +82,9 @@ void valexpr_fprintf(valexpr_t *expr, FILE *file){
             break;
         case VALEXPR_TYPE_YOURVAR:
         case VALEXPR_TYPE_MAPVAR:
+        case VALEXPR_TYPE_GLOBALVAR:
         case VALEXPR_TYPE_MYVAR:
-            fprintf(file,
-                expr->type == VALEXPR_TYPE_YOURVAR? "yourvar(":
-                expr->type == VALEXPR_TYPE_MAPVAR? "mapvar(":
-                "myvar(");
+            fprintf(file, "%s(", valexpr_type_msg(expr->type));
             valexpr_fprintf(expr->u.key_expr, file);
             fputc(')', file);
             break;
@@ -120,6 +120,7 @@ int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer){
     int type =
         GOT("yourvar")? VALEXPR_TYPE_YOURVAR:
         GOT("mapvar")? VALEXPR_TYPE_MAPVAR:
+        GOT("globalvar")? VALEXPR_TYPE_GLOBALVAR:
         GOT("myvar")? VALEXPR_TYPE_MYVAR:
         GOT("if")? VALEXPR_TYPE_IF:
         VALEXPR_TYPE_LITERAL;
@@ -127,6 +128,7 @@ int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer){
     if(
         type == VALEXPR_TYPE_YOURVAR ||
         type == VALEXPR_TYPE_MAPVAR ||
+        type == VALEXPR_TYPE_GLOBALVAR ||
         type == VALEXPR_TYPE_MYVAR
     ){
         NEXT
@@ -197,10 +199,12 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
         }
         case VALEXPR_TYPE_YOURVAR:
         case VALEXPR_TYPE_MAPVAR:
+        case VALEXPR_TYPE_GLOBALVAR:
         case VALEXPR_TYPE_MYVAR: {
             vars_t *vars =
                 expr->type == VALEXPR_TYPE_YOURVAR? context->yourvars:
                 expr->type == VALEXPR_TYPE_MAPVAR? context->mapvars:
+                expr->type == VALEXPR_TYPE_GLOBALVAR? context->globalvars:
                 context->myvars;
 
             if(!vars){

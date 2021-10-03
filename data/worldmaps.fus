@@ -1,3 +1,4 @@
+vars:
 worldmaps:
     : "data/maps/tutorial/worldmap.fus"
     : "data/maps/tutorial2/worldmap.fus"

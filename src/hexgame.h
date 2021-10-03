@@ -373,6 +373,8 @@ typedef struct hexgame {
     bool show_minimap;
     hexmap_tileset_t minimap_tileset;
 
+    vars_t vars;
+
     ARRAY_DECL(char*, worldmaps)
     ARRAY_DECL(hexmap_t*, maps)
     ARRAY_DECL(camera_t*, cameras)

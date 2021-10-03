@@ -179,6 +179,9 @@ void hexgame_body_dump(body_t *body, int depth){
     fprintf(stderr, "submap: %s\n",
         body->cur_submap->filename);
     print_tabs(stderr, depth);
+    fprintf(stderr, "global vars:\n");
+    vars_write(&body->game->vars, stderr, TAB_SPACES * (depth + 1));
+    print_tabs(stderr, depth);
     fprintf(stderr, "map vars:\n");
     vars_write(&body->map->vars, stderr, TAB_SPACES * (depth + 1));
     print_tabs(stderr, depth);
@@ -202,7 +205,8 @@ int body_is_visible(body_t *body, bool *visible_ptr){
     val_t *result;
     valexpr_context_t context = {
         .myvars = &body->vars,
-        .mapvars = &body->map->vars
+        .mapvars = &body->map->vars,
+        .globalvars = &body->game->vars
     };
     err = valexpr_get(&body->visible_expr, &context, &result);
     if(err){

@@ -11,6 +11,7 @@ enum valexpr_type {
     VALEXPR_TYPE_LITERAL,
     VALEXPR_TYPE_YOURVAR,
     VALEXPR_TYPE_MAPVAR,
+    VALEXPR_TYPE_GLOBALVAR,
     VALEXPR_TYPE_MYVAR,
     VALEXPR_TYPE_IF,
     VALEXPR_TYPES
@@ -21,6 +22,7 @@ static const char *valexpr_type_msg(int type){
         case VALEXPR_TYPE_LITERAL: return "literal";
         case VALEXPR_TYPE_YOURVAR: return "yourvar";
         case VALEXPR_TYPE_MAPVAR: return "mapvar";
+        case VALEXPR_TYPE_GLOBALVAR: return "globalvar";
         case VALEXPR_TYPE_MYVAR: return "myvar";
         case VALEXPR_TYPE_IF: return "if";
         default: return "unknown";
@@ -46,6 +48,7 @@ typedef struct valexpr {
 typedef struct valexpr_context {
     vars_t *yourvars;
     vars_t *mapvars;
+    vars_t *globalvars;
     vars_t *myvars;
 } valexpr_context_t;
 

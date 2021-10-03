@@ -14,6 +14,7 @@
 #include "hexgame_location.h"
 #include "lexer.h"
 #include "lexer_macros.h"
+#include "var_utils.h"
 
 
 
@@ -328,6 +329,7 @@ int camera_render(camera_t *camera,
 
 void hexgame_cleanup(hexgame_t *game){
     hexmap_tileset_cleanup(&game->minimap_tileset);
+    vars_cleanup(&game->vars);
     ARRAY_FREE_PTR(char*, game->worldmaps, (void))
     ARRAY_FREE_PTR(hexmap_t*, game->maps, hexmap_cleanup)
     ARRAY_FREE_PTR(camera_t*, game->cameras, camera_cleanup)
@@ -344,6 +346,12 @@ static int hexgame_load_worldmaps(hexgame_t *game, const char *worldmaps_filenam
 
     err = fus_lexer_init(lexer, text, worldmaps_filename);
     if(err)return err;
+
+    GET("vars")
+    GET("(")
+    err = vars_parse(&game->vars, lexer);
+    if(err)return err;
+    GET(")")
 
     GET("worldmaps")
     GET("(")
@@ -389,6 +397,10 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     game->continue_callback = continue_callback;
     game->set_players_callback = set_players_callback;
     game->exit_callback = exit_callback;
+
+    static const char *prop_names[HEXMAP_VARS_PROPS + 1] =
+        {HEXMAP_VARS_PROP_NAMES, NULL};
+    vars_init_with_props(&game->vars, prop_names);
 
     ARRAY_INIT(game->worldmaps)
     ARRAY_INIT(game->maps)

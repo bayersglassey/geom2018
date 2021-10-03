@@ -1545,7 +1545,10 @@ int hexmap_submap_is_visible(hexmap_submap_t *submap, bool *visible_ptr){
     bool visible = true;
     if(submap->visible_expr != NULL){
         val_t *result;
-        valexpr_context_t context = {.mapvars = &submap->map->vars};
+        valexpr_context_t context = {
+            .mapvars = &submap->map->vars,
+            .globalvars = &submap->map->game->vars
+        };
         err = valexpr_get(submap->visible_expr, &context, &result);
         if(err){
             fprintf(stderr,
@@ -1585,7 +1588,10 @@ const char *hexmap_submap_get_text(hexmap_submap_t *submap){
     if(submap->text_expr == NULL)return NULL;
 
     val_t *result;
-    valexpr_context_t context = {.mapvars = &submap->map->vars};
+    valexpr_context_t context = {
+        .mapvars = &submap->map->vars,
+        .globalvars = &submap->map->game->vars
+    };
     int err = valexpr_get(submap->text_expr, &context, &result);
     if(err){
         fprintf(stderr,

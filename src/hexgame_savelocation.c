@@ -66,18 +66,16 @@ int hexgame_savelocation_save(const char *filename,
             fus_write_str(f, location->state_name);
         }
     }
-
-    /* PROBABLY TODO...
     fputc('\n', f);
+
     fprintf(f, "vars:\n");
-    vars_write(&location->vars, f, 4*1);
-    */
+    vars_write(&game->vars, f, 4*1);
 
-    fputc('\n', f);
     fprintf(f, "maps:\n");
     /* !!! THIS IS A BIT OF A HACK!!!
     ...instead of hexgame_savelocation_t being a self-contained data
-    structure, its save method here is dumping stuff from game->maps. */
+    structure, its save method here is dumping stuff from game->vars
+    and game->maps. */
     for(int i = 0; i < game->maps_len; i++){
         hexmap_t *map = game->maps[i];
         fprintf(f, "    ");
@@ -144,18 +142,16 @@ int hexgame_savelocation_load(const char *filename,
         }
     }
 
-    /* PROBABLY TODO...
     if(fus_lexer_got(lexer, "vars")){
         err = fus_lexer_next(lexer);
         if(err)return err;
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
-        err = vars_parse(&location->vars, lexer);
+        err = vars_parse(&game->vars, lexer);
         if(err)return err;
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
     }
-    */
 
     /* !!! THIS IS A BIT OF A HACK!!!
     ...instead of hexgame_savelocation_t being a self-contained data
