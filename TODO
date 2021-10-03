@@ -836,3 +836,28 @@ Oct 2, 2021:
 
 * Right side of data/maps/demo/jungle5.fus: flierplayer can get trapped in a circle
   if he flies+lands in from the top-right of the circle O_o
+
+* Add rollers to the first water you see in trees area, and to water at start of water
+  area, so players hopefully see it's possible to enter the water.
+
+* Water area: bubbles whose contents can be air or water, depending on a switch
+    * You can already shoot while swimming, so the idea will be to swim around and hit switches,
+      positioning yourself so that you land properly when the water you're in turns to air.
+
+* SAVEPOINT/DOOR COLLISION: It's weird because they are only this:
+         .
+         *
+       .   .
+  ...but they look like they're this:
+       .   .
+       *\*/*
+     . - + - .
+       */*\*
+       .   .
+  ...this can be weird when a door/savepoint looks like it's "on the ceiling".
+  Then you can't get into it if you're crouching on the ceiling.
+
+* Add globalvars("blabla")
+
+* Hermit enters the door he opens, appearing at end of water area, where he waits
+  if necessary for that side of the door to be unblocked. Then... dunno what happens next.
