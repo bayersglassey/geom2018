@@ -279,18 +279,18 @@ shapes:
             : "_eye_border" (0 0 0 0) 0 f
             : "_eye_look" (0 0 0 0) 4 f
 
-    "eye_looking_r":
+    "eye_looking_d":
         animation: cycle 1
         shapes:
             : "_eye_border" (0 0 0 0) 0 f
             : "_eye_looking_1" (0 0 0 0) 8 f 0 (0 1)
 
-    "eye_unlooking_r":
-        animation: cycle "eye_looking_r"
+    "eye_unlooking_d":
+        animation: cycle "eye_looking_d"
         shapes:
-            : "eye_looking_r" (0 0 0 0) 0 f 0+r
+            : "eye_looking_d" (0 0 0 0) 0 f 0+r
 
-    "eye_look_r":
+    "eye_look_d":
         shapes:
             : "_eye_border" (0 0 0 0) 0 f
             : "_eye_look" (0 0 0 0) 8 f

@@ -1,7 +1,47 @@
 
+collmap "opening":
+    ;;            + - + - + - + - + - +
+    ;;           /*\*/*\*/*\*/*\*/*\*/*\
+    ;;          + - + - + - + - + - + - +
+    ;;         /*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;        + - + - + - + - + - + - + - +
+    ;;       /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;      + - + - + - + - + - + - + - + - +
+    ;;     /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;    + - + - + - + - + - + - + - + - + - +
+    ;;   /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;  + - + - + - + - + -(+)- + - + - + - + - +
+    ;;   \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;    + - + - + - + - + - + - + - + - + - +
+    ;;     \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;      + - + - + - + - + - + - + - + - +
+    ;;       \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;        + - + - + - + - + - + - + - +
+    ;;         \*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;          + - + - + - + - + - + - +
+    ;;           \*/*\*/*\*/*\*/*\*/*\*/
+    ;;            + - + - + - + - + - +
+
+collmap "looking":
+    ;;                          + - +
+    ;;                         /*\*/*\
+    ;;                        + - + - +
+    ;;                       /*\*/*\*/*\
+    ;;                      + - + - + - +
+    ;;                     /*\*/*\*/*\*/*\
+    ;;                    + - + - + - + - +
+    ;;                   /*\*/*\*/*\*/*\*/*\
+    ;;                  + -(+)- + - + - + - +
+    ;;                   \*/*\*/*\*/*\*/*\*/
+    ;;                    + - + - + - + - +
+
+collmap "looking_l": collmap("looking") ^  2
+collmap "looking_d": collmap("looking") ^ -2
+
 closed:
     rgraph: "eye_closed"
-    if: key: wasdown u
+
+    if: coll: bodies any yes collmap("opening")
     then: goto delay: opening
 
 opening:
@@ -11,17 +51,29 @@ opening:
 open:
     rgraph: "eye_open"
 
-    if: key: isdown u
+    # Apparently "if: coll: bodies all no" is not the same as
+    # "if: not: coll: bodies any yes"... isn't that a bug?
+    # Doesn't it mean we fail De Morgan's Law?
+    if: not: coll: bodies any yes collmap("opening")
+    then: goto delay: closing
+
+    if:
+        coll: bodies any yes collmap("looking")
+        not: coll: bodies any yes collmap("looking_l")
+        not: coll: bodies any yes collmap("looking_d")
     then: goto delay: looking
 
-    if: key: isdown l
+    if:
+        not: coll: bodies any yes collmap("looking")
+        coll: bodies any yes collmap("looking_l")
+        not: coll: bodies any yes collmap("looking_d")
     then: goto delay: looking_l
 
-    if: key: isdown r
-    then: goto delay: looking_r
-
-    if: key: wasdown d
-    then: goto delay: closing
+    if:
+        not: coll: bodies any yes collmap("looking")
+        not: coll: bodies any yes collmap("looking_l")
+        coll: bodies any yes collmap("looking_d")
+    then: goto delay: looking_d
 
 closing:
     rgraph: "eye_closing"
@@ -30,12 +82,9 @@ closing:
 # "anim/_eye_looking.fus":
 # Provides states looking, unlooking, look (with suffix indicated
 # by LOOK_SUFFIX)
-$SET_STR LOOK_KEY "u"
 $SET_STR LOOK_SUFFIX ""
 import "anim/_eye_looking.fus"
-$SET_STR LOOK_KEY "l"
 $SET_STR LOOK_SUFFIX "_l"
 import "anim/_eye_looking.fus"
-$SET_STR LOOK_KEY "r"
-$SET_STR LOOK_SUFFIX "_r"
+$SET_STR LOOK_SUFFIX "_d"
 import "anim/_eye_looking.fus"

@@ -1,7 +1,6 @@
 
 # Expected variables:
-# LOOK_KEY (str), one of "l", "u", "r"
-# LOOK_SUFFIX (str), one of "_l", "", "_r"
+# LOOK_SUFFIX (str), one of "_l", "", "_d"
 
 $SUFFIX LOOK_SUFFIX looking:
     rgraph: $SUFFIX LOOK_SUFFIX "eye_looking"
@@ -14,5 +13,8 @@ $SUFFIX LOOK_SUFFIX unlooking:
 $SUFFIX LOOK_SUFFIX look:
     rgraph: $SUFFIX LOOK_SUFFIX "eye_look"
 
-    if: key: not isdown $GET_SYM LOOK_KEY
+    # Apparently "if: coll: bodies all no" is not the same as
+    # "if: not: coll: bodies any yes"... isn't that a bug?
+    # Doesn't it mean we fail De Morgan's Law?
+    if: not: coll: bodies any yes collmap($SUFFIX LOOK_SUFFIX "looking")
     then: goto delay: $SUFFIX LOOK_SUFFIX unlooking
