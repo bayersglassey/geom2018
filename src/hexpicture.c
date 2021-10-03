@@ -14,6 +14,10 @@
 
 #define HEXPICTURE_VERT_NEIGHBOURS 6
 
+
+/* _neigh_hexcoords[rot] is the 2d coordinate offset of the
+corresponding neighbouring vertex.
+That is, its (x, y) coordinates within a hexpicture. */
 const int _neigh_coords[HEXPICTURE_VERT_NEIGHBOURS * 2][2] = {
     { 4,  0},
     { 3, -2},
@@ -31,6 +35,9 @@ const int _neigh_coords[HEXPICTURE_VERT_NEIGHBOURS * 2][2] = {
 };
 
 
+/* _neigh_hexcoords[rot] is the vec4 coordinate offset of the
+corresponding neighbouring vertex.
+In otherwords, _neigh_hexcoords[rot] = A^rot */
 const int _neigh_hexcoords[HEXPICTURE_VERT_NEIGHBOURS * 2][4] = {
     { 1,  0,  0,  0},
     { 0,  1,  0,  0},
@@ -47,9 +54,32 @@ const int _neigh_hexcoords[HEXPICTURE_VERT_NEIGHBOURS * 2][4] = {
     { 0,  1,  0, -1}
 };
 
+
 #define HEXPICTURE_FACE_SQ_MAX_ROT 3
 #define HEXPICTURE_FACE_TRI_MAX_ROT 4
 #define HEXPICTURE_FACE_DIA_MAX_ROT 6
+
+/* Location (x, y) of cell -- that is, lines[y][x] -- whose value
+determines face->color, e.g. '0' -> 0, 'A' -> 10, etc. */
+const int sq_face_coords[HEXPICTURE_FACE_SQ_MAX_ROT][2] = {
+    { 1, -1},
+    { 0, -1},
+    { 0, -1}
+};
+const int tri_face_coords[HEXPICTURE_FACE_TRI_MAX_ROT][2] = {
+    { 2, -1},
+    { 1, -2},
+    { 0, -1},
+    {-1, -2}
+};
+const int dia_face_coords[HEXPICTURE_FACE_DIA_MAX_ROT][2] = {
+    { 3, -1},
+    { 2, -2},
+    { 1, -3},
+    {-1, -3},
+    {-2, -2},
+    {-3, -1}
+};
 
 
 #define _GET_PART(_X, _Y) (&parts[(_Y) * max_line_len + (_X)])
@@ -72,11 +102,13 @@ enum hexpicture_part_type {
 };
 
 typedef struct hexpicture_face {
+    int rot; /* 0 <= rot < HEXPICTURE_VERT_NEIGHBOURS */
     int type; /* enum hexpicture_face_type */
     int color; /* 0..255 are colours, -1 is error */
 } hexpicture_face_t;
 
 typedef struct hexpicture_edge {
+    int rot; /* 0 <= rot < HEXPICTURE_VERT_NEIGHBOURS */
     bool solid;
     struct hexpicture_vert *vert;
         /* vert: the vert "pointed to" by this edge, from the vert on
@@ -133,6 +165,13 @@ static int _get_color(char c){
     if(c >= 'A' && c <= 'Z')return c - 'A' + 10 + 1;
     if(c >= 'a' && c <= 'z')return c - 'a' + 10 + 1;
     return -1;
+}
+
+static char _get_color_char(int color){
+    if(color == 0)return '.';
+    if(color >= 1 && color <= 10)return '0' + (color - 1);
+    if(color >= 11 && color <= 16)return 'A' + (color - 1);
+    return '?';
 }
 
 static const char *_get_char(const char **lines,
@@ -273,6 +312,7 @@ static int _hexpicture_parse_edges(
                 return 2;
             }
             hexpicture_edge_t *edge = &vert->edges[neigh_i];
+            edge->rot = neigh_i;
             edge->vert = part->part.vert;
             edge->vert->reverse_verts[neigh_i] = vert;
         }
@@ -392,28 +432,6 @@ static int _hexpicture_parse_faces(
         static const int tri_edge_rots[] = {0, 4, 8, -1};
         static const int dia_edge_rots[] = {0, 1, 6, 7, -1};
 
-        /* Location (x, y) of cell -- that is, lines[y][x] -- whose value
-        determines face->color, e.g. '0' -> 0, 'A' -> 10, etc. */
-        static const int sq_face_coords[HEXPICTURE_FACE_SQ_MAX_ROT][2] = {
-            { 1, -1},
-            { 0, -1},
-            { 0, -1}
-        };
-        static const int tri_face_coords[HEXPICTURE_FACE_TRI_MAX_ROT][2] = {
-            { 2, -1},
-            { 1, -2},
-            { 0, -1},
-            {-1, -2}
-        };
-        static const int dia_face_coords[HEXPICTURE_FACE_DIA_MAX_ROT][2] = {
-            { 3, -1},
-            { 2, -2},
-            { 1, -3},
-            {-1, -3},
-            {-2, -2},
-            {-3, -1}
-        };
-
         /* Array to be indexed by type - 1 (sq=0, tri=1, dia=2) */
         /* NOTE: C's type notation at its gankiest... */
         static const int (*(face_coords[]))[2] = {
@@ -447,6 +465,7 @@ static int _hexpicture_parse_faces(
 
             if(type != HEXPICTURE_FACE_TYPE_NONE){
                 hexpicture_face_t *face = &vert->faces[rot];
+                face->rot = rot;
                 face->type = type;
 
                 const int (*coords)[2] = face_coords[type - 1];
@@ -482,8 +501,7 @@ static void _hexpicture_dump_verts(
     hexpicture_vert_t *origin,
     hexpicture_vert_t *verts, size_t verts_len
 ){
-    /* Dump a text representation of verts to file
-    */
+    /* Dump a text representation of verts to file */
     fprintf(file, "verts, edges, faces:\n");
     for(int vert_i = 0; vert_i < verts_len; vert_i++){
         hexpicture_vert_t *vert = &verts[vert_i];
@@ -511,6 +529,111 @@ static void _hexpicture_dump_verts(
                 _face_type_msg(face->type), face->color);
         }
     }
+}
+
+static int _hexpicture_dump_verts_picture(
+    FILE *file,
+    size_t lines_len, size_t max_line_len,
+    hexpicture_vert_t *origin,
+    hexpicture_vert_t *verts, size_t verts_len
+){
+#   define CHARAT(_X, _Y) picture[(_Y) * max_line_len + (_X)]
+    /* Dump a recreation of the original hexpicture, but with verts labeled
+    with their indices (modulo 10), to file */
+
+    size_t picture_size = lines_len * max_line_len;
+    char *picture = malloc(picture_size);
+    if(!picture)return 1;
+    memset(picture, ' ', picture_size);
+
+    for(int i = 0; i < verts_len; i++){
+        hexpicture_vert_t *vert = &verts[i];
+        int x = vert->x;
+        int y = vert->y;
+
+        /* Display vert as its index, modulo 10... so we can hopefully
+        tell at a glance which vert is which. */
+        char c = '0' + i % 10;
+        CHARAT(x, y) = c;
+
+        for(int neigh_i = 0; neigh_i < HEXPICTURE_VERT_NEIGHBOURS;
+            neigh_i++
+        ){
+            hexpicture_edge_t *edge = &vert->edges[neigh_i];
+            if(!edge->vert)continue;
+            switch(edge->rot){
+                case 0:
+                    CHARAT(x+1, y  ) = '-';
+                    CHARAT(x+2, y  ) = '-';
+                    CHARAT(x+3, y  ) = '-';
+                    break;
+                case 1:
+                    CHARAT(x+1, y-1) = '-';
+                    CHARAT(x+2, y-1) = '-';
+                    break;
+                case 2:
+                    CHARAT(x+1, y-1) = '|';
+                    CHARAT(x+1, y-2) = '|';
+                    break;
+                case 3:
+                    CHARAT(x  , y-1) = '|';
+                    CHARAT(x  , y-2) = '|';
+                    CHARAT(x  , y-3) = '|';
+                    break;
+                case 4:
+                    CHARAT(x-1, y-1) = '|';
+                    CHARAT(x-1, y-2) = '|';
+                    break;
+                case 5:
+                    CHARAT(x-1, y-1) = '-';
+                    CHARAT(x-2, y-1) = '-';
+                    break;
+                default:
+                    fprintf(stderr, "Bad rot value for edge %i: %i\n",
+                        neigh_i, edge->rot);
+                    return 2;
+            }
+        }
+        for(int neigh_i = 0; neigh_i < HEXPICTURE_VERT_NEIGHBOURS;
+            neigh_i++
+        ){
+            hexpicture_face_t *face = &vert->faces[neigh_i];
+            if(face->type == HEXPICTURE_FACE_TYPE_NONE)continue;
+            const int *coords = NULL; /* int[2] representing (x, y) */
+            switch(face->type){
+                case HEXPICTURE_FACE_TYPE_SQ:
+                    coords = sq_face_coords[face->rot];
+                    break;
+                case HEXPICTURE_FACE_TYPE_TRI:
+                    coords = tri_face_coords[face->rot];
+                    break;
+                case HEXPICTURE_FACE_TYPE_DIA:
+                    coords = dia_face_coords[face->rot];
+                    break;
+                default:
+                    fprintf(stderr, "Bad type for face %i: %i\n",
+                        neigh_i, face->type);
+                    return 2;
+            }
+
+            /* Could use the following:
+                char c = _get_color_char(face->color);
+            ...but it makes it harder to see vert indices, so just use
+            hardcoded symbol for all faces. */
+            CHARAT(x+coords[0], y+coords[1]) = '#';
+        }
+    }
+
+    for(int y = 0; y < lines_len; y++){
+        for(int x = 0; x < max_line_len; x++){
+            fputc(CHARAT(x, y), file);
+        }
+        fputc('\n', file);
+    }
+
+    free(picture);
+    return 0;
+#   undef CHARAT
 }
 
 static int _hexpicture_parse_return_faces(
@@ -567,8 +690,9 @@ int hexpicture_parse(
     }
 
     /* Determine max_line_len and verts_len.
-    (These are the width + height of our 2d coordinate system, used by
-    e.g. the "parts" array below) */
+    NOTE: max_line_len/lines_len are the width/height of our 2d coordinate
+    system.
+    These are used by e.g. parts, a 2d array of hexpicture_part_t. */
     size_t max_line_len;
     size_t verts_len;
     _hexpicture_parse_max_line_len_and_verts_len(
@@ -631,6 +755,9 @@ int hexpicture_parse(
 
     if(verbose){
         _hexpicture_dump_verts(stderr, origin, verts, verts_len);
+        err = _hexpicture_dump_verts_picture(stderr, lines_len, max_line_len,
+            origin, verts, verts_len);
+        if(err)goto end;
     }
 
     /* Generate faces to be returned */

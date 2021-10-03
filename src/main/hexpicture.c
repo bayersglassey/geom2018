@@ -104,5 +104,9 @@ int main(int n_args, char **args){
 
     free(faces);
 
+    for(int i = 0; i < LINES_LEN; i++){
+        free(lines[i]);
+    }
+
     return 0;
 }
