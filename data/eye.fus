@@ -1,0 +1,296 @@
+
+shapes:
+
+    $SKIP: "_eye_outline":
+        # Just for copy+pasting and starting a new eye-related
+        # hexpicture.
+        hexpicture:
+            ;;                 +---+
+            ;;               --     --
+            ;;              +         +
+            ;;             |           |
+            ;;             |           |
+            ;;            +             +
+            ;;            |             |
+            ;;            |      *      |
+            ;;            |             |
+            ;;            +             +
+            ;;             |           |
+            ;;             |           |
+            ;;              +         +
+            ;;               --     --
+            ;;                 +---+
+
+    "_eye_border":
+        hexpicture:
+            ;;                 +---+
+            ;;               + |   | +
+            ;;             -- ||   || --
+            ;;            +   ||4  ||   +
+            ;;           + |   +---+   | +
+            ;;          | -\.-/ | | \-./- |
+            ;;          |   + |.|.|.| +   |
+            ;;         +   |.+---+---+.|   +
+            ;;          --./-|   |   |-\.--
+            ;;        +---+ .|   |   |. +---+
+            ;;        |   |--|.  |.  |--|   |
+            ;;        |   |. +---*---+ .|   |
+            ;;        |4  |-- | | | | --|4  |
+            ;;        +---+   |.|.|.|   +---+
+            ;;         | | |   +---+   | | |
+            ;;         |.|4|.--|   |--.|4|.|
+            ;;          +---+ .|   |. +---+
+            ;;              |--|.  |--|
+            ;;              |4 +---+ 4|
+            ;;              |-- | | --|
+            ;;              +   |4|   +
+            ;;                   +
+
+    "_eye_closed":
+        hexpicture:
+            ;;                 +---+
+            ;;               -/ | | \-
+            ;;              + |9|9|9| +
+            ;;             |9+---+---+9|
+            ;;             /-|   |   |-\
+            ;;            + 1|   |   |1 +
+            ;;            |--|1  |1  |--|
+            ;;            |1 +---*---+ 1|
+            ;;            |-- | | | | --|
+            ;;            +   |9|9|9|   +
+            ;;             |   +---+   |
+            ;;             |9--|   |--9|
+            ;;              + 1|   |1 +
+            ;;               --|1  |--
+            ;;                 +---+
+
+    "_eye_opening_1":
+        hexpicture:
+            ;;                 +---+
+            ;;               -/ | | \-
+            ;;              + |1|1|1| +
+            ;;             |1+---+---+1|
+            ;;             /-|   |   |-\
+            ;;            + 9|   |   |9 +
+            ;;            |--|9  |9  |--|
+            ;;            |9 +---*---+ 9|
+            ;;            |-- | | | | --|
+            ;;            +   |1|1|1|   +
+            ;;             |   +---+   |
+            ;;             |1--|   |--1|
+            ;;              + F|   |F +
+            ;;               --|F  |--
+            ;;                 +---+
+
+    "_eye_opening_2":
+        hexpicture:
+            ;;                 +---+
+            ;;               -/ | | \-
+            ;;              + |9|9|9| +
+            ;;             |9+---+---+9|
+            ;;             /-|   |   |-\
+            ;;            + 1|   |   |1 +
+            ;;            |--|1  |1  |--|
+            ;;            |1 +---*---+ 1|
+            ;;            |-- | | | | --|
+            ;;            +   |0|0|0|   +
+            ;;             |   +---+   |
+            ;;             |F--|   |--F|
+            ;;              + F|   |F +
+            ;;               --|F  |--
+            ;;                 +---+
+
+    "_eye_opening_3":
+        hexpicture:
+            ;;                 +---+
+            ;;               -/ | | \-
+            ;;              + |1|1|1| +
+            ;;             |1+---+---+1|
+            ;;             /-|   |   |-\
+            ;;            + F|   |   |F +
+            ;;            |--|0  |0  |--|
+            ;;            |F +---*---+ F|
+            ;;            |-- | | | | --|
+            ;;            +   |0|0|0|   +
+            ;;             |   +---+   |
+            ;;             |F--|   |--F|
+            ;;              + F|   |F +
+            ;;               --|F  |--
+            ;;                 +---+
+
+    "_eye_open_outside":
+        # We need to combine 2 hexpictures for eye_open's various shapes,
+        # because they use "dia" faces which confuses the parser into
+        # seeing extra "tri" and "sq" faces...
+        hexpicture:
+            ;;                 +---+
+            ;;               --7 --|--
+            ;;              +---+ F|F +
+            ;;             |     --|-- |
+            ;;             |       +   |
+            ;;            +       |     +
+            ;;            |--     |    ||
+            ;;            |F +---*     ||
+            ;;            |--|    |   + |
+            ;;            + F|    | --|7+
+            ;;             \-|     + F||
+            ;;             | +     |--||
+            ;;              +7|    |F +
+            ;;               -\    |--
+            ;;                 +---+
+
+    "_eye_look_outside":
+        # See comment on "_eye_open_outside"
+        hexpicture:
+            ;;                 +---+
+            ;;               --7 --|--
+            ;;              +---+ F|F +
+            ;;             |     --|-- |
+            ;;             |       +   |
+            ;;            +       |     +
+            ;;            |--     |    ||
+            ;;            |7 +---*     ||
+            ;;            |--|    |   + |
+            ;;            + 7|    | --|7+
+            ;;             \-|     + F||
+            ;;             | +     |--||
+            ;;              +7|    |F +
+            ;;               -\    |--
+            ;;                 +---+
+
+    "_eye_open_center":
+        # See comment on "_eye_open_outside"
+        hexpicture:
+            ;;              +---+     +
+            ;;             | -- F-- -- |
+            ;;             |   +---+   |
+            ;;            +   | | | |   +
+            ;;             --F|0|0|0|F-/
+            ;;               +---*---+ |
+            ;;               || | | |F+
+            ;;               ||0|0|0/-
+            ;;               | +---+
+            ;;               +F|   |
+            ;;                ||   |
+            ;;                ||F  |
+            ;;                 +---+
+
+    "_eye_looking_1_center":
+        # See comment on "_eye_open_outside"
+        hexpicture:
+            ;;              +---+     +
+            ;;             | -- F-- -- |
+            ;;             |   +---+   |
+            ;;            +   | | | |   +
+            ;;             --F|F|F|0|0-/
+            ;;               +---*---+ |
+            ;;               || | | |F+
+            ;;               ||F|F|F/-
+            ;;               | +---+
+            ;;               +F|   |
+            ;;                ||   |
+            ;;                ||F  |
+            ;;                 +---+
+
+    "_eye_look_center":
+        # See comment on "_eye_open_outside"
+        hexpicture:
+            ;;              +---+     +
+            ;;             | -- F-- -- |
+            ;;             |   +---+   |
+            ;;            +   | | | |   +
+            ;;             --F|F|F|F|0-/
+            ;;               +---*---+ |
+            ;;               || | | |F+
+            ;;               ||F|F|F/-
+            ;;               | +---+
+            ;;               +7|   |
+            ;;                ||   |
+            ;;                ||F  |
+            ;;                 +---+
+
+    "_eye_open":
+        shapes:
+            : "_eye_open_outside" (0 0 0 0) 0 f
+            : "_eye_open_center" (0 0 0 0) 0 f
+
+    "_eye_looking_1":
+        shapes:
+            : "_eye_open_outside" (0 0 0 0) 0 f
+            : "_eye_looking_1_center" (0 0 0 0) 0 f
+
+    "_eye_look":
+        shapes:
+            : "_eye_look_outside" (0 0 0 0) 0 f
+            : "_eye_look_center" (0 0 0 0) 0 f
+
+    "eye_closed":
+        shapes:
+            : "_eye_border" (0 0 0 0) 0 f
+            : "_eye_closed" (0 0 0 0) 0 f
+
+    "eye_opening":
+        animation: cycle 3
+        shapes:
+            : "_eye_border" (0 0 0 0) 0 f
+            : "_eye_opening_1" (0 0 0 0) 0 f 0 (0 1)
+            : "_eye_opening_2" (0 0 0 0) 0 f 0 (1 1)
+            : "_eye_opening_3" (0 0 0 0) 0 f 0 (2 1)
+
+    "eye_closing":
+        animation: cycle "eye_opening"
+        shapes:
+            : "eye_opening" (0 0 0 0) 0 f 0+r
+
+    "eye_open":
+        shapes:
+            : "_eye_border" (0 0 0 0) 0 f
+            : "_eye_open" (0 0 0 0) 0 f
+
+    "eye_looking":
+        animation: cycle 1
+        shapes:
+            : "_eye_border" (0 0 0 0) 0 f
+            : "_eye_looking_1" (0 0 0 0) 0 f 0 (0 1)
+
+    "eye_unlooking":
+        animation: cycle "eye_looking"
+        shapes:
+            : "eye_looking" (0 0 0 0) 0 f 0+r
+
+    "eye_look":
+        shapes:
+            : "_eye_border" (0 0 0 0) 0 f
+            : "_eye_look" (0 0 0 0) 0 f
+
+    "eye_looking_l":
+        animation: cycle 1
+        shapes:
+            : "_eye_border" (0 0 0 0) 0 f
+            : "_eye_looking_1" (0 0 0 0) 4 f 0 (0 1)
+
+    "eye_unlooking_l":
+        animation: cycle "eye_looking_l"
+        shapes:
+            : "eye_looking_l" (0 0 0 0) 0 f 0+r
+
+    "eye_look_l":
+        shapes:
+            : "_eye_border" (0 0 0 0) 0 f
+            : "_eye_look" (0 0 0 0) 4 f
+
+    "eye_looking_r":
+        animation: cycle 1
+        shapes:
+            : "_eye_border" (0 0 0 0) 0 f
+            : "_eye_looking_1" (0 0 0 0) 8 f 0 (0 1)
+
+    "eye_unlooking_r":
+        animation: cycle "eye_looking_r"
+        shapes:
+            : "eye_looking_r" (0 0 0 0) 0 f 0+r
+
+    "eye_look_r":
+        shapes:
+            : "_eye_border" (0 0 0 0) 0 f
+            : "_eye_look" (0 0 0 0) 8 f

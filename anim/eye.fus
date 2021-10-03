@@ -1,0 +1,41 @@
+
+closed:
+    rgraph: "eye_closed"
+    if: key: wasdown u
+    then: goto delay: opening
+
+opening:
+    rgraph: "eye_opening"
+    if() then: goto: open
+
+open:
+    rgraph: "eye_open"
+
+    if: key: isdown u
+    then: goto delay: looking
+
+    if: key: isdown l
+    then: goto delay: looking_l
+
+    if: key: isdown r
+    then: goto delay: looking_r
+
+    if: key: wasdown d
+    then: goto delay: closing
+
+closing:
+    rgraph: "eye_closing"
+    if() then: goto: closed
+
+# "anim/_eye_looking.fus":
+# Provides states looking, unlooking, look (with suffix indicated
+# by LOOK_SUFFIX)
+$SET_STR LOOK_KEY "u"
+$SET_STR LOOK_SUFFIX ""
+import "anim/_eye_looking.fus"
+$SET_STR LOOK_KEY "l"
+$SET_STR LOOK_SUFFIX "_l"
+import "anim/_eye_looking.fus"
+$SET_STR LOOK_KEY "r"
+$SET_STR LOOK_SUFFIX "_r"
+import "anim/_eye_looking.fus"

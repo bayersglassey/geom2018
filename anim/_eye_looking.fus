@@ -1,0 +1,18 @@
+
+# Expected variables:
+# LOOK_KEY (str), one of "l", "u", "r"
+# LOOK_SUFFIX (str), one of "_l", "", "_r"
+
+$SUFFIX LOOK_SUFFIX looking:
+    rgraph: $SUFFIX LOOK_SUFFIX "eye_looking"
+    if() then: goto: $SUFFIX LOOK_SUFFIX look
+
+$SUFFIX LOOK_SUFFIX unlooking:
+    rgraph: $SUFFIX LOOK_SUFFIX "eye_unlooking"
+    if() then: goto: open
+
+$SUFFIX LOOK_SUFFIX look:
+    rgraph: $SUFFIX LOOK_SUFFIX "eye_look"
+
+    if: key: not isdown $GET_SYM LOOK_KEY
+    then: goto delay: $SUFFIX LOOK_SUFFIX unlooking
