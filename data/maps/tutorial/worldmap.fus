@@ -10,28 +10,12 @@ vars:
     "eye_b_open": F
     "eye_c_open": F
 
-$SET_STR GREETING_A: lines:
-    ;; Why, hello there.
-$SET_STR GREETING_B: lines:
-    ;;
-    ;;      It's awake...
-$SET_STR GREETING_C: lines:
-    ;;
-    ;;
-    ;;            Keep going!
 $SET_STR TUT1: lines:
     ;;
     ;;
     ;;   Welcome to Crawl Space!
     ;;
     ;;  Use the left & right arrow keys to move.
-$SET_STR TUT1b: lines:
-    ;;
-    ;;  Touch the shiny green thing to save.
-    ;;    You will reappear there if you... run into trouble.
-    ;;
-    ;;  You can also press "1" to return there
-    ;;    if you feel you are stuck.
 $SET_STR TUT2: lines:
     ;;Keep going!
 $SET_STR TUT_LOOP: lines:
@@ -84,15 +68,12 @@ submaps:
             :
                 file: "data/maps/tutorial/start.fus"
                 text: if mapvar("solved_puzzle") then $GET_STR TUT_GO3 else null
-                text: if mapvar("eye_a_open") then $GET_STR GREETING_A else null
-                text: if mapvar("eye_b_open") then $GET_STR GREETING_B else null
-                text: if mapvar("eye_c_open") then $GET_STR GREETING_C else null
                 pos: eval: (0 0)
                 camera: (8 0)
                 mapper: ("quadruple")
             :
                 file: "data/maps/tutorial/start2.fus"
-                text: if mapvar("solved_puzzle") then $GET_STR TUT_GO2 else $GET_STR TUT1b
+                text: if mapvar("solved_puzzle") then $GET_STR TUT_GO2 else null
                 pos: eval: (19 0)
                 camera: (9 0)
             :

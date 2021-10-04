@@ -1,13 +1,36 @@
+$SET_STR GREETING_A: lines:
+    ;;
+    ;;
+    ;;
+    ;; Why, hello there.
+$SET_STR GREETING_B: lines:
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;                  It's awake...
+$SET_STR GREETING_C: lines:
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;                                     Keep going!
+
+text: if mapvar("solved_puzzle") then null else if mapvar("start_eye_a_open") then $GET_STR GREETING_A else null
+text: if mapvar("solved_puzzle") then null else if mapvar("start_eye_b_open") then $GET_STR GREETING_B else null
+text: if mapvar("solved_puzzle") then null else if mapvar("start_eye_c_open") then $GET_STR GREETING_C else null
 parts:
     "a": recording "data/recs/eye.fus"
         vars:
-            "open_key": "eye_a_open"
+            "open_key": "start_eye_a_open"
     "b": recording "data/recs/eye.fus"
         vars:
-            "open_key": "eye_b_open"
+            "open_key": "start_eye_b_open"
     "c": recording "data/recs/eye.fus"
         vars:
-            "open_key": "eye_c_open"
+            "open_key": "start_eye_c_open"
 collmap:
     ;;
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
