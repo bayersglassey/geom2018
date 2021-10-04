@@ -1,4 +1,22 @@
+$SET_STR COINS: lines:
+    ;;
+    ;;
+    ;;   Can you grab all these for me?
+$SET_STR THANKS: lines:
+    ;;
+    ;;
+    ;;
+    ;;          Thanks!
+    ;;
+    ;;
+    ;;       Keep going.
+
+text: if mapvar("start_eye_a_open") then if mapvar("start_solved") then $GET_STR THANKS else $GET_STR COINS else null
 parts:
+    "A": recording "data/recs/eye.fus"
+        vars:
+            "key": "coin_f"
+            "opened_key": "start_eye_a_open"
     "f": recording "data/recs/coin.fus"
         vars:
             "appear": T
@@ -38,7 +56,7 @@ collmap:
     ;;                        * * *\ /                                                           /*\* * * *
     ;;          .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   +   .   .   .   .   .
     ;;                  *   * */                                                                 \*/* * *
-    ;;            .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .
+    ;;            .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   ?   .   .   .   .          [A]
     ;;                  *   */                                                                   /* * * * *
     ;;          .   .   .   +   .   .   .   .   .   .   .   .   + - +   .   .   ?   .   .   .   +   .   .   .   .   .   .      [g]
     ;;                      *\                                 /    *\                         /* * *

@@ -14,6 +14,13 @@ vars:
     "start_solved2": F
     nosave "num_coin_g": 5
 
+    nosave "start_eye_a_open": F
+    nosave "start2_eye_a_open": F
+    nosave "start2_eye_b_open": F
+    nosave "start2_eye_c_open": F
+    nosave "start3b_eye_a_open": F
+    nosave "start4_eye_a_open": F
+
     "start3b_coin_a": F
     "start3b_coin_b": F
     "start3b_coin_c": F
@@ -27,63 +34,6 @@ vars:
 
     "start4_solved": F
     nosave "start4_num_coin": (6 + 19)
-
-$SET_STR TUT_COINS: lines:
-    ;;Spit with Spacebar.
-    ;;It may help you judge your jumps.
-    ;;
-    ;;Collect shiny purple things
-    ;;   with your body or spit.
-$SET_STR TUT_DANGER: lines:
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;Something dangerous is
-    ;; rolling around down there.
-    ;;
-    ;;
-    ;;
-    ;; Everything with be okay.
-    ;;   Keep going.
-$SET_STR TUT_DANGER2: lines:
-    ;;
-    ;;  That thing is scary!
-    ;;  Hit it with your spit to
-    ;;  change its direction.
-    ;;
-    ;;  Follow the purple things...
-$SET_STR TUT_DANGER_PASSED: lines:
-    ;;Nicely done. Keep going!
-$SET_STR TUT_COIN_BEASTS: lines:
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;; The purple people
-    ;; cannot hurt you.
-    ;;
-    ;;   You must...
-    ;;   collect them...
-    ;;   to continue.
-
 
 submaps:
     :
@@ -117,7 +67,6 @@ submaps:
                     tileset: "data/tileset1_bg.fus"
                 :
                     file: "data/maps/tutorial2/start2.fus"
-                    text: if mapvar("coin_f") then null else $GET_STR TUT_COINS
                     pos: eval: (28 0)
                     camera: (8 0)
             : submaps:
@@ -128,12 +77,10 @@ submaps:
                     tileset: "data/tileset1_bg.fus"
                 :
                     file: "data/maps/tutorial2/start3.fus"
-                    text: $GET_STR TUT_DANGER
                     pos: eval: (0 0) + (13 -9)
                     camera: (-4 -8)
                 :
                     file: "data/maps/tutorial2/start3b.fus"
-                    text: if mapvar("start3b_solved") then $GET_STR TUT_DANGER_PASSED else $GET_STR TUT_DANGER2
                     pos: eval: (0 0) + (13 -9) + (-1 -12)
                     camera: (-5 -6)
                 :
@@ -148,13 +95,11 @@ submaps:
                     tileset: "data/tileset1_bg.fus"
                 :
                     file: "data/maps/tutorial2/start4.fus"
-                    text: if mapvar("start4_solved") then null else $GET_STR TUT_COIN_BEASTS
                     pos: eval: (0 0) + (13 -9) + (-1 -12) + (-29 -19)
                     camera: (-8 6)
                     submaps:
                         :
                             file: "data/maps/tutorial2/start4_door_closed.fus"
-                            text: if mapvar("start4_solved") then null else $GET_STR TUT_COIN_BEASTS
                             visible: not mapvar("start4_solved")
                             pos: (-11 -4)
                         :

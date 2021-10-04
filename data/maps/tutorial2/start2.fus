@@ -1,4 +1,35 @@
+$SET_STR COINS2: lines:
+    ;;
+    ;;
+    ;;  Could you grab that for me?
+$SET_STR THANKS2: lines:
+    ;;
+    ;;
+    ;;  Thanks. Keep going!
+$SET_STR SPIT: lines:
+    ;;
+    ;;
+    ;;     You can grab it with your spit.
+$SET_STR GO_BACK: lines:
+    ;;
+    ;;
+    ;;     You should probably go back and get that.
+
+text: if mapvar("start2_eye_a_open") then if mapvar("coin_f") then $GET_STR THANKS2 else $GET_STR COINS2 else null
+text: if mapvar("start2_eye_b_open") then if mapvar("coin_c") then null else $GET_STR SPIT else null
+text: if mapvar("start2_eye_c_open") then if mapvar("coin_c") then null else $GET_STR GO_BACK else null
 parts:
+    "A": recording "data/recs/eye.fus"
+        vars:
+            "opened_key": "start2_eye_a_open"
+    "B": recording "data/recs/eye.fus"
+        vars:
+            "key": "coin_b"
+            "opened_key": "start2_eye_b_open"
+    "C": recording "data/recs/eye.fus"
+        vars:
+            "key": "coin_b"
+            "opened_key": "start2_eye_c_open"
     "a": recording "data/recs/coin.fus"
         vars:
             "collected_key": "coin_a"
@@ -7,7 +38,7 @@ parts:
             "appear": T
             "key": "coin_a"
             "collected_key": "coin_b"
-    "c": recording "data/recs/coin.fus"
+    "c": recording "data/recs/coin_crouch.fus"
         vars:
             "appear": T
             "key": "coin_b"
@@ -32,13 +63,13 @@ collmap:
     ;;                                                                                                       * *
     ;;               .   .   .   .   .   .   .   .   .   .   .   .   .   + - + - +   .   .   .   .   .   .   .   +   .   .
     ;;                                                                  / \  * */ \                                * *
-    ;;             .   .   .   .   .   .   + - +   .   .   .   .   + - +   +   +   +   .   .   .   .   .   .   .   .   .   .
+    ;;             .   .   .   .   .   .   + - +   .   .   .   .   + - +   +   +   +   .   .   ?   .   .   .   .   .   .   .   [C]
     ;;                                    /*                                \*/     \
     ;;               .   .   .   .   .   +   .   .   .   .   .   .   .   .   +   .   +   .   .   .   .   .   .   .   .   .
     ;;                                  /* * * * * *
     ;;             .   .   .   .   + - +   .   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                            /* * *                              /  * *\
-    ;;               .   .   .   +   .   .   .   .   .   .   .   + - +   .   +   .   .   .   .   .   .   .   .   .   .   .
+    ;;               .   .   .   +   ?   .   .   .   .   .   .   + - +   .   +   .   .   .   .   .   .   .   .   .   .   .      [A]
     ;;                            \* * *                        /  * *\  * */
     ;;             .   .   .   .   +   .   .   .   .   .   .   + - +   +   +   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                                                              \* *\*/
@@ -57,21 +88,21 @@ collmap:
     ;;           .   +   .   +   .   .   .   .   .   .   .   +   +   .   +   +   .   .   .   .   .   .   .   .   .   .   .
     ;;           * * *\  * */                                     \  * */
     ;;         .   .   +   +   ?   .   .   .   .   .   .   .   .   +   +   .   .   .   .   .   .   .   .   .   .   .   .   .         [b]
-    ;;           * * * *\*/ \                                       \*/
+    ;;           * * * *\*/ \                                       \*/                                                            *
     ;;               .   +   +   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   + - +   .   .   .   .   .
-    ;;                    \  *\                                                                     /     \
+    ;;                    \  *\                                                                     /     \                      * *
     ;;             .   .   +   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   +   +   .   .   .   .
-    ;;                      \*/                                                               /     \  * */   / \
+    ;;                      \*/                                                               /     \  * */   / \              * * *
     ;;               .   .   +   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   +   .   +   +   +   +   .   .   .
-    ;;                                                  /  */                                 \  * */ \*/     \*/
+    ;;                                                  /  */                                 \  * */ \*/     \*/              * * *
     ;;             .   .   .   .   .   .   .   .   .   +   +   .   .   .   .   .   .   + - +   +   +   +   .   +   .   .   .   .
-    ;;                                                  \ /                           /     \   \*/
-    ;;               .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   +   .   +   +   .   .   .   + - + - +   .
-    ;;                                                                                \  * */ \                 /   /     \
-    ;;             .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   +   +   .   ?   .   +   +   .   +   .       [c]
-    ;;                                                                                  \*/ \*/                 \* *\* *  /
+    ;;                                                  \ /                           /     \* *\*/                            * * *
+    ;;               .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   +   .   +   +   .   .   .   + - + - +   .   ?       [B]
+    ;;                                                                                \  * */ \                 /   /     \    * * *
+    ;;             .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   +   +   .   .   .   +   +   .   +   .
+    ;;                                                                                  \*/ \*/        * * *    \* *\* *  /    * * *
     ;;               .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   +   .   .   .   .   + - +   +   .
-    ;;                                                                                                                \*/
-    ;;             .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .
+    ;;                                                                                                 * * *          \*/      * * *
+    ;;             .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   +   .   .    [c]
     ;;
     ;;               .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
