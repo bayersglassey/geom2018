@@ -41,6 +41,11 @@ collmap "looking_d": collmap("looking") ^ -2
 closed:
     rgraph: "eye_closed"
 
+    if: exists myvar("open_key")
+    then:
+        set mapvar(myvar("open_key")): F
+        continue
+
     if: coll: bodies any yes collmap("opening")
     then: goto delay: opening
 
@@ -50,6 +55,11 @@ opening:
 
 open:
     rgraph: "eye_open"
+
+    if: exists myvar("open_key")
+    then:
+        set mapvar(myvar("open_key")): T
+        continue
 
     # Apparently "if: coll: bodies all no" is not the same as
     # "if: not: coll: bodies any yes"... isn't that a bug?
