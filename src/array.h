@@ -11,11 +11,7 @@
     array##_len = 0; \
     array##_size = 0;
 
-/* WARNING: ARRAY_COPY doesn't actually copy the array, it copies a
-reference to it.
-If you want to allocate a new array of the same size & copy over the
-data, then you're looking for ARRAY_CLONE. */
-#define ARRAY_COPY(array, array2) \
+#define ARRAY_ASSIGN(array, array2) \
     array = array2; \
     array##_len = array2##_len; \
     array##_size = array##_size;

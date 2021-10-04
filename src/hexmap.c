@@ -1507,6 +1507,7 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
     submap->map = map;
 
     submap->filename = filename;
+    ARRAY_INIT(submap->text_exprs)
     submap->text_exprs_len = text_exprs_len;
     submap->text_exprs = text_exprs;
     submap->visible_expr = visible_expr;
