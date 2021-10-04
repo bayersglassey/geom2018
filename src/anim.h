@@ -75,7 +75,11 @@ typedef struct state {
     struct stateset *stateset;
     char *name;
     rendergraph_t *rgraph;
+    hexcollmap_t *own_hitbox;
+        /* For if we own the hitbox, as opposed to
+        just pointing to one from stateset->collmaps. */
     hexcollmap_t *hitbox;
+        /* If own_hitbox != NULL, then hitbox == own_hitbox */
     bool safe;
     bool flying;
     ARRAY_DECL(char*, collmsgs)
@@ -328,8 +332,7 @@ state_t *stateset_get_state(stateset_t *stateset, const char *name);
 
 
 void state_cleanup(state_t *state);
-int state_init(state_t *state, stateset_t *stateset, char *name,
-    rendergraph_t *rgraph);
+int state_init(state_t *state, stateset_t *stateset, char *name);
 void state_dump(state_t *state, FILE *file, int depth);
 
 void state_rule_cleanup(state_rule_t *rule);

@@ -36,6 +36,64 @@ static int _parse_trf(fus_lexer_t *lexer, vecspace_t *space, rot_t *rot_ptr){
 }
 
 
+static int _parse_collmap(stateset_t *stateset, fus_lexer_t *lexer,
+    vecspace_t *space,
+    hexcollmap_t **own_collmap_ptr, hexcollmap_t **collmap_ptr
+){
+    int err;
+
+    /* To be returned via own_collmap_ptr, collmap_ptr */
+    hexcollmap_t *own_collmap = NULL;
+    hexcollmap_t *collmap;
+
+    if(GOT("collmap")){
+        NEXT
+        GET("(")
+        char *name;
+        GET_STR(name)
+
+        hexcollmap_t *found_collmap = stateset_get_collmap(
+            stateset, name);
+        if(!found_collmap){
+            fus_lexer_err_info(lexer);
+            fprintf(stderr, "Couldn't find collmap: %s\n", name);
+            free(name); return 2;
+        }
+        free(name);
+        GET(")")
+
+        rot_t rot;
+        err = _parse_trf(lexer, space, &rot);
+        if(err)return err;
+
+        if(rot != 0){
+            own_collmap = calloc(1, sizeof(*own_collmap));
+            if(!own_collmap)return 1;
+            hexcollmap_init_clone(own_collmap, found_collmap,
+                strdup(lexer->filename));
+            int err = hexcollmap_clone(own_collmap, found_collmap, rot);
+            if(err)return err;
+
+            collmap = own_collmap;
+        }else{
+            collmap = found_collmap;
+        }
+    }else{
+        own_collmap = calloc(1, sizeof(*collmap));
+        if(own_collmap == NULL)return 1;
+        hexcollmap_init(own_collmap, space,
+            strdup(lexer->filename));
+        err = hexcollmap_parse(own_collmap, lexer, true);
+        if(err)return err;
+        collmap = own_collmap;
+    }
+
+    *own_collmap_ptr = own_collmap;
+    *collmap_ptr = collmap;
+    return 0;
+}
+
+
 static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
     prismelrenderer_t *prend, vecspace_t *space,
     state_effect_t *effect);
@@ -225,50 +283,11 @@ static int _parse_cond(stateset_t *stateset, fus_lexer_t *lexer,
         else return UNEXPECTED("yes or no");
         NEXT
 
-        hexcollmap_t *own_collmap = NULL;
+        hexcollmap_t *own_collmap;
         hexcollmap_t *collmap;
-
-        if(GOT("collmap")){
-            NEXT
-            GET("(")
-            char *name;
-            GET_STR(name)
-
-            hexcollmap_t *found_collmap = stateset_get_collmap(
-                stateset, name);
-            if(!found_collmap){
-                fus_lexer_err_info(lexer);
-                fprintf(stderr, "Couldn't find collmap: %s\n", name);
-                free(name); return 2;
-            }
-            free(name);
-            GET(")")
-
-            rot_t rot;
-            err = _parse_trf(lexer, space, &rot);
-            if(err)return err;
-
-            if(rot != 0){
-                own_collmap = calloc(1, sizeof(*own_collmap));
-                if(!own_collmap)return 1;
-                hexcollmap_init_clone(own_collmap, found_collmap,
-                    strdup(lexer->filename));
-                int err = hexcollmap_clone(own_collmap, found_collmap, rot);
-                if(err)return err;
-
-                collmap = own_collmap;
-            }else{
-                collmap = found_collmap;
-            }
-        }else{
-            own_collmap = calloc(1, sizeof(*collmap));
-            if(own_collmap == NULL)return 1;
-            hexcollmap_init(own_collmap, space,
-                strdup(lexer->filename));
-            err = hexcollmap_parse(own_collmap, lexer, true);
-            if(err)return err;
-            collmap = own_collmap;
-        }
+        err = _parse_collmap(stateset, lexer, space,
+            &own_collmap, &collmap);
+        if(err)return err;
 
         GET(")")
 
@@ -743,67 +762,77 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
         GET_NAME(name)
         GET("(")
 
-        rendergraph_t *rgraph = NULL;
-        if(GOT("rgraph")){
-            char *rgraph_name;
-            NEXT
-            GET("(")
-            GET_STR(rgraph_name)
-            GET(")")
-            rgraph = prismelrenderer_get_rendergraph(
-                prend, rgraph_name);
-            if(rgraph == NULL){
-                fus_lexer_err_info(lexer);
-                fprintf(stderr, "Couldn't find shape: %s\n", rgraph_name);
-                free(rgraph_name); return 2;}
-            free(rgraph_name);
-        }
-
         ARRAY_PUSH_NEW(state_t*, stateset->states, state)
-        err = state_init(state, stateset, name, rgraph);
+        err = state_init(state, stateset, name);
         if(err)return err;
 
-        if(GOT("unsafe")){
-            NEXT
-            state->safe = false;
-        }
-        if(GOT("flying")){
-            NEXT
-            state->flying = true;
-        }
-        if(GOT("collmsgs")){
-            NEXT
-            GET("(")
-            while(!GOT(")")){
-                char *msg;
-                GET_STR(msg)
-                ARRAY_PUSH(char*, state->collmsgs, msg)
+        /* Parse state properties */
+        while(1){
+            if(GOT("rgraph")){
+                char *rgraph_name;
+                NEXT
+                GET("(")
+                GET_STR(rgraph_name)
+                GET(")")
+                state->rgraph = prismelrenderer_get_rendergraph(
+                    prend, rgraph_name);
+                if(state->rgraph == NULL){
+                    fus_lexer_err_info(lexer);
+                    fprintf(stderr, "Couldn't find shape: %s\n", rgraph_name);
+                    free(rgraph_name); return 2;}
+                free(rgraph_name);
+                continue;
             }
-            NEXT
-        }
-        if(GOT("hitbox")){
-            NEXT
-            GET("(")
+            if(GOT("unsafe")){
+                NEXT
+                state->safe = false;
+                continue;
+            }
+            if(GOT("flying")){
+                NEXT
+                state->flying = true;
+                continue;
+            }
+            if(GOT("collmsgs")){
+                NEXT
+                GET("(")
+                while(!GOT(")")){
+                    char *msg;
+                    GET_STR(msg)
+                    ARRAY_PUSH(char*, state->collmsgs, msg)
+                }
+                NEXT
+                continue;
+            }
+            if(GOT("hitbox")){
+                NEXT
+                GET("(")
 
-            hexcollmap_t *collmap = calloc(1, sizeof(*collmap));
-            if(collmap == NULL)return 1;
-            hexcollmap_init(collmap, space,
-                strdup(lexer->filename));
-            err = hexcollmap_parse(collmap, lexer, true);
-            if(err)return err;
-            state->hitbox = collmap;
+                hexcollmap_t *own_collmap;
+                hexcollmap_t *collmap;
+                err = _parse_collmap(stateset, lexer, space,
+                    &own_collmap, &collmap);
+                if(err)return err;
 
-            GET(")")
-        }
-        while(GOT("on")){
-            NEXT
-            collmsg_handler_t handler;
-            err = _parse_collmsg_handler(stateset, lexer, &handler,
-                prend, space);
-            if(err)return err;
-            ARRAY_PUSH(collmsg_handler_t, state->collmsg_handlers, handler)
+                state->own_hitbox = own_collmap;
+                state->hitbox = collmap;
+
+                GET(")")
+                continue;
+            }
+            if(GOT("on")){
+                NEXT
+                collmsg_handler_t handler;
+                err = _parse_collmsg_handler(stateset, lexer, &handler,
+                    prend, space);
+                if(err)return err;
+                ARRAY_PUSH(collmsg_handler_t, state->collmsg_handlers, handler)
+                continue;
+            }
+            break;
         }
 
+        /* Parse rules */
         while(1){
             if(GOT(")"))break;
 
@@ -879,21 +908,20 @@ state_t *stateset_get_state(stateset_t *stateset, const char *name){
 
 void state_cleanup(state_t *state){
     free(state->name);
-    if(state->hitbox != NULL){
-        hexcollmap_cleanup(state->hitbox);
-        free(state->hitbox);
+    if(state->own_hitbox != NULL){
+        hexcollmap_cleanup(state->own_hitbox);
+        free(state->own_hitbox);
     }
     ARRAY_FREE_PTR(char*, state->collmsgs, (void))
     ARRAY_FREE(collmsg_handler_t, state->collmsg_handlers, collmsg_handler_cleanup)
     ARRAY_FREE_PTR(state_rule_t*, state->rules, state_rule_cleanup)
 }
 
-int state_init(state_t *state, stateset_t *stateset, char *name,
-    rendergraph_t *rgraph
-){
+int state_init(state_t *state, stateset_t *stateset, char *name){
     state->stateset = stateset;
     state->name = name;
-    state->rgraph = rgraph;
+    state->rgraph = NULL;
+    state->own_hitbox = NULL;
     state->hitbox = NULL;
     state->safe = true;
     state->flying = false;
