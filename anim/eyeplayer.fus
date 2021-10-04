@@ -1,0 +1,3 @@
+
+$SET_STR NS eyeplayer_
+import "anim/_player.fus"

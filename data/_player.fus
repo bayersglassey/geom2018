@@ -1,6 +1,13 @@
 
 # Expected vars:
 # NS (str), e.g. "player_"
+# PLAYER_AIMER (bool)
+# PLAYER_SPIKEY (bool)
+# PLAYER_ROLLER (bool)
+# PLAYER_FLIER (bool)
+# PLAYER_BIRD (bool)
+# PLAYER_EYE (bool)
+
 
 shapes:
 
@@ -37,10 +44,17 @@ shapes:
     # +-
 
     $PREFIX NS "bleg":
-        prismels:
-            : "tri" (  0 -1  0  0) 11 f eval: 1 + 8 + 5
-            : "sq"  (  0 -1 -1  0) 11 f eval: 1 + 8 + 3
-            : "tri" (  0 -1 -1 -1)  1 f eval: 1 + 8 + 3
+        $IF PLAYER_EYE:
+            # Just changing the colours
+            prismels:
+                : "tri" (  0 -1  0  0) 11 f eval: 1 + 0 + 4
+                : "sq"  (  0 -1 -1  0) 11 f eval: 1 + 0 + 7
+                : "tri" (  0 -1 -1 -1)  1 f eval: 1 + 0 + 7
+        $IF !PLAYER_EYE:
+            prismels:
+                : "tri" (  0 -1  0  0) 11 f eval: 1 + 8 + 5
+                : "sq"  (  0 -1 -1  0) 11 f eval: 1 + 8 + 3
+                : "tri" (  0 -1 -1 -1)  1 f eval: 1 + 8 + 3
 
     $PREFIX NS "fleg":
         shapes:
@@ -127,28 +141,40 @@ shapes:
                 : "tri" (1 0 0 0) 1 f eval: 1 + 8 + 2
 
     $PREFIX NS "head":
-        shapes:
-            : $PREFIX NS "_head" (0 0 0 0) 0 f
-            : $PREFIX NS "eye" (0 0 0 0)  0 f
-            : $PREFIX NS "nose" (1 1 0 -1) 0 f
-            $IF PLAYER_SPIKEY:
-                : $PREFIX NS "head_spikes" (0 0 0 0)  0 f
+        $IF PLAYER_EYE:
+            shapes:
+                : "_eye_look" (0 0 0 0) 11 f
+        $IF !PLAYER_EYE:
+            shapes:
+                : $PREFIX NS "_head" (0 0 0 0) 0 f
+                : $PREFIX NS "eye" (0 0 0 0)  0 f
+                : $PREFIX NS "nose" (1 1 0 -1) 0 f
+                $IF PLAYER_SPIKEY:
+                    : $PREFIX NS "head_spikes" (0 0 0 0)  0 f
 
     $PREFIX NS "crawl_head":
-        shapes:
-            : $PREFIX NS "_head" (0 0 0 0) 0 f
-            : $PREFIX NS "eye" (0 0 0 0)  0 f
-            : $PREFIX NS "nose" (1 1 0 -1) 0 f
-            $IF PLAYER_SPIKEY:
-                : $PREFIX NS "head_spikes_extended" (0 0 0 0)  0 f
+        $IF PLAYER_EYE:
+            shapes:
+                : "_eye_look" (0 0 0 0) 0 f
+        $IF !PLAYER_EYE:
+            shapes:
+                : $PREFIX NS "_head" (0 0 0 0) 0 f
+                : $PREFIX NS "eye" (0 0 0 0)  0 f
+                : $PREFIX NS "nose" (1 1 0 -1) 0 f
+                $IF PLAYER_SPIKEY:
+                    : $PREFIX NS "head_spikes_extended" (0 0 0 0)  0 f
 
     $PREFIX NS "sleep_head":
-        shapes:
-            : $PREFIX NS "_head" (0 0 0 0) 0 f
-            # No eye (it's "closed")
-            : $PREFIX NS "nose" (1 1 0 -1) 0 f
-            $IF PLAYER_SPIKEY:
-                : $PREFIX NS "head_spikes" (0 0 0 0)  0 f
+        $IF PLAYER_EYE:
+            shapes:
+                : "_eye_closed" (0 0 0 0) 0 f
+        $IF !PLAYER_EYE:
+            shapes:
+                : $PREFIX NS "_head" (0 0 0 0) 0 f
+                # No eye (it's "closed")
+                : $PREFIX NS "nose" (1 1 0 -1) 0 f
+                $IF PLAYER_SPIKEY:
+                    : $PREFIX NS "head_spikes" (0 0 0 0)  0 f
 
     $PREFIX NS "stand":
         shapes:
