@@ -13,5 +13,5 @@ $SUFFIX LOOK_SUFFIX unlooking:
 $SUFFIX LOOK_SUFFIX look:
     rgraph: $SUFFIX LOOK_SUFFIX "eye_look"
 
-    if: not: coll: bodies any yes collmap($SUFFIX LOOK_SUFFIX "looking")
+    if: not: coll: bodies "touch" any yes collmap($SUFFIX LOOK_SUFFIX "looking")
     then: goto delay: $SUFFIX LOOK_SUFFIX unlooking

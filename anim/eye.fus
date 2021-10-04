@@ -53,7 +53,7 @@ closed:
         any:
             not: exists myvar("antikey")
             not: get_bool mapvar(myvar("antikey"))
-        coll: bodies any yes collmap("opening")
+        coll: bodies "touch" any yes collmap("opening")
     then: goto delay: opening
 
 opening:
@@ -75,25 +75,25 @@ open:
         all:
             exists myvar("antikey")
             get_bool mapvar(myvar("antikey"))
-        not: coll: bodies any yes collmap("opening")
+        not: coll: bodies "touch" any yes collmap("opening")
     then: goto delay: closing
 
     if:
-        coll: bodies any yes collmap("looking")
-        not: coll: bodies any yes collmap("looking_l")
-        not: coll: bodies any yes collmap("looking_d")
+        coll: bodies "touch" any yes collmap("looking")
+        not: coll: bodies "touch" any yes collmap("looking_l")
+        not: coll: bodies "touch" any yes collmap("looking_d")
     then: goto delay: looking
 
     if:
-        not: coll: bodies any yes collmap("looking")
-        coll: bodies any yes collmap("looking_l")
-        not: coll: bodies any yes collmap("looking_d")
+        not: coll: bodies "touch" any yes collmap("looking")
+        coll: bodies "touch" any yes collmap("looking_l")
+        not: coll: bodies "touch" any yes collmap("looking_d")
     then: goto delay: looking_l
 
     if:
-        not: coll: bodies any yes collmap("looking")
-        not: coll: bodies any yes collmap("looking_l")
-        coll: bodies any yes collmap("looking_d")
+        not: coll: bodies "touch" any yes collmap("looking")
+        not: coll: bodies "touch" any yes collmap("looking_l")
+        coll: bodies "touch" any yes collmap("looking_d")
     then: goto delay: looking_d
 
 closing:
