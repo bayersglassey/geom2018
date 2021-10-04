@@ -148,11 +148,27 @@ int test_app_render_game(test_app_t *app){
         if(err)return err;
     }else if(!showed_dead_msg){
         hexmap_submap_t *submap = app->camera->cur_submap;
-        const char *text = !submap? NULL:
-            hexmap_submap_get_text(submap);
-        if(text){
-            test_app_printf(app, 0, app->lines_printed * app->font.char_h,
-                text);
+        if(submap) for(int i = 0; i < submap->text_exprs_len; i++){
+            valexpr_t *text_expr = submap->text_exprs[i];
+            val_t *result;
+            valexpr_context_t context = {
+                .mapvars = &submap->map->vars,
+                .globalvars = &submap->map->game->vars
+            };
+            err = valexpr_get(text_expr, &context, &result);
+            if(err){
+                fprintf(stderr,
+                    "Error while evaluating text for submap: %s\n",
+                    submap->filename);
+                valexpr_fprintf(text_expr, stderr);
+                fputc('\n', stderr);
+                return err;
+            }
+            const char *text = val_get_str(result);
+            if(text){
+                test_app_printf(app, 0,
+                    app->lines_printed * app->font.char_h, text);
+            }
         }
     }
 

@@ -116,7 +116,8 @@ typedef struct hexmap_submap {
     vec_t camera_pos;
     int camera_type; /* enum camera_type */
     char *filename;
-    valexpr_t *text_expr; /* Text displayed at top-left when camera is on this submap */
+    ARRAY_DECL(valexpr_t*, text_exprs)
+        /* Text displayed when camera is on this submap */
     valexpr_t *visible_expr; /* Whether this submap is visible */
     bool visible_expr_not; /* Whether to invert the result of visible_expr */
     hexcollmap_t collmap;
@@ -186,13 +187,13 @@ int hexmap_refresh_vars(hexmap_t *map);
 void hexmap_door_cleanup(hexmap_door_t *door);
 void hexmap_submap_cleanup(hexmap_submap_t *submap);
 int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
-    char *filename, valexpr_t *text_expr,
+    char *filename,
+    int text_exprs_len, valexpr_t **text_exprs,
     valexpr_t *visible_expr, bool visible_expr_not,
     bool solid, vec_t pos, int camera_type, vec_t camera_pos,
     prismelmapper_t *mapper, char *palette_filename, char *tileset_filename);
 int hexmap_submap_is_visible(hexmap_submap_t *submap, bool *visible_ptr);
 int hexmap_submap_is_solid(hexmap_submap_t *submap, bool *solid_ptr);
-const char *hexmap_submap_get_text(hexmap_submap_t *submap);
 int hexmap_submap_create_rgraph_map(hexmap_submap_t *submap);
 int hexmap_submap_create_rgraph_minimap(hexmap_submap_t *submap);
 hexmap_door_t *hexmap_submap_get_door(hexmap_submap_t *submap,

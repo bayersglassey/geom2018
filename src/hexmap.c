@@ -859,17 +859,16 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
         if(err)return err;
     }
 
-    valexpr_t *submap_text_expr = NULL;
-    if(fus_lexer_got(lexer, "text")){
+    ARRAY_DECL(valexpr_t*, text_exprs)
+    ARRAY_INIT(text_exprs)
+    while(fus_lexer_got(lexer, "text")){
         err = fus_lexer_next(lexer);
         if(err)return err;
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
 
-        submap_text_expr = calloc(1, sizeof(*submap_text_expr));
-        if(!submap_text_expr)return 1;
-
-        err = valexpr_parse(submap_text_expr, lexer);
+        ARRAY_PUSH_NEW(valexpr_t*, text_exprs, text_expr)
+        err = valexpr_parse(text_expr, lexer);
         if(err)return err;
 
         err = fus_lexer_get(lexer, ")");
@@ -984,7 +983,8 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
 
         ARRAY_PUSH_NEW(hexmap_submap_t*, map->submaps, submap)
         err = hexmap_submap_init(map, submap,
-            strdup(submap_filename), submap_text_expr,
+            strdup(submap_filename),
+            text_exprs_len, text_exprs,
             submap_visible_expr, submap_visible_expr_not,
             solid, pos, camera_type, camera_pos, mapper,
             palette_filename, tileset_filename);
@@ -1484,10 +1484,7 @@ void hexmap_door_cleanup(hexmap_door_t *door){
 
 void hexmap_submap_cleanup(hexmap_submap_t *submap){
     free(submap->filename);
-    if(submap->text_expr){
-        valexpr_cleanup(submap->text_expr);
-        free(submap->text_expr);
-    }
+    ARRAY_FREE_PTR(valexpr_t*, submap->text_exprs, valexpr_cleanup)
     if(submap->visible_expr){
         valexpr_cleanup(submap->visible_expr);
         free(submap->visible_expr);
@@ -1496,8 +1493,11 @@ void hexmap_submap_cleanup(hexmap_submap_t *submap){
     ARRAY_FREE_PTR(hexmap_door_t*, submap->doors, hexmap_door_cleanup)
 }
 
+/* TODO: make this function *MUCH* lighter-weight, and have parser init the
+submap, then modify its values. */
 int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
-    char *filename, valexpr_t *text_expr,
+    char *filename,
+    int text_exprs_len, valexpr_t **text_exprs,
     valexpr_t *visible_expr, bool visible_expr_not,
     bool solid, vec_t pos, int camera_type, vec_t camera_pos,
     prismelmapper_t *mapper, char *palette_filename, char *tileset_filename
@@ -1507,7 +1507,8 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
     submap->map = map;
 
     submap->filename = filename;
-    submap->text_expr = text_expr;
+    submap->text_exprs_len = text_exprs_len;
+    submap->text_exprs = text_exprs;
     submap->visible_expr = visible_expr;
     submap->visible_expr_not = visible_expr_not;
     vec_cpy(MAX_VEC_DIMS, submap->pos, pos);
@@ -1581,30 +1582,6 @@ int hexmap_submap_is_solid(hexmap_submap_t *submap, bool *solid_ptr){
 done:
     *solid_ptr = solid;
     return 0;
-}
-
-const char *hexmap_submap_get_text(hexmap_submap_t *submap){
-    /* May return NULL if submap doesn't have associated text. */
-    if(submap->text_expr == NULL)return NULL;
-
-    val_t *result;
-    valexpr_context_t context = {
-        .mapvars = &submap->map->vars,
-        .globalvars = &submap->map->game->vars
-    };
-    int err = valexpr_get(submap->text_expr, &context, &result);
-    if(err){
-        fprintf(stderr,
-            "Error while evaluating text for submap: %s\n",
-            submap->filename);
-        /* MAYBE TODO: we're swallowing this error and just using a default
-        value... maybe better to exit(err) or *gag* change this function to
-        return an error value and take a const char **text_ptr argument?.. */
-        return NULL;
-    }else if(!result){
-        return NULL;
-    }
-    return val_get_str(result);
 }
 
 hexmap_door_t *hexmap_submap_get_door(hexmap_submap_t *submap,
