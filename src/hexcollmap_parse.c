@@ -420,6 +420,13 @@ static int hexcollmap_draw(hexcollmap_t *collmap1, hexcollmap_t *collmap2,
         trf_apply(space, &rendergraph1->trf, trf);
     }
 
+    for(int i = 0; i < collmap2->text_exprs_len; i++){
+        valexpr_t *text_expr2 = collmap2->text_exprs[i];
+        ARRAY_PUSH_NEW(valexpr_t*, collmap1->text_exprs, text_expr1)
+        err = valexpr_copy(text_expr1, text_expr2);
+        if(err)return err;
+    }
+
     return 0;
 }
 
@@ -963,6 +970,15 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
             GET(")")
         }
 
+        while(GOT("text")){
+            NEXT
+            GET("(")
+            ARRAY_PUSH_NEW(valexpr_t*, collmap->text_exprs, text_expr)
+            err = valexpr_parse(text_expr, lexer);
+            if(err)return err;
+            GET(")")
+        }
+
         if(GOT("parts")){
             NEXT
             GET("(")
@@ -1097,6 +1113,8 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
     int err;
 
     ARRAY_DECL(hexcollmap_part_t*, parts)
+    /* NOTE: we don't ARRAY_INIT parts, because it's completely overwritten by
+    hexcollmap_parse_with_parts on successful return */
     err = hexcollmap_parse_with_parts(collmap, lexer, just_coll,
         &parts, &parts_len);
     if(err)return err;

@@ -110,6 +110,8 @@ void hexcollmap_cleanup(hexcollmap_t *collmap){
         hexmap_recording_cleanup)
     ARRAY_FREE_PTR(hexmap_rendergraph_t*, collmap->rendergraphs,
         hexmap_rendergraph_cleanup)
+    ARRAY_FREE_PTR(valexpr_t*, collmap->text_exprs,
+        valexpr_cleanup)
 }
 
 void hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
@@ -120,6 +122,7 @@ void hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
     collmap->space = space;
     ARRAY_INIT(collmap->recordings);
     ARRAY_INIT(collmap->rendergraphs);
+    ARRAY_INIT(collmap->text_exprs);
 }
 
 void hexcollmap_init_clone(hexcollmap_t *collmap,

@@ -97,6 +97,31 @@ int test_app_set_players(test_app_t *app, int n_players){
 }
 
 
+static int _print_text_expr(test_app_t *app, hexmap_submap_t *submap,
+    valexpr_t *text_expr
+){
+    int err;
+    val_t *result;
+    valexpr_context_t context = {
+        .mapvars = &submap->map->vars,
+        .globalvars = &submap->map->game->vars
+    };
+    err = valexpr_get(text_expr, &context, &result);
+    if(err){
+        fprintf(stderr,
+            "Error while evaluating text for submap: %s\n",
+            submap->filename);
+        valexpr_fprintf(text_expr, stderr);
+        fputc('\n', stderr);
+        return err;
+    }
+    const char *text = val_get_str(result);
+    if(text){
+        test_app_printf(app, 0, 0, text);
+    }
+    return 0;
+}
+
 int test_app_render_game(test_app_t *app){
     int err;
 
@@ -148,26 +173,17 @@ int test_app_render_game(test_app_t *app){
         if(err)return err;
     }else if(!showed_dead_msg){
         hexmap_submap_t *submap = app->camera->cur_submap;
-        if(submap) for(int i = 0; i < submap->text_exprs_len; i++){
-            valexpr_t *text_expr = submap->text_exprs[i];
-            val_t *result;
-            valexpr_context_t context = {
-                .mapvars = &submap->map->vars,
-                .globalvars = &submap->map->game->vars
-            };
-            err = valexpr_get(text_expr, &context, &result);
-            if(err){
-                fprintf(stderr,
-                    "Error while evaluating text for submap: %s\n",
-                    submap->filename);
-                valexpr_fprintf(text_expr, stderr);
-                fputc('\n', stderr);
-                return err;
+        if(submap){
+            for(int i = 0; i < submap->text_exprs_len; i++){
+                valexpr_t *text_expr = submap->text_exprs[i];
+                err = _print_text_expr(app, submap, text_expr);
+                if(err)return err;
             }
-            const char *text = val_get_str(result);
-            if(text){
-                test_app_printf(app, 0,
-                    app->lines_printed * app->font.char_h, text);
+            hexcollmap_t *collmap = &submap->collmap;
+            for(int i = 0; i < collmap->text_exprs_len; i++){
+                valexpr_t *text_expr = collmap->text_exprs[i];
+                err = _print_text_expr(app, submap, text_expr);
+                if(err)return err;
             }
         }
     }
