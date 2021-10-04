@@ -1,3 +1,11 @@
+$SET_STR FOLLOW_ME: lines:
+    ;;
+    ;;
+    ;;      Look, this is how you do it!
+    ;;
+    ;;          Keep going!
+
+text: $GET_STR FOLLOW_ME
 collmap:
     ;;
     ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .

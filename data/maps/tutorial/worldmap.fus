@@ -19,29 +19,8 @@ vars:
     nosave "start4_eye_b_open": F
     nosave "start4_eye_c_open": F
     nosave "skypipes_eye_a_open": F
-
-$SET_STR TUT_GAPS: lines:
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;Don't worry about small gaps
-    ;;   in the floor.
-    ;;
-    ;;You can walk
-    ;;   right over them.
-$SET_STR TUT_CRAWL: lines:
-    ;;  Press the down arrow key to crouch.
-    ;;   While crouching, use the left & right arrow keys to crawl.
-$SET_STR TUT_DOOR: lines:
-    ;;
-    ;;The shiny blue thing is a door.
-    ;;
-    ;;
-    ;;Go through it to continue to the next area.
+    nosave "skypipes3_eye_a_open": F
+    nosave "skypipes4_eye_a_open": F
 
 submaps:
     :
@@ -94,17 +73,16 @@ submaps:
                         pos: eval: (25 2) + (8 0) + (12 0)
             :
                 file: "data/maps/tutorial/skypipes2.fus"
-                text: $GET_STR TUT_GAPS
                 pos: eval: (19 0) + (19 -1) + (24 17) + (28 12)
                 camera: (9 4)
+                recs:
+                    : "data/maps/tutorial/recs/eyeplayer000.fus"
             :
                 file: "data/maps/tutorial/skypipes3.fus"
-                text: $GET_STR TUT_CRAWL
                 pos: eval: (19 0) + (19 -1) + (24 17) + (28 12) + (27 10)
                 camera: (9 0)
             :
                 file: "data/maps/tutorial/skypipes4.fus"
-                text: $GET_STR TUT_DOOR
                 pos: eval: (19 0) + (19 -1) + (24 17) + (28 12) + (27 10) + (25 3)
                 camera: (10 0)
                 doors:

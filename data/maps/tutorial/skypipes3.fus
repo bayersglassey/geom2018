@@ -1,3 +1,17 @@
+$SET_STR CRAWL: lines:
+    ;;
+    ;;
+    ;;  Press the down arrow key to crouch.
+    ;;   While crouching, use the left & right arrow keys to crawl.
+    ;;
+    ;;
+    ;;      You can crawl on the ceiling too.
+
+text: if mapvar("skypipes3_eye_a_open") then $GET_STR CRAWL else null
+parts:
+    "a": recording "data/recs/eye.fus"
+        vars:
+            "opened_key": "skypipes3_eye_a_open"
 collmap:
     ;;
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
@@ -18,7 +32,7 @@ collmap:
     ;;                                         * * * * *                                    \
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .
     ;;                                       * * * * * * *                                    \
-    ;;     .   .   .  (+)- + - +   + - + - + - .   .   . - + - +   .   .   .   .   .   .   .   +   .   .   .   .   .
+    ;;     .   .   .  (+)- + - +   + - + - + - .   ?   . - + - +   .   .   .   .   .   .   .   +   .   .   .   .   .   [a]
     ;;                /         \            * * * * * * *      \                               \
     ;;   .   .   .   +   .   .   +   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   +   .   .   .   .
     ;;                \           \            * * * * *          \                             /
