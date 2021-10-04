@@ -92,9 +92,9 @@ void valexpr_fprintf(valexpr_t *expr, FILE *file){
             fprintf(file, "if ");
             if(expr->u.if_expr.cond_not)fprintf(file, "not ");
             valexpr_fprintf(expr->u.if_expr.cond_expr, file);
-            fprintf(file, "then ");
+            fprintf(file, " then ");
             valexpr_fprintf(expr->u.if_expr.then_expr, file);
-            fprintf(file, "else ");
+            fprintf(file, " else ");
             valexpr_fprintf(expr->u.if_expr.else_expr, file);
             break;
         default:
