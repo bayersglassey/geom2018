@@ -24,15 +24,15 @@ text: if mapvar("start_eye_c_open") then $GET_STR GREETING_C else null
 parts:
     "a": recording "data/recs/eye.fus"
         vars:
-            "antikey": "solved_puzzle"
+            "antikey": "made_it_underneath"
             "opened_key": "start_eye_a_open"
     "b": recording "data/recs/eye.fus"
         vars:
-            "antikey": "solved_puzzle"
+            "antikey": "made_it_underneath"
             "opened_key": "start_eye_b_open"
     "c": recording "data/recs/eye.fus"
         vars:
-            "antikey": "solved_puzzle"
+            "antikey": "made_it_underneath"
             "opened_key": "start_eye_c_open"
 collmap:
     ;;

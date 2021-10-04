@@ -1,7 +1,7 @@
 parts:
     "h": recording "data/recs/hotspot.fus"
         vars:
-            "key": "solved_puzzle2"
+            "key": "going_upwards"
 
 collmap:
     ;;

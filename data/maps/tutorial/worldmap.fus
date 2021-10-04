@@ -4,8 +4,8 @@ spawn: "data/maps/tutorial/start.fus"
 default_palette: "data/pal1.fus"
 default_tileset: "data/tileset1.fus"
 vars:
-    "solved_puzzle": F
-    "solved_puzzle2": F
+    "made_it_underneath": F
+    "going_upwards": F
     "eye_a_open": F
     "eye_b_open": F
     "eye_c_open": F
@@ -67,29 +67,29 @@ submaps:
         submaps:
             :
                 file: "data/maps/tutorial/start.fus"
-                text: if mapvar("solved_puzzle") then $GET_STR TUT_GO3 else null
+                text: if mapvar("made_it_underneath") then $GET_STR TUT_GO3 else null
                 pos: eval: (0 0)
                 camera: (8 0)
                 mapper: ("quadruple")
             :
                 file: "data/maps/tutorial/start2.fus"
-                text: if mapvar("solved_puzzle") then $GET_STR TUT_GO2 else null
+                text: if mapvar("made_it_underneath") then $GET_STR TUT_GO2 else null
                 pos: eval: (19 0)
                 camera: (9 0)
             :
                 file: "data/maps/tutorial/start3.fus"
-                text: if mapvar("solved_puzzle2") then $GET_STR TUT_GO4 else if mapvar("solved_puzzle") then null else $GET_STR TUT2
+                text: if mapvar("going_upwards") then $GET_STR TUT_GO4 else if mapvar("made_it_underneath") then null else $GET_STR TUT2
                 pos: eval: (19 0) + (19 -1)
                 camera: (9 0)
             :
                 file: "data/maps/tutorial/loop.fus"
-                text: if mapvar("solved_puzzle") then null else $GET_STR TUT_LOOP
+                text: if mapvar("made_it_underneath") then null else $GET_STR TUT_LOOP
                 pos: eval: (19 0) + (19 -1) + (19 -6)
                 camera: (9 4)
                 mapper: ("quadruple")
             :
                 file: "data/maps/tutorial/start4.fus"
-                text: if mapvar("solved_puzzle") then $GET_STR TUT_SOLVED_PUZZLE else $GET_STR TUT3
+                text: if mapvar("made_it_underneath") then $GET_STR TUT_SOLVED_PUZZLE else $GET_STR TUT3
                 pos: eval: (19 0) + (19 -1) + (19 -6) + (19 -3)
                 camera: (9 -2)
             :
