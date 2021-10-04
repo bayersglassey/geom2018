@@ -1,3 +1,11 @@
+$SET_STR ONWARD: lines:
+    ;;Onward and upward!
+
+text: if mapvar("skypipes_eye_a_open") then $GET_STR ONWARD else null
+parts:
+    "a": recording "data/recs/eye.fus"
+        vars:
+            "opened_key": "skypipes_eye_a_open"
 collmap:
     ;;
     ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
@@ -34,7 +42,7 @@ collmap:
     ;;          /       /                                                                             \
     ;;     .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .
     ;;                /* * *\                                                                         /
-    ;;   .   .   .   +   .   + - +   .   .   .   .   .   .   .   .   + - + - + - + - + - + - + - + - +   .   .   .   .   .   .
+    ;;   .   .   .   +   ?   + - +   .   .   .   .   .   .   .   .   + - + - + - + - + - + - + - + - +   .   .   .   .   .   .   [a]
     ;;              /* * * * * * * * *
     ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;               * * * * * * * * *

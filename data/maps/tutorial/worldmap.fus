@@ -6,36 +6,19 @@ default_tileset: "data/tileset1.fus"
 vars:
     "made_it_underneath": F
     "going_upwards": F
-    "eye_a_open": F
-    "eye_b_open": F
-    "eye_c_open": F
-
-$SET_STR TUT1: lines:
-    ;;
-    ;;
-    ;;   Welcome to Crawl Space!
-    ;;
-    ;;  Use the left & right arrow keys to move.
-$SET_STR TUT2: lines:
-    ;;Keep going!
-$SET_STR TUT_LOOP: lines:
-    ;;
-    ;;             BE BRAVE!!!
-$SET_STR TUT3: lines:
-    ;;Sometimes you'll need to jump.
-    ;;
-    ;;Press the up arrow key to leap forwards!
-$SET_STR TUT_SOLVED_PUZZLE: lines:
-    ;;    Sometimes you'll need to travel upside down.
-    ;;    Don't worry about it!
-    ;;   Keep going.
-$SET_STR TUT_GO2: lines:
-    ;;         Almost there...
-$SET_STR TUT_GO3: lines:
-    ;;
-    ;;            Too far!
-$SET_STR TUT_GO4: lines:
-    ;;Onward and upward!
+    nosave "start_eye_a_open": F
+    nosave "start_eye_b_open": F
+    nosave "start_eye_c_open": F
+    nosave "start2_eye_a_open": F
+    nosave "start2_eye_b_open": F
+    nosave "start2_eye_c_open": F
+    nosave "start3_eye_a_open": F
+    nosave "start3_eye_b_open": F
+    nosave "start3_eye_c_open": F
+    nosave "start4_eye_a_open": F
+    nosave "start4_eye_b_open": F
+    nosave "start4_eye_c_open": F
+    nosave "skypipes_eye_a_open": F
 
 $SET_STR TUT_GAPS: lines:
     ;;
@@ -67,29 +50,24 @@ submaps:
         submaps:
             :
                 file: "data/maps/tutorial/start.fus"
-                text: if mapvar("made_it_underneath") then $GET_STR TUT_GO3 else null
                 pos: eval: (0 0)
                 camera: (8 0)
                 mapper: ("quadruple")
             :
                 file: "data/maps/tutorial/start2.fus"
-                text: if mapvar("made_it_underneath") then $GET_STR TUT_GO2 else null
                 pos: eval: (19 0)
                 camera: (9 0)
             :
                 file: "data/maps/tutorial/start3.fus"
-                text: if mapvar("going_upwards") then $GET_STR TUT_GO4 else if mapvar("made_it_underneath") then null else $GET_STR TUT2
                 pos: eval: (19 0) + (19 -1)
                 camera: (9 0)
             :
                 file: "data/maps/tutorial/loop.fus"
-                text: if mapvar("made_it_underneath") then null else $GET_STR TUT_LOOP
                 pos: eval: (19 0) + (19 -1) + (19 -6)
                 camera: (9 4)
                 mapper: ("quadruple")
             :
                 file: "data/maps/tutorial/start4.fus"
-                text: if mapvar("made_it_underneath") then $GET_STR TUT_SOLVED_PUZZLE else $GET_STR TUT3
                 pos: eval: (19 0) + (19 -1) + (19 -6) + (19 -3)
                 camera: (9 -2)
             :
@@ -102,7 +80,6 @@ submaps:
         submaps:
             :
                 file: "data/maps/tutorial/skypipes.fus"
-                text: $GET_STR TUT_GO4
                 pos: eval: (19 0) + (19 -1) + (24 17)
                 camera: (8 0)
                 submaps:

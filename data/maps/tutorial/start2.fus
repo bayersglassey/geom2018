@@ -1,6 +1,6 @@
 $SET_STR SAVEPOINT_A: lines:
     ;;
-    ;;  Touch the shiny green thing to save.
+    ;;  Touch this to save.
 $SET_STR SAVEPOINT_B: lines:
     ;;
     ;;
@@ -13,23 +13,23 @@ $SET_STR SAVEPOINT_C: lines:
     ;;
     ;;
     ;;  If you ever feel stuck, press "1" to return
-    ;;    to the last shiny green thing you touched.
+    ;;    to where you last saved.
+    ;;                         (Try it now!)
+$SET_STR ALMOST_THERE: lines:
+    ;;         Almost there...
 
-text: if mapvar("start2_eye_a_open") then $GET_STR SAVEPOINT_A else null
-text: if mapvar("start2_eye_b_open") then $GET_STR SAVEPOINT_B else null
-text: if mapvar("start2_eye_c_open") then $GET_STR SAVEPOINT_C else null
+text: if mapvar("start2_eye_a_open") then if mapvar("made_it_underneath") then $GET_STR ALMOST_THERE else $GET_STR SAVEPOINT_A else null
+text: if mapvar("start2_eye_b_open") then if mapvar("made_it_underneath") then $GET_STR ALMOST_THERE else $GET_STR SAVEPOINT_B else null
+text: if mapvar("start2_eye_c_open") then if mapvar("made_it_underneath") then $GET_STR ALMOST_THERE else $GET_STR SAVEPOINT_C else null
 parts:
     "a": recording "data/recs/eye.fus"
         vars:
-            "antikey": "made_it_underneath"
             "opened_key": "start2_eye_a_open"
     "b": recording "data/recs/eye.fus"
         vars:
-            "antikey": "made_it_underneath"
             "opened_key": "start2_eye_b_open"
     "c": recording "data/recs/eye.fus"
         vars:
-            "antikey": "made_it_underneath"
             "opened_key": "start2_eye_c_open"
 collmap:
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
@@ -47,9 +47,9 @@ collmap:
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                 * * *       * * *
     ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;
+    ;;                                 * * *
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;
+    ;;                                 * * *
     ;;     .   .   .   .   .   .   .   .   .   .   .   + - + - +   .   .   .   .   .   .
     ;;                                                /         \
     ;;   + -(+)- + - + - + - +   .   .   .   .   .   +   ?   .   +   .   .   .   .   .   .     [b]
