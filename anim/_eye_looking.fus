@@ -13,8 +13,5 @@ $SUFFIX LOOK_SUFFIX unlooking:
 $SUFFIX LOOK_SUFFIX look:
     rgraph: $SUFFIX LOOK_SUFFIX "eye_look"
 
-    # Apparently "if: coll: bodies all no" is not the same as
-    # "if: not: coll: bodies any yes"... isn't that a bug?
-    # Doesn't it mean we fail De Morgan's Law?
     if: not: coll: bodies any yes collmap($SUFFIX LOOK_SUFFIX "looking")
     then: goto delay: $SUFFIX LOOK_SUFFIX unlooking

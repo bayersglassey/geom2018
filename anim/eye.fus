@@ -41,12 +41,19 @@ collmap "looking_d": collmap("looking") ^ -2
 closed:
     rgraph: "eye_closed"
 
-    if: exists myvar("open_key")
+    if: exists myvar("opened_key")
     then:
-        set mapvar(myvar("open_key")): F
+        set mapvar(myvar("opened_key")): F
         continue
 
-    if: coll: bodies any yes collmap("opening")
+    if:
+        any:
+            not: exists myvar("key")
+            get_bool mapvar(myvar("key"))
+        any:
+            not: exists myvar("antikey")
+            not: get_bool mapvar(myvar("antikey"))
+        coll: bodies any yes collmap("opening")
     then: goto delay: opening
 
 opening:
@@ -56,15 +63,19 @@ opening:
 open:
     rgraph: "eye_open"
 
-    if: exists myvar("open_key")
+    if: exists myvar("opened_key")
     then:
-        set mapvar(myvar("open_key")): T
+        set mapvar(myvar("opened_key")): T
         continue
 
-    # Apparently "if: coll: bodies all no" is not the same as
-    # "if: not: coll: bodies any yes"... isn't that a bug?
-    # Doesn't it mean we fail De Morgan's Law?
-    if: not: coll: bodies any yes collmap("opening")
+    if: any:
+        all:
+            exists myvar("key")
+            not: get_bool mapvar(myvar("key"))
+        all:
+            exists myvar("antikey")
+            get_bool mapvar(myvar("antikey"))
+        not: coll: bodies any yes collmap("opening")
     then: goto delay: closing
 
     if:

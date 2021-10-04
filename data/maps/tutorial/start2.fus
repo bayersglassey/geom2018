@@ -15,19 +15,22 @@ $SET_STR SAVEPOINT_C: lines:
     ;;  If you ever feel stuck, press "1" to return
     ;;    to the last shiny green thing you touched.
 
-text: if mapvar("solved_puzzle") then null else if mapvar("start2_eye_a_open") then $GET_STR SAVEPOINT_A else null
-text: if mapvar("solved_puzzle") then null else if mapvar("start2_eye_b_open") then $GET_STR SAVEPOINT_B else null
-text: if mapvar("solved_puzzle") then null else if mapvar("start2_eye_c_open") then $GET_STR SAVEPOINT_C else null
+text: if mapvar("start2_eye_a_open") then $GET_STR SAVEPOINT_A else null
+text: if mapvar("start2_eye_b_open") then $GET_STR SAVEPOINT_B else null
+text: if mapvar("start2_eye_c_open") then $GET_STR SAVEPOINT_C else null
 parts:
     "a": recording "data/recs/eye.fus"
         vars:
-            "open_key": "start2_eye_a_open"
+            "antikey": "solved_puzzle"
+            "opened_key": "start2_eye_a_open"
     "b": recording "data/recs/eye.fus"
         vars:
-            "open_key": "start2_eye_b_open"
+            "antikey": "solved_puzzle"
+            "opened_key": "start2_eye_b_open"
     "c": recording "data/recs/eye.fus"
         vars:
-            "open_key": "start2_eye_c_open"
+            "antikey": "solved_puzzle"
+            "opened_key": "start2_eye_c_open"
 collmap:
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
@@ -49,11 +52,11 @@ collmap:
     ;;
     ;;     .   .   .   .   .   .   .   .   .   .   .   + - + - +   .   .   .   .   .   .
     ;;                                                /         \
-    ;;   + -(+)- + - + - + - +   .   .   .   .   .   +   .   .   +   .   .   .   .   .   .
+    ;;   + -(+)- + - + - + - +   .   .   .   .   .   +   ?   .   +   .   .   .   .   .   .     [b]
     ;;        \               \                     /             \
     ;;     .   + - + - +   ?   +   .   .   .   .   +   .   .   .   + - +   .   .   .   .      [a]
     ;;                  \       \                 /                   /
-    ;;   .   .   .   .   + - + - +   .   .   .   + - ! - + - + - + - +   .   .   .   .   .    [b]
+    ;;   .   .   .   .   + - + - +   .   .   .   + - + - + - + - + - +   .   .   .   .   .
     ;;                            \      S      /
     ;;     .   .   .   .   .   .   + - + - + - +   .   .   .   .   .   .   .   .   .   .
     ;;
