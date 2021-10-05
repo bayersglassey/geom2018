@@ -1012,7 +1012,12 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
     ARRAY_DECL(hexcollmap_part_t*, parts)
     ARRAY_INIT(parts)
 
-    if(!just_coll){
+    if(just_coll){
+        err = _hexcollmap_parse_with_parts(collmap, lexer,
+            default_vert_c, default_edge_c, default_face_c,
+            parts, parts_len);
+        if(err)return err;
+    }else{
         if(GOT("spawn")){
             NEXT
             GET("(")
@@ -1062,17 +1067,46 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
             GET(")")
         }
 
-        GET("collmap")
-        GET("(")
-    }
+        if(GOT("import")){
+            NEXT
 
-    err = _hexcollmap_parse_with_parts(collmap, lexer,
-        default_vert_c, default_edge_c, default_face_c,
-        parts, parts_len);
-    if(err)return err;
+            /* We use _fus_lexer_get_str to avoid calling fus_lexer_next until after
+            the call to fus_lexer_init_with_vars is done, to make sure we don't modify
+            lexer->vars first */
+            char *filename;
+            err = _fus_lexer_get_str(lexer, &filename);
+            if(err)return err;
 
-    if(!just_coll){
-        GET(")")
+            char *text = load_file(filename);
+            if(text == NULL)return 1;
+
+            fus_lexer_t sublexer;
+            err = fus_lexer_init_with_vars(&sublexer, text, filename,
+                lexer->vars);
+            if(err)return err;
+
+            err = _hexcollmap_parse_with_parts(collmap, &sublexer,
+                default_vert_c, default_edge_c, default_face_c,
+                parts, parts_len);
+            if(err)return err;
+
+            /* We now call fus_lexer_next manually, see call to _fus_lexer_get_str
+            above */
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+
+            fus_lexer_cleanup(&sublexer);
+            free(filename);
+            free(text);
+        }else{
+            GET("collmap")
+            GET("(")
+            err = _hexcollmap_parse_with_parts(collmap, lexer,
+                default_vert_c, default_edge_c, default_face_c,
+                parts, parts_len);
+            if(err)return err;
+            GET(")")
+        }
 
         if(GOT("draw")){
             NEXT
