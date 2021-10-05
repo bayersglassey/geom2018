@@ -261,12 +261,6 @@ void hexcollmap_write(hexcollmap_t *collmap, FILE *f,
 int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
     vecspace_t *space, char *filename, bool just_coll,
     hexcollmap_part_t ***parts_ptr, int *parts_len_ptr);
-void hexcollmap_vert_rot(
-    int *x_ptr, int *y_ptr, int *i_ptr, rot_t addrot);
-void hexcollmap_edge_rot(
-    int *x_ptr, int *y_ptr, int *i_ptr, rot_t addrot);
-void hexcollmap_face_rot(
-    int *x_ptr, int *y_ptr, int *i_ptr, rot_t addrot);
 int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
     vecspace_t *space, char *filename, bool just_coll);
 int hexcollmap_clone(hexcollmap_t *collmap,

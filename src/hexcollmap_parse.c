@@ -50,117 +50,6 @@ static int _parse_trf(fus_lexer_t *lexer, vecspace_t *space,
     return 0;
 }
 
-void hexcollmap_vert_rot(
-    int *x_ptr, int *y_ptr, int *i_ptr, rot_t addrot
-){
-    /* Does nothing!.. unlike hexcollmap_edge/face_rot, leaves its inputs
-    unchaged.
-    But we include this function so we can refer to hexcollmap_##PART##_rot
-    in a macro, even when PART is "vert". */
-}
-
-void hexcollmap_edge_rot(
-    int *x_ptr, int *y_ptr, int *i_ptr, rot_t addrot
-){
-    int x = *x_ptr;
-    int y = *y_ptr;
-    rot_t rot_from = *i_ptr;
-    rot_t rot_to = rot_contain(HEXSPACE_ROT_MAX, rot_from + addrot);
-
-    static const int leupsticoedophaeia[6][3] = {
-        /*
-
-            This table uses the following data structure:
-
-            {x, y, i}
-
-            ...to represent the following diagram:
-
-               \ /
-            . -(.)-
-               / \
-              .   .
-
-            ...where the x, y axes are:
-
-            (.)- . X
-              \
-               .
-                Y
-
-            ...and i is an index into the 3 edges stored at each coordinate:
-
-            2   1
-             \ /
-             (.)- 0
-
-        */
-        { 0,  0, 0},
-        { 0,  0, 1},
-        { 0,  0, 2},
-        {-1,  0, 0},
-        {-1,  1, 1},
-        { 0,  1, 2}
-    };
-
-    const int *leupsticoedophum_from = leupsticoedophaeia[rot_from];
-    const int *leupsticoedophum_to = leupsticoedophaeia[rot_to];
-    *x_ptr = x - leupsticoedophum_from[0] + leupsticoedophum_to[0];
-    *y_ptr = y - leupsticoedophum_from[1] + leupsticoedophum_to[1];
-    *i_ptr = leupsticoedophum_to[2];
-}
-
-void hexcollmap_face_rot(
-    int *x_ptr, int *y_ptr, int *i_ptr, rot_t addrot
-){
-    int x = *x_ptr;
-    int y = *y_ptr;
-    rot_t rot_from = *i_ptr;
-    rot_t rot_to = rot_contain(HEXSPACE_ROT_MAX, rot_from + addrot);
-
-    static const int hypsofactodontaseri[6][3] = {
-        /*
-
-            This table uses the following data structure:
-
-            {x, y, i}
-
-            ...to represent the following diagram:
-
-              * * *
-            .  (.)
-              * * *
-              .   .
-
-            ...where the x, y axes are:
-
-            (.)- . X
-              \
-               .
-                Y
-
-            ...and i is an index into the 2 faces stored at each coordinate:
-
-              1 0
-              * *
-             (.)
-
-        */
-        { 0,  0, 0},
-        { 0,  0, 1},
-        {-1,  0, 0},
-        {-1,  1, 1},
-        {-1,  1, 0},
-        { 0,  1, 1}
-    };
-
-    const int *hypsofactodontaserus_from = hypsofactodontaseri[rot_from];
-    const int *hypsofactodontaserus_to = hypsofactodontaseri[rot_to];
-    *x_ptr = x - hypsofactodontaserus_from[0] + hypsofactodontaserus_to[0];
-    *y_ptr = y - hypsofactodontaserus_from[1] + hypsofactodontaserus_to[1];
-    *i_ptr = hypsofactodontaserus_to[2];
-}
-
 static char get_elem_type(char c){
     switch(c){
         case '.':
@@ -1181,43 +1070,12 @@ int hexcollmap_clone(hexcollmap_t *collmap,
     err = hexcollmap_init_tiles_from_hexbox(collmap);
     if(err)return err;
 
-    for(int from_y = 0; from_y < from_collmap->h; from_y++){
-        // \ /
-        //  . -
-
-        int from_vy = from_collmap->oy - from_y;
-        for(int from_x = 0; from_x < from_collmap->w; from_x++){
-            int from_vx = from_x - from_collmap->ox;
-
-            /*
-            (from_x, from_y): coordinates into the from_collmap->tiles array
-            (from_vx, from_vy): coordinates in (X, Y) space of from_collmap
-            */
-
-            hexcollmap_tile_t *from_tile =
-                &from_collmap->tiles[from_y * from_collmap->w + from_x];
-
-            vec_t v = {from_vx, from_vy};
-            hexspace_rot(v, rot);
-
-            int x = collmap->ox + v[0];
-            int y = collmap->oy - v[1];
-
-#           define _PARSE_PART(PART, MAX_I) \
-            for(int i = 0; i < MAX_I; i++){ \
-                int to_x = x, to_y = y, to_i = i; \
-                hexcollmap_##PART##_rot(&to_x, &to_y, &to_i, rot); \
-                hexcollmap_tile_t *tile = hexcollmap_get_tile_xy( \
-                    collmap, to_x, to_y); \
-                if(!tile)continue; \
-                tile->PART[to_i] = from_tile->PART[i]; \
-            }
-            _PARSE_PART(vert, 1)
-            _PARSE_PART(edge, 3)
-            _PARSE_PART(face, 2)
-#           undef _PARSE_PART
-        }
-    }
+    trf_t trf = {
+        .rot = rot
+    };
+    int draw_z = 0;
+    err = hexcollmap_draw(collmap, from_collmap, &trf, draw_z);
+    if(err)return err;
 
     return 0;
 }

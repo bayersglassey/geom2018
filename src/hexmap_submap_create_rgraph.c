@@ -21,6 +21,66 @@ should disable bitmap caching for it (somehow). */
 #define HEXMAP_SUBMAP_RGRAPH_N_FRAMES 24
 
 
+static void hexcollmap_face_rot(
+    int *x_ptr, int *y_ptr, int *i_ptr, rot_t addrot
+){
+    /* NOTE: this function was originally in hexcollmap_parse.c, used by
+    hexcollmap_clone. However, that function now simply calls out to
+    hexcollmap_draw, which sets up a trf_t index and ultimately does
+    hexcollmap_normalize_##PART(&index).
+    Somehow, doing that sidesteps the need for this function's lookup table.
+    Is that better somehow?.. do we want to remove this function and document
+    & use hexcollmap_draw's technique?.. */
+
+    int x = *x_ptr;
+    int y = *y_ptr;
+    rot_t rot_from = *i_ptr;
+    rot_t rot_to = rot_contain(HEXSPACE_ROT_MAX, rot_from + addrot);
+
+    static const int hypsofactodontaseri[6][3] = {
+        /*
+
+            This table uses the following data structure:
+
+            {x, y, i}
+
+            ...to represent the following diagram:
+
+              * * *
+            .  (.)
+              * * *
+              .   .
+
+            ...where the x, y axes are:
+
+            (.)- . X
+              \
+               .
+                Y
+
+            ...and i is an index into the 2 faces stored at each coordinate:
+
+              1 0
+              * *
+             (.)
+
+        */
+        { 0,  0, 0},
+        { 0,  0, 1},
+        {-1,  0, 0},
+        {-1,  1, 1},
+        {-1,  1, 0},
+        { 0,  1, 1}
+    };
+
+    const int *hypsofactodontaserus_from = hypsofactodontaseri[rot_from];
+    const int *hypsofactodontaserus_to = hypsofactodontaseri[rot_to];
+    *x_ptr = x - hypsofactodontaserus_from[0] + hypsofactodontaserus_to[0];
+    *y_ptr = y - hypsofactodontaserus_from[1] + hypsofactodontaserus_to[1];
+    *i_ptr = hypsofactodontaserus_to[2];
+}
+
+
 static int _get_rgraph_i_when_faces_solid_vert(int n_faces_solid) {
     if(n_faces_solid == 0)return 0;
     if(n_faces_solid == 6)return 2;
