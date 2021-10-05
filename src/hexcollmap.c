@@ -43,6 +43,39 @@ int hexmap_recording_init(hexmap_recording_t *recording, int type,
     return 0;
 }
 
+int hexmap_recording_clone(hexmap_recording_t *recording1,
+    hexmap_recording_t *recording2
+){
+    int err;
+
+    char *filename = NULL;
+    if(recording2->filename){
+        filename = strdup(recording2->filename);
+        if(!filename)return 1;
+    }
+
+    char *palmapper_name = NULL;
+    if(recording2->palmapper_name){
+        palmapper_name = strdup(recording2->palmapper_name);
+        if(!palmapper_name)return 1;
+    }
+
+    err = hexmap_recording_init(recording1, recording2->type,
+        filename, palmapper_name, recording2->frame_offset);
+
+    recording1->trf = recording2->trf;
+
+    err = valexpr_copy(&recording1->visible_expr, &recording2->visible_expr);
+    if(err)return err;
+    recording1->visible_not = recording2->visible_not;
+
+    err = vars_copy(&recording1->vars, &recording2->vars);
+    if(err)return err;
+    err = vars_copy(&recording1->bodyvars, &recording2->bodyvars);
+    if(err)return err;
+    return 0;
+}
+
 
 /**********************
  * HEXMAP RENDERGRAPH *

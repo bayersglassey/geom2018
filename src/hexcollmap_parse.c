@@ -276,19 +276,10 @@ static int hexcollmap_draw(hexcollmap_t *collmap1, hexcollmap_t *collmap2,
 
         ARRAY_PUSH_NEW(hexmap_recording_t*, collmap1->recordings,
             recording1)
-        err = hexmap_recording_init(recording1, recording2->type,
-            filename, palmapper_name, recording2->frame_offset);
+        err = hexmap_recording_clone(recording1, recording2);
         if(err)return err;
+
         trf_apply(space, &recording1->trf, trf);
-
-        err = valexpr_copy(&recording1->visible_expr, &recording2->visible_expr);
-        if(err)return err;
-        recording1->visible_not = recording2->visible_not;
-
-        err = vars_copy(&recording1->vars, &recording2->vars);
-        if(err)return err;
-        err = vars_copy(&recording1->bodyvars, &recording2->bodyvars);
-        if(err)return err;
     }
 
     /* "Draw" rendergraphs from collmap2 onto collmap1, in other words copy

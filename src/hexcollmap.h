@@ -54,6 +54,8 @@ typedef struct hexmap_recording {
 void hexmap_recording_cleanup(hexmap_recording_t *recording);
 int hexmap_recording_init(hexmap_recording_t *recording, int type,
     char *filename, char *palmapper_name, int frame_offset);
+int hexmap_recording_clone(hexmap_recording_t *recording1,
+    hexmap_recording_t *recording2);
 
 
 /**********************
