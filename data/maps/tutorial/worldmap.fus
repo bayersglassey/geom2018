@@ -6,21 +6,21 @@ default_tileset: "data/tileset1.fus"
 vars:
     "made_it_underneath": F
     "going_upwards": F
-    nosave "start_eye_a_open": F
-    nosave "start_eye_b_open": F
-    nosave "start_eye_c_open": F
-    nosave "start2_eye_a_open": F
-    nosave "start2_eye_b_open": F
-    nosave "start2_eye_c_open": F
-    nosave "start3_eye_a_open": F
-    nosave "start3_eye_b_open": F
-    nosave "start3_eye_c_open": F
-    nosave "start4_eye_a_open": F
-    nosave "start4_eye_b_open": F
-    nosave "start4_eye_c_open": F
-    nosave "skypipes_eye_a_open": F
-    nosave "skypipes3_eye_a_open": F
-    nosave "skypipes4_eye_a_open": F
+    nosave "start_eye_a_open": 0
+    nosave "start_eye_b_open": 0
+    nosave "start_eye_c_open": 0
+    nosave "start2_eye_a_open": 0
+    nosave "start2_eye_b_open": 0
+    nosave "start2_eye_c_open": 0
+    nosave "start3_eye_a_open": 0
+    nosave "start3_eye_b_open": 0
+    nosave "start3_eye_c_open": 0
+    nosave "start4_eye_a_open": 0
+    nosave "start4_eye_b_open": 0
+    nosave "start4_eye_c_open": 0
+    nosave "skypipes_eye_a_open": 0
+    nosave "skypipes3_eye_a_open": 0
+    nosave "skypipes4_eye_a_open": 0
 
 submaps:
     :

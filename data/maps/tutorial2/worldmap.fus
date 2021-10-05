@@ -14,12 +14,13 @@ vars:
     "start_solved2": F
     nosave "num_coin_g": 5
 
-    nosave "start_eye_a_open": F
-    nosave "start2_eye_a_open": F
-    nosave "start2_eye_b_open": F
-    nosave "start2_eye_c_open": F
-    nosave "start3b_eye_a_open": F
-    nosave "start4_eye_a_open": F
+    nosave "start_eye_a_open": 0
+    nosave "start2_eye_a_open": 0
+    nosave "start2_eye_b_open": 0
+    nosave "start2_eye_c_open": 0
+    nosave "start3_eye_a_open": 0
+    nosave "start3b_eye_a_open": 0
+    nosave "start4_eye_a_open": 0
 
     "start3b_coin_a": F
     "start3b_coin_b": F

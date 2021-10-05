@@ -41,11 +41,6 @@ collmap "looking_d": collmap("looking") ^ -2
 closed:
     rgraph: "eye_closed"
 
-    if: exists myvar("opened_key")
-    then:
-        set mapvar(myvar("opened_key")): F
-        continue
-
     if:
         any:
             not: exists myvar("key")
@@ -58,15 +53,14 @@ closed:
 
 opening:
     rgraph: "eye_opening"
-    if() then: goto: open
+    if() then:
+        if: exists myvar("opened_key")
+        then:
+            inc mapvar(myvar("opened_key"))
+        goto: open
 
 open:
     rgraph: "eye_open"
-
-    if: exists myvar("opened_key")
-    then:
-        set mapvar(myvar("opened_key")): T
-        continue
 
     if: any:
         all:
@@ -98,7 +92,11 @@ open:
 
 closing:
     rgraph: "eye_closing"
-    if() then: goto: closed
+    if() then:
+        if: exists myvar("opened_key")
+        then:
+            dec mapvar(myvar("opened_key"))
+        goto: closed
 
 # "anim/_eye_looking.fus":
 # Provides states looking, unlooking, look (with suffix indicated
