@@ -948,6 +948,57 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
     return 0;
 }
 
+static int _hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
+    char default_vert_c, char default_edge_c, char default_face_c,
+    hexcollmap_part_t **parts, int parts_len
+){
+    int err;
+
+    /* set up dynamic array of lines */
+    int collmap_lines_len = 0;
+    int collmap_lines_size = 8;
+    char **collmap_lines = calloc(collmap_lines_size,
+        sizeof(*collmap_lines));
+    if(collmap_lines == NULL)return 1;
+
+    /* read in lines */
+    while(GOT_STR){
+        /* resize array of lines, if necessary */
+        if(collmap_lines_len >= collmap_lines_size){
+            int new_lines_size = collmap_lines_size * 2;
+            char **new_lines = realloc(collmap_lines,
+                sizeof(*collmap_lines) * new_lines_size);
+            if(new_lines == NULL)return 1;
+            for(int i = collmap_lines_size;
+                i < new_lines_size; i++){
+                    new_lines[i] = NULL;}
+            collmap_lines_size = new_lines_size;
+            collmap_lines = new_lines;
+        }
+
+        /* get new line from lexer */
+        collmap_lines_len++;
+        GET_STR(collmap_lines[collmap_lines_len - 1])
+    }
+
+    /* parse lines */
+    err = hexcollmap_parse_lines(collmap,
+        collmap_lines, collmap_lines_len, parts, parts_len,
+        default_vert_c, default_edge_c, default_face_c);
+    if(err){
+        fus_lexer_err_info(lexer);
+        fprintf(stderr, "Couldn't parse hexcollmap lines\n");
+        return err;}
+
+    /* free lines and dynamic array thereof */
+    for(int i = 0; i < collmap_lines_len; i++){
+        free(collmap_lines[i]);
+        collmap_lines[i] = NULL;}
+    free(collmap_lines);
+
+    return 0;
+}
+
 int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
     bool just_coll,
     hexcollmap_part_t ***parts_ptr, int *parts_len_ptr
@@ -1015,43 +1066,10 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
         GET("(")
     }
 
-    /* set up dynamic array of lines */
-    int collmap_lines_len = 0;
-    int collmap_lines_size = 8;
-    char **collmap_lines = calloc(collmap_lines_size,
-        sizeof(*collmap_lines));
-    if(collmap_lines == NULL)return 1;
-
-    /* read in lines */
-    while(!GOT(")")){
-        /* resize array of lines, if necessary */
-        if(collmap_lines_len >= collmap_lines_size){
-            int new_lines_size = collmap_lines_size * 2;
-            char **new_lines = realloc(collmap_lines,
-                sizeof(*collmap_lines) * new_lines_size);
-            if(new_lines == NULL)return 1;
-            for(int i = collmap_lines_size;
-                i < new_lines_size; i++){
-                    new_lines[i] = NULL;}
-            collmap_lines_size = new_lines_size;
-            collmap_lines = new_lines;
-        }
-
-        /* get new line from lexer */
-        collmap_lines_len++;
-        GET_STR(collmap_lines[collmap_lines_len - 1])
-    }
-    /* NOTE: we do NOT get ")" here, it will either be gotten below, *or*
-    by caller, depending on whether just_coll is true. */
-
-    /* parse lines */
-    err = hexcollmap_parse_lines(collmap,
-        collmap_lines, collmap_lines_len, parts, parts_len,
-        default_vert_c, default_edge_c, default_face_c);
-    if(err){
-        fus_lexer_err_info(lexer);
-        fprintf(stderr, "Couldn't parse hexcollmap lines\n");
-        return err;}
+    err = _hexcollmap_parse_with_parts(collmap, lexer,
+        default_vert_c, default_edge_c, default_face_c,
+        parts, parts_len);
+    if(err)return err;
 
     if(!just_coll){
         GET(")")
@@ -1094,12 +1112,6 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
             NEXT
         }
     }
-
-    /* free lines and dynamic array thereof */
-    for(int i = 0; i < collmap_lines_len; i++){
-        free(collmap_lines[i]);
-        collmap_lines[i] = NULL;}
-    free(collmap_lines);
 
     *parts_ptr = parts;
     *parts_len_ptr = parts_len;
