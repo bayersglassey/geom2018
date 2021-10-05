@@ -5,5 +5,5 @@ edges:
     "0": "map_edge0_bg"
 faces:
     "0": "map_face0_bg"
-    "E": "map_face_energy_on"
+    "E": frame_offset(1) "map_face_energy_on"
     "e": "map_face_energy_off"
