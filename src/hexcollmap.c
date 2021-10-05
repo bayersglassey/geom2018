@@ -104,7 +104,7 @@ void hexcollmap_part_cleanup(hexcollmap_part_t *part){
 
 
 void hexcollmap_cleanup(hexcollmap_t *collmap){
-    free(collmap->name);
+    free(collmap->filename);
     free(collmap->tiles);
     ARRAY_FREE_PTR(hexmap_recording_t*, collmap->recordings,
         hexmap_recording_cleanup)
@@ -115,10 +115,10 @@ void hexcollmap_cleanup(hexcollmap_t *collmap){
 }
 
 void hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
-    char *name
+    char *filename
 ){
     memset(collmap, 0, sizeof(*collmap));
-    collmap->name = name;
+    collmap->filename = filename;
     collmap->space = space;
     ARRAY_INIT(collmap->recordings);
     ARRAY_INIT(collmap->rendergraphs);
@@ -126,9 +126,12 @@ void hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
 }
 
 void hexcollmap_init_clone(hexcollmap_t *collmap,
-    hexcollmap_t *from_collmap, char *name
+    hexcollmap_t *from_collmap, char *filename
 ){
-    hexcollmap_init(collmap, from_collmap->space, name);
+    /* NOTE: filename is presumably strdup(from_collmap->filename), but we
+    leave that to caller so we can avoid doing any allocation (and therefore
+    return void without having to worry about returning an error code). */
+    hexcollmap_init(collmap, from_collmap->space, filename);
     collmap->spawn = from_collmap->spawn;
     collmap->hexbox = from_collmap->hexbox;
 }
@@ -242,8 +245,8 @@ void hexcollmap_dump(hexcollmap_t *collmap, FILE *f){
     }
 }
 
-int hexcollmap_load(hexcollmap_t *collmap, const char *filename,
-    vars_t *vars
+int hexcollmap_load(hexcollmap_t *collmap, vecspace_t *space,
+    const char *filename, vars_t *vars
 ){
     int err;
     fus_lexer_t lexer;
@@ -254,7 +257,10 @@ int hexcollmap_load(hexcollmap_t *collmap, const char *filename,
     err = fus_lexer_init_with_vars(&lexer, text, filename, vars);
     if(err)return err;
 
-    err = hexcollmap_parse(collmap, &lexer, false);
+    char *filename_copy = strdup(filename);
+    if(!filename_copy)return 1;
+
+    err = hexcollmap_parse(collmap, &lexer, space, filename_copy, false);
     if(err)return err;
 
     fus_lexer_cleanup(&lexer);

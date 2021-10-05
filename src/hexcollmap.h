@@ -192,7 +192,7 @@ typedef struct hexcollmap {
            + - +
 
     */
-    char *name;
+    char *filename;
     hexgame_location_t spawn;
     hexbox_t hexbox;
     int w;
@@ -246,9 +246,9 @@ void hexcollmap_part_cleanup(hexcollmap_part_t *part);
 
 void hexcollmap_cleanup(hexcollmap_t *collmap);
 void hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
-    char *name);
+    char *filename);
 void hexcollmap_init_clone(hexcollmap_t *collmap,
-    hexcollmap_t *from_collmap, char *name);
+    hexcollmap_t *from_collmap, char *filename);
 int hexcollmap_init_tiles_from_hexbox(hexcollmap_t *collmap);
 int hexcollmap_union_hexbox(hexcollmap_t *collmap, hexbox_t *hexbox);
 void hexcollmap_dump(hexcollmap_t *collmap, FILE *f);
@@ -259,7 +259,7 @@ void hexcollmap_write(hexcollmap_t *collmap, FILE *f,
     bool just_coll, bool extra, bool nodots, bool show_tiles,
     bool eol_semicolons);
 int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
-    bool just_coll,
+    vecspace_t *space, char *filename, bool just_coll,
     hexcollmap_part_t ***parts_ptr, int *parts_len_ptr);
 void hexcollmap_vert_rot(
     int *x_ptr, int *y_ptr, int *i_ptr, rot_t addrot);
@@ -268,11 +268,11 @@ void hexcollmap_edge_rot(
 void hexcollmap_face_rot(
     int *x_ptr, int *y_ptr, int *i_ptr, rot_t addrot);
 int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
-    bool just_coll);
+    vecspace_t *space, char *filename, bool just_coll);
 int hexcollmap_clone(hexcollmap_t *collmap,
     hexcollmap_t *collmap_from, rot_t rot);
-int hexcollmap_load(hexcollmap_t *collmap, const char *filename,
-    vars_t *vars);
+int hexcollmap_load(hexcollmap_t *collmap, vecspace_t *space,
+    const char *filename, vars_t *vars);
 void hexcollmap_normalize_vert(trf_t *index);
 void hexcollmap_normalize_edge(trf_t *index);
 void hexcollmap_normalize_face(trf_t *index);

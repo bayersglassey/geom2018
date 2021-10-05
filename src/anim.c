@@ -70,7 +70,7 @@ static int _parse_collmap(stateset_t *stateset, fus_lexer_t *lexer,
             own_collmap = calloc(1, sizeof(*own_collmap));
             if(!own_collmap)return 1;
             hexcollmap_init_clone(own_collmap, found_collmap,
-                strdup(lexer->filename));
+                strdup(found_collmap->filename));
             int err = hexcollmap_clone(own_collmap, found_collmap, rot);
             if(err)return err;
 
@@ -81,9 +81,8 @@ static int _parse_collmap(stateset_t *stateset, fus_lexer_t *lexer,
     }else{
         own_collmap = calloc(1, sizeof(*collmap));
         if(own_collmap == NULL)return 1;
-        hexcollmap_init(own_collmap, space,
-            strdup(lexer->filename));
-        err = hexcollmap_parse(own_collmap, lexer, true);
+        err = hexcollmap_parse(own_collmap, lexer, space,
+            strdup(lexer->filename), true);
         if(err)return err;
         collmap = own_collmap;
     }
@@ -695,14 +694,14 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                 collmap = calloc(1, sizeof(*collmap));
                 if(!collmap)return 1;
                 hexcollmap_init_clone(collmap, found_collmap,
-                    strdup(lexer->filename));
+                    strdup(found_collmap->filename));
                 int err = hexcollmap_clone(collmap, found_collmap, rot);
                 if(err)return err;
             }else{
                 collmap = calloc(1, sizeof(*collmap));
                 if(!collmap)return 1;
-                hexcollmap_init(collmap, space, strdup(lexer->filename));
-                err = hexcollmap_parse(collmap, lexer, true);
+                err = hexcollmap_parse(collmap, lexer, space,
+                    strdup(lexer->filename), true);
                 if(err)return err;
             }
             GET(")")

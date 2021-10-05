@@ -982,6 +982,9 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
         fprintf(stderr, "Loading submap: %s\n", submap_filename);
 
         ARRAY_PUSH_NEW(hexmap_submap_t*, map->submaps, submap)
+
+        /* WARNING: submap's init does *NOT* init its collmap, so need
+        to load submap->collmap immediately after this call. */
         err = hexmap_submap_init(map, submap,
             strdup(submap_filename),
             text_exprs_len, text_exprs,
@@ -995,10 +998,12 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
 
             hexcollmap_t *collmap = calloc(1, sizeof(*collmap));
             if(!collmap)return 1;
-            err = hexcollmap_load(collmap, submap_filename, lexer->vars);
+            err = hexcollmap_load(collmap, map->space,
+                submap_filename, lexer->vars);
             if(err)return err;
 
-            hexcollmap_init_clone(&submap->collmap, collmap, submap_filename);
+            hexcollmap_init_clone(&submap->collmap, collmap,
+                strdup(collmap->filename));
             int err = hexcollmap_clone(&submap->collmap, collmap, rot);
             if(err)return err;
 
@@ -1006,7 +1011,8 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
             free(collmap);
         }else{
             /* load collmap */
-            err = hexcollmap_load(&submap->collmap, submap_filename, lexer->vars);
+            err = hexcollmap_load(&submap->collmap, map->space,
+                submap_filename, lexer->vars);
             if(err)return err;
         }
 
@@ -1504,6 +1510,10 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
 ){
     int err;
 
+    /* WARNING: we do *NOT* init submap->collmap here, that is handled
+    by hexcollmap_parse and friends, which should be called by our caller
+    immediately after us */
+
     submap->map = map;
 
     submap->filename = filename;
@@ -1518,8 +1528,6 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
 
     submap->camera_type = camera_type;
     vec_cpy(MAX_VEC_DIMS, submap->camera_pos, camera_pos);
-
-    hexcollmap_init(&submap->collmap, map->space, strdup(filename));
 
     submap->rgraph_map = NULL;
     submap->rgraph_minimap = NULL;

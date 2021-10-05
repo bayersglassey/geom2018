@@ -93,9 +93,7 @@ typedef struct state {
 ***********/
 
 typedef struct stateset_collmap_entry {
-    /* Key/value pair in the array stateset->collmaps.
-    The key is an arbitrary string (whereas collmap->name is supposed to be
-    the filename it was parsed from). */
+    /* Key/value pair in the array stateset->collmaps. */
     char *name;
     struct hexcollmap *collmap;
 } stateset_collmap_entry_t;

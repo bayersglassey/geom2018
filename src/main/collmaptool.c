@@ -15,6 +15,13 @@ static hexcollmap_t *load_collmap(FILE *file, const char *filename,
 ){
     int err;
 
+    /* NOTE: this function is basically like hexcollmap_load, except that it
+    dynamically allocates a hexcollmap, and accepts a FILE* instead of a
+    filename (so that e.g. we can accept stdin as our input file).
+    We probably allocate a hexcollmap so that caller can easily replace
+    it with a rotated version (by allocating a rotated clone, then freeing
+    the original). */
+
     char *buffer = read_stream(file, filename);
     if(!buffer){
         fprintf(stderr, "Couldn't read collmap stream: %s\n", filename);
@@ -27,14 +34,13 @@ static hexcollmap_t *load_collmap(FILE *file, const char *filename,
         return NULL;
     }
 
-    hexcollmap_init(collmap, &hexspace, strdup(filename));
-
     {
         fus_lexer_t lexer;
         int err = fus_lexer_init(&lexer, buffer, filename);
         if(err)return NULL;
 
-        err = hexcollmap_parse_with_parts(collmap, &lexer, just_coll,
+        err = hexcollmap_parse_with_parts(collmap, &lexer,
+            &hexspace, strdup(filename), just_coll,
             parts_ptr, parts_len_ptr);
         if(err)return NULL;
 
@@ -127,7 +133,8 @@ int main(int n_args, char **args){
             perror("calloc collmap");
             return 1;
         }
-        hexcollmap_init_clone(collmap, from_collmap, strdup("<clone>"));
+        hexcollmap_init_clone(collmap, from_collmap,
+            strdup(from_collmap->filename));
         int err = hexcollmap_clone(collmap, from_collmap, rot);
         if(err)return err;
 

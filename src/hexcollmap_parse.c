@@ -447,9 +447,7 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
         if(part->filename == NULL)return 0;
 
         hexcollmap_t part_collmap;
-        hexcollmap_init(&part_collmap,
-            collmap->space, strdup(part->filename));
-        err = hexcollmap_load(&part_collmap,
+        err = hexcollmap_load(&part_collmap, collmap->space,
             part->filename, NULL);
         if(err)return err;
         err = hexcollmap_draw(collmap, &part_collmap,
@@ -948,7 +946,8 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
     return 0;
 }
 
-static int _hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
+static int _hexcollmap_parse_with_parts(hexcollmap_t *collmap,
+    fus_lexer_t *lexer,
     char default_vert_c, char default_edge_c, char default_face_c,
     hexcollmap_part_t **parts, int parts_len
 ){
@@ -1000,10 +999,12 @@ static int _hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexe
 }
 
 int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
-    bool just_coll,
+    vecspace_t *space, char *filename, bool just_coll,
     hexcollmap_part_t ***parts_ptr, int *parts_len_ptr
 ){
     int err;
+
+    hexcollmap_init(collmap, space, filename);
 
     char default_vert_c = '0';
     char default_edge_c = '0';
@@ -1154,14 +1155,15 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
 
 
 int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
-    bool just_coll
+    vecspace_t *space, char *filename, bool just_coll
 ){
     int err;
 
     ARRAY_DECL(hexcollmap_part_t*, parts)
     /* NOTE: we don't ARRAY_INIT parts, because it's completely overwritten by
     hexcollmap_parse_with_parts on successful return */
-    err = hexcollmap_parse_with_parts(collmap, lexer, just_coll,
+    err = hexcollmap_parse_with_parts(collmap, lexer,
+        space, filename, just_coll,
         &parts, &parts_len);
     if(err)return err;
     ARRAY_FREE_PTR(hexcollmap_part_t*, parts, hexcollmap_part_cleanup)
