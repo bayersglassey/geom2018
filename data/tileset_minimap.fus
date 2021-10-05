@@ -16,6 +16,8 @@ faces:
     "1": "minimap.face"
     "2": "minimap.face"
     "o": "minimap.face"
+    "e": "minimap.face"
+    "E": "minimap.face"
     "S": "minimap.save"
     "D": "minimap.door"
     "w": frame_offset(1) "minimap.water"

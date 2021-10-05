@@ -153,6 +153,39 @@ shapes:
             : "map_face0_dark_third" (1 1 1 0)  4 f
             : "map_face0_dark_third" (1 1 1 0)  8 f
 
+    "map_face_energy_off_third":
+        prismels:
+            : "tri" ( 0 0 0 0)  2 f eval(1 +  0 + 1)
+            : "sq"  (-1 0 1 0)  0 f eval(1 +  0 + 1)
+            : "tri" (-1 0 1 1)  0 f eval(1 +  8 + 1)
+
+    "map_face_energy_off":
+        shapes:
+            : "map_face_energy_off_third" (1 1 1 0)  0 f
+            #: "map_face_energy_off_third" (1 1 1 0)  4 f
+            #: "map_face_energy_off_third" (1 1 1 0)  8 f
+
+    "map_face_energy_on_third_a":
+        animation: cycle 12
+        prismels:
+            : "tri" ( 0 0 0 0)  2 f eval(1 +  8 + 6) (0 4)
+            : "sq"  (-1 0 1 0)  0 f eval(1 +  8 + 6) (1 4)
+            : "tri" (-1 0 1 1)  0 f eval(1 +  8 + 6) (2 4)
+
+    "map_face_energy_on_third_b":
+        animation: cycle 12
+        prismels:
+            : "tri" ( 0 0 0 0)  2 f eval(1 +  0 + 6) (0 4)
+            : "sq"  (-1 0 1 0)  0 f eval(1 +  0 + 6) (1 4)
+            : "tri" (-1 0 1 1)  0 f eval(1 +  0 + 6) (2 4)
+
+    "map_face_energy_on":
+        animation: cycle 12
+        shapes:
+            : "map_face_energy_off_third" (1 1 1 0)  0 f 0+
+            : "map_face_energy_on_third_a" (1 1 1 0)  4 f 2+
+            : "map_face_energy_on_third_b" (1 1 1 0)  8 f 4+
+
     "map_savepoint_third":
         animation: oscillate 6
         prismels:
