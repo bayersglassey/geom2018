@@ -1,5 +1,4 @@
 parts:
-    "C": recording "data/recs/coin_crouch.fus"
     "s": recording "data/recs/switch.fus"
         vars:
             "key": "start3_blocker"
@@ -16,7 +15,7 @@ collmap:
     ;;
     ;;           .   .   .   .   .   .   .   .   .   .   .   .   +   .   +   .   +   .   +   .   +   .   .   .   .   .   .
     ;;                                                            \             /
-    ;;             .   .   .   .   .   .   .   .   .   .   .   .   ! - ! - ! - +   .   .   .   .   .   .   .   .   .   .   .  [C][C][C]
+    ;;             .   .   .   .   .   .   .   .   .   .   .   .   + - + - + - +   .   .   .   .   .   .   .   .   .   .   .
     ;;
     ;;           .   .   .   .   .   .   .   .   .   .   .   +   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;

@@ -12,32 +12,64 @@ vars:
 
 submaps:
     :
+        tileset: "data/tileset1_bg.fus"
         submaps:
             :
                 bg
                 file: "data/maps/triangles/tutorial_bg.fus"
                 pos: eval: (-10 -6)
-                tileset: "data/tileset1_bg.fus"
             :
-                bg
-                file: "data/maps/triangles/start_bg.fus"
                 pos: eval: (0 0)
-                tileset: "data/tileset1_bg.fus"
+                submaps:
+                    :
+                        bg
+                        file: "data/maps/triangles/start_bg_e.fus"
+                        visible: mapvar("start_blocker")
+                    :
+                        bg
+                        file: "data/maps/triangles/start_bg_E.fus"
+                        visible: not mapvar("start_blocker")
+                    :
+                        bg
+                        file: "data/maps/triangles/start_bg_e2.fus"
+                        visible: mapvar("start_blocker2")
+                    :
+                        bg
+                        file: "data/maps/triangles/start_bg_E2.fus"
+                        visible: not mapvar("start_blocker2")
+                    :
+                        bg
+                        file: "data/maps/triangles/start_bg.fus"
             :
-                bg
-                file: "data/maps/triangles/start2_bg.fus"
                 pos: eval: (14 12)
-                tileset: "data/tileset1_bg.fus"
+                submaps:
+                    :
+                        bg
+                        file: "data/maps/triangles/start2_bg_e.fus"
+                        visible: mapvar("start2_blocker")
+                    :
+                        bg
+                        file: "data/maps/triangles/start2_bg_E.fus"
+                        visible: not mapvar("start2_blocker")
+                    :
+                        bg
+                        file: "data/maps/triangles/start2_bg_e2.fus"
+                        visible: mapvar("start4_blocker")
+                    :
+                        bg
+                        file: "data/maps/triangles/start2_bg_E2.fus"
+                        visible: not mapvar("start4_blocker")
+                    :
+                        bg
+                        file: "data/maps/triangles/start2_bg.fus"
             :
                 bg
                 file: "data/maps/triangles/start3_bg.fus"
                 pos: eval: (14 12) + (22 15)
-                tileset: "data/tileset1_bg.fus"
             :
                 bg
                 file: "data/maps/triangles/start4_bg.fus"
                 pos: eval: (14 12) + (22 15) + (-4 3)
-                tileset: "data/tileset1_bg.fus"
     :
         submaps:
             :
@@ -79,7 +111,7 @@ submaps:
             :
                 file: "data/maps/triangles/start2.fus"
                 pos: eval: (14 12)
-                camera: (16 6)
+                camera: (16 5)
                 mapper: ("triple")
             :
                 file: "data/maps/triangles/start2_blocker.fus"
