@@ -6,13 +6,8 @@
 
 swim_spit:
     rgraph: $PREFIX NS "swim_spit"
+    hitbox: collmap("stand")
     unsafe
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
     if() then: goto: swim
 
 swim_jump:
@@ -23,14 +18,8 @@ swim_jump:
     # water without checking.
 
     rgraph: $PREFIX NS "swim_jump"
+    hitbox: collmap("stand")
     unsafe
-
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
 
     if:
         any:
@@ -106,14 +95,8 @@ swim_jump:
 
 swim:
     rgraph: $PREFIX NS "swim"
+    hitbox: collmap("stand")
     unsafe
-
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
 
     if:
         key: wentdown y

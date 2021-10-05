@@ -21,16 +21,20 @@ $SET_STR STATE_LAND_UP step
 collmsgs: "touch"
 on "crush": goto: dead
 
+collmap "stand":
+    ;;   .   .
+    ;;   *\*/*
+    ;; . - + - .
+    ;;   */*\*
+    ;;  (.)  .
+collmap "crawl":
+    ;;     .
+    ;;     *
+    ;;  (.)  .
 
 stand:
     rgraph: $PREFIX NS "stand"
-
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
+    hitbox: collmap("stand")
 
     # Can't stand on nothing
     if:
@@ -99,22 +103,12 @@ stand:
 
 look_up:
     rgraph: $PREFIX NS "look_up"
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
+    hitbox: collmap("stand")
     if() then: goto: looking_up
 
 looking_up:
     rgraph: $PREFIX NS "looking_up"
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
+    hitbox: collmap("stand")
 
     if:
         key: wentdown y
@@ -152,22 +146,12 @@ looking_up:
 
 spit:
     rgraph: $PREFIX NS "spit"
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
+    hitbox: collmap("stand")
     if() then: goto: stand
 
 looking_up_spit:
     rgraph: $PREFIX NS "looking_up_spit"
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
+    hitbox: collmap("stand")
     if() then: goto: looking_up
 
 start_jump:
@@ -186,12 +170,7 @@ start_jump:
             delay: 2
 
     if:
-        coll: water any yes
-            ;;   .   .
-            ;;   *\*/*
-            ;; . - + - .
-            ;;   */*\*
-            ;;  (.)  .
+        coll: water any yes collmap("stand")
     then:
         goto delay: swim_jump
 
@@ -205,15 +184,9 @@ jump:
     # Therefore, if we're in "jump", then we can safely assume we're not in
     # water without checking.
 
-    rgraph: $PREFIX NS "jump"
     unsafe
-
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
+    rgraph: $PREFIX NS "jump"
+    hitbox: collmap("stand")
 
     # Landing, jumping, crashing
     import "anim/_player_jump.state.fus"
@@ -244,12 +217,7 @@ step_down:
 
 step:
     rgraph: $PREFIX NS "step"
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
+    hitbox: collmap("stand")
 
     if:
         key: wentdown y
@@ -268,10 +236,7 @@ step:
 
 sleep:
     rgraph: $PREFIX NS "sleep"
-    hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)  .
+    hitbox: collmap("crawl")
     if: any:
         key: isdown u
         key: isdown d

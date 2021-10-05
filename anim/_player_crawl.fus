@@ -6,50 +6,27 @@
 
 crawling:
     rgraph: $PREFIX NS "crawling"
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
+    hitbox: collmap("stand")
     if() then: goto: crawl
 
 uncrawling:
     rgraph: $PREFIX NS "uncrawling"
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
+    hitbox: collmap("stand")
     if() then: goto: stand
 
 crawling_looking_up:
     rgraph: $PREFIX NS "crawling_looking_up"
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
+    hitbox: collmap("stand")
     if() then: goto: crawl_looking_up
 
 uncrawling_looking_up:
     rgraph: $PREFIX NS "uncrawling_looking_up"
-    hitbox:
-        ;;   .   .
-        ;;   *\*/*
-        ;; . - + - .
-        ;;   */*\*
-        ;;  (.)  .
+    hitbox: collmap("stand")
     if() then: goto: looking_up
 
 crawl_looking_up:
     rgraph: $PREFIX NS "crawl_looking_up"
-    hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)  .
+    hitbox: collmap("crawl")
     $IF PLAYER_SPIKEY: on "crush": goto delay: crawl_shielding
 
     if:
@@ -79,29 +56,19 @@ crawl_looking_up:
 
 crawl_spit:
     rgraph: $PREFIX NS "crawl_spit"
-    hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)  .
+    hitbox: collmap("crawl")
     $IF PLAYER_SPIKEY: on "crush": goto delay: crawl_shielding
     if() then: goto: crawl
 
 crawl_looking_up_spit:
     rgraph: $PREFIX NS "crawl_looking_up_spit"
-    hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)  .
+    hitbox: collmap("crawl")
     $IF PLAYER_SPIKEY: on "crush": goto delay: crawl_shielding
     if() then: goto: crawl_looking_up
 
 crawl:
     rgraph: $PREFIX NS "crawl"
-
-    hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)  .
+    hitbox: collmap("crawl")
 
     $IF PLAYER_SPIKEY: on "crush": goto delay: crawl_shielding
 
@@ -199,10 +166,7 @@ crawl:
 
 crawl_look_up:
     rgraph: $PREFIX NS "crawl_look_up"
-    hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)  .
+    hitbox: collmap("crawl")
     $IF PLAYER_SPIKEY: on "crush": goto delay: crawl_shielding
     if() then: goto: crawl_looking_up
 
@@ -259,10 +223,7 @@ crawl_turn:
     # (so you can turn around in-place while crouching, without exposing yourself
     # to being crushed)
     rgraph: $PREFIX NS "crawl_step"
-    hitbox:
-        ;;        .
-        ;;        *
-        ;;     (.)  .
+    hitbox: collmap("crawl")
     $IF PLAYER_SPIKEY: on "crush": goto delay: crawl_shielding
 
     if:
@@ -282,5 +243,6 @@ crawl_turn:
 
 $IF PLAYER_SPIKEY: crawl_shielding:
     rgraph: $PREFIX NS "crawl_shielding"
+    # (No hitbox: we are invincible)
     if:
     then: goto: crawl
