@@ -66,8 +66,11 @@ void val_unset(val_t *val){
 }
 
 bool val_get_bool(val_t *val){
-    if(val->type != VAL_TYPE_BOOL)return false;
-    return val->u.b;
+    if(val->type == VAL_TYPE_BOOL)return val->u.b;
+    if(val->type == VAL_TYPE_INT)return val->u.i;
+    if(val->type == VAL_TYPE_STR)return val->u.s;
+    if(val->type == VAL_TYPE_CONST_STR)return val->u.cs;
+    return false;
 }
 int val_get_int(val_t *val){
     if(val->type != VAL_TYPE_INT)return 0;

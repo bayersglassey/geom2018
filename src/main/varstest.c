@@ -69,17 +69,30 @@ int testrunner(){
 
         ASSERT(!vars_set_null(vars, "x"))
         ASSERT(vars->vars_len == 1)
+        ASSERT(!vars_get_bool(vars, "x"))
 
         ASSERT(!vars_set_null(vars, "x"))
         ASSERT(vars->vars_len == 1)
 
+        ASSERT(!vars_set_int(vars, "x", 0))
+        ASSERT(vars->vars_len == 1)
+        ASSERT(vars_get_int(vars, "x") == 0)
+        ASSERT(!vars_get_bool(vars, "x"))
+
         ASSERT(!vars_set_int(vars, "x", 3))
         ASSERT(vars->vars_len == 1)
         ASSERT(vars_get_int(vars, "x") == 3)
+        ASSERT(vars_get_bool(vars, "x"))
+
+        ASSERT(!vars_set_const_str(vars, "y", NULL))
+        ASSERT(vars->vars_len == 2)
+        ASSERT(vars_get_str(vars, "y") == NULL)
+        ASSERT(!vars_get_bool(vars, "y"))
 
         ASSERT(!vars_set_const_str(vars, "y", "HAHA"))
         ASSERT(vars->vars_len == 2)
         ASSERT(!strcmp(vars_get_str(vars, "y"), "HAHA"))
+        ASSERT(vars_get_bool(vars, "y"))
 
         ASSERT(!vars_set_str(vars, "z", strdup("LAWL")))
         ASSERT(vars->vars_len == 3)
