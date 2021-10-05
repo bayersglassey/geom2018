@@ -21,7 +21,7 @@ $SUFFIX R0 $PREFIX ANIM_NS stand:
         if:
             expr: > myvar("speed") 0
         then:
-            inc myvar("speed"): -1
+            dec myvar("speed")
             set myvar("f"): T
             continue
     $IF !INERT:

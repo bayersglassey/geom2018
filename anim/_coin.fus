@@ -45,7 +45,7 @@ _collected:
         then:
             if: exists myvar("num_key")
             then:
-                inc mapvar(myvar("num_key")): -1
+                dec mapvar(myvar("num_key"))
                 if: expr: <= mapvar(myvar("num_key")) 0
                 then: set mapvar(myvar("collected_key")): T
             else: set mapvar(myvar("collected_key")): T

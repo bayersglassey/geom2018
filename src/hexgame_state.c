@@ -534,6 +534,7 @@ int state_effect_apply(state_effect_t *effect,
         break;
     }
     case STATE_EFFECT_TYPE_INC:
+    case STATE_EFFECT_TYPE_DEC:
     case STATE_EFFECT_TYPE_SET: {
         valexpr_context_t valexpr_context = {0};
         err = _get_vars(context, &valexpr_context);
@@ -558,7 +559,10 @@ int state_effect_apply(state_effect_t *effect,
             return 2;
         }
 
-        if(effect->type == STATE_EFFECT_TYPE_INC){
+        if(
+            effect->type == STATE_EFFECT_TYPE_INC ||
+            effect->type == STATE_EFFECT_TYPE_DEC
+        ){
             if(val_val->type != VAL_TYPE_INT){
                 RULE_PERROR()
                 fprintf(stderr, "Increment expects RHS to be int. Got: ");
@@ -569,7 +573,9 @@ int state_effect_apply(state_effect_t *effect,
                 fputc('\n', stderr);
                 return 2;
             }
-            val_set_int(var_val, val_get_int(var_val) + val_get_int(val_val));
+            int inc = val_get_int(val_val);
+            if(effect->type == STATE_EFFECT_TYPE_DEC)inc = -inc;
+            val_set_int(var_val, val_get_int(var_val) + inc);
         }else{
             /* STATE_EFFECT_TYPE_SET */
             err = val_copy(var_val, val_val);

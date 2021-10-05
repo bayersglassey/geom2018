@@ -463,9 +463,10 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
             NEXT
             effect->u.dead = BODY_MOSTLY_DEAD;
         }else effect->u.dead = BODY_ALL_DEAD;
-    }else if(GOT("inc")){
+    }else if(GOT("inc") || GOT("dec")){
+        effect->type = GOT("dec")?
+            STATE_EFFECT_TYPE_DEC: STATE_EFFECT_TYPE_INC;
         NEXT
-        effect->type = STATE_EFFECT_TYPE_INC;
 
         err = valexpr_parse(&effect->u.set.var_expr, lexer);
         if(err)return err;
@@ -1016,6 +1017,7 @@ void state_effect_cleanup(state_effect_t *effect){
             free(effect->u.play_filename);
             break;
         case STATE_EFFECT_TYPE_INC:
+        case STATE_EFFECT_TYPE_DEC:
         case STATE_EFFECT_TYPE_SET:
             valexpr_cleanup(&effect->u.set.var_expr);
             valexpr_cleanup(&effect->u.set.val_expr);
