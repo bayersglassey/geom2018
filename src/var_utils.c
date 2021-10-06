@@ -78,6 +78,7 @@ int val_parse(val_t *val, fus_lexer_t *lexer){
                 char binop = lexer->token[0];
                 NEXT
                 val_t _val2, *val2=&_val2;
+                val_init(val2);
                 err = val_parse(val2, lexer);
                 if(err)return err;
                 if(val2->type != VAL_TYPE_INT){

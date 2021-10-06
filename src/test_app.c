@@ -81,6 +81,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->scw = scw;
     app->sch = sch;
     app->delay_goal = delay_goal;
+    app->took = 0;
     app->developer_mode = developer_mode;
 
     app->window = window;

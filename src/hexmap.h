@@ -118,8 +118,8 @@ typedef struct hexmap_submap {
     char *filename;
     ARRAY_DECL(valexpr_t*, text_exprs)
         /* Text displayed when camera is on this submap */
-    valexpr_t *visible_expr; /* Whether this submap is visible */
-    bool visible_expr_not; /* Whether to invert the result of visible_expr */
+    valexpr_t visible_expr; /* Whether this submap is visible */
+    bool visible_not; /* Whether to invert the result of visible_expr */
     hexcollmap_t collmap;
     ARRAY_DECL(hexmap_door_t*, doors)
 
@@ -133,6 +133,25 @@ typedef struct hexmap_submap {
     palette_t *palette;
     hexmap_tileset_t *tileset;
 } hexmap_submap_t;
+
+typedef struct hexmap_submap_parser_context {
+    bool solid;
+    vec_t pos;
+    rot_t rot;
+    vec_t camera_pos;
+    int camera_type;
+
+    valexpr_t visible_expr;
+    bool visible_not;
+
+    ARRAY_DECL(struct valexpr*, text_exprs)
+
+    /* Weakrefs */
+    struct hexmap_submap_parser_context *parent;
+    prismelmapper_t *mapper;
+    palette_t *palette;
+    hexmap_tileset_t *tileset;
+} hexmap_submap_parser_context_t;
 
 const char *submap_camera_type_msg(int camera_type);
 
@@ -164,10 +183,8 @@ int hexmap_load(hexmap_t *map, struct hexgame *game, const char *filename,
     vars_t *vars);
 int hexmap_parse(hexmap_t *map, struct hexgame *game, char *name,
     fus_lexer_t *lexer);
-int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
-    vec_t parent_pos, vec_t parent_camera_pos, int parent_camera_type,
-    prismelmapper_t *parent_mapper, char *palette_filename,
-    char *tileset_filename);
+int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
+    hexmap_submap_parser_context_t *parent_context);
 int hexmap_get_submap_index(hexmap_t *map, hexmap_submap_t *submap);
 int hexmap_get_or_create_palette(hexmap_t *map, const char *name,
     palette_t **palette_ptr);
@@ -186,18 +203,19 @@ int hexmap_refresh_vars(hexmap_t *map);
 
 void hexmap_door_cleanup(hexmap_door_t *door);
 void hexmap_submap_cleanup(hexmap_submap_t *submap);
-int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
-    char *filename,
-    int text_exprs_len, valexpr_t **text_exprs,
-    valexpr_t *visible_expr, bool visible_expr_not,
-    bool solid, vec_t pos, int camera_type, vec_t camera_pos,
-    prismelmapper_t *mapper, char *palette_filename, char *tileset_filename);
+int hexmap_submap_init_from_parser_context(hexmap_t *map,
+    hexmap_submap_t *submap, char *filename,
+    hexmap_submap_parser_context_t *context);
 int hexmap_submap_is_visible(hexmap_submap_t *submap, bool *visible_ptr);
 int hexmap_submap_is_solid(hexmap_submap_t *submap, bool *solid_ptr);
 int hexmap_submap_create_rgraph_map(hexmap_submap_t *submap);
 int hexmap_submap_create_rgraph_minimap(hexmap_submap_t *submap);
 hexmap_door_t *hexmap_submap_get_door(hexmap_submap_t *submap,
     hexcollmap_elem_t *elem);
+
+int hexmap_submap_parser_context_init(hexmap_submap_parser_context_t *context,
+    hexmap_submap_parser_context_t *parent);
+void hexmap_submap_parser_context_cleanup(hexmap_submap_parser_context_t *context);
 
 
 #endif

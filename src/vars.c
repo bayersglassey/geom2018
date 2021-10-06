@@ -38,7 +38,7 @@ void val_cleanup(val_t *val){
 }
 
 void val_init(val_t *val){
-    val->type = 'n';
+    val->type = VAL_TYPE_NULL;
 }
 
 void val_fprintf(val_t *val, FILE *file){
@@ -282,7 +282,7 @@ void vars_dumpvar(vars_t *vars, const char *key){
 
 int vars_add(vars_t *vars, char *key, var_t **var_ptr){
     ARRAY_PUSH_NEW(var_t*, vars->vars, var)
-    var->key = key;
+    var_init(var, key);
     *var_ptr = var;
     return 0;
 }
@@ -300,7 +300,7 @@ var_t *vars_get_or_add(vars_t *vars, const char *key){
     if(!var){
         char *new_key = strdup(key);
         if(new_key == NULL){
-            perror("vars_get_or_add");
+            perror("strdup");
             return NULL;
         }
         int err = vars_add(vars, new_key, &var);

@@ -556,27 +556,38 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, char *name,
     if(err)return err;
 
     /* default palette */
-    char *default_palette_filename;
-    err = fus_lexer_get(lexer, "default_palette");
-    if(err)return err;
-    err = fus_lexer_get(lexer, "(");
-    if(err)return err;
-    err = fus_lexer_get_str(lexer, &default_palette_filename);
-    if(err)return err;
-    err = fus_lexer_get(lexer, ")");
-    if(err)return err;
+    palette_t *default_palette;
+    {
+        char *palette_filename;
+        err = fus_lexer_get(lexer, "default_palette");
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_get_str(lexer, &palette_filename);
+        if(err)return err;
+        err = hexmap_get_or_create_palette(map, palette_filename,
+            &default_palette);
+        if(err)return err;
+        err = fus_lexer_get(lexer, ")");
+        if(err)return err;
+    }
 
     /* default tileset */
-    char *default_tileset_filename;
-    err = fus_lexer_get(lexer, "default_tileset");
-    if(err)return err;
-    err = fus_lexer_get(lexer, "(");
-    if(err)return err;
-    err = fus_lexer_get_str(lexer, &default_tileset_filename);
-    if(err)return err;
-    err = fus_lexer_get(lexer, ")");
-    if(err)return err;
-
+    hexmap_tileset_t *default_tileset;
+    {
+        char *tileset_filename;
+        err = fus_lexer_get(lexer, "default_tileset");
+        if(err)return err;
+        err = fus_lexer_get(lexer, "(");
+        if(err)return err;
+        err = fus_lexer_get_str(lexer, &tileset_filename);
+        if(err)return err;
+        err = hexmap_get_or_create_tileset(map, tileset_filename,
+            &default_tileset);
+        if(err)return err;
+        err = fus_lexer_get(lexer, ")");
+        if(err)return err;
+    }
 
     /* parse actors */
     if(fus_lexer_got(lexer, "actors")){
@@ -641,16 +652,23 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, char *name,
     if(err)return err;
     err = fus_lexer_get(lexer, "(");
     if(err)return err;
-    while(1){
-        if(fus_lexer_got(lexer, ")"))break;
-        err = fus_lexer_get(lexer, "(");
+    {
+        hexmap_submap_parser_context_t context;
+        err = hexmap_submap_parser_context_init(&context, NULL);
         if(err)return err;
-        err = hexmap_parse_submap(map, lexer, true,
-            (vec_t){0}, (vec_t){0}, 0, NULL,
-            default_palette_filename, default_tileset_filename);
-        if(err)return err;
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
+
+        context.palette = default_palette;
+        context.tileset = default_tileset;
+        while(1){
+            if(fus_lexer_got(lexer, ")"))break;
+            err = fus_lexer_get(lexer, "(");
+            if(err)return err;
+            err = hexmap_parse_submap(map, lexer, &context);
+            if(err)return err;
+            err = fus_lexer_get(lexer, ")");
+            if(err)return err;
+        }
+        hexmap_submap_parser_context_cleanup(&context);
     }
     err = fus_lexer_next(lexer);
     if(err)return err;
@@ -824,10 +842,8 @@ static int hexmap_populate_submap_doors(hexmap_t *map,
     return 0;
 }
 
-int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
-    vec_t parent_pos, vec_t parent_camera_pos, int parent_camera_type,
-    prismelmapper_t *parent_mapper, char *palette_filename,
-    char *tileset_filename
+int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
+    hexmap_submap_parser_context_t *parent_context
 ){
     int err;
     vecspace_t *space = map->space;
@@ -841,12 +857,19 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
         return 0;
     }
 
+    hexmap_submap_parser_context_t _context, *context=&_context;
+    err = hexmap_submap_parser_context_init(context, parent_context);
+    if(err)return err;
+
     if(fus_lexer_got(lexer, "bg")){
         err = fus_lexer_next(lexer);
         if(err)return err;
-        solid = false;
+        context->solid = false;
     }
 
+    /* We own this string, and free it before returning.
+    If we pass it to other functions, they either copy it themselves, or we
+    pass them a copy. */
     char *submap_filename = NULL;
     if(fus_lexer_got(lexer, "file")){
         err = fus_lexer_next(lexer);
@@ -859,15 +882,24 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
         if(err)return err;
     }
 
-    ARRAY_DECL(valexpr_t*, text_exprs)
-    ARRAY_INIT(text_exprs)
+    /* You can inherit parent's texts, and/or define your own. */
+    if(fus_lexer_got(lexer, "inherit_text")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        for(int i = 0; i < parent_context->text_exprs_len; i++){
+            valexpr_t *text_expr = parent_context->text_exprs[i];
+            ARRAY_PUSH_NEW(valexpr_t*, context->text_exprs, new_text_expr)
+            err = valexpr_copy(new_text_expr, text_expr);
+            if(err)return err;
+        }
+    }
     while(fus_lexer_got(lexer, "text")){
         err = fus_lexer_next(lexer);
         if(err)return err;
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
 
-        ARRAY_PUSH_NEW(valexpr_t*, text_exprs, text_expr)
+        ARRAY_PUSH_NEW(valexpr_t*, context->text_exprs, text_expr)
         err = valexpr_parse(text_expr, lexer);
         if(err)return err;
 
@@ -875,9 +907,18 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
         if(err)return err;
     }
 
-    valexpr_t *submap_visible_expr = NULL;
-    bool submap_visible_expr_not = false;
-    if(fus_lexer_got(lexer, "visible")){
+    /* You can *either* inherit parent context's visibility, or define your
+    own.
+    (NOTE: context->visible_expr is initialized to a literal bool, which doesn't
+    need to be cleaned up, so we can freely overwrite it, *once*.) */
+    if(fus_lexer_got(lexer, "inherit_visible")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        err = valexpr_copy(&context->visible_expr,
+            &parent_context->visible_expr);
+        if(err)return err;
+        context->visible_not = parent_context->visible_not;
+    }else if(fus_lexer_got(lexer, "visible")){
         err = fus_lexer_next(lexer);
         if(err)return err;
         err = fus_lexer_get(lexer, "(");
@@ -885,47 +926,46 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
         if(fus_lexer_got(lexer, "not")){
             err = fus_lexer_next(lexer);
             if(err)return err;
-            submap_visible_expr_not = true;
+            context->visible_not = true;
         }
 
-        submap_visible_expr = calloc(1, sizeof(*submap_visible_expr));
-        if(!submap_visible_expr)return 1;
-
-        err = valexpr_parse(submap_visible_expr, lexer);
+        err = valexpr_parse(&context->visible_expr, lexer);
         if(err)return err;
 
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
     }
 
-    vec_t pos = {0};
     if(fus_lexer_got(lexer, "pos")){
         err = fus_lexer_next(lexer);
         if(err)return err;
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
+
+        vec_t pos;
         err = fus_lexer_get_vec(lexer, space, pos);
         if(err)return err;
+        vec_add(space->dims, context->pos, pos);
+
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
     }
-    vec_add(space->dims, pos, parent_pos);
 
-    rot_t rot = 0;
     if(fus_lexer_got(lexer, "rot")){
         err = fus_lexer_next(lexer);
         if(err)return err;
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
+
+        rot_t rot = 0;
         err = fus_lexer_get_int(lexer, &rot);
         if(err)return err;
+        context->rot = rot_contain(space->rot_max, context->rot + rot);
+
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
     }
 
-    int camera_type = parent_camera_type;
-    vec_t camera_pos;
-    vec_cpy(space->dims, camera_pos, parent_camera_pos);
     if(fus_lexer_got(lexer, "camera")){
         err = fus_lexer_next(lexer);
         if(err)return err;
@@ -934,23 +974,26 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
         if(fus_lexer_got(lexer, "follow")){
             err = fus_lexer_next(lexer);
             if(err)return err;
-            camera_type = CAMERA_TYPE_FOLLOW;
+            context->camera_type = CAMERA_TYPE_FOLLOW;
         }else{
+            vec_t camera_pos;
             err = fus_lexer_get_vec(lexer, space, camera_pos);
             if(err)return err;
-            vec_add(space->dims, camera_pos, pos);
+
+            /* Camera pos becomes submap's pos, plus whatever we parsed */
+            vec_cpy(space->dims, context->camera_pos, context->pos);
+            vec_add(space->dims, context->camera_pos, camera_pos);
         }
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
     }
 
-    prismelmapper_t *mapper = parent_mapper;
     if(fus_lexer_got(lexer, "mapper")){
         err = fus_lexer_next(lexer);
         if(err)return err;
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
-        err = fus_lexer_get_mapper(lexer, map->prend, NULL, &mapper);
+        err = fus_lexer_get_mapper(lexer, map->prend, NULL, &context->mapper);
         if(err)return err;
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
@@ -961,8 +1004,15 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
         if(err)return err;
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
+
+        char *palette_filename;
         err = fus_lexer_get_str(lexer, &palette_filename);
         if(err)return err;
+        err = hexmap_get_or_create_palette(map, palette_filename,
+            &context->palette);
+        if(err)return err;
+        free(palette_filename);
+
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
     }
@@ -972,8 +1022,15 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
         if(err)return err;
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
+
+        char *tileset_filename;
         err = fus_lexer_get_str(lexer, &tileset_filename);
         if(err)return err;
+        err = hexmap_get_or_create_tileset(map, tileset_filename,
+            &context->tileset);
+        if(err)return err;
+        free(tileset_filename);
+
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
     }
@@ -983,17 +1040,17 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
 
         ARRAY_PUSH_NEW(hexmap_submap_t*, map->submaps, submap)
 
+        char *submap_filename_copy = strdup(submap_filename);
+        if(!submap_filename_copy)return 1;
+
         /* WARNING: submap's init does *NOT* init its collmap, so need
         to load submap->collmap immediately after this call. */
-        err = hexmap_submap_init(map, submap,
-            strdup(submap_filename),
-            text_exprs_len, text_exprs,
-            submap_visible_expr, submap_visible_expr_not,
-            solid, pos, camera_type, camera_pos, mapper,
-            palette_filename, tileset_filename);
+        err = hexmap_submap_init_from_parser_context(map, submap,
+            submap_filename_copy, context);
         if(err)return err;
 
-        if(rot){
+        /* Load submap->collmap */
+        if(context->rot){
             /* load & transform collmap */
 
             hexcollmap_t *collmap = calloc(1, sizeof(*collmap));
@@ -1002,9 +1059,11 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
                 submap_filename, lexer->vars);
             if(err)return err;
 
-            hexcollmap_init_clone(&submap->collmap, collmap,
-                strdup(collmap->filename));
-            int err = hexcollmap_clone(&submap->collmap, collmap, rot);
+            char *collmap_filename = strdup(submap_filename);
+            if(!collmap_filename)return 1;
+
+            hexcollmap_init_clone(&submap->collmap, collmap, collmap_filename);
+            int err = hexcollmap_clone(&submap->collmap, collmap, context->rot);
             if(err)return err;
 
             hexcollmap_cleanup(collmap);
@@ -1075,8 +1134,8 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
             if(err)return err;
 
             if(relative){
-                trf_rot(space, &trf, rot);
-                vec_add(space->dims, trf.add, pos);
+                trf_rot(space, &trf, context->rot);
+                vec_add(space->dims, trf.add, context->pos);
             }
 
             ARRAY_PUSH_NEW(hexmap_recording_t*, map->recordings,
@@ -1105,9 +1164,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
             if(fus_lexer_got(lexer, ")"))break;
             err = fus_lexer_get(lexer, "(");
             if(err)return err;
-            err = hexmap_parse_submap(map, lexer, true, pos,
-                camera_pos, camera_type, mapper,
-                palette_filename, tileset_filename);
+            err = hexmap_parse_submap(map, lexer, context);
             if(err)return err;
             err = fus_lexer_get(lexer, ")");
             if(err)return err;
@@ -1116,6 +1173,8 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer, bool solid,
         if(err)return err;
     }
 
+    free(submap_filename);
+    hexmap_submap_parser_context_cleanup(context);
     return 0;
 }
 
@@ -1491,22 +1550,14 @@ void hexmap_door_cleanup(hexmap_door_t *door){
 void hexmap_submap_cleanup(hexmap_submap_t *submap){
     free(submap->filename);
     ARRAY_FREE_PTR(valexpr_t*, submap->text_exprs, valexpr_cleanup)
-    if(submap->visible_expr){
-        valexpr_cleanup(submap->visible_expr);
-        free(submap->visible_expr);
-    }
+    valexpr_cleanup(&submap->visible_expr);
     hexcollmap_cleanup(&submap->collmap);
     ARRAY_FREE_PTR(hexmap_door_t*, submap->doors, hexmap_door_cleanup)
 }
 
-/* TODO: make this function *MUCH* lighter-weight, and have parser init the
-submap, then modify its values. */
-int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
-    char *filename,
-    int text_exprs_len, valexpr_t **text_exprs,
-    valexpr_t *visible_expr, bool visible_expr_not,
-    bool solid, vec_t pos, int camera_type, vec_t camera_pos,
-    prismelmapper_t *mapper, char *palette_filename, char *tileset_filename
+int hexmap_submap_init_from_parser_context(hexmap_t *map,
+    hexmap_submap_t *submap, char *filename,
+    hexmap_submap_parser_context_t *context
 ){
     int err;
 
@@ -1514,32 +1565,34 @@ int hexmap_submap_init(hexmap_t *map, hexmap_submap_t *submap,
     by hexcollmap_parse and friends, which should be called by our caller
     immediately after us */
 
+    vecspace_t *space = map->space;
+
     submap->map = map;
-
     submap->filename = filename;
+
+    submap->solid = context->solid;
+    vec_cpy(space->dims, submap->pos, context->pos);
+    vec_cpy(space->dims, submap->camera_pos, context->camera_pos);
+    submap->camera_type = context->camera_type;
+
+    err = valexpr_copy(&submap->visible_expr, &context->visible_expr);
+    if(err)return err;
+    submap->visible_not = context->visible_not;
+
     ARRAY_INIT(submap->text_exprs)
-    submap->text_exprs_len = text_exprs_len;
-    submap->text_exprs = text_exprs;
-    submap->visible_expr = visible_expr;
-    submap->visible_expr_not = visible_expr_not;
-    vec_cpy(MAX_VEC_DIMS, submap->pos, pos);
-
-    submap->solid = solid;
-
-    submap->camera_type = camera_type;
-    vec_cpy(MAX_VEC_DIMS, submap->camera_pos, camera_pos);
+    for(int i = 0; i < context->text_exprs_len; i++){
+        valexpr_t *text_expr = context->text_exprs[i];
+        ARRAY_PUSH_NEW(valexpr_t*, submap->text_exprs, new_text_expr)
+        err = valexpr_copy(new_text_expr, text_expr);
+        if(err)return err;
+    }
 
     submap->rgraph_map = NULL;
     submap->rgraph_minimap = NULL;
-    submap->mapper = mapper;
 
-    err = hexmap_get_or_create_palette(map, palette_filename,
-        &submap->palette);
-    if(err)return err;
-
-    err = hexmap_get_or_create_tileset(map, tileset_filename,
-        &submap->tileset);
-    if(err)return err;
+    submap->mapper = context->mapper;
+    submap->palette = context->palette;
+    submap->tileset = context->tileset;
 
     ARRAY_INIT(submap->doors)
 
@@ -1553,13 +1606,13 @@ int hexmap_submap_is_visible(hexmap_submap_t *submap, bool *visible_ptr){
 
     /* NOTE: visible by default. */
     bool visible = true;
-    if(submap->visible_expr != NULL){
-        val_t *result;
+    val_t *result;
+    {
         valexpr_context_t context = {
             .mapvars = &submap->map->vars,
             .globalvars = &submap->map->game->vars
         };
-        err = valexpr_get(submap->visible_expr, &context, &result);
+        err = valexpr_get(&submap->visible_expr, &context, &result);
         if(err){
             fprintf(stderr,
                 "Error while evaluating visibility for submap: %s\n",
@@ -1572,7 +1625,7 @@ int hexmap_submap_is_visible(hexmap_submap_t *submap, bool *visible_ptr){
         }
     }
 
-    if(submap->visible_expr_not)visible = !visible;
+    if(submap->visible_not)visible = !visible;
     *visible_ptr = visible;
     return 0;
 }
@@ -1601,4 +1654,45 @@ hexmap_door_t *hexmap_submap_get_door(hexmap_submap_t *submap,
         if(door->elem == elem)return door;
     }
     return NULL;
+}
+
+
+int hexmap_submap_parser_context_init(hexmap_submap_parser_context_t *context,
+    hexmap_submap_parser_context_t *parent
+){
+    int err;
+
+    /* Not inherited from parent (for backwards compat) */
+    context->solid = true;
+
+    context->rot = parent? parent->rot: 0;
+
+    if(parent){
+        vec_cpy(HEXSPACE_DIMS, context->pos, parent->pos);
+        vec_cpy(HEXSPACE_DIMS, context->camera_pos, parent->camera_pos);
+    }else{
+        vec_zero(context->pos);
+        vec_zero(context->camera_pos);
+    }
+
+    context->camera_type = parent? parent->camera_type: CAMERA_TYPE_STATIC;
+
+    /* Visibility is *NOT* inherited by default.
+    Opt in with the "inherit_visible" syntax. */
+    valexpr_set_literal_bool(&context->visible_expr, true);
+    context->visible_not = false;
+
+    ARRAY_INIT(context->text_exprs)
+
+    context->parent = parent;
+    context->mapper = parent? parent->mapper: NULL;
+    context->palette = parent? parent->palette: NULL;
+    context->tileset = parent? parent->tileset: NULL;
+
+    return 0;
+}
+
+void hexmap_submap_parser_context_cleanup(hexmap_submap_parser_context_t *context){
+    valexpr_cleanup(&context->visible_expr);
+    ARRAY_FREE_PTR(valexpr_t*, context->text_exprs, valexpr_cleanup)
 }

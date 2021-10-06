@@ -191,7 +191,11 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
     val_t **result_ptr, bool set
 ){
     int err;
+
+    /* To be returned. It *MAY BE NULL* if e.g. we can't find the variable
+    referred to! */
     val_t *result = NULL;
+
     switch(expr->type){
         case VALEXPR_TYPE_LITERAL: {
             result = &expr->u.val;
