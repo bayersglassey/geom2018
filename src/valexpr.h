@@ -58,6 +58,7 @@ int valexpr_copy(valexpr_t *expr1, valexpr_t *expr2);
 void valexpr_fprintf(valexpr_t *expr, FILE *file);
 void valexpr_set_literal_bool(valexpr_t *expr, bool b);
 void valexpr_set_literal_int(valexpr_t *expr, int i);
+void valexpr_set_literal_str(valexpr_t *expr, const char *cs);
 int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer);
 int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
     val_t **result_ptr, bool set);

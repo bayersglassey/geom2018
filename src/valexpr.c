@@ -115,6 +115,12 @@ void valexpr_set_literal_int(valexpr_t *expr, int i){
     expr->u.val.u.i = i;
 }
 
+void valexpr_set_literal_str(valexpr_t *expr, const char *cs){
+    expr->type = VALEXPR_TYPE_LITERAL;
+    expr->u.val.type = VAL_TYPE_CONST_STR;
+    expr->u.val.u.cs = cs;
+}
+
 int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer){
     INIT
     int type =

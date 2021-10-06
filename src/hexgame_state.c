@@ -318,40 +318,24 @@ int state_cond_match(state_cond_t *cond,
         }
         break;
     }
-    case STATE_COND_TYPE_GET_BOOL:
+    case STATE_COND_TYPE_GET_BOOL: {
+        valexpr_context_t valexpr_context = {0};
+        err = _get_vars(context, &valexpr_context);
+        if(err)return err;
+
+        matched = valexpr_get_bool(&cond->u.valexpr, &valexpr_context);
+        break;
+    }
     case STATE_COND_TYPE_EXISTS: {
         valexpr_context_t valexpr_context = {0};
         err = _get_vars(context, &valexpr_context);
         if(err)return err;
 
         val_t *val;
-        err = valexpr_get(&cond->u.valexpr,
-            &valexpr_context, &val);
+        err = valexpr_get(&cond->u.valexpr, &valexpr_context, &val);
         if(err)return err;
 
-        if(cond->type == STATE_COND_TYPE_EXISTS){
-            matched = val != NULL;
-            break;
-        }
-        /* ...otherwise, cond->type == STATE_COND_TYPE_GET_BOOL... */
-
-        if(val == NULL){
-            RULE_PERROR()
-            fprintf(stderr, "Couldn't get value for expression: ");
-            valexpr_fprintf(&cond->u.valexpr, stderr);
-            fputc('\n', stderr);
-            return 2;
-        }
-
-        if(val->type != VAL_TYPE_BOOL){
-            RULE_PERROR()
-            fprintf(stderr, "Expected bool value, got: ");
-            val_fprintf(val, stderr);
-            fputc('\n', stderr);
-            return 2;
-        }
-
-        matched = val->u.b;
+        matched = val != NULL;
         break;
     }
     default: {

@@ -70,7 +70,7 @@ bin/stringstoretest: src/main/stringstoretest.o src/stringstore.o
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
-bin/varstest: src/main/varstest.o src/vars.o src/lexer.o src/write.o src/str_utils.o src/file_utils.o src/var_utils.o
+bin/varstest: src/main/varstest.o src/vars.o src/valexpr.o src/lexer.o src/write.o src/str_utils.o src/file_utils.o src/var_utils.o
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
