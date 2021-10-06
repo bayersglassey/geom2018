@@ -1665,7 +1665,10 @@ int hexmap_submap_parser_context_init(hexmap_submap_parser_context_t *context,
     /* Not inherited from parent (for backwards compat) */
     context->solid = true;
 
-    context->rot = parent? parent->rot: 0;
+    /* Not inherited by parent (for backwards compat, and also because then
+    it seems like parent's rot should affect child's pos?.. which would be
+    weird somehow.) */
+    context->rot = 0;
 
     if(parent){
         vec_cpy(HEXSPACE_DIMS, context->pos, parent->pos);
