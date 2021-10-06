@@ -28,10 +28,15 @@ static int parse_valexpr(valexpr_t *expr, const char *text){
     err = fus_lexer_init(&lexer, text, "<test>");
     if(err)return err;
     err = valexpr_parse(expr, &lexer);
+
+    valexpr_fprintf(expr, stderr);
+    fputc('\n', stderr);
+
     if(!fus_lexer_done(&lexer)){
         fprintf(stderr, "### Not all input lexed!.. input was:\n%s\n", text);
         return 2;
     }
+
     fus_lexer_cleanup(&lexer);
     return 0;
 }

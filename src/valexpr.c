@@ -391,10 +391,14 @@ void valexpr_cond_fprintf(valexpr_cond_t *cond, FILE *file){
             break;
         case VALEXPR_COND_TYPE_ANY:
         case VALEXPR_COND_TYPE_ALL: {
+            fputs(cond->type == VALEXPR_COND_TYPE_ANY? "any": "all", file);
+            fputc('(', file);
             for(int i = 0; i < cond->u.subconds.subconds_len; i++){
+                if(i > 0)fputc(' ', file);
                 valexpr_cond_t *subcond = cond->u.subconds.subconds[i];
                 valexpr_cond_fprintf(subcond, file);
             }
+            fputc(')', file);
             break;
         }
         default:
