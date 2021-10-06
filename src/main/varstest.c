@@ -243,6 +243,38 @@ int testrunner(int *n_tests_ptr, int *n_fails_ptr){
             valexpr_cleanup(expr);
         }
 
+        {
+            err = parse_valexpr(expr, "if not T then T else F");
+            if(err)return err;
+            ASSERT(!valexpr_get_bool(expr, &context));
+            valexpr_cleanup(expr);
+
+            err = parse_valexpr(expr, "if not F then T else F");
+            if(err)return err;
+            ASSERT(valexpr_get_bool(expr, &context));
+            valexpr_cleanup(expr);
+
+            err = parse_valexpr(expr, "if any(F F F) then T else F");
+            if(err)return err;
+            ASSERT(!valexpr_get_bool(expr, &context));
+            valexpr_cleanup(expr);
+
+            err = parse_valexpr(expr, "if any(F T F) then T else F");
+            if(err)return err;
+            ASSERT(valexpr_get_bool(expr, &context));
+            valexpr_cleanup(expr);
+
+            err = parse_valexpr(expr, "if all(T T T) then T else F");
+            if(err)return err;
+            ASSERT(valexpr_get_bool(expr, &context));
+            valexpr_cleanup(expr);
+
+            err = parse_valexpr(expr, "if all(T F T) then T else F");
+            if(err)return err;
+            ASSERT(!valexpr_get_bool(expr, &context));
+            valexpr_cleanup(expr);
+        }
+
         vars_cleanup(&yourvars);
         vars_cleanup(&mapvars);
         vars_cleanup(&globalvars);

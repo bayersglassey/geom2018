@@ -10,6 +10,7 @@
 #include "valexpr.h"
 
 
+
 void valexpr_cleanup(valexpr_t *expr){
     switch(expr->type){
         case VALEXPR_TYPE_LITERAL:
@@ -23,8 +24,8 @@ void valexpr_cleanup(valexpr_t *expr){
             free(expr->u.key_expr);
             break;
         case VALEXPR_TYPE_IF:
-            valexpr_cleanup(expr->u.if_expr.cond_expr);
-            free(expr->u.if_expr.cond_expr);
+            valexpr_cond_cleanup(expr->u.if_expr.cond);
+            free(expr->u.if_expr.cond);
             valexpr_cleanup(expr->u.if_expr.then_expr);
             free(expr->u.if_expr.then_expr);
             valexpr_cleanup(expr->u.if_expr.else_expr);
@@ -53,15 +54,15 @@ int valexpr_copy(valexpr_t *expr1, valexpr_t *expr2){
             if(err)return err;
             break;
         case VALEXPR_TYPE_IF:
-            expr1->u.if_expr.cond_expr = calloc(1, sizeof(valexpr_t));
-            if(!expr1->u.if_expr.cond_expr)return 1;
+            expr1->u.if_expr.cond = calloc(1, sizeof(valexpr_cond_t));
+            if(!expr1->u.if_expr.cond)return 1;
             expr1->u.if_expr.then_expr = calloc(1, sizeof(valexpr_t));
             if(!expr1->u.if_expr.then_expr)return 1;
             expr1->u.if_expr.else_expr = calloc(1, sizeof(valexpr_t));
             if(!expr1->u.if_expr.else_expr)return 1;
 
-            err = valexpr_copy(expr1->u.if_expr.cond_expr,
-                expr2->u.if_expr.cond_expr);
+            err = valexpr_cond_copy(expr1->u.if_expr.cond,
+                expr2->u.if_expr.cond);
             if(err)return err;
             err = valexpr_copy(expr1->u.if_expr.then_expr,
                 expr2->u.if_expr.then_expr);
@@ -90,8 +91,7 @@ void valexpr_fprintf(valexpr_t *expr, FILE *file){
             break;
         case VALEXPR_TYPE_IF:
             fprintf(file, "if ");
-            if(expr->u.if_expr.cond_not)fprintf(file, "not ");
-            valexpr_fprintf(expr->u.if_expr.cond_expr, file);
+            valexpr_cond_fprintf(expr->u.if_expr.cond, file);
             fprintf(file, " then ");
             valexpr_fprintf(expr->u.if_expr.then_expr, file);
             fprintf(file, " else ");
@@ -101,6 +101,11 @@ void valexpr_fprintf(valexpr_t *expr, FILE *file){
             fprintf(file, "<unknown>");
             break;
     }
+}
+
+void valexpr_set_literal_null(valexpr_t *expr){
+    expr->type = VALEXPR_TYPE_LITERAL;
+    expr->u.val.type = VAL_TYPE_NULL;
 }
 
 void valexpr_set_literal_bool(valexpr_t *expr, bool b){
@@ -153,21 +158,15 @@ int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer){
     }else if(type == VALEXPR_TYPE_IF){
         NEXT
         expr->type = type;
-        expr->u.if_expr.cond_not = false;
-        expr->u.if_expr.cond_expr = NULL;
+        expr->u.if_expr.cond = NULL;
         expr->u.if_expr.then_expr = NULL;
         expr->u.if_expr.else_expr = NULL;
 
-        if(GOT("not")){
-            NEXT
-            expr->u.if_expr.cond_not = true;
-        }
-
-        valexpr_t *cond_expr = calloc(1, sizeof(*cond_expr));
-        if(!cond_expr)return 1;
-        err = valexpr_parse(cond_expr, lexer);
+        valexpr_cond_t *cond = calloc(1, sizeof(*cond));
+        if(!cond)return 1;
+        err = valexpr_cond_parse(cond, lexer);
         if(err)return err;
-        expr->u.if_expr.cond_expr = cond_expr;
+        expr->u.if_expr.cond = cond;
 
         GET("then")
 
@@ -261,18 +260,9 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
             break;
         }
         case VALEXPR_TYPE_IF: {
-            val_t *cond_val;
-            err = valexpr_get(expr->u.if_expr.cond_expr,
-                context, &cond_val);
+            bool cond;
+            err = valexpr_cond_eval(expr->u.if_expr.cond, context, &cond);
             if(err)return err;
-            if(!cond_val){
-                fprintf(stderr,
-                    "valexpr_eval: Couldn't get cond value\n");
-                return 2;
-            }
-
-            bool cond = val_get_bool(cond_val);
-            if(expr->u.if_expr.cond_not)cond = !cond;
 
             if(cond){
                 err = valexpr_eval(expr->u.if_expr.then_expr,
@@ -332,3 +322,173 @@ VALEXPR_GET_TYPE(bool, bool)
 VALEXPR_GET_TYPE(int, int)
 VALEXPR_GET_TYPE(const char *, str)
 #undef VALEXPR_GET_TYPE
+
+
+
+
+void valexpr_cond_init(valexpr_cond_t *cond, int type, bool not){
+    cond->type = type;
+    cond->not = not;
+    switch(cond->type){
+        case VALEXPR_COND_TYPE_EXPR:
+            valexpr_set_literal_null(&cond->u.expr);
+            break;
+        case VALEXPR_COND_TYPE_ANY:
+        case VALEXPR_COND_TYPE_ALL:
+            ARRAY_INIT(cond->u.subconds.subconds)
+            break;
+        default: break;
+    }
+}
+
+void valexpr_cond_cleanup(valexpr_cond_t *cond){
+    switch(cond->type){
+        case VALEXPR_COND_TYPE_EXPR:
+            valexpr_cleanup(&cond->u.expr);
+            break;
+        case VALEXPR_COND_TYPE_ANY:
+        case VALEXPR_COND_TYPE_ALL: {
+            for(int i = 0; i < cond->u.subconds.subconds_len; i++){
+                valexpr_cond_t *subcond = cond->u.subconds.subconds[i];
+                valexpr_cond_cleanup(subcond);
+            }
+            break;
+        }
+        default: break;
+    }
+}
+
+int valexpr_cond_copy(valexpr_cond_t *cond1, valexpr_cond_t *cond2){
+    int err;
+    cond1->type = cond2->type;
+    cond1->not = cond2->not;
+    switch(cond1->type){
+        case VALEXPR_COND_TYPE_EXPR: {
+            err = valexpr_copy(&cond1->u.expr, &cond2->u.expr);
+            if(err)return err;
+            break;
+        }
+        case VALEXPR_COND_TYPE_ANY:
+        case VALEXPR_COND_TYPE_ALL: {
+            for(int i = 0; i < cond2->u.subconds.subconds_len; i++){
+                valexpr_cond_t *subcond = cond2->u.subconds.subconds[i];
+                ARRAY_PUSH_NEW(valexpr_cond_t *, cond1->u.subconds.subconds,
+                    new_subcond)
+                err = valexpr_cond_copy(new_subcond, subcond);
+                if(err)return err;
+            }
+            break;
+        }
+        default: break;
+    }
+    return 0;
+}
+
+void valexpr_cond_fprintf(valexpr_cond_t *cond, FILE *file){
+    switch(cond->type){
+        case VALEXPR_COND_TYPE_EXPR:
+            valexpr_fprintf(&cond->u.expr, file);
+            break;
+        case VALEXPR_COND_TYPE_ANY:
+        case VALEXPR_COND_TYPE_ALL: {
+            for(int i = 0; i < cond->u.subconds.subconds_len; i++){
+                valexpr_cond_t *subcond = cond->u.subconds.subconds[i];
+                valexpr_cond_fprintf(subcond, file);
+            }
+            break;
+        }
+        default:
+            fprintf(file, "<unknown>");
+            break;
+    }
+}
+
+int valexpr_cond_parse(valexpr_cond_t *cond, fus_lexer_t *lexer){
+    INIT
+
+    bool not = false;
+    if(GOT("not")){
+        NEXT
+        not = true;
+    }
+
+    if(GOT("any") || GOT("all")){
+        int type = GOT("all")? VALEXPR_COND_TYPE_ALL: VALEXPR_COND_TYPE_ANY;
+        NEXT
+
+        valexpr_cond_init(cond, type, not);
+
+        GET("(")
+        while(1){
+            if(GOT(")"))break;
+            ARRAY_PUSH_NEW(valexpr_cond_t*, cond->u.subconds.subconds,
+                new_cond)
+            err = valexpr_cond_parse(new_cond, lexer);
+            if(err)return err;
+        }
+        NEXT
+    }else{
+        valexpr_cond_init(cond, VALEXPR_COND_TYPE_EXPR, not);
+        err = valexpr_parse(&cond->u.expr, lexer);
+        if(err)return err;
+    }
+
+    return 0;
+}
+
+int valexpr_cond_eval(valexpr_cond_t *cond, valexpr_context_t *context,
+    bool *result_ptr
+){
+    int err;
+
+    bool result;
+    switch(cond->type){
+        case VALEXPR_COND_TYPE_EXPR:
+            result = valexpr_get_bool(&cond->u.expr, context);
+            break;
+        case VALEXPR_COND_TYPE_ANY: {
+            result = false;
+            for(int i = 0; i < cond->u.subconds.subconds_len; i++){
+                valexpr_cond_t *subcond = cond->u.subconds.subconds[i];
+                bool subresult;
+                err = valexpr_cond_eval(subcond, context, &subresult);
+                if(err)return err;
+                if(subresult){
+                    result = true;
+                    break;
+                }
+            }
+            break;
+        }
+        case VALEXPR_COND_TYPE_ALL: {
+            result = true;
+            for(int i = 0; i < cond->u.subconds.subconds_len; i++){
+                valexpr_cond_t *subcond = cond->u.subconds.subconds[i];
+                bool subresult;
+                err = valexpr_cond_eval(subcond, context, &subresult);
+                if(err)return err;
+                if(!subresult){
+                    result = false;
+                    break;
+                }
+            }
+            break;
+        }
+        default:
+            fprintf(stderr, "Unrecognized cond type: %i\n", cond->type);
+            return 2;
+    }
+
+    *result_ptr = cond->not? !result: result;
+    return 0;
+}
+
+bool valexpr_cond_get_bool(valexpr_cond_t *cond, valexpr_context_t *context){
+    bool result;
+    int err = valexpr_cond_eval(cond, context, &result);
+    if(err){
+        fprintf(stderr, "Error while getting bool from valexpr_cond\n");
+        return false;
+    }
+    return result;
+}

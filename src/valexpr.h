@@ -5,6 +5,7 @@
 
 #include "lexer.h"
 #include "vars.h"
+#include "array.h"
 
 
 enum valexpr_type {
@@ -30,6 +31,23 @@ static const char *valexpr_type_msg(int type){
 }
 
 
+enum valexpr_cond_type {
+    VALEXPR_COND_TYPE_EXPR,
+    VALEXPR_COND_TYPE_ANY,
+    VALEXPR_COND_TYPE_ALL,
+    VALEXPR_COND_TYPES
+};
+
+static const char *valexpr_cond_type_msg(int type){
+    switch(type){
+        case VALEXPR_COND_TYPE_EXPR: return "expr";
+        case VALEXPR_COND_TYPE_ANY: return "any";
+        case VALEXPR_COND_TYPE_ALL: return "all";
+        default: return "unknown";
+    }
+}
+
+
 typedef struct valexpr {
     /* An expression specifying a val_t */
     int type; /* enum valexpr_type */
@@ -37,13 +55,24 @@ typedef struct valexpr {
         val_t val;
         struct valexpr *key_expr;
         struct {
-            bool cond_not; /* Inverts cond_expr's value */
-            struct valexpr *cond_expr;
+            struct valexpr_cond *cond;
             struct valexpr *then_expr;
             struct valexpr *else_expr;
         } if_expr;
     } u;
 } valexpr_t;
+
+typedef struct valexpr_cond {
+    int type; /* enum valexpr_cond_type */
+    bool not; /* Inverts cond's value */
+    union {
+        struct valexpr expr;
+        struct {
+            ARRAY_DECL(struct valexpr_cond*, subconds)
+        } subconds;
+    } u;
+} valexpr_cond_t;
+
 
 typedef struct valexpr_context {
     vars_t *yourvars;
@@ -56,6 +85,7 @@ typedef struct valexpr_context {
 void valexpr_cleanup(valexpr_t *expr);
 int valexpr_copy(valexpr_t *expr1, valexpr_t *expr2);
 void valexpr_fprintf(valexpr_t *expr, FILE *file);
+void valexpr_set_literal_null(valexpr_t *expr);
 void valexpr_set_literal_bool(valexpr_t *expr, bool b);
 void valexpr_set_literal_int(valexpr_t *expr, int i);
 void valexpr_set_literal_str(valexpr_t *expr, const char *cs);
@@ -70,5 +100,15 @@ int valexpr_set(valexpr_t *expr, valexpr_context_t *context,
 bool valexpr_get_bool(valexpr_t *expr, valexpr_context_t *context);
 int valexpr_get_int(valexpr_t *expr, valexpr_context_t *context);
 const char *valexpr_get_str(valexpr_t *expr, valexpr_context_t *context);
+
+
+void valexpr_cond_init(valexpr_cond_t *cond, int type, bool not);
+void valexpr_cond_cleanup(valexpr_cond_t *cond);
+int valexpr_cond_copy(valexpr_cond_t *cond1, valexpr_cond_t *cond2);
+void valexpr_cond_fprintf(valexpr_cond_t *cond, FILE *file);
+int valexpr_cond_parse(valexpr_cond_t *cond, fus_lexer_t *lexer);
+int valexpr_cond_eval(valexpr_cond_t *cond, valexpr_context_t *context,
+    bool *result_ptr);
+bool valexpr_cond_get_bool(valexpr_cond_t *cond, valexpr_context_t *context);
 
 #endif
