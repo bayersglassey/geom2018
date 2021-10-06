@@ -182,6 +182,43 @@ $SET_STR HIT_THE_SWITCH: lines:
     ;;                                               with your spit.
     ;;
 
+$SET_STR JUMP_FROM_HERE: lines:
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;                    JUMP FROM HERE!!!
+
 $SET_STR WHAT_ELSE: lines:
     ;;
     ;;
@@ -353,13 +390,19 @@ submaps:
                 inherit_text
                 pos: (-7 4)
             :
-                file: "data/maps/tutorial3/start3_switched.fus"
-                text:
-                    if mapvar("switch2") then
-                        if not mapvar("switch3") then $GET_STR START3_SWITCHED_HINT else null
-                    else null
+                file: "data/maps/tutorial3/start3_switched_a.fus"
+                inherit_text
                 visible: mapvar("switch2")
                 pos: (0 10)
+                submaps:
+                    :
+                        file: "data/maps/tutorial3/start3_switched_b.fus"
+                        text:
+                            if mapvar("start_eye_e_open") then
+                                if mapvar("switch2") then $GET_STR START3_SWITCHED_HINT else null
+                            else null
+                        inherit_visible
+                        pos: (11 2)
             :
                 file: "data/maps/tutorial3/start3_switched_blocker.fus"
 
@@ -393,7 +436,14 @@ submaps:
         mapper: ("triple")
     :
         file: "data/maps/tutorial3/start.fus"
-        text: if mapvar("switch1") then $GET_STR WHAT_ELSE else $GET_STR HIT_THE_SWITCH
+        text:
+            if any:
+                mapvar("start_eye_a_open")
+                mapvar("start_eye_b_open")
+                mapvar("start_eye_c_open")
+            then if mapvar("switch1") then $GET_STR WHAT_ELSE else $GET_STR HIT_THE_SWITCH
+            else null
+        text: if mapvar("start_eye_d_open") then if mapvar("switch1") then null else $GET_STR JUMP_FROM_HERE else null
         pos: eval: (0 0) + (11 -14) + (7 -16) + (0 -12) + (-10 -8)
         rot: 4
         camera: (-5 0)
@@ -409,6 +459,6 @@ submaps:
                 pos: (2 -7)
             :
                 file: "data/maps/tutorial3/start5_switched.fus"
-                text: $GET_STR WHAT_ELSE
+                inherit_text
                 visible: mapvar("switch1")
                 pos: (-9 -11)
