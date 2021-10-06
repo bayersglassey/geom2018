@@ -1,0 +1,14 @@
+parts:
+    "e": recording "data/recs/eye.fus"
+        vars:
+            "opened_key": "start_eye_e_open"
+collmap:
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;     .   .   .   + - +   .   .   .
+    ;;                /*\*/*\
+    ;;   .   .   .   + -(?)- +   .   .   .   [e]
+    ;;                \*/*\*/
+    ;;     .   .   .   + - +   .   .   .
+    ;;
