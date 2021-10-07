@@ -1,6 +1,12 @@
 
 # Expected vars:
 # NS (str), e.g. "player_"
+# PLAYER_AIMER (bool)
+# PLAYER_BIRD (bool)
+# PLAYER_FLIER (bool)
+# PLAYER_SPIKEY (bool)
+# PLAYER_ROLLER (bool)
+# PLAYER_EYE (bool)
 
 # NOTE: make sure "stand" is the first anim, so any imports
 # should go below it
@@ -76,6 +82,13 @@ stand:
         then:
             goto: bird_crawl
             delay: 1
+
+    # Blink
+    $IF PLAYER_EYE:
+        if:
+            key: wasdown x
+        then:
+            goto delay: eye_closing
 
     # Crawl
     if:
@@ -243,6 +256,22 @@ sleep:
         key: isdown l
         key: isdown r
     then: goto: crawl
+
+$IF PLAYER_EYE:
+    eye_closing:
+        rgraph: $PREFIX NS "eye_closing"
+        hitbox: collmap("stand")
+        if() then: goto: eye_closed
+    eye_unclosing:
+        rgraph: $PREFIX NS "eye_unclosing"
+        hitbox: collmap("stand")
+        if() then: goto: stand
+    eye_closed:
+        rgraph: $PREFIX NS "eye_closed"
+        hitbox: collmap("stand")
+        if:
+            key: not isdown x
+        then: goto delay: eye_unclosing
 
 mostly_dead:
     rgraph: "dead_cycle"
