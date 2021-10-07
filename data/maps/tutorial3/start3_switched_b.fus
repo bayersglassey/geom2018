@@ -1,5 +1,6 @@
 parts:
     "e": recording "data/recs/eye.fus"
+        visible: mapvar("switch2")
         vars:
             "antikey": "switch3"
             "opened_key": "start_eye_e_open"

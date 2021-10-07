@@ -292,15 +292,20 @@ submaps:
                         pos: (11 2)
             :
                 file: "data/maps/tutorial3/start3_switched_blocker.fus"
-
-                # This monstrosity of a conditional is an indicator that our valexpr system is a giant hack
-                visible: if mapvar("switch2") then if not mapvar("switch3") then T else F else F
-
+                visible:
+                    if all:
+                        mapvar("switch2")
+                        not mapvar("switch3")
+                    then T else F
                 pos: (0 10)
                 camera: (2 0)
             :
                 file: "data/maps/tutorial3/miniblocker_line.fus"
-                visible: if mapvar("switch1") then if not mapvar("switch2") then T else F else F
+                visible:
+                    if all:
+                        mapvar("switch1")
+                        not mapvar("switch2")
+                    then T else F
                 pos: (-1 4)
     :
         file: "data/maps/tutorial3/start.fus"
@@ -312,14 +317,6 @@ submaps:
         recs:
             : relative (-1 -4) 0 n "data/recs/death_roller_r.fus"
         submaps:
-            :
-                file: "data/maps/tutorial3/start_save.fus"
-                visible: not mapvar("switch1")
-                inherit_rot
-            :
-                file: "data/maps/tutorial3/start_save_alt.fus"
-                visible: mapvar("switch1")
-                inherit_rot
             :
                 file: "data/maps/tutorial3/start4_switched.fus"
                 visible: mapvar("switch1")
@@ -349,12 +346,7 @@ submaps:
             : relative (11 -2) 0 n "data/recs/death_roller_l.fus"
         submaps:
             :
-                file: "data/maps/tutorial3/start_save.fus"
-                visible: not mapvar("switch1")
-                inherit_rot
-            :
                 file: "data/maps/tutorial3/start_save_alt.fus"
-                visible: mapvar("switch1")
                 inherit_rot
             :
                 file: "data/maps/tutorial3/start5.fus"
