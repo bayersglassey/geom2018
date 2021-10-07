@@ -951,6 +951,12 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
         if(err)return err;
     }
 
+    if(fus_lexer_got(lexer, "inherit_rot")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+        context->rot = rot_contain(space->rot_max,
+            context->rot + parent_context->rot);
+    }
     if(fus_lexer_got(lexer, "rot")){
         err = fus_lexer_next(lexer);
         if(err)return err;
