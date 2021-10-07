@@ -10,8 +10,10 @@ WIW=`echo "$WININFO" | sed -nr -e 's/^.*Width: +([0-9]+).*$/\1/p'`
 WIH=`echo "$WININFO" | sed -nr -e 's/^.*Height: +([0-9]+).*$/\1/p'`
 echo "wininfo: x, y, w, h = $WIX, $WIY, $WIW, $WIH"
 
-w=512
-h=384
+#w=512
+#h=384
+w="$WIW"
+h="$WIH"
 x=$(expr $WIX + '(' $WIW - $w ')' / 2)
 y=$(expr $WIY + '(' $WIH - $h ')' / 2)
 
