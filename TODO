@@ -885,15 +885,6 @@ Oct 6, 2021:
     reference to a val_t (or even var_t?!?!?!)... but we can provide two such
     vals/vars as singletons, one for T and the other for F.
 
-* Laptop fan is going nuts when I run this under Chrome.
-  Maybe the issue is that I'm calling SDL_Delay (see test_app_mainloop_step) inside my main
-  Emscripten loop (see test_app_mainloop_emcc), which is being run using browser's
-  requestAnimationFrame API, which means... I'm pausing during the BROWSER'S frame-drawing
-  time. O_o
-  Oh lord, what have I done?
-  Anyway, probably just need to move (when #ifdef __EMSCRIPTEN__) the call to SDL_Delay
-  out of test_app_mainloop_step into test_app_mainloop_emcc. Yeah?
-
 MEMORY SAVING MEASURES:
 
     * Cache all hexcollmaps by filename + rot

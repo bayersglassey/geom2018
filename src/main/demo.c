@@ -24,8 +24,25 @@ const int DEFAULT_PLAYERS_PLAYING = 1;
 
 #ifdef __EMSCRIPTEN__
 #include "../emscripten.h"
+
+/* Initialize to SDL_GetTicks() before first call to test_app_mainloop_emcc */
+Uint32 tick0;
+
 static void test_app_mainloop_emcc(void *arg){
     test_app_t *app = arg;
+
+    Uint32 tick1 = SDL_GetTicks();
+    Uint32 took = tick1 - tick0;
+
+    /* This function is called by browser's requestAnimationFrame thing,
+    so possibly every vsync.
+    We only run a step of the game loop if the proper amount of time has
+    passed since last step. */
+    if(took < app->delay_goal)return;
+
+    app->took = took;
+    tick0 = tick1;
+
     int e = test_app_mainloop_step(app);
     if(e){
         fprintf(stderr, "%s: Exiting with error: %i\n", __func__, e);
@@ -189,6 +206,7 @@ int main(int n_args, char *args[]){
                     fprintf(stderr, "Couldn't init test app\n");
                 }else{
 #ifdef __EMSCRIPTEN__
+                    tick0 = SDL_GetTicks();
                     emscripten_set_main_loop_arg(&test_app_mainloop_emcc,
                         &app, 0, true);
 #else

@@ -250,8 +250,16 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 
 int test_app_mainloop(test_app_t *app){
     while(app->loop){
+        Uint32 tick0 = SDL_GetTicks();
+
         int err = test_app_mainloop_step(app);
         if(err)return err;
+
+        Uint32 tick1 = SDL_GetTicks();
+        app->took = tick1 - tick0;
+        if(app->took < app->delay_goal){
+            SDL_Delay(app->delay_goal - app->took);
+        }
     }
     return 0;
 }
@@ -376,7 +384,6 @@ static int test_app_poll_events(test_app_t *app){
 
 int test_app_mainloop_step(test_app_t *app){
     int err;
-    Uint32 tick0 = SDL_GetTicks();
 
     hexgame_t *game = &app->hexgame;
 
@@ -405,10 +412,6 @@ int test_app_mainloop_step(test_app_t *app){
 
     err = test_app_poll_events(app);
     if(err)return err;
-
-    Uint32 tick1 = SDL_GetTicks();
-    app->took = tick1 - tick0;
-    if(app->took < app->delay_goal)SDL_Delay(app->delay_goal - app->took);
 
     return 0;
 }
