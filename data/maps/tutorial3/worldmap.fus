@@ -7,6 +7,7 @@ vars:
     "switch1": F
     "switch2": F
     "switch3": F
+    "final_switch": F
 
     nosave "start_eye_a_open": 0
     nosave "start_eye_b_open": 0
@@ -14,9 +15,15 @@ vars:
     nosave "start_eye_d_open": 0
     nosave "start_eye_e_open": 0
 
-$SET_STR LAST_ONE: lines: at(25 23)
-    ;;Almost finished
-    ;;  the tutorial!
+$SET_STR ITS_YOU: lines: at(25 21)
+    ;;It's you.
+
+$SET_STR LAST_THINGS: lines: at(28 24)
+    ;;It's you!..
+
+$SET_STR THEN_RELEASE: lines: at(29 36)
+    ;;Soon we can
+    ;;    release you.
 
 $SET_STR LOCKED_OUT: lines: at(25 24)
     ;;You're locked out!
@@ -109,6 +116,28 @@ $SET_STR START3_SWITCHED_HINT: lines: at(21 15)
     ;;  your spit
     ;;   bounces)
 
+$SET_STR FINAL_YOURE_BACK: lines: at(28 23)
+    ;;You're back.
+
+$SET_STR FINAL_RELEASE1: lines: at(25 23)
+    ;;We can release you!
+
+$SET_STR FINAL_RELEASE2: lines: at(28 26)
+    ;;Release...
+
+$SET_STR FINAL_RELEASE3: lines: at(29 36)
+    ;;Release!..
+
+$SET_STR FINAL_RELEASE4: lines: at(27 21)
+    ;;Keep going.
+
+$SET_STR FINAL_RELEASE5: lines: at(28 25)
+    ;;We'll be
+    ;;  watching.
+
+$SET_STR FINAL_RELEASE6: lines: at(29 36)
+    ;;Good.
+
 submaps:
     :
         file: "data/maps/tutorial3/floaty_start.fus"
@@ -117,16 +146,46 @@ submaps:
         mapper: ("quadruple")
     :
         file: "data/maps/tutorial3/start.fus"
+        text: if mapvar("start_eye_a_open") then if mapvar("switch1") then null else $GET_STR ITS_YOU else null
+        text: if mapvar("start_eye_b_open") then if mapvar("switch1") then null else $GET_STR LAST_THINGS else null
+        text: if mapvar("start_eye_c_open") then if mapvar("switch1") then null else $GET_STR THEN_RELEASE else null
         text:
-            if any:
-                mapvar("start_eye_a_open")
-                mapvar("start_eye_b_open")
-                mapvar("start_eye_c_open")
-            then if mapvar("switch1") then null else $GET_STR LAST_ONE else null
+            if mapvar("start_eye_a_open") then
+                if mapvar("final_switch") then $GET_STR FINAL_RELEASE4
+                else if mapvar("switch3") then $GET_STR FINAL_RELEASE1 else null
+            else null
+        text:
+            if mapvar("start_eye_b_open") then
+                if mapvar("final_switch") then $GET_STR FINAL_RELEASE5
+                else if mapvar("switch3") then $GET_STR FINAL_RELEASE2 else null
+            else null
+        text:
+            if mapvar("start_eye_c_open") then
+                if mapvar("final_switch") then $GET_STR FINAL_RELEASE6
+                else if mapvar("switch3") then $GET_STR FINAL_RELEASE3 else null
+            else null
+        text:
+            if mapvar("start_eye_d_open") then
+                if mapvar("final_switch") then null
+                else if mapvar("switch3") then $GET_STR FINAL_YOURE_BACK else null
+            else null
         pos: eval: (0 0)
         camera: (6 0)
         mapper: ("triple")
         submaps:
+            :
+                file: "data/maps/tutorial3/start_save.fus"
+                visible: not mapvar("switch1")
+                inherit_rot
+            :
+                file: "data/maps/tutorial3/start_save_alt.fus"
+                visible: mapvar("switch1")
+                inherit_rot
+            :
+                file: "data/maps/tutorial3/final_switch.fus"
+                visible: mapvar("switch3")
+                pos: (0 -10)
+                rot: 3
             :
                 file: "data/maps/tutorial3/start_exit.fus"
                 text:
@@ -134,7 +193,6 @@ submaps:
                         mapvar("start_eye_a_open")
                         mapvar("start_eye_b_open")
                         mapvar("start_eye_c_open")
-                        mapvar("start_eye_d_open")
                     then if mapvar("switch3") then null else $GET_STR LOCKED_OUT else null
                 pos: (3 -5)
                 tileset: "data/tileset2.fus"
@@ -147,14 +205,8 @@ submaps:
                 submaps:
                     :
                         file: "data/maps/tutorial3/start_exit_blocker.fus"
-                        text:
-                            if any:
-                                mapvar("start_eye_a_open")
-                                mapvar("start_eye_b_open")
-                                mapvar("start_eye_c_open")
-                                mapvar("start_eye_d_open")
-                            then if mapvar("switch3") then null else $GET_STR LOCKED_OUT else null
-                        visible: not mapvar("switch3")
+                        inherit_text
+                        visible: not mapvar("final_switch")
     :
         file: "data/maps/tutorial3/blocker.fus"
         pos: eval: (0 0) + (-8 -20)
@@ -185,6 +237,11 @@ submaps:
                 visible: mapvar("switch3")
             : relative (10  4) 0 n "data/recs/death_roller_l.fus"
                 visible: mapvar("switch3")
+        submaps:
+            :
+                file: "data/maps/tutorial3/start_save.fus"
+                visible: not mapvar("switch1")
+                inherit_rot
     :
         file: "data/maps/tutorial3/start.fus"
         text:
@@ -207,6 +264,14 @@ submaps:
         mapper: ("triple")
         tileset: "data/tileset1.fus"
         submaps:
+            :
+                file: "data/maps/tutorial3/start_save.fus"
+                visible: not mapvar("switch1")
+                inherit_rot
+            :
+                file: "data/maps/tutorial3/start_save_alt.fus"
+                visible: mapvar("switch1")
+                inherit_rot
             :
                 file: "data/maps/tutorial3/lone_eye.fus"
                 inherit_text
@@ -248,6 +313,14 @@ submaps:
             : relative (-1 -4) 0 n "data/recs/death_roller_r.fus"
         submaps:
             :
+                file: "data/maps/tutorial3/start_save.fus"
+                visible: not mapvar("switch1")
+                inherit_rot
+            :
+                file: "data/maps/tutorial3/start_save_alt.fus"
+                visible: mapvar("switch1")
+                inherit_rot
+            :
                 file: "data/maps/tutorial3/start4_switched.fus"
                 visible: mapvar("switch1")
                 pos: (-5 -2)
@@ -275,6 +348,14 @@ submaps:
             : relative (-1 -4) 0 n "data/recs/death_roller_r.fus"
             : relative (11 -2) 0 n "data/recs/death_roller_l.fus"
         submaps:
+            :
+                file: "data/maps/tutorial3/start_save.fus"
+                visible: not mapvar("switch1")
+                inherit_rot
+            :
+                file: "data/maps/tutorial3/start_save_alt.fus"
+                visible: mapvar("switch1")
+                inherit_rot
             :
                 file: "data/maps/tutorial3/start5.fus"
                 inherit_text

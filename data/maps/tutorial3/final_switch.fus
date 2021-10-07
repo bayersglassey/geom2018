@@ -1,0 +1,9 @@
+parts:
+    "s": recording "data/recs/switch.fus"
+        visible: mapvar("switch3")
+        vars:
+            "key": "final_switch"
+collmap:
+    ;;    .
+    ;;
+    ;; (?)  .   [s]
