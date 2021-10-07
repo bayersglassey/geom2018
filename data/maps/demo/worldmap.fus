@@ -18,8 +18,12 @@ actors:
     : (21 -15) 5 y "actor/airollerplayer.fus" "player_cpu"
 
 vars:
+    "passed_start": F
+    "passed_start2": F
+
     "map3_blocker": F
     "map3x_blocker": F
+
     "jungle_cage": F
     "vines3_door": F
 

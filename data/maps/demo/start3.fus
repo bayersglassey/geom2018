@@ -1,4 +1,7 @@
-
+parts:
+    "h": recording "data/recs/hotspot.fus"
+        vars:
+            "key": "passed_start2"
 collmap:
     ;;                                                                       S
     ;;                                                     + - + - + - + - + - + - + - +
@@ -13,7 +16,7 @@ collmap:
     ;;
     ;;           .                                                           .       .
     ;;
-    ;;         .                               .                               .       .
+    ;;         ?                               .                               .       .       [h]
     ;;
     ;;       .                                                                   .       .
     ;;  %* */                                                                                  [ooo]

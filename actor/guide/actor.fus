@@ -1,6 +1,7 @@
 
 start:
-    if:
+    if: any:
+        get_bool mapvar("passed_start")
         coll: bodies any yes
             ;;
             ;;
@@ -16,7 +17,8 @@ start:
         play: "actor/guide/rec/start.fus"
 
 start2:
-    if:
+    if: any:
+        get_bool mapvar("passed_start2")
         coll: bodies any yes
             ;;   + - + - +
             ;;  /*\*/*\*/*\
