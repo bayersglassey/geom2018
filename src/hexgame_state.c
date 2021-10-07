@@ -84,6 +84,15 @@ static int _get_vars(hexgame_state_context_t *context,
 }
 
 
+static int _get_rgraph_delay(rendergraph_t *rgraph){
+    if(!rgraph)return 0;
+    int delay = rgraph->n_frames;
+    if(rgraph->animation_type == rendergraph_animation_type_oscillate){
+        delay *= 2;
+    }
+    return delay > 0? delay - 1: 0;
+}
+
 int state_effect_goto_apply_to_body(state_effect_goto_t *gotto,
     body_t *body
 ){
@@ -92,9 +101,7 @@ int state_effect_goto_apply_to_body(state_effect_goto_t *gotto,
     err = body_set_state(body, gotto->name, false);
     if(err)return err;
     if(gotto->delay && body->state){
-        rendergraph_t *rgraph = body->state->rgraph;
-        int delay = rgraph? rgraph->n_frames - 1: 0;
-        body->cooldown = delay;
+        body->cooldown = _get_rgraph_delay(body->state->rgraph);
     }
     return 0;
 }
@@ -107,9 +114,7 @@ int state_effect_goto_apply_to_actor(state_effect_goto_t *gotto,
     err = actor_set_state(actor, gotto->name);
     if(err)return err;
     if(gotto->delay && actor->state){
-        rendergraph_t *rgraph = actor->state->rgraph;
-        int delay = rgraph? rgraph->n_frames - 1: 0;
-        actor->wait = delay;
+        actor->wait = _get_rgraph_delay(actor->state->rgraph);
     }
     return 0;
 }
