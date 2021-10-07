@@ -1,6 +1,6 @@
 
 unit: 3 2 0 -1
-spawn: "data/maps/tutorial3/start.fus"
+spawn: "data/maps/tutorial3/floaty_start.fus"
 default_palette: "data/pal1.fus"
 default_tileset: "data/tileset1.fus"
 vars:
@@ -14,34 +14,12 @@ vars:
     nosave "start_eye_d_open": 0
     nosave "start_eye_e_open": 0
 
-$SET_STR LAST_ONE: lines:
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;                         Almost finished
-    ;;                           the tutorial!
+$SET_STR LAST_ONE: lines: at(25 23)
+    ;;Almost finished
+    ;;  the tutorial!
 
-$SET_STR LOCKED_OUT: lines:
+$SET_STR LOCKED_OUT: lines: at(25 24)
+    ;;You're locked out!
     ;;
     ;;
     ;;
@@ -52,63 +30,32 @@ $SET_STR LOCKED_OUT: lines:
     ;;
     ;;
     ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;                         You're locked out!
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;                              Better
-    ;;                              look around
-    ;;                              for a way to
-    ;;                              open it.
+    ;;     Better
+    ;;     look around
+    ;;     for a way to
+    ;;     open it.
 
-$SET_STR CREATURES: lines:
+$SET_STR CREATURES: lines: at(16 16)
+    ;;These
+    ;;   rolling blue
+    ;;         creatures
+    ;;
+    ;;           are tame,
     ;;
     ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;                These
-    ;;                   rolling blue
-    ;;                         creatures
-    ;;
-    ;;                           are tame,
-    ;;
-    ;;
-    ;;                     and harmless.
+    ;;     and harmless.
 
-$SET_STR DEATH_CREATURES: lines:
+$SET_STR DEATH_CREATURES: lines: at(20 20)
+    ;; ....however,
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;  bright red
+    ;;creatures
     ;;
     ;;
     ;;
@@ -119,123 +66,24 @@ $SET_STR DEATH_CREATURES: lines:
     ;;
     ;;
     ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;                     ....however,
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;                      bright red
-    ;;                    creatures
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;                                      are death
-    ;;                                         to touch.
+    ;;                  are death
+    ;;                     to touch.
 
-$SET_STR HIT_THE_SWITCH: lines:
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;                                              Hit the switch
-    ;;                                               with your spit.
-    ;;
+$SET_STR HIT_THE_SWITCH: lines: at(46 25)
+    ;;Hit the switch
+    ;; with your spit.
 
-$SET_STR JUMP_FROM_HERE: lines:
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;                    JUMP FROM HERE!!!
+$SET_STR JUMP_FROM_HERE: lines: at(20 34)
+    ;;JUMP FROM HERE!!!
 
-$SET_STR WHAT_ELSE: lines:
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;       What else
-    ;;         has changed?
-    ;;
+$SET_STR WHAT_ELSE: lines: at(7 11)
+    ;;What else
+    ;;  has changed?
 
-$SET_STR START3_SWITCHED: lines:
+$SET_STR START3_SWITCHED: lines: at(20 12)
+    ;;      You can
+    ;;      hit this
+    ;;      switch!
     ;;
     ;;
     ;;
@@ -244,54 +92,29 @@ $SET_STR START3_SWITCHED: lines:
     ;;
     ;;
     ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;                          You can
-    ;;                          hit this
-    ;;                          switch!
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;                    ...it's tricky
-    ;;                              though.
+    ;;...it's tricky
+    ;;          though.
 
-$SET_STR START3_SWITCHED_HINT: lines:
+$SET_STR START3_SWITCHED_HINT: lines: at(21 15)
+    ;;        Hit it
+    ;;                from
+    ;;                       here
     ;;
     ;;
     ;;
     ;;
     ;;
     ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;                             Hit it
-    ;;                                     from
-    ;;                                            here
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;                     (Remember:
-    ;;                       your spit
-    ;;                        bounces)
+    ;;(Remember:
+    ;;  your spit
+    ;;   bounces)
 
 submaps:
+    :
+        file: "data/maps/tutorial3/floaty_start.fus"
+        pos: eval: (-7 0)
+        camera: (0 0)
+        mapper: ("quadruple")
     :
         file: "data/maps/tutorial3/start.fus"
         text:
@@ -303,7 +126,6 @@ submaps:
         pos: eval: (0 0)
         camera: (6 0)
         mapper: ("triple")
-        tileset: "data/tileset1.fus"
         submaps:
             :
                 file: "data/maps/tutorial3/start_exit.fus"
@@ -443,7 +265,7 @@ submaps:
                 mapvar("start_eye_c_open")
             then if mapvar("switch1") then $GET_STR WHAT_ELSE else $GET_STR HIT_THE_SWITCH
             else null
-        text: if mapvar("start_eye_d_open") then if mapvar("switch1") then null else $GET_STR JUMP_FROM_HERE else null
+        text: if mapvar("start_eye_d_open") then if mapvar("switch1") then $GET_STR WHAT_ELSE else $GET_STR JUMP_FROM_HERE else null
         pos: eval: (0 0) + (11 -14) + (7 -16) + (0 -12) + (-10 -8)
         rot: 4
         camera: (-5 0)
