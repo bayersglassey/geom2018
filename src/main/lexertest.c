@@ -147,6 +147,10 @@ static int _run_tests(){
         "$SET_STR A (lines (\"a\" \"b\")) $GET_STR A",
         "\"a\\nb\\n\"");
     if(err)return err;
+    err = run_test(
+        "$SET_STR A (lines (at(2 3) \"a\" \"b\")) $GET_STR A",
+        "\"\\n\\n\\n  a\\n  b\\n\"");
+    if(err)return err;
 
     /* INT macros */
     err = run_test(

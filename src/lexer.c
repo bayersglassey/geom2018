@@ -639,7 +639,9 @@ int fus_lexer_get_str(fus_lexer_t *lexer, char **s){
     return fus_lexer_next(lexer);
 }
 
-static int _fus_lexer_get_lines(fus_lexer_t *lexer, char **s){
+static int _fus_lexer_get_lines(fus_lexer_t *lexer, char **s,
+    int add_x, int add_y
+){
     int err;
 
     /* The string we use for newline.
@@ -677,17 +679,37 @@ static int _fus_lexer_get_lines(fus_lexer_t *lexer, char **s){
     }
 
     /* Calculate length of final string */
-    size_t final_len = 0;
+    /* For each add_y we add 2 chars: "\\n" */
+    size_t final_len = 2 * add_y;
     for(int i = 0; i < n_lines; i++){
+        /* For each add_x we add a ' ' to start of line */
+        final_len += add_x;
         final_len += strlen(lines[i]) + newline_len;
     }
 
-    /* Build final string */
+    /* Allocate final string */
     char *final_s0 = malloc(sizeof(*final_s0) * (final_len + 1));
+    if(!final_s0){
+        perror("malloc");
+        return 1;
+    }
+
+    /* Build final string */
     char *final_s = final_s0;
+    for(int i = 0; i < add_y; i++){
+        final_s[0] = '\\';
+        final_s[1] = 'n';
+        final_s += 2;
+    }
     for(int i = 0; i < n_lines; i++){
         char *line = lines[i];
         size_t line_len = strlen(line);
+
+        for(int j = 0; j < add_x; j++){
+            final_s[0] = ' ';
+            final_s++;
+        }
+
         strcpy(final_s, line);
         final_s += line_len;
         strcpy(final_s, newline);
@@ -741,7 +763,30 @@ int _fus_lexer_get_str_fancy(fus_lexer_t *lexer, char **s){
             err = _fus_lexer_next(lexer);
             if(err)return err;
 
-            err = _fus_lexer_get_lines(lexer, s);
+            int add_x = 0; /* Add this many ' ' at start of each line */
+            int add_y = 0; /* Add this many '\n' at start of final string */
+            if(fus_lexer_got(lexer, "at")){
+                err = _fus_lexer_next(lexer);
+                if(err)return err;
+                err = _fus_lexer_get(lexer, "(");
+                if(err)return err;
+                err = _fus_lexer_next(lexer);
+                if(err)return err;
+                err = _fus_lexer_get_int(lexer, &add_x);
+                if(err)return err;
+                err = _fus_lexer_next(lexer);
+                if(err)return err;
+                err = _fus_lexer_get_int(lexer, &add_y);
+                if(err)return err;
+                err = _fus_lexer_next(lexer);
+                if(err)return err;
+                err = _fus_lexer_get(lexer, ")");
+                if(err)return err;
+                err = _fus_lexer_next(lexer);
+                if(err)return err;
+            }
+
+            err = _fus_lexer_get_lines(lexer, s, add_x, add_y);
             if(err)return err;
 
             err = _fus_lexer_get(lexer, ")");
