@@ -871,6 +871,20 @@ Oct 2, 2021:
 Oct 6, 2021:
 ------------
 
+* In tutorial3/worldmap.fus, there is this monstrosity:
+                visible:
+                    if all:
+                        mapvar("switch2")
+                        not mapvar("switch3")
+                    then T else F
+    ...clearly we need something more like:
+                visible: cond: all:
+                    mapvar("switch2")
+                    not mapvar("switch3")
+    ...and this requires (currently) that this "cond: ..." syntax return a
+    reference to a val_t (or even var_t?!?!?!)... but we can provide two such
+    vals/vars as singletons, one for T and the other for F.
+
 MEMORY SAVING MEASURES:
 
     * Cache all hexcollmaps by filename + rot
