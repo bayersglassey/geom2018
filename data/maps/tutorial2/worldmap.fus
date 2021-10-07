@@ -110,6 +110,6 @@ submaps:
                             doors:
                                 :
                                     map: "data/maps/tutorial3/worldmap.fus"
-                                    pos: (0 0)
+                                    pos: (-7 0)
                                     rot: 0
                                     turn: n
