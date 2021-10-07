@@ -857,5 +857,35 @@ Oct 2, 2021:
   ...this can be weird when a door/savepoint looks like it's "on the ceiling".
   Then you can't get into it if you're crouching on the ceiling.
 
-* Hermit enters the door he opens, appearing at end of water area, where he waits
-  if necessary for that side of the door to be unblocked. Then... dunno what happens next.
+* VISUAL CLUE SHOWING YOUR SPAWN LOCATION
+    * (At least, showing last-touched savepoint)
+
+* You're leading another spider somewhere. At one point you go ahead, other spider
+  waits behind.
+  You come upon an eye, and a switch. The eye says "pssst!". When you hit the switch,
+  eye closes, and other spider comes up.
+  So it's as if... the eyes only open for you, and "hide" by staying closed when
+  other spiders are around.
+
+
+Oct 6, 2021:
+------------
+
+MEMORY SAVING MEASURES:
+
+    * Cache all hexcollmaps by filename + rot
+
+    * Add properties to "shapes" (the fus structures which are turned into rendergraphs)
+      indicating whether their bitmaps should be cached
+
+        * See prend->cache_bitmaps (and play with "bin/demo --dont_cache_bitmaps")
+
+            * Currently runs afoul of out-of-bound check in surface8_get_pixel_ptr,
+              but that only issues a warning... maybe we should just remove the
+              warning?
+
+            * Also messes up... something... about rendering.
+              prismelmapper->solid, maybe?..
+
+    * Collmap parser should "trim" empty space around edge of collmap
+      (E.g. as left by "."s)
