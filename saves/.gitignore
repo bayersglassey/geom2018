@@ -1,0 +1,5 @@
+
+# Ignore every file in this directory except this .gitignore file
+# (The idea being to store save files in here)
+*
+!.gitignore

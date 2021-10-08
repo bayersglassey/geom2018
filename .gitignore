@@ -5,7 +5,6 @@
 *.o
 
 # demo stuff
-/respawn*.txt
 /data/rec???.fus
 /screen.bmp
 

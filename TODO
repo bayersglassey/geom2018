@@ -614,7 +614,7 @@ NOW THAT MAPVARS ARE PART OF WHAT'S SAVED... save points should be activated if 
 any mapvars????
 (Not just if "the distance from your last savepoint is more than 3" or whatever we check now)
 ...so, we want a mapvars_diff function or something?
-...oooof, no, because we're diffing against the contents of respawn_0.txt or whatever. GAH
+...oooof, no, because we're diffing against the contents of saves/0.txt or whatever. GAH
 ...see hexgame_savelocation_{save,load}.
 ...properest solution is to add a "dict" of maps and their vars to hexgame_savelocation_t. :P
 

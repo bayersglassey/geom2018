@@ -29,10 +29,10 @@
 *******************/
 
 static char *generate_respawn_filename(const char *base_name, int i, const char *ext){
-    /* Generate a name, e.g. "respawn_1.txt" */
+    /* Generate a name, e.g. "saves/1.txt" */
 
     /* Defaults */
-    if(base_name == NULL)base_name = "respawn_";
+    if(base_name == NULL)base_name = "saves/";
     if(ext == NULL)ext = ".txt";
 
     int base_name_len = strlen(base_name);
