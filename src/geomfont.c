@@ -67,8 +67,6 @@ int geomfont_init(geomfont_t *geomfont, char *name, font_t *font,
      * CREATE CHAR RGRAPHS *
      ***********************/
 
-    Uint8 colors[FONT_N_COLOR_VALUES] = {0, 1+8, 1+7, 1+15};
-
     for(int i = 0; i < FONT_N_CHARS; i++){
         unsigned char *char_data = font->char_data[i];
         if(!char_data){
@@ -100,13 +98,13 @@ int geomfont_init(geomfont_t *geomfont, char *name, font_t *font,
             vec_nmul(space->dims, v, -y - 1);
 
             for(int x = 0; x < char_w; x++){
-                int color_i = char_data[y * char_h + x];
+                int color = char_data[y * char_h + x];
 
                 prismel_trf_t *prismel_trf;
                 err = rendergraph_push_prismel_trf(rgraph, &prismel_trf);
                 if(err)return err;
                 prismel_trf->prismel = prismel;
-                prismel_trf->color = colors[color_i];
+                prismel_trf->color = color;
                 vec_cpy(space->dims, prismel_trf->trf.add, v);
 
                 vec_add(space->dims, v, vx);

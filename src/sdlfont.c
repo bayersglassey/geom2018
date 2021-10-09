@@ -40,17 +40,13 @@ int sdlfont_init(sdlfont_t *sdlfont, font_t *font, SDL_Palette *pal){
      * CREATE SURFACE *
      ******************/
 
-    /* 16 * 8 = 128 = FONT_N_CHARS */
+    /* 16 * 16 = 256 = FONT_N_CHARS */
     SDL_Surface *surface = surface8_create(
-        char_w * 16, char_h * 8, true, true, pal);
+        char_w * 16, char_h * 16, true, true, pal);
     if(surface == NULL)return 2;
 
     SDL_LockSurface(surface);
     SDL_memset(surface->pixels, 0, surface->h * surface->pitch);
-
-    /* "palette" indexed by font's char_data "pixel values", 0 is
-    actually transparent though */
-    Uint8 colors[FONT_N_COLOR_VALUES] = {0, 1+8, 1+7, 1+15};
 
     for(int i = 0; i < FONT_N_CHARS; i++){
         unsigned char *char_data = font->char_data[i];
@@ -64,8 +60,7 @@ int sdlfont_init(sdlfont_t *sdlfont, font_t *font, SDL_Palette *pal){
                 char_x * char_w,
                 char_y * char_h + y);
             for(int x = 0; x < char_w; x++){
-                int color_i = char_data[y * char_h + x];
-                p[x] = colors[color_i];
+                p[x] = char_data[y * char_h + x];
             }
         }
     }

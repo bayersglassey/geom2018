@@ -13,6 +13,22 @@
 
 
 
+static int _get_color(char c){
+    if(c == ' ')return 0;
+    if(c >= '0' && c <= '9')return c - '0' + 1;
+    if(c >= 'A' && c <= 'Z')return c - 'A' + 10 + 1;
+    if(c >= 'a' && c <= 'z')return c - 'a' + 10 + 1;
+    return -1;
+}
+
+static char _get_color_char(int color){
+    if(color == 0)return ' ';
+    if(color >= 1 && color <= 10)return '0' + (color - 1);
+    if(color >= 11 && color <= 16)return 'A' + (color - 1);
+    return '?';
+}
+
+
 void font_cleanup(font_t *font){
     free(font->filename);
     for(int i = 0; i < FONT_N_CHARS; i++){
@@ -137,19 +153,10 @@ int font_parse(font_t *font, fus_lexer_t *lexer){
 
             for(int x = 0; x < char_w; x++){
                 char c = line[x];
-                int value;
-                if(c == ' '){
-                    value = 0;
-                }else if(c >= '0' && c <= '9'){
-                    value = c - '0' + 1;
-                }else{
+                int value = _get_color(c);
+                if(value < 0){
                     return fus_lexer_unexpected(lexer,
-                        "' ' or a digit");
-                }
-                if(value >= FONT_N_COLOR_VALUES){
-                    fprintf(stderr, "%s: pixel value >= %i: %i\n",
-                        __func__, FONT_N_COLOR_VALUES, value);
-                    return 2;
+                        "' ' or a hexadecimal digit");
                 }
                 char_data[y * char_w + x] = value;
             }
