@@ -27,5 +27,5 @@
 # core dumps
 vgcore.*
 
-# screencast output (e.g. byzanz, recordmydesktop)
+# screencast output (e.g. byzanz, recordmydesktop, vlc)
 out.*
