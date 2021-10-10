@@ -1,0 +1,57 @@
+
+shapes:
+
+    "octopus_sm_sixth":
+
+        #   +
+        #  +++
+        # ++++
+        # .  +
+
+        #      -+
+        #     / |
+        #   +-   \
+        #   |     |
+        #  / \   -+
+        # |   | / |
+        # 0---+-  |
+        #       \ |
+        #        -+
+
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval: 1 + 1
+            : "tri" (1 0 0 0) 11 f eval: 1 + 2
+            : "sq"  (1 0 0 0)  1 f eval: 1 + 3
+
+    "octopus_sm":
+        shapes:
+            : "octopus_sm_sixth" (0 0 0 0)  0 f
+            : "octopus_sm_sixth" (0 0 0 0)  2 f
+            : "octopus_sm_sixth" (0 0 0 0)  4 f
+            : "octopus_sm_sixth" (0 0 0 0)  6 f
+            : "octopus_sm_sixth" (0 0 0 0)  8 f
+            : "octopus_sm_sixth" (0 0 0 0) 10 f
+
+
+    "octopus_sm_anim_sixth":
+        animation: oscillate 6
+        shapes:
+            : "octopus_sm_sixth" (0 0 0 0) 0 f
+        prismels:
+            : "tri" (1 1 0 0)  2 f eval(1 + 4) (1 1)
+            : "sq"  (1 1 0 0)  1 f eval(1 + 4) (2 4)
+            : "tri" (1 2 0 0)  2 f eval(1 + 3) (3 1)
+            : "sq"  (1 2 0 0)  1 f eval(1 + 3) (4 2)
+            : "tri" (1 3 0 0)  2 f eval(1 + 2) (5 1)
+
+    "octopus_sm_anim":
+        animation: cycle 12
+        shapes:
+            : "octopus_sm_anim_sixth" (0 0 0 0)  0 f  0+
+            : "octopus_sm_anim_sixth" (0 0 0 0)  2 f  2+
+            : "octopus_sm_anim_sixth" (0 0 0 0)  4 f  4+
+            : "octopus_sm_anim_sixth" (0 0 0 0)  6 f  6+
+            : "octopus_sm_anim_sixth" (0 0 0 0)  8 f  8+
+            : "octopus_sm_anim_sixth" (0 0 0 0) 10 f 10+
+
+    "octopus_anim": map ("curvy") ("octopus_sm_anim")
