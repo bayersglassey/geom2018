@@ -105,7 +105,7 @@ stand:
     then:
         move: 1 0
         turn
-        goto delay: step
+        goto delay: turn
 
     # Look up
     $IF PLAYER_AIMER:
@@ -246,6 +246,12 @@ step:
             delay: $GET_INT ROLLER_STAND_DELAY
 
     if() then: goto: stand
+
+turn:
+    rgraph: $PREFIX NS "turn"
+    hitbox: collmap("stand")
+
+    if() then: goto immediate: step
 
 sleep:
     rgraph: $PREFIX NS "sleep"

@@ -222,24 +222,11 @@ crawl_turn:
     # Like crawl_step, but without the extended hitbox
     # (so you can turn around in-place while crouching, without exposing yourself
     # to being crushed)
-    rgraph: $PREFIX NS "crawl_step"
+    rgraph: $PREFIX NS "crawl_turn"
     hitbox: collmap("crawl")
     $IF PLAYER_SPIKEY: on "crush": goto delay: crawl_shielding
 
-    if:
-        key: wentdown y
-    then:
-        spawn: $GET_STR SPIT_FUS "crouch_fly" (0 0) 0 f
-        goto delay: crawl_spit
-
-    $IF PLAYER_ROLLER:
-        if:
-            key: wentdown x
-        then:
-            goto: roller_stand
-            delay: $GET_INT ROLLER_STAND_DELAY
-
-    if() then: goto: crawl
+    if() then: goto immediate: crawl_step
 
 $IF PLAYER_SPIKEY: crawl_shielding:
     rgraph: $PREFIX NS "crawl_shielding"
