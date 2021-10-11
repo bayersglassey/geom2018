@@ -13,6 +13,11 @@
 #include "var_utils.h"
 
 
+#ifdef __EMSCRIPTEN__
+void emccdemo_syncfs();
+#endif
+
+
 void hexgame_savelocation_init(hexgame_savelocation_t *location){
     vec_zero(location->loc.pos);
     location->loc.rot = 0;
@@ -89,6 +94,12 @@ int hexgame_savelocation_save(const char *filename,
     }
 
     fclose(f);
+
+#   ifdef __EMSCRIPTEN__
+    /* Needed to actually save the IDBFS data to browser's indexedDb. */
+    emccdemo_syncfs();
+#   endif
+
     return 0;
 }
 

@@ -25,10 +25,62 @@ const int DEFAULT_PLAYERS_PLAYING = 1;
 #ifdef __EMSCRIPTEN__
 #include "../emscripten.h"
 
-/* Initialize to SDL_GetTicks() before first call to test_app_mainloop_emcc */
+/* Initialize to SDL_GetTicks() before first call to emccdemo_step */
 Uint32 tick0;
 
-static void test_app_mainloop_emcc(void *arg){
+/* Used to "pass" the app from one function to another so I don't have
+to learn how to pass C pointers around between Javascript calls */
+test_app_t *emccdemo_app;
+
+/* "emccdemo_*" function prototypes */
+void emccdemo_initial_syncfs();
+void EMSCRIPTEN_KEEPALIVE emccdemo_syncfs();
+void EMSCRIPTEN_KEEPALIVE emccdemo_start();
+void emccdemo_step(void *arg);
+
+EM_JS(void, emccdemo_initial_syncfs, (), {
+    console.log("Starting initial syncfs...");
+    FS.syncfs(true, function(err){
+        console.log("Initial syncfs finished.");
+        if(err){
+            console.error("There was an error in FS.syncfs.", err);
+            if(!window._syncfs_broke)alert(
+                "There was an error in FS.syncfs. " +
+                "Saved games may not persist between page refreshes! " +
+                "See the console for error details.");
+            window._syncfs_broke = true;
+        }
+        ccall('emccdemo_start', 'v');
+    });
+})
+
+EM_JS(void, emccdemo_syncfs, (), {
+    console.log("Starting syncfs...");
+    FS.syncfs(false, function(err){
+        console.log("Syncfs finished.");
+        if(err){
+            console.error("There was an error in FS.syncfs.", err);
+            if(!window._syncfs_broke)alert(
+                "There was an error in FS.syncfs. " +
+                "Saved games may not persist between page refreshes! " +
+                "See the console for error details.");
+            window._syncfs_broke = true;
+        }
+    });
+})
+
+void emccdemo_start(){
+    fprintf(stderr, "Starting main loop...\n");
+
+    /* TODO: pass app->delay_goal instead of 0 here, and get rid of the
+    tick0 and SDL_Delay stuff when we're using emcc. */
+    int fps = 0;
+
+    tick0 = SDL_GetTicks();
+    emscripten_set_main_loop_arg(&emccdemo_step, emccdemo_app, fps, true);
+}
+
+void emccdemo_step(void *arg){
     test_app_t *app = arg;
 
     Uint32 tick1 = SDL_GetTicks();
@@ -93,6 +145,12 @@ int main(int n_args, char *args[]){
     int n_players = DEFAULT_PLAYERS;
     int n_players_playing = DEFAULT_PLAYERS_PLAYING;
     bool load_game = false;
+
+#ifdef __EMSCRIPTEN__
+    /* Override some defaults if we're running in the browser (and therefore
+    aren't getting any commandline arguments) */
+    load_game = true;
+#endif
 
     /* The classic */
     srand(time(0));
@@ -195,8 +253,9 @@ int main(int n_args, char *args[]){
                 fprintf(stderr, "SDL_CreateRenderer error: %s\n",
                     SDL_GetError());
             }else{
-                test_app_t app;
-                if(test_app_init(&app, SCW, SCH, DELAY_GOAL,
+                test_app_t *app = calloc(1, sizeof(*app));
+                if(!app){ perror("calloc"); return 1; }
+                if(test_app_init(app, SCW, SCH, DELAY_GOAL,
                     window, renderer, prend_filename, stateset_filename,
                     hexmap_filename, submap_filename, developer_mode,
                     minimap_alt, cache_bitmaps,
@@ -206,14 +265,25 @@ int main(int n_args, char *args[]){
                     fprintf(stderr, "Couldn't init test app\n");
                 }else{
 #ifdef __EMSCRIPTEN__
-                    tick0 = SDL_GetTicks();
-                    emscripten_set_main_loop_arg(&test_app_mainloop_emcc,
-                        &app, 0, true);
+                    /* To be picked up by emccdemo_start */
+                    emccdemo_app = app;
+
+                    /* Load save files from IndexedDB */
+                    emccdemo_initial_syncfs();
+
+                    /* Now kill the current call stack!!!
+                    Why? Because emccdemo_initial_syncfs has kicked off an
+                    async JS operation which, when it completes, will set
+                    current thread's "main loop" to emccdemo_step.
+                    So the current call to main() never returns.
+                    Hooray, it's callback hell with C *and* Javascript! */
+                    emscripten_exit_with_live_runtime();
 #else
-                    e = test_app_mainloop(&app);
+                    e = test_app_mainloop(app);
 #endif
                     fprintf(stderr, "Cleaning up...\n");
-                    test_app_cleanup(&app);
+                    test_app_cleanup(app);
+                    free(app);
                 }
                 SDL_DestroyRenderer(renderer);
             }

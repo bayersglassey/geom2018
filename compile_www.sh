@@ -21,7 +21,16 @@ CFLAGS+=" -DNO_EXECINFO"
 CFLAGS+=" -s USE_SDL=2 "
 CFLAGS+=" --preload-file data --preload-file actor --preload-file anim"
 
-#CFLAGS+=" -s TOTAL_MEMORY=1073741824" # 1024*1024*1024 = 1G
+# Use IDBFS for save files
+CFLAGS+=" -l idbfs.js "
+CFLAGS+=" --post-js setup_fs.js "
+
+# Without this, when the program exits (e.g. because it ran into an error).
+# the JS runtime will continue... which in our case means our main loop
+# (emccdemo_step) will keep being called, and the error will probably keep
+# happening, spamming the JS console.
+CFLAGS+=" -s EXIT_RUNTIME=1 "
+
 CFLAGS+=" -s ALLOW_MEMORY_GROWTH=1"
 
 if [ "$RELEASE" = 1 ]
