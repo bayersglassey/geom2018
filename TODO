@@ -903,3 +903,9 @@ MEMORY SAVING MEASURES:
 
     * Collmap parser should "trim" empty space around edge of collmap
       (E.g. as left by "."s)
+
+
+Oct 7, 2021:
+------------
+
+* Saving to indexedDb: https://badlydrawnrod.github.io/posts/2020/06/07/emscripten-indexeddb/
