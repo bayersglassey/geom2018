@@ -1,4 +1,4 @@
 geomfonts:
     "geomfont1":
-        "data/font.fus"
+        font: "data/font.fus"
         prismel: "sq" (1 0 0 0) (0 0 0 1)

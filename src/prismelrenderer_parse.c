@@ -802,13 +802,50 @@ static int parse_geomfonts(prismelrenderer_t *prend, fus_lexer_t *lexer){
 
         GET("(")
 
-        char *font_filename;
-        GET_STR(font_filename)
+        /* MAYBE TODO:
+        Allow defining a geomfont in terms of another by way of
+        prismelmappers/palettemappers.
+        E.g.
+            "curvy_font1": map ("font1") ("curvy")
+            "red.font1": palmap ("font1") ("red")
+        In order to make this work, we'll want to add memoization for it...
+        That is, struct prismelrenderer currently has:
+            ARRAY_DECL(prismelmapper_application_t*, applications)
+            ARRAY_DECL(prismelmapper_mapplication_t*, mapplications)
+        ...and we'll want to add:
+            ARRAY_DECL(prismelmapper_gfapplication_t*, gfapplications)
+        ...where:
+            typedef struct prismelmapper_gfapplication {
+                geomfont_t *mapped_geomfont;
+                geomfont_t *resulting_geomfont;
+            } prismelmapper_gfapplication_t;
+        ...yeah?
+        If we're going to do that, can we do a refactor first so we don't
+        just copy-paste applications and mapplications?
+        Maybe something like...
+            MEMOIZED_MAPPING_DECL(gfapplication, geomfont)
+        ...oh man yeah, because also palettemapper_t has:
+            ARRAY_DECL(struct palettemapper_pmapplication*, pmapplications)
+            ARRAY_DECL(struct palettemapper_application*, applications)
+
+        ...HOWEVER, HERE IS WHY WE MIGHT NOT WANT TO BOTHER:
+        * We could always just apply our mappers to the text rgraphs we
+          generate using a given geomfont.
+          Simple solution, clearly a workaround, but not even a hack.
+        */
+
         font_t *font;
-        err = prismelrenderer_get_or_create_font(
-            prend, font_filename, &font);
-        if(err)return err;
-        free(font_filename);
+        GET("font")
+        GET("(")
+        {
+            char *font_filename;
+            GET_STR(font_filename)
+            err = prismelrenderer_get_or_create_font(
+                prend, font_filename, &font);
+            if(err)return err;
+            free(font_filename);
+        }
+        GET(")")
 
         GET("prismel")
         GET("(")

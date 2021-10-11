@@ -163,7 +163,7 @@ static int geomfont_get_c_rgraph(geomfont_t *geomfont, char c,
     Returns nonzero on error
     May set *rgraph_ptr to NULL on success if c has no bitmap */
     if(geomfont->font->autoupper)c = toupper(c);
-    int char_i = c;
+    int char_i = (unsigned char)c;
     if(char_i < 0 || char_i >= FONT_N_CHARS){
         fprintf(stderr, "%s: Char outside 0..%i: %i (%c)\n",
             __func__, FONT_N_CHARS - 1, char_i, c);

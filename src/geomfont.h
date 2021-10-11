@@ -18,13 +18,13 @@ struct prismelmapper;
 
 typedef struct geomfont {
     char *name;
-    font_t *font;
 
     struct rendergraph *char_rgraphs[FONT_N_CHARS];
     vec_t vx;
     vec_t vy;
 
     /* Weakrefs */
+    font_t *font;
     struct prismelrenderer *prend;
 } geomfont_t;
 
