@@ -15,6 +15,9 @@
 #define DELAY_GOAL 30
 
 
+static test_app_t *get_test_app();
+
+
 const char* DEFAULT_PREND_FILENAME = "data/test.fus";
 const char* DEFAULT_STATESET_FILENAME = "anim/player.fus";
 const char* ENV_DEVEL = "HEXGAME_DEVEL";
@@ -27,10 +30,6 @@ const int DEFAULT_PLAYERS_PLAYING = 1;
 
 /* Initialize to SDL_GetTicks() before first call to emccdemo_step */
 Uint32 tick0;
-
-/* Used to "pass" the app from one function to another so I don't have
-to learn how to pass C pointers around between Javascript calls */
-test_app_t *emccdemo_app;
 
 /* "emccdemo_*" function prototypes */
 void emccdemo_initial_syncfs();
@@ -70,14 +69,23 @@ EM_JS(void, emccdemo_syncfs, (), {
 })
 
 void emccdemo_start(){
+    fprintf(stderr, "Creating test app...\n");
+
+    test_app_t *app = get_test_app();
+    if(app == NULL){
+        fprintf(stderr, "Couldn't init test app\n");
+        return;
+    }
+
     fprintf(stderr, "Starting main loop...\n");
 
-    /* TODO: pass app->delay_goal instead of 0 here, and get rid of the
-    tick0 and SDL_Delay stuff when we're using emcc. */
-    int fps = 0;
-
     tick0 = SDL_GetTicks();
-    emscripten_set_main_loop_arg(&emccdemo_step, emccdemo_app, fps, true);
+    emscripten_set_main_loop_arg(&emccdemo_step, app, 0, true);
+    /* NOTE: I believe we never return from the above call. */
+
+    fprintf(stderr, "Cleaning up test app...\n");
+    test_app_cleanup(app);
+    free(app);
 }
 
 void emccdemo_step(void *arg){
@@ -132,19 +140,43 @@ bool get_bool_env(const char *name){
 }
 
 
+/* Global variables largely just to make them easier to use after
+calling emscripten_exit_with_live_runtime */
+Uint32 window_flags = SDL_WINDOW_SHOWN;
+const char *prend_filename = NULL;
+const char *stateset_filename = NULL;
+const char *hexmap_filename = NULL;
+const char *submap_filename = NULL;
+bool minimap_alt = true;
+bool cache_bitmaps = true;
+bool developer_mode = false;
+int n_players = DEFAULT_PLAYERS;
+int n_players_playing = DEFAULT_PLAYERS_PLAYING;
+bool load_game = false;
+SDL_Window *window = NULL;
+SDL_Renderer *renderer = NULL;
+
+static test_app_t *get_test_app(){
+    test_app_t *app = calloc(1, sizeof(*app));
+    if(!app){ perror("calloc"); return NULL; }
+    int err = test_app_init(app, SCW, SCH, DELAY_GOAL,
+        window, renderer, prend_filename, stateset_filename,
+        hexmap_filename, submap_filename, developer_mode,
+        minimap_alt, cache_bitmaps,
+        n_players, n_players_playing, load_game);
+    if(err){
+        free(app);
+        return NULL;
+    }
+    return app;
+}
+
 int main(int n_args, char *args[]){
     int e = 0;
-    Uint32 window_flags = SDL_WINDOW_SHOWN;
-    const char *prend_filename = DEFAULT_PREND_FILENAME;
-    const char *stateset_filename = DEFAULT_STATESET_FILENAME;
-    const char *hexmap_filename = NULL;
-    const char *submap_filename = NULL;
-    bool minimap_alt = true;
-    bool cache_bitmaps = true;
-    bool developer_mode = get_bool_env(ENV_DEVEL);
-    int n_players = DEFAULT_PLAYERS;
-    int n_players_playing = DEFAULT_PLAYERS_PLAYING;
-    bool load_game = false;
+
+    prend_filename = DEFAULT_PREND_FILENAME;
+    stateset_filename = DEFAULT_STATESET_FILENAME;
+    developer_mode = get_bool_env(ENV_DEVEL);
 
 #ifdef __EMSCRIPTEN__
     /* Override some defaults if we're running in the browser (and therefore
@@ -236,7 +268,7 @@ int main(int n_args, char *args[]){
         e = 1;
         fprintf(stderr, "SDL_Init error: %s\n", SDL_GetError());
     }else{
-        SDL_Window *window = SDL_CreateWindow("Spider Game",
+        window = SDL_CreateWindow("Spider Game",
             SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
             SCW, SCH, window_flags);
 
@@ -245,7 +277,7 @@ int main(int n_args, char *args[]){
             fprintf(stderr, "SDL_CreateWindow error: %s\n",
                 SDL_GetError());
         }else{
-            SDL_Renderer *renderer = SDL_CreateRenderer(window, -1,
+            renderer = SDL_CreateRenderer(window, -1,
                 SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
             if(!renderer){
@@ -253,34 +285,24 @@ int main(int n_args, char *args[]){
                 fprintf(stderr, "SDL_CreateRenderer error: %s\n",
                     SDL_GetError());
             }else{
-                test_app_t *app = calloc(1, sizeof(*app));
-                if(!app){ perror("calloc"); return 1; }
-                if(test_app_init(app, SCW, SCH, DELAY_GOAL,
-                    window, renderer, prend_filename, stateset_filename,
-                    hexmap_filename, submap_filename, developer_mode,
-                    minimap_alt, cache_bitmaps,
-                    n_players, n_players_playing, load_game)
-                ){
+#ifdef __EMSCRIPTEN__
+                /* Load save files from IndexedDB */
+                emccdemo_initial_syncfs();
+
+                /* Now kill the current call stack!!!
+                Why? Because emccdemo_initial_syncfs has kicked off an
+                async JS operation which, when it completes, will set
+                current thread's "main loop" to emccdemo_step.
+                So the current call to main() never returns.
+                Hooray, it's callback hell with C *and* Javascript! */
+                emscripten_exit_with_live_runtime();
+#endif
+                test_app_t *app = get_test_app();
+                if(app == NULL){
                     e = 1;
                     fprintf(stderr, "Couldn't init test app\n");
                 }else{
-#ifdef __EMSCRIPTEN__
-                    /* To be picked up by emccdemo_start */
-                    emccdemo_app = app;
-
-                    /* Load save files from IndexedDB */
-                    emccdemo_initial_syncfs();
-
-                    /* Now kill the current call stack!!!
-                    Why? Because emccdemo_initial_syncfs has kicked off an
-                    async JS operation which, when it completes, will set
-                    current thread's "main loop" to emccdemo_step.
-                    So the current call to main() never returns.
-                    Hooray, it's callback hell with C *and* Javascript! */
-                    emscripten_exit_with_live_runtime();
-#else
                     e = test_app_mainloop(app);
-#endif
                     fprintf(stderr, "Cleaning up...\n");
                     test_app_cleanup(app);
                     free(app);
