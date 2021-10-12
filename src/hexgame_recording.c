@@ -465,7 +465,7 @@ int body_record_keydown(body_t *body, int key_i){
     body_maybe_record_wait(body);
 
     char c = body_get_key_c(body, key_i, true);
-    fprintf(body->recording.file, "+%c", c);
+    fprintf(body->recording.file, " +%c", c);
     if(DEBUG_RECORDINGS)printf("+%c\n", c);
 
     /*
@@ -484,7 +484,7 @@ int body_record_keyup(body_t *body, int key_i){
     body_maybe_record_wait(body);
 
     char c = body_get_key_c(body, key_i, true);
-    fprintf(body->recording.file, "-%c", c);
+    fprintf(body->recording.file, " -%c", c);
     if(DEBUG_RECORDINGS)printf("-%c\n", c);
 
     /*
