@@ -37,10 +37,10 @@ $SET_STR LOCKED_OUT: lines: at(25 24)
     ;;
     ;;
     ;;
-    ;;     Better
-    ;;     look around
-    ;;     for a way to
-    ;;     open it.
+    ;;    Better look
+    ;;     around for
+    ;;       a way to
+    ;;        open it.
 
 $SET_STR CREATURES: lines: at(16 16)
     ;;These
@@ -86,21 +86,6 @@ $SET_STR JUMP_FROM_HERE: lines: at(20 34)
 $SET_STR WHAT_ELSE: lines: at(7 11)
     ;;What else
     ;;  has changed?
-
-$SET_STR START3_SWITCHED: lines: at(20 12)
-    ;;      You can
-    ;;      hit this
-    ;;      switch!
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;...it's tricky
-    ;;          though.
 
 $SET_STR START3_SWITCHED_HINT: lines: at(21 15)
     ;;        Hit it
@@ -183,9 +168,13 @@ submaps:
                 inherit_rot
             :
                 file: "data/maps/tutorial3/final_switch.fus"
-                visible: mapvar("switch3")
+                inherit_text
                 pos: (0 -10)
-                rot: 3
+                submaps:
+                    :
+                        file: "data/maps/tutorial3/final_switch_blocker.fus"
+                        inherit_text
+                        visible: not mapvar("switch3")
             :
                 file: "data/maps/tutorial3/start_exit.fus"
                 text:
@@ -252,11 +241,7 @@ submaps:
                 mapvar("start_eye_d_open")
                 mapvar("start_eye_e_open")
             then
-                if mapvar("switch1") then
-                    if mapvar("switch2") then
-                        if not mapvar("switch3") then $GET_STR START3_SWITCHED else null
-                    else null
-                else $GET_STR DEATH_CREATURES
+                if mapvar("switch1") then null else $GET_STR DEATH_CREATURES
             else null
         pos: eval: (0 0) + (11 -14) + (7 -16)
         rot: 2
