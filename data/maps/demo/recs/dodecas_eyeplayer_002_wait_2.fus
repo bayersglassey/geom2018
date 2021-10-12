@@ -1,0 +1,13 @@
+anim: "anim/eyeplayer.fus"
+state: "eye_closed"
+pos: ( 3 42)
+rot: 5
+turn: no
+keys:
+    x: is was
+    y:
+    u:
+    d:
+    l:
+    r:
+nodata

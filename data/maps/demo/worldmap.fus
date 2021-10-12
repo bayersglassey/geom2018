@@ -5,8 +5,11 @@ default_palette: "data/pal1.fus"
 default_tileset: "data/tileset1.fus"
 
 actors:
+    # Start:
     : "actor/guide/actor.fus" "player_cpu"
-    : "actor/hermit/actor.fus" "player_cpu"
+    : "actor/dodecas_eyeplayer_000.fus"
+    : "actor/dodecas_eyeplayer_001.fus"
+    : "actor/dodecas_eyeplayer_002.fus"
 
     # Spidertown:
     : (42 75) 0 y "actor/aiplayer.fus" "player_cpu"
@@ -17,9 +20,16 @@ actors:
     # Dodecas:
     : (21 -15) 5 y "actor/airollerplayer.fus" "player_cpu"
 
+    # Jungle:
+    : "actor/hermit/actor.fus" "player_cpu"
+
 vars:
     "guide_passed_start": F
     "guide_passed_start2": F
+
+    "dodecas_eyeplayer_000_ran_away_1": F
+    "dodecas_eyeplayer_001_ran_away_1": F
+    "dodecas_eyeplayer_002_ran_away_1": F
 
     "map3_blocker": F
     "map3x_blocker": F

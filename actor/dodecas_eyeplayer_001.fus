@@ -1,0 +1,44 @@
+collmap "detect":
+    ;;            + - + - + - + - + - +
+    ;;           /*\*/*\*/*\*/*\*/*\*/*\
+    ;;          + - + - + - + - + - + - +
+    ;;         /*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;        + - + - + - + - + - + - + - +
+    ;;       /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;      + - + - + - + - + - + - + - + - +
+    ;;     /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;    + - + - + - + - + - + - + - + - + - +
+    ;;   /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;  + - + - + - + - + -(+)- + - + - + - + - +
+    ;;   \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;    + - + - + - + - + - + - + - + - + - +
+    ;;     \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;      + - + - + - + - + - + - + - + - +
+    ;;       \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;        + - + - + - + - + - + - + - +
+    ;;         \*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;          + - + - + - + - + - + - +
+    ;;           \*/*\*/*\*/*\*/*\*/*\*/
+    ;;            + - + - + - + - + - +
+
+create_body:
+    if:
+        get_bool mapvar("dodecas_eyeplayer_001_ran_away_1")
+    then:
+        play: "data/maps/demo/recs/dodecas_eyeplayer_001_wait_2.fus"
+        goto immediate: start2
+
+    if:
+    then:
+        play: "data/maps/demo/recs/dodecas_eyeplayer_001_wait_1.fus"
+        goto immediate: start
+
+start:
+    if:
+        coll: bodies "spit" any yes collmap("detect")
+    then:
+        set mapvar("dodecas_eyeplayer_001_ran_away_1"): T
+        play: "data/maps/demo/recs/dodecas_eyeplayer_001_run_away_1.fus"
+        goto: start2
+
+start2:
