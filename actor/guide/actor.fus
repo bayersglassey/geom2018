@@ -1,7 +1,7 @@
 
 start:
     if: any:
-        get_bool mapvar("passed_start")
+        get_bool mapvar("guide_passed_start")
         coll: bodies any yes
             ;;
             ;;
@@ -18,7 +18,7 @@ start:
 
 start2:
     if: any:
-        get_bool mapvar("passed_start2")
+        get_bool mapvar("guide_passed_start2")
         coll: bodies any yes
             ;;   + - + - +
             ;;  /*\*/*\*/*\

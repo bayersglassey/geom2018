@@ -423,7 +423,7 @@ static const char *test_app_get_recording_filename(
 ){
     char *recording_filename = app->_recording_filename;
     int zeros_pos = strchr(RECORDING_FILENAME_TEMPLATE, '0') - RECORDING_FILENAME_TEMPLATE;
-    int n_zeros = strrchr(RECORDING_FILENAME_TEMPLATE, '0') - RECORDING_FILENAME_TEMPLATE - zeros_pos;
+    int n_zeros = strrchr(RECORDING_FILENAME_TEMPLATE, '0') - RECORDING_FILENAME_TEMPLATE - zeros_pos + 1;
     for(int i = 0; i < n_zeros; i++){
         int rem = n % 10;
         n = n / 10;

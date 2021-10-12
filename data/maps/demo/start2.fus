@@ -1,7 +1,7 @@
 parts:
     "h": recording "data/recs/hotspot.fus"
         vars:
-            "key": "passed_start"
+            "key": "guide_passed_start"
 collmap:
     ;;                                         +
     ;;
