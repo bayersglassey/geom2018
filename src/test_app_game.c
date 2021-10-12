@@ -238,7 +238,8 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
                     if(err)return err;
                 }else{
                     fprintf(stderr, "Finished recording. "
-                        "Press F10 to play it back.\n");
+                        "Press F10 to play it back, or Shift+F10 to "
+                        "play it back using your current body.\n");
                     err = body_stop_recording(body);
                     if(err)return err;
                 }

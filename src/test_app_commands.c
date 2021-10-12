@@ -259,6 +259,38 @@ lexer_err:
     return 0;
 }
 
+static int _test_app_command_play_recording(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
+    int err;
+
+    char *recording_filename;
+    err = fus_lexer_get_str(lexer, &recording_filename);
+    if(err)goto lexer_err;
+
+    hexgame_t *game = &app->hexgame;
+    for(int i = 0; i < game->players_len; i++){
+        player_t *player = game->players[i];
+        if(player->keymap != 0)continue;
+
+        body_t *body = player->body;
+        if(!body){
+            fprintf(stderr,
+                "Can't play back recording without a body!\n");
+            break;
+        }
+
+        err = hexmap_load_recording(body->map,
+            recording_filename, NULL, true, 0, NULL, NULL);
+        if(err)return err;
+    }
+
+    free(recording_filename);
+
+    return 0;
+lexer_err:
+    *lexer_err_ptr = true;
+    return 0;
+}
+
 static int _test_app_command_save(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
     int err;
     char *filename = NULL;
@@ -445,6 +477,7 @@ test_app_command_t _test_app_commands[] = {
     COMMAND(add_player, "ap", "[STATESET]"),
     COMMAND(edit_player, "ep", "[PLAYER_INDEX] [STATESET]"),
     COMMAND(save_player, "sp", "[PLAYER_INDEX]"),
+    COMMAND(play_recording, "pc", "[FILENAME]"),
     COMMAND(save, NULL, "[FILENAME]"),
     COMMAND(dump, NULL, "[(rgraph | prend | nobitmaps | surfaces | file FILENAME) ...]"),
     COMMAND(map, NULL, "MAPPER RGRAPH [RESULTING_RGRAPH]"),
