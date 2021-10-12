@@ -22,6 +22,7 @@
 #include "hexspace.h"
 #include "generic_printf.h"
 
+const char *RECORDING_FILENAME_TEMPLATE = "recs/000.fus";
 
 
 /*******************
@@ -91,7 +92,8 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->hexmap_filename = hexmap_filename;
     app->submap_filename = submap_filename;
 
-    strcpy(app->_recording_filename, "data/rec000.fus");
+    strcpy(app->_recording_filename, RECORDING_FILENAME_TEMPLATE);
+    if(!app->_recording_filename)return 1;
 
     SDL_Palette *sdl_palette = SDL_AllocPalette(256);
     app->sdl_palette = sdl_palette;
@@ -420,8 +422,8 @@ static const char *test_app_get_recording_filename(
     test_app_t *app, int n
 ){
     char *recording_filename = app->_recording_filename;
-    static const int zeros_pos = 8;
-    static const int n_zeros = 3;
+    int zeros_pos = strchr(RECORDING_FILENAME_TEMPLATE, '0') - RECORDING_FILENAME_TEMPLATE;
+    int n_zeros = strrchr(RECORDING_FILENAME_TEMPLATE, '0') - RECORDING_FILENAME_TEMPLATE - zeros_pos;
     for(int i = 0; i < n_zeros; i++){
         int rem = n % 10;
         n = n / 10;

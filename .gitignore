@@ -5,7 +5,6 @@
 *.o
 
 # demo stuff
-/data/rec???.fus
 /screen.bmp
 
 # deploy stuff
