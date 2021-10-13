@@ -9,10 +9,10 @@ fly:
     collmsgs: "spit" $IF SPIKEY("spikeyspit")
     hitbox:
         ;;   .   .
-        ;;   *\*/*\*/
-        ;; . - + - +
+        ;;   *\*/
+        ;; . - +   .
         ;;
-        ;;   .  (.)
+        ;;  (.)  .
 
     on "crush": goto: dead
     on "solid": goto: dead
@@ -52,8 +52,8 @@ crouch_fly:
     collmsgs: "spit" $IF SPIKEY("spikeyspit")
     hitbox:
         ;;    .   .
-        ;;  */*\*/*\
-        ;;  .  (.)  .
+        ;;  */*\
+        ;; (.)  .   .
 
     on "crush": goto: crouch_dead
     on "solid": goto: crouch_dead
