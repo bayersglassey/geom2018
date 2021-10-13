@@ -27,16 +27,7 @@ start:
         play: "actor/guide/rec/start.fus"
 
 start2:
-    if: any:
-        get_bool mapvar("guide_passed_start2")
-        coll: bodies any yes
-            ;;   + - + - +
-            ;;  /*\*/*\*/*\
-            ;; + - + - + - + - + - +
-            ;;  \*/*\*/*\*/*\*/*\*/*\
-            ;;   + - + - + - + - + - +
-            ;;    \*/*\*/*\*/*\*/*\*/
-            ;;    (+)- + - + - + - +
+    if: get_bool mapvar("guide_passed_start2")
     then:
         play: "actor/guide/rec/start2_to_start3.fus"
         goto: start3

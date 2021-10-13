@@ -10,4 +10,4 @@ keys:
     d:
     l:
     r:
-data: " +d w2 +l w10 -d w69 -l w5 +r w9 -r w9 +l w6 -l w5 +y w3 -y w13 +r w37 -r w8 +l w3 -l w11 +r w13 -r w2 +l w2 -l"
+data: " w20 +d w2 +l w14 -d w57 -l w16 +r w10 -r w11 +l w14 -l w16 +r w14 -r +y w5 -y w4 +l w17 +y -l w3 -y w14 +l w4 +y w1 -l w3 -y w21 +l w1 +d w52 -l w2 -d w18"
