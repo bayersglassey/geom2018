@@ -794,34 +794,6 @@ Aug 31, 2021:
   around jungle5) -- either "fix" those areas (by zooming them out a bit) or allow them to
   opt into the old scrolling behaviour?.. (or is that behaviour always broken if you fly?..)
 
-* Ummmmmmmm you can shoot switches through walls
-
-
-Sep 19, 2021:
--------------
-
-* The tutorial section: instead of text just explaining stuff, have eyes which open and watch
-  you, and the text only appears while they're open, so it's like some crazy god is speaking
-  to you.
-
-* After tutorial, we are dropped into "demo" worldmap.
-  Crazy god no longer speaks to us directly -- we have been told as much at end of tutorial,
-  something like "you won't hear from me again... if you're lucky" -- and now we meet other
-  spiders, and learn what our "goals" are.
-  First spider we meet says what... "ah, someone new!"
-  And we imply... what, that we have all been reborn as spider robots?
-  Or that we are a newly born spider?
-  In any case, the spiders' goals are... to find spidertown again? Or what?
-
-* In a few out-of-the-way places in demo worldmap, we see the eyes from the tutorial...
-  but they don't speak to you.
-  Maybe they only appear in quiet places you're guaranteed to pass through?..
-  Until somewhere near the end of the game, one finally speaks to you again?..
-  Something simple like "Good to see you again".
-  ......nahhhhh.
-
-* Hmmmmm.
-
 
 Oct 2, 2021:
 ------------
@@ -871,20 +843,6 @@ Oct 2, 2021:
 Oct 6, 2021:
 ------------
 
-* In tutorial3/worldmap.fus, there is this monstrosity:
-                visible:
-                    if all:
-                        mapvar("switch2")
-                        not mapvar("switch3")
-                    then T else F
-    ...clearly we need something more like:
-                visible: cond: all:
-                    mapvar("switch2")
-                    not mapvar("switch3")
-    ...and this requires (currently) that this "cond: ..." syntax return a
-    reference to a val_t (or even var_t?!?!?!)... but we can provide two such
-    vals/vars as singletons, one for T and the other for F.
-
 MEMORY SAVING MEASURES:
 
     * Cache all hexcollmaps by filename + rot
@@ -905,7 +863,52 @@ MEMORY SAVING MEASURES:
       (E.g. as left by "."s)
 
 
-Oct 7, 2021:
-------------
+Oct 12, 2021:
+-------------
 
-* Saving to indexedDb: https://badlydrawnrod.github.io/posts/2020/06/07/emscripten-indexeddb/
+Current tree of possible areas you can go, starting at maps/demo:
+* demo (start)
+    * vines
+        * jungle
+            * water
+                * [unlock... door in hermit's house?..]
+            * [turn into spikeyplayer?..]
+            * [save the hermit, unlocking... door at end of water?..]
+            * [new area, "birds"?..]
+    * pebbles
+        * tunnels
+            * [turn into rollerplayer?..]
+            * wilderness
+                * [what do you do here?..]
+            * mini-spidertown (mapxx etc)
+                * "dark spidertown" (maps/test)
+                    * [solve secret_path "puzzle"]
+                    * maps/test/worldmap_minimal.fus
+                        * [turn into aimerplayer]
+                * spidertown
+                    * trees
+                        * [turn into spikeyplayer]
+                        * [turn into rollerplayer]
+        * dodecas
+            * [secret shortcut to jungle?.. or should we patch that?.. probably]
+            * fisheye
+                * triangles
+                * [turn into roller?..]
+
+
+* Add things spiders can roll?..
+    * In dodecas area, spiders can be hunting (spitting at some animals till they turn
+      to rollable "food"), or collecting rollable whatevers... and somehow these are
+      transported up to spidertown?
+
+* dodecas area: the spiders here should use an "ai" actor which knows how to stay safe
+  from the hexrollers... in particular, this actor should know how to stay inside the
+  dodeca shapes.
+    * Maybe... this actor can use spikey spiders?..
+      Feels kind of like cheating, but otherwise we need a way for the actor to distinguish
+      the safe and unsafe areas.
+
+* Let's say we keep the current thing: "guide" spider chases away some eyespiders from start2.
+  They go hide in various places.
+  (BTW, let's add a new one to leftmost part of dodecas area.)
+  If you come across them, they explain something to you.
