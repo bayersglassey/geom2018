@@ -60,6 +60,7 @@ void test_app_cleanup(test_app_t *app){
     SDL_FreePalette(app->sdl_palette);
     prismelrenderer_cleanup(&app->prend);
     prismelrenderer_cleanup(&app->minimap_prend);
+    stringstore_cleanup(&app->stringstore);
     hexgame_cleanup(&app->hexgame);
     font_cleanup(&app->font);
     minieditor_cleanup(&app->editor);
@@ -107,8 +108,11 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         app->sdl_palette);
     if(app->surface == NULL)return 1;
 
+    stringstore_t *stringstore = &app->stringstore;
+    stringstore_init(stringstore);
+
     prismelrenderer_t *prend = &app->prend;
-    err = prismelrenderer_init(prend, &vec4);
+    err = prismelrenderer_init(prend, &vec4, stringstore);
     if(err)return err;
     err = prismelrenderer_load(prend, app->prend_filename, NULL);
     if(err)return err;
@@ -119,7 +123,8 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 
     prismelrenderer_t *minimap_prend = &app->minimap_prend;
     err = prismelrenderer_init(minimap_prend,
-        minimap_alt? &vec4_alt: &vec4);
+        minimap_alt? &vec4_alt: &vec4,
+        stringstore);
     if(err)return err;
     err = prismelrenderer_load(minimap_prend,
         minimap_alt? "data/minimap_alt.fus": "data/minimap.fus",

@@ -99,19 +99,22 @@ void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box,
 
 typedef struct prismelrenderer {
     bool cache_bitmaps;
-    vecspace_t *space;
-    stringstore_t stringstore;
     ARRAY_DECL(struct font*, fonts)
     ARRAY_DECL(struct geomfont*, geomfonts)
     ARRAY_DECL(struct prismel*, prismels)
     ARRAY_DECL(struct rendergraph*, rendergraphs)
     ARRAY_DECL(struct prismelmapper*, mappers)
     ARRAY_DECL(struct palettemapper*, palmappers)
+
+    /* Weakrefs */
+    vecspace_t *space;
+    stringstore_t *stringstore;
 } prismelrenderer_t;
 
 
 
-int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space);
+int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space,
+    stringstore_t *stringstore);
 void prismelrenderer_cleanup(prismelrenderer_t *renderer);
 void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
     int dump_bitmaps);

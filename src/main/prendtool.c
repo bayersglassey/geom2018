@@ -202,9 +202,11 @@ int main(int n_args, char *args[]){
     {
         int err;
 
-        prismelrenderer_t prend;
+        stringstore_t stringstore;
+        stringstore_init(&stringstore);
 
-        err = prismelrenderer_init(&prend, &vec4);
+        prismelrenderer_t prend;
+        err = prismelrenderer_init(&prend, &vec4, &stringstore);
         if(err)return err;
 
         err = prismelrenderer_load(&prend, prend_filename, NULL);
@@ -214,6 +216,7 @@ int main(int n_args, char *args[]){
         if(err)return err;
 
         prismelrenderer_cleanup(&prend);
+        stringstore_cleanup(&stringstore);
     }
 
     return 0;

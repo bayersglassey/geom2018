@@ -253,9 +253,10 @@ static int _save_image(minieditor_t *editor, options_t *opts){
 static int _reload_editor(minieditor_t *editor, options_t *opts){
     int err;
 
+    stringstore_t *stringstore = editor->prend->stringstore;
     prismelrenderer_cleanup(editor->prend);
 
-    err = prismelrenderer_init(editor->prend, &vec4);
+    err = prismelrenderer_init(editor->prend, &vec4, stringstore);
     if(err)return err;
 
     err = prismelrenderer_load(editor->prend, opts->prend_filename, NULL);
@@ -342,6 +343,9 @@ static int _mainloop(minieditor_t *editor, options_t *opts,
 static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
     int err;
 
+    stringstore_t _stringstore, *stringstore=&_stringstore;
+    stringstore_init(stringstore);
+
     SDL_Palette *sdl_palette = SDL_AllocPalette(256);
     RET_IF_SDL_NULL(sdl_palette);
 
@@ -358,7 +362,7 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
     if(err)return err;
 
     prismelrenderer_t _prend, *prend = &_prend;
-    err = prismelrenderer_init(prend, &vec4);
+    err = prismelrenderer_init(prend, &vec4, stringstore);
     if(err)return err;
 
     err = prismelrenderer_load(prend, opts->prend_filename, NULL);
@@ -369,7 +373,7 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
     prend->cache_bitmaps = opts->cache_bitmaps;
 
     prismelrenderer_t _font_prend, *font_prend = &_font_prend;
-    err = prismelrenderer_init(font_prend, &vec4);
+    err = prismelrenderer_init(font_prend, &vec4, stringstore);
     if(err)return err;
 
     err = prismelrenderer_load(font_prend, opts->fonts_filename, NULL);
@@ -434,6 +438,7 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
     font_cleanup(font);
     SDL_FreeSurface(surface);
     SDL_FreePalette(sdl_palette);
+    stringstore_cleanup(stringstore);
 
     return err;
 }
