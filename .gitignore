@@ -16,6 +16,9 @@
 # www stuff
 /www/
 
+# nano stuff
+*.swp
+
 # EMCC files (should be removed by _compile_demo)
 #/main.js
 #/main.html
