@@ -161,13 +161,15 @@ static int rendergraph_add_rgraph(rendergraph_t *rgraph, rendergraph_t *rgraph2,
     vec_t add, rot_t rot, int frame_i
 ){
     int err;
-    rendergraph_trf_t *rendergraph_trf;
-    err = rendergraph_push_rendergraph_trf(rgraph, &rendergraph_trf);
+    rendergraph_child_t *child;
+    err = rendergraph_push_child(rgraph,
+        RENDERGRAPH_CHILD_TYPE_RGRAPH,
+        &child);
     if(err)return err;
-    rendergraph_trf->rendergraph = rgraph2;
-    rendergraph_trf->trf.rot = rot;
-    rendergraph_trf->frame_i = frame_i;
-    vec_cpy(rgraph->prend->space->dims, rendergraph_trf->trf.add, add);
+    child->u.rgraph.rendergraph = rgraph2;
+    child->u.rgraph.frame_i = frame_i;
+    child->trf.rot = rot;
+    vec_cpy(rgraph->prend->space->dims, child->trf.add, add);
     return 0;
 }
 
@@ -315,7 +317,7 @@ static int rendergraph_add_rgraphs_from_collmap(
     hexmap_tileset_t *tileset, vec_t unit,
     bool add_collmap_rendergraphs
 ){
-    /* Add to rgraph->rendergraph_trfs, according to collmap->tiles,
+    /* Add to rgraph->rendergraph_children, according to collmap->tiles,
     using tiles from tileset.
     unit should be the tileset's unit vector; tileset_t doesn't currently
     have an explicit unit, it's generally supplied by hexmap_t. */

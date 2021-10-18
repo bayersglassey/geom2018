@@ -8,19 +8,20 @@ But the notes are good.
 
     We have color tables and palmappers.
     The former are stored on palmappers.
-    The latter are currently only stored on rendergraph_trf.
+    The latter are currently only stored on rendergraph_child_t whose
+    type == RENDERGRAPH_CHILD_TYPE_RGRAPH.
 
     The following functions make use of color tables (Unit8*):
     * prismelmapper_apply_to_rendergraph ('table' param)
         Used to find the color passed to
         prismelrenderer_get_solid_palettemapper used to set
-        new_rendergraph_trf->palmapper
+        new_rendergraph_child->u.rgraph.palmapper
     * palettemapper_apply_to_palettemapper
         There are 3 palmappers involved, and the table fields of
         the first two are used to populate that of the third
     * rendergraph_render_bitmap
         When rendering sub-rendergraphs,
-        rendergraph_trf->palmapper->table is used to generate a table
+        rendergraph_child->u.rgraph.palmapper->table is used to generate a table
         passed to SDL_PaletteMappedBlit
 
     I think we just need rendergraph_render_bitmap to take an optional
@@ -31,7 +32,7 @@ But the notes are good.
         if(palmapper){
             for(int i = 0; i < 256; i++)table[i] = i;     // <------- !!!!!!
             for(int i = 0;
-                i < iter.rendergraph_trf->palmapper_n_applications;
+                i < iter.child.u.rgraph->palmapper_n_applications;
                 i++
             ){
                 for(int i = 0; i < 256; i++){

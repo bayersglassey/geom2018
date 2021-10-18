@@ -368,17 +368,19 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
             free(name); return 2;}
         free(name);
 
-        rendergraph_trf_t *rendergraph_trf;
-        err = rendergraph_push_rendergraph_trf(rgraph, &rendergraph_trf);
+        rendergraph_child_t *child;
+        err = rendergraph_push_child(rgraph,
+            RENDERGRAPH_CHILD_TYPE_RGRAPH,
+            &child);
         if(err)return err;
-        rendergraph_trf->rendergraph = found;
-        rendergraph_trf->palmapper = palmapper;
-        rendergraph_trf->trf = trf;
-        rendergraph_trf->frame_start = frame_start;
-        rendergraph_trf->frame_len = frame_len;
-        rendergraph_trf->frame_i = frame_i;
-        rendergraph_trf->frame_i_additive = frame_i_additive;
-        rendergraph_trf->frame_i_reversed = frame_i_reversed;
+        child->u.rgraph.rendergraph = found;
+        child->u.rgraph.palmapper = palmapper;
+        child->trf = trf;
+        child->frame_start = frame_start;
+        child->frame_len = frame_len;
+        child->u.rgraph.frame_i = frame_i;
+        child->u.rgraph.frame_i_additive = frame_i_additive;
+        child->u.rgraph.frame_i_reversed = frame_i_reversed;
     }
     NEXT
     return 0;
@@ -432,16 +434,18 @@ static int parse_shape_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer,
         }
         free(name);
 
-        prismel_trf_t *prismel_trf;
-        err = rendergraph_push_prismel_trf(rgraph, &prismel_trf);
+        rendergraph_child_t *child;
+        err = rendergraph_push_child(rgraph,
+            RENDERGRAPH_CHILD_TYPE_PRISMEL,
+            &child);
         if(err)return err;
-        prismel_trf->prismel = found;
-        prismel_trf->trf.rot = rot;
-        prismel_trf->trf.flip = flip;
-        prismel_trf->color = color;
-        prismel_trf->frame_start = frame_start;
-        prismel_trf->frame_len = frame_len;
-        vec_cpy(prend->space->dims, prismel_trf->trf.add, v);
+        child->u.prismel.prismel = found;
+        child->trf.rot = rot;
+        child->trf.flip = flip;
+        child->u.prismel.color = color;
+        child->frame_start = frame_start;
+        child->frame_len = frame_len;
+        vec_cpy(prend->space->dims, child->trf.add, v);
     }
     NEXT
     return 0;
@@ -487,16 +491,18 @@ static int parse_shape_hexpicture(prismelrenderer_t *prend, fus_lexer_t *lexer,
 
     for(int i = 0; i < faces_len; i++){
         hexpicture_return_face_t *face = &faces[i];
-        prismel_trf_t *prismel_trf;
-        err = rendergraph_push_prismel_trf(rgraph, &prismel_trf);
+        rendergraph_child_t *child;
+        err = rendergraph_push_child(rgraph,
+            RENDERGRAPH_CHILD_TYPE_PRISMEL,
+            &child);
         if(err)return err;
-        prismel_trf->prismel = prismels[face->type];
-        prismel_trf->trf.rot = face->rot;
-        prismel_trf->trf.flip = false;
-        prismel_trf->color = face->color;
-        prismel_trf->frame_start = 0;
-        prismel_trf->frame_len = -1;
-        vec4_set(prismel_trf->trf.add,
+        child->u.prismel.prismel = prismels[face->type];
+        child->trf.rot = face->rot;
+        child->trf.flip = false;
+        child->u.prismel.color = face->color;
+        child->frame_start = 0;
+        child->frame_len = -1;
+        vec4_set(child->trf.add,
             face->a, face->b, face->c, face->d);
     }
 

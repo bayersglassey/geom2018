@@ -16,28 +16,59 @@
  * RENDERGRAPH *
  ***************/
 
-typedef struct prismel_trf {
-    struct prismel *prismel;
-    Uint8 color;
-    trf_t trf;
+enum rendergraph_child_type {
+    RENDERGRAPH_CHILD_TYPE_PRISMEL,
+    RENDERGRAPH_CHILD_TYPE_RGRAPH,
+    RENDERGRAPH_CHILD_TYPE_LABEL,
+    RENDERGRAPH_CHILD_TYPES
+};
 
+static const char *rendergraph_child_type_msg(int type){
+    switch(type){
+        case RENDERGRAPH_CHILD_TYPE_PRISMEL: return "prismel";
+        case RENDERGRAPH_CHILD_TYPE_RGRAPH: return "shape";
+        case RENDERGRAPH_CHILD_TYPE_LABEL: return "label";
+        default: return "<unknown>";
+    }
+}
+
+static const char *rendergraph_child_type_plural(int type){
+    switch(type){
+        case RENDERGRAPH_CHILD_TYPE_PRISMEL: return "prismels";
+        case RENDERGRAPH_CHILD_TYPE_RGRAPH: return "shapes";
+        case RENDERGRAPH_CHILD_TYPE_LABEL: return "labels";
+        default: return "<unknown>";
+    }
+}
+
+typedef struct rendergraph_child {
+    trf_t trf;
     int frame_start;
     int frame_len;
-} prismel_trf_t;
 
-typedef struct rendergraph_trf {
-    struct rendergraph *rendergraph;
-    trf_t trf;
-    int frame_i;
-    bool frame_i_additive;
-    bool frame_i_reversed;
+    int type; /* enum rendergraph_child_type */
+    union {
+        struct {
+            Uint8 color;
 
-    struct palettemapper *palmapper;
-    int palmapper_n_applications;
+            /* Weakrefs */
+            struct prismel *prismel;
+        } prismel;
+        struct {
+            int frame_i;
+            bool frame_i_additive;
+            bool frame_i_reversed;
+            int palmapper_n_applications;
 
-    int frame_start;
-    int frame_len;
-} rendergraph_trf_t;
+            /* Weakrefs */
+            struct rendergraph *rendergraph;
+            struct palettemapper *palmapper;
+        } rgraph;
+        struct {
+            const char *label; /* from a stringstore */
+        } label;
+    } u;
+} rendergraph_child_t;
 
 typedef struct rendergraph_bitmap {
     bool pbox_calculated;
@@ -47,8 +78,7 @@ typedef struct rendergraph_bitmap {
 
 typedef struct rendergraph {
     char *name;
-    ARRAY_DECL(struct prismel_trf*, prismel_trfs)
-    ARRAY_DECL(struct rendergraph_trf*, rendergraph_trfs)
+    ARRAY_DECL(struct rendergraph_child*, children)
 
     int n_frames;
 
@@ -63,8 +93,8 @@ typedef struct rendergraph {
     struct palettemapper *palmapper;
     struct rendergraph *copy_of;
         /* If not NULL, this rendergraph is a copy of another one.
-        In particular, it does *NOT* own its prismel_trfs and
-        rendergraph_trfs, so should *NOT* modify or free them. */
+        In particular, it does *NOT* own its children, so should
+        *NOT* modify or free them. */
 } rendergraph_t;
 
 
@@ -79,6 +109,7 @@ extern const int rendergraph_n_frames_default;
 struct prismelrenderer;
 struct rendergraph_bitmap;
 
+void rendergraph_child_cleanup(rendergraph_child_t *child);
 void rendergraph_cleanup(rendergraph_t *rendergraph);
 int rendergraph_init(rendergraph_t *rendergraph, char *name,
     struct prismelrenderer *prend, struct palettemapper *palmapper,
@@ -90,10 +121,8 @@ void rendergraph_bitmap_dump(struct rendergraph_bitmap *bitmap, FILE *f,
 void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces,
     int dump_bitmaps);
 int rendergraph_create_bitmaps(rendergraph_t *rendergraph);
-int rendergraph_push_rendergraph_trf(rendergraph_t *rendergraph,
-    rendergraph_trf_t **rendergraph_trf_ptr);
-int rendergraph_push_prismel_trf(rendergraph_t *rendergraph,
-    prismel_trf_t **prismel_trf_ptr);
+int rendergraph_push_child(rendergraph_t *rendergraph,
+    int type, rendergraph_child_t **child_ptr);
 int rendergraph_get_bitmap_i(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i);
 rendergraph_bitmap_t *rendergraph_get_bitmap(rendergraph_t *rendergraph,

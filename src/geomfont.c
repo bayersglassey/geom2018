@@ -100,12 +100,14 @@ int geomfont_init(geomfont_t *geomfont, char *name, font_t *font,
             for(int x = 0; x < char_w; x++){
                 int color = char_data[y * char_h + x];
 
-                prismel_trf_t *prismel_trf;
-                err = rendergraph_push_prismel_trf(rgraph, &prismel_trf);
+                rendergraph_child_t *child;
+                err = rendergraph_push_child(rgraph,
+                    RENDERGRAPH_CHILD_TYPE_PRISMEL,
+                    &child);
                 if(err)return err;
-                prismel_trf->prismel = prismel;
-                prismel_trf->color = color;
-                vec_cpy(space->dims, prismel_trf->trf.add, v);
+                child->u.prismel.prismel = prismel;
+                child->u.prismel.color = color;
+                vec_cpy(space->dims, child->trf.add, v);
 
                 vec_add(space->dims, v, vx);
             }
@@ -318,14 +320,16 @@ int geomfont_blitter_putc(geomfont_blitter_t *blitter, char c){
             return 2;
         }
     }else if(blitter->type == GEOMFONT_BLITTER_TYPE_RGRAPH){
-        rendergraph_trf_t *rendergraph_trf;
-        err = rendergraph_push_rendergraph_trf(
-            blitter->u.rgraph.rgraph, &rendergraph_trf);
+        rendergraph_child_t *child;
+        err = rendergraph_push_child(
+            blitter->u.rgraph.rgraph,
+            RENDERGRAPH_CHILD_TYPE_RGRAPH,
+            &child);
         if(err)return err;
-        rendergraph_trf->rendergraph = c_rgraph;
-        rendergraph_trf->frame_i = frame_i;
-        trf_cpy(space, &rendergraph_trf->trf, &blitter->trf);
-        vec_add(space->dims, rendergraph_trf->trf.add, pos);
+        child->u.rgraph.rendergraph = c_rgraph;
+        child->u.rgraph.frame_i = frame_i;
+        trf_cpy(space, &child->trf, &blitter->trf);
+        vec_add(space->dims, child->trf.add, pos);
     }else{
         fprintf(stderr, "%s: Unrecognized geomfont_blitter type: %i\n",
             __func__, blitter->type);

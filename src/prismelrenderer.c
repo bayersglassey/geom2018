@@ -717,50 +717,67 @@ int prismelrenderer_write(prismelrenderer_t *prend, FILE *f){
         fprintf(f, "        animation: %s %i\n",
             rgraph->animation_type, rgraph->n_frames);
 
-        if(rgraph->prismel_trfs != NULL){
-            fprintf(f, "        prismels:\n");}
-        for(int i = 0; i < rgraph->prismel_trfs_len; i++){
-            prismel_trf_t *prismel_trf =
-                rgraph->prismel_trfs[i];
-            prismel_t *prismel = prismel_trf->prismel;
-            trf_t *trf = &prismel_trf->trf;
+        /* prev_type: takes a value from enum rendergraph_child_type, or -1
+        (an invalid value), so that child->type != prev_type for any child to
+        begin with */
+        int prev_type = -1;
 
-            fprintf(f, "            : ");
-            fus_write_str_padded(f, prismel->name, 7);
-            fprintf(f, " (");
-            fprintf(f, "% 3i", trf->add[0]);
-            for(int i = 1; i < prend->space->dims; i++){
-                fprintf(f, " % 3i", trf->add[i]);
+        for(int i = 0; i < rgraph->children_len; i++){
+            rendergraph_child_t *child = rgraph->children[i];
+
+            if(child->type != prev_type){
+                const char *type_msg =
+                    rendergraph_child_type_plural(child->type);
+                fprintf(f, "        %s:\n", type_msg);
+                prev_type = child->type;
             }
-            fprintf(f, ") %2i %c %2i (%2i %2i)\n",
-                trf->rot, trf->flip? 't': 'f',
-                prismel_trf->color,
-                prismel_trf->frame_start,
-                prismel_trf->frame_len);
-        }
 
-        if(rgraph->rendergraph_trfs != NULL){
-            fprintf(f, "        shapes:\n");}
-        for(int i = 0; i < rgraph->rendergraph_trfs_len; i++){
-            rendergraph_trf_t *rendergraph_trf =
-                rgraph->rendergraph_trfs[i];
-            rendergraph_t *rendergraph = rendergraph_trf->rendergraph;
-            trf_t *trf = &rendergraph_trf->trf;
-
-            fprintf(f, "            : ");
-            fus_write_str_padded(f, rendergraph->name, 40);
-            fprintf(f, " (");
-            fprintf(f, "% 3i", trf->add[0]);
-            for(int i = 1; i < prend->space->dims; i++){
-                fprintf(f, " % 3i", trf->add[i]);
+            trf_t *trf = &child->trf;
+            switch(child->type){
+                case RENDERGRAPH_CHILD_TYPE_RGRAPH: {
+                    rendergraph_t *rendergraph = child->u.rgraph.rendergraph;
+                    fprintf(f, "            : ");
+                    fus_write_str_padded(f, rendergraph->name, 40);
+                    fprintf(f, " (");
+                    fprintf(f, "% 3i", trf->add[0]);
+                    for(int i = 1; i < prend->space->dims; i++){
+                        fprintf(f, " % 3i", trf->add[i]);
+                    }
+                    fprintf(f, ") %2i %c %2i%c%c (%2i %2i)\n",
+                        trf->rot, trf->flip? 't': 'f',
+                        child->u.rgraph.frame_i,
+                        child->u.rgraph.frame_i_additive? '+': ' ',
+                        child->u.rgraph.frame_i_reversed? 'r': ' ',
+                        child->frame_start,
+                        child->frame_len);
+                    break;
+                }
+                case RENDERGRAPH_CHILD_TYPE_PRISMEL: {
+                    prismel_t *prismel = child->u.prismel.prismel;
+                    fprintf(f, "            : ");
+                    fus_write_str_padded(f, prismel->name, 7);
+                    fprintf(f, " (");
+                    fprintf(f, "% 3i", trf->add[0]);
+                    for(int i = 1; i < prend->space->dims; i++){
+                        fprintf(f, " % 3i", trf->add[i]);
+                    }
+                    fprintf(f, ") %2i %c %2i (%2i %2i)\n",
+                        trf->rot, trf->flip? 't': 'f',
+                        child->u.prismel.color,
+                        child->frame_start,
+                        child->frame_len);
+                    break;
+                }
+                case RENDERGRAPH_CHILD_TYPE_LABEL:
+                    fprintf(f, "            : ");
+                    fus_write_str_padded(f, child->u.label.label, 40);
+                    fputc('\n', f);
+                    break;
+                default:
+                    fprintf(stderr, "Unknown rgraph child type: %i\n",
+                        child->type);
+                    return 2;
             }
-            fprintf(f, ") %2i %c %2i%c%c (%2i %2i)\n",
-                trf->rot, trf->flip? 't': 'f',
-                rendergraph_trf->frame_i,
-                rendergraph_trf->frame_i_additive? '+': ' ',
-                rendergraph_trf->frame_i_reversed? 'r': ' ',
-                rendergraph_trf->frame_start,
-                rendergraph_trf->frame_len);
         }
         fprintf(f, "\n");
     }
@@ -943,85 +960,106 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
         mapped_rgraph->animation_type, mapped_rgraph->n_frames);
     if(err)return err;
 
-    /* Apply mapper to mapped_rgraph's prismels */
-    for(int i = 0; i < mapped_rgraph->prismel_trfs_len; i++){
-        prismel_trf_t *prismel_trf = mapped_rgraph->prismel_trfs[i];
-        prismel_t *prismel = prismel_trf->prismel;
+    /* Apply mapper to mapped_rgraph's children */
+    for(int i = 0; i < mapped_rgraph->children_len; i++){
+        rendergraph_child_t *child = mapped_rgraph->children[i];
+        switch(child->type){
+            case RENDERGRAPH_CHILD_TYPE_RGRAPH: {
+                rendergraph_t *rgraph = child->u.rgraph.rendergraph;
 
-        bool entry_found = false;
-        for(int i = 0; i < mapper->entries_len; i++){
-            prismelmapper_entry_t *entry = mapper->entries[i];
-            if(prismel == entry->prismel){
-                rendergraph_trf_t *new_rendergraph_trf;
-                err = rendergraph_push_rendergraph_trf(resulting_rgraph,
-                    &new_rendergraph_trf);
+                /* Recurse! */
+                rendergraph_t *new_rgraph;
+                err = prismelmapper_apply_to_rendergraph(mapper, prend,
+                    rgraph, NULL, space, table, &new_rgraph);
                 if(err)return err;
-                new_rendergraph_trf->rendergraph = entry->rendergraph;
-                new_rendergraph_trf->trf = prismel_trf->trf;
-                vec_mul(mapper->space, new_rendergraph_trf->trf.add,
+
+                /* Add a child to resulting_rgraph */
+                rendergraph_child_t *new_child;
+                err = rendergraph_push_child(resulting_rgraph,
+                    RENDERGRAPH_CHILD_TYPE_RGRAPH,
+                    &new_child);
+                if(err)return err;
+                new_child->u.rgraph.rendergraph = new_rgraph;
+                new_child->trf = child->trf;
+                vec_mul(mapper->space, new_child->trf.add,
                     mapper->unit);
-                new_rendergraph_trf->frame_start =
-                    prismel_trf->frame_start;
-                new_rendergraph_trf->frame_len =
-                    prismel_trf->frame_len;
-
                 if(mapper->solid){
-                    Uint8 color = prismel_trf->color;
-                    if(table != NULL)color = table[color];
-                    err = prismelrenderer_get_or_create_solid_palettemapper(
-                        prend, color,
-                        &new_rendergraph_trf->palmapper);
-                    if(err)return err;
-                }
-
-                entry_found = true;
+                    /* TODO: think about this and make sure it's correct */
+                    new_child->u.rgraph.palmapper =
+                        child->u.rgraph.palmapper;}
+                new_child->u.rgraph.frame_i =
+                    child->u.rgraph.frame_i;
+                new_child->u.rgraph.frame_i_additive =
+                    child->u.rgraph.frame_i_additive;
+                new_child->u.rgraph.frame_i_reversed =
+                    child->u.rgraph.frame_i_reversed;
+                new_child->frame_start =
+                    child->frame_start;
+                new_child->frame_len =
+                    child->frame_len;
                 break;
             }
+            case RENDERGRAPH_CHILD_TYPE_PRISMEL: {
+                prismel_t *prismel = child->u.prismel.prismel;
+
+                bool entry_found = false;
+                for(int i = 0; i < mapper->entries_len; i++){
+                    prismelmapper_entry_t *entry = mapper->entries[i];
+                    if(prismel == entry->prismel){
+                        rendergraph_child_t *new_child;
+                        err = rendergraph_push_child(resulting_rgraph,
+                            RENDERGRAPH_CHILD_TYPE_RGRAPH,
+                            &new_child);
+                        if(err)return err;
+                        new_child->u.rgraph.rendergraph = entry->rendergraph;
+                        new_child->trf = child->trf;
+                        vec_mul(mapper->space, new_child->trf.add,
+                            mapper->unit);
+                        new_child->frame_start =
+                            child->frame_start;
+                        new_child->frame_len =
+                            child->frame_len;
+
+                        if(mapper->solid){
+                            Uint8 color = child->u.prismel.color;
+                            if(table != NULL)color = table[color];
+                            err = prismelrenderer_get_or_create_solid_palettemapper(
+                                prend, color,
+                                &new_child->u.rgraph.palmapper);
+                            if(err)return err;
+                        }
+
+                        entry_found = true;
+                        break;
+                    }
+                }
+
+                if(!entry_found){
+                    fprintf(stderr,
+                        "Prismel %s does not match any entry of mapper %s\n",
+                        prismel->name, mapper->name);
+                    err = 2; return err;
+                }
+                break;
+            }
+            case RENDERGRAPH_CHILD_TYPE_LABEL: {
+                /* Add a child to resulting_rgraph */
+                rendergraph_child_t *new_child;
+                err = rendergraph_push_child(resulting_rgraph,
+                    RENDERGRAPH_CHILD_TYPE_LABEL,
+                    &new_child);
+                if(err)return err;
+                new_child->u.label.label = child->u.label.label;
+                new_child->trf = child->trf;
+                vec_mul(mapper->space, new_child->trf.add,
+                    mapper->unit);
+                break;
+            }
+            default:
+                fprintf(stderr, "Unknown rgraph child type: %i\n",
+                    child->type);
+                return 2;
         }
-
-        if(!entry_found){
-            fprintf(stderr,
-                "Prismel %s does not match any entry of mapper %s\n",
-                prismel->name, mapper->name);
-            err = 2; return err;
-        }
-    }
-
-    /* Apply mapper to mapped_rgraph's sub-rendergraphs */
-    for(int i = 0; i < mapped_rgraph->rendergraph_trfs_len; i++){
-        rendergraph_trf_t *rendergraph_trf =
-            mapped_rgraph->rendergraph_trfs[i];
-        rendergraph_t *rgraph = rendergraph_trf->rendergraph;
-
-        /* Recurse! */
-        rendergraph_t *new_rgraph;
-        err = prismelmapper_apply_to_rendergraph(mapper, prend,
-            rgraph, NULL, space, table, &new_rgraph);
-        if(err)return err;
-
-        /* Add a rendergraph_trf to resulting_rgraph */
-        rendergraph_trf_t *new_rendergraph_trf;
-        err = rendergraph_push_rendergraph_trf(resulting_rgraph,
-            &new_rendergraph_trf);
-        if(err)return err;
-        new_rendergraph_trf->rendergraph = new_rgraph;
-        new_rendergraph_trf->trf = rendergraph_trf->trf;
-        vec_mul(mapper->space, new_rendergraph_trf->trf.add,
-            mapper->unit);
-        if(mapper->solid){
-            /* TODO: think about this and make sure it's correct */
-            new_rendergraph_trf->palmapper =
-                rendergraph_trf->palmapper;}
-        new_rendergraph_trf->frame_i =
-            rendergraph_trf->frame_i;
-        new_rendergraph_trf->frame_i_additive =
-            rendergraph_trf->frame_i_additive;
-        new_rendergraph_trf->frame_i_reversed =
-            rendergraph_trf->frame_i_reversed;
-        new_rendergraph_trf->frame_start =
-            rendergraph_trf->frame_start;
-        new_rendergraph_trf->frame_len =
-            rendergraph_trf->frame_len;
     }
 
     /* Cache this resulting_rgraph on the mapper in case it
