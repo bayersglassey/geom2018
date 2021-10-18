@@ -291,59 +291,52 @@ static int rendergraph_child_rgraph_get_frame_i(rendergraph_child_t *child,
 }
 
 typedef struct {
-    /* TODO: ADD COMMENTS */
-    bool done, skip;
-    rendergraph_child_t *child;
+    /* The "return value" of rendergraph_child_details is this struct.
+    That is to say, you pass it a pointer to one of these, and it fills
+    it in. */
+    bool skip; /* Whether caller should continue its loop */
     int frame_i2;
     trf_t trf2;
     int bitmap_i2; /* index into prismel->images */
-    int shift_x, shift_y;
-} rendergraph_child_iter_t;
+    int shift_x, shift_y; /* 2d surface coordinate shift */
+} rendergraph_child_details_t;
 
-static int rendergraph_child_iter(
-    rendergraph_child_iter_t *iter,
-    rendergraph_t *rendergraph, int i,
+static int rendergraph_child_details(
+    rendergraph_child_details_t *details,
+    rendergraph_child_t *child,
+    rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i
 ){
-    /* TODO: ADD COMMENTS */
-
-    /* USAGE EXAMPLE
-        // Given rendergraph_t *rendergraph...
-        for(int i = 0; i < rendergraph->children_len; i++){
-            rendergraph_child_iter_t iter = {0};
-            err = rendergraph_child_iter(&iter,
-                rendergraph, i, rot, flip, frame_i);
-            if(err)return err;
-            if(iter.done)break;
-            if(iter.skip)continue;
-
-            // Do something with iter...
-        }
-    */
+    /* Get the "details" for this child, e.g. where/how it should be
+    rendered, given parent rendergraph's currently-rendered position */
 
     int err;
 
-    rendergraph_child_t *child = rendergraph->children[i];
-    iter->child = child;
-    iter->frame_i2 = child->type == RENDERGRAPH_CHILD_TYPE_RGRAPH?
-        rendergraph_child_rgraph_get_frame_i(
-            iter->child, frame_i):
-        0;
+    /* Early exit (and set details->skip) if frame's not visible */
     bool visible = rendergraph_child_get_frame_visible(
         child, rendergraph->n_frames, frame_i);
-    if(!visible){iter->skip = true; return 0;}
+    if(!visible){details->skip = true; return 0;}
 
-    /* Combine the transformations: trf and child->trf */
-    iter->trf2 = child->trf;
-    trf_apply(rendergraph->space, &iter->trf2,
+    /* Set details->frame_i2 */
+    details->frame_i2 = child->type == RENDERGRAPH_CHILD_TYPE_RGRAPH?
+        rendergraph_child_rgraph_get_frame_i(child, frame_i):
+        0;
+
+    /* Set details->trf2 */
+    details->trf2 = child->trf;
+    trf_apply(rendergraph->space, &details->trf2,
         &(trf_t){flip, rot, {0, 0, 0, 0}});
-    iter->bitmap_i2 = child->type == RENDERGRAPH_CHILD_TYPE_RGRAPH?
+
+    /* Set details->bitmap_i2 */
+    details->bitmap_i2 = child->type == RENDERGRAPH_CHILD_TYPE_RGRAPH?
         rendergraph_get_bitmap_i(child->u.rgraph.rendergraph,
-            iter->trf2.rot, iter->trf2.flip, iter->frame_i2):
+            details->trf2.rot, details->trf2.flip, details->frame_i2):
         get_bitmap_i(rendergraph->space,
-            iter->trf2.rot, iter->trf2.flip, 1, 0);
-    rendergraph->space->vec_render(iter->trf2.add,
-        &iter->shift_x, &iter->shift_y);
+            details->trf2.rot, details->trf2.flip, 1, 0);
+
+    /* Set details->shift_x, details->shift_y */
+    rendergraph->space->vec_render(details->trf2.add,
+        &details->shift_x, &details->shift_y);
 
     return 0;
 }
@@ -384,37 +377,37 @@ int rendergraph_calculate_bitmap_bounds(rendergraph_t *rendergraph,
     boundary_box_clear(&bbox);
 
     for(int i = 0; i < rendergraph->children_len; i++){
-        rendergraph_child_iter_t iter = {0};
-        err = rendergraph_child_iter(&iter,
-            rendergraph, i, rot, flip, frame_i);
+        rendergraph_child_t *child = rendergraph->children[i];
+        rendergraph_child_details_t details = {0};
+        err = rendergraph_child_details(&details, child,
+            rendergraph, rot, flip, frame_i);
         if(err)return err;
-        if(iter.done)break;
-        if(iter.skip)continue;
+        if(details.skip)continue;
 
-        switch(iter.child->type){
+        switch(child->type){
             case RENDERGRAPH_CHILD_TYPE_RGRAPH: {
-                rendergraph_t *child_rgraph = iter.child->u.rgraph.rendergraph;
+                rendergraph_t *child_rgraph = child->u.rgraph.rendergraph;
 
                 /* Calculate bounds for sub-bitmap for this child */
                 err = rendergraph_calculate_bitmap_bounds(child_rgraph,
-                    iter.trf2.rot, iter.trf2.flip, iter.frame_i2);
+                    details.trf2.rot, details.trf2.flip, details.frame_i2);
                 if(err)return err;
 
                 /* Union sub-bitmap's bbox into our "accumulating" bbox */
                 rendergraph_bitmap_t *bitmap2 = &child_rgraph->bitmaps[
-                    iter.bitmap_i2];
+                    details.bitmap_i2];
                 boundary_box_t bbox2;
                 boundary_box_from_position_box(&bbox2, &bitmap2->pbox);
-                boundary_box_shift(&bbox2, iter.shift_x, iter.shift_y);
+                boundary_box_shift(&bbox2, details.shift_x, details.shift_y);
                 boundary_box_union(&bbox, &bbox2);
                 break;
             }
             case RENDERGRAPH_CHILD_TYPE_PRISMEL: {
                 /* Calculate & union prismel's bbox into our "accumulating" bbox */
                 boundary_box_t bbox2;
-                prismel_get_boundary_box(iter.child->u.prismel.prismel,
-                    &bbox2, iter.bitmap_i2);
-                boundary_box_shift(&bbox2, iter.shift_x, iter.shift_y);
+                prismel_get_boundary_box(child->u.prismel.prismel,
+                    &bbox2, details.bitmap_i2);
+                boundary_box_shift(&bbox2, details.shift_x, details.shift_y);
                 boundary_box_union(&bbox, &bbox2);
                 break;
             }
@@ -488,23 +481,22 @@ int rendergraph_render_to_surface(rendergraph_t *rendergraph,
 
     /* Render children */
     for(int i = 0; i < rendergraph->children_len; i++){
-        rendergraph_child_iter_t iter = {0};
-        err = rendergraph_child_iter(&iter,
-            rendergraph, i, rot, flip, frame_i);
+        rendergraph_child_t *child = rendergraph->children[i];
+        rendergraph_child_details_t details = {0};
+        err = rendergraph_child_details(&details, child,
+            rendergraph, rot, flip, frame_i);
         if(err)return err;
-        if(iter.done)break;
-        if(iter.skip)continue;
+        if(details.skip)continue;
 
-        rendergraph_child_t *child = iter.child;
         switch(child->type){
             case RENDERGRAPH_CHILD_TYPE_RGRAPH: {
                 rendergraph_t *rendergraph2 = child->u.rgraph.rendergraph;
                 rendergraph_bitmap_t *bitmap2 = rendergraph_get_bitmap(
                     rendergraph2,
-                    iter.trf2.rot, iter.trf2.flip, iter.frame_i2);
+                    details.trf2.rot, details.trf2.flip, details.frame_i2);
                 SDL_Rect dst_rect2 = {
-                    dst_rect->x + bitmap->pbox.x + iter.shift_x - bitmap2->pbox.x,
-                    dst_rect->y + bitmap->pbox.y + iter.shift_y - bitmap2->pbox.y,
+                    dst_rect->x + bitmap->pbox.x + details.shift_x - bitmap2->pbox.x,
+                    dst_rect->y + bitmap->pbox.y + details.shift_y - bitmap2->pbox.y,
                     bitmap2->pbox.w,
                     bitmap2->pbox.h
                 };
@@ -513,7 +505,7 @@ int rendergraph_render_to_surface(rendergraph_t *rendergraph,
                     /* Recurse and continue */
                     err = rendergraph_render_to_surface(rendergraph2, surface,
                         &dst_rect2,
-                        iter.trf2.rot, iter.trf2.flip, iter.frame_i2, pal);
+                        details.trf2.rot, details.trf2.flip, details.frame_i2, pal);
                     if(err)return err;
                     continue;
                 }
@@ -522,7 +514,7 @@ int rendergraph_render_to_surface(rendergraph_t *rendergraph,
                 /* NOTE: &bitmap2 should be redundant, it should result the same
                 pointer value we already had */
                 err = rendergraph_get_or_render_bitmap(rendergraph2,
-                    &bitmap2, iter.trf2.rot, iter.trf2.flip, iter.frame_i2, pal);
+                    &bitmap2, details.trf2.rot, details.trf2.flip, details.frame_i2, pal);
 
                 /* Blit sub-bitmap's surface onto ours */
                 SDL_Surface *surface2 = bitmap2->surface;
@@ -561,11 +553,11 @@ int rendergraph_render_to_surface(rendergraph_t *rendergraph,
                     c = palettemapper_apply_to_color(rendergraph->palmapper, c);
                 }
                 prismel_t *prismel = child->u.prismel.prismel;
-                prismel_image_t *image = &prismel->images[iter.bitmap_i2];
+                prismel_image_t *image = &prismel->images[details.bitmap_i2];
                 for(int i = 0; i < image->lines_len; i++){
                     prismel_image_line_t *line = image->lines[i];
-                    int x = dst_rect->x + line->x + bitmap->pbox.x + iter.shift_x;
-                    int y = dst_rect->y + line->y + bitmap->pbox.y + iter.shift_y;
+                    int x = dst_rect->x + line->x + bitmap->pbox.x + details.shift_x;
+                    int y = dst_rect->y + line->y + bitmap->pbox.y + details.shift_y;
                     Uint8 *p = surface8_get_pixel_ptr(surface, x, y);
                     for(int xx = 0; xx < line->w; xx++){
                         p[xx] = c;
