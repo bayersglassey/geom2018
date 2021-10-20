@@ -65,7 +65,7 @@ typedef struct rendergraph_child {
             struct palettemapper *palmapper;
         } rgraph;
         struct {
-            const char *label; /* from a stringstore */
+            const char *name; /* from a stringstore */
         } label;
     } u;
 } rendergraph_child_t;

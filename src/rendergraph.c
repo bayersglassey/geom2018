@@ -180,7 +180,7 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces,
                 break;
             }
             case RENDERGRAPH_CHILD_TYPE_LABEL: {
-                const char *label = child->u.label.label;
+                const char *label = child->u.label.name;
                 fprintf(f, "%s    label  : %7s ", spaces,
                     label == NULL? "<NULL>": label);
                 trf_fprintf(f, rendergraph->space->dims, &child->trf);
@@ -242,7 +242,7 @@ int rendergraph_push_child(rendergraph_t *rendergraph,
             child->u.prismel.prismel = NULL;
             break;
         case RENDERGRAPH_CHILD_TYPE_LABEL:
-            child->u.label.label = NULL;
+            child->u.label.name = NULL;
             break;
         default:
             fprintf(stderr, "Unrecognized child type: %i\n", type);

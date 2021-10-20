@@ -770,7 +770,7 @@ int prismelrenderer_write(prismelrenderer_t *prend, FILE *f){
                 }
                 case RENDERGRAPH_CHILD_TYPE_LABEL:
                     fprintf(f, "            : ");
-                    fus_write_str_padded(f, child->u.label.label, 40);
+                    fus_write_str_padded(f, child->u.label.name, 40);
                     fputc('\n', f);
                     break;
                 default:
@@ -1049,7 +1049,7 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
                     RENDERGRAPH_CHILD_TYPE_LABEL,
                     &new_child);
                 if(err)return err;
-                new_child->u.label.label = child->u.label.label;
+                new_child->u.label.name = child->u.label.name;
                 new_child->trf = child->trf;
                 vec_mul(mapper->space, new_child->trf.add,
                     mapper->unit);
