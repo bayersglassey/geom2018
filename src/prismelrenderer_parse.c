@@ -393,9 +393,9 @@ static int parse_shape_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer,
         Example data:
 
         :
-            : tri (0 0 0 0)  0 f 0
-            : tri (1 0 0 0) 11 f 1
-            : sq  (1 0 0 0)  1 f 2 (3 1)
+            : "tri" (0 0 0 0)  0 f 0
+            : "tri" (1 0 0 0) 11 f 1
+            : "sq"  (1 0 0 0)  1 f 2 (3 1)
     */
     INIT
     GET("(")
@@ -403,7 +403,6 @@ static int parse_shape_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer,
         if(GOT(")"))break;
 
         char *name;
-        int dims = 0;
         vec_t v;
         int rot;
         bool flip;
@@ -451,6 +450,58 @@ static int parse_shape_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer,
     return 0;
 }
 
+static int parse_shape_labels(prismelrenderer_t *prend, fus_lexer_t *lexer,
+    rendergraph_t *rgraph
+){
+    /*
+        Example data:
+
+        :
+            : "label1" ( 0 0 0 0)  0 f
+            : "label2" (-1 0 2 0) 11 t (3 1)
+    */
+    INIT
+    GET("(")
+    while(1){
+        if(GOT(")"))break;
+
+        char *name;
+        vec_t v;
+        int rot;
+        bool flip;
+        int frame_start = 0;
+        int frame_len = -1;
+
+        GET("(")
+        {
+            GET_STR(name)
+            GET_VEC(prend->space, v)
+            GET_INT(rot)
+            GET_BOOL(flip)
+            if(GOT("(")){
+                NEXT
+                GET_INT(frame_start)
+                GET_INT(frame_len)
+                GET(")")
+            }
+        }
+        GET(")")
+
+        rendergraph_child_t *child;
+        err = rendergraph_push_child(rgraph,
+            RENDERGRAPH_CHILD_TYPE_LABEL,
+            &child);
+        if(err)return err;
+        child->u.label.name = name;
+        child->trf.rot = rot;
+        child->trf.flip = flip;
+        child->frame_start = frame_start;
+        child->frame_len = frame_len;
+        vec_cpy(prend->space->dims, child->trf.add, v);
+    }
+    NEXT
+    return 0;
+}
 
 static int parse_shape_hexpicture(prismelrenderer_t *prend, fus_lexer_t *lexer,
     rendergraph_t *rgraph
@@ -598,6 +649,10 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
         }else if(GOT("prismels")){
             NEXT
             err = parse_shape_prismels(prend, lexer, rgraph);
+            if(err)return err;
+        }else if(GOT("labels")){
+            NEXT
+            err = parse_shape_labels(prend, lexer, rgraph);
             if(err)return err;
         }else if(GOT("hexpicture")){
             NEXT

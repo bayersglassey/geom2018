@@ -110,6 +110,8 @@ shapes:
             : "tri" (0 0 0 0) 10 f eval: 1 + 8 + 4
 
     $PREFIX NS "_head":
+        labels:
+            : "player_head" (0 0 0 0) 0 f (0 1)
         $IF PLAYER_ROLLER:
             shapes:
                 : "_roller_body_hollow" (0 0 0 0)  0 f
