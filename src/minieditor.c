@@ -99,6 +99,7 @@ static void minieditor_print_controls(minieditor_t *editor,
         "  0 - reset rotation\n"
         "  enter - show/hide controls\n"
         "  ctrl+enter - dump controls to stderr\n"
+        "  shift+enter - dump current rendergraph to stderr\n"
         "Displaying rendergraphs from file: %s\n"
         "Rendergraph %i / %i: %s\n"
         "  pan=(%i,%i), rot = %i, flip = %c, zoom = %i\n"
@@ -142,6 +143,20 @@ int minieditor_process_event(minieditor_t *editor, SDL_Event *event){
             if(event->key.keysym.sym == SDLK_RETURN){
                 if(event->key.keysym.mod & KMOD_CTRL){
                     minieditor_print_controls(editor, stderr, NULL);
+                }else if(event->key.keysym.mod & KMOD_SHIFT){
+                    rendergraph_t *rgraph = minieditor_get_rgraph(editor);
+                    if(rgraph){
+                        int dump_bitmaps = 1;
+                        /* dump_bitmaps: if 1, dumps bitmaps.
+                        If 2, also dumps their surfaces. */
+
+                        err = rendergraph_calculate_labels(rgraph);
+                        if(err)return err;
+
+                        rendergraph_dump(rgraph, stderr, dump_bitmaps, 2);
+                    }else{
+                        fprintf(stderr, "(No rendergraph)\n");
+                    }
                 }else{
                     editor->show_editor_controls =
                         !editor->show_editor_controls;

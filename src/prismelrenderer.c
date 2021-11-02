@@ -95,6 +95,9 @@ bool get_animated_frame_visible(int n_frames,
 int get_animated_frame_i(const char *animation_type,
     int n_frames, int frame_i
 ){
+    /* Returns a value >= 0 and < n_frames.
+    Assumes frame_i >= 0. */
+
     if(animation_type == rendergraph_animation_type_once){
         /* Is this correct??? */
         if(frame_i >= n_frames)frame_i = n_frames - 1;
@@ -481,6 +484,8 @@ void prismelrenderer_cleanup(prismelrenderer_t *renderer){
 void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
     int dump_bitmaps
 ){
+    /* dump_bitmaps: if 1, dumps bitmaps. If 2, also dumps their surfaces. */
+
     fprintf(f, "prismelrenderer: %p\n", renderer);
     if(renderer == NULL)return;
     fprintf(f, "  space: %p\n", renderer->space);

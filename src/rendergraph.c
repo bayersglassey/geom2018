@@ -46,6 +46,7 @@ void rendergraph_cleanup(rendergraph_t *rendergraph){
     if(!rendergraph->copy_of){
         ARRAY_FREE_PTR(rendergraph_child_t*, rendergraph->children,
             rendergraph_child_cleanup)
+        ARRAY_FREE_PTR(rendergraph_label_t*, rendergraph->labels, (void))
     }
 
     for(int i = 0; i < rendergraph->n_bitmaps; i++){
@@ -92,6 +93,7 @@ int rendergraph_init(rendergraph_t *rendergraph, char *name,
     if(err)return err;
 
     ARRAY_INIT(rendergraph->children)
+    ARRAY_INIT(rendergraph->labels)
     return 0;
 }
 
@@ -108,8 +110,8 @@ int rendergraph_copy(rendergraph_t *rendergraph, char *name,
     rendergraph->palmapper = copy_of->palmapper;
     rendergraph->copy_of = copy_of;
 
-    rendergraph->children = copy_of->children;
-    rendergraph->children_len = copy_of->children_len;
+    ARRAY_ASSIGN(rendergraph->children, copy_of->children)
+    ARRAY_ASSIGN(rendergraph->labels, copy_of->labels)
 
     return 0;
 }
@@ -142,6 +144,8 @@ void rendergraph_bitmap_dump(rendergraph_bitmap_t *bitmap, FILE *f,
 void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces,
     int dump_bitmaps
 ){
+    /* dump_bitmaps: if 1, dumps bitmaps. If 2, also dumps their surfaces. */
+
     char spaces[MAX_SPACES];
     get_spaces(spaces, MAX_SPACES, n_spaces);
 
@@ -184,7 +188,7 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces,
                 fprintf(f, "%s    label  : %7s ", spaces,
                     label == NULL? "<NULL>": label);
                 trf_fprintf(f, rendergraph->space->dims, &child->trf);
-                fprintf(f, " [% 3i % 3i]\n",
+                fprintf(f, " frame(% 3i % 3i)\n",
                     child->frame_start, child->frame_len);
                 break;
             }
@@ -207,6 +211,19 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces,
 
     fprintf(f, "%s  boundbox: ", spaces); boundbox_fprintf(f,
         rendergraph->space->dims, rendergraph->boundbox); fprintf(f, "\n");
+
+    if(rendergraph->labels_calculated){
+        fprintf(f, "%s  labels:\n", spaces);
+        for(int i = 0; i < rendergraph->labels_len; i++){
+            rendergraph_label_t *label = rendergraph->labels[i];
+            fprintf(f, "%s    %8s ", spaces, label->name);
+            trf_fprintf(f, rendergraph->space->dims, &label->trf);
+            fprintf(f, " frame(% 3i % 3i)\n",
+                label->frame_start, label->frame_len);
+        }
+    }else{
+        fprintf(f, "%s  labels: (not calculated)\n", spaces);
+    }
 }
 
 int rendergraph_create_bitmaps(rendergraph_t *rendergraph){
@@ -293,7 +310,11 @@ static int rendergraph_child_rgraph_get_frame_i(rendergraph_child_t *child,
 typedef struct {
     /* The "return value" of rendergraph_child_details is this struct.
     That is to say, you pass it a pointer to one of these, and it fills
-    it in. */
+    it in.
+    This struct doesn't represent anything, it's basically just a bunch
+    of values which a caller of rendergraph_child_details would need
+    to calculate and store in variables, so we've wrapped it in a
+    struct to make that a bit easier. */
     bool skip; /* Whether caller should continue its loop */
     int frame_i2;
     trf_t trf2;
@@ -305,10 +326,13 @@ static int rendergraph_child_details(
     rendergraph_child_details_t *details,
     rendergraph_child_t *child,
     rendergraph_t *rendergraph,
-    rot_t rot, flip_t flip, int frame_i
+    trf_t *trf, int frame_i
 ){
     /* Get the "details" for this child, e.g. where/how it should be
-    rendered, given parent rendergraph's currently-rendered position */
+    rendered, given parent rendergraph's currently-rendered position.
+
+    This function doesn't represent anything, it basically just saves
+    caller the trouble of calculating a bunch of values individually. */
 
     int err;
 
@@ -324,8 +348,7 @@ static int rendergraph_child_details(
 
     /* Set details->trf2 */
     details->trf2 = child->trf;
-    trf_apply(rendergraph->space, &details->trf2,
-        &(trf_t){flip, rot, {0, 0, 0, 0}});
+    trf_apply(rendergraph->space, &details->trf2, trf);
 
     /* Set details->bitmap_i2 */
     details->bitmap_i2 = child->type == RENDERGRAPH_CHILD_TYPE_RGRAPH?
@@ -338,6 +361,93 @@ static int rendergraph_child_details(
     rendergraph->space->vec_render(details->trf2.add,
         &details->shift_x, &details->shift_y);
 
+    return 0;
+}
+
+static int _rendergraph_render_labels(rendergraph_t *target_rgraph,
+    rendergraph_t *rgraph,
+    trf_t *trf, int frame_i
+){
+    /* Recursively populates target_rgraph->labels, adding one for every
+    descendant rgraph (found by recursing over children, rendergraph_child_t,
+    whose type is RENDERGRAPH_CHILD_TYPE_LABEL).
+    NOTE: it is possible that target_rgraph == graph. */
+    int err;
+
+    for(int i = 0; i < rgraph->children_len; i++){
+        rendergraph_child_t *child = rgraph->children[i];
+        rendergraph_child_details_t details = {0};
+        err = rendergraph_child_details(&details, child, rgraph,
+            trf, frame_i);
+        if(err)return err;
+        if(details.skip)continue;
+
+        switch(child->type){
+            case RENDERGRAPH_CHILD_TYPE_RGRAPH: {
+                rendergraph_t *child_rgraph = child->u.rgraph.rendergraph;
+                if(
+                    false && /* TODO: REMOVE THIS ONCE WE'RE SURE THE TYPE_LABEL CASE WORKS */
+                    child_rgraph->labels_calculated
+                ){
+                    for(int i = 0; i < child_rgraph->labels_len; i++){
+                        rendergraph_label_t *child_label = child_rgraph->labels[i];
+                        ARRAY_PUSH_NEW(rendergraph_label_t*, target_rgraph->labels,
+                            label)
+
+                        /* Both labels point to (but do not own) the same
+                        child->u.label.name */
+                        label->name = child_label->name;
+
+                        label->trf = child_label->trf;
+                        trf_apply(target_rgraph->space, &label->trf, &details.trf2);
+
+                        /* Does this work?.. */
+                        label->frame_start = child_label->frame_start + details.frame_i2;
+
+                        label->frame_len = child_label->frame_len;
+                    }
+                }else{
+                    err = _rendergraph_render_labels(target_rgraph, child_rgraph,
+                        &details.trf2, details.frame_i2);
+                    if(err)return err;
+                }
+                break;
+            }
+            case RENDERGRAPH_CHILD_TYPE_LABEL: {
+                ARRAY_PUSH_NEW(rendergraph_label_t*, target_rgraph->labels,
+                    label)
+                label->name = child->u.label.name; /* Weakref */
+                label->trf = details.trf2;
+
+                label->frame_start = details.frame_i2;
+                label->frame_len = child->frame_len;
+                break;
+            }
+            default: break;
+        }
+    }
+
+    return 0;
+}
+int rendergraph_calculate_labels(rendergraph_t *rgraph){
+    /* Populates rgraph->labels, adding one for every descendant
+    (rendergraph_child_t) of rgraph for which type is
+    RENDERGRAPH_CHILD_TYPE_LABEL.
+    This is only ever done once per rgraph;
+    rgraph->labels_calculated is used to mark whether it has been
+    done already. */
+    int err;
+
+    /* Already populated rgraph->labels, early exit */
+    if(rgraph->labels_calculated)return 0;
+
+    /* Calculate our labels */
+    trf_t trf = {0};
+    err = _rendergraph_render_labels(rgraph, rgraph, &trf, 0);
+    if(err)return err;
+
+    /* Our labels have now been calculated */
+    rgraph->labels_calculated = true;
     return 0;
 }
 
@@ -379,8 +489,8 @@ int rendergraph_calculate_bitmap_bounds(rendergraph_t *rendergraph,
     for(int i = 0; i < rendergraph->children_len; i++){
         rendergraph_child_t *child = rendergraph->children[i];
         rendergraph_child_details_t details = {0};
-        err = rendergraph_child_details(&details, child,
-            rendergraph, rot, flip, frame_i);
+        err = rendergraph_child_details(&details, child, rendergraph,
+            &(trf_t){.rot=rot, .flip=flip}, frame_i);
         if(err)return err;
         if(details.skip)continue;
 
@@ -483,8 +593,8 @@ int rendergraph_render_to_surface(rendergraph_t *rendergraph,
     for(int i = 0; i < rendergraph->children_len; i++){
         rendergraph_child_t *child = rendergraph->children[i];
         rendergraph_child_details_t details = {0};
-        err = rendergraph_child_details(&details, child,
-            rendergraph, rot, flip, frame_i);
+        err = rendergraph_child_details(&details, child, rendergraph,
+            &(trf_t){.rot=rot, .flip=flip}, frame_i);
         if(err)return err;
         if(details.skip)continue;
 

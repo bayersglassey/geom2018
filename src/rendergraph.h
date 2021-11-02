@@ -76,9 +76,23 @@ typedef struct rendergraph_bitmap {
     SDL_Surface *surface;
 } rendergraph_bitmap_t;
 
+typedef struct rendergraph_label {
+    /* Every rendergraph has an array of these labels, which are
+    rendered from all the rendergraph's descendants (rendergraph_child_t)
+    which have type RENDERGRAPH_CHILD_TYPE_LABEL. */
+    const char *name; /* Points to a child->u.label.name */
+    trf_t trf;
+    int frame_start;
+    int frame_len;
+} rendergraph_label_t;
+
 typedef struct rendergraph {
     char *name;
     ARRAY_DECL(struct rendergraph_child*, children)
+    ARRAY_DECL(struct rendergraph_label*, labels)
+
+    bool labels_calculated;
+    int n_labels;
 
     int n_frames;
 
@@ -93,8 +107,12 @@ typedef struct rendergraph {
     struct palettemapper *palmapper;
     struct rendergraph *copy_of;
         /* If not NULL, this rendergraph is a copy of another one.
-        In particular, it does *NOT* own its children, so should
-        *NOT* modify or free them. */
+        In particular, it does *NOT* own its children or labels, so
+        should *NOT* modify or free them.
+        However, it *DOES* own its bitmaps.
+        The reason for doing this is basically for one rgraph to be
+        the same as another, but with a (different) palmapper applied
+        to it. */
 } rendergraph_t;
 
 
@@ -127,6 +145,7 @@ int rendergraph_get_bitmap_i(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i);
 rendergraph_bitmap_t *rendergraph_get_bitmap(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i);
+int rendergraph_calculate_labels(rendergraph_t *rgraph);
 int rendergraph_calculate_bitmap_bounds(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i);
 int rendergraph_render_to_surface(rendergraph_t *rendergraph,
