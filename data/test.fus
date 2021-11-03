@@ -17,6 +17,7 @@ import "data/maps/sprucetown/tilesets/earth_tiles.fus"
 
 import "data/effects.fus"
 import "data/eye.fus"
+import "data/food.fus"
 import "data/coin.fus"
 import "data/coin_beast.fus"
 import "data/switch.fus"

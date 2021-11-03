@@ -8,7 +8,7 @@ $SET_BOOL NO_COLLECT_ON_TOUCH
 
 on "crush": goto: dead
 
-import "anim/_coin.fus"
+import "anim/_coin.behaviour.fus"
 
 _crouch:
     if() then: goto: crawl

@@ -1,31 +1,4 @@
 
+$SET_STR RGRAPH_STAND "coin"
+$SET_STR RGRAPH_CROUCH "coin_crouch"
 import "anim/_coin.fus"
-
-_crouch:
-    if() then: goto: crouch
-
-_stand:
-    if() then: goto: stand
-
-appear:
-    rgraph: "dead_once_centered_reversed"
-    if() then: goto: stand
-
-appear_crouch:
-    rgraph: "dead_once_crouch_reversed"
-    if() then: goto: crouch
-
-stand:
-    rgraph: "coin"
-    hitbox:
-        ;;  (+)
-
-crouch:
-    rgraph: "coin_crouch"
-    hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)  .
-
-collected:
-    rgraph: "dead_once_centered"
