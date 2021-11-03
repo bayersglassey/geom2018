@@ -594,14 +594,54 @@ int state_effect_apply(state_effect_t *effect,
 
         for(int i = 0; i < effects_len; i++){
             state_effect_t *effect = effects[i];
-            if(DEBUG_RULES)printf("  %s: %s\n", matched? "then": "else", state_effect_type_name(effect->type));
-            err = state_effect_apply(effect, context, gotto_ptr, continues_ptr);
+            if(DEBUG_RULES)printf("  %s: %s\n", matched? "then": "else",
+                state_effect_type_name(effect->type));
+            err = state_effect_apply(effect, context, gotto_ptr,
+                continues_ptr);
             if(err){
                 if(err == 2){
                     fprintf(stderr, "...in \"if\" statement\n");
                 }
                 return err;
             }
+        }
+        break;
+    }
+    case STATE_EFFECT_TYPE_AS: {
+        switch(effect->u.as.type){
+            case EFFECT_AS_YOU: {
+                if(!your_body){
+                    fprintf(stderr, "No your_body!\n");
+                    return 2;
+                }
+
+                /* We apply our sub-effects "as you", that is, as your_body.
+                The terminology here is just too silly, eh?
+                Anyway, long story short, sub_context is like context but with
+                body and your_body swapped. */
+                hexgame_state_context_t sub_context = *context;
+                sub_context.your_body = body;
+                sub_context.body = your_body;
+
+                for(int i = 0; i < effect->u.as.sub_effects_len; i++){
+                    state_effect_t *sub_effect = effect->u.as.sub_effects[i];
+                    if(DEBUG_RULES)printf("  as: %s\n",
+                        state_effect_type_name(sub_effect->type));
+                    err = state_effect_apply(sub_effect, &sub_context, gotto_ptr,
+                        continues_ptr);
+                    if(err){
+                        if(err == 2){
+                            fprintf(stderr, "...in \"as\" statement\n");
+                        }
+                        return err;
+                    }
+                }
+                break;
+            }
+            default:
+                fprintf(stderr, "Unrecognized \"as\" type: %i\n",
+                    effect->u.as.type);
+                return 2;
         }
         break;
     }
@@ -682,6 +722,7 @@ int collmsg_handler_apply(collmsg_handler_t *handler,
 
         actor_t *actor = context->actor;
         body_t *body = context->body;
+        body_t *your_body = context->your_body;
 
         if(gotto != NULL){
             if(actor != NULL){
@@ -691,7 +732,7 @@ int collmsg_handler_apply(collmsg_handler_t *handler,
                 if(gotto->immediate){
                     /* If there was an "immediate goto" effect,
                     then we immediately handle the new state's rules */
-                    err = actor_handle_rules(actor);
+                    err = actor_handle_rules(actor, your_body);
                     if(err)return err;
                 }
             }else{
@@ -701,7 +742,7 @@ int collmsg_handler_apply(collmsg_handler_t *handler,
                 if(gotto->immediate){
                     /* If there was an "immediate goto" effect,
                     then we immediately handle the new state's rules */
-                    err = body_handle_rules(body);
+                    err = body_handle_rules(body, your_body);
                     if(err)return err;
                 }
             }

@@ -591,12 +591,13 @@ int body_update_cur_submap(body_t *body){
     return 0;
 }
 
-int body_handle_rules(body_t *body){
+int body_handle_rules(body_t *body, body_t *your_body){
     int err;
     handle: {
         hexgame_state_context_t context = {
             .game = body->game,
             .body = body,
+            .your_body = your_body,
         };
         state_effect_goto_t *gotto = NULL;
         err = state_handle_rules(body->state, &context, &gotto);
@@ -635,7 +636,7 @@ int body_step(body_t *body, hexgame_t *game){
         body->cooldown--;
     }else{
         /* Handle current state's rules */
-        err = body_handle_rules(body);
+        err = body_handle_rules(body, NULL);
         if(err)return err;
 
         /* Start of new frame, no keys have gone down yet.

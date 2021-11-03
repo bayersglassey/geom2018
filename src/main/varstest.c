@@ -28,6 +28,7 @@ static int parse_valexpr(valexpr_t *expr, const char *text){
     err = fus_lexer_init(&lexer, text, "<test>");
     if(err)return err;
     err = valexpr_parse(expr, &lexer);
+    if(err)return err;
 
     valexpr_fprintf(expr, stderr);
     fputc('\n', stderr);
@@ -233,9 +234,10 @@ int testrunner(int *n_tests_ptr, int *n_fails_ptr){
         }
 
         {
-            vars_set_bool(&yourvars, "cond", true);
             vars_set_int(&myvars, "x", 111);
             vars_set_int(&myvars, "y", 222);
+            vars_set_bool(&yourvars, "cond", true);
+            vars_set_int(&yourvars, "y", 333);
 
             err = parse_valexpr(expr, "myvar(if yourvar(\"cond\") then \"x\" else \"y\")");
             if(err)return err;
@@ -243,6 +245,16 @@ int testrunner(int *n_tests_ptr, int *n_fails_ptr){
             valexpr_cleanup(expr);
 
             err = parse_valexpr(expr, "myvar(if not yourvar(\"cond\") then \"x\" else \"y\")");
+            if(err)return err;
+            ASSERT(valexpr_get_int(expr, &context) == 222);
+            valexpr_cleanup(expr);
+
+            err = parse_valexpr(expr, "as you(myvar(\"y\"))");
+            if(err)return err;
+            ASSERT(valexpr_get_int(expr, &context) == 333);
+            valexpr_cleanup(expr);
+
+            err = parse_valexpr(expr, "as you(yourvar(\"y\"))");
             if(err)return err;
             ASSERT(valexpr_get_int(expr, &context) == 222);
             valexpr_cleanup(expr);

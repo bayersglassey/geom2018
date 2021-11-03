@@ -211,7 +211,7 @@ int body_set_state(body_t *body, const char *state_name,
 struct actor;
 struct hexgame;
 int body_update_cur_submap(body_t *body);
-int body_handle_rules(body_t *body);
+int body_handle_rules(body_t *body, body_t *your_body);
 int body_step(body_t *body, struct hexgame *game);
 bool body_sends_collmsg(body_t *body, const char *msg);
 collmsg_handler_t *body_get_collmsg_handler(body_t *body, const char *msg);
@@ -293,7 +293,7 @@ int actor_init(actor_t *actor, hexmap_t *map, body_t *body,
 int actor_init_stateset(actor_t *actor, const char *stateset_filename,
     const char *state_name, hexmap_t *map);
 int actor_set_state(actor_t *actor, const char *state_name);
-int actor_handle_rules(actor_t *actor);
+int actor_handle_rules(actor_t *actor, body_t *your_body);
 int actor_step(actor_t *actor, struct hexgame *game);
 int actor_refresh_vars(actor_t *actor);
 

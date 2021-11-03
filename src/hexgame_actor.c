@@ -74,13 +74,14 @@ int actor_set_state(actor_t *actor, const char *state_name){
     return 0;
 }
 
-int actor_handle_rules(actor_t *actor){
+int actor_handle_rules(actor_t *actor, body_t *your_body){
     int err;
     handle: {
         hexgame_state_context_t context = {
             .game = actor->game,
             .actor = actor,
             .body = actor->body,
+            .your_body = your_body,
         };
         state_effect_goto_t *gotto = NULL;
         err = state_handle_rules(actor->state, &context, &gotto);
@@ -110,7 +111,7 @@ int actor_step(actor_t *actor, struct hexgame *game){
         /* No body, or recording not playing */
 
         /* Handle current state's rules */
-        err = actor_handle_rules(actor);
+        err = actor_handle_rules(actor, NULL);
         if(err)return err;
     }
     return 0;

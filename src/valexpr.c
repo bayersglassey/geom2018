@@ -31,6 +31,10 @@ void valexpr_cleanup(valexpr_t *expr){
             valexpr_cleanup(expr->u.if_expr.else_expr);
             free(expr->u.if_expr.else_expr);
             break;
+        case VALEXPR_TYPE_AS:
+            valexpr_cleanup(expr->u.as.sub_expr);
+            free(expr->u.as.sub_expr);
+            break;
         default: break;
     }
 }
@@ -71,6 +75,15 @@ int valexpr_copy(valexpr_t *expr1, valexpr_t *expr2){
                 expr2->u.if_expr.else_expr);
             if(err)return err;
             break;
+        case VALEXPR_TYPE_AS:
+            expr1->u.as.type = expr2->u.as.type;
+
+            expr1->u.as.sub_expr = calloc(1, sizeof(valexpr_t));
+            if(!expr1->u.as.sub_expr)return 1;
+            err = valexpr_copy(expr1->u.as.sub_expr,
+                expr2->u.as.sub_expr);
+            if(err)return err;
+            break;
         default: break;
     }
     return 0;
@@ -96,6 +109,11 @@ void valexpr_fprintf(valexpr_t *expr, FILE *file){
             valexpr_fprintf(expr->u.if_expr.then_expr, file);
             fprintf(file, " else ");
             valexpr_fprintf(expr->u.if_expr.else_expr, file);
+            break;
+        case VALEXPR_TYPE_AS:
+            fprintf(file, "as %s (", valexpr_as_msg(expr->u.as.type));
+            valexpr_fprintf(expr->u.as.sub_expr, file);
+            fputc(')', file);
             break;
         default:
             fprintf(file, "<unknown>");
@@ -134,6 +152,7 @@ int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer){
         GOT("globalvar")? VALEXPR_TYPE_GLOBALVAR:
         GOT("myvar")? VALEXPR_TYPE_MYVAR:
         GOT("if")? VALEXPR_TYPE_IF:
+        GOT("as")? VALEXPR_TYPE_AS:
         VALEXPR_TYPE_LITERAL;
 
     if(
@@ -183,6 +202,26 @@ int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer){
         err = valexpr_parse(else_expr, lexer);
         if(err)return err;
         expr->u.if_expr.else_expr = else_expr;
+    }else if(type == VALEXPR_TYPE_AS){
+        NEXT
+        expr->type = type;
+
+        if(GOT("you")){
+            NEXT
+            expr->u.as.type = VALEXPR_AS_YOU;
+        }else{
+            return UNEXPECTED("you");
+        }
+
+        expr->u.as.sub_expr = NULL;
+
+        GET("(")
+        valexpr_t *sub_expr = calloc(1, sizeof(*sub_expr));
+        if(!sub_expr)return 1;
+        err = valexpr_parse(sub_expr, lexer);
+        if(err)return err;
+        expr->u.as.sub_expr = sub_expr;
+        GET(")")
     }else{
         expr->type = type;
         err = val_parse(&expr->u.val, lexer);
@@ -272,6 +311,28 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
                 err = valexpr_eval(expr->u.if_expr.else_expr,
                     context, &result, set);
                 if(err)return err;
+            }
+            break;
+        }
+        case VALEXPR_TYPE_AS: {
+            switch(expr->u.as.type){
+                case VALEXPR_AS_YOU: {
+                    /* We evaluate our sub-expr "as you", that is, with
+                    my_vars and your_vars swapped.
+                    The terminology here is just too silly, eh? */
+                    valexpr_context_t sub_context = *context;
+                    sub_context.yourvars = context->myvars;
+                    sub_context.myvars = context->yourvars;
+
+                    err = valexpr_eval(expr->u.as.sub_expr,
+                        &sub_context, &result, set);
+                    if(err)return err;
+                    break;
+                }
+                default:
+                    fprintf(stderr, "Unknown \"as\" type: %i\n",
+                        expr->u.as.type);
+                    return 2;
             }
             break;
         }

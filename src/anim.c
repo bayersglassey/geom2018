@@ -580,6 +580,27 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
             }
             NEXT
         }
+    }else if(GOT("as")){
+        NEXT
+        effect->type = STATE_EFFECT_TYPE_AS;
+
+        if(GOT("you")){
+            NEXT
+            effect->u.as.type = EFFECT_AS_YOU;
+        }else{
+            return UNEXPECTED("you");
+        }
+
+        ARRAY_INIT(effect->u.as.sub_effects)
+
+        GET("(")
+        while(!GOT(")")){
+            ARRAY_PUSH_NEW(state_effect_t*, effect->u.as.sub_effects,
+                sub_effect)
+            err = _parse_effect(stateset, lexer, prend, space, sub_effect);
+            if(err)return err;
+        }
+        NEXT
     }else if(GOT("play")){
         NEXT
         GET("(")
@@ -913,7 +934,8 @@ void state_cleanup(state_t *state){
         free(state->own_hitbox);
     }
     ARRAY_FREE_PTR(char*, state->collmsgs, (void))
-    ARRAY_FREE(collmsg_handler_t, state->collmsg_handlers, collmsg_handler_cleanup)
+    ARRAY_FREE(collmsg_handler_t, state->collmsg_handlers,
+        collmsg_handler_cleanup)
     ARRAY_FREE_PTR(state_rule_t*, state->rules, state_rule_cleanup)
 }
 
@@ -963,7 +985,8 @@ void state_cond_cleanup(state_cond_t *cond){
         case STATE_COND_TYPE_ANY:
         case STATE_COND_TYPE_ALL:
         case STATE_COND_TYPE_NOT:
-            ARRAY_FREE_PTR(state_cond_t*, cond->u.subconds.conds, state_cond_cleanup)
+            ARRAY_FREE_PTR(state_cond_t*, cond->u.subconds.conds,
+                state_cond_cleanup)
             break;
         case STATE_COND_TYPE_EXPR:
             valexpr_cleanup(&cond->u.expr.val1_expr);
@@ -1025,13 +1048,20 @@ void state_effect_cleanup(state_effect_t *effect){
         case STATE_EFFECT_TYPE_IF: {
             state_effect_ite_t *ite = effect->u.ite;
             if(ite){
-                ARRAY_FREE_PTR(state_cond_t*, ite->conds, state_cond_cleanup)
-                ARRAY_FREE_PTR(state_effect_t*, ite->then_effects, state_effect_cleanup)
-                ARRAY_FREE_PTR(state_effect_t*, ite->else_effects, state_effect_cleanup)
+                ARRAY_FREE_PTR(state_cond_t*, ite->conds,
+                    state_cond_cleanup)
+                ARRAY_FREE_PTR(state_effect_t*, ite->then_effects,
+                    state_effect_cleanup)
+                ARRAY_FREE_PTR(state_effect_t*, ite->else_effects,
+                    state_effect_cleanup)
                 free(ite);
             }
             break;
         }
+        case STATE_EFFECT_TYPE_AS:
+            ARRAY_FREE_PTR(state_effect_t*, effect->u.as.sub_effects,
+                state_effect_cleanup)
+            break;
         default: break;
     }
 }

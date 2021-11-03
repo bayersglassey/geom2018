@@ -49,6 +49,10 @@ enum effect_boolean {
     EFFECT_BOOLEAN_TOGGLE
 };
 
+enum effect_as {
+    EFFECT_AS_YOU
+};
+
 
 /******************
 * COLLMSG_HANDLER *
@@ -232,6 +236,7 @@ enum state_effect_type {
     STATE_EFFECT_TYPE_KEY,
     STATE_EFFECT_TYPE_SET,
     STATE_EFFECT_TYPE_IF,
+    STATE_EFFECT_TYPE_AS,
     STATE_EFFECT_TYPES
 };
 
@@ -256,6 +261,7 @@ static const char *state_effect_type_name(int type){
         case STATE_EFFECT_TYPE_KEY: return "key";
         case STATE_EFFECT_TYPE_SET: return "set";
         case STATE_EFFECT_TYPE_IF: return "if";
+        case STATE_EFFECT_TYPE_AS: return "as";
         default: return "unknown";
     }
 }
@@ -302,6 +308,10 @@ typedef struct state_effect {
             valexpr_t val_expr;
         } set;
         struct state_effect_ite *ite;
+        struct {
+            int type; /* enum effect_as */
+            ARRAY_DECL(struct state_effect*, sub_effects)
+        } as;
     } u;
 } state_effect_t;
 

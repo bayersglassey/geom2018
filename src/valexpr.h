@@ -15,6 +15,7 @@ enum valexpr_type {
     VALEXPR_TYPE_GLOBALVAR,
     VALEXPR_TYPE_MYVAR,
     VALEXPR_TYPE_IF,
+    VALEXPR_TYPE_AS,
     VALEXPR_TYPES
 };
 
@@ -26,6 +27,7 @@ static const char *valexpr_type_msg(int type){
         case VALEXPR_TYPE_GLOBALVAR: return "globalvar";
         case VALEXPR_TYPE_MYVAR: return "myvar";
         case VALEXPR_TYPE_IF: return "if";
+        case VALEXPR_TYPE_AS: return "as";
         default: return "unknown";
     }
 }
@@ -48,6 +50,18 @@ static const char *valexpr_cond_type_msg(int type){
 }
 
 
+enum valexpr_as {
+    VALEXPR_AS_YOU
+};
+
+static const char *valexpr_as_msg(int type){
+    switch(type){
+        case VALEXPR_AS_YOU: return "you";
+        default: return "unknown";
+    }
+}
+
+
 typedef struct valexpr {
     /* An expression specifying a val_t */
     int type; /* enum valexpr_type */
@@ -59,6 +73,10 @@ typedef struct valexpr {
             struct valexpr *then_expr;
             struct valexpr *else_expr;
         } if_expr;
+        struct {
+            int type; /* enum valexpr_as */
+            struct valexpr *sub_expr;
+        } as;
     } u;
 } valexpr_t;
 
