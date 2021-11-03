@@ -912,3 +912,24 @@ Current tree of possible areas you can go, starting at maps/demo:
   They go hide in various places.
   (BTW, let's add a new one to leftmost part of dodecas area.)
   If you come across them, they explain something to you.
+
+
+Nov 2, 2021:
+------------
+
+* NO MORE ALLOCATING + FREEING STRINGS!..
+    Get fus_lexer to use a stringstore, and then all the geom classes
+    can just use const char * references into that.
+
+* body_t should have a mapping from strings to strings (be nice to use the stringstore,
+    see above, so we can use char* pointer equality instead of strcmp), to be used as a
+    mapping from label names to rgraph names.
+    The idea being that, for each label in the mapping, the corresponding rgraph is
+    rendered at that label's position.
+    And then how do we interact with labels inside anims?..
+    We could go crazy and add mylabel(...), yourlabel(...) to valexpr, similar to
+    myvar(...), yourvar(...).
+    But that would be painful and ganky.
+    Easier to just add 2 effect types:
+        unset_label VALEXPR
+        set_label VALEXPR: VALEXPR
