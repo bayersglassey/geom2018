@@ -454,12 +454,13 @@ void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box,
  * PRISMELRENDERER *
  *******************/
 
-int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space,
-    stringstore_t *stringstore
-){
+int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space){
     renderer->cache_bitmaps = true;
     renderer->space = space;
-    renderer->stringstore = stringstore;
+
+    stringstore_init(&renderer->filename_store);
+    stringstore_init(&renderer->name_store);
+
     ARRAY_INIT(renderer->fonts)
     ARRAY_INIT(renderer->geomfonts)
     ARRAY_INIT(renderer->prismels)
@@ -470,6 +471,9 @@ int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space,
 }
 
 void prismelrenderer_cleanup(prismelrenderer_t *renderer){
+    stringstore_cleanup(&renderer->filename_store);
+    stringstore_cleanup(&renderer->name_store);
+
     ARRAY_FREE_PTR(font_t*, renderer->fonts, font_cleanup)
     ARRAY_FREE_PTR(geomfont_t*, renderer->geomfonts, geomfont_cleanup)
     ARRAY_FREE_PTR(prismel_t*, renderer->prismels, prismel_cleanup)

@@ -106,15 +106,16 @@ typedef struct prismelrenderer {
     ARRAY_DECL(struct prismelmapper*, mappers)
     ARRAY_DECL(struct palettemapper*, palmappers)
 
+    stringstore_t filename_store;
+    stringstore_t name_store;
+
     /* Weakrefs */
     vecspace_t *space;
-    stringstore_t *stringstore;
 } prismelrenderer_t;
 
 
 
-int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space,
-    stringstore_t *stringstore);
+int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space);
 void prismelrenderer_cleanup(prismelrenderer_t *renderer);
 void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
     int dump_bitmaps);

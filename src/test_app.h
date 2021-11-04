@@ -49,7 +49,6 @@ typedef struct test_app {
 
     palette_t palette;
     SDL_Palette *sdl_palette;
-    stringstore_t stringstore;
     prismelrenderer_t prend;
     prismelrenderer_t minimap_prend;
     font_t font;
