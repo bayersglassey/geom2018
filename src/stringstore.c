@@ -45,7 +45,9 @@ const char *stringstore_get(stringstore_t *store, const char *data){
     if(!data)return NULL;
     for(int i = 0; i < store->entries_len; i++){
         stringstore_entry_t *entry = store->entries[i];
-        if(!strcmp(entry->data, data))return entry->data;
+        if(entry->data == data || !strcmp(entry->data, data)){
+            return entry->data;
+        }
     }
     stringstore_entry_t *entry;
     int err = stringstore_add(store, data, &entry);
