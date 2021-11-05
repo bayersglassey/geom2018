@@ -20,7 +20,7 @@
  * GENERAL *
  ***********/
 
-static char *_generate_mapped_name(char *mapper_name, char *mappee_name,
+static char *_generate_mapped_name(const char *mapper_name, const char *mappee_name,
     const char *prefix, const char *separator, const char *suffix
 ){
     int prefix_len = strlen(prefix);
@@ -48,17 +48,17 @@ static char *_generate_mapped_name(char *mapper_name, char *mappee_name,
     return name;
 }
 
-char *generate_mapped_name(char *mapper_name, char *mappee_name){
+char *generate_mapped_name(const char *mapper_name, const char *mappee_name){
     /* Generate a name, e.g. "<curvy dodeca_sixth>" */
     return _generate_mapped_name(mapper_name, mappee_name, "<", " ", ">");
 }
 
-char *generate_palmapped_name(char *mapper_name, char *mappee_name){
+char *generate_palmapped_name(const char *mapper_name, const char *mappee_name){
     /* Generate a name, e.g. "<pm:red dodeca_sixth>" */
     return _generate_mapped_name(mapper_name, mappee_name, "<pm:", " ", ">");
 }
 
-char *generate_indexed_name(char *base_name, int i){
+char *generate_indexed_name(const char *base_name, int i){
     /* Generate a name, e.g. "<shape 6>" */
     int base_name_len = strlen(base_name);
     int i_len = strlen_of_int(i);
@@ -141,7 +141,7 @@ int get_bitmap_i(vecspace_t *space, rot_t rot, flip_t flip,
  * PALETTE *
  ***********/
 
-int palette_init(palette_t *pal, char *name){
+int palette_init(palette_t *pal, const char *name){
     pal->name = name;
     for(int i = 0; i < 256; i++){
         palette_entry_t *entry = &pal->entries[i];
@@ -154,7 +154,6 @@ int palette_init(palette_t *pal, char *name){
 }
 
 void palette_cleanup(palette_t *pal){
-    free(pal->name);
     for(int i = 0; i < 256; i++){
         palette_entry_t *entry = &pal->entries[i];
         ARRAY_FREE_PTR(palette_entry_keyframe_t*, entry->keyframes, (void))
@@ -370,7 +369,7 @@ int palette_load(palette_t *pal, const char *filename, vars_t *vars){
     err = fus_lexer_init_with_vars(&lexer, text, filename, vars);
     if(err)return err;
 
-    err = palette_init(pal, strdup(filename));
+    err = palette_init(pal, filename);
     if(err)return err;
 
     err = palette_parse(pal, &lexer);
@@ -391,14 +390,12 @@ int palette_load(palette_t *pal, const char *filename, vars_t *vars){
  ***********/
 
 
-int prismel_init(prismel_t *prismel, char *name, vecspace_t *space){
+int prismel_init(prismel_t *prismel, const char *name, vecspace_t *space){
     prismel->name = name;
     return prismel_create_images(prismel, space);
 }
 
 void prismel_cleanup(prismel_t *prismel){
-    free(prismel->name);
-
     for(int i = 0; i < prismel->n_images; i++){
         prismel_image_t *image = &prismel->images[i];
         ARRAY_FREE_PTR(prismel_image_line_t*, image->lines, (void))
@@ -454,49 +451,49 @@ void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box,
  * PRISMELRENDERER *
  *******************/
 
-int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space){
-    renderer->cache_bitmaps = true;
-    renderer->space = space;
+int prismelrenderer_init(prismelrenderer_t *prend, vecspace_t *space){
+    prend->cache_bitmaps = true;
+    prend->space = space;
 
-    stringstore_init(&renderer->filename_store);
-    stringstore_init(&renderer->name_store);
+    stringstore_init(&prend->filename_store);
+    stringstore_init(&prend->name_store);
 
-    ARRAY_INIT(renderer->fonts)
-    ARRAY_INIT(renderer->geomfonts)
-    ARRAY_INIT(renderer->prismels)
-    ARRAY_INIT(renderer->rendergraphs)
-    ARRAY_INIT(renderer->mappers)
-    ARRAY_INIT(renderer->palmappers)
+    ARRAY_INIT(prend->fonts)
+    ARRAY_INIT(prend->geomfonts)
+    ARRAY_INIT(prend->prismels)
+    ARRAY_INIT(prend->rendergraphs)
+    ARRAY_INIT(prend->mappers)
+    ARRAY_INIT(prend->palmappers)
     return 0;
 }
 
-void prismelrenderer_cleanup(prismelrenderer_t *renderer){
-    stringstore_cleanup(&renderer->filename_store);
-    stringstore_cleanup(&renderer->name_store);
+void prismelrenderer_cleanup(prismelrenderer_t *prend){
+    stringstore_cleanup(&prend->filename_store);
+    stringstore_cleanup(&prend->name_store);
 
-    ARRAY_FREE_PTR(font_t*, renderer->fonts, font_cleanup)
-    ARRAY_FREE_PTR(geomfont_t*, renderer->geomfonts, geomfont_cleanup)
-    ARRAY_FREE_PTR(prismel_t*, renderer->prismels, prismel_cleanup)
-    ARRAY_FREE_PTR(rendergraph_t*, renderer->rendergraphs,
+    ARRAY_FREE_PTR(font_t*, prend->fonts, font_cleanup)
+    ARRAY_FREE_PTR(geomfont_t*, prend->geomfonts, geomfont_cleanup)
+    ARRAY_FREE_PTR(prismel_t*, prend->prismels, prismel_cleanup)
+    ARRAY_FREE_PTR(rendergraph_t*, prend->rendergraphs,
         rendergraph_cleanup)
-    ARRAY_FREE_PTR(prismelmapper_t*, renderer->mappers,
+    ARRAY_FREE_PTR(prismelmapper_t*, prend->mappers,
         prismelmapper_cleanup)
-    ARRAY_FREE_PTR(palettemapper_t*, renderer->palmappers,
+    ARRAY_FREE_PTR(palettemapper_t*, prend->palmappers,
         palettemapper_cleanup)
 }
 
-void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
+void prismelrenderer_dump(prismelrenderer_t *prend, FILE *f,
     int dump_bitmaps
 ){
     /* dump_bitmaps: if 1, dumps bitmaps. If 2, also dumps their surfaces. */
 
-    fprintf(f, "prismelrenderer: %p\n", renderer);
-    if(renderer == NULL)return;
-    fprintf(f, "  space: %p\n", renderer->space);
+    fprintf(f, "prismelrenderer: %p\n", prend);
+    if(prend == NULL)return;
+    fprintf(f, "  space: %p\n", prend->space);
 
     fprintf(f, "  prismels:\n");
-    for(int i = 0; i < renderer->prismels_len; i++){
-        prismel_t *prismel = renderer->prismels[i];
+    for(int i = 0; i < prend->prismels_len; i++){
+        prismel_t *prismel = prend->prismels[i];
         fprintf(f, "    prismel: %p\n", prismel);
         fprintf(f, "      name: %s\n", prismel->name);
         fprintf(f, "      n_images: %i\n", prismel->n_images);
@@ -513,20 +510,20 @@ void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
     }
 
     fprintf(f, "  rendergraphs:\n");
-    for(int i = 0; i < renderer->rendergraphs_len; i++){
-        rendergraph_t *rgraph = renderer->rendergraphs[i];
+    for(int i = 0; i < prend->rendergraphs_len; i++){
+        rendergraph_t *rgraph = prend->rendergraphs[i];
         rendergraph_dump(rgraph, f, 4, dump_bitmaps);
     }
 
     fprintf(f, "  prismelmappers:\n");
-    for(int i = 0; i < renderer->mappers_len; i++){
-        prismelmapper_t *mapper = renderer->mappers[i];
+    for(int i = 0; i < prend->mappers_len; i++){
+        prismelmapper_t *mapper = prend->mappers[i];
         prismelmapper_dump(mapper, f, 4);
     }
 
     fprintf(f, "  palmappers:\n");
-    for(int i = 0; i < renderer->palmappers_len; i++){
-        palettemapper_t *palmapper = renderer->palmappers[i];
+    for(int i = 0; i < prend->palmappers_len; i++){
+        palettemapper_t *palmapper = prend->palmappers[i];
         fprintf(f, "    palmapper: %p\n", palmapper);
         fprintf(f, "      name: %s\n", palmapper->name);
         fprintf(f, "      table:\n");
@@ -581,14 +578,19 @@ void prismelrenderer_dump_stats(prismelrenderer_t *prend, FILE *f){
     _dump_size(surfaces_size, n_bitmaps, f);
 }
 
-int prismelrenderer_push_prismel(prismelrenderer_t *renderer, char *name,
+int prismelrenderer_push_prismel(prismelrenderer_t *prend, const char *name,
     prismel_t **prismel_ptr
 ){
     int err;
-    ARRAY_PUSH_NEW(prismel_t*, renderer->prismels, prismel)
-    if(!name){name = generate_indexed_name("prismel",
-        renderer->prismels_len - 1);}
-    err = prismel_init(prismel, name, renderer->space);
+    ARRAY_PUSH_NEW(prismel_t*, prend->prismels, prismel)
+    if(!name){
+        char *_name = generate_indexed_name("prismel",
+            prend->prismels_len - 1);
+        if(!name)return 1;
+        name = stringstore_get_donate(&prend->name_store, _name);
+        if(!name)return 1;
+    }
+    err = prismel_init(prismel, name, prend->space);
     if(err)return err;
     *prismel_ptr = prismel;
     return 0;
@@ -624,7 +626,7 @@ int prismelrenderer_get_or_create_font(
     if(font == NULL){
         ARRAY_PUSH_NEW(font_t*, prend->fonts, _font)
         font = _font;
-        err = font_load(font, strdup(filename), NULL);
+        err = font_load(font, filename, NULL);
         if(err)return err;
     }
     *font_ptr = font;
@@ -636,7 +638,13 @@ int prismelrenderer_get_or_create_solid_palettemapper(
     palettemapper_t **palmapper_ptr
 ){
     int err;
-    char *name = generate_indexed_name("solid", color);
+    const char *name;
+    {
+        char *_name = generate_indexed_name("solid", color);
+        if(!_name)return 1;
+        name = stringstore_get_donate(&prend->name_store, _name);
+        if(!name)return 1;
+    }
     palettemapper_t *palmapper = prismelrenderer_get_palmapper(
         prend, name);
     if(palmapper == NULL){
@@ -644,8 +652,6 @@ int prismelrenderer_get_or_create_solid_palettemapper(
         palmapper = _palmapper;
         err = palettemapper_init(palmapper, name, color);
         if(err)return err;
-    }else{
-        free(name);
     }
     *palmapper_ptr = palmapper;
     return 0;
@@ -841,7 +847,7 @@ int prismelrenderer_get_rgraph_i(prismelrenderer_t *prend,
 ){
     for(int i = 0; i < prend->rendergraphs_len; i++){
         rendergraph_t *rgraph = prend->rendergraphs[i];
-        if(!strcmp(rgraph->name, name))return i;
+        if(rgraph->name == name || !strcmp(rgraph->name, name))return i;
     }
     return -1;
 }
@@ -862,8 +868,6 @@ rendergraph_t *prismelrenderer_get_rgraph(prismelrenderer_t *prend,
  *****************/
 
 void prismelmapper_cleanup(prismelmapper_t *mapper){
-    free(mapper->name);
-
     ARRAY_FREE_PTR(prismelmapper_entry_t*, mapper->entries,
         (void))
     ARRAY_FREE_PTR(prismelmapper_application_t*, mapper->applications,
@@ -872,7 +876,7 @@ void prismelmapper_cleanup(prismelmapper_t *mapper){
         (void))
 }
 
-int prismelmapper_init(prismelmapper_t *mapper, char *name,
+int prismelmapper_init(prismelmapper_t *mapper, const char *name,
     vecspace_t *space, bool solid
 ){
     mapper->name = name;
@@ -939,7 +943,7 @@ int prismelmapper_push_entry(prismelmapper_t *mapper,
 int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
     prismelrenderer_t *prend,
     rendergraph_t *mapped_rgraph,
-    char *name, vecspace_t *space, Uint8 *table,
+    const char *name, vecspace_t *space, Uint8 *table,
     rendergraph_t **rgraph_ptr
 ){
     int err;
@@ -951,15 +955,18 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
     resulting_rgraph = prismelmapper_get_application(
         mapper, mapped_rgraph);
     if(resulting_rgraph != NULL){
-        free(name);
         *rgraph_ptr = resulting_rgraph;
         return 0;
     }
 
     /* If no name specified, generate one like "<curvy dodeca_sixth>" */
     if(name == NULL){
-        name = generate_mapped_name(mapper->name,
-            mapped_rgraph->name);}
+        char *_name = generate_mapped_name(mapper->name,
+            mapped_rgraph->name);
+        if(!_name)return 1;
+        name = stringstore_get_donate(&prend->name_store, _name);
+        if(!name)return 1;
+    }
 
     /* Create a new rendergraph */
     resulting_rgraph = calloc(1, sizeof(rendergraph_t));
@@ -1090,7 +1097,7 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
 int prismelmapper_apply_to_mapper(prismelmapper_t *mapper,
     prismelrenderer_t *prend,
     prismelmapper_t *mapped_mapper,
-    char *name, vecspace_t *space,
+    const char *name, vecspace_t *space,
     prismelmapper_t **mapper_ptr
 ){
     /* Hey dawg, we applied mapper to mapped_mapper, resulting in
@@ -1106,15 +1113,18 @@ int prismelmapper_apply_to_mapper(prismelmapper_t *mapper,
     resulting_mapper = prismelmapper_get_mapplication(
         mapper, mapped_mapper);
     if(resulting_mapper != NULL){
-        free(name);
         *mapper_ptr = resulting_mapper;
         return 0;
     }
 
     /* If no name specified, generate one like "<curvy double>" */
     if(name == NULL){
-        name = generate_mapped_name(mapper->name,
-            mapped_mapper->name);}
+        char *_name = generate_mapped_name(mapper->name,
+            mapped_mapper->name);
+        if(!_name)return 1;
+        name = stringstore_get_donate(&prend->name_store, _name);
+        if(!name)return 1;
+    }
 
     /* Create a new prismelmapper */
     resulting_mapper = calloc(1, sizeof(prismelmapper_t));
@@ -1131,9 +1141,14 @@ int prismelmapper_apply_to_mapper(prismelmapper_t *mapper,
     for(int i = 0; i < mapped_mapper->entries_len; i++){
         prismelmapper_entry_t *entry = mapped_mapper->entries[i];
 
-        char *name = generate_mapped_name(mapper->name,
-            entry->rendergraph->name);
-        if(name == NULL)return 1;
+        const char *name;
+        {
+            char *_name = generate_mapped_name(mapper->name,
+                entry->rendergraph->name);
+            if(!_name)return 1;
+            name = stringstore_get_donate(&prend->name_store, _name);
+            if(!name)return 1;
+        }
 
         rendergraph_t *new_rgraph;
         err = prismelmapper_apply_to_rendergraph(mapper, prend,
@@ -1209,8 +1224,7 @@ prismelmapper_t *prismelmapper_get_mapplication(prismelmapper_t *mapper,
  * PALETTE MAPPER *
  ******************/
 
-int palettemapper_init(palettemapper_t *palmapper, char *name, int color){
-    if(name == NULL)name = strdup("<palette mapper>");
+int palettemapper_init(palettemapper_t *palmapper, const char *name, int color){
     palmapper->name = name;
     palmapper->table[0] = 0; /* 0 is the transparent color */
     if(color < 0){
@@ -1223,7 +1237,8 @@ int palettemapper_init(palettemapper_t *palmapper, char *name, int color){
 }
 
 void palettemapper_cleanup(palettemapper_t *palmapper){
-    free(palmapper->name);
+    ARRAY_FREE_PTR(palettemapper_application_t*, palmapper->applications,
+        (void))
     ARRAY_FREE_PTR(palettemapper_pmapplication_t*, palmapper->pmapplications,
         (void))
 }
@@ -1241,7 +1256,7 @@ void palettemapper_apply_to_table(palettemapper_t *palmapper, Uint8 *table){
 int palettemapper_apply_to_rendergraph(palettemapper_t *mapper,
     prismelrenderer_t *prend,
     rendergraph_t *mapped_rgraph,
-    char *name, vecspace_t *space,
+    const char *name, vecspace_t *space,
     rendergraph_t **rgraph_ptr
 ){
     int err;
@@ -1253,15 +1268,18 @@ int palettemapper_apply_to_rendergraph(palettemapper_t *mapper,
     resulting_rgraph = palettemapper_get_application(
         mapper, mapped_rgraph);
     if(resulting_rgraph != NULL){
-        free(name);
         *rgraph_ptr = resulting_rgraph;
         return 0;
     }
 
     /* If no name specified, generate one like "<pm:red dodeca_sixth>" */
     if(name == NULL){
-        name = generate_palmapped_name(mapper->name,
-            mapped_rgraph->name);}
+        char *_name = generate_palmapped_name(mapper->name,
+            mapped_rgraph->name);
+        if(!_name)return 1;
+        name = stringstore_get_donate(&prend->name_store, _name);
+        if(!name)return 1;
+    }
 
     /* resulting_rgraph starts off as a copy of mapped_rgraph */
     resulting_rgraph = calloc(1, sizeof(rendergraph_t));
@@ -1291,7 +1309,7 @@ int palettemapper_apply_to_rendergraph(palettemapper_t *mapper,
 
 int palettemapper_apply_to_palettemapper(palettemapper_t *palmapper,
     prismelrenderer_t *prend, palettemapper_t *mapped_palmapper,
-    char *name, palettemapper_t **palmapper_ptr
+    const char *name, palettemapper_t **palmapper_ptr
 ){
     int err;
 
@@ -1302,15 +1320,18 @@ int palettemapper_apply_to_palettemapper(palettemapper_t *palmapper,
     resulting_palmapper = palettemapper_get_pmapplication(
         palmapper, mapped_palmapper);
     if(resulting_palmapper != NULL){
-        free(name);
         *palmapper_ptr = resulting_palmapper;
         return 0;
     }
 
     /* If no name specified, generate one like "<cycle reverse>" */
     if(name == NULL){
-        name = generate_mapped_name(palmapper->name,
-            mapped_palmapper->name);}
+        char *_name = generate_mapped_name(palmapper->name,
+            mapped_palmapper->name);
+        if(!_name)return 1;
+        name = stringstore_get_donate(&prend->name_store, _name);
+        if(!name)return 1;
+    }
 
     /* Create a new palettemapper */
     resulting_palmapper = calloc(1, sizeof(palettemapper_t));

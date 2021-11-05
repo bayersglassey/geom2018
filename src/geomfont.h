@@ -17,7 +17,7 @@ struct prismelmapper;
 **********/
 
 typedef struct geomfont {
-    char *name;
+    const char *name;
 
     struct rendergraph *char_rgraphs[FONT_N_CHARS];
     vec_t vx;
@@ -29,7 +29,7 @@ typedef struct geomfont {
 } geomfont_t;
 
 void geomfont_cleanup(geomfont_t *geomfont);
-int geomfont_init(geomfont_t *geomfont, char *name, font_t *font,
+int geomfont_init(geomfont_t *geomfont, const char *name, font_t *font,
     struct prismelrenderer *prend, const char *prismel_name,
     vec_t vx, vec_t vy);
 int geomfont_render_printf(geomfont_t *geomfont,

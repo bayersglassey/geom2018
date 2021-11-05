@@ -25,6 +25,7 @@ typedef struct console {
 
 
 void console_clear(console_t *console);
+void console_cleanup(console_t *console);
 int console_init(console_t *console, int cols, int rows, int input_maxlen);
 int console_get_index(console_t *console, int col, int row);
 int console_get_text_i(console_t *console);

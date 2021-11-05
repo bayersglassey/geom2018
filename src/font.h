@@ -16,7 +16,7 @@ we apologize. */
 #define FONT_N_CHARS 256
 
 typedef struct font {
-    char *filename;
+    const char *filename;
     int char_w;
     int char_h;
 
@@ -36,7 +36,7 @@ typedef struct font {
 typedef int font_putc_callback_t(void *data, char c);
 
 void font_cleanup(font_t *font);
-int font_load(font_t *font, char *filename, vars_t *vars);
+int font_load(font_t *font, const char *filename, vars_t *vars);
 int font_parse(font_t *font, fus_lexer_t *lexer);
 
 #endif

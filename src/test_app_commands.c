@@ -136,30 +136,22 @@ static int _test_app_command_list_actors(test_app_t *app, fus_lexer_t *lexer, bo
 
 static int _test_app_command_add_player(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
     int err;
-    char *stateset_filename;
 
-    if(!fus_lexer_done(lexer)){
-        err = fus_lexer_get_str(lexer, &stateset_filename);
-        if(err)goto lexer_err;
-    }else{
-        stateset_filename = strdup(app->stateset_filename);
-        if(!stateset_filename)return 1;
+    const char *stateset_filename = app->stateset_filename;
+    if(!DONE){
+        GET_STR_CACHED(stateset_filename, &app->prend.filename_store)
     }
 
     hexgame_t *game = &app->hexgame;
     /* HACK: we just grab maps[0] */
     hexmap_t *map = game->maps[0];
     hexgame_location_t spawn = map->spawn;
-    char *respawn_map_filename = NULL;
+    const char *respawn_map_filename = map->name;
     if(game->players_len > 0){
         /* HACK: we just grab players[0] */
         player_t *player = game->players[0];
         spawn = player->respawn_location.loc;
-        respawn_map_filename = strdup(player->respawn_location.map_filename);
-        if(!respawn_map_filename)return 1;
-    }else{
-        respawn_map_filename = strdup(map->name);
-        if(!respawn_map_filename)return 1;
+        respawn_map_filename = player->respawn_location.map_filename;
     }
 
     hexmap_t *respawn_map;
@@ -201,19 +193,15 @@ lexer_err:
 static int _test_app_command_edit_player(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
     int err;
     int player_i = 0;
-    char *stateset_filename;
 
     if(!fus_lexer_done(lexer) && fus_lexer_got_int(lexer)){
         err = fus_lexer_get_int(lexer, &player_i);
         if(err)goto lexer_err;
     }
 
-    if(!fus_lexer_done(lexer)){
-        err = fus_lexer_get_str(lexer, &stateset_filename);
-        if(err)goto lexer_err;
-    }else{
-        stateset_filename = strdup(app->stateset_filename);
-        if(!stateset_filename)return 1;
+    const char *stateset_filename = app->stateset_filename;
+    if(!DONE){
+        GET_STR_CACHED(stateset_filename, &app->prend.filename_store)
     }
 
     hexgame_t *game = &app->hexgame;
@@ -260,11 +248,10 @@ lexer_err:
 }
 
 static int _test_app_command_play_recording(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    int err;
+    INIT
 
-    char *recording_filename;
-    err = fus_lexer_get_str(lexer, &recording_filename);
-    if(err)goto lexer_err;
+    const char *recording_filename = NULL;
+    GET_STR_CACHED(recording_filename, &app->prend.filename_store)
 
     hexgame_t *game = &app->hexgame;
     for(int i = 0; i < game->players_len; i++){
@@ -282,8 +269,6 @@ static int _test_app_command_play_recording(test_app_t *app, fus_lexer_t *lexer,
             recording_filename, NULL, true, 0, NULL, NULL);
         if(err)return err;
     }
-
-    free(recording_filename);
 
     return 0;
 lexer_err:
@@ -307,8 +292,11 @@ static int _test_app_command_save(test_app_t *app, fus_lexer_t *lexer, bool *lex
         err = prismelrenderer_save(&app->prend, filename);
         if(err)return err;
     }
+    free(filename);
     return 0;
+
 lexer_err:
+    free(filename);
     *lexer_err_ptr = true;
     return 0;
 }
@@ -334,6 +322,7 @@ static int _test_app_command_dump(test_app_t *app, fus_lexer_t *lexer, bool *lex
             err = fus_lexer_get_str(lexer, &filename);
             if(err)goto lexer_err;
             file = fopen(filename, "w");
+            free(filename);
             if(!file){
                 perror("fopen");
                 return 1;
@@ -362,18 +351,15 @@ lexer_err:
 }
 
 static int _test_app_command_map(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    int err;
-    char *mapper_name;
-    char *mapped_rgraph_name;
-    char *resulting_rgraph_name = NULL;
+    INIT
 
-    err = fus_lexer_get_str(lexer, &mapper_name);
-    if(err)goto lexer_err;
-    err = fus_lexer_get_str(lexer, &mapped_rgraph_name);
-    if(err)goto lexer_err;
-    if(!fus_lexer_done(lexer)){
-        err = fus_lexer_get_str(lexer, &resulting_rgraph_name);
-        if(err)goto lexer_err;
+    const char *mapper_name;
+    const char *mapped_rgraph_name;
+    const char *resulting_rgraph_name = NULL;
+    GET_STR_CACHED(mapper_name, &app->prend.name_store)
+    GET_STR_CACHED(mapped_rgraph_name, &app->prend.name_store)
+    if(!DONE){
+        GET_STR_CACHED(resulting_rgraph_name, &app->prend.name_store)
     }
 
     prismelmapper_t *mapper = prismelrenderer_get_mapper(
@@ -387,9 +373,6 @@ static int _test_app_command_map(test_app_t *app, fus_lexer_t *lexer, bool *lexe
         fprintf(stderr, "Couldn't find shape: %s\n",
             mapped_rgraph_name);
         return 2;}
-
-    free(mapper_name);
-    free(mapped_rgraph_name);
 
     rendergraph_t *rgraph;
     err = prismelmapper_apply_to_rendergraph(mapper, &app->prend,
@@ -411,10 +394,10 @@ static int _test_app_command_renderall(test_app_t *app, fus_lexer_t *lexer, bool
 }
 
 static int _test_app_command_get_shape(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    int err;
-    char *name;
-    err = fus_lexer_get_str(lexer, &name);
-    if(err)goto lexer_err;
+    INIT
+
+    const char *name;
+    GET_STR_CACHED(name, &app->prend.name_store)
     int rgraph_i = prismelrenderer_get_rgraph_i(
         &app->prend, name);
     if(rgraph_i < 0){

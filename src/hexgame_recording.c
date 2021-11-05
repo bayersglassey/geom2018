@@ -46,9 +46,6 @@ void recording_node_init_wait(recording_node_t *node, int wait){
  *************/
 
 void recording_cleanup(recording_t *rec){
-    free(rec->name);
-    free(rec->stateset_name);
-    free(rec->state_name);
     if(rec->file != NULL)fclose(rec->file);
     ARRAY_FREE(struct recording_node, rec->nodes, (void))
 }
@@ -122,13 +119,16 @@ static int recording_parse(recording_t *rec,
     int err;
 
     hexmap_t *map = rec->body->map;
+    prismelrenderer_t *prend = map->prend;
     vecspace_t *space = map->space;
 
     GET_ATTR_YESNO("reacts", rec->reacts, true)
     GET_ATTR_YESNO("loop", rec->loop, true)
     GET_ATTR_YESNO("resets_position", rec->resets_position, true)
-    GET_ATTR_STR("anim", rec->stateset_name, false)
-    GET_ATTR_STR("state", rec->state_name, false)
+    GET_ATTR_STR_CACHED("anim", rec->stateset_name, false,
+        &prend->name_store)
+    GET_ATTR_STR_CACHED("state", rec->state_name, false,
+        &prend->name_store)
 
     GET("pos")
     OPEN
@@ -380,7 +380,7 @@ int body_restart_recording(body_t *body, bool ignore_offset, bool reset_position
     return 0;
 }
 
-int body_start_recording(body_t *body, char *name){
+int body_start_recording(body_t *body, const char *name){
 
     FILE *f = fopen(name, "w");
     if(f == NULL){

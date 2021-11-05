@@ -46,7 +46,7 @@ typedef struct hexmap_tileset_entry {
 } hexmap_tileset_entry_t;
 
 typedef struct hexmap_tileset {
-    char *name;
+    const char *name;
 
     /* Weakrefs */
     ARRAY_DECL(hexmap_tileset_entry_t*, vert_entries)
@@ -55,7 +55,7 @@ typedef struct hexmap_tileset {
 } hexmap_tileset_t;
 
 void hexmap_tileset_cleanup(hexmap_tileset_t *tileset);
-int hexmap_tileset_init(hexmap_tileset_t *tileset, char *name);
+int hexmap_tileset_init(hexmap_tileset_t *tileset, const char *name);
 int hexmap_tileset_load(hexmap_tileset_t *tileset,
     prismelrenderer_t *prend, const char *filename, vars_t *vars);
 
@@ -99,7 +99,7 @@ typedef struct hexmap_door {
     union {
         hexgame_savelocation_t location; /* type == HEXMAP_DOOR_TYPE_RESPAWN or HEXMAP_DOOR_TYPE_NEW_GAME */
         int n_players; /* type == HEXMAP_DOOR_TYPE_PLAYERS */
-        char *s; /* type == HEXMAP_DOOR_TYPE_CAMERA_MAPPER */
+        const char *mapper_name; /* type == HEXMAP_DOOR_TYPE_CAMERA_MAPPER */
     } u;
 
     /* Weakrefs */
@@ -115,7 +115,7 @@ typedef struct hexmap_submap {
     vec_t pos;
     vec_t camera_pos;
     int camera_type; /* enum camera_type */
-    char *filename;
+    const char *filename;
     ARRAY_DECL(valexpr_t*, text_exprs)
         /* Text displayed when camera is on this submap */
     valexpr_t visible_expr; /* Whether this submap is visible */
@@ -156,7 +156,7 @@ typedef struct hexmap_submap_parser_context {
 const char *submap_camera_type_msg(int camera_type);
 
 typedef struct hexmap {
-    char *name;
+    const char *name;
 
     vars_t vars;
 
@@ -177,11 +177,11 @@ typedef struct hexmap {
 
 
 void hexmap_cleanup(hexmap_t *map);
-int hexmap_init(hexmap_t *map, struct hexgame *game, char *name,
+int hexmap_init(hexmap_t *map, struct hexgame *game, const char *name,
     vec_t unit);
 int hexmap_load(hexmap_t *map, struct hexgame *game, const char *filename,
     vars_t *vars);
-int hexmap_parse(hexmap_t *map, struct hexgame *game, char *name,
+int hexmap_parse(hexmap_t *map, struct hexgame *game, const char *name,
     fus_lexer_t *lexer);
 int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
     hexmap_submap_parser_context_t *parent_context);
@@ -204,7 +204,7 @@ int hexmap_refresh_vars(hexmap_t *map);
 void hexmap_door_cleanup(hexmap_door_t *door);
 void hexmap_submap_cleanup(hexmap_submap_t *submap);
 int hexmap_submap_init_from_parser_context(hexmap_t *map,
-    hexmap_submap_t *submap, char *filename,
+    hexmap_submap_t *submap, const char *filename,
     hexmap_submap_parser_context_t *context);
 int hexmap_submap_is_visible(hexmap_submap_t *submap, bool *visible_ptr);
 int hexmap_submap_is_solid(hexmap_submap_t *submap, bool *solid_ptr);

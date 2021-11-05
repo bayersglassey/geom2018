@@ -41,8 +41,6 @@ void rendergraph_child_cleanup(rendergraph_child_t *child){
 }
 
 void rendergraph_cleanup(rendergraph_t *rendergraph){
-    free(rendergraph->name);
-
     if(!rendergraph->copy_of){
         ARRAY_FREE_PTR(rendergraph_child_t*, rendergraph->children,
             rendergraph_child_cleanup)
@@ -56,7 +54,7 @@ void rendergraph_cleanup(rendergraph_t *rendergraph){
     free(rendergraph->bitmaps);
 }
 
-static int _rendergraph_init(rendergraph_t *rendergraph, char *name,
+static int _rendergraph_init(rendergraph_t *rendergraph, const char *name,
     prismelrenderer_t *prend, palettemapper_t *palmapper,
     const char *animation_type, int n_frames
 ){
@@ -82,7 +80,7 @@ static int _rendergraph_init(rendergraph_t *rendergraph, char *name,
     return 0;
 }
 
-int rendergraph_init(rendergraph_t *rendergraph, char *name,
+int rendergraph_init(rendergraph_t *rendergraph, const char *name,
     prismelrenderer_t *prend, palettemapper_t *palmapper,
     const char *animation_type, int n_frames
 ){
@@ -97,7 +95,7 @@ int rendergraph_init(rendergraph_t *rendergraph, char *name,
     return 0;
 }
 
-int rendergraph_copy(rendergraph_t *rendergraph, char *name,
+int rendergraph_copy(rendergraph_t *rendergraph, const char *name,
     rendergraph_t *copy_of
 ){
     int err;
@@ -394,8 +392,7 @@ static int _rendergraph_render_labels(rendergraph_t *target_rgraph,
                         ARRAY_PUSH_NEW(rendergraph_label_t*, target_rgraph->labels,
                             label)
 
-                        /* Both labels point to (but do not own) the same
-                        child->u.label.name */
+                        /* Both labels point to the same child->u.label.name */
                         label->name = child_label->name;
 
                         label->trf = child_label->trf;
@@ -416,7 +413,7 @@ static int _rendergraph_render_labels(rendergraph_t *target_rgraph,
             case RENDERGRAPH_CHILD_TYPE_LABEL: {
                 ARRAY_PUSH_NEW(rendergraph_label_t*, target_rgraph->labels,
                     label)
-                label->name = child->u.label.name; /* Weakref */
+                label->name = child->u.label.name;
                 label->trf = details.trf2;
 
                 label->frame_start = details.frame_i2;

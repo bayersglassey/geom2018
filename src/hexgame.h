@@ -79,8 +79,8 @@ typedef struct recording {
     bool reacts;
     bool loop;
     bool resets_position; /* default: true, if false, looping doesn't reset body's position */
-    char *stateset_name;
-    char *state_name;
+    const char *stateset_name;
+    const char *state_name;
 
     hexgame_location_t loc0;
 
@@ -91,7 +91,7 @@ typedef struct recording {
     int frame_i;
     int node_i;
     int wait;
-    char *name;
+    const char *name;
     FILE *file;
     int offset;
 
@@ -229,7 +229,7 @@ char body_get_key_c(body_t *body, int key_i, bool absolute);
 int body_load_recording(body_t *body, const char *filename, bool loop);
 int body_play_recording(body_t *body);
 int body_restart_recording(body_t *body, bool ignore_offset, bool reset_position);
-int body_start_recording(body_t *body, char *name);
+int body_start_recording(body_t *body, const char *name);
 int body_stop_recording(body_t *body);
 int body_record_keydown(body_t *body, int key_i);
 int body_record_keyup(body_t *body, int key_i);
@@ -242,7 +242,7 @@ int body_record_keyup(body_t *body, int key_i);
 typedef struct player {
     hexgame_savelocation_t respawn_location;
     hexgame_savelocation_t safe_location;
-    char *respawn_filename;
+    const char *respawn_filename;
 
     int keymap;
     SDL_Keycode key_code[KEYINFO_KEYS];
@@ -255,7 +255,7 @@ typedef struct player {
 void player_cleanup(player_t *player);
 int player_init(player_t *player, struct hexgame *game, int keymap,
     vec_t respawn_pos, rot_t respawn_rot, bool respawn_turn,
-    char *respawn_map_filename, char *respawn_filename);
+    const char *respawn_map_filename, const char *respawn_filename);
 
 void player_set_body(player_t *player, body_t *body);
 int player_get_index(player_t *player);

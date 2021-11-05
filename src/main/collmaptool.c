@@ -5,13 +5,15 @@
 
 #include "../str_utils.h"
 #include "../file_utils.h"
+#include "../stringstore.h"
 #include "../hexspace.h"
 #include "../hexcollmap.h"
 
 
 static hexcollmap_t *load_collmap(FILE *file, const char *filename,
     bool just_coll,
-    hexcollmap_part_t ***parts_ptr, int *parts_len_ptr
+    hexcollmap_part_t ***parts_ptr, int *parts_len_ptr,
+    stringstore_t *name_store, stringstore_t *filename_store
 ){
     int err;
 
@@ -40,8 +42,9 @@ static hexcollmap_t *load_collmap(FILE *file, const char *filename,
         if(err)return NULL;
 
         err = hexcollmap_parse_with_parts(collmap, &lexer,
-            &hexspace, strdup(filename), just_coll,
-            parts_ptr, parts_len_ptr);
+            &hexspace, filename, just_coll,
+            parts_ptr, parts_len_ptr,
+            name_store, filename_store);
         if(err)return NULL;
 
         fus_lexer_cleanup(&lexer);
@@ -117,12 +120,18 @@ int main(int n_args, char **args){
         return 2;
     }
 
+    stringstore_t name_store;
+    stringstore_t filename_store;
+    stringstore_init(&name_store);
+    stringstore_init(&filename_store);
+
     hexcollmap_part_t **parts;
     int parts_len;
 
     /* Load collmap */
     hexcollmap_t *collmap = load_collmap(stdin, "<stdin>", just_coll,
-        &parts, &parts_len);
+        &parts, &parts_len,
+        &name_store, &filename_store);
     if(!collmap)return 2;
 
     /* Transform collmap */
@@ -133,8 +142,7 @@ int main(int n_args, char **args){
             perror("calloc collmap");
             return 1;
         }
-        hexcollmap_init_clone(collmap, from_collmap,
-            strdup(from_collmap->filename));
+        hexcollmap_init_clone(collmap, from_collmap, from_collmap->filename);
         int err = hexcollmap_clone(collmap, from_collmap, rot);
         if(err)return err;
 
@@ -159,6 +167,9 @@ int main(int n_args, char **args){
     free(parts);
     hexcollmap_cleanup(collmap);
     free(collmap);
+
+    stringstore_cleanup(&name_store);
+    stringstore_cleanup(&filename_store);
 
     return 0;
 }

@@ -57,14 +57,11 @@ int fus_lexer_get_keyinfo(fus_lexer_t *lexer,
         if(fus_lexer_got(lexer, ")"))break;
 
         char key_c;
-        char *name;
-        err = fus_lexer_get_name(lexer, &name);
+        err = fus_lexer_get_chr(lexer, &key_c);
         if(err)return err;
-        if(strlen(name) != 1 || !strchr(ANIM_KEY_CS, name[0])){
+        if(!strchr(ANIM_KEY_CS, key_c)){
             return fus_lexer_unexpected(lexer,
                 "one of the characters: " ANIM_KEY_CS);}
-        key_c = name[0];
-        free(name);
 
         int key_i = body_get_key_i(NULL, key_c);
 
@@ -424,9 +421,7 @@ int body_set_stateset(body_t *body, const char *stateset_filename,
 
         hexmap_t *map = body->map;
 
-        char *stateset_filename_dup = strdup(stateset_filename);
-        if(!stateset_filename_dup)return 1;
-        err = stateset_load(&body->stateset, stateset_filename_dup,
+        err = stateset_load(&body->stateset, stateset_filename,
             NULL, map->prend, map->space);
         if(err)return err;
     }

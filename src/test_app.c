@@ -58,8 +58,10 @@ static char *generate_respawn_filename(const char *base_name, int i, const char 
 void test_app_cleanup(test_app_t *app){
     palette_cleanup(&app->palette);
     SDL_FreePalette(app->sdl_palette);
+    SDL_FreeSurface(app->surface);
     prismelrenderer_cleanup(&app->prend);
     prismelrenderer_cleanup(&app->minimap_prend);
+    console_cleanup(&app->console);
     hexgame_cleanup(&app->hexgame);
     font_cleanup(&app->font);
     minieditor_cleanup(&app->editor);
@@ -126,7 +128,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         NULL);
     if(err)return err;
 
-    err = font_load(&app->font, strdup("data/font.fus"), NULL);
+    err = font_load(&app->font, "data/font.fus", NULL);
     if(err)return err;
 
     const char *geomfont_name = "geomfont1";
@@ -156,13 +158,12 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     vecspace_t *space = map->space;
 
     for(int i = 0; i < n_players; i++){
-        char *respawn_filename = generate_respawn_filename(
+        char *_respawn_filename = generate_respawn_filename(
             NULL, i, NULL);
-        if(respawn_filename == NULL)return 1;
-
-        /* Why the strdup, again?.. who ends up owning it?..
-        probably player */
-        char *respawn_map_filename = strdup(map->name);
+        if(!_respawn_filename)return 1;
+        const char *respawn_filename = stringstore_get_donate(
+            &prend->filename_store, _respawn_filename);
+        if(!respawn_filename)return 1;
 
         ARRAY_PUSH_NEW(player_t*, game->players, player)
 
@@ -191,7 +192,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 
         err = player_init(player, game, i,
             spawn.pos, spawn.rot, spawn.turn,
-            respawn_map_filename, respawn_filename);
+            map->name, respawn_filename);
         if(err)return err;
     }
 

@@ -23,12 +23,11 @@ static void print_tabs(FILE *file, int depth){
 void player_cleanup(player_t *player){
     hexgame_savelocation_cleanup(&player->respawn_location);
     hexgame_savelocation_cleanup(&player->safe_location);
-    free(player->respawn_filename);
 }
 
 int player_init(player_t *player, hexgame_t *game, int keymap,
     vec_t respawn_pos, rot_t respawn_rot, bool respawn_turn,
-    char *respawn_map_filename, char *respawn_filename
+    const char *respawn_map_filename, const char *respawn_filename
 ){
     int err;
 
@@ -69,13 +68,9 @@ int player_init(player_t *player, hexgame_t *game, int keymap,
         respawn_pos, respawn_rot, respawn_turn, respawn_map_filename,
         NULL, NULL);
 
-    /* Locations own their map filenames, so need to strdup */
-    char *jump_map_filename = strdup(respawn_map_filename);
-    if(!jump_map_filename)return 1;
-
     hexgame_savelocation_init(&player->safe_location);
     hexgame_savelocation_set(&player->safe_location, space,
-        respawn_pos, respawn_rot, respawn_turn, jump_map_filename,
+        respawn_pos, respawn_rot, respawn_turn, respawn_map_filename,
         NULL, NULL);
 
     player->respawn_filename = respawn_filename;
@@ -121,37 +116,8 @@ static int _player_set_location(player_t *player, hexgame_savelocation_t *locati
 ){
     hexgame_t *game = player->game;
     vecspace_t *space = game->space;
-
-    /* We now do some weird C macro stuff so we don't free+malloc
-    a string if its new value is same as old value. */
-    char *new_map_filename;
-    char *new_stateset_filename;
-    char *new_state_name;
-    #define ASSIGN_A_THING(THING) { \
-        if(THING == NULL){ \
-            new_##THING = NULL; \
-        }else{ \
-            /* Only assign new location->THING if new string is */ \
-            /* different from the old one */ \
-            new_##THING = location->THING; \
-            if(!location->THING || strcmp(location->THING, THING)){ \
-                /* NOTE: no need to free old location->THING, location_set */ \
-                /* will handle that for us */ \
-                new_##THING = strdup(THING); \
-                if(!new_##THING){ \
-                    perror("strdup"); \
-                    return 1; \
-                } \
-            } \
-        } \
-    }
-    ASSIGN_A_THING(map_filename)
-    ASSIGN_A_THING(stateset_filename)
-    ASSIGN_A_THING(state_name)
-    #undef ASSIGN_A_THING
-
-    hexgame_savelocation_set(location, space, pos, rot, turn, new_map_filename,
-        new_stateset_filename, new_state_name);
+    hexgame_savelocation_set(location, space, pos, rot, turn, map_filename,
+        stateset_filename, state_name);
     return 0;
 }
 
@@ -266,10 +232,11 @@ static int player_use_door(player_t *player, hexmap_door_t *door){
         err = game->exit_callback(game, player);
         if(err)return err;
     }else if(door->type == HEXMAP_DOOR_TYPE_CAMERA_MAPPER){
-        prismelmapper_t *mapper = prismelrenderer_get_mapper(game->prend, door->u.s);
+        prismelmapper_t *mapper = prismelrenderer_get_mapper(game->prend,
+            door->u.mapper_name);
         if(mapper == NULL){
             fprintf(stderr, "%s: Couldn't find camera mapper: %s\n",
-                __func__, door->u.s);
+                __func__, door->u.mapper_name);
             return 2;
         }
         FOREACH_BODY_CAMERA(body, camera, {

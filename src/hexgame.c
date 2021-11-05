@@ -462,7 +462,7 @@ int hexgame_get_or_load_map(hexgame_t *game, const char *map_filename,
 
     for(int i = 0; i < game->maps_len; i++){
         hexmap_t *map = game->maps[i];
-        if(!strcmp(map->name, map_filename)){
+        if(map->name == map_filename || !strcmp(map->name, map_filename)){
             *map_ptr = map;
             return 0;
         }

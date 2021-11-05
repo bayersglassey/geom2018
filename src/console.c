@@ -23,6 +23,11 @@ void console_clear_line(console_t *console){
     console->col = 0;
 }
 
+void console_cleanup(console_t *console){
+    free(console->text);
+    free(console->input);
+}
+
 int console_init(console_t *console, int cols, int rows, int input_maxlen){
     int text_len = cols * rows;
 
@@ -30,7 +35,7 @@ int console_init(console_t *console, int cols, int rows, int input_maxlen){
     if(text == NULL)return 1;
     for(int i = 0; i < text_len; i++)text[i] = ' ';
 
-    char *input = calloc(input_maxlen + 1, sizeof(*text));
+    char *input = calloc(input_maxlen + 1, sizeof(*input));
     if(input == NULL)return 1;
 
     console->cols = cols;

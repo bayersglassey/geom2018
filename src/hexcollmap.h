@@ -7,6 +7,7 @@
 #include "lexer.h"
 #include "vars.h"
 #include "valexpr.h"
+#include "stringstore.h"
 #include "geom.h"
 #include "hexbox.h"
 #include "hexgame_location.h"
@@ -35,12 +36,12 @@ static const char *hexmap_recording_type_msg(int type){
 
 typedef struct hexmap_recording {
     int type; /* enum hexmap_recording_type */
-    char *filename;
+    const char *filename;
         /*
         HEXMAP_RECORDING_TYPE_RECORDING -> recording filename
         HEXMAP_RECORDING_TYPE_ACTOR -> actor stateset filename
         */
-    char *palmapper_name;
+    const char *palmapper_name;
     trf_t trf;
     int frame_offset;
 
@@ -53,7 +54,7 @@ typedef struct hexmap_recording {
 
 void hexmap_recording_cleanup(hexmap_recording_t *recording);
 int hexmap_recording_init(hexmap_recording_t *recording, int type,
-    char *filename, char *palmapper_name, int frame_offset);
+    const char *filename, const char *palmapper_name, int frame_offset);
 int hexmap_recording_clone(hexmap_recording_t *recording1,
     hexmap_recording_t *recording2);
 
@@ -66,8 +67,8 @@ int hexmap_recording_clone(hexmap_recording_t *recording1,
 location on a hexmap... */
 
 typedef struct hexmap_rendergraph {
-    char *name;
-    char *palmapper_name;
+    const char *name;
+    const char *palmapper_name;
     trf_t trf;
         /* NOTE: trf is in hexspace! It's up to you to convert to
         prend->space once you actually have a prend and an rgraph! */
@@ -75,7 +76,7 @@ typedef struct hexmap_rendergraph {
 
 void hexmap_rendergraph_cleanup(hexmap_rendergraph_t *rendergraph);
 int hexmap_rendergraph_init(hexmap_rendergraph_t *rendergraph,
-    char *name, char *palmapper_name);
+    const char *name, const char *palmapper_name);
 
 
 /**************
@@ -145,8 +146,8 @@ typedef struct hexcollmap_part {
 
     int type; /* enum hexcollmap_part_type */
     char part_c;
-    char *filename;
-    char *palmapper_name;
+    const char *filename;
+    const char *palmapper_name;
     int frame_offset;
 
     trf_t trf;
@@ -194,7 +195,7 @@ typedef struct hexcollmap {
            + - +
 
     */
-    char *filename;
+    const char *filename;
     hexgame_location_t spawn;
     hexbox_t hexbox;
     int w;
@@ -241,16 +242,16 @@ static bool hexcollmap_elem_is_special(hexcollmap_elem_t *elem){
 
 
 int hexcollmap_part_init(hexcollmap_part_t *part, int type,
-    char part_c, char *filename, char *palmapper_name, int frame_offset,
-    valexpr_t *visible_expr, bool visible_not,
+    char part_c, const char *filename, const char *palmapper_name,
+    int frame_offset, valexpr_t *visible_expr, bool visible_not,
     vars_t *vars, vars_t *bodyvars);
 void hexcollmap_part_cleanup(hexcollmap_part_t *part);
 
 void hexcollmap_cleanup(hexcollmap_t *collmap);
 void hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
-    char *filename);
+    const char *filename);
 void hexcollmap_init_clone(hexcollmap_t *collmap,
-    hexcollmap_t *from_collmap, char *filename);
+    hexcollmap_t *from_collmap, const char *filename);
 int hexcollmap_init_tiles_from_hexbox(hexcollmap_t *collmap);
 int hexcollmap_union_hexbox(hexcollmap_t *collmap, hexbox_t *hexbox);
 void hexcollmap_dump(hexcollmap_t *collmap, FILE *f);
@@ -261,14 +262,17 @@ void hexcollmap_write(hexcollmap_t *collmap, FILE *f,
     bool just_coll, bool extra, bool nodots, bool show_tiles,
     bool eol_semicolons);
 int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
-    vecspace_t *space, char *filename, bool just_coll,
-    hexcollmap_part_t ***parts_ptr, int *parts_len_ptr);
+    vecspace_t *space, const char *filename, bool just_coll,
+    hexcollmap_part_t ***parts_ptr, int *parts_len_ptr,
+    stringstore_t *name_store, stringstore_t *filename_store);
 int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
-    vecspace_t *space, char *filename, bool just_coll);
+    vecspace_t *space, const char *filename, bool just_coll,
+    stringstore_t *name_store, stringstore_t *filename_store);
 int hexcollmap_clone(hexcollmap_t *collmap,
     hexcollmap_t *collmap_from, rot_t rot);
 int hexcollmap_load(hexcollmap_t *collmap, vecspace_t *space,
-    const char *filename, vars_t *vars);
+    const char *filename, vars_t *vars,
+    stringstore_t *name_store, stringstore_t *filename_store);
 void hexcollmap_normalize_vert(trf_t *index);
 void hexcollmap_normalize_edge(trf_t *index);
 void hexcollmap_normalize_face(trf_t *index);

@@ -9,6 +9,7 @@
 #include "hexgame.h"
 #include "file_utils.h"
 #include "lexer.h"
+#include "lexer_macros.h"
 #include "write.h"
 #include "var_utils.h"
 
@@ -28,27 +29,19 @@ void hexgame_savelocation_init(hexgame_savelocation_t *location){
 }
 
 void hexgame_savelocation_cleanup(hexgame_savelocation_t *location){
-    free(location->map_filename);
-    free(location->stateset_filename);
-    free(location->state_name);
+    /* Nuthin */
 }
 
 void hexgame_savelocation_set(hexgame_savelocation_t *location, vecspace_t *space,
-    vec_t pos, rot_t rot, bool turn, char *map_filename,
-    char *stateset_filename, char *state_name
+    vec_t pos, rot_t rot, bool turn, const char *map_filename,
+    const char *stateset_filename, const char *state_name
 ){
     vec_cpy(space->dims, location->loc.pos, pos);
     location->loc.rot = rot;
     location->loc.turn = turn;
-
-    #define SET_A_THING(THING) if(location->THING != THING){ \
-        free(location->THING); \
-        location->THING = THING; \
-    }
-    SET_A_THING(map_filename)
-    SET_A_THING(stateset_filename)
-    SET_A_THING(state_name)
-    #undef SET_A_THING
+    location->map_filename = map_filename;
+    location->stateset_filename = stateset_filename;
+    location->state_name = state_name;
 }
 
 int hexgame_savelocation_save(const char *filename,
@@ -107,7 +100,9 @@ int hexgame_savelocation_load(const char *filename,
     hexgame_savelocation_t *location, hexgame_t *game,
     bool *file_found_ptr
 ){
-    int err = 0;
+    INIT
+
+    prismelrenderer_t *prend = game->prend;
 
     char *text = load_file(filename);
     if(file_found_ptr)*file_found_ptr = true;
@@ -130,78 +125,58 @@ int hexgame_savelocation_load(const char *filename,
     int x, y;
     rot_t rot;
     bool turn;
-    char *map_filename = NULL;
-    char *stateset_filename = NULL;
-    char *state_name = NULL;
+    const char *map_filename = NULL;
+    const char *stateset_filename = NULL;
+    const char *state_name = NULL;
 
-    err = fus_lexer_get_int(lexer, &x);
-    if(err)goto err;
-    err = fus_lexer_get_int(lexer, &y);
-    if(err)goto err;
-    err = fus_lexer_get_int(lexer, &rot);
-    if(err)goto err;
-    err = fus_lexer_get_yn(lexer, &turn);
-    if(err)goto err;
-    err = fus_lexer_get_str(lexer, &map_filename);
-    if(err)goto err;
-    if(!fus_lexer_done(lexer)){
-        err = fus_lexer_get_str(lexer, &stateset_filename);
-        if(err)goto err;
-        if(!fus_lexer_done(lexer)){
-            err = fus_lexer_get_str(lexer, &state_name);
-            if(err)goto err;
+    GET_INT(x)
+    GET_INT(y)
+    GET_INT(rot)
+    GET_YN(turn)
+    GET_STR_CACHED(map_filename, &prend->filename_store)
+    if(!DONE){
+        GET_STR_CACHED(stateset_filename, &prend->filename_store)
+        if(!DONE){
+            GET_STR_CACHED(state_name, &prend->name_store)
         }
     }
 
-    if(fus_lexer_got(lexer, "vars")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
+    if(GOT("vars")){
+        NEXT
+        OPEN
         err = vars_parse(&game->vars, lexer);
         if(err)return err;
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
+        CLOSE
     }
 
     /* !!! THIS IS A BIT OF A HACK!!!
     ...instead of hexgame_savelocation_t being a self-contained data
     structure, its load method here is loading stuff from game->maps. */
-    if(fus_lexer_got(lexer, "maps")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
+    if(GOT("maps")){
+        NEXT
+        OPEN
         while(1){
-            if(fus_lexer_got(lexer, ")"))break;
-            char *name;
-            err = fus_lexer_get_str(lexer, &name);
-            if(err)return err;
+            if(GOT(")"))break;
+            const char *name;
+            GET_STR_CACHED(name, &prend->name_store)
 
             hexmap_t *map;
             err = hexgame_get_or_load_map(game, name, &map);
             if(err)return err;
-            free(name);
 
-            err = fus_lexer_get(lexer, "(");
-            if(err)return err;
+            OPEN
             {
-                if(fus_lexer_got(lexer, "vars")){
-                    err = fus_lexer_next(lexer);
-                    if(err)return err;
-                    err = fus_lexer_get(lexer, "(");
-                    if(err)return err;
+                if(GOT("vars")){
+                    NEXT
+                    OPEN
                     err = vars_parse(&map->vars, lexer);
                     if(err)return err;
-                    err = fus_lexer_get(lexer, ")");
-                    if(err)return err;
+                    CLOSE
                 }
             }
-            err = fus_lexer_get(lexer, ")");
-            if(err)return err;
+            CLOSE
         }
-        err = fus_lexer_next(lexer);
-        if(err)return err;
+        NEXT
     }
 
     location->loc.pos[0] = x;
@@ -211,13 +186,7 @@ int hexgame_savelocation_load(const char *filename,
     location->map_filename = map_filename;
     location->stateset_filename = stateset_filename;
     location->state_name = state_name;
-    goto done;
 
-err:
-    free(map_filename);
-    free(stateset_filename);
-    free(state_name);
-done:
     fus_lexer_cleanup(lexer);
     free(text);
     return err;

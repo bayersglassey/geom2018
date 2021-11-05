@@ -19,15 +19,13 @@
  ********************/
 
 void hexmap_recording_cleanup(hexmap_recording_t *recording){
-    free(recording->filename);
-    free(recording->palmapper_name);
     valexpr_cleanup(&recording->visible_expr);
     vars_cleanup(&recording->vars);
     vars_cleanup(&recording->bodyvars);
 }
 
 int hexmap_recording_init(hexmap_recording_t *recording, int type,
-    char *filename, char *palmapper_name, int frame_offset
+    const char *filename, const char *palmapper_name, int frame_offset
 ){
     recording->type = type;
     recording->filename = filename;
@@ -48,20 +46,9 @@ int hexmap_recording_clone(hexmap_recording_t *recording1,
 ){
     int err;
 
-    char *filename = NULL;
-    if(recording2->filename){
-        filename = strdup(recording2->filename);
-        if(!filename)return 1;
-    }
-
-    char *palmapper_name = NULL;
-    if(recording2->palmapper_name){
-        palmapper_name = strdup(recording2->palmapper_name);
-        if(!palmapper_name)return 1;
-    }
-
     err = hexmap_recording_init(recording1, recording2->type,
-        filename, palmapper_name, recording2->frame_offset);
+        recording2->filename, recording2->palmapper_name,
+        recording2->frame_offset);
 
     recording1->trf = recording2->trf;
 
@@ -82,12 +69,11 @@ int hexmap_recording_clone(hexmap_recording_t *recording1,
  **********************/
 
 void hexmap_rendergraph_cleanup(hexmap_rendergraph_t *rendergraph){
-    free(rendergraph->name);
-    free(rendergraph->palmapper_name);
+    /* Nuthin */
 }
 
 int hexmap_rendergraph_init(hexmap_rendergraph_t *rendergraph,
-    char *name, char *palmapper_name
+    const char *name, const char *palmapper_name
 ){
     rendergraph->name = name;
     rendergraph->palmapper_name = palmapper_name;
@@ -101,8 +87,8 @@ int hexmap_rendergraph_init(hexmap_rendergraph_t *rendergraph,
  **************/
 
 int hexcollmap_part_init(hexcollmap_part_t *part, int type,
-    char part_c, char *filename, char *palmapper_name, int frame_offset,
-    valexpr_t *visible_expr, bool visible_not,
+    char part_c, const char *filename, const char *palmapper_name,
+    int frame_offset, valexpr_t *visible_expr, bool visible_not,
     vars_t *vars, vars_t *bodyvars
 ){
     part->type = type;
@@ -128,8 +114,6 @@ int hexcollmap_part_init(hexcollmap_part_t *part, int type,
 }
 
 void hexcollmap_part_cleanup(hexcollmap_part_t *part){
-    free(part->filename);
-    free(part->palmapper_name);
     valexpr_cleanup(&part->visible_expr);
     vars_cleanup(&part->vars);
     vars_cleanup(&part->bodyvars);
@@ -137,7 +121,6 @@ void hexcollmap_part_cleanup(hexcollmap_part_t *part){
 
 
 void hexcollmap_cleanup(hexcollmap_t *collmap){
-    free(collmap->filename);
     free(collmap->tiles);
     ARRAY_FREE_PTR(hexmap_recording_t*, collmap->recordings,
         hexmap_recording_cleanup)
@@ -148,7 +131,7 @@ void hexcollmap_cleanup(hexcollmap_t *collmap){
 }
 
 void hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
-    char *filename
+    const char *filename
 ){
     memset(collmap, 0, sizeof(*collmap));
     collmap->filename = filename;
@@ -159,11 +142,8 @@ void hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
 }
 
 void hexcollmap_init_clone(hexcollmap_t *collmap,
-    hexcollmap_t *from_collmap, char *filename
+    hexcollmap_t *from_collmap, const char *filename
 ){
-    /* NOTE: filename is presumably strdup(from_collmap->filename), but we
-    leave that to caller so we can avoid doing any allocation (and therefore
-    return void without having to worry about returning an error code). */
     hexcollmap_init(collmap, from_collmap->space, filename);
     collmap->spawn = from_collmap->spawn;
     collmap->hexbox = from_collmap->hexbox;
@@ -279,7 +259,8 @@ void hexcollmap_dump(hexcollmap_t *collmap, FILE *f){
 }
 
 int hexcollmap_load(hexcollmap_t *collmap, vecspace_t *space,
-    const char *filename, vars_t *vars
+    const char *filename, vars_t *vars,
+    stringstore_t *name_store, stringstore_t *filename_store
 ){
     int err;
     fus_lexer_t lexer;
@@ -290,10 +271,8 @@ int hexcollmap_load(hexcollmap_t *collmap, vecspace_t *space,
     err = fus_lexer_init_with_vars(&lexer, text, filename, vars);
     if(err)return err;
 
-    char *filename_copy = strdup(filename);
-    if(!filename_copy)return 1;
-
-    err = hexcollmap_parse(collmap, &lexer, space, filename_copy, false);
+    err = hexcollmap_parse(collmap, &lexer, space, filename, false,
+        name_store, filename_store);
     if(err)return err;
 
     fus_lexer_cleanup(&lexer);

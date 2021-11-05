@@ -35,10 +35,10 @@ static char *generate_char_name(const char *base_name, const char *suffix, int i
 **********/
 
 void geomfont_cleanup(geomfont_t *geomfont){
-    free(geomfont->name);
+    /* Nuthin */
 }
 
-int geomfont_init(geomfont_t *geomfont, char *name, font_t *font,
+int geomfont_init(geomfont_t *geomfont, const char *name, font_t *font,
     prismelrenderer_t *prend, const char *prismel_name,
     vec_t vx, vec_t vy
 ){
@@ -74,8 +74,15 @@ int geomfont_init(geomfont_t *geomfont, char *name, font_t *font,
             continue;
         }
 
-        char *rgraph_name = generate_char_name(prismel->name, "_char", i);
-        if(!rgraph_name)return 1;
+        const char *rgraph_name;
+        {
+            char *_rgraph_name = generate_char_name(prismel->name,
+                "_char", i);
+            if(!_rgraph_name)return 1;
+            rgraph_name = stringstore_get_donate(&prend->name_store,
+                _rgraph_name);
+            if(!rgraph_name)return 1;
+        }
 
         int n_frames = 1;
 

@@ -409,10 +409,8 @@ void valexpr_cond_cleanup(valexpr_cond_t *cond){
             break;
         case VALEXPR_COND_TYPE_ANY:
         case VALEXPR_COND_TYPE_ALL: {
-            for(int i = 0; i < cond->u.subconds.subconds_len; i++){
-                valexpr_cond_t *subcond = cond->u.subconds.subconds[i];
-                valexpr_cond_cleanup(subcond);
-            }
+            ARRAY_FREE_PTR(valexpr_cond_t *, cond->u.subconds.subconds,
+                valexpr_cond_cleanup)
             break;
         }
         default: break;

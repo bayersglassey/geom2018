@@ -8,6 +8,7 @@
 #include "hexmap.h"
 #include "hexgame.h"
 #include "lexer.h"
+#include "lexer_macros.h"
 #include "vars.h"
 #include "var_utils.h"
 #include "valexpr.h"
@@ -39,13 +40,12 @@ const char *hexmap_door_type_msg(int door_type){
  ******************/
 
 void hexmap_tileset_cleanup(hexmap_tileset_t *tileset){
-    free(tileset->name);
     ARRAY_FREE_PTR(hexmap_tileset_entry_t*, tileset->vert_entries, (void))
     ARRAY_FREE_PTR(hexmap_tileset_entry_t*, tileset->edge_entries, (void))
     ARRAY_FREE_PTR(hexmap_tileset_entry_t*, tileset->face_entries, (void))
 }
 
-int hexmap_tileset_init(hexmap_tileset_t *tileset, char *name){
+int hexmap_tileset_init(hexmap_tileset_t *tileset, const char *name){
     tileset->name = name;
     ARRAY_INIT(tileset->vert_entries)
     ARRAY_INIT(tileset->edge_entries)
@@ -68,7 +68,7 @@ static int _hexmap_tileset_parse_part(
 ){
     /* WELCOME TO THE FUNCTION FROM HELL
     AREN'T WE GLAD WE ROLLED OUR OWN DATA FORMAT? */
-    int err;
+    INIT
 
     /* The following hack is an indication that our array.h system
     of doing things was itself a hack.
@@ -82,41 +82,31 @@ static int _hexmap_tileset_parse_part(
     int entries_len = *entries_len_ptr;
     int entries_size = *entries_size_ptr;
 
-    err = fus_lexer_get(lexer, part_name);
-    if(err)return err;
-    err = fus_lexer_get(lexer, "(");
-    if(err)return err;
+    GET(part_name)
+    OPEN
     while(1){
-        if(fus_lexer_got(lexer, ")"))break;
+        if(GOT(")"))break;
 
         char tile_c;
-        err = fus_lexer_get_chr(lexer, &tile_c);
-        if(err)return err;
+        GET_CHR(tile_c)
 
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
+        OPEN
         ARRAY_PUSH_NEW(hexmap_tileset_entry_t*, entries, entry)
         entry->type = HEXMAP_TILESET_ENTRY_TYPE_ROTS;
         entry->n_rgraphs = 0;
         entry->tile_c = tile_c;
         entry->frame_offset = 0;
 
-        if(fus_lexer_got(lexer, "frame_offset")){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
-            err = fus_lexer_get(lexer, "(");
-            if(err)return err;
-            err = fus_lexer_get_int(lexer, &entry->frame_offset);
-            if(err)return err;
-            err = fus_lexer_get(lexer, ")");
-            if(err)return err;
+        if(GOT("frame_offset")){
+            NEXT
+            OPEN
+            GET_INT(entry->frame_offset)
+            CLOSE
         }
 
         const char **rgraph_keys = NULL;
-        if(fus_lexer_got(lexer, "when_faces_solid")){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
-
+        if(GOT("when_faces_solid")){
+            NEXT
             if(part_name == VERTS){
                 rgraph_keys = WHEN_FACES_SOLID_RGRAPH_KEYS_VERT;
             }else if(part_name == EDGES){
@@ -129,14 +119,12 @@ static int _hexmap_tileset_parse_part(
             }
 
             entry->type = HEXMAP_TILESET_ENTRY_TYPE_WHEN_FACES_SOLID;
-
-            err = fus_lexer_get(lexer, "(");
-            if(err)return err;
+            OPEN
         }
 
         while(1){
             if(rgraph_keys){
-                if(!fus_lexer_got_name(lexer))break;
+                if(!GOT_NAME)break;
                 const char *rgraph_key = rgraph_keys[entry->n_rgraphs];
                 if(rgraph_key == NULL){
                     fus_lexer_err_info(lexer);
@@ -144,12 +132,10 @@ static int _hexmap_tileset_parse_part(
                         "Too many entries for when_faces_solid.\n");
                     return 2;
                 }
-                err = fus_lexer_get(lexer, rgraph_key);
-                if(err)return err;
-                err = fus_lexer_get(lexer, "(");
-                if(err)return err;
+                GET(rgraph_key)
+                OPEN
             }else{
-                if(!fus_lexer_got_str(lexer))break;
+                if(!GOT_STR)break;
             }
             if(entry->n_rgraphs == HEXMAP_TILESET_ENTRY_RGRAPHS) {
                 fus_lexer_err_info(lexer);
@@ -157,27 +143,24 @@ static int _hexmap_tileset_parse_part(
                     HEXMAP_TILESET_ENTRY_RGRAPHS);
                 return 2;
             }
-            char *rgraph_name;
-            err = fus_lexer_get_str(lexer, &rgraph_name);
-            if(err)return err;
+            const char *rgraph_name;
+            GET_STR_CACHED(rgraph_name, &prend->name_store)
             rendergraph_t *rgraph =
                 prismelrenderer_get_rendergraph(prend, rgraph_name);
             if(rgraph == NULL){
                 fus_lexer_err_info(lexer);
                 fprintf(stderr, "Couldn't find shape: %s\n",
                     rgraph_name);
-                free(rgraph_name); return 2;}
-            free(rgraph_name);
+                return 2;}
             entry->rgraphs[entry->n_rgraphs] = rgraph;
             entry->n_rgraphs++;
             if(rgraph_keys){
-                err = fus_lexer_get(lexer, ")");
-                if(err)return err;
+                CLOSE
             }
         }
 
         if(entry->n_rgraphs == 0){
-            return fus_lexer_unexpected(lexer, "str");
+            return UNEXPECTED("str");
         }
         if(rgraph_keys){
             const char *rgraph_key = rgraph_keys[entry->n_rgraphs];
@@ -191,14 +174,11 @@ static int _hexmap_tileset_parse_part(
                 fputc('\n', stderr);
                 return 2;
             }
-            err = fus_lexer_get(lexer, ")");
-            if(err)return err;
+            CLOSE
         }
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
+        CLOSE
     }
-    err = fus_lexer_next(lexer);
-    if(err)return err;
+    NEXT
 
     *entries_ptr = entries;
     *entries_len_ptr = entries_len;
@@ -207,7 +187,7 @@ static int _hexmap_tileset_parse_part(
 }
 
 static int hexmap_tileset_parse(hexmap_tileset_t *tileset,
-    prismelrenderer_t *prend, char *name,
+    prismelrenderer_t *prend, const char *name,
     fus_lexer_t *lexer
 ){
     int err;
@@ -251,7 +231,7 @@ int hexmap_tileset_load(hexmap_tileset_t *tileset,
     err = fus_lexer_init_with_vars(&lexer, text, filename, vars);
     if(err)return err;
 
-    err = hexmap_tileset_parse(tileset, prend, strdup(filename),
+    err = hexmap_tileset_parse(tileset, prend, filename,
         &lexer);
     if(err)return err;
 
@@ -268,8 +248,6 @@ int hexmap_tileset_load(hexmap_tileset_t *tileset,
 
 void body_cleanup(struct body *body);
 void hexmap_cleanup(hexmap_t *map){
-    free(map->name);
-
     ARRAY_FREE_PTR(body_t*, map->bodies, body_cleanup)
 
     ARRAY_FREE_PTR(hexmap_submap_t*, map->submaps, hexmap_submap_cleanup)
@@ -282,7 +260,7 @@ void hexmap_cleanup(hexmap_t *map){
     vars_cleanup(&map->vars);
 }
 
-int hexmap_init(hexmap_t *map, hexgame_t *game, char *name,
+int hexmap_init(hexmap_t *map, hexgame_t *game, const char *name,
     vec_t unit
 ){
     int err;
@@ -310,23 +288,21 @@ int hexmap_init(hexmap_t *map, hexgame_t *game, char *name,
     return 0;
 }
 
-static int hexmap_parse_recording(fus_lexer_t *lexer,
-    char **filename_ptr, char **palmapper_name_ptr, int *frame_offset_ptr,
+static int hexmap_parse_recording(fus_lexer_t *lexer, prismelrenderer_t *prend,
+    const char **filename_ptr, const char **palmapper_name_ptr, int *frame_offset_ptr,
     trf_t *trf, vars_t *vars, vars_t *bodyvars, bool *relative_ptr,
     valexpr_t *visible_expr, bool *visible_not_ptr
 ){
-    int err;
+    INIT
 
     valexpr_set_literal_bool(visible_expr, true);
     bool visible_not = false;
 
-    err = fus_lexer_get(lexer, "(");
-    if(err)return err;
+    OPEN
 
     bool relative = false;
-    if(fus_lexer_got(lexer, "relative")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
+    if(GOT("relative")){
+        NEXT
         relative = true;
     }
     *relative_ptr = relative;
@@ -335,73 +311,58 @@ static int hexmap_parse_recording(fus_lexer_t *lexer,
     hexgame_location_t, so that we can e.g. dump player's current location
     and use it directly in maps. */
     hexgame_location_t loc = {0};
-    if(fus_lexer_got(lexer, "(")){
+    if(GOT("(")){
         err = hexgame_location_parse(&loc, lexer);
         if(err)return err;
     }
     hexgame_location_init_trf(&loc, trf);
 
-    err = fus_lexer_get_str(lexer, filename_ptr);
-    if(err)return err;
+    GET_STR_CACHED(*filename_ptr, &prend->filename_store)
     if(
-        !fus_lexer_got(lexer, ")") &&
-        !fus_lexer_got(lexer, "visible") &&
-        !fus_lexer_got(lexer, "vars") &&
-        !fus_lexer_got(lexer, "bodyvars")
+        !GOT(")") &&
+        !GOT("visible") &&
+        !GOT("vars") &&
+        !GOT("bodyvars")
     ){
-        if(fus_lexer_got(lexer, "empty")){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
+        if(GOT("empty")){
+            NEXT
         }else{
-            err = fus_lexer_get_str(lexer, palmapper_name_ptr);
-            if(err)return err;
+            GET_STR_CACHED(*palmapper_name_ptr, &prend->name_store)
         }
-        if(fus_lexer_got_int(lexer)){
-            err = fus_lexer_get_int(lexer, frame_offset_ptr);
-            if(err)return err;
+        if(GOT_INT){
+            GET_INT(*frame_offset_ptr)
         }
     }
 
-    if(fus_lexer_got(lexer, "visible")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
-        if(fus_lexer_got(lexer, "not")){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
+    if(GOT("visible")){
+        NEXT
+        OPEN
+        if(GOT("not")){
+            NEXT
             visible_not = true;
         }
         err = valexpr_parse(visible_expr, lexer);
         if(err)return err;
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
+        CLOSE
     }
 
-    if(fus_lexer_got(lexer, "vars")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
+    if(GOT("vars")){
+        NEXT
+        OPEN
         err = vars_parse(vars, lexer);
         if(err)return err;
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
+        CLOSE
     }
 
-    if(fus_lexer_got(lexer, "bodyvars")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
+    if(GOT("bodyvars")){
+        NEXT
+        OPEN
         err = vars_parse(bodyvars, lexer);
         if(err)return err;
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
+        CLOSE
     }
 
-    err = fus_lexer_get(lexer, ")");
-    if(err)return err;
+    CLOSE
 
     *visible_not_ptr = visible_not;
     return 0;
@@ -491,7 +452,7 @@ int hexmap_load(hexmap_t *map, hexgame_t *game, const char *filename,
     err = fus_lexer_init_with_vars(&lexer, text, filename, vars);
     if(err)return err;
 
-    err = hexmap_parse(map, game, strdup(filename), &lexer);
+    err = hexmap_parse(map, game, filename, &lexer);
     if(err)return err;
 
     /* Load recordings & actors */
@@ -515,143 +476,116 @@ int hexmap_load(hexmap_t *map, hexgame_t *game, const char *filename,
     return 0;
 }
 
-int hexmap_parse(hexmap_t *map, hexgame_t *game, char *name,
+int hexmap_parse(hexmap_t *map, hexgame_t *game, const char *name,
     fus_lexer_t *lexer
 ){
-    int err;
+    INIT
 
     prismelrenderer_t *prend = game->prend;
 
     /* parse unit */
     vec_t unit;
-    err = fus_lexer_get(lexer, "unit");
-    if(err)return err;
-    err = fus_lexer_get(lexer, "(");
-    if(err)return err;
+    GET("unit")
+    OPEN
     for(int i = 0; i < prend->space->dims; i++){
-        err = fus_lexer_get_int(lexer, &unit[i]);
-        if(err)return err;
+        GET_INT(unit[i])
     }
-    err = fus_lexer_get(lexer, ")");
-    if(err)return err;
+    CLOSE
 
     /* init the map */
     err = hexmap_init(map, game, name, unit);
     if(err)return err;
 
     /* parse spawn point */
-    char *spawn_filename = NULL;
-    err = fus_lexer_get(lexer, "spawn");
-    if(err)return err;
-    err = fus_lexer_get(lexer, "(");
-    if(err)return err;
+    const char *spawn_filename = NULL;
+    GET("spawn")
+    OPEN
     if(fus_lexer_got_str(lexer)){
-        err = fus_lexer_get_str(lexer, &spawn_filename);
-        if(err)return err;
+        GET_STR_CACHED(spawn_filename, &prend->filename_store)
     }else{
-        err = fus_lexer_get_vec(lexer, map->space, map->spawn.pos);
-        if(err)return err;
+        GET_VEC(map->space, map->spawn.pos)
     }
-    err = fus_lexer_get(lexer, ")");
-    if(err)return err;
+    CLOSE
 
     /* default palette */
     palette_t *default_palette;
     {
-        char *palette_filename;
-        err = fus_lexer_get(lexer, "default_palette");
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
-        err = fus_lexer_get_str(lexer, &palette_filename);
-        if(err)return err;
+        const char *palette_filename;
+        GET("default_palette")
+        OPEN
+        GET_STR_CACHED(palette_filename, &prend->filename_store)
         err = hexmap_get_or_create_palette(map, palette_filename,
             &default_palette);
         if(err)return err;
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
+        CLOSE
     }
 
     /* default tileset */
     hexmap_tileset_t *default_tileset;
     {
-        char *tileset_filename;
-        err = fus_lexer_get(lexer, "default_tileset");
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
-        err = fus_lexer_get_str(lexer, &tileset_filename);
-        if(err)return err;
+        const char *tileset_filename;
+        GET("default_tileset")
+        OPEN
+        GET_STR_CACHED(tileset_filename, &prend->filename_store)
         err = hexmap_get_or_create_tileset(map, tileset_filename,
             &default_tileset);
         if(err)return err;
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
+        CLOSE
     }
 
     /* parse actors */
-    if(fus_lexer_got(lexer, "actors")){
-    err = fus_lexer_next(lexer);
-    if(err)return err;
-    err = fus_lexer_get(lexer, "(");
-    if(err)return err;
-    while(1){
-        if(fus_lexer_got(lexer, ")"))break;
+    if(GOT("actors")){
+        NEXT
+        OPEN
+        while(1){
+            if(GOT(")"))break;
 
-        char *filename;
-        char *palmapper_name = NULL;
-        int frame_offset = 0;
-        trf_t trf;
-        vars_t vars;
-        vars_init(&vars);
-        vars_t bodyvars;
-        vars_init(&bodyvars);
-        bool relative; /* unused here -- only used when parsing submaps */
-        valexpr_t visible_expr;
-        bool visible_not;
-        err = hexmap_parse_recording(lexer,
-            &filename, &palmapper_name, &frame_offset, &trf,
-            &vars, &bodyvars, &relative, &visible_expr, &visible_not);
-        if(err)return err;
+            const char *filename;
+            const char *palmapper_name = NULL;
+            int frame_offset = 0;
+            trf_t trf;
+            vars_t vars;
+            vars_init(&vars);
+            vars_t bodyvars;
+            vars_init(&bodyvars);
+            bool relative; /* unused here -- only used when parsing submaps */
+            valexpr_t visible_expr;
+            bool visible_not;
+            err = hexmap_parse_recording(lexer, prend,
+                &filename, &palmapper_name, &frame_offset, &trf,
+                &vars, &bodyvars, &relative, &visible_expr, &visible_not);
+            if(err)return err;
 
-        ARRAY_PUSH_NEW(hexmap_recording_t*, map->recordings,
-            recording)
-        err = hexmap_recording_init(recording,
-            HEXMAP_RECORDING_TYPE_ACTOR,
-            filename, palmapper_name, frame_offset);
-        if(err)return err;
+            ARRAY_PUSH_NEW(hexmap_recording_t*, map->recordings,
+                recording)
+            err = hexmap_recording_init(recording,
+                HEXMAP_RECORDING_TYPE_ACTOR,
+                filename, palmapper_name, frame_offset);
+            if(err)return err;
 
-        recording->trf = trf;
-        recording->vars = vars;
-        recording->bodyvars = bodyvars;
-        recording->visible_expr = visible_expr;
-        recording->visible_not = visible_not;
-    }
-    err = fus_lexer_next(lexer);
-    if(err)return err;
+            recording->trf = trf;
+            recording->vars = vars;
+            recording->bodyvars = bodyvars;
+            recording->visible_expr = visible_expr;
+            recording->visible_not = visible_not;
+        }
+        NEXT
     }
 
 
     /* parse vars */
-    if(fus_lexer_got(lexer, "vars")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
-
+    if(GOT("vars")){
+        NEXT
+        OPEN
         err = vars_parse(&map->vars, lexer);
         if(err)return err;
-
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
+        CLOSE
     }
 
 
     /* parse submaps */
-    err = fus_lexer_get(lexer, "submaps");
-    if(err)return err;
-    err = fus_lexer_get(lexer, "(");
-    if(err)return err;
+    GET("submaps")
+    OPEN
     {
         hexmap_submap_parser_context_t context;
         err = hexmap_submap_parser_context_init(&context, NULL);
@@ -660,18 +594,15 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, char *name,
         context.palette = default_palette;
         context.tileset = default_tileset;
         while(1){
-            if(fus_lexer_got(lexer, ")"))break;
-            err = fus_lexer_get(lexer, "(");
-            if(err)return err;
+            if(GOT(")"))break;
+            OPEN
             err = hexmap_parse_submap(map, lexer, &context);
             if(err)return err;
-            err = fus_lexer_get(lexer, ")");
-            if(err)return err;
+            CLOSE
         }
         hexmap_submap_parser_context_cleanup(&context);
     }
-    err = fus_lexer_next(lexer);
-    if(err)return err;
+    NEXT
 
 
     /* maybe get spawn point from a submap */
@@ -688,7 +619,6 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, char *name,
             return 2;}
         map->spawn = spawn_submap->collmap.spawn;
         vec_add(map->space->dims, map->spawn.pos, spawn_submap->pos);
-        free(spawn_filename);
     }
 
 
@@ -697,107 +627,75 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, char *name,
 }
 
 static int hexmap_parse_door(hexmap_t *map, hexmap_submap_t *submap,
-    hexmap_door_t *door, fus_lexer_t *lexer
+    hexmap_door_t *door, fus_lexer_t *lexer, prismelrenderer_t *prend
 ){
     /* We assume door's memory starts off zero'd, e.g. it was calloc'd
     by ARRAY_PUSH_NEW */
-    int err;
+    INIT
 
     vecspace_t *space = map->space;
 
-    if(fus_lexer_got(lexer, "dud")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
+    if(GOT("dud")){
+        NEXT
         door->type = HEXMAP_DOOR_TYPE_DUD;
-    }else if(fus_lexer_got(lexer, "new_game")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
+    }else if(GOT("new_game")){
+        NEXT
         door->type = HEXMAP_DOOR_TYPE_NEW_GAME;
-        err = fus_lexer_get_str(lexer, &door->u.location.map_filename);
-        if(err)return err;
-    }else if(fus_lexer_got(lexer, "continue")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
+        GET_STR_CACHED(door->u.location.map_filename,
+            &prend->filename_store)
+    }else if(GOT("continue")){
+        NEXT
         door->type = HEXMAP_DOOR_TYPE_CONTINUE;
-    }else if(fus_lexer_got(lexer, "players")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
+    }else if(GOT("players")){
+        NEXT
         door->type = HEXMAP_DOOR_TYPE_PLAYERS;
-        err = fus_lexer_get_int(lexer, &door->u.n_players);
-        if(err)return err;
-    }else if(fus_lexer_got(lexer, "exit")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
+        GET_INT(door->u.n_players)
+    }else if(GOT("exit")){
+        NEXT
         door->type = HEXMAP_DOOR_TYPE_EXIT;
-    }else if(fus_lexer_got(lexer, "camera_mapper")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        char *s;
-        {
-            err = fus_lexer_get(lexer, "(");
-            if(err)return err;
-            err = fus_lexer_get_str(lexer, &s);
-            if(err)return err;
-            err = fus_lexer_get(lexer, ")");
-            if(err)return err;
-        }
+    }else if(GOT("camera_mapper")){
+        NEXT
         door->type = HEXMAP_DOOR_TYPE_CAMERA_MAPPER;
-        door->u.s = s;
+        OPEN
+        GET_STR_CACHED(door->u.mapper_name, &prend->name_store)
+        CLOSE
     }else{
         door->type = HEXMAP_DOOR_TYPE_RESPAWN;
 
-        if(fus_lexer_got(lexer, "map")){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
-            err = fus_lexer_get(lexer, "(");
-            if(err)return err;
-            err = fus_lexer_get_str(lexer, &door->u.location.map_filename);
-            if(err)return err;
-            err = fus_lexer_get(lexer, ")");
-            if(err)return err;
+        if(GOT("map")){
+            NEXT
+            OPEN
+            GET_STR_CACHED(door->u.location.map_filename,
+                &prend->filename_store)
+            CLOSE
         }else{
             /* Non-null door->u.location.map_filename indicates player should
             "teleport" to door->u.location */
-            door->u.location.map_filename = strdup(map->name);
+            door->u.location.map_filename = map->name;
         }
 
-        if(fus_lexer_got(lexer, "anim")){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
-            err = fus_lexer_get(lexer, "(");
-            if(err)return err;
-            err = fus_lexer_get_str(lexer, &door->u.location.stateset_filename);
-            if(err)return err;
-            err = fus_lexer_get(lexer, ")");
-            if(err)return err;
+        if(GOT("anim")){
+            NEXT
+            OPEN
+            GET_STR_CACHED(door->u.location.stateset_filename,
+                &prend->filename_store)
+            CLOSE
         }
 
-        err = fus_lexer_get(lexer, "pos");
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
-        err = fus_lexer_get_vec(lexer, space, door->u.location.loc.pos);
-        if(err)return err;
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
+        GET("pos")
+        OPEN
+        GET_VEC(space, door->u.location.loc.pos)
+        CLOSE
 
-        err = fus_lexer_get(lexer, "rot");
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
-        err = fus_lexer_get_int(lexer, &door->u.location.loc.rot);
-        if(err)return err;
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
+        GET("rot")
+        OPEN
+        GET_INT(door->u.location.loc.rot)
+        CLOSE
 
-        err = fus_lexer_get(lexer, "turn");
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
-        err = fus_lexer_get_yn(lexer, &door->u.location.loc.turn);
-        if(err)return err;
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
+        GET("turn")
+        OPEN
+        GET_YN(door->u.location.loc.turn)
+        CLOSE
     }
 
     return 0;
@@ -849,11 +747,9 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
     vecspace_t *space = map->space;
     prismelrenderer_t *prend = map->prend;
 
-    if(fus_lexer_got(lexer, "skip")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        err = fus_lexer_parse_silent(lexer);
-        if(err)return err;
+    if(GOT("skip")){
+        NEXT
+        PARSE_SILENT
         return 0;
     }
 
@@ -861,31 +757,22 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
     err = hexmap_submap_parser_context_init(context, parent_context);
     if(err)return err;
 
-    if(fus_lexer_got(lexer, "bg")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
+    if(GOT("bg")){
+        NEXT
         context->solid = false;
     }
 
-    /* We own this string, and free it before returning.
-    If we pass it to other functions, they either copy it themselves, or we
-    pass them a copy. */
-    char *submap_filename = NULL;
-    if(fus_lexer_got(lexer, "file")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
-        err = fus_lexer_get_str(lexer, &submap_filename);
-        if(err)return err;
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
+    const char *submap_filename = NULL;
+    if(GOT("file")){
+        NEXT
+        OPEN
+        GET_STR_CACHED(submap_filename, &prend->filename_store)
+        CLOSE
     }
 
     /* You can inherit parent's texts, and/or define your own. */
-    if(fus_lexer_got(lexer, "inherit_text")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
+    if(GOT("inherit_text")){
+        NEXT
         for(int i = 0; i < parent_context->text_exprs_len; i++){
             valexpr_t *text_expr = parent_context->text_exprs[i];
             ARRAY_PUSH_NEW(valexpr_t*, context->text_exprs, new_text_expr)
@@ -893,152 +780,105 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
             if(err)return err;
         }
     }
-    while(fus_lexer_got(lexer, "text")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
-
+    while(GOT("text")){
+        NEXT
+        OPEN
         ARRAY_PUSH_NEW(valexpr_t*, context->text_exprs, text_expr)
         err = valexpr_parse(text_expr, lexer);
         if(err)return err;
-
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
+        CLOSE
     }
 
     /* You can *either* inherit parent context's visibility, or define your
     own.
     (NOTE: context->visible_expr is initialized to a literal bool, which doesn't
     need to be cleaned up, so we can freely overwrite it, *once*.) */
-    if(fus_lexer_got(lexer, "inherit_visible")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
+    if(GOT("inherit_visible")){
+        NEXT
         err = valexpr_copy(&context->visible_expr,
             &parent_context->visible_expr);
         if(err)return err;
         context->visible_not = parent_context->visible_not;
-    }else if(fus_lexer_got(lexer, "visible")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
-        if(fus_lexer_got(lexer, "not")){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
+    }else if(GOT("visible")){
+        NEXT
+        OPEN
+        if(GOT("not")){
+            NEXT
             context->visible_not = true;
         }
-
         err = valexpr_parse(&context->visible_expr, lexer);
         if(err)return err;
-
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
+        CLOSE
     }
 
-    if(fus_lexer_got(lexer, "pos")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
-
+    if(GOT("pos")){
+        NEXT
+        OPEN
         vec_t pos;
-        err = fus_lexer_get_vec(lexer, space, pos);
-        if(err)return err;
+        GET_VEC(space, pos)
         vec_add(space->dims, context->pos, pos);
-
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
+        CLOSE
     }
 
-    if(fus_lexer_got(lexer, "inherit_rot")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
+    if(GOT("inherit_rot")){
+        NEXT
         context->rot = rot_contain(space->rot_max,
             context->rot + parent_context->rot);
     }
-    if(fus_lexer_got(lexer, "rot")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
-
+    if(GOT("rot")){
+        NEXT
+        OPEN
         rot_t rot = 0;
-        err = fus_lexer_get_int(lexer, &rot);
-        if(err)return err;
+        GET_INT(rot)
         context->rot = rot_contain(space->rot_max, context->rot + rot);
-
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
+        CLOSE
     }
 
-    if(fus_lexer_got(lexer, "camera")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
-        if(fus_lexer_got(lexer, "follow")){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
+    if(GOT("camera")){
+        NEXT
+        OPEN
+        if(GOT("follow")){
+            NEXT
             context->camera_type = CAMERA_TYPE_FOLLOW;
         }else{
             vec_t camera_pos;
-            err = fus_lexer_get_vec(lexer, space, camera_pos);
-            if(err)return err;
+            GET_VEC(space, camera_pos)
 
             /* Camera pos becomes submap's pos, plus whatever we parsed */
             vec_cpy(space->dims, context->camera_pos, context->pos);
             vec_add(space->dims, context->camera_pos, camera_pos);
         }
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
+        CLOSE
     }
 
-    if(fus_lexer_got(lexer, "mapper")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
+    if(GOT("mapper")){
+        NEXT
+        OPEN
         err = fus_lexer_get_mapper(lexer, map->prend, NULL, &context->mapper);
         if(err)return err;
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
+        CLOSE
     }
 
-    if(fus_lexer_got(lexer, "palette")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
-
-        char *palette_filename;
-        err = fus_lexer_get_str(lexer, &palette_filename);
-        if(err)return err;
+    if(GOT("palette")){
+        NEXT
+        OPEN
+        const char *palette_filename;
+        GET_STR_CACHED(palette_filename, &prend->filename_store)
         err = hexmap_get_or_create_palette(map, palette_filename,
             &context->palette);
         if(err)return err;
-        free(palette_filename);
-
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
+        CLOSE
     }
 
-    if(fus_lexer_got(lexer, "tileset")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
-
-        char *tileset_filename;
-        err = fus_lexer_get_str(lexer, &tileset_filename);
-        if(err)return err;
+    if(GOT("tileset")){
+        NEXT
+        OPEN
+        const char *tileset_filename;
+        GET_STR_CACHED(tileset_filename, &prend->filename_store)
         err = hexmap_get_or_create_tileset(map, tileset_filename,
             &context->tileset);
         if(err)return err;
-        free(tileset_filename);
-
-        err = fus_lexer_get(lexer, ")");
-        if(err)return err;
+        CLOSE
     }
 
     if(submap_filename != NULL){
@@ -1046,13 +886,10 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
 
         ARRAY_PUSH_NEW(hexmap_submap_t*, map->submaps, submap)
 
-        char *submap_filename_copy = strdup(submap_filename);
-        if(!submap_filename_copy)return 1;
-
         /* WARNING: submap's init does *NOT* init its collmap, so need
         to load submap->collmap immediately after this call. */
         err = hexmap_submap_init_from_parser_context(map, submap,
-            submap_filename_copy, context);
+            submap_filename, context);
         if(err)return err;
 
         /* Load submap->collmap */
@@ -1062,13 +899,11 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
             hexcollmap_t *collmap = calloc(1, sizeof(*collmap));
             if(!collmap)return 1;
             err = hexcollmap_load(collmap, map->space,
-                submap_filename, lexer->vars);
+                submap_filename, lexer->vars,
+                &prend->name_store, &prend->filename_store);
             if(err)return err;
 
-            char *collmap_filename = strdup(submap_filename);
-            if(!collmap_filename)return 1;
-
-            hexcollmap_init_clone(&submap->collmap, collmap, collmap_filename);
+            hexcollmap_init_clone(&submap->collmap, collmap, submap_filename);
             int err = hexcollmap_clone(&submap->collmap, collmap, context->rot);
             if(err)return err;
 
@@ -1077,7 +912,8 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
         }else{
             /* load collmap */
             err = hexcollmap_load(&submap->collmap, map->space,
-                submap_filename, lexer->vars);
+                submap_filename, lexer->vars,
+                &prend->name_store, &prend->filename_store);
             if(err)return err;
         }
 
@@ -1088,43 +924,34 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
         if(err)return err;
 
         /* parse doors */
-        if(fus_lexer_got(lexer, "doors")){
-            err = fus_lexer_next(lexer);
-            if(err)return err;
-            err = fus_lexer_get(lexer, "(");
-            if(err)return err;
+        if(GOT("doors")){
+            NEXT
+            OPEN
 
             while(1){
-                if(fus_lexer_got(lexer, ")"))break;
+                if(GOT(")"))break;
 
-                err = fus_lexer_get(lexer, "(");
-                if(err)return err;
-
+                OPEN
                 ARRAY_PUSH_NEW(hexmap_door_t*, submap->doors, door)
-                err = hexmap_parse_door(map, submap, door, lexer);
+                err = hexmap_parse_door(map, submap, door, lexer, prend);
                 if(err)return err;
-
-                err = fus_lexer_get(lexer, ")");
-                if(err)return err;
+                CLOSE
             }
-            err = fus_lexer_next(lexer);
-            if(err)return err;
+            NEXT
 
             err = hexmap_populate_submap_doors(map, submap);
             if(err)return err;
         }
     }
 
-    if(fus_lexer_got(lexer, "recs")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
+    if(GOT("recs")){
+        NEXT
+        OPEN
         while(1){
-            if(fus_lexer_got(lexer, ")"))break;
+            if(GOT(")"))break;
 
-            char *filename;
-            char *palmapper_name = NULL;
+            const char *filename;
+            const char *palmapper_name = NULL;
             int frame_offset = 0;
             trf_t trf;
             vars_t vars;
@@ -1134,7 +961,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
             bool relative;
             valexpr_t visible_expr;
             bool visible_not;
-            err = hexmap_parse_recording(lexer,
+            err = hexmap_parse_recording(lexer, prend,
                 &filename, &palmapper_name, &frame_offset, &trf,
                 &vars, &bodyvars, &relative, &visible_expr, &visible_not);
             if(err)return err;
@@ -1157,29 +984,22 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
             recording->visible_expr = visible_expr;
             recording->visible_not = visible_not;
         }
-        err = fus_lexer_next(lexer);
-        if(err)return err;
+        NEXT
     }
 
-    if(fus_lexer_got(lexer, "submaps")){
-        err = fus_lexer_next(lexer);
-        if(err)return err;
-        err = fus_lexer_get(lexer, "(");
-        if(err)return err;
+    if(GOT("submaps")){
+        NEXT
+        OPEN
         while(1){
-            if(fus_lexer_got(lexer, ")"))break;
-            err = fus_lexer_get(lexer, "(");
-            if(err)return err;
+            if(GOT(")"))break;
+            OPEN
             err = hexmap_parse_submap(map, lexer, context);
             if(err)return err;
-            err = fus_lexer_get(lexer, ")");
-            if(err)return err;
+            CLOSE
         }
-        err = fus_lexer_next(lexer);
-        if(err)return err;
+        NEXT
     }
 
-    free(submap_filename);
     hexmap_submap_parser_context_cleanup(context);
     return 0;
 }
@@ -1194,7 +1014,9 @@ int hexmap_get_submap_index(hexmap_t *map, hexmap_submap_t *submap){
 static palette_t *hexmap_get_palette(hexmap_t *map, const char *name){
     for(int i = 0; i < map->palettes_len; i++){
         palette_t *palette = map->palettes[i];
-        if(!strcmp(palette->name, name))return palette;
+        if(palette->name == name || !strcmp(palette->name, name)){
+            return palette;
+        }
     }
     return NULL;
 }
@@ -1218,7 +1040,9 @@ int hexmap_get_or_create_palette(hexmap_t *map, const char *name,
 static hexmap_tileset_t *hexmap_get_tileset(hexmap_t *map, const char *name){
     for(int i = 0; i < map->tilesets_len; i++){
         hexmap_tileset_t *tileset = map->tilesets[i];
-        if(!strcmp(tileset->name, name))return tileset;
+        if(tileset->name == name || !strcmp(tileset->name, name)){
+            return tileset;
+        }
     }
     return NULL;
 }
@@ -1545,16 +1369,12 @@ void hexmap_door_cleanup(hexmap_door_t *door){
         case HEXMAP_DOOR_TYPE_NEW_GAME:
             hexgame_savelocation_cleanup(&door->u.location);
             break;
-        case HEXMAP_DOOR_TYPE_CAMERA_MAPPER:
-            free(door->u.s);
-            break;
         default:
             break;
     }
 }
 
 void hexmap_submap_cleanup(hexmap_submap_t *submap){
-    free(submap->filename);
     ARRAY_FREE_PTR(valexpr_t*, submap->text_exprs, valexpr_cleanup)
     valexpr_cleanup(&submap->visible_expr);
     hexcollmap_cleanup(&submap->collmap);
@@ -1562,7 +1382,7 @@ void hexmap_submap_cleanup(hexmap_submap_t *submap){
 }
 
 int hexmap_submap_init_from_parser_context(hexmap_t *map,
-    hexmap_submap_t *submap, char *filename,
+    hexmap_submap_t *submap, const char *filename,
     hexmap_submap_parser_context_t *context
 ){
     int err;

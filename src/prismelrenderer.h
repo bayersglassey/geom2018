@@ -20,9 +20,9 @@
  * GENERAL *
  ***********/
 
-char *generate_mapped_name(char *mapper_name, char *mappee_name);
-char *generate_palmapped_name(char *mapper_name, char *mappee_name);
-char *generate_indexed_name(char *base_name, int i);
+char *generate_mapped_name(const char *mapper_name, const char *mappee_name);
+char *generate_palmapped_name(const char *mapper_name, const char *mappee_name);
+char *generate_indexed_name(const char *base_name, int i);
 bool get_animated_frame_visible(int n_frames,
     int frame_start, int frame_len, int frame_i);
 int get_animated_frame_i(const char *animation_type,
@@ -49,11 +49,11 @@ typedef struct palette_entry {
 } palette_entry_t;
 
 typedef struct palette {
-    char *name;
+    const char *name;
     palette_entry_t entries[256];
 } palette_t;
 
-int palette_init(palette_t *pal, char *name);
+int palette_init(palette_t *pal, const char *name);
 void palette_cleanup(palette_t *pal);
 int palette_reset(palette_t *pal);
 int palette_step(palette_t *pal);
@@ -77,14 +77,14 @@ typedef struct prismel_image {
 } prismel_image_t;
 
 typedef struct prismel {
-    char *name;
+    const char *name;
 
     int n_images;
     struct prismel_image *images;
 } prismel_t;
 
 
-int prismel_init(prismel_t *prismel, char *name, vecspace_t *space);
+int prismel_init(prismel_t *prismel, const char *name, vecspace_t *space);
 void prismel_cleanup(prismel_t *prismel);
 int prismel_create_images(prismel_t *prismel, vecspace_t *space);
 int prismel_image_push_line(prismel_image_t *image, int x, int y, int w);
@@ -115,12 +115,12 @@ typedef struct prismelrenderer {
 
 
 
-int prismelrenderer_init(prismelrenderer_t *renderer, vecspace_t *space);
-void prismelrenderer_cleanup(prismelrenderer_t *renderer);
-void prismelrenderer_dump(prismelrenderer_t *renderer, FILE *f,
+int prismelrenderer_init(prismelrenderer_t *prend, vecspace_t *space);
+void prismelrenderer_cleanup(prismelrenderer_t *prend);
+void prismelrenderer_dump(prismelrenderer_t *prend, FILE *f,
     int dump_bitmaps);
-void prismelrenderer_dump_stats(prismelrenderer_t *renderer, FILE *f);
-int prismelrenderer_push_prismel(prismelrenderer_t *renderer, char *name,
+void prismelrenderer_dump_stats(prismelrenderer_t *prend, FILE *f);
+int prismelrenderer_push_prismel(prismelrenderer_t *prend, const char *name,
     prismel_t **prismel_ptr);
 #define DICT_DECL(TYPE, THING, THINGS, NAME) \
     struct TYPE *prismelrenderer_get_##THING(prismelrenderer_t *prend, \
@@ -173,7 +173,7 @@ typedef struct prismelmapper_entry {
 } prismelmapper_entry_t;
 
 typedef struct prismelmapper {
-    char *name;
+    const char *name;
     vecspace_t *space;
     vec_t unit;
     bool solid;
@@ -184,7 +184,7 @@ typedef struct prismelmapper {
 
 
 void prismelmapper_cleanup(prismelmapper_t *mapper);
-int prismelmapper_init(prismelmapper_t *mapper, char *name,
+int prismelmapper_init(prismelmapper_t *mapper, const char *name,
     vecspace_t *space, bool solid);
 void prismelmapper_dump(prismelmapper_t *mapper, FILE *f, int n_spaces);
 int prismelmapper_push_entry(prismelmapper_t *mapper,
@@ -192,12 +192,12 @@ int prismelmapper_push_entry(prismelmapper_t *mapper,
 int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
     prismelrenderer_t *prend,
     rendergraph_t *mapped_rgraph,
-    char *name, vecspace_t *space, Uint8 *table,
+    const char *name, vecspace_t *space, Uint8 *table,
     rendergraph_t **rgraph_ptr);
 int prismelmapper_apply_to_mapper(prismelmapper_t *mapper,
     prismelrenderer_t *prend,
     prismelmapper_t *mapped_mapper,
-    char *name, vecspace_t *space,
+    const char *name, vecspace_t *space,
     prismelmapper_t **mapper_ptr);
 int prismelmapper_push_application(prismelmapper_t *mapper,
     rendergraph_t *mapped_rgraph, rendergraph_t *resulting_rgraph);
@@ -214,7 +214,7 @@ prismelmapper_t *prismelmapper_get_mapplication(prismelmapper_t *mapper,
  ******************/
 
 typedef struct palettemapper {
-    char *name;
+    const char *name;
     Uint8 table[256];
     ARRAY_DECL(struct palettemapper_pmapplication*, pmapplications)
     ARRAY_DECL(struct palettemapper_application*, applications)
@@ -235,18 +235,18 @@ typedef struct palettemapper_pmapplication {
     struct palettemapper *resulting_mapper;
 } palettemapper_pmapplication_t;
 
-int palettemapper_init(palettemapper_t *palmapper, char *name, int color);
+int palettemapper_init(palettemapper_t *palmapper, const char *name, int color);
 void palettemapper_cleanup(palettemapper_t *palmapper);
 Uint8 palettemapper_apply_to_color(palettemapper_t *palmapper, Uint8 c);
 void palettemapper_apply_to_table(palettemapper_t *palmapper, Uint8 *table);
 int palettemapper_apply_to_rendergraph(palettemapper_t *mapper,
     prismelrenderer_t *prend,
     rendergraph_t *mapped_rgraph,
-    char *name, vecspace_t *space,
+    const char *name, vecspace_t *space,
     rendergraph_t **rgraph_ptr);
 int palettemapper_apply_to_palettemapper(palettemapper_t *palmapper,
     prismelrenderer_t *prend, palettemapper_t *mapped_palmapper,
-    char *name, palettemapper_t **palmapper_ptr);
+    const char *name, palettemapper_t **palmapper_ptr);
 int palettemapper_push_application(palettemapper_t *mapper,
     rendergraph_t *mapped_rgraph, rendergraph_t *resulting_rgraph);
 rendergraph_t *palettemapper_get_application(palettemapper_t *mapper,
@@ -262,13 +262,13 @@ palettemapper_t *palettemapper_get_pmapplication(palettemapper_t *mapper,
  *************/
 
 int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
-    prismelrenderer_t *prend, char *name, palettemapper_t **palmapper_ptr);
+    prismelrenderer_t *prend, const char *name, palettemapper_t **palmapper_ptr);
 int fus_lexer_get_prismel(fus_lexer_t *lexer,
-    prismelrenderer_t *prend, char *name, prismel_t **prismel_ptr);
+    prismelrenderer_t *prend, const char *name, prismel_t **prismel_ptr);
 int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
-    prismelrenderer_t *prend, char *name, rendergraph_t **rgraph_ptr);
+    prismelrenderer_t *prend, const char *name, rendergraph_t **rgraph_ptr);
 int fus_lexer_get_mapper(fus_lexer_t *lexer,
-    prismelrenderer_t *prend, char *name, prismelmapper_t **mapper_ptr);
+    prismelrenderer_t *prend, const char *name, prismelmapper_t **mapper_ptr);
 
 
 #endif

@@ -422,7 +422,7 @@ int hexmap_submap_create_rgraph_map(hexmap_submap_t *submap){
     int n_frames = HEXMAP_SUBMAP_RGRAPH_N_FRAMES;
 
     ARRAY_PUSH_NEW(rendergraph_t*, prend->rendergraphs, rgraph)
-    err = rendergraph_init(rgraph, strdup(submap->filename), prend, NULL,
+    err = rendergraph_init(rgraph, submap->filename, prend, NULL,
         rendergraph_animation_type_default,
         n_frames);
     if(err)return err;
@@ -449,9 +449,16 @@ int hexmap_submap_create_rgraph_minimap(hexmap_submap_t *submap){
 
     int n_frames = HEXMAP_SUBMAP_RGRAPH_N_FRAMES;
 
+    const char *name;
+    {
+        char *_name = strdupcat("minimap:", submap->filename);
+        if(!_name)return 1;
+        name = stringstore_get_donate(&prend->name_store, _name);
+        if(!name)return 1;
+    }
+
     ARRAY_PUSH_NEW(rendergraph_t*, prend->rendergraphs, rgraph)
-    err = rendergraph_init(rgraph, strdupcat("minimap:", submap->filename),
-        prend, NULL,
+    err = rendergraph_init(rgraph, name, prend, NULL,
         rendergraph_animation_type_default,
         n_frames);
     if(err)return err;

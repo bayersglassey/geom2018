@@ -74,7 +74,7 @@ int test_app_set_players(test_app_t *app, int n_players){
 
         ARRAY_PUSH_NEW(body_t*, respawn_map->bodies, body)
         err = body_init(body, player->game, respawn_map,
-            strdup(app->stateset_filename), NULL, NULL);
+            app->stateset_filename, NULL, NULL);
         if(err)return err;
 
         /* Attach body to player */
@@ -229,12 +229,15 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
                     fprintf(stderr,
                         "Can't record without a body!\n");
                 }else if(body->recording.action != 2){
-                    const char *recording_filename =
+                    const char *_recording_filename =
                         test_app_get_next_recording_filename(app);
+                    const char *recording_filename = stringstore_get(
+                        &app->prend.filename_store, _recording_filename);
+                    if(!recording_filename)return 1;
                     fprintf(stderr, "Recording to file: %s "
                         " (When finished, press F9 to save!)\n",
                         recording_filename);
-                    err = body_start_recording(body, strdup(recording_filename));
+                    err = body_start_recording(body, recording_filename);
                     if(err)return err;
                 }else{
                     fprintf(stderr, "Finished recording. "
@@ -247,12 +250,15 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
         }else if(event->key.keysym.sym == SDLK_F10 && app->developer_mode){
             /* load recording */
             bool shift = event->key.keysym.mod & KMOD_SHIFT;
-            const char *recording_filename =
+            const char *_recording_filename =
                 test_app_get_last_recording_filename(app);
-            if(recording_filename == NULL){
+            if(_recording_filename == NULL){
                 fprintf(stderr, "Couldn't find file of last recording. "
                     "Maybe you need to record your first one with F9?\n");
             }else{
+                const char *recording_filename = stringstore_get(
+                    &app->prend.filename_store, _recording_filename);
+                if(!recording_filename)return 1;
                 fprintf(stderr, "Playing back from file: %s\n",
                     recording_filename);
                 for(int i = 0; i < game->players_len; i++){

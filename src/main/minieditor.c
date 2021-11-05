@@ -354,7 +354,7 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
     if(err)return err;
 
     font_t _font, *font=&_font;
-    err = font_load(font, strdup(opts->font_filename), NULL);
+    err = font_load(font, opts->font_filename, NULL);
     if(err)return err;
 
     prismelrenderer_t _prend, *prend = &_prend;

@@ -37,7 +37,7 @@ static int _parse_trf(fus_lexer_t *lexer, vecspace_t *space, rot_t *rot_ptr){
 
 
 static int _parse_collmap(stateset_t *stateset, fus_lexer_t *lexer,
-    vecspace_t *space,
+    prismelrenderer_t *prend, vecspace_t *space,
     hexcollmap_t **own_collmap_ptr, hexcollmap_t **collmap_ptr
 ){
     int err;
@@ -49,17 +49,16 @@ static int _parse_collmap(stateset_t *stateset, fus_lexer_t *lexer,
     if(GOT("collmap")){
         NEXT
         OPEN
-        char *name;
-        GET_STR(name)
+        const char *name;
+        GET_STR_CACHED(name, &prend->name_store)
 
         hexcollmap_t *found_collmap = stateset_get_collmap(
             stateset, name);
         if(!found_collmap){
             fus_lexer_err_info(lexer);
             fprintf(stderr, "Couldn't find collmap: %s\n", name);
-            free(name); return 2;
+            return 2;
         }
-        free(name);
         CLOSE
 
         rot_t rot;
@@ -70,7 +69,7 @@ static int _parse_collmap(stateset_t *stateset, fus_lexer_t *lexer,
             own_collmap = calloc(1, sizeof(*own_collmap));
             if(!own_collmap)return 1;
             hexcollmap_init_clone(own_collmap, found_collmap,
-                strdup(found_collmap->filename));
+                found_collmap->filename);
             int err = hexcollmap_clone(own_collmap, found_collmap, rot);
             if(err)return err;
 
@@ -82,7 +81,8 @@ static int _parse_collmap(stateset_t *stateset, fus_lexer_t *lexer,
         own_collmap = calloc(1, sizeof(*collmap));
         if(own_collmap == NULL)return 1;
         err = hexcollmap_parse(own_collmap, lexer, space,
-            strdup(lexer->filename), true);
+            lexer->filename, true,
+            &prend->name_store, &prend->filename_store);
         if(err)return err;
         collmap = own_collmap;
     }
@@ -139,12 +139,11 @@ void collmsg_handler_init(collmsg_handler_t *handler, char *msg){
  ************/
 
 void stateset_collmap_entry_cleanup(stateset_collmap_entry_t *entry){
-    free(entry->name);
     hexcollmap_cleanup(entry->collmap);
+    free(entry->collmap);
 }
 
 void stateset_cleanup(stateset_t *stateset){
-    free(stateset->filename);
     ARRAY_FREE_PTR(char*, stateset->collmsgs, (void))
     ARRAY_FREE(collmsg_handler_t, stateset->collmsg_handlers,
         collmsg_handler_cleanup)
@@ -153,7 +152,7 @@ void stateset_cleanup(stateset_t *stateset){
         stateset_collmap_entry_cleanup)
 }
 
-int stateset_init(stateset_t *stateset, char *filename){
+int stateset_init(stateset_t *stateset, const char *filename){
     stateset->filename = filename;
     ARRAY_INIT(stateset->collmsgs)
     ARRAY_INIT(stateset->collmsg_handlers)
@@ -180,7 +179,7 @@ hexcollmap_t *stateset_get_collmap(stateset_t *stateset, const char *name){
     return NULL;
 }
 
-int stateset_load(stateset_t *stateset, char *filename, vars_t *vars,
+int stateset_load(stateset_t *stateset, const char *filename, vars_t *vars,
     prismelrenderer_t *prend, vecspace_t *space
 ){
     int err;
@@ -238,11 +237,9 @@ static int _parse_cond(stateset_t *stateset, fus_lexer_t *lexer,
         }
         NEXT
 
-        char *name;
-        GET_NAME(name)
-
-        char c = name[0];
-        if(strlen(name) != 1 || !strchr(ANIM_KEY_CS, c)){
+        char c;
+        GET_CHR(c)
+        if(!strchr(ANIM_KEY_CS, c)){
             UNEXPECTED(
                 "one of the characters: " ANIM_KEY_CS);
         }
@@ -251,7 +248,6 @@ static int _parse_cond(stateset_t *stateset, fus_lexer_t *lexer,
         cond->u.key.kstate = kstate;
         cond->u.key.c = c;
         cond->u.key.yes = yes;
-        free(name);
 
         CLOSE
     }else if(GOT("coll")){
@@ -284,7 +280,7 @@ static int _parse_cond(stateset_t *stateset, fus_lexer_t *lexer,
 
         hexcollmap_t *own_collmap;
         hexcollmap_t *collmap;
-        err = _parse_collmap(stateset, lexer, space,
+        err = _parse_collmap(stateset, lexer, prend, space,
             &own_collmap, &collmap);
         if(err)return err;
 
@@ -377,7 +373,7 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         NEXT
         OPEN
         effect->type = STATE_EFFECT_TYPE_PRINT_VAR;
-        GET_NAME(effect->u.var_name)
+        GET_NAME_CACHED(effect->u.var_name, &prend->name_store)
         CLOSE
     }else if(GOT("print_vars")){
         NEXT
@@ -418,8 +414,8 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
 
         OPEN
 
-        char *goto_name;
-        GET_NAME(goto_name)
+        const char *goto_name;
+        GET_NAME_CACHED(goto_name, &prend->name_store)
 
         effect->type = STATE_EFFECT_TYPE_GOTO;
         effect->u.gotto.name = goto_name;
@@ -443,8 +439,8 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         OPEN
 
         state_effect_spawn_t spawn = {0};
-        GET_STR(spawn.stateset_filename)
-        GET_STR(spawn.state_name)
+        GET_STR_CACHED(spawn.stateset_filename, &prend->filename_store)
+        GET_STR_CACHED(spawn.state_name, &prend->name_store)
         OPEN
         GET_INT(spawn.loc.pos[0])
         GET_INT(spawn.loc.pos[1])
@@ -514,11 +510,9 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         }
         NEXT
 
-        char *name;
-        GET_NAME(name)
-
-        char c = name[0];
-        if(strlen(name) != 1 || !strchr(ANIM_KEY_CS, c)){
+        char c;
+        GET_CHR(c)
+        if(!strchr(ANIM_KEY_CS, c)){
             UNEXPECTED(
                 "one of the characters: " ANIM_KEY_CS);
         }
@@ -526,7 +520,6 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         effect->type = STATE_EFFECT_TYPE_KEY;
         effect->u.key.action = action;
         effect->u.key.c = c;
-        free(name);
 
         CLOSE
     }else if(GOT("set")){
@@ -605,8 +598,8 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         NEXT
         OPEN
 
-        char *play_filename;
-        GET_STR(play_filename)
+        const char *play_filename;
+        GET_STR_CACHED(play_filename, &prend->filename_store)
 
         effect->type = STATE_EFFECT_TYPE_PLAY;
         effect->u.play_filename = play_filename;
@@ -688,25 +681,24 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
         }
         if(GOT("collmap")){
             NEXT
-            char *name;
-            GET_STR(name)
+            const char *name;
+            GET_STR_CACHED(name, &prend->name_store)
             OPEN
 
             hexcollmap_t *collmap;
             if(GOT("collmap")){
                 NEXT
                 OPEN
-                char *name;
-                GET_STR(name)
+                const char *name;
+                GET_STR_CACHED(name, &prend->name_store)
 
                 hexcollmap_t *found_collmap = stateset_get_collmap(
                     stateset, name);
                 if(!found_collmap){
                     fus_lexer_err_info(lexer);
                     fprintf(stderr, "Couldn't find collmap: %s\n", name);
-                    free(name); return 2;
+                    return 2;
                 }
-                free(name);
                 CLOSE
 
                 rot_t rot;
@@ -716,14 +708,15 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                 collmap = calloc(1, sizeof(*collmap));
                 if(!collmap)return 1;
                 hexcollmap_init_clone(collmap, found_collmap,
-                    strdup(found_collmap->filename));
+                    found_collmap->filename);
                 int err = hexcollmap_clone(collmap, found_collmap, rot);
                 if(err)return err;
             }else{
                 collmap = calloc(1, sizeof(*collmap));
                 if(!collmap)return 1;
                 err = hexcollmap_parse(collmap, lexer, space,
-                    strdup(lexer->filename), true);
+                    lexer->filename, true,
+                    &prend->name_store, &prend->filename_store);
                 if(err)return err;
             }
             CLOSE
@@ -779,8 +772,8 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             continue;
         }
 
-        char *name;
-        GET_NAME(name)
+        const char *name;
+        GET_NAME_CACHED(name, &prend->name_store)
         OPEN
 
         ARRAY_PUSH_NEW(state_t*, stateset->states, state)
@@ -790,18 +783,17 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
         /* Parse state properties */
         while(1){
             if(GOT("rgraph")){
-                char *rgraph_name;
+                const char *rgraph_name;
                 NEXT
                 OPEN
-                GET_STR(rgraph_name)
+                GET_STR_CACHED(rgraph_name, &prend->name_store)
                 CLOSE
                 state->rgraph = prismelrenderer_get_rendergraph(
                     prend, rgraph_name);
                 if(state->rgraph == NULL){
                     fus_lexer_err_info(lexer);
                     fprintf(stderr, "Couldn't find shape: %s\n", rgraph_name);
-                    free(rgraph_name); return 2;}
-                free(rgraph_name);
+                    return 2;}
                 continue;
             }
             if(GOT("unsafe")){
@@ -831,7 +823,7 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
 
                 hexcollmap_t *own_collmap;
                 hexcollmap_t *collmap;
-                err = _parse_collmap(stateset, lexer, space,
+                err = _parse_collmap(stateset, lexer, prend, space,
                     &own_collmap, &collmap);
                 if(err)return err;
 
@@ -916,7 +908,7 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
 state_t *stateset_get_state(stateset_t *stateset, const char *name){
     for(int i = 0; i < stateset->states_len; i++){
         state_t *state = stateset->states[i];
-        if(!strcmp(state->name, name))return state;
+        if(state->name == name || !strcmp(state->name, name))return state;
     }
     return NULL;
 }
@@ -928,7 +920,6 @@ state_t *stateset_get_state(stateset_t *stateset, const char *name){
  *********/
 
 void state_cleanup(state_t *state){
-    free(state->name);
     if(state->own_hitbox != NULL){
         hexcollmap_cleanup(state->own_hitbox);
         free(state->own_hitbox);
@@ -939,7 +930,7 @@ void state_cleanup(state_t *state){
     ARRAY_FREE_PTR(state_rule_t*, state->rules, state_rule_cleanup)
 }
 
-int state_init(state_t *state, stateset_t *stateset, char *name){
+int state_init(state_t *state, stateset_t *stateset, const char *name){
     state->stateset = stateset;
     state->name = name;
     state->rgraph = NULL;
@@ -1024,20 +1015,6 @@ void state_effect_cleanup(state_effect_t *effect){
     switch(effect->type){
         case STATE_EFFECT_TYPE_PRINT:
             free(effect->u.msg);
-            break;
-        case STATE_EFFECT_TYPE_PRINT_VAR:
-            free(effect->u.var_name);
-            break;
-        case STATE_EFFECT_TYPE_GOTO:
-            free(effect->u.gotto.name);
-            break;
-        case STATE_EFFECT_TYPE_SPAWN:
-            free(effect->u.spawn.stateset_filename);
-            free(effect->u.spawn.state_name);
-            free(effect->u.spawn.palmapper_name);
-            break;
-        case STATE_EFFECT_TYPE_PLAY:
-            free(effect->u.play_filename);
             break;
         case STATE_EFFECT_TYPE_INC:
         case STATE_EFFECT_TYPE_DEC:

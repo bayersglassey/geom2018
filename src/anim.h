@@ -77,7 +77,7 @@ struct state_effect_goto;
 
 typedef struct state {
     struct stateset *stateset;
-    char *name;
+    const char *name;
     rendergraph_t *rgraph;
     hexcollmap_t *own_hitbox;
         /* For if we own the hitbox, as opposed to
@@ -98,12 +98,12 @@ typedef struct state {
 
 typedef struct stateset_collmap_entry {
     /* Key/value pair in the array stateset->collmaps. */
-    char *name;
+    const char *name;
     struct hexcollmap *collmap;
 } stateset_collmap_entry_t;
 
 typedef struct stateset {
-    char *filename;
+    const char *filename;
     ARRAY_DECL(char*, collmsgs)
     ARRAY_DECL(struct collmsg_handler, collmsg_handlers)
     ARRAY_DECL(struct state*, states)
@@ -267,15 +267,15 @@ static const char *state_effect_type_name(int type){
 }
 
 typedef struct state_effect_goto {
-    char *name;
+    const char *name;
     bool immediate;
     bool delay;
 } state_effect_goto_t;
 
 typedef struct state_effect_spawn {
-    char *stateset_filename;
-    char *state_name;
-    char *palmapper_name;
+    const char *stateset_filename;
+    const char *state_name;
+    const char *palmapper_name;
     hexgame_location_t loc;
 } state_effect_spawn_t;
 
@@ -283,12 +283,12 @@ typedef struct state_effect {
     int type; /* enum state_effect_type */
     union {
         char *msg;
-        char *var_name;
+        const char *var_name;
         int delay;
         state_effect_goto_t gotto;
         int dead; /* enum body_dead */
         state_effect_spawn_t spawn;
-        char *play_filename;
+        const char *play_filename;
         vec_t vec;
         rot_t rot;
         int boolean; /* enum effect_boolean */
@@ -331,10 +331,10 @@ typedef struct state_effect_ite {
 void stateset_collmap_entry_cleanup(stateset_collmap_entry_t *entry);
 
 void stateset_cleanup(stateset_t *stateset);
-int stateset_init(stateset_t *stateset, char *filename);
+int stateset_init(stateset_t *stateset, const char *filename);
 void stateset_dump(stateset_t *stateset, FILE *file, int depth);
 hexcollmap_t *stateset_get_collmap(stateset_t *stateset, const char *name);
-int stateset_load(stateset_t *stateset, char *filename, vars_t *vars,
+int stateset_load(stateset_t *stateset, const char *filename, vars_t *vars,
     prismelrenderer_t *prend, vecspace_t *space);
 int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
     prismelrenderer_t *prend, vecspace_t *space);
@@ -342,7 +342,7 @@ state_t *stateset_get_state(stateset_t *stateset, const char *name);
 
 
 void state_cleanup(state_t *state);
-int state_init(state_t *state, stateset_t *stateset, char *name);
+int state_init(state_t *state, stateset_t *stateset, const char *name);
 void state_dump(state_t *state, FILE *file, int depth);
 
 void state_rule_cleanup(state_rule_t *rule);

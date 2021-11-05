@@ -30,13 +30,12 @@ static char _get_color_char(int color){
 
 
 void font_cleanup(font_t *font){
-    free(font->filename);
     for(int i = 0; i < FONT_N_CHARS; i++){
         free(font->char_data[i]);
     }
 }
 
-int font_load(font_t *font, char *filename, vars_t *vars){
+int font_load(font_t *font, const char *filename, vars_t *vars){
     font->filename = filename;
     font->autoupper = false;
     font->char_w = 0;

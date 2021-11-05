@@ -65,7 +65,7 @@ typedef struct rendergraph_child {
             struct palettemapper *palmapper;
         } rgraph;
         struct {
-            const char *name; /* from a stringstore */
+            const char *name;
         } label;
     } u;
 } rendergraph_child_t;
@@ -87,7 +87,7 @@ typedef struct rendergraph_label {
 } rendergraph_label_t;
 
 typedef struct rendergraph {
-    char *name;
+    const char *name;
     ARRAY_DECL(struct rendergraph_child*, children)
     ARRAY_DECL(struct rendergraph_label*, labels)
 
@@ -129,10 +129,10 @@ struct rendergraph_bitmap;
 
 void rendergraph_child_cleanup(rendergraph_child_t *child);
 void rendergraph_cleanup(rendergraph_t *rendergraph);
-int rendergraph_init(rendergraph_t *rendergraph, char *name,
+int rendergraph_init(rendergraph_t *rendergraph, const char *name,
     struct prismelrenderer *prend, struct palettemapper *palmapper,
     const char *animation_type, int n_frames);
-int rendergraph_copy(rendergraph_t *rendergraph, char *name,
+int rendergraph_copy(rendergraph_t *rendergraph, const char *name,
     rendergraph_t *copy_of);
 void rendergraph_bitmap_dump(struct rendergraph_bitmap *bitmap, FILE *f,
     int i, int n_spaces, bool dump_surface);
