@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "../stringstore.h"
+#include "../str_utils.h"
 
 
 #define ASSERT(COND) n_tests++; if(COND){ \
@@ -31,6 +32,17 @@ int stringstore_tests(){
 
     const char *y1 = stringstore_get(store, "y");
     ASSERT(store->entries_len == 2)
+
+    char *z1 = strdup("z");
+    ASSERT(z1 != NULL)
+
+    const char *z2 = stringstore_get_donate(store, z1);
+    ASSERT(store->entries_len == 3)
+    ASSERT(z2 == z1)
+
+    const char *z3 = stringstore_get(store, "z");
+    ASSERT(store->entries_len == 3)
+    ASSERT(z3 == z1)
 
     stringstore_dump(store);
     stringstore_cleanup(store);

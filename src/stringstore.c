@@ -41,7 +41,17 @@ int stringstore_add(stringstore_t *store, const char *data,
     return 0;
 }
 
-const char *stringstore_get(stringstore_t *store, const char *data){
+int stringstore_add_donate(stringstore_t *store, char *data,
+    stringstore_entry_t **entry_ptr
+){
+    /* Caller "donates" (passes ownership of) data to store */
+    ARRAY_PUSH_NEW(stringstore_entry_t*, store->entries, entry)
+    entry->data = data;
+    *entry_ptr = entry;
+    return 0;
+}
+
+const char *stringstore_find(stringstore_t *store, const char *data){
     if(!data)return NULL;
     for(int i = 0; i < store->entries_len; i++){
         stringstore_entry_t *entry = store->entries[i];
@@ -49,8 +59,39 @@ const char *stringstore_get(stringstore_t *store, const char *data){
             return entry->data;
         }
     }
+    return NULL;
+}
+
+const char *stringstore_get(stringstore_t *store, const char *data){
+    if(!data)return NULL;
+
+    const char *found_data = stringstore_find(store, data);
+    if(found_data)return found_data;
+
     stringstore_entry_t *entry;
     int err = stringstore_add(store, data, &entry);
+    if(err)return NULL;
+    return entry->data;
+}
+
+const char *stringstore_get_donate(stringstore_t *store, char *data){
+    /* Caller "donates" (passes ownership of) data to store */
+    if(!data)return NULL;
+
+    const char *found_data = stringstore_find(store, data);
+    if(found_data){
+
+        /* We don't need data, since we already had a copy of this string
+        in the store.
+        But caller passed us ownership of data, so we must free it if we're
+        not going to store it. */
+        free(data);
+
+        return found_data;
+    }
+
+    stringstore_entry_t *entry;
+    int err = stringstore_add_donate(store, data, &entry);
     if(err)return NULL;
     return entry->data;
 }
