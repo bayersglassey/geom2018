@@ -14,13 +14,13 @@ void stringstore_cleanup(stringstore_t *store){
     ARRAY_FREE_PTR(entry_t*, store->entries, stringstore_entry_cleanup)
 }
 
-void stringstore_dump(stringstore_t *store){
-    fprintf(stderr, "STRING STORE (%p) (%i ENTRIES):\n", store,
+void stringstore_dump(stringstore_t *store, FILE *f){
+    fprintf(f, "STRING STORE (%p) (%i ENTRIES):\n", store,
         store->entries_len);
     for(int i = 0; i < store->entries_len; i++){
         stringstore_entry_t *entry = store->entries[i];
-        fprintf(stderr, "  ENTRY %i (%p): (%p) %s\n",
-            i, entry, entry->data, entry->data);
+        fprintf(f, "  ENTRY %i: %s\n",
+            i, entry->data);
     }
 }
 

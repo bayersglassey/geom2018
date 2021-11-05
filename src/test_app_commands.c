@@ -317,7 +317,7 @@ static int _test_app_command_dump(test_app_t *app, fus_lexer_t *lexer, bool *lex
             dump_bitmaps = 2;
         }else if(fus_lexer_got(lexer, "file")){
             err = fus_lexer_next(lexer);
-            if(err)return err;
+            if(err)goto lexer_err;
             char *filename;
             err = fus_lexer_get_str(lexer, &filename);
             if(err)goto lexer_err;
@@ -329,7 +329,7 @@ static int _test_app_command_dump(test_app_t *app, fus_lexer_t *lexer, bool *lex
             }
         }else goto lexer_err;
         err = fus_lexer_next(lexer);
-        if(err)return err;
+        if(err)goto lexer_err;
     }
     if(dump_what == 0){
         rendergraph_t *rgraph =
@@ -343,6 +343,45 @@ static int _test_app_command_dump(test_app_t *app, fus_lexer_t *lexer, bool *lex
             perror("fclose");
             return 1;
         }
+    }
+    return 0;
+lexer_err:
+    *lexer_err_ptr = true;
+    return 0;
+}
+
+static int _test_app_command_dump_stringstores(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
+    int err;
+    bool dump_map = true;
+    bool dump_minimap = false;
+    if(!fus_lexer_done(lexer)){
+        if(fus_lexer_got(lexer, "map")){
+            err = fus_lexer_next(lexer);
+            if(err)goto lexer_err;
+            dump_map = true;
+            dump_minimap = false;
+        }else if(fus_lexer_got(lexer, "minimap")){
+            err = fus_lexer_next(lexer);
+            if(err)goto lexer_err;
+            dump_map = false;
+            dump_minimap = true;
+        }else if(fus_lexer_got(lexer, "both")){
+            err = fus_lexer_next(lexer);
+            if(err)goto lexer_err;
+            dump_map = true;
+            dump_minimap = true;
+        }else{
+            err = fus_lexer_unexpected(lexer, "map minimap both");
+            goto lexer_err;
+        }
+    }
+    if(dump_map){
+        fprintf(stderr, "=== MAP:\n");
+        prismelrenderer_dump_stringstores(&app->prend, stderr);
+    }
+    if(dump_minimap){
+        fprintf(stderr, "=== MINI MAP:\n");
+        prismelrenderer_dump_stringstores(&app->minimap_prend, stderr);
     }
     return 0;
 lexer_err:
@@ -463,6 +502,7 @@ test_app_command_t _test_app_commands[] = {
     COMMAND(play_recording, "pc", "[FILENAME]"),
     COMMAND(save, NULL, "[FILENAME]"),
     COMMAND(dump, NULL, "[(rgraph | prend | nobitmaps | surfaces | file FILENAME) ...]"),
+    COMMAND(dump_stringstores, "dss", "[map | minimap | both]"),
     COMMAND(map, NULL, "MAPPER RGRAPH [RESULTING_RGRAPH]"),
     COMMAND(renderall, NULL, NULL),
     COMMAND(get_shape, NULL, "SHAPE"),

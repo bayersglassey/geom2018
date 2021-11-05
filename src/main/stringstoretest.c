@@ -44,7 +44,7 @@ int stringstore_tests(){
     ASSERT(store->entries_len == 3)
     ASSERT(z3 == z1)
 
-    stringstore_dump(store);
+    stringstore_dump(store, stderr);
     stringstore_cleanup(store);
 
     if(n_fails > 0){

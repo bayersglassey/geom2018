@@ -120,6 +120,7 @@ void prismelrenderer_cleanup(prismelrenderer_t *prend);
 void prismelrenderer_dump(prismelrenderer_t *prend, FILE *f,
     int dump_bitmaps);
 void prismelrenderer_dump_stats(prismelrenderer_t *prend, FILE *f);
+void prismelrenderer_dump_stringstores(prismelrenderer_t *prend, FILE *f);
 int prismelrenderer_push_prismel(prismelrenderer_t *prend, const char *name,
     prismel_t **prismel_ptr);
 #define DICT_DECL(TYPE, THING, THINGS, NAME) \

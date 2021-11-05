@@ -578,6 +578,14 @@ void prismelrenderer_dump_stats(prismelrenderer_t *prend, FILE *f){
     _dump_size(surfaces_size, n_bitmaps, f);
 }
 
+void prismelrenderer_dump_stringstores(prismelrenderer_t *prend, FILE *f){
+    fprintf(f, "* NAME STORE:\n");
+    stringstore_dump(&prend->name_store, f);
+    fprintf(f, "* FILENAME STORE:\n");
+    stringstore_dump(&prend->filename_store, f);
+}
+
+
 int prismelrenderer_push_prismel(prismelrenderer_t *prend, const char *name,
     prismel_t **prismel_ptr
 ){
