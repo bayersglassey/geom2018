@@ -755,7 +755,7 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
     vars_t bodyvars;
     vars_init(&bodyvars);
 
-    GET("(")
+    OPEN
     {
         if(GOT("recording")){
             NEXT
@@ -789,33 +789,33 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
 
         if(GOT("visible")){
             NEXT
-            GET("(")
+            OPEN
             if(GOT("not")){
                 NEXT
                 visible_not = true;
             }
             err = valexpr_parse(&visible_expr, lexer);
             if(err)return err;
-            GET(")")
+            CLOSE
         }
 
         if(GOT("vars")){
             NEXT
-            GET("(")
+            OPEN
             err = vars_parse(&vars, lexer);
             if(err)return err;
-            GET(")")
+            CLOSE
         }
 
         if(GOT("bodyvars")){
             NEXT
-            GET("(")
+            OPEN
             err = vars_parse(&bodyvars, lexer);
             if(err)return err;
-            GET(")")
+            CLOSE
         }
     }
-    GET(")")
+    CLOSE
 
     err = hexcollmap_part_init(part, type, part_c,
         filename, palmapper_name, frame_offset,
@@ -901,24 +901,24 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
     }else{
         if(GOT("spawn")){
             NEXT
-            GET("(")
+            OPEN
             err = hexgame_location_parse(&collmap->spawn, lexer);
             if(err)return err;
-            GET(")")
+            CLOSE
         }
 
         while(GOT("text")){
             NEXT
-            GET("(")
+            OPEN
             ARRAY_PUSH_NEW(valexpr_t*, collmap->text_exprs, text_expr)
             err = valexpr_parse(text_expr, lexer);
             if(err)return err;
-            GET(")")
+            CLOSE
         }
 
         if(GOT("parts")){
             NEXT
-            GET("(")
+            OPEN
             while(!GOT(")")){
                 ARRAY_PUSH_NEW(hexcollmap_part_t*, parts, part)
                 err = _hexcollmap_parse_part(collmap, part, lexer);
@@ -929,23 +929,23 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
 
         if(GOT("default_vert")){
             NEXT
-            GET("(")
+            OPEN
             GET_CHR(default_vert_c)
-            GET(")")
+            CLOSE
         }
 
         if(GOT("default_edge")){
             NEXT
-            GET("(")
+            OPEN
             GET_CHR(default_edge_c)
-            GET(")")
+            CLOSE
         }
 
         if(GOT("default_face")){
             NEXT
-            GET("(")
+            OPEN
             GET_CHR(default_face_c)
-            GET(")")
+            CLOSE
         }
 
         if(GOT("import")){
@@ -981,19 +981,19 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
             free(text);
         }else{
             GET("collmap")
-            GET("(")
+            OPEN
             err = _hexcollmap_parse_with_parts(collmap, lexer,
                 default_vert_c, default_edge_c, default_face_c,
                 parts, parts_len);
             if(err)return err;
-            GET(")")
+            CLOSE
         }
 
         if(GOT("draw")){
             NEXT
-            GET("(")
+            OPEN
             while(!GOT(")")){
-                GET("(")
+                OPEN
 
                 char part_c;
                 GET_CHR(part_c)
@@ -1022,7 +1022,7 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
                     return 2;
                 }
 
-                GET(")")
+                CLOSE
             }
             NEXT
         }

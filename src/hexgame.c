@@ -348,20 +348,20 @@ static int hexgame_load_worldmaps(hexgame_t *game, const char *worldmaps_filenam
     if(err)return err;
 
     GET("vars")
-    GET("(")
+    OPEN
     err = vars_parse(&game->vars, lexer);
     if(err)return err;
-    GET(")")
+    CLOSE
 
     GET("worldmaps")
-    GET("(")
+    OPEN
     while(1){
         if(GOT(")"))break;
-        GET("(")
+        OPEN
         char *worldmap;
         GET_STR(worldmap)
         ARRAY_PUSH(char*, game->worldmaps, worldmap)
-        GET(")")
+        CLOSE
     }
     NEXT
 

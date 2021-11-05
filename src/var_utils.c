@@ -185,13 +185,13 @@ int vars_parse(vars_t *vars, fus_lexer_t *lexer){
 
         char *name;
         GET_STR(name)
-        GET("(")
+        OPEN
         var_t *var = vars_get_or_add(vars, name);
         if(var == NULL)return 2;
         var->props = props;
         err = val_parse(&var->value, lexer);
         if(err)return err;
-        GET(")")
+        CLOSE
 
         free(name);
     }

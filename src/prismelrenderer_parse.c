@@ -38,7 +38,7 @@ int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
 ){
     INIT
     palettemapper_t *palmapper = NULL;
-    GET("(")
+    OPEN
 
     if(GOT_STR){
         char *name;
@@ -48,7 +48,7 @@ int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
             fprintf(stderr, "Couldn't find palette mapper: %s\n", name);
             free(name); return 2;}
         free(name);
-        GET(")")
+        CLOSE
         goto ok;
     }
 
@@ -69,7 +69,7 @@ int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
             palmapper2, name, &palmapper);
         if(err)return err;
 
-        GET(")")
+        CLOSE
         goto ok;
     }
 
@@ -98,7 +98,7 @@ int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
             return 2;
         }
 
-        GET("(")
+        OPEN
         {
             if(!GOT(")")){
                 int color;
@@ -117,7 +117,7 @@ int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
                 }
             }
         }
-        GET(")")
+        CLOSE
     }
     NEXT
 
@@ -136,7 +136,7 @@ static int parse_prismel_image(prismel_t *prismel, fus_lexer_t *lexer,
 ){
     INIT
     prismel_image_t *image = &prismel->images[image_i];
-    GET("(")
+    OPEN
 
     if(GOT_INT){
         /* For example:
@@ -156,13 +156,13 @@ static int parse_prismel_image(prismel_t *prismel, fus_lexer_t *lexer,
         int add_x = 0, add_y = 0;
         if(GOT("+")){
             NEXT
-            GET("(")
+            OPEN
             GET_INT(add_x)
             GET_INT(add_y)
-            GET(")")
+            CLOSE
         }
 
-        GET(")")
+        CLOSE
 
         for(int i = 0; i < other_image->lines_len; i++){
             prismel_image_line_t *other_line =
@@ -182,7 +182,7 @@ static int parse_prismel_image(prismel_t *prismel, fus_lexer_t *lexer,
                 GET_INT(x)
                 GET_INT(y)
                 GET_INT(w)
-                GET(")")
+                CLOSE
                 err = prismel_image_push_line(image, x, y, w);
                 if(err)return err;
             }else if(GOT(")")){
@@ -235,18 +235,18 @@ int fus_lexer_get_prismel(fus_lexer_t *lexer,
     err = prismelrenderer_push_prismel(prend, name, &prismel);
     if(err)return err;
 
-    GET("(")
+    OPEN
     while(1){
         if(GOT(")")){
             break;
         }else if(GOT("images")){
             NEXT
-            GET("(")
+            OPEN
             for(int i = 0; i < prismel->n_images; i++){
                 err = parse_prismel_image(prismel, lexer, i);
                 if(err)return err;
             }
-            GET(")")
+            CLOSE
         }else{
             return UNEXPECTED("images");
         }
@@ -306,7 +306,7 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
             : "sixth" (0 0 0 0)  4 f "red"  0+ (0 1)
     */
     INIT
-    GET("(")
+    OPEN
     while(1){
         if(GOT(")"))break;
 
@@ -320,7 +320,7 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
         bool frame_i_additive = true;
         bool frame_i_reversed = false;
 
-        GET("(")
+        OPEN
         {
             GET_STR(name)
             GET_TRF(prend->space, trf)
@@ -346,11 +346,11 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
                     NEXT
                     GET_INT(frame_start)
                     GET_INT(frame_len)
-                    GET(")")
+                    CLOSE
                 }
             }
         }
-        GET(")")
+        CLOSE
 
         if(palmapper_name != NULL){
             palmapper = prismelrenderer_get_palmapper(
@@ -398,7 +398,7 @@ static int parse_shape_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer,
             : "sq"  (1 0 0 0)  1 f 2 (3 1)
     */
     INIT
-    GET("(")
+    OPEN
     while(1){
         if(GOT(")"))break;
 
@@ -410,7 +410,7 @@ static int parse_shape_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer,
         int frame_start = 0;
         int frame_len = -1;
 
-        GET("(")
+        OPEN
         {
             GET_STR(name)
             GET_VEC(prend->space, v)
@@ -421,10 +421,10 @@ static int parse_shape_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer,
                 NEXT
                 GET_INT(frame_start)
                 GET_INT(frame_len)
-                GET(")")
+                CLOSE
             }
         }
-        GET(")")
+        CLOSE
 
         prismel_t *found = prismelrenderer_get_prismel(prend, name);
         if(found == NULL){
@@ -461,7 +461,7 @@ static int parse_shape_labels(prismelrenderer_t *prend, fus_lexer_t *lexer,
             : "label2" (-1 0 2 0) 11 t (3 1)
     */
     INIT
-    GET("(")
+    OPEN
     while(1){
         if(GOT(")"))break;
 
@@ -472,7 +472,7 @@ static int parse_shape_labels(prismelrenderer_t *prend, fus_lexer_t *lexer,
         int frame_start = 0;
         int frame_len = -1;
 
-        GET("(")
+        OPEN
         {
             GET_STR(name)
             GET_VEC(prend->space, v)
@@ -482,10 +482,10 @@ static int parse_shape_labels(prismelrenderer_t *prend, fus_lexer_t *lexer,
                 NEXT
                 GET_INT(frame_start)
                 GET_INT(frame_len)
-                GET(")")
+                CLOSE
             }
         }
-        GET(")")
+        CLOSE
 
         rendergraph_child_t *child;
         err = rendergraph_push_child(rgraph,
@@ -507,7 +507,7 @@ static int parse_shape_hexpicture(prismelrenderer_t *prend, fus_lexer_t *lexer,
     rendergraph_t *rgraph
 ){
     INIT
-    GET("(")
+    OPEN
 
     static const char *names[3] = {"sq", "tri", "dia"};
     prismel_t *prismels[3];
@@ -569,7 +569,7 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
     INIT
     rendergraph_t *rgraph = NULL;
 
-    GET("(")
+    OPEN
 
     if(GOT_STR){
         char *name;
@@ -607,7 +607,7 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
 
     if(GOT("animation")){
         NEXT
-        GET("(")
+        OPEN
 
         const char **animation_type_ptr = rendergraph_animation_types;
         while(*animation_type_ptr != NULL){
@@ -626,7 +626,7 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
         }else{
             GET_INT(n_frames)
         }
-        GET(")")
+        CLOSE
     }
 
     rgraph = calloc(1, sizeof(rendergraph_t));
@@ -661,7 +661,7 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
             if(err)return err;
         }else if(GOT("text")){
             NEXT
-            GET("(")
+            OPEN
 
             char *geomfont_name;
             GET_STR(geomfont_name)
@@ -682,7 +682,7 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
                 NEXT
                 GET_INT(cx)
                 GET_INT(cy)
-                GET(")")
+                CLOSE
             }
 
             err = geomfont_rgraph_printf(geomfont, rgraph, cx, cy,
@@ -690,7 +690,7 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
             if(err)return err;
             free(text);
 
-            GET(")")
+            CLOSE
             goto ok;
         }else{
             err = UNEXPECTED("shapes or prismels");
@@ -699,7 +699,7 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
     }
 
 ok:
-    GET(")")
+    CLOSE
 
     *rgraph_ptr = rgraph;
     return 0;
@@ -736,7 +736,7 @@ int fus_lexer_get_mapper(fus_lexer_t *lexer,
     INIT
     prismelmapper_t *mapper = NULL;
 
-    GET("(")
+    OPEN
 
     if(GOT_STR){
         char *name;
@@ -791,10 +791,10 @@ int fus_lexer_get_mapper(fus_lexer_t *lexer,
 
     if(GOT("entries")){
         NEXT
-        GET("(")
+        OPEN
         while(1){
             if(GOT(")"))break;
-            GET("(")
+            OPEN
             char *prismel_name;
             GET_STR(prismel_name)
             prismel_t *prismel = prismelrenderer_get_prismel(
@@ -818,13 +818,13 @@ int fus_lexer_get_mapper(fus_lexer_t *lexer,
             err = prismelmapper_push_entry(mapper, prismel, rgraph);
             if(err)return err;
 
-            GET(")")
+            CLOSE
         }
         NEXT
     }
 
 ok:
-    GET(")")
+    CLOSE
 
     *mapper_ptr = mapper;
     return 0;
@@ -861,7 +861,7 @@ static int parse_geomfonts(prismelrenderer_t *prend, fus_lexer_t *lexer){
             return 2;
         }
 
-        GET("(")
+        OPEN
 
         /* MAYBE TODO:
         Allow defining a geomfont in terms of another by way of
@@ -897,7 +897,7 @@ static int parse_geomfonts(prismelrenderer_t *prend, fus_lexer_t *lexer){
 
         font_t *font;
         GET("font")
-        GET("(")
+        OPEN
         {
             char *font_filename;
             GET_STR(font_filename)
@@ -906,10 +906,10 @@ static int parse_geomfonts(prismelrenderer_t *prend, fus_lexer_t *lexer){
             if(err)return err;
             free(font_filename);
         }
-        GET(")")
+        CLOSE
 
         GET("prismel")
-        GET("(")
+        OPEN
         {
             char *prismel_name;
             GET_STR(prismel_name)
@@ -925,9 +925,9 @@ static int parse_geomfonts(prismelrenderer_t *prend, fus_lexer_t *lexer){
 
             free(prismel_name);
         }
-        GET(")")
+        CLOSE
 
-        GET(")")
+        CLOSE
     }
     NEXT
     return 0;
@@ -947,27 +947,27 @@ int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer){
             break;
         }else if(GOT("palmappers")){
             NEXT
-            GET("(")
+            OPEN
             err = parse_palmappers(prend, lexer);
             if(err)return err;
         }else if(GOT("prismels")){
             NEXT
-            GET("(")
+            OPEN
             err = parse_prismels(prend, lexer);
             if(err)return err;
         }else if(GOT("shapes")){
             NEXT
-            GET("(")
+            OPEN
             err = parse_shapes(prend, lexer);
             if(err)return err;
         }else if(GOT("mappers")){
             NEXT
-            GET("(")
+            OPEN
             err = parse_mappers(prend, lexer);
             if(err)return err;
         }else if(GOT("geomfonts")){
             NEXT
-            GET("(")
+            OPEN
             err = parse_geomfonts(prend, lexer);
             if(err)return err;
         }else if(GOT("import")){

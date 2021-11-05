@@ -65,7 +65,7 @@ int parse_fusnode(fusnode_t *fusnode, fus_lexer_t *lexer){
             NEXT
             err = parse_fusnode(child, lexer);
             if(err)return err;
-            GET(")")
+            CLOSE
         }
     }
     return 0;

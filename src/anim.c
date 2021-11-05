@@ -48,7 +48,7 @@ static int _parse_collmap(stateset_t *stateset, fus_lexer_t *lexer,
 
     if(GOT("collmap")){
         NEXT
-        GET("(")
+        OPEN
         char *name;
         GET_STR(name)
 
@@ -60,7 +60,7 @@ static int _parse_collmap(stateset_t *stateset, fus_lexer_t *lexer,
             free(name); return 2;
         }
         free(name);
-        GET(")")
+        CLOSE
 
         rot_t rot;
         err = _parse_trf(lexer, space, &rot);
@@ -106,7 +106,7 @@ static int _parse_collmsg_handler(stateset_t *stateset, fus_lexer_t *lexer,
 
     collmsg_handler_init(handler, msg);
 
-    GET("(")
+    OPEN
     while(true){
         if(GOT(")"))break;
         ARRAY_PUSH_NEW(state_effect_t*, handler->effects, effect)
@@ -217,7 +217,7 @@ static int _parse_cond(stateset_t *stateset, fus_lexer_t *lexer,
         cond->type = STATE_COND_TYPE_TRUE;
     }else if(GOT("key")){
         NEXT
-        GET("(")
+        OPEN
 
         bool yes = true;
         if(GOT("not")){
@@ -253,10 +253,10 @@ static int _parse_cond(stateset_t *stateset, fus_lexer_t *lexer,
         cond->u.key.yes = yes;
         free(name);
 
-        GET(")")
+        CLOSE
     }else if(GOT("coll")){
         NEXT
-        GET("(")
+        OPEN
 
         int flags = 0;
         char *collmsg = NULL;
@@ -288,7 +288,7 @@ static int _parse_cond(stateset_t *stateset, fus_lexer_t *lexer,
             &own_collmap, &collmap);
         if(err)return err;
 
-        GET(")")
+        CLOSE
 
         cond->type = STATE_COND_TYPE_COLL;
         cond->u.coll.own_collmap = own_collmap;
@@ -297,7 +297,7 @@ static int _parse_cond(stateset_t *stateset, fus_lexer_t *lexer,
         cond->u.coll.collmsg = collmsg;
     }else if(GOT("chance")){
         NEXT
-        GET("(")
+        OPEN
         int a;
         int b = 100;
         GET_INT(a)
@@ -307,7 +307,7 @@ static int _parse_cond(stateset_t *stateset, fus_lexer_t *lexer,
             GET("/")
             GET_INT(b)
         }
-        GET(")")
+        CLOSE
         cond->type = STATE_COND_TYPE_CHANCE;
         cond->u.ratio.a = a;
         cond->u.ratio.b = b;
@@ -319,7 +319,7 @@ static int _parse_cond(stateset_t *stateset, fus_lexer_t *lexer,
         ARRAY_INIT(cond->u.subconds.conds)
 
         NEXT
-        GET("(")
+        OPEN
         while(!GOT(")")){
             ARRAY_PUSH_NEW(state_cond_t*, cond->u.subconds.conds, subcond)
             err = _parse_cond(stateset, lexer, prend, space, subcond);
@@ -329,7 +329,7 @@ static int _parse_cond(stateset_t *stateset, fus_lexer_t *lexer,
     }else if(GOT("expr")){
         cond->type = STATE_COND_TYPE_EXPR;
         NEXT
-        GET("(")
+        OPEN
         if(GOT("=="))cond->u.expr.op = STATE_COND_EXPR_OP_EQ;
         else if(GOT("!="))cond->u.expr.op = STATE_COND_EXPR_OP_NE;
         else if(GOT( "<"))cond->u.expr.op = STATE_COND_EXPR_OP_LT;
@@ -342,7 +342,7 @@ static int _parse_cond(stateset_t *stateset, fus_lexer_t *lexer,
         if(err)return err;
         err = valexpr_parse(&cond->u.expr.val2_expr, lexer);
         if(err)return err;
-        GET(")")
+        CLOSE
     }else if(GOT("get_bool")){
         cond->type = STATE_COND_TYPE_GET_BOOL;
         NEXT
@@ -369,35 +369,35 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         effect->type = STATE_EFFECT_TYPE_NOOP;
     }else if(GOT("print")){
         NEXT
-        GET("(")
+        OPEN
         effect->type = STATE_EFFECT_TYPE_PRINT;
         GET_STR(effect->u.msg)
-        GET(")")
+        CLOSE
     }else if(GOT("print_var")){
         NEXT
-        GET("(")
+        OPEN
         effect->type = STATE_EFFECT_TYPE_PRINT_VAR;
         GET_NAME(effect->u.var_name)
-        GET(")")
+        CLOSE
     }else if(GOT("print_vars")){
         NEXT
         effect->type = STATE_EFFECT_TYPE_PRINT_VARS;
     }else if(GOT("move")){
         NEXT
-        GET("(")
+        OPEN
         effect->type = STATE_EFFECT_TYPE_MOVE;
         for(int i = 0; i < space->dims; i++){
             GET_INT(effect->u.vec[i]);
         }
-        GET(")")
+        CLOSE
     }else if(GOT("rot")){
         NEXT
-        GET("(")
+        OPEN
         int rot;
         GET_INT(rot)
         effect->type = STATE_EFFECT_TYPE_ROT;
         effect->u.rot = rot_contain(space->rot_max, rot);
-        GET(")")
+        CLOSE
     }else if(GOT("turn")){
         NEXT
         effect->type = STATE_EFFECT_TYPE_TURN;
@@ -416,7 +416,7 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
             delay = true;
         }
 
-        GET("(")
+        OPEN
 
         char *goto_name;
         GET_NAME(goto_name)
@@ -426,10 +426,10 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         effect->u.gotto.immediate = immediate;
         effect->u.gotto.delay = delay;
 
-        GET(")")
+        CLOSE
     }else if(GOT("delay")){
         NEXT
-        GET("(")
+        OPEN
 
         int delay;
         GET_INT(delay)
@@ -437,25 +437,25 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         effect->type = STATE_EFFECT_TYPE_DELAY;
         effect->u.delay = delay;
 
-        GET(")")
+        CLOSE
     }else if(GOT("spawn")){
         NEXT
-        GET("(")
+        OPEN
 
         state_effect_spawn_t spawn = {0};
         GET_STR(spawn.stateset_filename)
         GET_STR(spawn.state_name)
-        GET("(")
+        OPEN
         GET_INT(spawn.loc.pos[0])
         GET_INT(spawn.loc.pos[1])
-        GET(")")
+        CLOSE
         GET_INT(spawn.loc.rot)
         GET_BOOL(spawn.loc.turn)
 
         effect->type = STATE_EFFECT_TYPE_SPAWN;
         effect->u.spawn = spawn;
 
-        GET(")")
+        CLOSE
     }else if(GOT("die")){
         NEXT
         effect->type = STATE_EFFECT_TYPE_DIE;
@@ -475,7 +475,7 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
             NEXT
             err = valexpr_parse(&effect->u.set.val_expr, lexer);
             if(err)return err;
-            GET(")")
+            CLOSE
         }else{
             /* Default: increment by 1 */
             valexpr_set_literal_int(&effect->u.set.val_expr, 1);
@@ -485,7 +485,7 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         NEXT
     }else if(GOT("confused")){
         NEXT
-        GET("(")
+        OPEN
         int boolean;
         if(GOT("yes"))boolean = EFFECT_BOOLEAN_TRUE;
         else if(GOT("no"))boolean = EFFECT_BOOLEAN_FALSE;
@@ -496,10 +496,10 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         NEXT
         effect->type = STATE_EFFECT_TYPE_CONFUSED;
         effect->u.boolean = boolean;
-        GET(")")
+        CLOSE
     }else if(GOT("key")){
         NEXT
-        GET("(")
+        OPEN
 
         int action;
         if(GOT("down")){
@@ -528,7 +528,7 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         effect->u.key.c = c;
         free(name);
 
-        GET(")")
+        CLOSE
     }else if(GOT("set")){
         NEXT
 
@@ -537,10 +537,10 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         err = valexpr_parse(&effect->u.set.var_expr, lexer);
         if(err)return err;
 
-        GET("(")
+        OPEN
         err = valexpr_parse(&effect->u.set.val_expr, lexer);
         if(err)return err;
-        GET(")")
+        CLOSE
     }else if(GOT("if")){
         NEXT
         effect->type = STATE_EFFECT_TYPE_IF;
@@ -553,7 +553,7 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         ARRAY_INIT(ite->then_effects)
         ARRAY_INIT(ite->else_effects)
 
-        GET("(")
+        OPEN
         while(!GOT(")")){
             ARRAY_PUSH_NEW(state_cond_t*, ite->conds, cond)
             err = _parse_cond(stateset, lexer, prend, space, cond);
@@ -562,7 +562,7 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         NEXT
 
         GET("then")
-        GET("(")
+        OPEN
         while(!GOT(")")){
             ARRAY_PUSH_NEW(state_effect_t*, ite->then_effects, effect)
             err = _parse_effect(stateset, lexer, prend, space, effect);
@@ -572,7 +572,7 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
 
         if(GOT("else")){
             NEXT
-            GET("(")
+            OPEN
             while(!GOT(")")){
                 ARRAY_PUSH_NEW(state_effect_t*, ite->else_effects, effect)
                 err = _parse_effect(stateset, lexer, prend, space, effect);
@@ -593,7 +593,7 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
 
         ARRAY_INIT(effect->u.as.sub_effects)
 
-        GET("(")
+        OPEN
         while(!GOT(")")){
             ARRAY_PUSH_NEW(state_effect_t*, effect->u.as.sub_effects,
                 sub_effect)
@@ -603,7 +603,7 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         NEXT
     }else if(GOT("play")){
         NEXT
-        GET("(")
+        OPEN
 
         char *play_filename;
         GET_STR(play_filename)
@@ -611,7 +611,7 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         effect->type = STATE_EFFECT_TYPE_PLAY;
         effect->u.play_filename = play_filename;
 
-        GET(")")
+        CLOSE
     }else{
         return UNEXPECTED(NULL);
     }
@@ -630,7 +630,7 @@ static int _state_parse_rule(state_t *state, fus_lexer_t *lexer,
     if(err)return err;
 
     GET("if")
-    GET("(")
+    OPEN
     while(1){
         if(GOT(")"))break;
         ARRAY_PUSH_NEW(state_cond_t*, rule->conds, cond)
@@ -640,7 +640,7 @@ static int _state_parse_rule(state_t *state, fus_lexer_t *lexer,
     NEXT
 
     GET("then")
-    GET("(")
+    OPEN
     while(1){
         if(GOT(")"))break;
         ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
@@ -668,7 +668,7 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
         }
         if(GOT("collmsgs")){
             NEXT
-            GET("(")
+            OPEN
             while(!GOT(")")){
                 char *msg;
                 GET_STR(msg)
@@ -690,12 +690,12 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             NEXT
             char *name;
             GET_STR(name)
-            GET("(")
+            OPEN
 
             hexcollmap_t *collmap;
             if(GOT("collmap")){
                 NEXT
-                GET("(")
+                OPEN
                 char *name;
                 GET_STR(name)
 
@@ -707,7 +707,7 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     free(name); return 2;
                 }
                 free(name);
-                GET(")")
+                CLOSE
 
                 rot_t rot;
                 err = _parse_trf(lexer, space, &rot);
@@ -726,7 +726,7 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                     strdup(lexer->filename), true);
                 if(err)return err;
             }
-            GET(")")
+            CLOSE
 
             ARRAY_PUSH_NEW(stateset_collmap_entry_t*, stateset->collmaps,
                 entry)
@@ -781,7 +781,7 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
 
         char *name;
         GET_NAME(name)
-        GET("(")
+        OPEN
 
         ARRAY_PUSH_NEW(state_t*, stateset->states, state)
         err = state_init(state, stateset, name);
@@ -792,9 +792,9 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             if(GOT("rgraph")){
                 char *rgraph_name;
                 NEXT
-                GET("(")
+                OPEN
                 GET_STR(rgraph_name)
-                GET(")")
+                CLOSE
                 state->rgraph = prismelrenderer_get_rendergraph(
                     prend, rgraph_name);
                 if(state->rgraph == NULL){
@@ -816,7 +816,7 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             }
             if(GOT("collmsgs")){
                 NEXT
-                GET("(")
+                OPEN
                 while(!GOT(")")){
                     char *msg;
                     GET_STR(msg)
@@ -827,7 +827,7 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             }
             if(GOT("hitbox")){
                 NEXT
-                GET("(")
+                OPEN
 
                 hexcollmap_t *own_collmap;
                 hexcollmap_t *collmap;
@@ -838,7 +838,7 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                 state->own_hitbox = own_collmap;
                 state->hitbox = collmap;
 
-                GET(")")
+                CLOSE
                 continue;
             }
             if(GOT("on")){

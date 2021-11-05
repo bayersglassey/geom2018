@@ -131,10 +131,10 @@ static int recording_parse(recording_t *rec,
     GET_ATTR_STR("state", rec->state_name, false)
 
     GET("pos")
-    GET("(")
+    OPEN
     err = fus_lexer_get_vec(lexer, space, rec->loc0.pos);
     if(err)return err;
-    GET(")")
+    CLOSE
 
     GET_ATTR_INT("rot", rec->loc0.rot, false)
     GET_ATTR_YESNO("turn", rec->loc0.turn, false)
@@ -148,13 +148,13 @@ static int recording_parse(recording_t *rec,
 
     if(GOT("data")){
         NEXT
-        GET("(")
+        OPEN
         char *data;
         GET_STR(data)
         err = recording_parse_nodes(rec, data);
         if(err)return err;
         free(data);
-        GET(")")
+        CLOSE
     }else{
         GET("nodata")
 

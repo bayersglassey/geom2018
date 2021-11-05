@@ -164,7 +164,7 @@ int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer){
         NEXT
         expr->type = type;
         expr->u.key_expr = NULL;
-        GET("(")
+        OPEN
 
         valexpr_t *key_expr = calloc(1, sizeof(*key_expr));
         if(!key_expr)return 1;
@@ -173,7 +173,7 @@ int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer){
         if(err)return err;
 
         expr->u.key_expr = key_expr;
-        GET(")")
+        CLOSE
     }else if(type == VALEXPR_TYPE_IF){
         NEXT
         expr->type = type;
@@ -215,13 +215,13 @@ int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer){
 
         expr->u.as.sub_expr = NULL;
 
-        GET("(")
+        OPEN
         valexpr_t *sub_expr = calloc(1, sizeof(*sub_expr));
         if(!sub_expr)return 1;
         err = valexpr_parse(sub_expr, lexer);
         if(err)return err;
         expr->u.as.sub_expr = sub_expr;
-        GET(")")
+        CLOSE
     }else{
         expr->type = type;
         err = val_parse(&expr->u.val, lexer);
@@ -483,7 +483,7 @@ int valexpr_cond_parse(valexpr_cond_t *cond, fus_lexer_t *lexer){
 
         valexpr_cond_init(cond, type, not);
 
-        GET("(")
+        OPEN
         while(1){
             if(GOT(")"))break;
             ARRAY_PUSH_NEW(valexpr_cond_t*, cond->u.subconds.subconds,
