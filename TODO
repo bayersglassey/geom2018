@@ -917,12 +917,7 @@ Current tree of possible areas you can go, starting at maps/demo:
 Nov 2, 2021:
 ------------
 
-* NO MORE ALLOCATING + FREEING STRINGS!..
-    Get fus_lexer to use a stringstore, and then all the geom classes
-    can just use const char * references into that.
-
-* body_t should have a mapping from strings to strings (be nice to use the stringstore,
-    see above, so we can use char* pointer equality instead of strcmp), to be used as a
+* body_t should have a mapping from strings to strings, to be used as a
     mapping from label names to rgraph names.
     The idea being that, for each label in the mapping, the corresponding rgraph is
     rendered at that label's position.
@@ -933,3 +928,30 @@ Nov 2, 2021:
     Easier to just add 2 effect types:
         unset_label VALEXPR
         set_label VALEXPR: VALEXPR
+
+
+Nov 3, 2021:
+------------
+
+* Sound!
+    Read the ALSA docs:
+        https://www.alsa-project.org/alsa-doc/alsa-lib/group___p_c_m.html#gabc748a500743713eafa960c7d104ca6f
+    ...each function lists example .c files which use it!..
+
+    ...from this guy's post on TIGSource:
+    https://forums.tigsource.com/index.php?topic=1733.msg1432473#msg1432473
+
+
+Nov 4, 2021:
+------------
+
+* vars_t should probably have a stringstore which it uses for its keys?..
+    * as far as values are concerned, it's up to caller to decide whether to use
+      const_str or str values
+
+* Handy thing:
+
+    shopt -s globstar
+    sed -i 's/GET("(")/OPEN/' **/*.c
+    sed -i 's/GET(")")/CLOSE/' **/*.c
+
