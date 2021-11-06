@@ -105,6 +105,7 @@ void body_cleanup(body_t *body){
     vars_cleanup(&body->vars);
     stateset_cleanup(&body->stateset);
     recording_cleanup(&body->recording);
+    ARRAY_FREE_PTR(body_label_mapping_t*, body->label_mappings, (void))
 }
 
 int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
@@ -126,6 +127,8 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
     body->visible_not = false;
 
     vars_init(&body->vars);
+
+    ARRAY_INIT(body->label_mappings)
 
     body->recording.action = 0; /* No recording loaded */
 
@@ -294,6 +297,45 @@ int body_add_body(body_t *body, body_t **new_body_ptr,
 /*************
  * BODY MISC *
  *************/
+
+static int body_get_label_mapping(body_t *body, const char *label_name,
+    body_label_mapping_t **mapping_ptr
+){
+    int err;
+    for(int i = 0; i < body->label_mappings_len; i++){
+        body_label_mapping_t *mapping = body->label_mappings[i];
+        if(
+            mapping->label_name == label_name ||
+            !strcmp(mapping->label_name, label_name)
+        ){
+            *mapping_ptr = mapping;
+            return 0;
+        }
+    }
+
+    ARRAY_PUSH_NEW(body_label_mapping_t*, body->label_mappings, mapping)
+    mapping->label_name = label_name;
+    mapping->rgraph = NULL;
+    *mapping_ptr = mapping;
+    return 0;
+}
+
+int body_unset_label_mapping(body_t *body, const char *label_name){
+    return body_set_label_mapping(body, label_name, NULL);
+}
+
+int body_set_label_mapping(body_t *body, const char *label_name,
+    rendergraph_t *rgraph
+){
+    int err;
+
+    body_label_mapping_t *mapping;
+    err = body_get_label_mapping(body, label_name, &mapping);
+    if(err)return err;
+
+    mapping->rgraph = rgraph;
+    return 0;
+}
 
 player_t *body_get_player(body_t *body){
     hexgame_t *game = body->game;

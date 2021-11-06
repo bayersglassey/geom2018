@@ -399,6 +399,7 @@ int state_effect_apply(state_effect_t *effect,
     int err;
 
     hexgame_t *game = context->game;
+    prismelrenderer_t *prend = game->prend;
     actor_t *actor = context->actor;
     body_t *body = context->body;
     body_t *your_body = context->your_body;
@@ -530,15 +531,16 @@ int state_effect_apply(state_effect_t *effect,
         if(err)return err;
 
         val_t *var_val;
-        err = valexpr_set(&effect->u.set.var_expr, &valexpr_context, &var_val);
+        err = valexpr_set(&effect->u.set.var_expr, &valexpr_context,
+            &var_val);
         if(err)return err;
         /* NOTE: valexpr_set guarantees that we find (or create, if
         necessary) a val, so we don't need to check whether var_val is
         NULL. */
 
         val_t *val_val;
-        err = valexpr_get(&effect->u.set.val_expr,
-            &valexpr_context, &val_val);
+        err = valexpr_get(&effect->u.set.val_expr, &valexpr_context,
+            &val_val);
         if(err)return err;
         if(val_val == NULL){
             RULE_PERROR()
@@ -570,6 +572,81 @@ int state_effect_apply(state_effect_t *effect,
             err = val_copy(var_val, val_val);
             if(err)return err;
         }
+        break;
+    }
+    case STATE_EFFECT_TYPE_SET_LABEL: {
+        valexpr_context_t valexpr_context = {0};
+        err = _get_vars(context, &valexpr_context);
+        if(err)return err;
+
+        val_t *label_name_val;
+        err = valexpr_get(&effect->u.set.var_expr, &valexpr_context,
+            &label_name_val);
+        if(err)return err;
+        const char *label_name = label_name_val?
+            val_get_str(label_name_val): NULL;
+        if(label_name == NULL){
+            RULE_PERROR()
+            fprintf(stderr, "Couldn't get value for label name: ");
+            valexpr_fprintf(&effect->u.set.var_expr, stderr);
+            fputc('\n', stderr);
+            if(label_name_val != NULL){
+                fprintf(stderr, "(Found the val, but it wasn't a string: ");
+                val_fprintf(label_name_val, stderr);
+                fputs(")\n", stderr);
+            }
+            return 2;
+        }
+
+        val_t *rgraph_name_val;
+        err = valexpr_get(&effect->u.set.var_expr, &valexpr_context,
+            &rgraph_name_val);
+        if(err)return err;
+
+        /* We are ok if either:
+            * we got a str val
+            * we got null val
+        */
+        bool ok = true;
+        const char *rgraph_name = NULL;
+        if(!rgraph_name_val){
+            ok = false;
+        }else if(rgraph_name_val->type == VAL_TYPE_NULL){
+            /* This is ok */
+        }else{
+            rgraph_name = val_get_str(rgraph_name_val);
+            if(!rgraph_name)ok = false;
+        }
+
+        if(!ok){
+            RULE_PERROR()
+            fprintf(stderr, "Couldn't get value for rgraph name: ");
+            valexpr_fprintf(&effect->u.set.var_expr, stderr);
+            fputc('\n', stderr);
+            if(rgraph_name_val != NULL){
+                fprintf(stderr, "(Found the val, but it wasn't a str or null: ");
+                val_fprintf(rgraph_name_val, stderr);
+                fputs(")\n", stderr);
+            }
+            return 2;
+        }
+
+        /* Early exit if we're unsetting a label (by assigning it null) */
+        if(rgraph_name_val->type == VAL_TYPE_NULL){
+            err = body_unset_label_mapping(body, label_name);
+            if(err)return err;
+            break;
+        }
+
+        rendergraph_t *rgraph = prismelrenderer_get_rgraph(prend, rgraph_name);
+        if(!rgraph){
+            RULE_PERROR()
+            fprintf(stderr, "Couldn't find rgraph: %s\n", rgraph_name);
+            return 2;
+        }
+
+        err = body_set_label_mapping(body, label_name, rgraph);
+        if(err)return err;
         break;
     }
     case STATE_EFFECT_TYPE_IF: {

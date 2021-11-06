@@ -124,12 +124,23 @@ int recording_step(recording_t *rec);
     } \
 }
 
+typedef struct body_label_mapping {
+    /* Weakreafs: */
+    const char *label_name;
+    rendergraph_t *rgraph;
+        /* May be NULL (indicates label is not mapped; we do this when
+        "unsetting" a label mapping, as opposed to removing the mapping
+        from body->label_mappings */
+} body_label_mapping_t;
+
 typedef struct body {
     hexgame_location_t loc;
     keyinfo_t keyinfo;
     valexpr_t visible_expr;
     bool visible_not;
     vars_t vars;
+
+    ARRAY_DECL(body_label_mapping_t*, label_mappings)
 
     recording_t recording;
         /* This can be used by player (while they create/edit
@@ -195,6 +206,9 @@ int body_add_body(body_t *body, body_t **new_body_ptr,
     vec_t addpos, rot_t addrot, bool turn);
 
 struct player;
+int body_unset_label_mapping(body_t *body, const char *label_name);
+int body_set_label_mapping(body_t *body, const char *label_name,
+    rendergraph_t *rgraph);
 struct player *body_get_player(body_t *body);
 void body_flash_cameras(body_t *body, Uint8 r, Uint8 g, Uint8 b,
     int percent);

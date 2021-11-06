@@ -235,6 +235,7 @@ enum state_effect_type {
     STATE_EFFECT_TYPE_CONFUSED,
     STATE_EFFECT_TYPE_KEY,
     STATE_EFFECT_TYPE_SET,
+    STATE_EFFECT_TYPE_SET_LABEL,
     STATE_EFFECT_TYPE_IF,
     STATE_EFFECT_TYPE_AS,
     STATE_EFFECT_TYPES
@@ -260,6 +261,7 @@ static const char *state_effect_type_name(int type){
         case STATE_EFFECT_TYPE_CONFUSED: return "confused";
         case STATE_EFFECT_TYPE_KEY: return "key";
         case STATE_EFFECT_TYPE_SET: return "set";
+        case STATE_EFFECT_TYPE_SET_LABEL: return "set_label";
         case STATE_EFFECT_TYPE_IF: return "if";
         case STATE_EFFECT_TYPE_AS: return "as";
         default: return "unknown";
