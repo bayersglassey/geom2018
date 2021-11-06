@@ -955,3 +955,59 @@ Nov 4, 2021:
     sed -i 's/GET("(")/OPEN/' **/*.c
     sed -i 's/GET(")")/CLOSE/' **/*.c
 
+
+Nov 5, 2021:
+------------
+
+* vars and stringstores
+    * keys can obviously be names (as opposed to filenames)
+    * vals aren't obviously names or filenames
+    * currently, in hexgame, vars_t is modified (exclusively?) via valexpr_t
+        * string values are therefore stored as "literals" owned by valexprs
+        * src/hexgame_state.c: state_effect_apply:
+            case STATE_EFFECT_TYPE_{INC,DEC,SET}:
+                * uses valexpr_set on &effect->u.set.var_expr to get a val_t* for the "lvalue"
+                * uses valexpr_get on &effect->u.set.val_expr to get a val_t* for the "rvalue"
+                * {INC,DEC} do val_get_int on the rvalue, then val_set_int on the lvalue
+                * SET does val_copy from the rvalue to the lvalue
+                    * !!! val_copy for VAL_TYPE_STR uses strdup!..
+                        * so this is what we might like to "fix"...
+                        * currently, vals are only copied around, but we might eventually
+                          want to add support for concat, etc
+                          So, any stringstore stuff we implement should work with that.
+                          If we had VAL_TYPE_NAME and VAL_TYPE_FILENAME, that could work.
+                          But that's... obviously ganky.
+                          Instead, it probably makes most sense to have one stringstore
+                          used by all vars_t and valexpr_t in hexgame.
+                          According to: nano $(ack -l "  vars_t" src/*.h)
+                          ...the places we use vars_t in hexgame are:
+
+                            hexmap_recording_t:
+                                vars
+                                bodyvars
+                            hexcollmap_part_t:
+                                vars
+                                bodyvars
+                            body_t:
+                                vars
+                            actor_t:
+                                vars
+                            hexgame_t:
+                                vars
+                            hexmap_t:
+                                vars
+
+                        * Ok, I think this is what makes sense:
+                            * Have one stringstore for vars (vars_store)
+                            * It's used for all keys
+                                * Would need to add support for var_t not owning its keys!
+                            * It's used for all parsed vals
+                                * With VAL_TYPE_CONST_STR
+                            * If we add dynamically-generated vals (e.g. "concat" etc),
+                              maybe don't use the stringstore?..
+                                * So, use VAL_TYPE_STR instead of VAL_TYPE_CONST_STR?..
+                                * !!! I'm not sure about this. Anyway, it doesn't really
+                                  matter right now.
+
+* recording_t should have vars, so e.g. data/recs/coin_crouch.fus should have state "init" and
+  vars: "crouch": T, whereas currently it has state "crouch".
