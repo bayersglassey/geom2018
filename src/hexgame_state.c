@@ -583,9 +583,9 @@ int state_effect_apply(state_effect_t *effect,
         err = valexpr_get(&effect->u.set.var_expr, &valexpr_context,
             &label_name_val);
         if(err)return err;
-        const char *label_name = label_name_val?
+        const char *_label_name = label_name_val?
             val_get_str(label_name_val): NULL;
-        if(label_name == NULL){
+        if(_label_name == NULL){
             RULE_PERROR()
             fprintf(stderr, "Couldn't get value for label name: ");
             valexpr_fprintf(&effect->u.set.var_expr, stderr);
@@ -598,8 +598,15 @@ int state_effect_apply(state_effect_t *effect,
             return 2;
         }
 
+        /* _label_name might belong to a val of type VAL_TYPE_STR, which
+        might get freed later, so we convert to a const char* owned by a
+        stringstore here. */
+        const char *label_name = stringstore_get(&prend->name_store,
+            _label_name);
+        if(!label_name)return 1;
+
         val_t *rgraph_name_val;
-        err = valexpr_get(&effect->u.set.var_expr, &valexpr_context,
+        err = valexpr_get(&effect->u.set.val_expr, &valexpr_context,
             &rgraph_name_val);
         if(err)return err;
 
@@ -621,7 +628,7 @@ int state_effect_apply(state_effect_t *effect,
         if(!ok){
             RULE_PERROR()
             fprintf(stderr, "Couldn't get value for rgraph name: ");
-            valexpr_fprintf(&effect->u.set.var_expr, stderr);
+            valexpr_fprintf(&effect->u.set.val_expr, stderr);
             fputc('\n', stderr);
             if(rgraph_name_val != NULL){
                 fprintf(stderr, "(Found the val, but it wasn't a str or null: ");

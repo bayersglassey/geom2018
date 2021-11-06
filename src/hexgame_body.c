@@ -194,6 +194,14 @@ void hexgame_body_dump(body_t *body, int depth){
     print_tabs(stderr, depth);
     fprintf(stderr, "body vars:\n");
     vars_write(&body->vars, stderr, TAB_SPACES * (depth + 1));
+    print_tabs(stderr, depth);
+    fprintf(stderr, "label mappings:\n");
+    for(int i = 0; i < body->label_mappings_len; i++){
+        body_label_mapping_t *mapping = body->label_mappings[i];
+        print_tabs(stderr, depth);
+        fprintf(stderr, "    %s -> %s\n", mapping->label_name,
+            mapping->rgraph? mapping->rgraph->name: "(null)");
+    }
 }
 
 int body_is_visible(body_t *body, bool *visible_ptr){
