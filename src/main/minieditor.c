@@ -25,7 +25,6 @@
 
 typedef struct options {
     bool quiet;
-    bool gui_mode;
     Uint32 window_flags;
     const char *prend_filename;
     const char *rgraph_name;
@@ -44,10 +43,12 @@ typedef struct options {
     int sch;
     int x0;
     int y0;
+    bool screenshot;
+    bool dump;
+    int dump_bitmaps;
 } options_t;
 
 void options_init(options_t *opts){
-    opts->gui_mode = true;
     opts->window_flags = SDL_WINDOW_SHOWN;
     opts->prend_filename = DEFAULT_PREND_FILENAME;
     opts->palette_filename = DEFAULT_PALETTE_FILENAME;
@@ -84,7 +85,14 @@ static void print_help(FILE *file){
         "  --font  FILENAME Load font (default: " DEFAULT_FONT_FILENAME ")\n"
         "  --fonts FILENAME Load fonts (default: " DEFAULT_FONTS_FILENAME ")\n"
         "  --nocontrols     Don't show controls initially\n"
-        "  --nogui          Run in pure command mode, save screenshot (see -if)\n"
+        "  --dump_bitmaps   Whether to dump rendergraph's bitmaps (see --dump)\n"
+        "                     0: don't dump bitmaps\n"
+        "                     1: dump bitmaps\n"
+        "                     2: also dump their surfaces\n"
+        "Commands which cause the program to run without a GUI window:\n"
+        "  --screenshot     Save screenshot and exit (see -if)\n"
+        "  --dump           Dump rgraph's details to stdout and exit\n"
+        "                   (see -n, --dump_bitmaps)\n"
     , MINIEDITOR_MAX_ZOOM, DEFAULT_DELAY_GOAL, DEFAULT_SCW, DEFAULT_SCH);
 }
 
@@ -189,8 +197,19 @@ static int parse_options(options_t *opts,
             opts->fonts_filename = args[arg_i];
         }else if(!strcmp(arg, "--nocontrols")){
             opts->show_editor_controls = false;
-        }else if(!strcmp(arg, "--nogui")){
-            opts->gui_mode = false;
+        }else if(!strcmp(arg, "--dump_bitmaps")){
+            arg_i++;
+            if(arg_i >= n_args){
+                fprintf(stderr, "Missing integer (0 <= i <= 2) after %s\n", arg);
+                return 2;}
+            int i = atoi(args[arg_i]);
+            if(i < 0)i = 0;
+            if(i > 2)i = 2;
+            opts->dump_bitmaps = i;
+        }else if(!strcmp(arg, "--screenshot")){
+            opts->screenshot = true;
+        }else if(!strcmp(arg, "--dump")){
+            opts->dump = true;
         }else if(!strcmp(arg, "--dont_cache_bitmaps")){
             opts->cache_bitmaps = false;
         }else{
@@ -340,6 +359,8 @@ static int _mainloop(minieditor_t *editor, options_t *opts,
 }
 
 static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
+    /* NOTE: renderer may be NULL, in which case we're running without a
+    GUI */
     int err;
 
     SDL_Palette *sdl_palette = SDL_AllocPalette(256);
@@ -414,18 +435,36 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
 
         fprintf(stderr, "Cleaning up...\n");
     }else{
-        /* We're running at the bare commandline.
-        Just attempt to render and dump the pixel data to stdout. */
+        /* We're running at the bare commandline, no GUI. */
 
-        err = palette_update_sdl_palette(palette, editor->sdl_palette);
-        if(err)return err;
+        if(opts->screenshot){
+            err = palette_update_sdl_palette(palette, editor->sdl_palette);
+            if(err)return err;
 
-        int line_y = 0;
-        err = minieditor_render(editor, &line_y);
-        if(err)return err;
+            int line_y = 0;
+            err = minieditor_render(editor, &line_y);
+            if(err)return err;
 
-        err = _save_image(editor, opts);
-        if(err)return err;
+            err = _save_image(editor, opts);
+            if(err)return err;
+        }else if(opts->dump){
+            rendergraph_t *rgraph = minieditor_get_rgraph(editor);
+            if(!rgraph){
+                fprintf(stderr, "Rgraph not found!\n");
+                return 2;
+            }
+
+            err = rendergraph_calculate_labels(rgraph);
+            if(err)return err;
+
+            int n_spaces = 0;
+            int dump_bitmaps = 0;
+            rendergraph_dump(rgraph, stdout, n_spaces, dump_bitmaps);
+        }else{
+            /* This should never happen... */
+            fprintf(stderr,
+                "Running without a GUI, but no command given...\n");
+        }
     }
 
     minieditor_cleanup(editor);
@@ -505,6 +544,6 @@ int main(int n_args, char **args){
         if(quit)return 0;
     }
 
-    if(opts.gui_mode)return main_gui(&opts);
-    else return main_nogui(&opts);
+    if(opts.screenshot || opts.dump)return main_nogui(&opts);
+    else return main_gui(&opts);
 }
