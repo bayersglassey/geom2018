@@ -123,3 +123,11 @@ rot_t vec4_rot_from_hexspace(rot_t r){
     return r * 2;
 }
 
+void vec4_coords_from_hexspace(
+    vec_t hex_pos, rot_t hex_rot, flip_t hex_flip,
+    vec_t vec4_pos, rot_t *vec4_rot, flip_t *vec4_flip
+){
+    vec4_vec_from_hexspace(vec4_pos, hex_pos);
+    *vec4_rot = vec4_rot_from_hexspace(hex_rot);
+    *vec4_flip = hex_flip;
+}
