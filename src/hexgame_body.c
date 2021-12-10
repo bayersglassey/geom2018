@@ -840,29 +840,88 @@ int body_render(body_t *body,
     if(rgraph == NULL)return 0;
 
     prismelrenderer_t *prend = map->prend;
-    vecspace_t *space = map->space;
+    vecspace_t *map_space = map->space; /* &hexspace */
+    vecspace_t *rgraph_space = rgraph->space; /* &vec4 */
 
     if(body->palmapper){
         err = palettemapper_apply_to_rendergraph(body->palmapper,
-            prend, rgraph, NULL, space, &rgraph);
+            prend, rgraph, NULL, map_space, &rgraph);
         if(err)return err;
     }
 
-    vec_t pos;
-    vec4_vec_from_hexspace(pos, body->loc.pos);
-    vec_sub(rgraph->space->dims, pos, camera_renderpos);
-    vec_mul(rgraph->space, pos, map->unit);
-
-    rot_t body_rot = hexgame_location_get_rot(&body->loc);
-    rot_t rot = vec4_rot_from_hexspace(body_rot);
-    flip_t flip = body->loc.turn;
     int frame_i = body->frame_i;
 
+    vec_t rendered_pos;
+    rot_t rendered_rot;
+    flip_t rendered_flip;
+    vec4_coords_from_hexspace(
+        body->loc.pos,
+        hexgame_location_get_rot(&body->loc),
+        body->loc.turn,
+        rendered_pos, &rendered_rot, &rendered_flip);
+    vec_sub(rgraph_space->dims, rendered_pos, camera_renderpos);
+    vec_mul(rgraph_space, rendered_pos, map->unit);
+
+    /* Render body's rgraph */
     err = rendergraph_render(rgraph, surface,
         pal, prend,
         x0, y0, zoom,
-        pos, rot, flip, frame_i, mapper);
+        rendered_pos, rendered_rot, rendered_flip,
+        frame_i, mapper);
     if(err)return err;
+
+    if(body->label_mappings_len){
+
+        /* Make sure body->labels is populated */
+        err = rendergraph_calculate_labels(rgraph);
+        if(err)return err;
+
+        trf_t rendered_trf = {
+            .rot = rendered_rot,
+            .flip = rendered_flip,
+        };
+        vec_cpy(rgraph_space->dims, rendered_trf.add, rendered_pos);
+
+        int animated_frame_i = get_animated_frame_i(
+            rgraph->animation_type, rgraph->n_frames, frame_i);
+        rendergraph_frame_t *frame = &rgraph->frames[animated_frame_i];
+
+        /* Render all mapped labels */
+        for(int i = 0; i < body->label_mappings_len; i++){
+            body_label_mapping_t *mapping = body->label_mappings[i];
+            rendergraph_t *label_rgraph = mapping->rgraph;
+            if(label_rgraph == NULL)continue;
+            for(int j = 0; j < frame->labels_len; j++){
+                rendergraph_label_t *label = frame->labels[j];
+                if(!(
+                    label->name == mapping->label_name ||
+                    !strcmp(label->name, mapping->label_name)
+                ))continue;
+
+                trf_t label_trf = label->trf;
+                trf_apply(rgraph_space, &label_trf, &rendered_trf);
+
+                /* I don't think this is quite what we want... frame_i is
+                body->frame_i, which is reset to zero at the start of each
+                animation, whereas for the label's rgraph we probably want
+                to use a constantly increasing frame_i, like body->age
+                (except there is no such thing at the moment).
+                So basically, label's rgraph should probably be animated
+                independently, if it's going to be animated at all. */
+                int label_frame_i = get_animated_frame_i(
+                    label_rgraph->animation_type,
+                    label_rgraph->n_frames, frame_i);
+
+                /* Render label's rgraph */
+                err = rendergraph_render(label_rgraph, surface,
+                    pal, prend,
+                    x0, y0, zoom,
+                    label_trf.add, label_trf.rot, label_trf.flip,
+                    label_frame_i, mapper);
+                if(err)return err;
+            }
+        }
+    }
 
     return 0;
 }

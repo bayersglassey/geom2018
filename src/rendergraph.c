@@ -36,15 +36,24 @@ const char *rendergraph_animation_type_default =
     rendergraph_animation_type_cycle;
 const int rendergraph_n_frames_default = 1;
 
-void rendergraph_child_cleanup(rendergraph_child_t *child){
+static void rendergraph_child_cleanup(rendergraph_child_t *child){
     /* Nothing to do!.. */
+}
+
+static void rendergraph_frame_cleanup(rendergraph_frame_t *frame){
+    ARRAY_FREE_PTR(rendergraph_label_t*, frame->labels, (void))
 }
 
 void rendergraph_cleanup(rendergraph_t *rendergraph){
     if(!rendergraph->copy_of){
         ARRAY_FREE_PTR(rendergraph_child_t*, rendergraph->children,
             rendergraph_child_cleanup)
-        ARRAY_FREE_PTR(rendergraph_label_t*, rendergraph->labels, (void))
+
+        for(int i = 0; i < rendergraph->n_frames; i++){
+            rendergraph_frame_t *frame = &rendergraph->frames[i];
+            rendergraph_frame_cleanup(frame);
+        }
+        free(rendergraph->frames);
     }
 
     for(int i = 0; i < rendergraph->n_bitmaps; i++){
@@ -58,25 +67,28 @@ static int _rendergraph_init(rendergraph_t *rendergraph, const char *name,
     prismelrenderer_t *prend, palettemapper_t *palmapper,
     const char *animation_type, int n_frames
 ){
-    /* initialize everything except children */
+    /* initialize everything except children and frames */
 
     int err;
 
     vecspace_t *space = prend->space;
 
     rendergraph->name = name;
-    rendergraph->prend = prend;
-    rendergraph->space = space;
-
-    rendergraph->animation_type = animation_type;
     rendergraph->n_frames = n_frames;
 
+    int n_bitmaps = get_n_bitmaps(space, n_frames);
+    rendergraph_bitmap_t *bitmaps = calloc(n_bitmaps, sizeof(*bitmaps));
+    if(bitmaps == NULL)return 1;
+    rendergraph->n_bitmaps = n_bitmaps;
+    rendergraph->bitmaps = bitmaps;
+
+    boundbox_init(rendergraph->boundbox, space->dims);
+
+    rendergraph->prend = prend;
+    rendergraph->space = space;
+    rendergraph->animation_type = animation_type;
     rendergraph->palmapper = palmapper;
     rendergraph->copy_of = NULL;
-
-    err = rendergraph_create_bitmaps(rendergraph);
-    if(err)return err;
-    boundbox_init(rendergraph->boundbox, space->dims);
     return 0;
 }
 
@@ -90,8 +102,16 @@ int rendergraph_init(rendergraph_t *rendergraph, const char *name,
         animation_type, n_frames);
     if(err)return err;
 
+    rendergraph_frame_t *frames = calloc(n_frames, sizeof(*frames));
+    if(frames == NULL)return 1;
+    for(int i = 0; i < n_frames; i++){
+        rendergraph_frame_t *frame = &frames[i];
+        ARRAY_INIT(frame->labels)
+    }
+    rendergraph->frames = frames;
+    rendergraph->labels_calculated = false;
+
     ARRAY_INIT(rendergraph->children)
-    ARRAY_INIT(rendergraph->labels)
     return 0;
 }
 
@@ -105,12 +125,12 @@ int rendergraph_copy(rendergraph_t *rendergraph, const char *name,
         copy_of->animation_type, copy_of->n_frames);
     if(err)return err;
 
-    rendergraph->palmapper = copy_of->palmapper;
-    rendergraph->copy_of = copy_of;
+    rendergraph->frames = copy_of->frames;
+    rendergraph->labels_calculated = copy_of->labels_calculated;
 
     ARRAY_ASSIGN(rendergraph->children, copy_of->children)
-    ARRAY_ASSIGN(rendergraph->labels, copy_of->labels)
 
+    rendergraph->copy_of = copy_of;
     return 0;
 }
 
@@ -182,9 +202,9 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces,
                 break;
             }
             case RENDERGRAPH_CHILD_TYPE_LABEL: {
-                const char *label = child->u.label.name;
+                const char *label_name = child->u.label.name;
                 fprintf(f, "%s    label  : %7s ", spaces,
-                    label == NULL? "<NULL>": label);
+                    label_name == NULL? "<NULL>": label_name);
                 trf_fprintf(f, rendergraph->space->dims, &child->trf);
                 fprintf(f, " frame(% 3i % 3i)\n",
                     child->frame_start, child->frame_len);
@@ -212,26 +232,19 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces,
 
     if(rendergraph->labels_calculated){
         fprintf(f, "%s  labels:\n", spaces);
-        for(int i = 0; i < rendergraph->labels_len; i++){
-            rendergraph_label_t *label = rendergraph->labels[i];
-            fprintf(f, "%s    %8s ", spaces, label->name);
-            trf_fprintf(f, rendergraph->space->dims, &label->trf);
-            fprintf(f, " frame(% 3i % 3i)\n",
-                label->frame_start, label->frame_len);
+        for(int i = 0; i < rendergraph->n_frames; i++){
+            rendergraph_frame_t *frame = &rendergraph->frames[i];
+            fprintf(f, "%s    frame %i:\n", spaces, i);
+            for(int j = 0; j < frame->labels_len; j++){
+                rendergraph_label_t *label = frame->labels[j];
+                fprintf(f, "%s      %8s ", spaces, label->name);
+                trf_fprintf(f, rendergraph->space->dims, &label->trf);
+                fputc('\n', f);
+            }
         }
     }else{
         fprintf(f, "%s  labels: (not calculated)\n", spaces);
     }
-}
-
-int rendergraph_create_bitmaps(rendergraph_t *rendergraph){
-    int n_bitmaps = get_n_bitmaps(rendergraph->space, rendergraph->n_frames);
-    rendergraph_bitmap_t *bitmaps = calloc(n_bitmaps,
-        sizeof(rendergraph_bitmap_t));
-    if(bitmaps == NULL)return 1;
-    rendergraph->n_bitmaps = n_bitmaps;
-    rendergraph->bitmaps = bitmaps;
-    return 0;
 }
 
 int rendergraph_push_child(rendergraph_t *rendergraph,
@@ -282,27 +295,22 @@ rendergraph_bitmap_t *rendergraph_get_bitmap(rendergraph_t *rendergraph,
     return &rendergraph->bitmaps[bitmap_i];
 }
 
-static bool rendergraph_child_get_frame_visible(rendergraph_child_t *child,
-    int n_frames, int frame_i
-){
-    int frame_start = child->frame_start;
-    int frame_len = child->frame_len;
-    if(frame_len == -1)return true;
-    return get_animated_frame_visible(
-        n_frames, frame_start, frame_len, frame_i);
-}
-
-static int rendergraph_child_rgraph_get_frame_i(rendergraph_child_t *child,
+static int rendergraph_child_get_frame_i(rendergraph_child_t *child,
     int parent_frame_i
 ){
-    int frame_i = child->u.rgraph.frame_i;
-    rendergraph_t *rgraph = child->u.rgraph.rendergraph;
-    if(child->u.rgraph.frame_i_additive)frame_i += parent_frame_i;
-    if(child->u.rgraph.frame_i_reversed){
-        frame_i = rgraph->n_frames - frame_i - 1;
+    switch(child->type){
+        case RENDERGRAPH_CHILD_TYPE_RGRAPH: {
+            int frame_i = child->u.rgraph.frame_i;
+            rendergraph_t *rgraph = child->u.rgraph.rendergraph;
+            if(child->u.rgraph.frame_i_additive)frame_i += parent_frame_i;
+            if(child->u.rgraph.frame_i_reversed){
+                frame_i = rgraph->n_frames - frame_i - 1;
+            }
+            return get_animated_frame_i(rgraph->animation_type,
+                rgraph->n_frames, frame_i);
+        }
+        default: return 0;
     }
-    return get_animated_frame_i(rgraph->animation_type,
-        rgraph->n_frames, frame_i);
 }
 
 typedef struct {
@@ -335,14 +343,12 @@ static int rendergraph_child_details(
     int err;
 
     /* Early exit (and set details->skip) if frame's not visible */
-    bool visible = rendergraph_child_get_frame_visible(
-        child, rendergraph->n_frames, frame_i);
+    bool visible = get_animated_frame_visible(rendergraph->n_frames,
+        child->frame_start, child->frame_len, frame_i);
     if(!visible){details->skip = true; return 0;}
 
     /* Set details->frame_i2 */
-    details->frame_i2 = child->type == RENDERGRAPH_CHILD_TYPE_RGRAPH?
-        rendergraph_child_rgraph_get_frame_i(child, frame_i):
-        0;
+    details->frame_i2 = rendergraph_child_get_frame_i(child, frame_i);
 
     /* Set details->trf2 */
     details->trf2 = child->trf;
@@ -362,62 +368,38 @@ static int rendergraph_child_details(
     return 0;
 }
 
-static int _rendergraph_render_labels(rendergraph_t *target_rgraph,
-    rendergraph_t *rgraph,
-    trf_t *trf, int frame_i
+static int _rendergraph_render_labels(rendergraph_frame_t *frame,
+    rendergraph_t *rgraph, trf_t *trf, int frame_i
 ){
-    /* Recursively populates target_rgraph->labels, adding one for every
-    descendant rgraph (found by recursing over children, rendergraph_child_t,
-    whose type is RENDERGRAPH_CHILD_TYPE_LABEL).
-    NOTE: it is possible that target_rgraph == graph. */
+    /* Recursively populates frame->labels, adding one for every descendant
+    rgraph of frame's rgraph. (The rgraph parameter is one such rgraph.) */
     int err;
 
     for(int i = 0; i < rgraph->children_len; i++){
         rendergraph_child_t *child = rgraph->children[i];
-        rendergraph_child_details_t details = {0};
-        err = rendergraph_child_details(&details, child, rgraph,
-            trf, frame_i);
-        if(err)return err;
-        if(details.skip)continue;
+
+        bool visible = get_animated_frame_visible(rgraph->n_frames,
+            child->frame_start, child->frame_len, frame_i);
+        if(!visible)continue;
+
+        trf_t trf2 = child->trf;
+        trf_apply(rgraph->space, &trf2, trf);
+
+        int frame_i2 = rendergraph_child_get_frame_i(child, frame_i);
 
         switch(child->type){
             case RENDERGRAPH_CHILD_TYPE_RGRAPH: {
                 rendergraph_t *child_rgraph = child->u.rgraph.rendergraph;
-                if(
-                    false && /* TODO: REMOVE THIS ONCE WE'RE SURE THE TYPE_LABEL CASE WORKS */
-                    child_rgraph->labels_calculated
-                ){
-                    for(int i = 0; i < child_rgraph->labels_len; i++){
-                        rendergraph_label_t *child_label = child_rgraph->labels[i];
-                        ARRAY_PUSH_NEW(rendergraph_label_t*, target_rgraph->labels,
-                            label)
-
-                        /* Both labels point to the same child->u.label.name */
-                        label->name = child_label->name;
-
-                        label->trf = child_label->trf;
-                        trf_apply(target_rgraph->space, &label->trf, &details.trf2);
-
-                        /* Does this work?.. */
-                        label->frame_start = child_label->frame_start + details.frame_i2;
-
-                        label->frame_len = child_label->frame_len;
-                    }
-                }else{
-                    err = _rendergraph_render_labels(target_rgraph, child_rgraph,
-                        &details.trf2, details.frame_i2);
-                    if(err)return err;
-                }
+                err = _rendergraph_render_labels(frame, child_rgraph,
+                    &trf2, frame_i2);
+                if(err)return err;
                 break;
             }
             case RENDERGRAPH_CHILD_TYPE_LABEL: {
-                ARRAY_PUSH_NEW(rendergraph_label_t*, target_rgraph->labels,
+                ARRAY_PUSH_NEW(rendergraph_label_t*, frame->labels,
                     label)
                 label->name = child->u.label.name;
-                label->trf = details.trf2;
-
-                label->frame_start = details.frame_i2;
-                label->frame_len = child->frame_len;
+                label->trf = trf2;
                 break;
             }
             default: break;
@@ -440,8 +422,11 @@ int rendergraph_calculate_labels(rendergraph_t *rgraph){
 
     /* Calculate our labels */
     trf_t trf = {0};
-    err = _rendergraph_render_labels(rgraph, rgraph, &trf, 0);
-    if(err)return err;
+    for(int frame_i = 0; frame_i < rgraph->n_frames; frame_i++){
+        rendergraph_frame_t *frame = &rgraph->frames[frame_i];
+        err = _rendergraph_render_labels(frame, rgraph, &trf, frame_i);
+        if(err)return err;
+    }
 
     /* Our labels have now been calculated */
     rgraph->labels_calculated = true;

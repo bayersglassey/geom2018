@@ -95,7 +95,6 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->submap_filename = submap_filename;
 
     strcpy(app->_recording_filename, RECORDING_FILENAME_TEMPLATE);
-    if(!app->_recording_filename)return 1;
 
     SDL_Palette *sdl_palette = SDL_AllocPalette(256);
     app->sdl_palette = sdl_palette;

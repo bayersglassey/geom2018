@@ -79,7 +79,14 @@ bool get_animated_frame_visible(int n_frames,
 ){
     /* This function answers that age-old question:
     Is frame_i in the interval [frame_start, frame_start + frame_len)
-    in the space of integers modulo n_frames? */
+    in the space of integers modulo n_frames?
+
+    We seem to assume that frame_i >= 0 and < n_frames, such as is true
+    of values returned by get_animated_frame_i.
+
+    NOTE: frame_len == -1 is a magic value meaning "always visible" */
+
+    if(frame_len == -1)return true;
 
     if(frame_i >= frame_start && frame_i < frame_start + frame_len){
         return true;}

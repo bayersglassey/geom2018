@@ -77,24 +77,28 @@ typedef struct rendergraph_bitmap {
 } rendergraph_bitmap_t;
 
 typedef struct rendergraph_label {
-    /* Every rendergraph has an array of these labels, which are
-    rendered from all the rendergraph's descendants (rendergraph_child_t)
-    which have type RENDERGRAPH_CHILD_TYPE_LABEL. */
+    /* Represents one of rendergraph's descendants (rendergraph_child_t)
+    which have type RENDERGRAPH_CHILD_TYPE_LABEL */
+
     const char *name; /* Points to a child->u.label.name */
     trf_t trf;
-    int frame_start;
-    int frame_len;
 } rendergraph_label_t;
+
+typedef struct rendergraph_frame {
+    /* Represents information about individual frames of a rendergraph */
+
+    ARRAY_DECL(struct rendergraph_label*, labels)
+        /* Labels visible on this frame */
+} rendergraph_frame_t;
 
 typedef struct rendergraph {
     const char *name;
     ARRAY_DECL(struct rendergraph_child*, children)
-    ARRAY_DECL(struct rendergraph_label*, labels)
-
-    bool labels_calculated;
-    int n_labels;
 
     int n_frames;
+    struct rendergraph_frame *frames;
+    bool labels_calculated;
+        /* Whether frame->labels has been populated for all frames */
 
     int n_bitmaps;
     struct rendergraph_bitmap *bitmaps;
@@ -107,7 +111,7 @@ typedef struct rendergraph {
     struct palettemapper *palmapper;
     struct rendergraph *copy_of;
         /* If not NULL, this rendergraph is a copy of another one.
-        In particular, it does *NOT* own its children or labels, so
+        In particular, it does *NOT* own its children or frames, so
         should *NOT* modify or free them.
         However, it *DOES* own its bitmaps.
         The reason for doing this is basically for one rgraph to be
@@ -127,7 +131,6 @@ extern const int rendergraph_n_frames_default;
 struct prismelrenderer;
 struct rendergraph_bitmap;
 
-void rendergraph_child_cleanup(rendergraph_child_t *child);
 void rendergraph_cleanup(rendergraph_t *rendergraph);
 int rendergraph_init(rendergraph_t *rendergraph, const char *name,
     struct prismelrenderer *prend, struct palettemapper *palmapper,
@@ -138,7 +141,6 @@ void rendergraph_bitmap_dump(struct rendergraph_bitmap *bitmap, FILE *f,
     int i, int n_spaces, bool dump_surface);
 void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces,
     int dump_bitmaps);
-int rendergraph_create_bitmaps(rendergraph_t *rendergraph);
 int rendergraph_push_child(rendergraph_t *rendergraph,
     int type, rendergraph_child_t **child_ptr);
 int rendergraph_get_bitmap_i(rendergraph_t *rendergraph,
