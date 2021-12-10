@@ -249,7 +249,7 @@ int state_cond_match(state_cond_t *cond,
     case STATE_COND_TYPE_ANY:
     case STATE_COND_TYPE_ALL:
     case STATE_COND_TYPE_NOT: {
-        bool all = cond->type == STATE_COND_TYPE_ALL;
+        bool all = cond->type != STATE_COND_TYPE_ANY;
         matched = all? true: false;
         for(int i = 0; i < cond->u.subconds.conds_len; i++){
             state_cond_t *subcond = cond->u.subconds.conds[i];
@@ -291,11 +291,10 @@ int state_cond_match(state_cond_t *cond,
             return 2;
         }
 
-        if(val1->type != val2->type){
+        if(!val_type_eq(val1, val2)){
             RULE_PERROR()
             fprintf(stderr, "Type mismatch between LHS, RHS: ");
             val_fprintf(val1, stderr);
-            fputc('\n', stderr);
             fputs(", ", stderr);
             val_fprintf(val2, stderr);
             fputc('\n', stderr);
