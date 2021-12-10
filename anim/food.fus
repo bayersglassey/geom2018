@@ -1,6 +1,9 @@
 
+collmsgs: "food"
+
 $SET_STR RGRAPH_STAND "food"
 $SET_STR RGRAPH_CROUCH "food_crouch"
 $SET_BOOL NO_COLLECT_ON_SPIT
+$SET_BOOL NO_COLLECT_ON_TOUCH
 $SET_BOOL IS_FOOD
 import "anim/_coin.fus"

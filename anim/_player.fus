@@ -26,6 +26,14 @@ $SET_STR STATE_LAND_UP step
 
 collmsgs: "touch"
 on "crush": goto: dead
+on "food":
+    if: not:
+        exists myvar("player_head")
+        expr: == myvar("player_head") "food_carried"
+    then:
+        set_label "player_head": "food_carried"
+        as you:
+            goto immediate: _collected
 
 collmap "stand":
     ;;   .   .
