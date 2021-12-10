@@ -111,7 +111,7 @@ shapes:
 
     $PREFIX NS "_head":
         labels:
-            : "player_head" (0 0 0 0) 0 f
+            : "carrying" (1 1 1 0) 0 f
         $IF PLAYER_ROLLER:
             shapes:
                 : "_roller_body_hollow" (0 0 0 0)  0 f

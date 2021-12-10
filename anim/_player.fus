@@ -32,38 +32,51 @@ on "food":
         expr: != myvar("carrying") "nothing"
     then:
         set myvar("carrying"): "food"
-        set_label "player_head": "food_carried"
+        set_label "carrying": "food_carried"
         as you:
             goto immediate: _collected
 
 
-proc _spit:
-    set myvar("carrying"): "nothing"
-    set_label "player_head": null
+proc _spawn_spit:
+    if:
+        exists myvar("carrying")
+        expr: != myvar("carrying") "nothing"
+    then:
+
+        if: expr: == myvar("carrying") "food"
+        then:
+            # Set spit's "carrying" to player's "carrying"
+            as you:
+                set_label "carrying": "food_carried"
+                set myvar("carrying"): yourvar("carrying")
+
+        # Unset player's "carrying"
+        set myvar("carrying"): "nothing"
+        set_label "carrying": null
 
 proc spit:
-    call: _spit
-    spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f
+    spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f do:
+        call: _spawn_spit
     goto delay: spit
 
 proc looking_up_spit:
-    call: _spit
-    spawn: $GET_STR SPIT_FUS "fly" (1 0) 1 f
+    spawn: $GET_STR SPIT_FUS "fly" (1 0) 1 f do:
+        call: _spawn_spit
     goto delay: looking_up_spit
 
 proc crawl_spit:
-    call: _spit
-    spawn: $GET_STR SPIT_FUS "crouch_fly" (0 0) 0 f
+    spawn: $GET_STR SPIT_FUS "crouch_fly" (0 0) 0 f do:
+        call: _spawn_spit
     goto delay: crawl_spit
 
 proc crawl_looking_up_spit:
-    call: _spit
-    spawn: $GET_STR SPIT_FUS "crouch_fly" (1 0) 1 f
+    spawn: $GET_STR SPIT_FUS "crouch_fly" (1 0) 1 f do:
+        call: _spawn_spit
     goto delay: crawl_looking_up_spit
 
 proc swim_spit:
-    call: _spit
-    spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f
+    spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f do:
+        call: _spawn_spit
     goto delay: swim_spit
 
 

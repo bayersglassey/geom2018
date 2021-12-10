@@ -33,4 +33,4 @@ shapes:
     "food_carried":
         animation: cycle 12
         shapes:
-            : "food" (1 1 1 0)  0 f
+            : "food" (0 0 0 0)  0 f
