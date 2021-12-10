@@ -1,0 +1,13 @@
+anim: "anim/eyeplayer.fus"
+state: "stand"
+pos: ( 122 38)
+rot: 0
+turn: yes
+keys:
+    x:
+    y:
+    u:
+    d:
+    l:
+    r:
+data: " w13 +l w14 -l w3 +d w4 +r w43 -d w1 -r w6 +r w19 -r w3 +l w3 -l w12 +d w6 +l w20 -d -l w9 +l w20 +d w23 -d -l w10 +r w2 -r w12 +d w6 +l w2 -l w1 +r w35 -r -d w8 +r w6 -r w6 +d w10 +r w15 -d w1 -r w14 +l w16 +d w43 -d -l w20 +r w18 -r w5 +l w1 -l w14"
