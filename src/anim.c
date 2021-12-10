@@ -535,6 +535,14 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         err = valexpr_parse(&effect->u.set.val_expr, lexer);
         if(err)return err;
         CLOSE
+    }else if(GOT("unset")){
+        effect->type = STATE_EFFECT_TYPE_UNSET;
+        NEXT
+
+        err = valexpr_parse(&effect->u.set.var_expr, lexer);
+        if(err)return err;
+
+        valexpr_set_literal_null(&effect->u.set.val_expr);
     }else if(GOT("if")){
         NEXT
         effect->type = STATE_EFFECT_TYPE_IF;
@@ -1020,6 +1028,7 @@ void state_effect_cleanup(state_effect_t *effect){
         case STATE_EFFECT_TYPE_INC:
         case STATE_EFFECT_TYPE_DEC:
         case STATE_EFFECT_TYPE_SET:
+        case STATE_EFFECT_TYPE_UNSET:
         case STATE_EFFECT_TYPE_SET_LABEL:
             valexpr_cleanup(&effect->u.set.var_expr);
             valexpr_cleanup(&effect->u.set.val_expr);

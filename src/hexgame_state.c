@@ -524,7 +524,8 @@ int state_effect_apply(state_effect_t *effect,
     }
     case STATE_EFFECT_TYPE_INC:
     case STATE_EFFECT_TYPE_DEC:
-    case STATE_EFFECT_TYPE_SET: {
+    case STATE_EFFECT_TYPE_SET:
+    case STATE_EFFECT_TYPE_UNSET: {
         valexpr_context_t valexpr_context = {0};
         err = _get_vars(context, &valexpr_context);
         if(err)return err;
@@ -536,6 +537,17 @@ int state_effect_apply(state_effect_t *effect,
         /* NOTE: valexpr_set guarantees that we find (or create, if
         necessary) a val, so we don't need to check whether var_val is
         NULL. */
+
+        if(effect->type == STATE_EFFECT_TYPE_UNSET){
+            /* TODO: decide whether we want to "fix" this (although it might
+            be tricky, since valexpr_get and friends currently return a val_t,
+            whereas I believe for \"unset\", we would want... not even just a
+            var_t, but really a var_t's parent vars_t...
+            Really, we'd need a whole new valexpr_unset function. */
+            fprintf(stderr,
+                "WARNING: \"unset\" doesn't actually unset things, "
+                "it just sets them to null.\n");
+        }
 
         val_t *val_val;
         err = valexpr_get(&effect->u.set.val_expr, &valexpr_context,
