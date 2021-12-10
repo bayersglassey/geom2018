@@ -36,6 +36,10 @@ on "food":
         as you:
             goto immediate: _collected
 
+proc spit:
+    set myvar("carrying"): "nothing"
+    set_label "player_head": null
+
 collmap "stand":
     ;;   .   .
     ;;   *\*/*
@@ -64,8 +68,7 @@ stand:
         key: wentdown y
     then:
         spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f
-        set myvar("carrying"): "nothing"
-        set_label "player_head": null
+        call: spit
         goto delay: spit
 
     # Turn into roller
@@ -138,6 +141,7 @@ looking_up:
         key: wentdown y
     then:
         spawn: $GET_STR SPIT_FUS "fly" (1 0) 1 f
+        call: spit
         goto delay: looking_up_spit
 
     if:
@@ -228,6 +232,7 @@ step_down:
         key: wentdown y
     then:
         spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f
+        call: spit
         goto delay: spit
 
     $IF PLAYER_ROLLER:
@@ -247,6 +252,7 @@ step:
         key: wentdown y
     then:
         spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f
+        call: spit
         goto delay: spit
 
     $IF PLAYER_ROLLER:

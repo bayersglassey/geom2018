@@ -33,6 +33,7 @@ crawl_looking_up:
         key: wentdown y
     then:
         spawn: $GET_STR SPIT_FUS "crouch_fly" (1 0) 1 f
+        call: spit
         goto delay: crawl_looking_up_spit
 
     if:
@@ -77,6 +78,7 @@ crawl:
         key: wentdown y
     then:
         spawn: $GET_STR SPIT_FUS "crouch_fly" (0 0) 0 f
+        call: spit
         goto delay: crawl_spit
 
     # Turn into roller
@@ -182,6 +184,7 @@ crawl_step_down:
         key: wentdown y
     then:
         spawn: $GET_STR SPIT_FUS "crouch_fly" (0 0) 0 f
+        call: spit
         goto delay: crawl_spit
 
     $IF PLAYER_ROLLER:
@@ -207,6 +210,7 @@ crawl_step:
         key: wentdown y
     then:
         spawn: $GET_STR SPIT_FUS "crouch_fly" (0 0) 0 f
+        call: spit
         goto delay: crawl_spit
 
     $IF PLAYER_ROLLER:
