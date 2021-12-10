@@ -31,11 +31,6 @@ parts:
         vars:
             "key": "start_solved"
             "opened_key": "start3_eye_a_open"
-    "c": recording "data/recs/coin.fus"
-        vars:
-            "appear": T
-            "key": "start_solved"
-            "collected_key": "start_solved2"
 collmap:
     ;;         .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                            /
@@ -47,7 +42,7 @@ collmap:
     ;;                         * *    \*     * *
     ;;     .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                                  \* *
-    ;;       .   .   .   .   .   .   ?   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .      [c]
+    ;;       .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
     ;;         .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                                               *         * * *

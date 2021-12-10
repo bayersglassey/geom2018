@@ -11,7 +11,6 @@ vars:
     "coin_e": F
     "coin_f": F
     "start_solved": F
-    "start_solved2": F
     nosave "num_coin_g": 5
 
     nosave "start_eye_a_open": 0
