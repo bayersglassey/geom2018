@@ -28,9 +28,10 @@ collmsgs: "touch"
 on "crush": goto: dead
 on "food":
     if: not:
-        exists myvar("player_head")
-        expr: == myvar("player_head") "food_carried"
+        exists myvar("carrying")
+        expr: != myvar("carrying") "nothing"
     then:
+        set myvar("carrying"): "food"
         set_label "player_head": "food_carried"
         as you:
             goto immediate: _collected
@@ -63,6 +64,8 @@ stand:
         key: wentdown y
     then:
         spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f
+        set myvar("carrying"): "nothing"
+        set_label "player_head": null
         goto delay: spit
 
     # Turn into roller
