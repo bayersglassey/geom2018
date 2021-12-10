@@ -711,13 +711,38 @@ int state_effect_apply(state_effect_t *effect,
                     state_effect_t *sub_effect = effect->u.as.sub_effects[i];
                     if(DEBUG_RULES)printf("  as: %s\n",
                         state_effect_type_name(sub_effect->type));
-                    err = state_effect_apply(sub_effect, &sub_context, gotto_ptr,
-                        continues_ptr);
+
+                    state_effect_goto_t *gotto = NULL;
+                    bool continues = false; /* No effect if used */
+                    err = state_effect_apply(sub_effect, &sub_context, &gotto,
+                        &continues);
                     if(err){
                         if(err == 2){
                             fprintf(stderr, "...in \"as\" statement\n");
                         }
                         return err;
+                    }
+
+                    if(gotto != NULL){
+                        /* SOMEWHAT HACKY:
+                        We apply the goto to your_body.
+                        The reason this is hacky is... uhhh... I'm not quite
+                        sure, but imagine the following:
+                            as you:
+                                as you:
+                                    goto: whatever
+                        ...this behaves subtly differently than a plain
+                        "goto: whatever", because the goto is applied
+                        immediately, instead of bubbling up the C callstack
+                        via gotto_ptr. */
+                        err = state_effect_goto_apply_to_body(gotto, your_body);
+                        if(err)return err;
+                        if(gotto->immediate){
+                            /* If there was an "immediate goto" effect,
+                            then we immediately handle the new state's rules */
+                            err = body_handle_rules(your_body, body);
+                            if(err)return err;
+                        }
                     }
                 }
                 break;
