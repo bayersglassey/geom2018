@@ -424,13 +424,6 @@ int body_refresh_vars(body_t *body){
     err = vars_set_bool(vars, ".turn", body->loc.turn);
     if(err)return err;
 
-    for(int i = 0; i < body->label_mappings_len; i++){
-        body_label_mapping_t *mapping = body->label_mappings[i];
-        err = vars_set_const_str(vars, mapping->label_name,
-            mapping->rgraph->name);
-        if(err)return err;
-    }
-
     return 0;
 }
 
