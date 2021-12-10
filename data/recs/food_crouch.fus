@@ -1,4 +1,4 @@
-anim: "anim/coin.fus"
+anim: "anim/food.fus"
 state: "init"
 pos: (0 0)
 rot: 0
