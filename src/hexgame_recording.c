@@ -14,6 +14,7 @@
 #include "lexer_macros.h"
 #include "util.h"
 #include "write.h"
+#include "var_utils.h"
 
 
 const char *recording_action_msg(int action){
@@ -118,7 +119,8 @@ static int recording_parse(recording_t *rec,
 ){
     int err;
 
-    hexmap_t *map = rec->body->map;
+    body_t *body = rec->body;
+    hexmap_t *map = body->map;
     prismelrenderer_t *prend = map->prend;
     vecspace_t *space = map->space;
 
@@ -166,6 +168,14 @@ static int recording_parse(recording_t *rec,
         ...that seems to work ok, but do we not want to just stop
         body_play_recording from setting body->recording.action to 1?.. */
         rec->loop = false;
+    }
+
+    if(GOT("vars")){
+        NEXT
+        OPEN
+        err = vars_parse(&body->vars, lexer);
+        if(err)return err;
+        CLOSE
     }
 
     return 0;
