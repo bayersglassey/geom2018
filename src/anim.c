@@ -506,6 +506,18 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         GET_INT(spawn.loc.rot)
         GET_BOOL(spawn.loc.turn)
 
+        ARRAY_INIT(spawn.effects)
+        if(GOT("do")){
+            NEXT
+            OPEN
+            while(!GOT(")")){
+                ARRAY_PUSH_NEW(state_effect_t*, spawn.effects, effect)
+                err = _parse_effect(stateset, lexer, prend, space, effect);
+                if(err)return err;
+            }
+            NEXT
+        }
+
         effect->type = STATE_EFFECT_TYPE_SPAWN;
         effect->u.spawn = spawn;
 
@@ -1099,6 +1111,10 @@ void state_effect_cleanup(state_effect_t *effect){
         case STATE_EFFECT_TYPE_SET_LABEL:
             valexpr_cleanup(&effect->u.set.var_expr);
             valexpr_cleanup(&effect->u.set.val_expr);
+            break;
+        case STATE_EFFECT_TYPE_SPAWN:
+            ARRAY_FREE_PTR(state_effect_t*, effect->u.spawn.effects,
+                state_effect_cleanup)
             break;
         case STATE_EFFECT_TYPE_IF: {
             state_effect_ite_t *ite = effect->u.ite;

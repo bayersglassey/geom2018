@@ -302,6 +302,7 @@ typedef struct state_effect_spawn {
     const char *state_name;
     const char *palmapper_name;
     hexgame_location_t loc;
+    ARRAY_DECL(struct state_effect*, effects)
 } state_effect_spawn_t;
 
 typedef struct state_effect {

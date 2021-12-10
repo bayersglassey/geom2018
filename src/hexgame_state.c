@@ -388,6 +388,42 @@ static void effect_apply_boolean(int boolean, bool *b_ptr){
     else if(boolean == EFFECT_BOOLEAN_TOGGLE)*b_ptr = !*b_ptr;
 }
 
+static int _apply_sub_effects(state_effect_t *effect,
+    int sub_effects_len, state_effect_t **sub_effects,
+    hexgame_state_context_t *context
+){
+    int err;
+
+    for(int i = 0; i < sub_effects_len; i++){
+        state_effect_t *sub_effect = sub_effects[i];
+
+        state_effect_goto_t *gotto = NULL;
+        bool continues = false; /* No effect if used */
+        err = state_effect_apply(sub_effect, context, &gotto,
+            &continues);
+        if(err){
+            if(err == 2){
+                fprintf(stderr, "...in \"%s\" statement\n",
+                    state_effect_type_name(effect->type));
+            }
+            return err;
+        }
+
+        if(gotto != NULL && context->body != NULL){
+            err = state_effect_goto_apply_to_body(gotto, context->body);
+            if(err)return err;
+            if(gotto->immediate){
+                /* If there was an "immediate goto" effect,
+                then we immediately handle the new state's rules */
+                err = body_handle_rules(context->body, context->your_body);
+                if(err)return err;
+            }
+        }
+    }
+
+    return 0;
+}
+
 int state_effect_apply(state_effect_t *effect,
     hexgame_state_context_t *context,
     state_effect_goto_t **gotto_ptr, bool *continues_ptr
@@ -506,6 +542,16 @@ int state_effect_apply(state_effect_t *effect,
             spawn->state_name, palmapper,
             spawn->loc.pos, spawn->loc.rot, spawn->loc.turn);
         if(err)return err;
+
+        hexgame_state_context_t sub_context = *context;
+        sub_context.your_body = new_body;
+
+        err = _apply_sub_effects(effect,
+            spawn->effects_len,
+            spawn->effects,
+            &sub_context);
+        if(err)return err;
+
         break;
     }
     case STATE_EFFECT_TYPE_PLAY: {
@@ -738,47 +784,14 @@ int state_effect_apply(state_effect_t *effect,
                 Anyway, long story short, sub_context is like context but with
                 body and your_body swapped. */
                 hexgame_state_context_t sub_context = *context;
-                sub_context.your_body = body;
                 sub_context.body = your_body;
+                sub_context.your_body = body;
 
-                for(int i = 0; i < effect->u.as.sub_effects_len; i++){
-                    state_effect_t *sub_effect = effect->u.as.sub_effects[i];
-                    if(DEBUG_RULES)printf("  as: %s\n",
-                        state_effect_type_name(sub_effect->type));
-
-                    state_effect_goto_t *gotto = NULL;
-                    bool continues = false; /* No effect if used */
-                    err = state_effect_apply(sub_effect, &sub_context, &gotto,
-                        &continues);
-                    if(err){
-                        if(err == 2){
-                            fprintf(stderr, "...in \"as\" statement\n");
-                        }
-                        return err;
-                    }
-
-                    if(gotto != NULL){
-                        /* SOMEWHAT HACKY:
-                        We apply the goto to your_body.
-                        The reason this is hacky is... uhhh... I'm not quite
-                        sure, but imagine the following:
-                            as you:
-                                as you:
-                                    goto: whatever
-                        ...this behaves subtly differently than a plain
-                        "goto: whatever", because the goto is applied
-                        immediately, instead of bubbling up the C callstack
-                        via gotto_ptr. */
-                        err = state_effect_goto_apply_to_body(gotto, your_body);
-                        if(err)return err;
-                        if(gotto->immediate){
-                            /* If there was an "immediate goto" effect,
-                            then we immediately handle the new state's rules */
-                            err = body_handle_rules(your_body, body);
-                            if(err)return err;
-                        }
-                    }
-                }
+                err = _apply_sub_effects(effect,
+                    effect->u.as.sub_effects_len,
+                    effect->u.as.sub_effects,
+                    &sub_context);
+                if(err)return err;
                 break;
             }
             default:
