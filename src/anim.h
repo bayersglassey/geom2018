@@ -71,6 +71,20 @@ void collmsg_handler_init(collmsg_handler_t *handler, char *msg);
 struct state_effect_goto;
 
 
+/****************
+* STATESET_PROC *
+*****************/
+
+typedef struct stateset_proc {
+    /* A "procedure" which can be "called" using STATE_EFFECT_TYPE_CALL */
+    const char *name;
+    ARRAY_DECL(struct state_effect*, effects)
+} stateset_proc_t;
+
+void stateset_proc_cleanup(stateset_proc_t *handler);
+void stateset_proc_init(stateset_proc_t *handler, const char *msg);
+
+
 /********
 * STATE *
 ********/
@@ -106,6 +120,7 @@ typedef struct stateset {
     const char *filename;
     ARRAY_DECL(char*, collmsgs)
     ARRAY_DECL(struct collmsg_handler, collmsg_handlers)
+    ARRAY_DECL(struct stateset_proc, procs)
     ARRAY_DECL(struct state*, states)
     ARRAY_DECL(stateset_collmap_entry_t*, collmaps)
     bool debug_collision;
@@ -225,6 +240,7 @@ enum state_effect_type {
     STATE_EFFECT_TYPE_ROT,
     STATE_EFFECT_TYPE_TURN,
     STATE_EFFECT_TYPE_GOTO,
+    STATE_EFFECT_TYPE_CALL,
     STATE_EFFECT_TYPE_DELAY,
     STATE_EFFECT_TYPE_SPAWN,
     STATE_EFFECT_TYPE_PLAY,
@@ -252,6 +268,7 @@ static const char *state_effect_type_name(int type){
         case STATE_EFFECT_TYPE_ROT: return "rot";
         case STATE_EFFECT_TYPE_TURN: return "turn";
         case STATE_EFFECT_TYPE_GOTO: return "goto";
+        case STATE_EFFECT_TYPE_CALL: return "call";
         case STATE_EFFECT_TYPE_DELAY: return "delay";
         case STATE_EFFECT_TYPE_SPAWN: return "spawn";
         case STATE_EFFECT_TYPE_PLAY: return "play";
@@ -276,6 +293,10 @@ typedef struct state_effect_goto {
     bool delay;
 } state_effect_goto_t;
 
+typedef struct state_effect_call {
+    const char *name;
+} state_effect_call_t;
+
 typedef struct state_effect_spawn {
     const char *stateset_filename;
     const char *state_name;
@@ -290,6 +311,7 @@ typedef struct state_effect {
         const char *var_name;
         int delay;
         state_effect_goto_t gotto;
+        state_effect_call_t call;
         int dead; /* enum body_dead */
         state_effect_spawn_t spawn;
         const char *play_filename;
@@ -338,6 +360,7 @@ void stateset_cleanup(stateset_t *stateset);
 int stateset_init(stateset_t *stateset, const char *filename);
 void stateset_dump(stateset_t *stateset, FILE *file, int depth);
 hexcollmap_t *stateset_get_collmap(stateset_t *stateset, const char *name);
+stateset_proc_t *stateset_get_proc(stateset_t *stateset, const char *name);
 int stateset_load(stateset_t *stateset, const char *filename, vars_t *vars,
     prismelrenderer_t *prend, vecspace_t *space);
 int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,

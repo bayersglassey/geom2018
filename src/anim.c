@@ -117,6 +117,27 @@ static int _parse_collmsg_handler(stateset_t *stateset, fus_lexer_t *lexer,
 
     return 0;
 }
+static int _parse_stateset_proc(stateset_t *stateset, fus_lexer_t *lexer,
+    stateset_proc_t *proc, prismelrenderer_t *prend, vecspace_t *space
+){
+    INIT
+
+    const char *name;
+    GET_NAME_CACHED(name, &prend->name_store)
+
+    stateset_proc_init(proc, name);
+
+    OPEN
+    while(true){
+        if(GOT(")"))break;
+        ARRAY_PUSH_NEW(state_effect_t*, proc->effects, effect)
+        err = _parse_effect(stateset, lexer, prend, space, effect);
+        if(err)return err;
+    }
+    NEXT
+
+    return 0;
+}
 
 
 /******************
@@ -134,6 +155,20 @@ void collmsg_handler_init(collmsg_handler_t *handler, char *msg){
 }
 
 
+/****************
+* STATESET_PROC *
+*****************/
+
+void stateset_proc_cleanup(stateset_proc_t *proc){
+    ARRAY_FREE_PTR(state_effect_t*, proc->effects, state_effect_cleanup)
+}
+
+void stateset_proc_init(stateset_proc_t *proc, const char *name){
+    proc->name = name;
+    ARRAY_INIT(proc->effects)
+}
+
+
 /************
  * STATESET *
  ************/
@@ -147,6 +182,8 @@ void stateset_cleanup(stateset_t *stateset){
     ARRAY_FREE_PTR(char*, stateset->collmsgs, (void))
     ARRAY_FREE(collmsg_handler_t, stateset->collmsg_handlers,
         collmsg_handler_cleanup)
+    ARRAY_FREE(stateset_proc_t, stateset->procs,
+        stateset_proc_cleanup)
     ARRAY_FREE_PTR(state_t*, stateset->states, state_cleanup)
     ARRAY_FREE_PTR(stateset_collmap_entry_t*, stateset->collmaps,
         stateset_collmap_entry_cleanup)
@@ -156,6 +193,7 @@ int stateset_init(stateset_t *stateset, const char *filename){
     stateset->filename = filename;
     ARRAY_INIT(stateset->collmsgs)
     ARRAY_INIT(stateset->collmsg_handlers)
+    ARRAY_INIT(stateset->procs)
     ARRAY_INIT(stateset->states)
     ARRAY_INIT(stateset->collmaps)
     stateset->debug_collision = false;
@@ -175,6 +213,14 @@ hexcollmap_t *stateset_get_collmap(stateset_t *stateset, const char *name){
     for(int i = 0; i < stateset->collmaps_len; i++){
         stateset_collmap_entry_t *entry = stateset->collmaps[i];
         if(!strcmp(entry->name, name))return entry->collmap;
+    }
+    return NULL;
+}
+
+stateset_proc_t *stateset_get_proc(stateset_t *stateset, const char *name){
+    for(int i = 0; i < stateset->procs_len; i++){
+        stateset_proc_t *proc = &stateset->procs[i];
+        if(!strcmp(proc->name, name))return proc;
     }
     return NULL;
 }
@@ -421,6 +467,18 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         effect->u.gotto.name = goto_name;
         effect->u.gotto.immediate = immediate;
         effect->u.gotto.delay = delay;
+
+        CLOSE
+    }else if(GOT("call")){
+        NEXT
+
+        OPEN
+
+        const char *name;
+        GET_NAME_CACHED(name, &prend->name_store)
+
+        effect->type = STATE_EFFECT_TYPE_CALL;
+        effect->u.call.name = name;
 
         CLOSE
     }else if(GOT("delay")){
@@ -686,6 +744,15 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                 prend, space);
             if(err)return err;
             ARRAY_PUSH(collmsg_handler_t, stateset->collmsg_handlers, handler)
+            continue;
+        }
+        if(GOT("proc")){
+            NEXT
+            stateset_proc_t proc;
+            err = _parse_stateset_proc(stateset, lexer, &proc,
+                prend, space);
+            if(err)return err;
+            ARRAY_PUSH(stateset_proc_t, stateset->procs, proc)
             continue;
         }
         if(GOT("collmap")){

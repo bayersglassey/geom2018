@@ -461,6 +461,29 @@ int state_effect_apply(state_effect_t *effect,
         *gotto_ptr = &effect->u.gotto;
         break;
     }
+    case STATE_EFFECT_TYPE_CALL: {
+        const char *name = effect->u.call.name;
+        stateset_proc_t *proc = stateset_get_proc(&body->stateset, name);
+        if(!proc){
+            RULE_PERROR()
+            fprintf(stderr,
+                "Couldn't find proc \"%s\" for stateset \"%s\"\n",
+                name, body->stateset.filename);
+            return 2;
+        }
+        for(int i = 0; i < proc->effects_len; i++){
+            state_effect_t *effect = proc->effects[i];
+            err = state_effect_apply(effect, context, gotto_ptr,
+                continues_ptr);
+            if(err){
+                if(err == 2){
+                    fprintf(stderr, "...in \"call\" statement\n");
+                }
+                return err;
+            }
+        }
+        break;
+    }
     case STATE_EFFECT_TYPE_DELAY: {
         if(actor){
             actor->wait = effect->u.delay;
