@@ -637,7 +637,7 @@ int state_effect_apply(state_effect_t *effect,
             return 2;
         }
 
-        /* Early exit if we're unsetting a label (by assigning it null) */
+        /* Early exit if we're unsetting a label */
         if(rgraph_name_val->type == VAL_TYPE_NULL){
             err = body_unset_label_mapping(body, label_name);
             if(err)return err;

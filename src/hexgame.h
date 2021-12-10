@@ -125,12 +125,9 @@ int recording_step(recording_t *rec);
 }
 
 typedef struct body_label_mapping {
-    /* Weakreafs: */
+    /* Weakrefs: */
     const char *label_name;
     rendergraph_t *rgraph;
-        /* May be NULL (indicates label is not mapped; we do this when
-        "unsetting" a label mapping, as opposed to removing the mapping
-        from body->label_mappings */
 } body_label_mapping_t;
 
 typedef struct body {

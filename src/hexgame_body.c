@@ -200,7 +200,7 @@ void hexgame_body_dump(body_t *body, int depth){
         body_label_mapping_t *mapping = body->label_mappings[i];
         print_tabs(stderr, depth);
         fprintf(stderr, "    %s -> %s\n", mapping->label_name,
-            mapping->rgraph? mapping->rgraph->name: "(null)");
+            mapping->rgraph->name);
     }
 }
 
@@ -306,19 +306,29 @@ int body_add_body(body_t *body, body_t **new_body_ptr,
  * BODY MISC *
  *************/
 
-static int body_get_label_mapping(body_t *body, const char *label_name,
-    body_label_mapping_t **mapping_ptr
+static body_label_mapping_t *_body_get_label_mapping(body_t *body,
+    const char *label_name
 ){
-    int err;
     for(int i = 0; i < body->label_mappings_len; i++){
         body_label_mapping_t *mapping = body->label_mappings[i];
         if(
             mapping->label_name == label_name ||
             !strcmp(mapping->label_name, label_name)
-        ){
-            *mapping_ptr = mapping;
-            return 0;
-        }
+        )return mapping;
+    }
+    return NULL;
+}
+
+static int body_get_label_mapping(body_t *body, const char *label_name,
+    body_label_mapping_t **mapping_ptr
+){
+    int err;
+
+    body_label_mapping_t *found_mapping = _body_get_label_mapping(body,
+        label_name);
+    if(found_mapping){
+        *mapping_ptr = found_mapping;
+        return 0;
     }
 
     ARRAY_PUSH_NEW(body_label_mapping_t*, body->label_mappings, mapping)
@@ -329,7 +339,13 @@ static int body_get_label_mapping(body_t *body, const char *label_name,
 }
 
 int body_unset_label_mapping(body_t *body, const char *label_name){
-    return body_set_label_mapping(body, label_name, NULL);
+    int err;
+    body_label_mapping_t *found_mapping = _body_get_label_mapping(body,
+        label_name);
+    if(found_mapping){
+        ARRAY_UNHOOK(body->label_mappings, found_mapping)
+    }
+    return 0;
 }
 
 int body_set_label_mapping(body_t *body, const char *label_name,
@@ -890,7 +906,6 @@ int body_render(body_t *body,
         for(int i = 0; i < body->label_mappings_len; i++){
             body_label_mapping_t *mapping = body->label_mappings[i];
             rendergraph_t *label_rgraph = mapping->rgraph;
-            if(label_rgraph == NULL)continue;
             for(int j = 0; j < frame->labels_len; j++){
                 rendergraph_label_t *label = frame->labels[j];
                 if(!(
