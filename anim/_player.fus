@@ -36,9 +36,36 @@ on "food":
         as you:
             goto immediate: _collected
 
-proc spit:
+
+proc _spit:
     set myvar("carrying"): "nothing"
     set_label "player_head": null
+
+proc spit:
+    call: _spit
+    spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f
+    goto delay: spit
+
+proc looking_up_spit:
+    call: _spit
+    spawn: $GET_STR SPIT_FUS "fly" (1 0) 1 f
+    goto delay: looking_up_spit
+
+proc crawl_spit:
+    call: _spit
+    spawn: $GET_STR SPIT_FUS "crouch_fly" (0 0) 0 f
+    goto delay: crawl_spit
+
+proc crawl_looking_up_spit:
+    call: _spit
+    spawn: $GET_STR SPIT_FUS "crouch_fly" (1 0) 1 f
+    goto delay: crawl_looking_up_spit
+
+proc swim_spit:
+    call: _spit
+    spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f
+    goto delay: swim_spit
+
 
 collmap "stand":
     ;;   .   .
@@ -67,9 +94,7 @@ stand:
     if:
         key: wentdown y
     then:
-        spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f
         call: spit
-        goto delay: spit
 
     # Turn into roller
     $IF PLAYER_ROLLER:
@@ -140,9 +165,7 @@ looking_up:
     if:
         key: wentdown y
     then:
-        spawn: $GET_STR SPIT_FUS "fly" (1 0) 1 f
-        call: spit
-        goto delay: looking_up_spit
+        call: looking_up_spit
 
     if:
         key: wasdown u
@@ -231,9 +254,7 @@ step_down:
     if:
         key: wentdown y
     then:
-        spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f
         call: spit
-        goto delay: spit
 
     $IF PLAYER_ROLLER:
         if:
@@ -251,9 +272,7 @@ step:
     if:
         key: wentdown y
     then:
-        spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f
         call: spit
-        goto delay: spit
 
     $IF PLAYER_ROLLER:
         if:
