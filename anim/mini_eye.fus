@@ -3,13 +3,12 @@ collmsgs: "carryable"
 
 vars:
     # For use with handlers for collmsg "carryable"
-    "carryable": "food"
-    "carryable_rgraph": "food_carried"
+    "carryable": "mini_eye"
+    "carryable_rgraph": "mini_eye_carried"
 
 
-$SET_STR RGRAPH_STAND "food"
-$SET_STR RGRAPH_CROUCH "food_crouch"
+$SET_STR RGRAPH_STAND "mini_eye"
+$SET_STR RGRAPH_CROUCH "mini_eye_crouch"
 $SET_BOOL NO_COLLECT_ON_SPIT
 $SET_BOOL NO_COLLECT_ON_TOUCH
-$SET_INT RESPAWN_TIME 400
 import "anim/_coin.fus"

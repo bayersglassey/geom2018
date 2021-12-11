@@ -1,0 +1,11 @@
+anim: "anim/mini_eye.fus"
+state: "init"
+pos: (0 0)
+rot: 0
+turn: no
+keys:
+    u:
+    d:
+    l:
+    r:
+nodata
