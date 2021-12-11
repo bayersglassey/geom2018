@@ -199,8 +199,8 @@ void hexgame_body_dump(body_t *body, int depth){
     for(int i = 0; i < body->label_mappings_len; i++){
         body_label_mapping_t *mapping = body->label_mappings[i];
         print_tabs(stderr, depth);
-        fprintf(stderr, "    %s -> %s\n", mapping->label_name,
-            mapping->rgraph->name);
+        fprintf(stderr, "    %s -> %s (frame=%i)\n", mapping->label_name,
+            mapping->rgraph->name, mapping->frame_i);
     }
 }
 
@@ -675,6 +675,11 @@ int body_handle_rules(body_t *body, body_t *your_body){
     return 0;
 }
 
+static int _increment_frame_i(int frame_i) {
+    if(frame_i == MAX_FRAME_I - 1)return 0;
+    return frame_i + 1;
+}
+
 int body_step(body_t *body, hexgame_t *game){
     int err;
 
@@ -689,8 +694,11 @@ int body_step(body_t *body, hexgame_t *game){
     if(err)return err;
 
     /* Increment frame */
-    body->frame_i++;
-    if(body->frame_i == MAX_FRAME_I)body->frame_i = 0;
+    body->frame_i = _increment_frame_i(body->frame_i);
+    for(int i = 0; i < body->label_mappings_len; i++){
+        body_label_mapping_t *mapping = body->label_mappings[i];
+        mapping->frame_i = _increment_frame_i(mapping->frame_i);
+    }
 
     /* Handle animation & input */
     if(body->cooldown > 0){
@@ -916,16 +924,9 @@ int body_render(body_t *body,
                 trf_t label_trf = label->trf;
                 trf_apply(rgraph_space, &label_trf, &rendered_trf);
 
-                /* I don't think this is quite what we want... frame_i is
-                body->frame_i, which is reset to zero at the start of each
-                animation, whereas for the label's rgraph we probably want
-                to use a constantly increasing frame_i, like body->age
-                (except there is no such thing at the moment).
-                So basically, label's rgraph should probably be animated
-                independently, if it's going to be animated at all. */
                 int label_frame_i = get_animated_frame_i(
                     label_rgraph->animation_type,
-                    label_rgraph->n_frames, frame_i);
+                    label_rgraph->n_frames, mapping->frame_i);
 
                 /* Render label's rgraph */
                 err = rendergraph_render(label_rgraph, surface,

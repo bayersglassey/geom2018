@@ -128,6 +128,7 @@ typedef struct body_label_mapping {
     /* Weakrefs: */
     const char *label_name;
     rendergraph_t *rgraph;
+    int frame_i;
 } body_label_mapping_t;
 
 typedef struct body {
