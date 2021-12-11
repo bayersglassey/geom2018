@@ -182,6 +182,10 @@ jump:
 collected:
     rgraph: "dead_once"
     unsafe
+    if() then:
+        # Do whatever it is coin-like things do while they've been collected...
+        call: while_collected
+        continue
     if() then: die
 
 mostly_dead:

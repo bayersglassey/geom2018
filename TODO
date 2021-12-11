@@ -1044,8 +1044,3 @@ it onto... some kind of a creature... which has an "eat" animation?..
 Or maybe a spider with an animation where it catches the food, and puts
 it away somewhere. Like in a giant bag. O_o
 Uhhhhh hmmmmmmm......
-
-
-How do we get food to reappear if it's "wasted" by being spat into a wall?..
-Easy: anim/_coin.behaviour.fus should support a "respawn_time" thing.
-

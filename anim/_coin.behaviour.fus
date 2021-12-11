@@ -2,6 +2,16 @@
 $IF !NO_COLLECT_ON_SPIT: on "spit": goto immediate: _collected
 $IF !NO_COLLECT_ON_TOUCH: on "touch": goto immediate: _collected
 
+
+proc while_collected:
+    # What we do every frame after we have been collected
+    if: exists myvar("respawn_in")
+    then:
+        if: expr: <= myvar("respawn_in") 0
+        then: goto immediate: init
+        else: dec myvar("respawn_in")
+
+
 # Default anim: init
 init:
     if:
@@ -49,5 +59,9 @@ _collected:
                 if: expr: <= mapvar(myvar("num_key")) 0
                 then: set mapvar(myvar("collected_key")): T
             else: set mapvar(myvar("collected_key")): T
+
+        if: exists myvar("respawn_time")
+        then: set myvar("respawn_in"): myvar("respawn_time")
+        $IF RESPAWN_TIME: else: set myvar("respawn_in"): $GET_INT RESPAWN_TIME
 
         goto: collected
