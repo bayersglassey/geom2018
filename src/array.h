@@ -30,11 +30,13 @@
     array = new_array; \
 }
 
-#define ARRAY_UNHOOK(array, elem) \
+#define ARRAY_REMOVE(array, elem, elem_cleanup) \
 { \
+    bool found = false; \
     int i1 = array##_len; \
     for(int i = 0; i < i1; i++){ \
         if(array[i] == elem){ \
+            found = true; \
             int j1 = array##_len - 1; \
             for(int j = i; j < j1; j++){ \
                 array[j] = array[j + 1]; \
@@ -42,7 +44,15 @@
             array##_len--; \
         } \
     } \
+    if(found)elem_cleanup(elem); \
 }
+
+#define ARRAY_REMOVE_PTR(array, elem, elem_cleanup) { \
+    ARRAY_REMOVE(array, elem, elem_cleanup) \
+    free(elem); \
+}
+
+#define ARRAY_UNHOOK(array, elem) ARRAY_REMOVE(array, elem, (void))
 
 #define ARRAY_GROW(T, array) \
 { \

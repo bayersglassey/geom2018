@@ -202,6 +202,7 @@ void stateset_cleanup(stateset_t *stateset){
     ARRAY_FREE_PTR(state_t*, stateset->states, state_cleanup)
     ARRAY_FREE_PTR(stateset_collmap_entry_t*, stateset->collmaps,
         stateset_collmap_entry_cleanup)
+    vars_cleanup(&stateset->vars);
 }
 
 int stateset_init(stateset_t *stateset, const char *filename){
@@ -211,6 +212,7 @@ int stateset_init(stateset_t *stateset, const char *filename){
     ARRAY_INIT(stateset->procs)
     ARRAY_INIT(stateset->states)
     ARRAY_INIT(stateset->collmaps)
+    vars_init(&stateset->vars);
     stateset->debug_collision = false;
     return 0;
 }
@@ -790,6 +792,14 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                 prend, space);
             if(err)return err;
             ARRAY_PUSH(stateset_proc_t, stateset->procs, proc)
+            continue;
+        }
+        if(GOT("vars")){
+            NEXT
+            OPEN
+            err = vars_parse(&stateset->vars, lexer);
+            if(err)return err;
+            CLOSE
             continue;
         }
         if(GOT("collmap")){

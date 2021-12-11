@@ -123,6 +123,7 @@ typedef struct stateset {
     ARRAY_DECL(struct stateset_proc, procs)
     ARRAY_DECL(struct state*, states)
     ARRAY_DECL(stateset_collmap_entry_t*, collmaps)
+    vars_t vars;
     bool debug_collision;
     const char *default_state_name; /* stateset->states[i]->name */
 } stateset_t;

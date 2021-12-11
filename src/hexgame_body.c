@@ -100,12 +100,17 @@ int fus_lexer_get_keyinfo(fus_lexer_t *lexer,
  * BODY INIT/CLEANUP *
  *********************/
 
+static void body_label_mapping_cleanup(body_label_mapping_t *mapping){
+    /* Nothing to do... */
+}
+
 void body_cleanup(body_t *body){
     valexpr_cleanup(&body->visible_expr);
     vars_cleanup(&body->vars);
     stateset_cleanup(&body->stateset);
     recording_cleanup(&body->recording);
-    ARRAY_FREE_PTR(body_label_mapping_t*, body->label_mappings, (void))
+    ARRAY_FREE_PTR(body_label_mapping_t*, body->label_mappings,
+        body_label_mapping_cleanup)
 }
 
 int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
@@ -343,7 +348,8 @@ int body_unset_label_mapping(body_t *body, const char *label_name){
     body_label_mapping_t *found_mapping = _body_get_label_mapping(body,
         label_name);
     if(found_mapping){
-        ARRAY_UNHOOK(body->label_mappings, found_mapping)
+        ARRAY_REMOVE_PTR(body->label_mappings, found_mapping,
+            body_label_mapping_cleanup)
     }
     return 0;
 }
@@ -491,6 +497,10 @@ int body_set_stateset(body_t *body, const char *stateset_filename,
             NULL, map->prend, map->space);
         if(err)return err;
     }
+
+    /* Copy stateset's vars onto body */
+    err = vars_copy(&body->vars, &body->stateset.vars);
+    if(err)return err;
 
     if(state_name == NULL){
         /* If state_name not provided, use stateset's default state */
