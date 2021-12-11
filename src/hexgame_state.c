@@ -339,7 +339,7 @@ int state_cond_match(state_cond_t *cond,
         err = valexpr_get(&cond->u.valexpr, &valexpr_context, &val);
         if(err)return err;
 
-        matched = val != NULL;
+        matched = val != NULL && val->type != VAL_TYPE_NULL;
         break;
     }
     default: {

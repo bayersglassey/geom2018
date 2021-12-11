@@ -27,9 +27,7 @@ $SET_STR STATE_LAND_UP step
 collmsgs: "touch"
 on "crush": goto: dead
 on "carryable":
-    if: not:
-        exists myvar("carrying")
-        expr: != myvar("carrying") "nothing"
+    if: not: exists myvar("carrying")
     then:
         set myvar("carrying"): yourvar("carryable")
         set myvar("carrying_rgraph"): yourvar("carryable_rgraph")
@@ -40,9 +38,7 @@ on "carryable":
 
 
 proc _spawn_spit:
-    if:
-        exists myvar("carrying")
-        expr: != myvar("carrying") "nothing"
+    if: exists myvar("carrying")
     then:
 
         # Set spit's "carrying" to player's "carrying"
@@ -52,7 +48,7 @@ proc _spawn_spit:
             set_label "carrying": myvar("carrying_rgraph")
 
         # Unset player's "carrying"
-        set myvar("carrying"): "nothing"
+        set myvar("carrying"): null
         set_label "carrying": null
 
 proc spit:
