@@ -104,6 +104,14 @@ static int _parse_collmsg_handler(stateset_t *stateset, fus_lexer_t *lexer,
     char *msg;
     GET_STR(msg)
 
+    collmsg_handler_t *found_handler = stateset_get_collmsg_handler(
+        stateset, msg);
+    if(found_handler){
+        fprintf(stderr, "Can't redefine handler \"%s\" in stateset \"%s\"\n",
+            msg, stateset->filename);
+        return 2;
+    }
+
     collmsg_handler_init(handler, msg);
 
     OPEN
@@ -124,6 +132,13 @@ static int _parse_stateset_proc(stateset_t *stateset, fus_lexer_t *lexer,
 
     const char *name;
     GET_NAME_CACHED(name, &prend->name_store)
+
+    stateset_proc_t *found_proc = stateset_get_proc(stateset, name);
+    if(found_proc){
+        fprintf(stderr, "Can't redefine proc \"%s\" in stateset \"%s\"\n",
+            name, stateset->filename);
+        return 2;
+    }
 
     stateset_proc_init(proc, name);
 
@@ -213,6 +228,16 @@ hexcollmap_t *stateset_get_collmap(stateset_t *stateset, const char *name){
     for(int i = 0; i < stateset->collmaps_len; i++){
         stateset_collmap_entry_t *entry = stateset->collmaps[i];
         if(!strcmp(entry->name, name))return entry->collmap;
+    }
+    return NULL;
+}
+
+collmsg_handler_t *stateset_get_collmsg_handler(stateset_t *stateset,
+    const char *msg
+){
+    for(int i = 0; i < stateset->collmsg_handlers_len; i++){
+        collmsg_handler_t *handler = &stateset->collmsg_handlers[i];
+        if(!strcmp(handler->msg, msg))return handler;
     }
     return NULL;
 }
