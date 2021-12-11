@@ -235,8 +235,6 @@ typedef struct state_cond {
 enum state_effect_type {
     STATE_EFFECT_TYPE_NOOP,
     STATE_EFFECT_TYPE_PRINT,
-    STATE_EFFECT_TYPE_PRINT_VAR,
-    STATE_EFFECT_TYPE_PRINT_VARS,
     STATE_EFFECT_TYPE_MOVE,
     STATE_EFFECT_TYPE_ROT,
     STATE_EFFECT_TYPE_TURN,
@@ -263,8 +261,6 @@ static const char *state_effect_type_name(int type){
     switch(type){
         case STATE_EFFECT_TYPE_NOOP: return "noop";
         case STATE_EFFECT_TYPE_PRINT: return "print";
-        case STATE_EFFECT_TYPE_PRINT_VAR: return "print_var";
-        case STATE_EFFECT_TYPE_PRINT_VARS: return "print_vars";
         case STATE_EFFECT_TYPE_MOVE: return "move";
         case STATE_EFFECT_TYPE_ROT: return "rot";
         case STATE_EFFECT_TYPE_TURN: return "turn";
@@ -309,7 +305,6 @@ typedef struct state_effect_spawn {
 typedef struct state_effect {
     int type; /* enum state_effect_type */
     union {
-        char *msg;
         const char *var_name;
         int delay;
         state_effect_goto_t gotto;
@@ -321,6 +316,7 @@ typedef struct state_effect {
         rot_t rot;
         int boolean; /* enum effect_boolean */
         int i;
+        valexpr_t expr;
         struct {
             int action;
                 /*

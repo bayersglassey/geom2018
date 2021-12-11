@@ -441,30 +441,29 @@ int state_effect_apply(state_effect_t *effect,
 
     switch(effect->type){
     case STATE_EFFECT_TYPE_NOOP: break;
-    case STATE_EFFECT_TYPE_PRINT:
-    case STATE_EFFECT_TYPE_PRINT_VAR:
-    case STATE_EFFECT_TYPE_PRINT_VARS: {
+    case STATE_EFFECT_TYPE_PRINT: {
+        valexpr_context_t valexpr_context = {0};
+        err = _get_vars(context, &valexpr_context);
+        if(err)return err;
+
+        val_t *val;
+        err = valexpr_get(&effect->u.expr, &valexpr_context, &val);
+        if(err)return err;
+        if(val == NULL){
+            RULE_PERROR()
+            fprintf(stderr, "Couldn't get value for expression: ");
+            valexpr_fprintf(&effect->u.expr, stderr);
+            fputc('\n', stderr);
+            return 2;
+        }
+
         if(body != NULL)fprintf(stderr, "body %p", body);
         else fprintf(stderr, "unknown body");
         if(actor != NULL)fprintf(stderr, " (actor %p)", actor);
+        fputs(": ", stderr);
 
-        vars_t *vars = actor? &actor->vars: &body->vars;
-        if(effect->type == STATE_EFFECT_TYPE_PRINT_VARS){
-            fprintf(stderr, " vars:\n");
-            vars_write(vars, stderr, 1);
-        }else if(effect->type == STATE_EFFECT_TYPE_PRINT_VAR){
-            var_t *var = vars_get(vars, effect->u.var_name);
-            if(var){
-                fprintf(stderr, " says: ");
-                val_fprintf(&var->value, stderr);
-                fprintf(stderr, "\n");
-            }else{
-                // :P
-                fprintf(stderr, " was tongue-tied\n");
-            }
-        }else{
-            fprintf(stderr, " says: %s\n", effect->u.msg);
-        }
+        val_fprintf(val, stderr);
+        fputc('\n', stderr);
         break;
     }
     case STATE_EFFECT_TYPE_MOVE: {

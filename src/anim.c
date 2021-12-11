@@ -440,17 +440,9 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         NEXT
         OPEN
         effect->type = STATE_EFFECT_TYPE_PRINT;
-        GET_STR(effect->u.msg)
+        err = valexpr_parse(&effect->u.expr, lexer);
+        if(err)return err;
         CLOSE
-    }else if(GOT("print_var")){
-        NEXT
-        OPEN
-        effect->type = STATE_EFFECT_TYPE_PRINT_VAR;
-        GET_NAME_CACHED(effect->u.var_name, &prend->name_store)
-        CLOSE
-    }else if(GOT("print_vars")){
-        NEXT
-        effect->type = STATE_EFFECT_TYPE_PRINT_VARS;
     }else if(GOT("move")){
         NEXT
         OPEN
@@ -1137,7 +1129,7 @@ void state_cond_dump(state_cond_t *cond, FILE *file, int depth){
 void state_effect_cleanup(state_effect_t *effect){
     switch(effect->type){
         case STATE_EFFECT_TYPE_PRINT:
-            free(effect->u.msg);
+            valexpr_cleanup(&effect->u.expr);
             break;
         case STATE_EFFECT_TYPE_INC:
         case STATE_EFFECT_TYPE_DEC:
