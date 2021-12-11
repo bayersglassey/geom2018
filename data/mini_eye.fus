@@ -4,29 +4,34 @@ shapes:
     "mini_eye":
         animation: cycle 24
         shapes:
-            : "_eye_look"        ( 0  0  0  0) 10 f 0 ( 0  1)
-            : "_eye_looking_1"   ( 0  0  0  0) 11 f 0 ( 1  1)
-            : "_eye_open"        ( 0  0  0  0)  0 f 0 ( 2  1)
-            : "_eye_opening_3"   ( 0  0  0  0)  0 f 0 ( 3  1)
-            : "_eye_opening_2"   ( 0  0  0  0)  0 f 0 ( 4  1)
-            : "_eye_opening_1"   ( 0  0  0  0)  0 f 0 ( 5  1)
-            : "_eye_closed"      ( 0  0  0  0)  0 f 0 ( 6  2)
+            : "_eye_look"        ( 0  0  0  0)  0 f 0 ( 0  1)
+            : "_eye_look"        ( 0  0  0  0)  1 f 0 ( 1  1)
+            : "_eye_look"        ( 0  0  0  0)  2 f 0 ( 2  1)
+            : "_eye_look"        ( 0  0  0  0)  3 f 0 ( 3  1)
+            : "_eye_look"        ( 0  0  0  0)  4 f 0 ( 4  1)
+            : "_eye_look"        ( 0  0  0  0)  5 f 0 ( 5  1)
+            : "_eye_look"        ( 0  0  0  0)  6 f 0 ( 6  1)
+            : "_eye_look"        ( 0  0  0  0)  7 f 0 ( 7  1)
+            : "_eye_look"        ( 0  0  0  0)  8 f 0 ( 8  1)
+            : "_eye_look"        ( 0  0  0  0)  9 f 0 ( 9  1)
+            : "_eye_look"        ( 0  0  0  0) 10 f 0 (10  1)
+            : "_eye_look"        ( 0  0  0  0) 11 f 0 (11 13)
+
+    "mini_eye_blink":
+        animation: cycle 24
+        shapes:
+            : "_eye_looking_1"   ( 0  0  0  0) 11 f 0 ( 0  1)
+            : "_eye_open"        ( 0  0  0  0)  0 f 0 ( 1  1)
+            : "_eye_opening_3"   ( 0  0  0  0)  0 f 0 ( 2  1)
+            : "_eye_opening_2"   ( 0  0  0  0)  0 f 0 ( 3  1)
+            : "_eye_opening_1"   ( 0  0  0  0)  0 f 0 ( 4  1)
+            : "_eye_closed"      ( 0  0  0  0)  0 f 0 ( 5  2)
+            : "_eye_opening_1"   ( 0  0  0  0)  0 f 0 ( 7  1)
             : "_eye_opening_1"   ( 0  0  0  0)  0 f 0 ( 8  1)
             : "_eye_opening_1"   ( 0  0  0  0)  0 f 0 ( 9  1)
-            : "_eye_opening_1"   ( 0  0  0  0)  0 f 0 (10  1)
-            : "_eye_open"        ( 0  0  0  0)  0 f 0 (11  1)
-            : "_eye_looking_1"   ( 0  0  0  0) 11 f 0 (12  1)
-            : "_eye_look"        ( 0  0  0  0) 11 f 0 (13  1)
-            : "_eye_look"        ( 0  0  0  0)  0 f 0 (14  1)
-            : "_eye_look"        ( 0  0  0  0)  1 f 0 (15  1)
-            : "_eye_look"        ( 0  0  0  0)  2 f 0 (16  1)
-            : "_eye_look"        ( 0  0  0  0)  3 f 0 (17  1)
-            : "_eye_look"        ( 0  0  0  0)  4 f 0 (18  1)
-            : "_eye_look"        ( 0  0  0  0)  5 f 0 (19  1)
-            : "_eye_look"        ( 0  0  0  0)  6 f 0 (20  1)
-            : "_eye_look"        ( 0  0  0  0)  7 f 0 (21  1)
-            : "_eye_look"        ( 0  0  0  0)  8 f 0 (22  1)
-            : "_eye_look"        ( 0  0  0  0)  9 f 0 (23  1)
+            : "_eye_open"        ( 0  0  0  0)  0 f 0 (10  1)
+            : "_eye_looking_1"   ( 0  0  0  0) 11 f 0 (11  1)
+            : "_eye_look"        ( 0  0  0  0) 11 f 0 (12 12)
 
     "mini_eye_crouch":
         animation: cycle "mini_eye"
@@ -34,6 +39,14 @@ shapes:
             : "mini_eye" (1 1 1 0)  0 f
 
     "mini_eye_carried":
-        animation: cycle "mini_eye"
+        animation: cycle 48
         shapes:
-            : "mini_eye" (0 0 0 0)  0 f
+            : "_eye_look"        ( 0  0  0  0) 11 f 0 ( 0  1)
+            : "_eye_looking_1"   ( 0  0  0  0) 11 f 0 ( 1  1)
+            : "_eye_open"        ( 0  0  0  0)  0 f 0 ( 2  1)
+            : "_eye_looking_1"   ( 0  0  0  0)  7 t 0 ( 3  1)
+            : "_eye_look"        ( 0  0  0  0)  7 t 0 ( 4  5)
+            : "_eye_looking_1"   ( 0  0  0  0)  7 t 0 ( 9  1)
+            : "_eye_open"        ( 0  0  0  0)  0 f 0 (10  1)
+            : "_eye_looking_1"   ( 0  0  0  0) 11 f 0 (11  1)
+            : "_eye_look"        ( 0  0  0  0) 11 f 0 (12 36)
