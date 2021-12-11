@@ -5,12 +5,11 @@ shapes:
         prismels:
             : "sq"  (-1  0  0  0)  0 f eval: 2 + 0 + 1
             : "sq"  ( 0  0  0  0)  0 f eval: 2 + 8 + 1
-            : "tri" ( 0  0  0  0)  6 f eval: 2 + 0 + 1
-            : "tri" ( 0  0  0  0)  8 f eval: 2 + 8 + 1
-            : "tri" ( 0  0  0  0) 10 f eval: 7 + 8 + 1
+            : "sq"  (-1  0  0 -1)  0 f eval: 2 + 8 + 1
+            : "sq"  ( 0  0  0 -1)  0 f eval: 7 + 8 + 1
 
     "food":
-        animation: cycle 12
+        animation: cycle 24
         shapes:
             : "_food" (0 0 0 0)  0 f  0 ( 0 1)
             : "_food" (0 0 0 0)  1 f  0 ( 1 1)
@@ -23,14 +22,14 @@ shapes:
             : "_food" (0 0 0 0)  8 f  0 ( 8 1)
             : "_food" (0 0 0 0)  9 f  0 ( 9 1)
             : "_food" (0 0 0 0) 10 f  0 (10 1)
-            : "_food" (0 0 0 0) 11 f  0 (11 1)
+            : "_food" (0 0 0 0) 11 f  0 (11 13)
 
     "food_crouch":
-        animation: cycle 12
+        animation: cycle "food"
         shapes:
             : "food" (1 1 1 0)  0 f
 
     "food_carried":
-        animation: cycle 12
+        animation: cycle "food"
         shapes:
             : "food" (0 0 0 0)  0 f

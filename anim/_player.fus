@@ -32,7 +32,9 @@ on "food":
         expr: != myvar("carrying") "nothing"
     then:
         set myvar("carrying"): "food"
-        set_label "carrying": "food_carried"
+        set myvar("carrying_rgraph"): "food_carried"
+        set_label "carrying": myvar("carrying_rgraph")
+
         as you:
             goto immediate: _collected
 
@@ -47,8 +49,9 @@ proc _spawn_spit:
         then:
             # Set spit's "carrying" to player's "carrying"
             as you:
-                set_label "carrying": "food_carried"
                 set myvar("carrying"): yourvar("carrying")
+                set myvar("carrying_rgraph"): yourvar("carrying_rgraph")
+                set_label "carrying": myvar("carrying_rgraph")
 
         # Unset player's "carrying"
         set myvar("carrying"): "nothing"
