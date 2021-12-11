@@ -4,6 +4,22 @@
 
 $SET_INT MAX_AGE 100
 
+
+proc on_death:
+
+    if: exists myvar("carrying")
+    then:
+        # This spit is carrying something
+
+        # Decrement a mapvar tracking how many of this thing are
+        # being carried
+        if: exists myvar("carrying_respawn_mapvar")
+        then: dec mapvar(myvar("carrying_respawn_mapvar"))
+
+        # We're no longer carrying anything
+        set myvar("carrying"): null
+
+
 fly:
     rgraph: $PREFIX RGRAPH_NS "spit_fly"
     collmsgs: "spit" $IF SPIKEY("spikeyspit")
@@ -86,8 +102,12 @@ crouch_fly:
 
 dead:
     rgraph: "dead_once"
-    if() then: die
+    if() then:
+        call: on_death
+        die
 
 crouch_dead:
     rgraph: "dead_once_crouch"
-    if() then: die
+    if() then:
+        call: on_death
+        die

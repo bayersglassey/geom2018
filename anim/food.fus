@@ -4,6 +4,7 @@ collmsgs: "carryable"
 vars:
     # For use with handlers for collmsg "carryable"
     "carryable": "food"
+    "respawn_mapvar": null
     "carryable_rgraph": "food_carried"
 
 

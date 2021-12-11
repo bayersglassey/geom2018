@@ -5,6 +5,15 @@ $IF !NO_COLLECT_ON_TOUCH: on "touch": goto immediate: _collected
 
 proc while_collected:
     # What we do every frame after we have been collected
+    # (Basically, wait to potentially respawn)
+
+    # Respawn based on a mapvar
+    if: exists myvar("respawn_mapvar")
+    then:
+        if: expr: <= mapvar(myvar("respawn_mapvar")) 0
+        then: goto immediate: init
+
+    # Respawn based on a timer
     if: exists myvar("respawn_in")
     then:
         if: expr: <= myvar("respawn_in") 0

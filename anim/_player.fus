@@ -27,23 +27,38 @@ $SET_STR STATE_LAND_UP step
 collmsgs: "touch"
 on "crush": goto: dead
 on "carryable":
+    # "me" is a player, "you" is a carryable thing (e.g. coin, food)
+
     if: not: exists myvar("carrying")
     then:
+        # Transfer some vars from carryable thing to the player who
+        # will now be "carrying it"
         set myvar("carrying"): yourvar("carryable")
+        set myvar("carrying_respawn_mapvar"): yourvar("respawn_mapvar")
         set myvar("carrying_rgraph"): yourvar("carryable_rgraph")
         set_label "carrying": myvar("carrying_rgraph")
 
+        # Increment a mapvar tracking how many of this thing are
+        # being carried
+        if: exists myvar("carrying_respawn_mapvar")
+        then: inc mapvar(myvar("carrying_respawn_mapvar"))
+
+        # When a thing is carried, it is "collected"
         as you:
             goto immediate: _collected
 
 
 proc _spawn_spit:
+    # "me" is player, "you" is player's newly-spawned spit
+
     if: exists myvar("carrying")
     then:
+        # Transfer the thing we're carrying over to our spit
 
         # Set spit's "carrying" to player's "carrying"
         as you:
             set myvar("carrying"): yourvar("carrying")
+            set myvar("carrying_respawn_mapvar"): yourvar("carrying_respawn_mapvar")
             set myvar("carrying_rgraph"): yourvar("carrying_rgraph")
             set_label "carrying": myvar("carrying_rgraph")
 
