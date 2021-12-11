@@ -1011,3 +1011,41 @@ Nov 5, 2021:
 
 * recording_t should have vars, so e.g. data/recs/coin_crouch.fus should have state "init" and
   vars: "crouch": T, whereas currently it has state "crouch".
+
+
+Dec 10, 2021:
+-------------
+
+Make it so you can carry eyeplayers.
+They turn into tiny eyes while you carry them.
+So something like, the 3 eyeplayers who run away at the start of demo,
+if you meet one, it opens its eye and faces you while you're close, then
+closes it if you're far away.
+But if you start exploring in the right direction, it runs after you and
+says "take me with you!" and turns into a tiny rotating eye. O_o
+So you pick it up and bring it somewhere.
+When you spit, do you spit the eye?..
+If so, does it just... complain, and re-appear?
+(But we don't have a way to make text appear on an arbitrary spot on the
+map, so there would be no way for the eye to "complain")
+Ummmmm hmmmm.
+But anyway, you could ferry eyeplayers across gaps this way.
+Maybe... if you spit the eye, and it hits a wall & explodes, it just
+reappears where it was before.
+(So somehow your spit needs to store a mapvar, representing the fact
+that the eye is being carried, and when the spit explodes, it should...
+set that variable... which is picked up by the eyeplayer's actor???
+That might actually work :O)
+So what is it you're supposed to actually spit the eyes onto?..
+Some kind of a "platform" or obvious receptable...
+
+Also, spiders in dodecas area should be collecting food and spitting
+it onto... some kind of a creature... which has an "eat" animation?..
+Or maybe a spider with an animation where it catches the food, and puts
+it away somewhere. Like in a giant bag. O_o
+Uhhhhh hmmmmmmm......
+
+
+How do we get food to reappear if it's "wasted" by being spat into a wall?..
+Easy: anim/_coin.behaviour.fus should support a "respawn_time" thing.
+
