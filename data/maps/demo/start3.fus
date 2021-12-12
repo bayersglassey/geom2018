@@ -1,3 +1,4 @@
+spawn: (8 2) 0 n
 parts:
     "h": recording "data/recs/hotspot.fus"
         vars:
