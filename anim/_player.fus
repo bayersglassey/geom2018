@@ -26,7 +26,9 @@ $SET_STR STATE_LAND_UP step
 
 collmsgs: "touch"
 on "crush": goto: dead
-on "carryable":
+
+
+$IF !PLAYER_EYE: on "carryable":
     # "me" is a player, "you" is a carryable thing (e.g. coin, food)
 
     if: not: exists myvar("carrying")
