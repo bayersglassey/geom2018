@@ -17,6 +17,9 @@ vars:
     "eyeplayer_tunnels_ran_away_1": F
     "eyeplayer_dodecas_ran_away_1": F
     "eyeplayer_vines_ran_away_1": F
+    "eyeplayer_vines_ran_away_2": F
+    "eyeplayer_vines_ran_away_3": F
+    "eyeplayer_vines_mini_eye_respawn": 0
 
 submaps:
     :

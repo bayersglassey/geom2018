@@ -21,6 +21,21 @@ collmap "detect":
     ;;           \*/*\*/*\*/*\*/*\*/*\*/
     ;;            + - + - + - + - + - +
 
+collmap "detect_small":
+    ;;       + - + - + - +
+    ;;      /*\*/*\*/*\*/*\
+    ;;     + - + - + - + - +
+    ;;    /*\*/*\*/*\*/*\*/*\
+    ;;   + - + - + - + - + - +
+    ;;  /*\*/*\*/*\*/*\*/*\*/*\
+    ;; + - + - + -(+)- + - + - +
+    ;;  \*/*\*/*\*/*\*/*\*/*\*/
+    ;;   + - + - + - + - + - +
+    ;;    \*/*\*/*\*/*\*/*\*/
+    ;;     + - + - + - + - +
+    ;;      \*/*\*/*\*/*\*/
+    ;;       + - + - + - +
+
 create_body:
     if:
         get_bool mapvar("eyeplayer_vines_ran_away_1")
@@ -35,6 +50,7 @@ create_body:
 
 start:
     if:
+        # There is spit nearby
         coll: bodies "spit" any yes collmap("detect")
     then:
         set mapvar("eyeplayer_vines_ran_away_1"): T
@@ -42,3 +58,21 @@ start:
         goto: start2
 
 start2:
+    if:
+        # There is a player next to us
+        coll: bodies "touch" any yes collmap("detect_small")
+    then:
+        set mapvar("eyeplayer_vines_ran_away_2"): T
+        play: "data/maps/demo/recs/eyeplayer_vines_run_away_2.fus"
+        goto: start3
+
+start3:
+    if() then:
+        set mapvar("eyeplayer_vines_ran_away_3"): T
+
+        # Delay long enough for the mini_eye to play its "appear" animation
+        delay: 8
+        goto: start3_remove
+
+start3_remove:
+    if() then: remove
