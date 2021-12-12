@@ -213,7 +213,7 @@ int hexmap_submap_create_rgraph_minimap(hexmap_submap_t *submap);
 hexmap_door_t *hexmap_submap_get_door(hexmap_submap_t *submap,
     hexcollmap_elem_t *elem);
 
-int hexmap_submap_parser_context_init(hexmap_submap_parser_context_t *context,
+void hexmap_submap_parser_context_init(hexmap_submap_parser_context_t *context,
     hexmap_submap_parser_context_t *parent);
 void hexmap_submap_parser_context_cleanup(hexmap_submap_parser_context_t *context);
 

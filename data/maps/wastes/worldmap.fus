@@ -2,8 +2,8 @@
 unit: 3 2 0 -1
 #spawn: "data/maps/wastes/start.fus"
 spawn: (-2 1)
-default_palette: "data/pal1.fus"
-default_tileset: "data/tileset1.fus"
+palette: "data/pal1.fus"
+tileset: "data/tileset1.fus"
 
 actors:
     #: (0 0) 0 n "actor/aiplayer.fus" "player_cpu"

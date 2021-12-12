@@ -507,28 +507,29 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, const char *name,
     }
     CLOSE
 
+    hexmap_submap_parser_context_t context;
+    hexmap_submap_parser_context_init(&context, NULL);
+
     /* default palette */
-    palette_t *default_palette;
     {
         const char *palette_filename;
-        GET("default_palette")
+        GET("palette")
         OPEN
         GET_STR_CACHED(palette_filename, &prend->filename_store)
         err = hexmap_get_or_create_palette(map, palette_filename,
-            &default_palette);
+            &context.palette);
         if(err)return err;
         CLOSE
     }
 
     /* default tileset */
-    hexmap_tileset_t *default_tileset;
     {
         const char *tileset_filename;
-        GET("default_tileset")
+        GET("tileset")
         OPEN
         GET_STR_CACHED(tileset_filename, &prend->filename_store)
         err = hexmap_get_or_create_tileset(map, tileset_filename,
-            &default_tileset);
+            &context.tileset);
         if(err)return err;
         CLOSE
     }
@@ -587,12 +588,6 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, const char *name,
     GET("submaps")
     OPEN
     {
-        hexmap_submap_parser_context_t context;
-        err = hexmap_submap_parser_context_init(&context, NULL);
-        if(err)return err;
-
-        context.palette = default_palette;
-        context.tileset = default_tileset;
         while(1){
             if(GOT(")"))break;
             OPEN
@@ -600,7 +595,6 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, const char *name,
             if(err)return err;
             CLOSE
         }
-        hexmap_submap_parser_context_cleanup(&context);
     }
     NEXT
 
@@ -623,6 +617,7 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, const char *name,
 
 
     /* pheeew */
+    hexmap_submap_parser_context_cleanup(&context);
     return 0;
 }
 
@@ -754,8 +749,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
     }
 
     hexmap_submap_parser_context_t _context, *context=&_context;
-    err = hexmap_submap_parser_context_init(context, parent_context);
-    if(err)return err;
+    hexmap_submap_parser_context_init(context, parent_context);
 
     if(GOT("bg")){
         NEXT
@@ -1483,11 +1477,9 @@ hexmap_door_t *hexmap_submap_get_door(hexmap_submap_t *submap,
 }
 
 
-int hexmap_submap_parser_context_init(hexmap_submap_parser_context_t *context,
+void hexmap_submap_parser_context_init(hexmap_submap_parser_context_t *context,
     hexmap_submap_parser_context_t *parent
 ){
-    int err;
-
     /* Not inherited from parent (for backwards compat) */
     context->solid = true;
 
@@ -1517,8 +1509,6 @@ int hexmap_submap_parser_context_init(hexmap_submap_parser_context_t *context,
     context->mapper = parent? parent->mapper: NULL;
     context->palette = parent? parent->palette: NULL;
     context->tileset = parent? parent->tileset: NULL;
-
-    return 0;
 }
 
 void hexmap_submap_parser_context_cleanup(hexmap_submap_parser_context_t *context){

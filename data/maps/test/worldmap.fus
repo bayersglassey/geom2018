@@ -1,8 +1,8 @@
 
 unit: 3 2 0 -1
 spawn: (0 0)
-default_palette: "data/maps/demo/pals/tunnels.fus"
-default_tileset: "data/tileset1.fus"
+palette: "data/maps/demo/pals/tunnels.fus"
+tileset: "data/tileset1.fus"
 vars:
     "map3_blocker": F
     "map3x_blocker": F

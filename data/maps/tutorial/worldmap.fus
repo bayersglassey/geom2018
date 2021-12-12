@@ -1,8 +1,8 @@
 
 unit: 3 2 0 -1
 spawn: "data/maps/tutorial/start.fus"
-default_palette: "data/pal1.fus"
-default_tileset: "data/tileset1.fus"
+palette: "data/pal1.fus"
+tileset: "data/tileset1.fus"
 vars:
     "made_it_underneath": F
     "going_upwards": F

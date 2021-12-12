@@ -1,10 +1,10 @@
 
 unit: 3 2 0 -1
 spawn: "data/maps/water/start.fus"
-#default_palette: "data/pal1.fus"
-default_palette: "data/maps/water/pals/deeps.fus"
-#default_palette: "data/maps/demo/pals/light_dark_cycle.fus"
-default_tileset: "data/tileset1.fus"
+#palette: "data/pal1.fus"
+palette: "data/maps/water/pals/deeps.fus"
+#palette: "data/maps/demo/pals/light_dark_cycle.fus"
+tileset: "data/tileset1.fus"
 
 vars:
     nosave "num_coins_a": 10

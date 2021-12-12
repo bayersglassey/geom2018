@@ -1,8 +1,8 @@
 
 unit: 3 2 0 -1
 spawn: "data/maps/tutorial3/floaty_start.fus"
-default_palette: "data/pal1.fus"
-default_tileset: "data/tileset1.fus"
+palette: "data/pal1.fus"
+tileset: "data/tileset1.fus"
 vars:
     "switch1": F
     "switch2": F
