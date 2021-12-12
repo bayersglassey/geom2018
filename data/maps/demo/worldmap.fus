@@ -6,17 +6,17 @@ tileset: "data/tileset1.fus"
 
 actors:
     : "actor/guide/actor.fus" "player_cpu"
-    : "actor/dodecas_eyeplayer_000.fus"
-    : "actor/dodecas_eyeplayer_001.fus"
-    : "actor/dodecas_eyeplayer_002.fus"
+    : "actor/eyeplayer_000.fus"
+    : "actor/eyeplayer_001.fus"
+    : "actor/eyeplayer_002.fus"
 
 vars:
     "guide_passed_start": F
     "guide_passed_start2": F
 
-    "dodecas_eyeplayer_000_ran_away_1": F
-    "dodecas_eyeplayer_001_ran_away_1": F
-    "dodecas_eyeplayer_002_ran_away_1": F
+    "eyeplayer_000_ran_away_1": F
+    "eyeplayer_001_ran_away_1": F
+    "eyeplayer_002_ran_away_1": F
 
 submaps:
     :
