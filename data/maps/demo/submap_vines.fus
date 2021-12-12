@@ -9,6 +9,7 @@ actors:
 vars:
     "jungle_cage": F
     "vines3_door": F
+    "player_passed_vines": F
 submaps:
     :
         file: "data/maps/demo/vines2.fus"

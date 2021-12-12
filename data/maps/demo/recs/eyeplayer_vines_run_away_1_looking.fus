@@ -10,4 +10,4 @@ keys:
     d:
     l:
     r:
-nodata
+data: "-x"

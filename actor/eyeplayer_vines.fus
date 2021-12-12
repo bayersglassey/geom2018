@@ -58,13 +58,25 @@ start:
         goto: start2
 
 start2:
-    if:
-        # There is a player next to us
-        coll: bodies "touch" any yes collmap("detect_small")
+
+    # There is a player next to us
+    if: coll: bodies "touch" any yes collmap("detect_small")
+    then:
+        play: "data/maps/demo/recs/eyeplayer_vines_run_away_1_looking.fus"
+        goto: start2_looking
+
+    if: get_bool mapvar("player_passed_vines")
     then:
         set mapvar("eyeplayer_vines_ran_away_2"): T
         play: "data/maps/demo/recs/eyeplayer_vines_run_away_2.fus"
         goto: start3
+
+start2_looking:
+    # There is *NOT* a player next to us
+    if: not: coll: bodies "touch" any yes collmap("detect_small")
+    then:
+        play: "data/maps/demo/recs/eyeplayer_vines_run_away_1_unlooking.fus"
+        goto: start2
 
 start3:
     if() then:
