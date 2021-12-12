@@ -67,7 +67,7 @@ submaps:
                     :
                         file: "data/maps/demo/vines.fus"
                         pos: (-4 2)
-                        camera: (-5 5)
+                        camera: (-7 5)
                         mapper: ("triple")
                         palette: "data/maps/demo/pals/vines.fus"
                         tileset: "data/maps/demo/tilesets/water.fus"
