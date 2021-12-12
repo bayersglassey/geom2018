@@ -1,0 +1,86 @@
+
+mapper: ("double")
+
+recs:
+    : "data/maps/demo/recs/dodecas_000.fus" "player_cpu"
+    : "data/maps/demo/recs/dodecas_001.fus" "player_cpu"
+    : "data/maps/demo/recs/dodecas_hexroller_000.fus"
+    : "data/maps/demo/recs/dodecas_hexroller_001.fus" "player_cpu"
+
+actors:
+    : (21 -15) 5 y "actor/airollerplayer.fus" "player_cpu"
+
+submaps:
+    :
+        file: "data/maps/demo/dodecas_bg.fus"
+        pos: (-55 -60)
+    :
+        file: "data/maps/demo/dodecas_bg2.fus"
+        pos: (20 -65)
+    :
+        file: "data/maps/demo/dodecas_0_0.fus"
+        pos: (1 -6)
+        camera: (0 -4)
+    :
+        file: "data/maps/demo/dodecas_0_-1.fus"
+        pos: (-27 -15)
+        camera: (0 -4)
+    :
+        file: "data/maps/demo/dodecas_1_0.fus"
+        pos: (0 -28)
+        camera: (0 -4)
+    :
+        file: "data/maps/demo/dodecas_1_-1.fus"
+        pos: (-22 -30)
+        camera: (0 -4)
+    :
+        file: "data/maps/demo/dodecas_2_0.fus"
+        pos: (0 -48)
+        camera: (0 -4)
+    :
+        file: "data/maps/demo/dodecas_2_-1.fus"
+        pos: (-22 -50)
+        camera: (0 -4)
+    :
+        pos: (20 -50)
+        submaps:
+            :
+                pos: (0 -28)
+                camera: (0 0)
+                recs:
+                    : "data/maps/demo/recs/big_000.fus"
+                submaps:
+                    :
+                        bg
+                        file: "data/maps/demo/big_bg.fus"
+                        tileset: "data/tileset1_bg.fus"
+                    :
+                        file: "data/maps/demo/big.fus"
+                        doors:
+                            :
+                                map: "data/maps/triangles/worldmap.fus"
+                                pos: (0 0)
+                                rot: 0
+                                turn: n
+            :
+                file: "data/maps/demo/fisheye.fus"
+                pos: (0 0)
+                camera: (0 0)
+            :
+                file: "data/maps/demo/fisheye2.fus"
+                pos: (-12 -16)
+                camera: (0 0)
+            :
+                file: "data/maps/demo/fisheye3.fus"
+                pos: (-32 -26)
+                camera: (0 0)
+            :
+                file: "data/maps/demo/fisheye4.fus"
+                pos: (-48 -28)
+                camera: (0 0)
+                doors:
+                    :
+                        anim: "anim/roller.fus"
+                        pos: (-11 -80)
+                        rot: 0
+                        turn: n

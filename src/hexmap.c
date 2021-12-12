@@ -538,8 +538,45 @@ static int _hexmap_parse(hexmap_t *map, fus_lexer_t *lexer,
         while(1){
             if(GOT(")"))break;
             OPEN
-            err = hexmap_parse_submap(map, lexer, context);
-            if(err)return err;
+
+            if(GOT("import")){
+                NEXT
+
+                /* We use _fus_lexer_get_str to avoid calling fus_lexer_next until after
+                the call to fus_lexer_init_with_vars is done, to make sure we don't modify
+                lexer->vars first */
+                char *filename;
+                err = _fus_lexer_get_str(lexer, &filename);
+                if(err)return err;
+
+                char *text = load_file(filename);
+                if(text == NULL)return 1;
+
+                fus_lexer_t sublexer;
+                err = fus_lexer_init_with_vars(&sublexer, text, filename,
+                    lexer->vars);
+                if(err)return err;
+
+                err = hexmap_parse_submap(map, &sublexer, context);
+                if(err)return err;
+
+                if(!fus_lexer_done(&sublexer)){
+                    return fus_lexer_unexpected(&sublexer, "end of file");
+                }
+
+                /* We now call fus_lexer_next manually, see call to _fus_lexer_get_str
+                above */
+                err = fus_lexer_next(lexer);
+                if(err)return err;
+
+                fus_lexer_cleanup(&sublexer);
+                free(filename);
+                free(text);
+            }else{
+                err = hexmap_parse_submap(map, lexer, context);
+                if(err)return err;
+            }
+
             CLOSE
         }
         NEXT

@@ -876,6 +876,10 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             err = _stateset_parse(stateset, &sublexer, prend, space);
             if(err)return err;
 
+            if(!fus_lexer_done(&sublexer)){
+                return fus_lexer_unexpected(&sublexer, "end of file");
+            }
+
             /* We now call fus_lexer_next manually, see call to _fus_lexer_get_str
             above */
             err = fus_lexer_next(lexer);

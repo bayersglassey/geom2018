@@ -964,6 +964,10 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
                 parts, parts_len, name_store, filename_store);
             if(err)return err;
 
+            if(!fus_lexer_done(&sublexer)){
+                return fus_lexer_unexpected(&sublexer, "end of file");
+            }
+
             /* We now call fus_lexer_next manually, see call to _fus_lexer_get_str
             above */
             err = fus_lexer_next(lexer);

@@ -1,0 +1,84 @@
+
+pos: (40 60)
+camera: (0 0)
+recs:
+    : "data/maps/demo/recs/test_003.fus" "player_cpu"
+    : "data/maps/demo/recs/test_flier_000.fus"
+
+actors:
+    : (42 75) 0 y "actor/aiplayer.fus" "player_cpu"
+    : (55 67) 0 y "actor/aiplayer.fus" "player_cpu"
+    : (51 78) 2 n "actor/aiplayer.fus" "player_cpu"
+    : (47 52) 0 n "actor/aiplayer.fus" "player_cpu"
+
+vars:
+    "map3_blocker": F
+    "map3x_blocker": F
+
+submaps:
+    :
+        file: "data/maps/test/map3.fus"
+        pos: (0 0)
+        camera: (0 4)
+        mapper: ("triple")
+        doors:
+            :
+                map: "data/maps/spidertown/worldmap.fus"
+                pos: (0 0)
+                rot: 0
+                turn: n
+        submaps:
+            :
+                file: "data/maps/test/map3_blocker.fus"
+                visible: not mapvar("map3_blocker")
+            :
+                file: "data/maps/test/map2.fus"
+                pos: (1 10)
+    :
+        file: "data/maps/test/map2x.fus"
+        pos: (15 12)
+        camera: (1 8)
+        mapper: ("double")
+        submaps:
+            :
+                file: "data/maps/test/map3x.fus"
+                pos: (1 10)
+                doors:
+                    :
+                        map: "data/maps/test/worldmap.fus"
+                        pos: (0 0)
+                        rot: 0
+                        turn: n
+            :
+                file: "data/maps/test/map3x_blocker.fus"
+                visible: not mapvar("map3x_blocker")
+                pos: eval: (1 10) + (-2 4)
+    :
+        pos: (-1 -10)
+        camera: (4 0)
+        mapper: ("triple")
+        submaps:
+            :
+                file: "data/maps/test/map1.fus"
+                pos: eval: (8 2) *  0 + (-1 3) *  0
+            :
+                file: "data/maps/test/map1grid.fus"
+                pos: eval: (8 2) *  0 + (-1 3) * -2
+            :
+                file: "data/maps/test/map1x.fus"
+                pos: eval: (8 2) *  0 + (-1 3) * -4
+                camera: (-1 -1)
+                mapper: ("quadruple")
+                submaps:
+                    :
+                        file: "data/maps/test/map1x_exit.fus"
+                        pos: (2 -8)
+                        camera: (8 0)
+                        mapper: ("solid_curvy")
+            :
+                file: "data/maps/test/map1.fus"
+                pos: eval: (8 2) *  1 + (-1 3) *  0
+            :
+                file: "data/maps/test/map1.fus"
+                pos: eval: (8 2) *  1 + (-1 3) * -1
+
