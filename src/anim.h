@@ -244,6 +244,7 @@ enum state_effect_type {
     STATE_EFFECT_TYPE_SPAWN,
     STATE_EFFECT_TYPE_PLAY,
     STATE_EFFECT_TYPE_DIE,
+    STATE_EFFECT_TYPE_REMOVE,
     STATE_EFFECT_TYPE_INC,
     STATE_EFFECT_TYPE_DEC,
     STATE_EFFECT_TYPE_CONTINUE,
@@ -270,6 +271,7 @@ static const char *state_effect_type_name(int type){
         case STATE_EFFECT_TYPE_SPAWN: return "spawn";
         case STATE_EFFECT_TYPE_PLAY: return "play";
         case STATE_EFFECT_TYPE_DIE: return "die";
+        case STATE_EFFECT_TYPE_REMOVE: return "remove";
         case STATE_EFFECT_TYPE_INC: return "inc";
         case STATE_EFFECT_TYPE_DEC: return "dec";
         case STATE_EFFECT_TYPE_CONTINUE: return "continue";

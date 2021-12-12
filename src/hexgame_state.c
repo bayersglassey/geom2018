@@ -568,6 +568,12 @@ int state_effect_apply(state_effect_t *effect,
         body->dead = effect->u.dead;
         break;
     }
+    case STATE_EFFECT_TYPE_REMOVE: {
+        CHECK_BODY
+        err = body_remove(body);
+        if(err)return err;
+        break;
+    }
     case STATE_EFFECT_TYPE_CONTINUE: {
         *continues_ptr = true;
         break;

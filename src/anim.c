@@ -548,6 +548,9 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
             NEXT
             effect->u.dead = BODY_MOSTLY_DEAD;
         }else effect->u.dead = BODY_ALL_DEAD;
+    }else if(GOT("remove")){
+        NEXT
+        effect->type = STATE_EFFECT_TYPE_REMOVE;
     }else if(GOT("inc") || GOT("dec")){
         effect->type = GOT("dec")?
             STATE_EFFECT_TYPE_DEC: STATE_EFFECT_TYPE_INC;
