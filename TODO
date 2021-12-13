@@ -1085,3 +1085,26 @@ src/hexgame_savelocation.[ch]:
 ...for instance, if you carry a mini_eye, then shoot it, and save while it's in the air,
 and then reload the game, we need to make sure the mini_eye isn't permanently gone.
 
+
+Dec 12, 2021:
+-------------
+
+One time I saw this:
+    ==7403== 60,960 (464 direct, 60,496 indirect) bytes in 1 blocks are definitely lost in loss record 2,237 of 2,238
+    ==7403==    at 0x483DD99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+    ==7403==    by 0x133107: hexmap_load_hexmap_recording (hexmap.c:414)
+    ==7403==    by 0x136206: hexmap_load (hexmap.c:461)
+    ==7403==    by 0x137B5B: hexgame_load_map (hexgame.c:452)
+    ==7403==    by 0x13E3CC: hexgame_savelocation_load (hexgame_savelocation.c:164)
+    ==7403==    by 0x13AACD: player_reload (hexgame_player.c:151)
+    ==7403==    by 0x13FB39: test_app_continue_callback (test_app_game.c:36)
+    ==7403==    by 0x13EDD0: test_app_init (test_app.c:245)
+    ==7403==    by 0x114EC3: get_test_app (demo.c:162)
+    ==7403==    by 0x114EC3: main (demo.c:300)
+...after playing around on vines.fus a bit.
+I think it was after getting eyeplayer_vines to follow me and turn into a mini_eye.
+So, what is happening at hexmap_load_hexmap_recording (hexmap.c:414)?..
+
+    ARRAY_PUSH_NEW(body_t*, map->bodies, body)
+
+...and that's happening specifically when recording->type == HEXMAP_RECORDING_TYPE_ACTOR.
