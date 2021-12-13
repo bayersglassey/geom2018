@@ -13,9 +13,17 @@ vars:
     nosave "eyeplayer_vines_looking": F
     "eyeplayer_vines_mini_eye_respawn": 0
 
+    "vines2_fluff_a": 0
+    "vines2_fluff_b": 0
+    "vines2_fluff_c": 0
+    "vines3_fluff_a": 0
+    "vines3_fluff_b": 0
+    "vines3_fluff_c": 0
+
     "jungle_cage": F
     "vines3_door": F
     "player_passed_vines": F
+    "player_passed_vines2": F
 
 
 $SET_STR VINES_HIDING: lines: at(25 3)
@@ -28,11 +36,49 @@ $SET_STR VINES_TAKE_ME: lines: at(14 24)
     ;;
     ;;  -- take me with you!
 
-
-$SET_STR VINES_COME_BACK: lines: at(30 15)
+$SET_STR VINES_COME_BACK: lines: at(35 15)
     ;;Come baaack!
     ;;
-    ;;Take me with you!
+    ;;  Take me
+    ;;    with you!
+
+$SET_STR VINES2_FLUFF_A: lines: at(25 22)
+    ;;       Looks tricky!
+    ;;
+    ;;
+    ;;    How're you going
+    ;;  to get down there?
+
+$SET_STR VINES2_FLUFF_B: lines: at(15 7)
+    ;;I'm generally scared
+    ;;  of spiders,
+    ;;    but you don't seem
+    ;;      too bad.
+
+$SET_STR VINES2_FLUFF_C: lines: at(20 23)
+    ;;  I reckon
+    ;;we're nearly
+    ;;  through!
+
+$SET_STR VINES3_FLUFF_A: lines: at(10 44)
+    ;;Looks like someone built a house up there.
+
+$SET_STR VINES3_FLUFF_B: lines: at(1 5)
+    ;;But who
+    ;; lives in
+    ;;  there?..
+
+$SET_STR VINES3_FLUFF_C: lines: at(20 14)
+    ;; Let's
+    ;;  just
+    ;;  sneak
+    ;;through
+
+$SET_STR VINES4_FLUFF_A: lines: at(5 4)
+    ;;PHEW
+    ;;
+    ;;
+    ;;  OUTTA  THERE  !!
 
 
 submaps:
@@ -45,6 +91,7 @@ submaps:
             then $GET_STR VINES_HIDING
             else if all:
                 mapvar("eyeplayer_vines_ran_away_2")
+                == mapvar("eyeplayer_vines_mini_eye_respawn") 0
             then $GET_STR VINES_TAKE_ME
             else null
         camera: (-7 5)
@@ -53,7 +100,19 @@ submaps:
         text:
             if all:
                 mapvar("eyeplayer_vines_ran_away_3")
+                == mapvar("eyeplayer_vines_mini_eye_respawn") 0
             then $GET_STR VINES_COME_BACK
+            else null
+        text:
+            if > mapvar("eyeplayer_vines_mini_eye_respawn") 0
+            then
+                if > mapvar("vines2_fluff_a") 0
+                then $GET_STR VINES2_FLUFF_A
+                else if > mapvar("vines2_fluff_b") 0
+                then $GET_STR VINES2_FLUFF_B
+                else if > mapvar("vines2_fluff_c") 0
+                then $GET_STR VINES2_FLUFF_C
+                else null
             else null
         pos: (-26 -5)
         camera: (-7 3)
@@ -61,6 +120,17 @@ submaps:
         submaps:
             :
                 file: "data/maps/demo/vines3.fus"
+                text:
+                    if > mapvar("eyeplayer_vines_mini_eye_respawn") 0
+                    then
+                        if > mapvar("vines3_fluff_a") 0
+                        then $GET_STR VINES3_FLUFF_A
+                        else if > mapvar("vines3_fluff_b") 0
+                        then $GET_STR VINES3_FLUFF_B
+                        else if > mapvar("vines3_fluff_c") 0
+                        then $GET_STR VINES3_FLUFF_C
+                        else null
+                    else null
                 pos: (-21 -6)
                 camera: (-6 7)
                 mapper: ("quadruple")
@@ -78,6 +148,10 @@ submaps:
                         pos: (-8 13)
             :
                 file: "data/maps/demo/vines4.fus"
+                text:
+                    if > mapvar("eyeplayer_vines_mini_eye_respawn") 0
+                    then $GET_STR VINES4_FLUFF_A
+                    else null
                 pos: (-40 4)
                 camera: (0 0)
             :
