@@ -30,15 +30,18 @@ init:
         goto: collected
 
     if() then:
-        if: exists myvar("key")
-        then:
-            if: expr: mapvar(myvar("key"))
-            then: goto immediate: _appear
-            else:
-                # Do nothing; so, our state will remain "init",
-                # so we will be invisible, and each frame we will
-                # retry all these checks.
-        else: goto immediate: _appear
+        if:
+            any:
+                not: exists myvar("key")
+                expr: mapvar(myvar("key"))
+            not:
+                exists myvar("antikey")
+                expr: mapvar(myvar("antikey"))
+        then: goto immediate: _appear
+        else:
+            # Do nothing; so, our state will remain "init",
+            # so we will be invisible, and each frame we will
+            # retry all these checks.
 
 _appear:
     if:
