@@ -9,6 +9,13 @@
 #include "write.h"
 
 
+/* CONSTANT VALS (marked "extern" in vars.h) */
+val_t val_null = { .type = VAL_TYPE_NULL };
+val_t val_true = { .type = VAL_TYPE_BOOL, .u.b = true };
+val_t val_false = { .type = VAL_TYPE_BOOL, .u.b = false };
+
+
+
 /*******
  * VAR *
  *******/

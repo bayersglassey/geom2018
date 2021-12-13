@@ -26,6 +26,12 @@ typedef struct val {
     char *s; /* If s == u.s, we own the string */
 } val_t;
 
+/* Constant values, for e.g. valexpr_t, which likes to return pointers
+to val_t */
+extern val_t val_null;
+extern val_t val_true;
+extern val_t val_false;
+
 typedef unsigned var_props_t;
 
 typedef struct var {
