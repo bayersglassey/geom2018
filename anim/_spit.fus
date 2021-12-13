@@ -104,10 +104,10 @@ dead:
     rgraph: "dead_once"
     if() then:
         call: on_death
-        die
+        remove
 
 crouch_dead:
     rgraph: "dead_once_crouch"
     if() then:
         call: on_death
-        die
+        remove

@@ -770,9 +770,6 @@ Mar 20, 2021:
         when body_is_done_for(actor->body).
             => THIS PROBABLY MAKES THE MOST SENSE.
 
-    * body_remove is only ever called in test_app_set_players, sooooo I suspect that your
-      bouncing spit will live forever.
-
 * Add a "gamma" setting or something, so that palette colours are brighter by default.
 
 * TWO BODIES CAN COLLECT THE SAME COIN!!!!
