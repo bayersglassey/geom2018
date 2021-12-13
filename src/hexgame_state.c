@@ -510,8 +510,7 @@ int state_effect_apply(state_effect_t *effect,
     }
     case STATE_EFFECT_TYPE_REMOVE: {
         CHECK_BODY
-        err = body_remove(body);
-        if(err)return err;
+        body->remove = true; /* mark for removal */
         break;
     }
     case STATE_EFFECT_TYPE_CONTINUE: {

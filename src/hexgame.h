@@ -175,6 +175,8 @@ typedef struct body {
     int cooldown;
     int dead; /* enum body_dead */
     bool safe; /* lets player know it should update its safe_location */
+    bool remove;
+        /* marks body for removal (for use e.g. while iterating over bodies) */
 
     bool confused; /* Reverses l/r keys */
 
@@ -211,7 +213,7 @@ struct player *body_get_player(body_t *body);
 void body_flash_cameras(body_t *body, Uint8 r, Uint8 g, Uint8 b,
     int percent);
 void body_reset_cameras(body_t *body);
-int body_remove(body_t *body);
+void body_remove(body_t *body);
 int body_move_to_map(body_t *body, hexmap_t *map);
 int body_refresh_vars(body_t *body);
 

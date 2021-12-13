@@ -141,6 +141,8 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
     body->frame_i = 0;
     body->cooldown = 0;
     body->dead = BODY_NOT_DEAD;
+    body->safe = false;
+    body->remove = false;
 
     memset(&body->stateset, 0, sizeof(body->stateset));
 
@@ -392,21 +394,22 @@ void body_reset_cameras(body_t *body){
     })
 }
 
-int body_remove(body_t *body){
+void body_remove(body_t *body){
     /* WARNING: this function modifies map->bodies for body->map.
     So if caller is trying to loop over map->bodies in the usual way,
-    the behaviour of that loop is probably gonna be super wrong. */
-    int err;
+    the behaviour of that loop is probably gonna be super wrong.
+    Instead, you can use body->remove = true to mark the body for removal
+    (which will result in body_remove being called when it is safe to do
+    so). */
     hexgame_t *game = body->game;
     hexmap_t *map = body->map;
-
-    ARRAY_UNHOOK(map->bodies, body)
 
     /* Update any cameras following this body */
     FOREACH_BODY_CAMERA(body, camera, {
         camera->body = NULL;
     })
-    return 0;
+
+    ARRAY_REMOVE_PTR(map->bodies, body, body_cleanup)
 }
 
 int body_move_to_map(body_t *body, hexmap_t *map){

@@ -1369,6 +1369,15 @@ int hexmap_step(hexmap_t *map){
         if(err)return err;
     }
 
+    /* Remove any bodies marked for removal */
+    for(int i = 0; i < map->bodies_len; i++){
+        body_t *body = map->bodies[i];
+        if(body->remove){
+            body_remove(body);
+            i--;
+        }
+    }
+
     return 0;
 }
 
