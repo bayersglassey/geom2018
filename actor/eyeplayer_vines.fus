@@ -38,7 +38,7 @@ collmap "detect_small":
 
 create_body:
     if:
-        get_bool mapvar("eyeplayer_vines_ran_away_1")
+        expr: mapvar("eyeplayer_vines_ran_away_1")
     then:
         play: "data/maps/demo/recs/eyeplayer_vines_wait_2.fus"
         goto immediate: start2
@@ -66,7 +66,7 @@ start2:
         set mapvar("eyeplayer_vines_looking"): T
         goto: start2_looking
 
-    if: get_bool mapvar("player_passed_vines")
+    if: expr: mapvar("player_passed_vines")
     then:
         set mapvar("eyeplayer_vines_ran_away_2"): T
         play: "data/maps/demo/recs/eyeplayer_vines_run_away_2.fus"

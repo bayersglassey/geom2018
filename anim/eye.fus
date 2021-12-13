@@ -44,10 +44,10 @@ closed:
     if:
         any:
             not: exists myvar("key")
-            get_bool mapvar(myvar("key"))
+            expr: mapvar(myvar("key"))
         any:
             not: exists myvar("antikey")
-            not: get_bool mapvar(myvar("antikey"))
+            not: expr: mapvar(myvar("antikey"))
         coll: bodies "touch" any yes collmap("opening")
     then: goto delay: opening
 
@@ -65,10 +65,10 @@ open:
     if: any:
         all:
             exists myvar("key")
-            not: get_bool mapvar(myvar("key"))
+            not: expr: mapvar(myvar("key"))
         all:
             exists myvar("antikey")
-            get_bool mapvar(myvar("antikey"))
+            expr: mapvar(myvar("antikey"))
         not: coll: bodies "touch" any yes collmap("opening")
     then: goto delay: closing
 

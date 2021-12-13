@@ -25,14 +25,14 @@ proc while_collected:
 init:
     if:
         exists myvar("collected_key")
-        get_bool mapvar(myvar("collected_key"))
+        expr: mapvar(myvar("collected_key"))
     then:
         goto: collected
 
     if() then:
         if: exists myvar("key")
         then:
-            if: get_bool mapvar(myvar("key"))
+            if: expr: mapvar(myvar("key"))
             then: goto immediate: _appear
             else:
                 # Do nothing; so, our state will remain "init",
@@ -43,18 +43,18 @@ init:
 _appear:
     if:
         exists myvar("appear")
-        get_bool myvar("appear")
+        expr: myvar("appear")
     then:
         if:
             exists myvar("crouch")
-            get_bool myvar("crouch")
+            expr: myvar("crouch")
         then: goto delay: appear_crouch
         else: goto delay: appear
 
     if() then:
         if:
             exists myvar("crouch")
-            get_bool myvar("crouch")
+            expr: myvar("crouch")
         then: goto immediate: _crouch
         else: goto immediate: _stand
 

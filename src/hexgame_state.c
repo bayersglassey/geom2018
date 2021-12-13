@@ -267,66 +267,6 @@ int state_cond_match(state_cond_t *cond,
         err = _get_vars(context, &valexpr_context);
         if(err)return err;
 
-        val_t *val1;
-        err = valexpr_get(&cond->u.expr.val1_expr,
-            &valexpr_context, &val1);
-        if(err)return err;
-        if(val1 == NULL){
-            RULE_PERROR()
-            fprintf(stderr, "Couldn't get value for LHS: ");
-            valexpr_fprintf(&cond->u.expr.val1_expr, stderr);
-            fputc('\n', stderr);
-            return 2;
-        }
-
-        val_t *val2;
-        err = valexpr_get(&cond->u.expr.val2_expr,
-            &valexpr_context, &val2);
-        if(err)return err;
-        if(val2 == NULL){
-            RULE_PERROR()
-            fprintf(stderr, "Couldn't get value for RHS: ");
-            valexpr_fprintf(&cond->u.expr.val2_expr, stderr);
-            fputc('\n', stderr);
-            return 2;
-        }
-
-        if(val1->type != val2->type){
-            RULE_PERROR()
-            fprintf(stderr, "Type mismatch between LHS, RHS: ");
-            val_fprintf(val1, stderr);
-            fputs(", ", stderr);
-            val_fprintf(val2, stderr);
-            fputc('\n', stderr);
-            fprintf(stderr, "...LHS was: ");
-            valexpr_fprintf(&cond->u.expr.val1_expr, stderr);
-            fputc('\n', stderr);
-            fprintf(stderr, "...RHS was: ");
-            valexpr_fprintf(&cond->u.expr.val2_expr, stderr);
-            fputc('\n', stderr);
-            return 2;
-        }
-
-        int op = cond->u.expr.op;
-        switch(op){
-            case STATE_COND_EXPR_OP_EQ: matched = val_eq(val1, val2); break;
-            case STATE_COND_EXPR_OP_NE: matched = val_ne(val1, val2); break;
-            case STATE_COND_EXPR_OP_LT: matched = val_lt(val1, val2); break;
-            case STATE_COND_EXPR_OP_LE: matched = val_le(val1, val2); break;
-            case STATE_COND_EXPR_OP_GT: matched = val_gt(val1, val2); break;
-            case STATE_COND_EXPR_OP_GE: matched = val_ge(val1, val2); break;
-            default:
-                fprintf(stderr, "Bad expr op: %i\n", op);
-                RULE_PERROR()
-                return 2;
-        }
-        break;
-    }
-    case STATE_COND_TYPE_GET_BOOL: {
-        valexpr_context_t valexpr_context = {0};
-        err = _get_vars(context, &valexpr_context);
-        if(err)return err;
-
         matched = valexpr_get_bool(&cond->u.valexpr, &valexpr_context);
         break;
     }

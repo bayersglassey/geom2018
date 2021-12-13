@@ -23,7 +23,7 @@ collmap "detect":
 
 create_body:
     if:
-        get_bool mapvar("eyeplayer_tunnels_ran_away_1")
+        expr: mapvar("eyeplayer_tunnels_ran_away_1")
     then:
         play: "data/maps/demo/recs/eyeplayer_tunnels_wait_2.fus"
         goto immediate: start2

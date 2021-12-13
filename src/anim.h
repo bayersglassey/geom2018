@@ -154,7 +154,6 @@ enum state_cond_type {
     STATE_COND_TYPE_ALL,
     STATE_COND_TYPE_NOT,
     STATE_COND_TYPE_EXPR,
-    STATE_COND_TYPE_GET_BOOL,
     STATE_COND_TYPE_EXISTS,
     STATE_COND_TYPES
 };
@@ -170,29 +169,14 @@ static const char *state_cond_type_name(int type){
         case STATE_COND_TYPE_ALL: return "all";
         case STATE_COND_TYPE_NOT: return "not";
         case STATE_COND_TYPE_EXPR: return "expr";
-        case STATE_COND_TYPE_GET_BOOL: return "get_bool";
         case STATE_COND_TYPE_EXISTS: return "exists";
         default: return "unknown";
     }
 }
 
-enum state_cond_expr_op {
-    STATE_COND_EXPR_OP_EQ,
-    STATE_COND_EXPR_OP_NE,
-    STATE_COND_EXPR_OP_LT,
-    STATE_COND_EXPR_OP_LE,
-    STATE_COND_EXPR_OP_GT,
-    STATE_COND_EXPR_OP_GE,
-};
-
 typedef struct state_cond {
     int type; /* enum state_cond_type */
     union {
-        struct {
-            int op; /* enum state_cond_expr_op */
-            valexpr_t val1_expr;
-            valexpr_t val2_expr;
-        } expr;
         struct {
             int flags; /* ORed combination of enum anim_cond_flag values */
             char *collmsg;

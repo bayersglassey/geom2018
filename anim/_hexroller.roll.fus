@@ -41,9 +41,9 @@ $SUFFIX R0 $PREFIX ANIM_NS stand:
             continue
 
     if:
-        get_bool myvar("u")
-        not: get_bool myvar("b")
-        get_bool myvar("f")
+        expr: myvar("u")
+        not: expr: myvar("b")
+        expr: myvar("f")
         coll: any yes
             ;;      +
             ;;
@@ -57,9 +57,9 @@ $SUFFIX R0 $PREFIX ANIM_NS stand:
         delay: $GET_INT DELAY
 
     if:
-        not: get_bool myvar("d")
-        not: get_bool myvar("b")
-        get_bool myvar("f")
+        not: expr: myvar("d")
+        not: expr: myvar("b")
+        expr: myvar("f")
         coll: any yes
             ;;        +
             ;;
@@ -70,8 +70,8 @@ $SUFFIX R0 $PREFIX ANIM_NS stand:
         goto: $SUFFIX R4 $PREFIX ANIM_NS stand
 
     if:
-        not: get_bool myvar("b")
-        get_bool myvar("f")
+        not: expr: myvar("b")
+        expr: myvar("f")
         coll: any yes
             ;; ( )  +
     then:
@@ -80,8 +80,8 @@ $SUFFIX R0 $PREFIX ANIM_NS stand:
         goto: $SUFFIX R5 $PREFIX ANIM_NS stand
 
     if:
-        not: get_bool myvar("b")
-        get_bool myvar("f")
+        not: expr: myvar("b")
+        expr: myvar("f")
         coll: all no
             ;;        .
             ;;       /*
@@ -93,8 +93,8 @@ $SUFFIX R0 $PREFIX ANIM_NS stand:
         delay: $GET_INT DELAY
 
     if:
-        not: get_bool myvar("f")
-        get_bool myvar("b")
+        not: expr: myvar("f")
+        expr: myvar("b")
     then:
         rot: -1
         turn

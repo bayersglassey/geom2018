@@ -16,9 +16,9 @@ $SUFFIX LOOK_SUFFIX look:
     if: any:
         all:
             exists myvar("key")
-            not: get_bool mapvar(myvar("key"))
+            not: expr: mapvar(myvar("key"))
         all:
             exists myvar("antikey")
-            get_bool mapvar(myvar("antikey"))
+            expr: mapvar(myvar("antikey"))
         not: coll: bodies "touch" any yes collmap($SUFFIX LOOK_SUFFIX "looking")
     then: goto delay: $SUFFIX LOOK_SUFFIX unlooking

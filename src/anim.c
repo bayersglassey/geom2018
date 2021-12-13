@@ -399,24 +399,9 @@ static int _parse_cond(stateset_t *stateset, fus_lexer_t *lexer,
         cond->type = STATE_COND_TYPE_EXPR;
         NEXT
         OPEN
-        if(GOT("=="))cond->u.expr.op = STATE_COND_EXPR_OP_EQ;
-        else if(GOT("!="))cond->u.expr.op = STATE_COND_EXPR_OP_NE;
-        else if(GOT( "<"))cond->u.expr.op = STATE_COND_EXPR_OP_LT;
-        else if(GOT("<="))cond->u.expr.op = STATE_COND_EXPR_OP_LE;
-        else if(GOT( ">"))cond->u.expr.op = STATE_COND_EXPR_OP_GT;
-        else if(GOT(">="))cond->u.expr.op = STATE_COND_EXPR_OP_GE;
-        else return UNEXPECTED("== or != or < or <= or > or >=");
-        NEXT
-        err = valexpr_parse(&cond->u.expr.val1_expr, lexer);
-        if(err)return err;
-        err = valexpr_parse(&cond->u.expr.val2_expr, lexer);
-        if(err)return err;
-        CLOSE
-    }else if(GOT("get_bool")){
-        cond->type = STATE_COND_TYPE_GET_BOOL;
-        NEXT
         err = valexpr_parse(&cond->u.valexpr, lexer);
         if(err)return err;
+        CLOSE
     }else if(GOT("exists")){
         cond->type = STATE_COND_TYPE_EXISTS;
         NEXT
@@ -1102,10 +1087,6 @@ void state_cond_cleanup(state_cond_t *cond){
                 state_cond_cleanup)
             break;
         case STATE_COND_TYPE_EXPR:
-            valexpr_cleanup(&cond->u.expr.val1_expr);
-            valexpr_cleanup(&cond->u.expr.val2_expr);
-            break;
-        case STATE_COND_TYPE_GET_BOOL:
         case STATE_COND_TYPE_EXISTS:
             valexpr_cleanup(&cond->u.valexpr);
             break;

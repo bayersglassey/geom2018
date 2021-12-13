@@ -1,9 +1,9 @@
 
 create_body:
-    if: get_bool mapvar("guide_passed_start2")
+    if: expr: mapvar("guide_passed_start2")
     then: goto immediate: start3
 
-    if: get_bool mapvar("guide_passed_start")
+    if: expr: mapvar("guide_passed_start")
     then: goto immediate: start2
 
     if:
@@ -11,7 +11,7 @@ create_body:
 
 start:
     if: any:
-        get_bool mapvar("guide_passed_start")
+        expr: mapvar("guide_passed_start")
         coll: bodies any yes
             ;;
             ;;
@@ -27,7 +27,7 @@ start:
         play: "actor/guide/rec/start.fus"
 
 start2:
-    if: get_bool mapvar("guide_passed_start2")
+    if: expr: mapvar("guide_passed_start2")
     then:
         play: "actor/guide/rec/start2_to_start3.fus"
         goto: start3

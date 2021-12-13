@@ -10,7 +10,7 @@ $SET_INT DELAY 2
 
 init:
     if:
-        get_bool mapvar(myvar("key"))
+        expr: mapvar(myvar("key"))
     then:
         goto immediate: switch_on
 
