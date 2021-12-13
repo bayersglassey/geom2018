@@ -292,6 +292,53 @@ int testrunner(int *n_tests_ptr, int *n_fails_ptr){
             valexpr_cleanup(expr);
         }
 
+        {
+            err = parse_valexpr(expr, "== null null");
+            if(err)return err;
+            ASSERT(valexpr_get_bool(expr, &context));
+            valexpr_cleanup(expr);
+
+            err = parse_valexpr(expr, "!= null 1");
+            if(err)return err;
+            ASSERT(valexpr_get_bool(expr, &context));
+            valexpr_cleanup(expr);
+
+            err = parse_valexpr(expr, "<= 1 1");
+            if(err)return err;
+            ASSERT(valexpr_get_bool(expr, &context));
+            valexpr_cleanup(expr);
+
+            err = parse_valexpr(expr, "< 1 2");
+            if(err)return err;
+            ASSERT(valexpr_get_bool(expr, &context));
+            valexpr_cleanup(expr);
+
+            err = parse_valexpr(expr, "> 999 -999");
+            if(err)return err;
+            ASSERT(valexpr_get_bool(expr, &context));
+            valexpr_cleanup(expr);
+
+            err = parse_valexpr(expr, "== \"aaa\" \"aaa\"");
+            if(err)return err;
+            ASSERT(valexpr_get_bool(expr, &context));
+            valexpr_cleanup(expr);
+
+            err = parse_valexpr(expr, "!= \"aaa\" \"bbb\"");
+            if(err)return err;
+            ASSERT(valexpr_get_bool(expr, &context));
+            valexpr_cleanup(expr);
+
+            err = parse_valexpr(expr, "< \"aaa\" \"bbb\"");
+            if(err)return err;
+            ASSERT(valexpr_get_bool(expr, &context));
+            valexpr_cleanup(expr);
+
+            err = parse_valexpr(expr, "> \"bbb\" \"aaa\"");
+            if(err)return err;
+            ASSERT(valexpr_get_bool(expr, &context));
+            valexpr_cleanup(expr);
+        }
+
         vars_cleanup(&yourvars);
         vars_cleanup(&mapvars);
         vars_cleanup(&globalvars);

@@ -16,6 +16,7 @@ enum valexpr_type {
     VALEXPR_TYPE_MYVAR,
     VALEXPR_TYPE_IF,
     VALEXPR_TYPE_AS,
+    VALEXPR_TYPE_OP,
     VALEXPR_TYPES
 };
 
@@ -28,6 +29,7 @@ static const char *valexpr_type_msg(int type){
         case VALEXPR_TYPE_MYVAR: return "myvar";
         case VALEXPR_TYPE_IF: return "if";
         case VALEXPR_TYPE_AS: return "as";
+        case VALEXPR_TYPE_OP: return "op";
         default: return "unknown";
     }
 }
@@ -62,6 +64,28 @@ static const char *valexpr_as_msg(int type){
 }
 
 
+enum valexpr_op {
+    VALEXPR_OP_EQ,
+    VALEXPR_OP_NE,
+    VALEXPR_OP_LT,
+    VALEXPR_OP_LE,
+    VALEXPR_OP_GT,
+    VALEXPR_OP_GE,
+};
+
+static const char *valexpr_op_msg(int op){
+    switch(op){
+        case VALEXPR_OP_EQ: return "==";
+        case VALEXPR_OP_NE: return "!=";
+        case VALEXPR_OP_LT: return "<";
+        case VALEXPR_OP_LE: return "<=";
+        case VALEXPR_OP_GT: return ">";
+        case VALEXPR_OP_GE: return ">=";
+        default: return "???";
+    }
+}
+
+
 typedef struct valexpr {
     /* An expression specifying a val_t */
     int type; /* enum valexpr_type */
@@ -77,6 +101,11 @@ typedef struct valexpr {
             int type; /* enum valexpr_as */
             struct valexpr *sub_expr;
         } as;
+        struct {
+            int op; /* enum valexpr_op */
+            struct valexpr *sub_expr1;
+            struct valexpr *sub_expr2;
+        } op;
     } u;
 } valexpr_t;
 
