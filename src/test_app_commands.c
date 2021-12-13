@@ -178,7 +178,7 @@ static int _test_app_command_add_player(test_app_t *app, fus_lexer_t *lexer, boo
     if(err)return err;
 
     /* Attach body to player */
-    player_set_body(player, body);
+    player->body = body;
 
     /* Move body to the respawn location */
     err = body_respawn(body, spawn.pos, spawn.rot, spawn.turn, map);

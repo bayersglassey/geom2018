@@ -72,26 +72,25 @@ int test_app_set_players(test_app_t *app, int n_players){
             player->respawn_location.map_filename, &respawn_map);
         if(err)return err;
 
-        ARRAY_PUSH_NEW(body_t*, respawn_map->bodies, body)
-        err = body_init(body, player->game, respawn_map,
-            app->stateset_filename, NULL, NULL);
-        if(err)return err;
+        /* Set player->body */
+        if(i >= n_players){
+            player->body = NULL;
+            continue;
+        }else{
+            ARRAY_PUSH_NEW(body_t*, respawn_map->bodies, body)
+            err = body_init(body, player->game, respawn_map,
+                app->stateset_filename, NULL, NULL);
+            if(err)return err;
 
-        /* Attach body to player */
-        player_set_body(player, body);
+            /* Attach body to player */
+            player->body = body;
 
-        /* Move body to the respawn location */
-        err = body_respawn(body,
-            player->respawn_location.loc.pos, player->respawn_location.loc.rot,
-            player->respawn_location.loc.turn, respawn_map);
-        if(err)return err;
-    }
-    for(int i = n_players; i < game->players_len; i++){
-        player_t *player = game->players[i];
-        if(player->body == NULL)continue;
-        err = body_remove(player->body);
-        if(err)return err;
-        player->body = NULL;
+            /* Move body to the respawn location */
+            err = body_respawn(body,
+                player->respawn_location.loc.pos, player->respawn_location.loc.rot,
+                player->respawn_location.loc.turn, respawn_map);
+            if(err)return err;
+        }
     }
     return 0;
 }

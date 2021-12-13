@@ -117,7 +117,7 @@ int test_app_list_bodies_select_item(test_app_list_t *list){
             } break;
             case 1: {
                 player_t *player = data->app->hexgame.players[0];
-                player_set_body(player, body);
+                player->body = body;
                 camera_set_body(data->app->camera, body);
             } break;
             case 2: {

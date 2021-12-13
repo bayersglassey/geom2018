@@ -78,10 +78,6 @@ int player_init(player_t *player, hexgame_t *game, int keymap,
     return 0;
 }
 
-void player_set_body(player_t *player, body_t *body){
-    player->body = body;
-}
-
 int player_get_index(player_t *player){
     hexgame_t *game = player->game;
     for(int i = 0; i < game->players_len; i++){
