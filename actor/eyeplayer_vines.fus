@@ -63,6 +63,7 @@ start2:
     if: coll: bodies "touch" any yes collmap("detect_small")
     then:
         play: "data/maps/demo/recs/eyeplayer_vines_run_away_1_looking.fus"
+        set mapvar("eyeplayer_vines_looking"): T
         goto: start2_looking
 
     if: get_bool mapvar("player_passed_vines")
@@ -76,6 +77,7 @@ start2_looking:
     if: not: coll: bodies "touch" any yes collmap("detect_small")
     then:
         play: "data/maps/demo/recs/eyeplayer_vines_run_away_1_unlooking.fus"
+        set mapvar("eyeplayer_vines_looking"): F
         goto: start2
 
 start3:
@@ -83,7 +85,7 @@ start3:
         set mapvar("eyeplayer_vines_ran_away_3"): T
 
         # Delay long enough for the mini_eye to play its "appear" animation
-        delay: 8
+        delay: 11
         goto: start3_remove
 
 start3_remove:

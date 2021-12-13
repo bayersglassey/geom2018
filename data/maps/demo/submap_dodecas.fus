@@ -10,6 +10,9 @@ recs:
 actors:
     : (21 -15) 5 y "actor/airollerplayer.fus" "player_cpu"
 
+vars:
+    "eyeplayer_dodecas_ran_away_1": F
+
 submaps:
     :
         file: "data/maps/demo/dodecas_bg.fus"

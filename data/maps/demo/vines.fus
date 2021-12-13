@@ -1,4 +1,9 @@
 parts:
+    "E": recording "data/recs/mini_eye_crouch.fus"
+        vars:
+            "key": "eyeplayer_vines_ran_away_3"
+            "appear": T
+            "respawn_mapvar": "eyeplayer_vines_mini_eye_respawn"
     "h": recording "data/recs/hotspot.fus"
         vars:
             "key": "player_passed_vines"
@@ -40,9 +45,9 @@ collmap:
     ;;  \   \
     ;;   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  %+ - +   . %(+)- +   .   .   [222] [222]
-    ;;                                                                               %/ \ /        %\ /            [222]  [22]
-    ;;   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  %+ - +   .   .  %+   .   .     [222]   [2]
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  %+ - +   . %(+)- +   .   .      [222] [222]
+    ;;                                                                               %/ \ /        %\ /               [222]  [22]
+    ;;   .   ! - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  %+ - +   .   .  %+   .   .    [E] [222]   [2]
     ;;      /     \
     ;; .   +   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;      \     /

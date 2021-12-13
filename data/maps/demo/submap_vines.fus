@@ -1,18 +1,60 @@
-file: "data/maps/demo/vines.fus"
 pos: (-4 2)
-camera: (-7 5)
 mapper: ("triple")
 palette: "data/maps/demo/pals/vines.fus"
 tileset: "data/maps/demo/tilesets/water.fus"
+
 actors:
     : "actor/hermit/actor.fus" "player_cpu"
+
 vars:
+    "eyeplayer_vines_ran_away_1": F
+    "eyeplayer_vines_ran_away_2": F
+    "eyeplayer_vines_ran_away_3": F
+    nosave "eyeplayer_vines_looking": F
+    "eyeplayer_vines_mini_eye_respawn": 0
+
     "jungle_cage": F
     "vines3_door": F
     "player_passed_vines": F
+
+
+$SET_STR VINES_HIDING: lines: at(25 3)
+    ;;Shhhh! I'm hiding!
+
+
+$SET_STR VINES_TAKE_ME: lines: at(14 24)
+    ;;Wait --
+    ;;
+    ;;
+    ;;  -- take me with you!
+
+
+$SET_STR VINES_COME_BACK: lines: at(30 15)
+    ;;Come baaack!
+    ;;
+    ;;Take me with you!
+
+
 submaps:
     :
+        file: "data/maps/demo/vines.fus"
+        text:
+            if all:
+                mapvar("eyeplayer_vines_ran_away_1")
+                mapvar("eyeplayer_vines_looking")
+            then $GET_STR VINES_HIDING
+            else if all:
+                mapvar("eyeplayer_vines_ran_away_2")
+            then $GET_STR VINES_TAKE_ME
+            else null
+        camera: (-7 5)
+    :
         file: "data/maps/demo/vines2.fus"
+        text:
+            if all:
+                mapvar("eyeplayer_vines_ran_away_3")
+            then $GET_STR VINES_COME_BACK
+            else null
         pos: (-26 -5)
         camera: (-7 3)
         mapper: ("quadruple")
