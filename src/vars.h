@@ -13,7 +13,6 @@ enum var_type {
     VAL_TYPE_BOOL,
     VAL_TYPE_INT,
     VAL_TYPE_STR,
-    VAL_TYPE_CONST_STR,
     VAL_TYPES
 };
 
@@ -22,9 +21,9 @@ typedef struct val {
     union {
         bool b;
         int i;
-        char *s;
-        const char *cs;
+        const char *s;
     } u;
+    char *s; /* If s == u.s, we own the string */
 } val_t;
 
 typedef unsigned var_props_t;
@@ -87,7 +86,6 @@ void val_init(val_t *val);
 void val_fprintf(val_t *val, FILE *file);
 const char *val_type_name(int type);
 
-void val_unset(val_t *val);
 bool val_get_bool(val_t *val);
 int val_get_int(val_t *val);
 const char *val_get_str(val_t *val);
@@ -95,11 +93,10 @@ void val_set_null(val_t *val);
 void val_set_bool(val_t *val, bool b);
 void val_set_int(val_t *val, int i);
 void val_set_str(val_t *val, char *s);
-void val_set_const_str(val_t *val, const char *cs);
+void val_set_const_str(val_t *val, const char *s);
 
 int val_copy(val_t *val1, val_t *val2);
 
-bool val_type_eq(val_t *val1, val_t *val2);
 bool val_eq(val_t *val1, val_t *val2);
 bool val_ne(val_t *val1, val_t *val2);
 bool val_lt(val_t *val1, val_t *val2);

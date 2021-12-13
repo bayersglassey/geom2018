@@ -123,25 +123,26 @@ void valexpr_fprintf(valexpr_t *expr, FILE *file){
 
 void valexpr_set_literal_null(valexpr_t *expr){
     expr->type = VALEXPR_TYPE_LITERAL;
-    expr->u.val.type = VAL_TYPE_NULL;
+    val_init(&expr->u.val);
+    val_set_null(&expr->u.val);
 }
 
 void valexpr_set_literal_bool(valexpr_t *expr, bool b){
     expr->type = VALEXPR_TYPE_LITERAL;
-    expr->u.val.type = VAL_TYPE_BOOL;
-    expr->u.val.u.b = b;
+    val_init(&expr->u.val);
+    val_set_bool(&expr->u.val, b);
 }
 
 void valexpr_set_literal_int(valexpr_t *expr, int i){
     expr->type = VALEXPR_TYPE_LITERAL;
-    expr->u.val.type = VAL_TYPE_INT;
-    expr->u.val.u.i = i;
+    val_init(&expr->u.val);
+    val_set_int(&expr->u.val, i);
 }
 
-void valexpr_set_literal_str(valexpr_t *expr, const char *cs){
+void valexpr_set_literal_str(valexpr_t *expr, const char *s){
     expr->type = VALEXPR_TYPE_LITERAL;
-    expr->u.val.type = VAL_TYPE_CONST_STR;
-    expr->u.val.u.cs = cs;
+    val_init(&expr->u.val);
+    val_set_const_str(&expr->u.val, s);
 }
 
 int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer){

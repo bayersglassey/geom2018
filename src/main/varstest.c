@@ -51,7 +51,7 @@ int testrunner(int *n_tests_ptr, int *n_fails_ptr){
     /* VAL OPERATIONS, DIFFERENT TYPES */
     {
         val_t val1 = {.type = VAL_TYPE_INT, .u.i = 2};
-        val_t val2 = {.type = VAL_TYPE_CONST_STR, .u.cs = "HELLO"};
+        val_t val2 = {.type = VAL_TYPE_STR, .u.s = "HELLO"};
         ASSERT(!val_eq(&val1, &val2));
         ASSERT(val_ne(&val1, &val2));
     }
@@ -87,8 +87,8 @@ int testrunner(int *n_tests_ptr, int *n_fails_ptr){
 
     /* STR VAL OPERATIONS */
     {
-        val_t val1 = {.type = VAL_TYPE_CONST_STR, .u.cs = "AAA"};
-        val_t val2 = {.type = VAL_TYPE_CONST_STR, .u.cs = "BBB"};
+        val_t val1 = {.type = VAL_TYPE_STR, .u.s = "AAA"};
+        val_t val2 = {.type = VAL_TYPE_STR, .u.s = "BBB"};
         ASSERT(!val_eq(&val1, &val2));
         ASSERT(val_ne(&val1, &val2));
         ASSERT(val_lt(&val1, &val2));

@@ -999,10 +999,10 @@ Nov 5, 2021:
                             * It's used for all keys
                                 * Would need to add support for var_t not owning its keys!
                             * It's used for all parsed vals
-                                * With VAL_TYPE_CONST_STR
+                                * With VAL_TYPE_STR
                             * If we add dynamically-generated vals (e.g. "concat" etc),
                               maybe don't use the stringstore?..
-                                * So, use VAL_TYPE_STR instead of VAL_TYPE_CONST_STR?..
+                                * So, use VAL_TYPE_STR with an owned string (val->s)?..
                                 * !!! I'm not sure about this. Anyway, it doesn't really
                                   matter right now.
 

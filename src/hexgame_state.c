@@ -291,7 +291,7 @@ int state_cond_match(state_cond_t *cond,
             return 2;
         }
 
-        if(!val_type_eq(val1, val2)){
+        if(val1->type != val2->type){
             RULE_PERROR()
             fprintf(stderr, "Type mismatch between LHS, RHS: ");
             val_fprintf(val1, stderr);
