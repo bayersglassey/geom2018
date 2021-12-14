@@ -5,8 +5,24 @@
 $SET_INT MAX_AGE 100
 
 
-proc on_death:
+proc on_collide:
+    # me: spit
+    # you: thing we collided with
 
+    if: exists myvar("carrying")
+    then:
+        # This spit is carrying something
+
+        # If we hit something which accepts what we're carrying,
+        # then transfer it over
+        if:
+            exists yourvar("accept_carryable")
+            expr: == yourvar("accept_carryable") myvar("carrying")
+        then: as you: call: accept_carryable
+
+    call: on_death
+
+proc on_death:
     if: exists myvar("carrying")
     then:
         # This spit is carrying something
@@ -30,8 +46,12 @@ fly:
         ;;
         ;;  (.)  .
 
-    on "crush": goto: dead
-    on "solid": goto: dead
+    on "crush":
+        call: on_collide
+        goto: dead
+    on "solid":
+        call: on_collide
+        goto: dead
 
     if:
     then:
@@ -47,6 +67,7 @@ fly:
             ;;
             ;;  ( )  .
     then:
+        call: on_death
         goto delay: dead
 
     if:
@@ -71,8 +92,12 @@ crouch_fly:
         ;;  */*\
         ;; (.)  .   .
 
-    on "crush": goto: crouch_dead
-    on "solid": goto: crouch_dead
+    on "crush":
+        call: on_collide
+        goto: crouch_dead
+    on "solid":
+        call: on_collide
+        goto: crouch_dead
 
     if:
     then:
@@ -86,6 +111,7 @@ crouch_fly:
             ;;    *\*
             ;; ( )  .
     then:
+        call: on_death
         goto delay: crouch_dead
 
     if:
@@ -102,12 +128,8 @@ crouch_fly:
 
 dead:
     rgraph: "dead_once"
-    if() then:
-        call: on_death
-        remove
+    if() then: remove
 
 crouch_dead:
     rgraph: "dead_once_crouch"
-    if() then:
-        call: on_death
-        remove
+    if() then: remove

@@ -1,4 +1,30 @@
 
+collmsgs: "solid"
+
+vars:
+    # This tells spit that we "accept" mini_eyes
+    # (i.e. if spit which collides with us is carrying a mini_eye,
+    # it should transfer it to us by calling our accept_carryable proc)
+    "accept_carryable": "mini_eye"
+
+    # If set to T, we open even if a player isn't nearby
+    "auto_open": F
+
+proc accept_carryable:
+    # me: an eye
+    # you: spit which is carrying a mini_eye
+
+    if: exists myvar("accepted_mini_eye_key")
+    then: set mapvar(myvar("accepted_mini_eye_key")): T
+
+
+collmap "hitbox":
+    ;;   .   .
+    ;;   *\*/*
+    ;; . -(+)- .
+    ;;   */*\*
+    ;;   .   .
+
 collmap "opening":
     ;;            + - + - + - + - + - +
     ;;           /*\*/*\*/*\*/*\*/*\*/*\
@@ -40,6 +66,7 @@ collmap "looking_d": collmap("looking") ^ -2
 
 closed:
     rgraph: "eye_closed"
+    hitbox: collmap("hitbox")
 
     if:
         any:
@@ -48,11 +75,14 @@ closed:
         any:
             not: exists myvar("antikey")
             not: expr: mapvar(myvar("antikey"))
-        coll: bodies "touch" any yes collmap("opening")
+        any:
+            expr: myvar("auto_open")
+            coll: bodies "touch" any yes collmap("opening")
     then: goto delay: opening
 
 opening:
     rgraph: "eye_opening"
+    hitbox: collmap("hitbox")
     if() then:
         if: exists myvar("opened_key")
         then:
@@ -61,6 +91,7 @@ opening:
 
 open:
     rgraph: "eye_open"
+    hitbox: collmap("hitbox")
 
     if: any:
         all:
@@ -69,7 +100,9 @@ open:
         all:
             exists myvar("antikey")
             expr: mapvar(myvar("antikey"))
-        not: coll: bodies "touch" any yes collmap("opening")
+        not: any:
+            expr: myvar("auto_open")
+            coll: bodies "touch" any yes collmap("opening")
     then: goto delay: closing
 
     if:
@@ -92,6 +125,7 @@ open:
 
 closing:
     rgraph: "eye_closing"
+    hitbox: collmap("hitbox")
     if() then:
         if: exists myvar("opened_key")
         then:
