@@ -1085,6 +1085,11 @@ src/hexgame_savelocation.[ch]:
 ...for instance, if you carry a mini_eye, then shoot it, and save while it's in the air,
 and then reload the game, we need to make sure the mini_eye isn't permanently gone.
 
+    ...HOWEVER, AN ALTERNATE APPROACH IS:
+
+        * Don't save body->vars, just map->vars
+        * So if you are carrying something, the relevant mapvars should be marked nosave
+
 
 Dec 12, 2021:
 -------------
@@ -1108,3 +1113,14 @@ So, what is happening at hexmap_load_hexmap_recording (hexmap.c:414)?..
     ARRAY_PUSH_NEW(body_t*, map->bodies, body)
 
 ...and that's happening specifically when recording->type == HEXMAP_RECORDING_TYPE_ACTOR.
+
+
+Dec 13, 2021:
+-------------
+
+* procs should be able to live on states as well as stateset...
+* Probably also want a STATE_COND for whether yourvars exists (i.e. whether your_body != NULL)
+* coinlike things should know how to remove themselves when their key becomes F (or antikey becomes T)?..
+    * Need this for when mapvar("eyeplayer_vines_ran_away_4") becomes T, then mini_eye should disappear
+
+* rec-vlc.sh: NEED TO UPDATE YOUR LAPPY'S CODECS SO THE RESULTING VIDEO DOESN'T HAVE GREEN ARTIFACTS
