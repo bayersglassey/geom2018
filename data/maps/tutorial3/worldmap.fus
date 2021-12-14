@@ -25,23 +25,6 @@ $SET_STR THEN_RELEASE: lines: at(29 36)
     ;;Soon we can
     ;;    release you.
 
-$SET_STR LOCKED_OUT: lines: at(25 24)
-    ;;You're locked out!
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;    Better look
-    ;;     around for
-    ;;       a way to
-    ;;        open it.
-
 $SET_STR CREATURES: lines: at(16 16)
     ;;These
     ;;   rolling blue
@@ -177,12 +160,6 @@ submaps:
                         visible: not mapvar("switch3")
             :
                 file: "data/maps/tutorial3/start_exit.fus"
-                text:
-                    if any:
-                        mapvar("start_eye_a_open")
-                        mapvar("start_eye_b_open")
-                        mapvar("start_eye_c_open")
-                    then if mapvar("switch3") then null else $GET_STR LOCKED_OUT else null
                 pos: (3 -5)
                 tileset: "data/tileset2.fus"
                 doors:

@@ -15,7 +15,16 @@ $SET_STR GO_BACK: lines:
     ;;
     ;;     You should probably go back and get that.
 
-text: if mapvar("start2_eye_a_open") then if mapvar("coin_f") then $GET_STR THANKS2 else $GET_STR COINS2 else null
+text:
+    if mapvar("start2_eye_a_open") then
+        if mapvar("coin_f")
+        then $GET_STR THANKS2
+        else if all:
+            mapvar("coin_d")
+            not mapvar("coin_e")
+        then $GET_STR GO_BACK
+        else $GET_STR COINS2
+    else null
 text: if mapvar("start2_eye_b_open") then if mapvar("coin_c") then null else $GET_STR SPIT else null
 text: if mapvar("start2_eye_c_open") then if mapvar("coin_c") then null else $GET_STR GO_BACK else null
 parts:

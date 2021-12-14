@@ -15,11 +15,12 @@ vars:
     nosave "start3_eye_a_open": 0
     nosave "start3_eye_b_open": 0
     nosave "start3_eye_c_open": 0
+    nosave "loop_eye_a_open": 0
+    nosave "loop_eye_b_open": 0
     nosave "start4_eye_a_open": 0
     nosave "start4_eye_b_open": 0
     nosave "start4_eye_c_open": 0
     nosave "skypipes_eye_a_open": 0
-    nosave "skypipes3_eye_a_open": 0
     nosave "skypipes4_eye_a_open": 0
 
 submaps:

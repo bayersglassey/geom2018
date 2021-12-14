@@ -2,6 +2,10 @@ $SET_STR NEED_TO_JUMP: lines:
     ;;Sometimes you'll need to jump.
     ;;
     ;;Press the up arrow key to leap forwards!
+$SET_STR A_SPIDER: lines: at(35 20)
+    ;;A spider?..
+    ;;  sending you out,
+    ;;    are they?..
 $SET_STR NEED_TO_UNDERNEATH: lines:
     ;;    Sometimes you'll need to travel upside down.
     ;;    Don't worry about it!
@@ -9,7 +13,7 @@ $SET_STR NEED_TO_UNDERNEATH: lines:
 
 text: if mapvar("start4_eye_a_open") then if mapvar("made_it_underneath") then null else $GET_STR NEED_TO_JUMP else null
 text: if mapvar("start4_eye_b_open") then $GET_STR NEED_TO_UNDERNEATH else null
-text: if mapvar("start4_eye_c_open") then $GET_STR NEED_TO_UNDERNEATH else null
+text: if mapvar("start4_eye_c_open") then $GET_STR A_SPIDER else null
 parts:
     "e": recording "data/recs/eye.fus"
     "a": recording "data/recs/eye.fus"
@@ -22,7 +26,7 @@ parts:
             "opened_key": "start4_eye_b_open"
     "c": recording "data/recs/eye.fus"
         vars:
-            "key": "made_it_underneath"
+            "antikey": "made_it_underneath"
             "opened_key": "start4_eye_c_open"
     "h": recording "data/recs/hotspot.fus"
         vars:

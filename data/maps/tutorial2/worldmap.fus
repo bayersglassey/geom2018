@@ -18,7 +18,6 @@ vars:
     nosave "start2_eye_b_open": 0
     nosave "start2_eye_c_open": 0
     nosave "start3_eye_a_open": 0
-    nosave "start3b_eye_a_open": 0
     nosave "start4_eye_a_open": 0
 
     "start3b_coin_a": F

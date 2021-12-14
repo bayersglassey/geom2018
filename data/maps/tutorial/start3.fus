@@ -1,6 +1,10 @@
-$SET_STR KEEP_GOING: lines:
+$SET_STR SAVEPOINT_C: lines:
     ;;
-    ;;  Keep going!
+    ;;  If you ever feel stuck,
+    ;;    press "1" to return
+    ;;      to where you last saved.
+    ;;
+    ;;           (Try it now!)
 $SET_STR REMEMBER: lines:
     ;;
     ;;
@@ -39,7 +43,7 @@ $SET_STR REMEMBER: lines:
 $SET_STR ONWARD: lines:
     ;;Onward and upward!
 
-text: if mapvar("start3_eye_a_open") then if mapvar("made_it_underneath") then null else $GET_STR KEEP_GOING else null
+text: if mapvar("start3_eye_a_open") then if mapvar("made_it_underneath") then null else $GET_STR SAVEPOINT_C else null
 text: if mapvar("start3_eye_b_open") then if mapvar("made_it_underneath") then null else $GET_STR REMEMBER else null
 text: if mapvar("start3_eye_c_open") then $GET_STR ONWARD else null
 parts:

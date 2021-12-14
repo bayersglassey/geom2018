@@ -13,9 +13,9 @@ $SET_STR COIN_BEASTS: lines:
     ;; The purple people
     ;; cannot hurt you.
     ;;
-    ;;   You must...
+    ;;   Please...
     ;;   collect them...
-    ;;   to continue.
+    ;;   for me.
 
 spawn: (0 0) 0 y
 text: if mapvar("start4_eye_a_open") then $GET_STR COIN_BEASTS else null

@@ -1,12 +1,36 @@
+$SET_STR UH_OH: lines: at(31 16)
+    ;;Uh oh.
+$SET_STR LETTING_ONE_GO: lines: at(38 3)
+    ;;They're
+    ;;letting
+    ;;one
+    ;;   go...
+
+text:
+    if all:
+        mapvar("made_it_underneath")
+        mapvar("loop_eye_a_open")
+    then $GET_STR UH_OH else null
+text:
+    if all:
+        mapvar("made_it_underneath")
+        mapvar("loop_eye_b_open")
+    then $GET_STR LETTING_ONE_GO else null
+
 parts:
-    "e": recording "data/recs/eye.fus"
+    "a": recording "data/recs/eye.fus"
+        vars:
+            "opened_key": "loop_eye_a_open"
+    "b": recording "data/recs/eye.fus"
+        vars:
+            "opened_key": "loop_eye_b_open"
 collmap:
     ;;
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                                   * * *
     ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                                   * * * * * *                   * * *
-    ;;   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .     [e^3]
+    ;;   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .     [b^3]
     ;;                                         * * *                   * * *
     ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                 * * * * *                                       * * *
@@ -20,7 +44,7 @@ collmap:
     ;;                     * * *        \                 /
     ;;   .   .   .   .   .   .   .   .   +   .   .   .   +   .   .   .   .   .   .   .   .
     ;;                     * * *          \             /                    * * *
-    ;;     .   .   .   ?   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .      [e]
+    ;;     .   .   .   ?   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .      [a]
     ;;                     * * *                      /                      * * * * * *
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                     * * *                             * * *                 * * * * * *
