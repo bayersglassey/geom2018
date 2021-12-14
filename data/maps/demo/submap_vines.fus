@@ -10,20 +10,24 @@ vars:
     "eyeplayer_vines_ran_away_1": F
     "eyeplayer_vines_ran_away_2": F
     "eyeplayer_vines_ran_away_3": F
+    "eyeplayer_vines_ran_away_4": F
     nosave "eyeplayer_vines_looking": F
-    "eyeplayer_vines_mini_eye_respawn": 0
+    nosave "eyeplayer_vines_mini_eye_respawn": 0
 
-    "vines2_fluff_a": 0
-    "vines2_fluff_b": 0
-    "vines2_fluff_c": 0
-    "vines3_fluff_a": 0
-    "vines3_fluff_b": 0
-    "vines3_fluff_c": 0
+    # Hotspots for showing "fluff" (flavour text)
+    nosave "vines2_fluff_a": 0
+    nosave "vines2_fluff_b": 0
+    nosave "vines2_fluff_c": 0
+    nosave "vines3_fluff_a": 0
+    nosave "vines3_fluff_b": 0
+    nosave "vines3_fluff_c": 0
 
     "jungle_cage": F
     "vines3_door": F
     "player_passed_vines": F
     "player_passed_vines2": F
+    nosave "player_leaving_vines": 0
+    nosave "player_leaving_vines_for_real": 0
 
 
 $SET_STR VINES_HIDING: lines: at(25 3)
@@ -31,10 +35,40 @@ $SET_STR VINES_HIDING: lines: at(25 3)
 
 
 $SET_STR VINES_TAKE_ME: lines: at(14 24)
-    ;;Wait --
+    ;;      Wait!
     ;;
     ;;
-    ;;  -- take me with you!
+    ;;      Are you
+    ;;       heading west?
+    ;;
+    ;;
+    ;;       ...take me
+    ;;          with you!
+
+$SET_STR VINES_THANKS: lines: at(14 24)
+    ;;You're not so bad
+    ;;
+    ;;
+    ;;
+    ;;    ...for a spider
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;      If you're
+    ;;       heading west,
+    ;;        I'll come too
+
+$SET_STR VINES_NOT_OUT_THERE: lines: at(16 26)
+    ;;NO WAIT
+    ;;
+    ;;
+    ;;  THERE ARE
+    ;;    SPIDERS
+    ;;   OUT THERE
+
+$SET_STR VINES_AAA: lines: at(16 26)
+    ;;AAAAAAAAAAAAAAAAAAAA
 
 $SET_STR VINES_COME_BACK: lines: at(35 15)
     ;;Come baaack!
@@ -63,10 +97,12 @@ $SET_STR VINES2_FLUFF_C: lines: at(20 23)
 $SET_STR VINES3_FLUFF_A: lines: at(10 44)
     ;;Looks like someone built a house up there.
 
-$SET_STR VINES3_FLUFF_B: lines: at(1 5)
-    ;;But who
-    ;; lives in
-    ;;  there?..
+$SET_STR VINES3_FLUFF_B: lines: at(1 1)
+    ;;But
+    ;; who
+    ;;lives
+    ;; in
+    ;;there?..
 
 $SET_STR VINES3_FLUFF_C: lines: at(20 14)
     ;; Let's
@@ -79,6 +115,14 @@ $SET_STR VINES4_FLUFF_A: lines: at(5 4)
     ;;
     ;;
     ;;  OUTTA  THERE  !!
+    ;;
+    ;;
+    ;;...say, can you spit me into
+    ;;  that receptacle?
+
+
+$SET_STR VINES4_FLUFF_B: lines: at(6 7)
+    ;;Thanks for everything!
 
 
 submaps:
@@ -91,8 +135,16 @@ submaps:
             then $GET_STR VINES_HIDING
             else if all:
                 mapvar("eyeplayer_vines_ran_away_2")
-                == mapvar("eyeplayer_vines_mini_eye_respawn") 0
-            then $GET_STR VINES_TAKE_ME
+                not mapvar("eyeplayer_vines_ran_away_4")
+            then
+                if > mapvar("eyeplayer_vines_mini_eye_respawn") 0
+                then
+                    if > mapvar("player_leaving_vines_for_real") 0
+                    then $GET_STR VINES_AAA
+                    else if > mapvar("player_leaving_vines") 0
+                    then $GET_STR VINES_NOT_OUT_THERE
+                    else $GET_STR VINES_THANKS
+                else $GET_STR VINES_TAKE_ME
             else null
         camera: (-7 5)
     :
@@ -100,6 +152,7 @@ submaps:
         text:
             if all:
                 mapvar("eyeplayer_vines_ran_away_3")
+                not mapvar("eyeplayer_vines_ran_away_4")
                 == mapvar("eyeplayer_vines_mini_eye_respawn") 0
             then $GET_STR VINES_COME_BACK
             else null
@@ -149,7 +202,9 @@ submaps:
             :
                 file: "data/maps/demo/vines4.fus"
                 text:
-                    if > mapvar("eyeplayer_vines_mini_eye_respawn") 0
+                    if mapvar("eyeplayer_vines_ran_away_4")
+                    then $GET_STR VINES4_FLUFF_B
+                    else if > mapvar("eyeplayer_vines_mini_eye_respawn") 0
                     then $GET_STR VINES4_FLUFF_A
                     else null
                 pos: (-40 4)

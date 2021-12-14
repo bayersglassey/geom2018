@@ -38,6 +38,11 @@ collmap "detect_small":
 
 create_body:
     if:
+        expr: mapvar("eyeplayer_vines_ran_away_2")
+    then:
+        goto immediate: start3_remove
+
+    if:
         expr: mapvar("eyeplayer_vines_ran_away_1")
     then:
         play: "data/maps/demo/recs/eyeplayer_vines_wait_2.fus"
