@@ -1,3 +1,5 @@
+spawn: (2 -2) 0 n
+
 $SET_STR FISHEYE_BECOME: lines: at(0 25)
     ;;              Hey.
     ;;
