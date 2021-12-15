@@ -24,7 +24,7 @@ void hexmap_recording_cleanup(hexmap_recording_t *recording){
     vars_cleanup(&recording->bodyvars);
 }
 
-int hexmap_recording_init(hexmap_recording_t *recording, int type,
+void hexmap_recording_init(hexmap_recording_t *recording, int type,
     const char *filename, const char *palmapper_name, int frame_offset
 ){
     recording->type = type;
@@ -38,7 +38,6 @@ int hexmap_recording_init(hexmap_recording_t *recording, int type,
 
     vars_init(&recording->vars);
     vars_init(&recording->bodyvars);
-    return 0;
 }
 
 int hexmap_recording_clone(hexmap_recording_t *recording1,
@@ -46,7 +45,7 @@ int hexmap_recording_clone(hexmap_recording_t *recording1,
 ){
     int err;
 
-    err = hexmap_recording_init(recording1, recording2->type,
+    hexmap_recording_init(recording1, recording2->type,
         recording2->filename, recording2->palmapper_name,
         recording2->frame_offset);
 
@@ -72,13 +71,26 @@ void hexmap_rendergraph_cleanup(hexmap_rendergraph_t *rendergraph){
     /* Nuthin */
 }
 
-int hexmap_rendergraph_init(hexmap_rendergraph_t *rendergraph,
+void hexmap_rendergraph_init(hexmap_rendergraph_t *rendergraph,
     const char *name, const char *palmapper_name
 ){
     rendergraph->name = name;
     rendergraph->palmapper_name = palmapper_name;
     trf_zero(&rendergraph->trf);
-    return 0;
+}
+
+
+/*******************
+ * HEXMAP LOCATION *
+ *******************/
+
+void hexmap_location_cleanup(hexmap_location_t *location){
+    /* Nuthin */
+}
+
+void hexmap_location_init(hexmap_location_t *location, const char *name){
+    location->name = name;
+    memset(&location->loc, 0, sizeof(location->loc));
 }
 
 
@@ -86,7 +98,7 @@ int hexmap_rendergraph_init(hexmap_rendergraph_t *rendergraph,
  * HEXCOLLMAP *
  **************/
 
-int hexcollmap_part_init(hexcollmap_part_t *part, int type,
+void hexcollmap_part_init(hexcollmap_part_t *part, int type,
     char part_c, const char *filename, const char *palmapper_name,
     int frame_offset, valexpr_t *visible_expr, bool visible_not,
     vars_t *vars, vars_t *bodyvars
@@ -109,8 +121,6 @@ int hexcollmap_part_init(hexcollmap_part_t *part, int type,
     Which it does. (See the comment in definition of vars_t.) */
     part->vars = *vars;
     part->bodyvars = *bodyvars;
-
-    return 0;
 }
 
 void hexcollmap_part_cleanup(hexcollmap_part_t *part){
@@ -126,6 +136,8 @@ void hexcollmap_cleanup(hexcollmap_t *collmap){
         hexmap_recording_cleanup)
     ARRAY_FREE_PTR(hexmap_rendergraph_t*, collmap->rendergraphs,
         hexmap_rendergraph_cleanup)
+    ARRAY_FREE_PTR(hexmap_location_t*, collmap->locations,
+        hexmap_location_cleanup)
     ARRAY_FREE_PTR(valexpr_t*, collmap->text_exprs,
         valexpr_cleanup)
 }

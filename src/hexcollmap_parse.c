@@ -285,10 +285,24 @@ static int hexcollmap_draw(hexcollmap_t *collmap1, hexcollmap_t *collmap2,
 
         ARRAY_PUSH_NEW(hexmap_rendergraph_t*, collmap1->rendergraphs,
             rendergraph1)
-        err = hexmap_rendergraph_init(rendergraph1,
+        hexmap_rendergraph_init(rendergraph1,
             rendergraph2->name, rendergraph2->palmapper_name);
-        if(err)return err;
         trf_apply(space, &rendergraph1->trf, trf);
+    }
+
+    /* "Draw" locations from collmap2 onto collmap1, in other words copy
+    them while adjusting location->loc appropriately */
+    for(int i = 0; i < collmap2->locations_len; i++){
+        hexmap_location_t *location2 = collmap2->locations[i];
+
+        ARRAY_PUSH_NEW(hexmap_location_t*, collmap1->locations,
+            location1)
+        hexmap_location_init(location1, location2->name);
+
+        trf_t trf2;
+        hexgame_location_init_trf(&location2->loc, &trf2);
+        trf_apply(space, &trf2, trf);
+        hexgame_location_from_trf(&location1->loc, &trf2);
     }
 
     for(int i = 0; i < collmap2->text_exprs_len; i++){
@@ -332,12 +346,11 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
     ){
         ARRAY_PUSH_NEW(hexmap_recording_t*, collmap->recordings,
             recording)
-        err = hexmap_recording_init(recording,
+        hexmap_recording_init(recording,
             part->type == HEXCOLLMAP_PART_TYPE_RECORDING?
                 HEXMAP_RECORDING_TYPE_RECORDING:
                 HEXMAP_RECORDING_TYPE_ACTOR,
             part->filename, part->palmapper_name, part->frame_offset);
-        if(err)return err;
 
         /* hexmap_recording_init set up recording->trf already, and now
         we modify it by applying trf2 to it */
@@ -354,10 +367,14 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
     }else if(part->type == HEXCOLLMAP_PART_TYPE_RENDERGRAPH){
         ARRAY_PUSH_NEW(hexmap_rendergraph_t*, collmap->rendergraphs,
             rendergraph)
-        err = hexmap_rendergraph_init(rendergraph,
+        hexmap_rendergraph_init(rendergraph,
             part->filename, part->palmapper_name);
-        if(err)return err;
         trf_cpy(space, &rendergraph->trf, &trf2);
+    }else if(part->type == HEXCOLLMAP_PART_TYPE_LOCATION){
+        ARRAY_PUSH_NEW(hexmap_location_t*, collmap->locations,
+            location)
+        hexmap_location_init(location, part->filename);
+        hexgame_location_from_trf(&location->loc, &trf2);
     }else{
         fprintf(stderr, "Unrecognized part type: %i\n", part->type);
         return 2;
@@ -755,6 +772,9 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
         }else if(GOT("shape")){
             NEXT
             type = HEXCOLLMAP_PART_TYPE_RENDERGRAPH;
+        }else if(GOT("location")){
+            NEXT
+            type = HEXCOLLMAP_PART_TYPE_LOCATION;
         }
 
         if(GOT("empty")){
@@ -806,10 +826,9 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
     }
     CLOSE
 
-    err = hexcollmap_part_init(part, type, part_c,
+    hexcollmap_part_init(part, type, part_c,
         filename, palmapper_name, frame_offset,
         &visible_expr, visible_not, &vars, &bodyvars);
-    if(err)return err;
     trf_cpy(collmap->space, &part->trf, &trf);
     part->draw_z = draw_z;
     return 0;

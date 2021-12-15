@@ -168,6 +168,7 @@ typedef struct hexmap {
     ARRAY_DECL(hexmap_recording_t*, recordings)
     ARRAY_DECL(palette_t*, palettes)
     ARRAY_DECL(hexmap_tileset_t*, tilesets)
+    ARRAY_DECL(hexmap_location_t*, locations)
 
     /* Weakrefs */
     struct hexgame *game;
@@ -179,6 +180,7 @@ typedef struct hexmap {
 void hexmap_cleanup(hexmap_t *map);
 int hexmap_init(hexmap_t *map, struct hexgame *game, const char *name,
     vec_t unit);
+hexgame_location_t *hexmap_get_location(hexmap_t *map, const char *name);
 int hexmap_load(hexmap_t *map, struct hexgame *game, const char *filename,
     vars_t *vars);
 int hexmap_parse(hexmap_t *map, struct hexgame *game, const char *name,

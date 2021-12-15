@@ -256,6 +256,8 @@ void hexmap_cleanup(hexmap_t *map){
     ARRAY_FREE_PTR(palette_t*, map->palettes, palette_cleanup)
     ARRAY_FREE_PTR(hexmap_tileset_t*, map->tilesets,
         hexmap_tileset_cleanup)
+    ARRAY_FREE_PTR(hexmap_location_t*, map->locations,
+        hexmap_location_cleanup)
 
     vars_cleanup(&map->vars);
 }
@@ -285,7 +287,16 @@ int hexmap_init(hexmap_t *map, hexgame_t *game, const char *name,
     ARRAY_INIT(map->recordings)
     ARRAY_INIT(map->palettes)
     ARRAY_INIT(map->tilesets)
+    ARRAY_INIT(map->locations)
     return 0;
+}
+
+hexgame_location_t *hexmap_get_location(hexmap_t *map, const char *name){
+    for(int i = 0; i < map->locations_len; i++){
+        hexmap_location_t *location = map->locations[i];
+        if(!strcmp(location->name, name))return &location->loc;
+    }
+    return NULL;
 }
 
 static int hexmap_parse_recording(fus_lexer_t *lexer, prismelrenderer_t *prend,
@@ -508,10 +519,9 @@ static int _hexmap_parse(hexmap_t *map, fus_lexer_t *lexer,
 
             ARRAY_PUSH_NEW(hexmap_recording_t*, map->recordings,
                 recording)
-            err = hexmap_recording_init(recording,
+            hexmap_recording_init(recording,
                 HEXMAP_RECORDING_TYPE_ACTOR,
                 filename, palmapper_name, frame_offset);
-            if(err)return err;
 
             recording->trf = trf;
             recording->vars = vars;
@@ -964,6 +974,15 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
         err = hexmap_submap_create_rgraph_minimap(submap);
         if(err)return err;
 
+        /* copy submap->collmap's locations onto map */
+        for(int i = 0; i < submap->collmap.locations_len; i++){
+            hexmap_location_t *location = submap->collmap.locations[i];
+            ARRAY_PUSH_NEW(hexmap_location_t*, map->locations, new_location)
+            hexmap_location_init(new_location, location->name);
+            new_location->loc = location->loc;
+            vec_add(space->dims, new_location->loc.pos, submap->pos);
+        }
+
         /* parse doors */
         if(GOT("doors")){
             NEXT
@@ -1014,10 +1033,9 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
 
             ARRAY_PUSH_NEW(hexmap_recording_t*, map->recordings,
                 recording)
-            err = hexmap_recording_init(recording,
+            hexmap_recording_init(recording,
                 HEXMAP_RECORDING_TYPE_RECORDING,
                 filename, palmapper_name, frame_offset);
-            if(err)return err;
 
             recording->trf = trf;
             recording->vars = vars;

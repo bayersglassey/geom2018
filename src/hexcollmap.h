@@ -14,6 +14,7 @@
 
 
 
+
 /********************
  * HEXMAP RECORDING *
  ********************/
@@ -53,7 +54,7 @@ typedef struct hexmap_recording {
 } hexmap_recording_t;
 
 void hexmap_recording_cleanup(hexmap_recording_t *recording);
-int hexmap_recording_init(hexmap_recording_t *recording, int type,
+void hexmap_recording_init(hexmap_recording_t *recording, int type,
     const char *filename, const char *palmapper_name, int frame_offset);
 int hexmap_recording_clone(hexmap_recording_t *recording1,
     hexmap_recording_t *recording2);
@@ -75,8 +76,21 @@ typedef struct hexmap_rendergraph {
 } hexmap_rendergraph_t;
 
 void hexmap_rendergraph_cleanup(hexmap_rendergraph_t *rendergraph);
-int hexmap_rendergraph_init(hexmap_rendergraph_t *rendergraph,
+void hexmap_rendergraph_init(hexmap_rendergraph_t *rendergraph,
     const char *name, const char *palmapper_name);
+
+
+/*******************
+ * HEXMAP LOCATION *
+ *******************/
+
+typedef struct hexmap_location {
+    const char *name;
+    hexgame_location_t loc;
+} hexmap_location_t;
+
+void hexmap_location_cleanup(hexmap_location_t *location);
+void hexmap_location_init(hexmap_location_t *location, const char *name);
 
 
 /**************
@@ -108,15 +122,17 @@ enum hexcollmap_part_type {
     HEXCOLLMAP_PART_TYPE_RECORDING,
     HEXCOLLMAP_PART_TYPE_ACTOR,
     HEXCOLLMAP_PART_TYPE_RENDERGRAPH,
+    HEXCOLLMAP_PART_TYPE_LOCATION,
 };
 
 static const char *hexmap_part_type_msg(int type){
     switch(type){
-        case HEXCOLLMAP_PART_TYPE_HEXCOLLMAP: return "Hexcollmap";
-        case HEXCOLLMAP_PART_TYPE_RECORDING: return "Recording";
-        case HEXCOLLMAP_PART_TYPE_ACTOR: return "Actor";
-        case HEXCOLLMAP_PART_TYPE_RENDERGRAPH: return "Rendergraph";
-        default: return "Unknown";
+        case HEXCOLLMAP_PART_TYPE_HEXCOLLMAP: return "hexcollmap";
+        case HEXCOLLMAP_PART_TYPE_RECORDING: return "recording";
+        case HEXCOLLMAP_PART_TYPE_ACTOR: return "actor";
+        case HEXCOLLMAP_PART_TYPE_RENDERGRAPH: return "rendergraph";
+        case HEXCOLLMAP_PART_TYPE_LOCATION: return "location";
+        default: return "unknown";
     }
 }
 
@@ -205,6 +221,7 @@ typedef struct hexcollmap {
     hexcollmap_tile_t *tiles; /* array of length w * h */
     ARRAY_DECL(hexmap_recording_t*, recordings)
     ARRAY_DECL(hexmap_rendergraph_t*, rendergraphs)
+    ARRAY_DECL(hexmap_location_t*, locations)
     ARRAY_DECL(valexpr_t*, text_exprs)
 
     /* Weakrefs */
@@ -241,7 +258,7 @@ static bool hexcollmap_elem_is_special(hexcollmap_elem_t *elem){
 }
 
 
-int hexcollmap_part_init(hexcollmap_part_t *part, int type,
+void hexcollmap_part_init(hexcollmap_part_t *part, int type,
     char part_c, const char *filename, const char *palmapper_name,
     int frame_offset, valexpr_t *visible_expr, bool visible_not,
     vars_t *vars, vars_t *bodyvars);

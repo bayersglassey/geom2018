@@ -149,6 +149,8 @@ void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
                     fputs("actor ", f);
                 }else if(part->type == HEXCOLLMAP_PART_TYPE_RENDERGRAPH){
                     fputs("shape ", f);
+                }else if(part->type == HEXCOLLMAP_PART_TYPE_LOCATION){
+                    fputs("location ", f);
                 }
 
                 if(part->filename){
