@@ -23,7 +23,7 @@ escape1_wait:
         # If the bird on jungle5.fus walks to our edge of platform,
         # he's about to turn and head away, so now's our chance to make
         # a break for it!..
-        coll: bodies "crush" any yes
+        coll: bodies("crush") any yes
             ;;       .   .   .   .   .   .   .   + - +
             ;;                                  /*\*/*\
             ;;     .   .   .   .   .   .   .   + - + - +

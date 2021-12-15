@@ -56,7 +56,7 @@ create_body:
 start:
     if:
         # There is spit nearby
-        coll: bodies "spit" any yes collmap("detect")
+        coll: bodies("spit") any yes collmap("detect")
     then:
         set mapvar("eyeplayer_vines_ran_away_1"): T
         play: "data/maps/demo/recs/eyeplayer_vines_run_away_1.fus"
@@ -65,7 +65,7 @@ start:
 start2:
 
     # There is a player next to us
-    if: coll: bodies "touch" any yes collmap("detect_small")
+    if: coll: bodies("touch") any yes collmap("detect_small")
     then:
         play: "data/maps/demo/recs/eyeplayer_vines_run_away_1_looking.fus"
         set mapvar("eyeplayer_vines_looking"): T
@@ -79,7 +79,7 @@ start2:
 
 start2_looking:
     # There is *NOT* a player next to us
-    if: not: coll: bodies "touch" any yes collmap("detect_small")
+    if: not: coll: bodies("touch") any yes collmap("detect_small")
     then:
         play: "data/maps/demo/recs/eyeplayer_vines_run_away_1_unlooking.fus"
         set mapvar("eyeplayer_vines_looking"): F

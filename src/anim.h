@@ -179,9 +179,11 @@ typedef struct state_cond {
     union {
         struct {
             int flags; /* ORed combination of enum anim_cond_flag values */
-            char *collmsg;
-                /* If flags^ANIM_COND_FLAGS_BODIES, collmsg specifies
-                that only bodies with this collmsg should collide */
+            valexpr_t collmsg_expr;
+                /* If flags^ANIM_COND_FLAGS_BODIES, collmsg_expr specifies
+                that only bodies with that collmsg should collide
+                (or, and this is a bit of a hack, collmsg_expr can specify
+                a stateset filename instead) */
             hexcollmap_t *own_collmap;
                 /* own_collmap is for if we own the collmap, as opposed to
                 just pointing to one from stateset->collmaps. */

@@ -35,7 +35,7 @@ create_body:
 
 start:
     if:
-        coll: bodies "spit" any yes collmap("detect")
+        coll: bodies("spit") any yes collmap("detect")
     then:
         set mapvar("eyeplayer_dodecas_ran_away_1"): T
         play: "data/maps/demo/recs/eyeplayer_dodecas_run_away_1.fus"

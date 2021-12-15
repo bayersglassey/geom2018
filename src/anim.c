@@ -328,7 +328,8 @@ static int _parse_cond(stateset_t *stateset, fus_lexer_t *lexer,
         OPEN
 
         int flags = 0;
-        char *collmsg = NULL;
+        valexpr_t collmsg_expr;
+        valexpr_set_literal_null(&collmsg_expr);
 
         if(GOT("water")){
             NEXT
@@ -336,8 +337,11 @@ static int _parse_cond(stateset_t *stateset, fus_lexer_t *lexer,
         }else if(GOT("bodies")){
             NEXT
             flags ^= ANIM_COND_FLAGS_BODIES;
-            if(GOT_STR){
-                GET_STR(collmsg)
+            if(GOT("(")){
+                NEXT
+                err = valexpr_parse(&collmsg_expr, lexer);
+                if(err)return err;
+                CLOSE
             }
         }
 
@@ -363,7 +367,7 @@ static int _parse_cond(stateset_t *stateset, fus_lexer_t *lexer,
         cond->u.coll.own_collmap = own_collmap;
         cond->u.coll.collmap = collmap;
         cond->u.coll.flags = flags;
-        cond->u.coll.collmsg = collmsg;
+        cond->u.coll.collmsg_expr = collmsg_expr;
     }else if(GOT("chance")){
         NEXT
         OPEN
@@ -1093,7 +1097,7 @@ void state_dump(state_t *state, FILE *file, int depth){
 void state_cond_cleanup(state_cond_t *cond){
     switch(cond->type){
         case STATE_COND_TYPE_COLL: {
-            free(cond->u.coll.collmsg);
+            valexpr_cleanup(&cond->u.coll.collmsg_expr);
             hexcollmap_t *collmap = cond->u.coll.own_collmap;
             if(collmap != NULL){
                 hexcollmap_cleanup(collmap);

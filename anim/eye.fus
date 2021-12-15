@@ -10,6 +10,9 @@ vars:
     # If set to T, we open even if a player isn't nearby
     "auto_open": F
 
+    # The collmsg (or stateset filename) of bodies we will look at
+    "key_anim": "touch"
+
 proc accept_carryable:
     # me: an eye
     # you: spit which is carrying a mini_eye
@@ -77,7 +80,7 @@ closed:
             not: expr: mapvar(myvar("antikey"))
         any:
             expr: myvar("auto_open")
-            coll: bodies "touch" any yes collmap("opening")
+            coll: bodies(myvar("key_anim")) any yes collmap("opening")
     then: goto delay: opening
 
 opening:
@@ -102,25 +105,25 @@ open:
             expr: mapvar(myvar("antikey"))
         not: any:
             expr: myvar("auto_open")
-            coll: bodies "touch" any yes collmap("opening")
+            coll: bodies(myvar("key_anim")) any yes collmap("opening")
     then: goto delay: closing
 
     if:
-        coll: bodies "touch" any yes collmap("looking")
-        not: coll: bodies "touch" any yes collmap("looking_l")
-        not: coll: bodies "touch" any yes collmap("looking_d")
+        coll: bodies(myvar("key_anim")) any yes collmap("looking")
+        not: coll: bodies(myvar("key_anim")) any yes collmap("looking_l")
+        not: coll: bodies(myvar("key_anim")) any yes collmap("looking_d")
     then: goto delay: looking
 
     if:
-        not: coll: bodies "touch" any yes collmap("looking")
-        coll: bodies "touch" any yes collmap("looking_l")
-        not: coll: bodies "touch" any yes collmap("looking_d")
+        not: coll: bodies(myvar("key_anim")) any yes collmap("looking")
+        coll: bodies(myvar("key_anim")) any yes collmap("looking_l")
+        not: coll: bodies(myvar("key_anim")) any yes collmap("looking_d")
     then: goto delay: looking_l
 
     if:
-        not: coll: bodies "touch" any yes collmap("looking")
-        not: coll: bodies "touch" any yes collmap("looking_l")
-        coll: bodies "touch" any yes collmap("looking_d")
+        not: coll: bodies(myvar("key_anim")) any yes collmap("looking")
+        not: coll: bodies(myvar("key_anim")) any yes collmap("looking_l")
+        coll: bodies(myvar("key_anim")) any yes collmap("looking_d")
     then: goto delay: looking_d
 
 closing:

@@ -194,9 +194,14 @@ int state_cond_match(state_cond_t *cond,
             bool water = flags & ANIM_COND_FLAGS_WATER;
             bool against_bodies = flags & ANIM_COND_FLAGS_BODIES;
 
-            const char *collmsg = cond->u.coll.collmsg;
-
             if(against_bodies){
+                valexpr_context_t valexpr_context = {0};
+                err = _get_vars(context, &valexpr_context);
+                if(err)return err;
+
+                const char *collmsg = valexpr_get_str(
+                    &cond->u.coll.collmsg_expr, &valexpr_context);
+
                 int n_matches = 0;
                 for(int j = 0; j < map->bodies_len; j++){
                     body_t *body_other = map->bodies[j];
@@ -210,9 +215,10 @@ int state_cond_match(state_cond_t *cond,
                     if(err)return err;
                     if(!visible)continue;
 
-                    if(collmsg &&
-                        !body_sends_collmsg(body_other, collmsg)
-                    )continue;
+                    if(collmsg && !(
+                        !strcmp(body_other->stateset.filename, collmsg) ||
+                        body_sends_collmsg(body_other, collmsg)
+                    ))continue;
 
                     trf_t hitbox_other_trf;
                     hexgame_location_init_trf(&body_other->loc, &hitbox_other_trf);

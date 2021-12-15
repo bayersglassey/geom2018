@@ -12,7 +12,7 @@ create_body:
 start:
     if: any:
         expr: mapvar("guide_passed_start")
-        coll: bodies any yes
+        coll: bodies("touch") any yes
             ;;
             ;;
             ;;        .   .
@@ -36,7 +36,7 @@ start2:
 
 start3:
     if:
-        coll: bodies any yes
+        coll: bodies("touch") any yes
             ;;   + - + - + - + - +
             ;;  /*\*/*\*/*\*/*\*/*\
             ;; + - + - + - + - + - +

@@ -43,7 +43,7 @@ closed:
         any:
             not: exists myvar("key")
             expr: mapvar(myvar("key"))
-        not: coll: bodies "touch" any yes collmap("cooldown")
+        not: coll: bodies("touch") any yes collmap("cooldown")
     then:
         goto: open
 
