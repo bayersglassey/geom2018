@@ -83,9 +83,3 @@ submaps:
                 file: "data/maps/demo/fisheye4.fus"
                 pos: (-48 -28)
                 camera: (0 0)
-                doors:
-                    :
-                        anim: "anim/rollerplayer.fus"
-                        pos: (-11 -80)
-                        rot: 0
-                        turn: n
