@@ -87,3 +87,23 @@ int hexgame_location_parse(hexgame_location_t *loc, fus_lexer_t *lexer){
     if(err)return err;
     return 0;
 }
+
+int hexgame_location_parse_string(hexgame_location_t *loc, const char *s){
+    /* Example input: "(0 0) 0 n" */
+
+    int x, y, r;
+    char c;
+    int ret = sscanf(s, " ( %i %i ) %i %c", &x, &y, &r, &c);
+    if(ret < 4 || (c != 'y' && c != 'n')){
+        fprintf(stderr, "Failed to parse location from string: %s\n", s);
+        fprintf(stderr, "...expected: (x y) rot turn\n");
+        fprintf(stderr, "...where turn is y or n\n");
+        return 2;
+    }
+
+    loc->pos[0] = x;
+    loc->pos[1] = y;
+    loc->rot = r;
+    loc->turn = c == 'y';
+    return 0;
+}
