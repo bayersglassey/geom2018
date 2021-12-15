@@ -24,7 +24,7 @@ $SET_STR STATE_LAND step
 $SET_STR STATE_LAND_UP step
 
 
-collmsgs: "touch"
+collmsgs: "touch" "enter_door"
 on "crush": goto: dead
 
 

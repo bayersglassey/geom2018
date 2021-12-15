@@ -1,0 +1,71 @@
+
+collmap "hitbox":
+    ;;  (+)
+
+# The "cooldown" hitbox is for after a door is used by a body, the
+# door closes until all bodies are outside this hitbox.
+collmap "cooldown":
+    ;;            + - + - + - + - + - +
+    ;;           /*\*/*\*/*\*/*\*/*\*/*\
+    ;;          + - + - + - + - + - + - +
+    ;;         /*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;        + - + - + - + - + - + - + - +
+    ;;       /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;      + - + - + - + - + - + - + - + - +
+    ;;     /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;    + - + - + - + - + - + - + - + - + - +
+    ;;   /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;  + - + - + - + - + -(+)- + - + - + - + - +
+    ;;   \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;    + - + - + - + - + - + - + - + - + - +
+    ;;     \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;      + - + - + - + - + - + - + - + - +
+    ;;       \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;        + - + - + - + - + - + - + - +
+    ;;         \*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;          + - + - + - + - + - + - +
+    ;;           \*/*\*/*\*/*\*/*\*/*\*/
+    ;;            + - + - + - + - + - +
+
+
+vars:
+    "location": null
+    "map": null
+    "anim": null
+    "anim_state": null
+
+
+closed:
+    rgraph: "doorframe"
+    hitbox: collmap("hitbox")
+
+    if:
+        any:
+            not: exists myvar("key")
+            expr: mapvar(myvar("key"))
+        not: coll: bodies "touch" any yes collmap("cooldown")
+    then:
+        goto: open
+
+open:
+    rgraph: "door"
+    hitbox: collmap("hitbox")
+
+    on "enter_door":
+        # me: door
+        # you: a body which just entered this door
+
+        # Relocate whatever entered the door
+        as you: relocate:
+            yourvar("location")
+            yourvar("map")
+            yourvar("anim")
+            yourvar("anim_state")
+
+        goto: closed
+
+    if:
+        exists myvar("key")
+        not: expr: mapvar(myvar("key"))
+    then:
+        goto: closed

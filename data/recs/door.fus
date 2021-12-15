@@ -1,0 +1,11 @@
+anim: "anim/door.fus"
+state: "closed"
+pos: (0 0)
+rot: 0
+turn: no
+keys:
+    u:
+    d:
+    l:
+    r:
+nodata
