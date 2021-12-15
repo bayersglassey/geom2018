@@ -1,4 +1,4 @@
-$SET_STR FISHEYE: lines: at(0 25)
+$SET_STR FISHEYE_BECOME: lines: at(0 25)
     ;;              Hey.
     ;;
     ;;
@@ -10,14 +10,28 @@ $SET_STR FISHEYE: lines: at(0 25)
     ;;
     ;;
 
-text: if mapvar("fisheye_eye_open") then $GET_STR FISHEYE else null
+$SET_STR FISHEYE_CRAWL: lines: at(12 35)
+    ;;Now you can roll
+    ;;  over sharp edges.
+    ;;
+    ;;
+    ;;  Crouch and keep crawling
+    ;;    to see what I mean...
+
+text: if mapvar("fisheye_eye_a_open") then $GET_STR FISHEYE_BECOME else null
+text: if mapvar("fisheye_eye_b_open") then $GET_STR FISHEYE_CRAWL else null
 
 parts:
     "F": "data/maps/demo/tiles/hex_vec4/fisheye_B.fus"
     "T": "data/maps/demo/tiles/hex_vec4/fisheye_big2tri.fus"
-    "e": recording "data/recs/eye.fus"
+    "A": recording "data/recs/eye.fus"
         vars:
-            "opened_key": "fisheye_eye_open"
+            "key_anim": "anim/player.fus"
+            "opened_key": "fisheye_eye_a_open"
+    "B": recording "data/recs/eye.fus"
+        vars:
+            "key_anim": "anim/rollerplayer.fus"
+            "opened_key": "fisheye_eye_b_open"
     "d": recording "data/recs/door.fus"
         vars:
             "anim": "anim/rollerplayer.fus"
@@ -41,7 +55,7 @@ collmap:
     ;;
     ;;   .   .   .   .   .   .   .   ?   .   ?   .   .   .   ?   .   .   .   ?   .   ?   .   .   .   .   .   .    [] []   []  [] []
     ;;                                       %\                                                                      [0|1]
-    ;; .   .   .   .   .   .   .   .   .   ?  %+   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   . [e] [0|1]
+    ;; .   .   .   .   .   .   .   .   .   ?  %+   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   . [A] [0|1]
     ;;                                       %/*\                                                                   [0|1 x|1 x|1]
     ;;   .   .   .   .   .   .   .   ?   ?%- + - +   .   .   .   .   .   ?   .   ?   ?   .   .   .   .   .   .   [] [][0|1 0|1 x|1 x|1]    [] [] []
     ;;
@@ -53,7 +67,7 @@ collmap:
     ;;
     ;;   .   .   .   .   .   ?   .   ?   ?   .   ?   .   .   .   .   .   ?   .   ?   ?   .   .   .   .   .   .[T][] [l] []     [] [] []
     ;;
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .       [B^3]
     ;;
     ;;   .   .   .   .   .   .   .   ?   .   ?   .   .   .   ?   .   .   .   ?   .   ?   .   .   .   .   .   .    [] []   []  [] []
     ;;
