@@ -22,6 +22,8 @@
 # GOTO_GRABBED: when you grab something, you stay grabbed until
 # letting go of "f"
 #
+# PLAYER_ROLLER: we are a rollerplayer
+#
 
 
 
@@ -40,6 +42,9 @@ $SET_BOOL FLIPPY_GRAB
 #$SET_BOOL STICKY_GRAB
 #$SET_BOOL GOTO_GRABBED
 #$SET_BOOL FLIPPY_GRAB
+
+
+$IF PLAYER_ROLLER: $SET_BOOL NOGRAB
 
 
 $PREFIX ANIM_NS stand:
