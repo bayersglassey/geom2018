@@ -1,0 +1,79 @@
+
+shapes:
+
+    "door_tri":
+        animation: oscillate 6
+        prismels:
+            : "tri" ( 0 0 0 0)  0 f eval(1 + 8 + 3) (0 2)
+            : "tri" ( 0 0 0 0)  0 f eval(1 + 0 + 3) (2 1)
+            : "tri" ( 0 0 0 0)  0 f eval(1 + 8 + 1) (3 1)
+            : "tri" ( 0 0 0 0)  0 f eval(1 + 0 + 1) (4 2)
+
+    "door_sq":
+        animation: oscillate 6
+        prismels:
+            : "sq"  ( 0 0 0 0)  0 f eval(1 + 8 + 3) (0 2)
+            : "sq"  ( 0 0 0 0)  0 f eval(1 + 0 + 3) (2 1)
+            : "sq"  ( 0 0 0 0)  0 f eval(1 + 8 + 1) (3 1)
+            : "sq"  ( 0 0 0 0)  0 f eval(1 + 0 + 1) (4 2)
+
+    "doorframe_sixth":
+        prismels:
+            : "tri" ( 1 1 1 0) 10 f eval(1 + 8 + 4)
+            : "tri" ( 1 1 1 0)  0 f eval(1 + 8 + 4)
+            : "tri" ( 1 1 1 0)  2 f eval(1 + 8 + 4)
+            #: "sq"  ( 2 1 0 0) 11 f eval(1 + 0 + 4)
+            #: "sq"  ( 0 1 2 0)  0 f eval(1 + 0 + 4)
+            #: "tri" ( 0 1 2 0)  3 f eval(1 + 0 + 4)
+
+    "doorframe":
+        # The frame around the door
+        shapes:
+            : "doorframe_sixth" (0 0 0 0)  0 f
+            : "doorframe_sixth" (0 0 0 0)  2 f
+            : "doorframe_sixth" (0 0 0 0)  4 f
+            : "doorframe_sixth" (0 0 0 0)  6 f
+            : "doorframe_sixth" (0 0 0 0)  8 f
+            : "doorframe_sixth" (0 0 0 0) 10 f
+
+    "doorstuff_sixth":
+        animation: cycle 12
+        shapes:
+            : "door_tri" ( 0 0 0 0)  0 f 0+
+            : "door_tri" ( 0 0 0 0)  2 f 0+
+            : "door_tri" ( 0 0 0 0)  4 f 0+
+            : "door_tri" ( 0 0 0 0)  6 f 0+
+            : "door_tri" ( 0 0 0 0)  8 f 0+
+            : "door_tri" ( 0 0 0 0) 10 f 0+
+
+            : "door_sq"  ( 1 0 0 0)  1 f 1+
+            : "door_tri" ( 0 0 1 0)  1 f 1+
+
+            : "door_tri" ( 1 1 0 0)  0 f 2+
+            : "door_tri" ( 1 1 0 0)  2 f 2+
+            : "door_tri" ( 0 1 1 0)  0 f 2+
+            : "door_sq"  ( 0 1 1 0)  2 f 2+
+
+            #: "door_tri" ( 1 1 1 0) 10 f 3+
+            #: "door_tri" ( 1 1 1 0)  0 f 3+
+            #: "door_tri" ( 1 1 1 0)  2 f 3+
+            ##: "door_sq"  ( 2 1 0 0) 11 f 3+
+            ##: "door_sq"  ( 0 1 2 0)  0 f 3+
+            ##: "door_tri" ( 0 1 2 0)  3 f 3+
+
+    "doorstuff":
+        # The glowing stuff in the middle of the door
+        animation: cycle "doorstuff_sixth"
+        shapes:
+            : "doorstuff_sixth" (0 0 0 0)  0 f
+            : "doorstuff_sixth" (0 0 0 0)  2 f
+            : "doorstuff_sixth" (0 0 0 0)  4 f
+            : "doorstuff_sixth" (0 0 0 0)  6 f
+            : "doorstuff_sixth" (0 0 0 0)  8 f
+            : "doorstuff_sixth" (0 0 0 0) 10 f
+
+    "door":
+        animation: cycle "doorstuff"
+        shapes:
+            : "doorframe" (0 0 0 0)  0 f
+            : "doorstuff" (0 0 0 0)  0 f
