@@ -13,6 +13,8 @@ actors:
 vars:
     "eyeplayer_dodecas_ran_away_1": F
 
+    nosave "fisheye_eye_open": F
+
 submaps:
     :
         file: "data/maps/demo/dodecas_bg.fus"
@@ -83,7 +85,7 @@ submaps:
                 camera: (0 0)
                 doors:
                     :
-                        anim: "anim/roller.fus"
+                        anim: "anim/rollerplayer.fus"
                         pos: (-11 -80)
                         rot: 0
                         turn: n

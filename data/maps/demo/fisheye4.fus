@@ -1,6 +1,23 @@
+$SET_STR FISHEYE: lines: at(0 25)
+    ;;              Hey.
+    ;;
+    ;;
+    ;;
+    ;;  Go through this door
+    ;;    and you will become
+    ;;      something different.
+    ;;
+    ;;
+    ;;
+
+text: if mapvar("fisheye_eye_open") then $GET_STR FISHEYE else null
+
 parts:
     "F": "data/maps/demo/tiles/hex_vec4/fisheye_B.fus"
     "T": "data/maps/demo/tiles/hex_vec4/fisheye_big2tri.fus"
+    "e": recording "data/recs/eye.fus"
+        vars:
+            "opened_key": "fisheye_eye_open"
 collmap:
     ;;
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
@@ -19,7 +36,7 @@ collmap:
     ;;
     ;;   .   .   .   .   .   .   .   ?   .   ?   .   .   .   ?   .   .   .   ?   .   ?   .   .   .   .   .   .    [] []   []  [] []
     ;;                                       %\                                                                      [0|1]
-    ;; .   .   .   .   .   .   .   .   .   .  %+   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .     [0|1]
+    ;; .   .   .   .   .   .   .   .   .   ?  %+   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   . [e] [0|1]
     ;;                                       %/*\                                                                   [0|1 x|1 x|1]
     ;;   .   .   .   .   .   .   .   ?   ?%- + - +   .   .   .   .   .   ?   .   ?   ?   .   .   .   .   .   .   [] [][0|1 0|1 x|1 x|1]    [] [] []
     ;;
