@@ -1124,3 +1124,11 @@ Dec 13, 2021:
     * Need this for when mapvar("eyeplayer_vines_ran_away_4") becomes T, then mini_eye should disappear
 
 * rec-vlc.sh: NEED TO UPDATE YOUR LAPPY'S CODECS SO THE RESULTING VIDEO DOESN'T HAVE GREEN ARTIFACTS
+
+
+Dec 14, 2021:
+-------------
+
+Concerning turning into non-spider things, e.g. rollers...
+That's not gonna interact well with e.g. myvars("carrying"), eh?
+So we either need to call a certain proc when transforming, or... uh... something else.
