@@ -432,6 +432,58 @@ int state_effect_apply(state_effect_t *effect,
         body->loc.rot = rot_flip(space->rot_max, body->loc.rot, true);
         break;
     }
+    case STATE_EFFECT_TYPE_RELOCATE: {
+        CHECK_BODY
+        valexpr_context_t valexpr_context = {0};
+        err = _get_vars(context, &valexpr_context);
+        if(err)return err;
+
+#       define GET_VALEXPR_STR(STR, EXPR) \
+        const char *STR = NULL; \
+        { \
+            val_t *val; \
+            err = valexpr_get(EXPR, &valexpr_context, &val); \
+            if(err)return err; \
+            if(val == NULL){ \
+                RULE_PERROR() \
+                fprintf(stderr, "Couldn't get value for " #STR " expression: "); \
+                valexpr_fprintf(EXPR, stderr); \
+                fputc('\n', stderr); \
+                return 2; \
+            } \
+            STR = val_get_str(val); \
+        }
+        GET_VALEXPR_STR(loc_name, &effect->u.relocate.loc_expr)
+        GET_VALEXPR_STR(map_filename, &effect->u.relocate.map_filename_expr)
+        GET_VALEXPR_STR(stateset_filename,
+            &effect->u.relocate.stateset_filename_expr)
+        GET_VALEXPR_STR(state_name, &effect->u.relocate.state_name_expr)
+#       undef GET_VALEXPR_STR
+
+        hexmap_t *new_map = body->map;
+        if(map_filename != NULL){
+            err = hexgame_get_or_load_map(game,
+                map_filename, &new_map);
+            if(err)return err;
+        }
+
+        hexgame_location_t *loc = NULL;
+        if(loc_name != NULL){
+            loc = hexmap_get_location(new_map, loc_name);
+            if(loc == NULL){
+                RULE_PERROR()
+                fprintf(stderr,
+                    "Couldn't find location \"%s\" for map \"%s\"\n",
+                    loc_name, new_map->name);
+                return 2;
+            }
+        }
+
+        err = body_relocate(body, map_filename,
+            loc, stateset_filename, state_name);
+        if(err)return err;
+        break;
+    }
     case STATE_EFFECT_TYPE_GOTO: {
         *gotto_ptr = &effect->u.gotto;
         break;

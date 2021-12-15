@@ -452,6 +452,53 @@ int body_refresh_vars(body_t *body){
     return 0;
 }
 
+int body_relocate(body_t *body, const char *map_filename,
+    hexgame_location_t *loc, const char *stateset_filename,
+    const char *state_name
+){
+    int err;
+
+    hexgame_t *game = body->game;
+
+    hexmap_t *new_map = body->map;
+    if(map_filename != NULL){
+        /* Switch map */
+        err = hexgame_get_or_load_map(game,
+            map_filename, &new_map);
+        if(err)return err;
+    }
+
+    if(loc == NULL)loc = &body->loc;
+
+    /* Respawn body */
+    err = body_respawn(body,
+        loc->pos, loc->rot, loc->turn, new_map);
+    if(err)return err;
+
+    /* Colour to flash screen (default: cyan) */
+    int flash_r = 0;
+    int flash_g = 255;
+    int flash_b = 255;
+
+    if(stateset_filename != NULL){
+        if(strcmp(body->stateset.filename, stateset_filename)){
+            /* Switch anim (stateset) */
+            err = body_set_stateset(body, stateset_filename, state_name);
+            if(err)return err;
+
+            /* Pink flash indicates your body was changed, not just teleported */
+            flash_r = 255;
+            flash_g = 200;
+            flash_b = 200;
+        }
+    }
+
+    /* Flash screen so player knows something happened */
+    body_flash_cameras(body, flash_r, flash_g, flash_b, 60);
+    body_reset_cameras(body);
+    return 0;
+}
+
 
 /**************
  * BODY STATE *

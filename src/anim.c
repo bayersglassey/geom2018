@@ -447,6 +447,27 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
     }else if(GOT("turn")){
         NEXT
         effect->type = STATE_EFFECT_TYPE_TURN;
+    }else if(GOT("relocate")){
+        NEXT
+        effect->type = STATE_EFFECT_TYPE_RELOCATE;
+        OPEN
+        if(!GOT(")")){
+            err = valexpr_parse(&effect->u.relocate.loc_expr, lexer);
+            if(err)return err;
+        }
+        if(!GOT(")")){
+            err = valexpr_parse(&effect->u.relocate.map_filename_expr, lexer);
+            if(err)return err;
+        }
+        if(!GOT(")")){
+            err = valexpr_parse(&effect->u.relocate.stateset_filename_expr, lexer);
+            if(err)return err;
+        }
+        if(!GOT(")")){
+            err = valexpr_parse(&effect->u.relocate.state_name_expr, lexer);
+            if(err)return err;
+        }
+        CLOSE
     }else if(GOT("goto")){
         NEXT
 
@@ -1118,6 +1139,12 @@ void state_effect_cleanup(state_effect_t *effect){
     switch(effect->type){
         case STATE_EFFECT_TYPE_PRINT:
             valexpr_cleanup(&effect->u.expr);
+            break;
+        case STATE_EFFECT_TYPE_RELOCATE:
+            valexpr_cleanup(&effect->u.relocate.loc_expr);
+            valexpr_cleanup(&effect->u.relocate.map_filename_expr);
+            valexpr_cleanup(&effect->u.relocate.stateset_filename_expr);
+            valexpr_cleanup(&effect->u.relocate.state_name_expr);
             break;
         case STATE_EFFECT_TYPE_INC:
         case STATE_EFFECT_TYPE_DEC:

@@ -239,40 +239,10 @@ static int player_use_door(player_t *player, hexmap_door_t *door){
             camera->mapper = mapper;
         })
     }else if(door->type == HEXMAP_DOOR_TYPE_RESPAWN){
-        hexmap_t *new_map = body->map;
-        if(door->u.location.map_filename != NULL){
-            /* Switch map */
-            err = hexgame_get_or_load_map(game,
-                door->u.location.map_filename, &new_map);
-            if(err)return err;
-        }
-
-        /* Respawn body */
-        err = body_respawn(body,
-            door->u.location.loc.pos, door->u.location.loc.rot, door->u.location.loc.turn, new_map);
+        err = body_relocate(body, door->u.location.map_filename,
+            &door->u.location.loc, door->u.location.stateset_filename,
+            door->u.location.state_name);
         if(err)return err;
-
-        /* Colour to flash screen (default: cyan) */
-        int flash_r = 0;
-        int flash_g = 255;
-        int flash_b = 255;
-
-        if(door->u.location.stateset_filename != NULL){
-            if(strcmp(body->stateset.filename, door->u.location.stateset_filename)){
-                /* Switch anim (stateset) */
-                err = body_set_stateset(body, door->u.location.stateset_filename, NULL);
-                if(err)return err;
-
-                /* Pink flash indicates your body was changed, not just teleported */
-                flash_r = 255;
-                flash_g = 200;
-                flash_b = 200;
-            }
-        }
-
-        /* Flash screen so player knows something happened */
-        body_flash_cameras(body, flash_r, flash_g, flash_b, 60);
-        body_reset_cameras(body);
     }
     return 0;
 }

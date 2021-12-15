@@ -216,6 +216,9 @@ void body_reset_cameras(body_t *body);
 void body_remove(body_t *body);
 int body_move_to_map(body_t *body, hexmap_t *map);
 int body_refresh_vars(body_t *body);
+int body_relocate(body_t *body, const char *map_filename,
+    hexgame_location_t *loc, const char *stateset_filename,
+    const char *state_name);
 
 int body_set_stateset(body_t *body, const char *stateset_filename,
     const char *state_name);

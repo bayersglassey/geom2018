@@ -222,6 +222,7 @@ enum state_effect_type {
     STATE_EFFECT_TYPE_MOVE,
     STATE_EFFECT_TYPE_ROT,
     STATE_EFFECT_TYPE_TURN,
+    STATE_EFFECT_TYPE_RELOCATE,
     STATE_EFFECT_TYPE_GOTO,
     STATE_EFFECT_TYPE_CALL,
     STATE_EFFECT_TYPE_DELAY,
@@ -249,6 +250,7 @@ static const char *state_effect_type_name(int type){
         case STATE_EFFECT_TYPE_MOVE: return "move";
         case STATE_EFFECT_TYPE_ROT: return "rot";
         case STATE_EFFECT_TYPE_TURN: return "turn";
+        case STATE_EFFECT_TYPE_RELOCATE: return "relocate";
         case STATE_EFFECT_TYPE_GOTO: return "goto";
         case STATE_EFFECT_TYPE_CALL: return "call";
         case STATE_EFFECT_TYPE_DELAY: return "delay";
@@ -303,6 +305,12 @@ typedef struct state_effect {
         int boolean; /* enum effect_boolean */
         int i;
         valexpr_t expr;
+        struct {
+            valexpr_t loc_expr;
+            valexpr_t map_filename_expr;
+            valexpr_t stateset_filename_expr;
+            valexpr_t state_name_expr;
+        } relocate;
         struct {
             int action;
                 /*
