@@ -8,6 +8,11 @@
 
 $SET_INT DELAY 2
 
+collmap "hitbox":
+    ;;     +
+    ;;     *
+    ;;  (.)- .
+
 init:
     if:
         expr: mapvar(myvar("key"))
@@ -20,10 +25,7 @@ init:
 
 switch_off:
     rgraph: $PREFIX RGRAPH_PREFIX "off"
-    hitbox:
-        ;;     +
-        ;;     *
-        ;;  (.)- .
+    hitbox: collmap("hitbox")
     on "spit":
         set mapvar(myvar("key")): T
         goto: switching_on
@@ -31,19 +33,13 @@ switch_off:
 
 switching_on:
     rgraph: $PREFIX RGRAPH_PREFIX "on"
-    hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)- .
+    hitbox: collmap("hitbox")
     if:
     then: goto: switch_on
 
 switch_on:
     rgraph: $PREFIX RGRAPH_PREFIX "on"
-    hitbox:
-        ;;     .
-        ;;     *
-        ;;  (.)- .
+    hitbox: collmap("hitbox")
     $IF !ONEWAY: on "spit":
         set mapvar(myvar("key")): F
         goto: switching_off
@@ -51,9 +47,6 @@ switch_on:
 
 switching_off:
     rgraph: $PREFIX RGRAPH_PREFIX "off"
-    hitbox:
-        ;;     +
-        ;;     *
-        ;;  (.)- .
+    hitbox: collmap("hitbox")
     if:
     then: goto: switch_off
