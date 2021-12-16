@@ -15,6 +15,7 @@ vars:
 
     nosave "fisheye_eye_a_open": F
     nosave "fisheye_eye_b_open": F
+    nosave "big_switch": T
 
 submaps:
     :
@@ -61,6 +62,16 @@ submaps:
                         file: "data/maps/demo/big_bg.fus"
                         tileset: "data/tileset1_bg.fus"
                     :
+                        bg
+                        file: "data/maps/demo/big_e.fus"
+                        visible: mapvar("big_switch")
+                        pos: (8 3)
+                    :
+                        bg
+                        file: "data/maps/demo/big_E.fus"
+                        visible: not mapvar("big_switch")
+                        pos: (8 3)
+                    :
                         file: "data/maps/demo/big.fus"
                         doors:
                             :
@@ -68,6 +79,10 @@ submaps:
                                 pos: (0 0)
                                 rot: 0
                                 turn: n
+                    :
+                        file: "data/maps/demo/big_spikes.fus"
+                        visible: not mapvar("big_switch")
+                        pos: (8 3)
             :
                 file: "data/maps/demo/fisheye.fus"
                 pos: (0 0)
