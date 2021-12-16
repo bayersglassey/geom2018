@@ -30,6 +30,11 @@ enum reset_level {
 };
 
 
+struct body;
+struct actor;
+struct hexgame;
+
+
 /************
  * KEY INFO *
  ************/
@@ -210,6 +215,7 @@ int body_unset_label_mapping(body_t *body, const char *label_name);
 int body_set_label_mapping(body_t *body, const char *label_name,
     rendergraph_t *rgraph);
 struct player *body_get_player(body_t *body);
+struct actor *body_get_actor(body_t *body);
 void body_flash_cameras(body_t *body, Uint8 r, Uint8 g, Uint8 b,
     int percent);
 void body_reset_cameras(body_t *body);

@@ -94,4 +94,8 @@ start3:
         goto: start3_remove
 
 start3_remove:
-    if() then: remove
+    if() then:
+        remove
+        goto: start3_removed
+
+start3_removed:

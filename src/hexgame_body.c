@@ -378,6 +378,15 @@ player_t *body_get_player(body_t *body){
     return NULL;
 }
 
+actor_t *body_get_actor(body_t *body){
+    hexgame_t *game = body->game;
+    for(int i = 0; i < game->actors_len; i++){
+        actor_t *actor = game->actors[i];
+        if(actor->body == body)return actor;
+    }
+    return NULL;
+}
+
 void body_flash_cameras(body_t *body, Uint8 r, Uint8 g, Uint8 b,
     int percent
 ){
@@ -408,6 +417,10 @@ void body_remove(body_t *body){
     FOREACH_BODY_CAMERA(body, camera, {
         camera->body = NULL;
     })
+
+    /* If body has an actor, unhook it from body */
+    actor_t *actor = body_get_actor(body);
+    if(actor)actor->body = NULL;
 
     ARRAY_REMOVE_PTR(map->bodies, body, body_cleanup)
 }
