@@ -67,7 +67,7 @@ void _console_write_field_header(console_t *console, const char *name){
 
 void _console_write_field(console_t *console, const char *name, const char *value){
     _console_write_field_header(console, name);
-    console_write_msg(console, value? value: "(unknown)");
+    console_write_msg(console, value? value: "(none)");
     console_newline(console);
 }
 
@@ -109,9 +109,10 @@ void _console_write_recording(console_t *console, recording_t *rec, bool show_da
         return;
     }
 
-    console_printf(console, "%name=%s, action=%s\n",
-        rec->name, recording_action_msg(rec->action));
-    console_printf(console, "reacts=%c, loop=%c, resets_position=%c\n",
+    console_printf(console, "filename=%s\n",
+        rec->filename);
+    console_printf(console, "action=%s, reacts=%c, loop=%c, resets_position=%c\n",
+        recording_action_msg(rec->action),
         rec->reacts? 'y': 'n',
         rec->loop? 'y': 'n',
         rec->resets_position? 'y': 'n');

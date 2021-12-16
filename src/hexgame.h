@@ -91,7 +91,7 @@ typedef struct recording {
     int frame_i;
     int node_i;
     int wait;
-    const char *name;
+    const char *filename;
     FILE *file;
     int offset;
 
@@ -103,8 +103,8 @@ const char *recording_action_msg(int action);
 
 void recording_cleanup(recording_t *rec);
 void recording_reset(recording_t *rec);
-void recording_init(recording_t *rec, struct body *body,
-    bool loop);
+void recording_init(recording_t *rec, const char *filename,
+    struct body *body, bool loop);
 int recording_load(recording_t *rec, const char *filename,
     vars_t *vars, struct body *body, bool loop);
 int recording_step(recording_t *rec);
@@ -246,7 +246,7 @@ char body_get_key_c(body_t *body, int key_i, bool absolute);
 int body_load_recording(body_t *body, const char *filename, bool loop);
 int body_play_recording(body_t *body);
 int body_restart_recording(body_t *body, bool ignore_offset, bool reset_position);
-int body_start_recording(body_t *body, const char *name);
+int body_start_recording(body_t *body, const char *filename);
 int body_stop_recording(body_t *body);
 int body_record_keydown(body_t *body, int key_i);
 int body_record_keyup(body_t *body, int key_i);

@@ -70,16 +70,17 @@ void recording_reset(recording_t *rec){
     rec->frame_i = 0;
     rec->node_i = 0;
     rec->wait = 0;
-    rec->name = NULL;
+    rec->filename = NULL;
     rec->file = NULL;
     rec->offset = 0;
 }
 
-void recording_init(recording_t *rec, body_t *body,
-    bool loop
+void recording_init(recording_t *rec, const char *filename,
+    body_t *body, bool loop
 ){
     /* This should probably call recording_reset... but it doesn't.
     Should we fix that, or would it break something?.. */
+    rec->filename = filename;
     rec->body = body;
     rec->loop = loop;
     rec->resets_position = true;
@@ -193,7 +194,7 @@ int recording_load(recording_t *rec, const char *filename,
     err = fus_lexer_init_with_vars(&lexer, text, filename, vars);
     if(err)return err;
 
-    recording_init(rec, body, loop);
+    recording_init(rec, filename, body, loop);
     err = recording_parse(rec, &lexer, filename);
     if(err)return err;
 
@@ -390,16 +391,16 @@ int body_restart_recording(body_t *body, bool ignore_offset, bool reset_position
     return 0;
 }
 
-int body_start_recording(body_t *body, const char *name){
+int body_start_recording(body_t *body, const char *filename){
 
-    FILE *f = fopen(name, "w");
+    FILE *f = fopen(filename, "w");
     if(f == NULL){
         perror("Couldn't start recording");
         return 2;}
 
     recording_reset(&body->recording);
     body->recording.action = 2; /* record */
-    body->recording.name = name;
+    body->recording.filename = filename;
     body->recording.file = f;
 
     fprintf(f, "anim: ");
