@@ -4,7 +4,6 @@ spawn: (0 0)
 palette: "data/maps/demo/pals/tunnels.fus"
 tileset: "data/tileset1.fus"
 vars:
-    "start_blocker": F
     "start_blocker2": F
     "start2_blocker": F
     "start3_blocker": F
@@ -21,14 +20,6 @@ submaps:
             :
                 pos: eval: (0 0)
                 submaps:
-                    :
-                        bg
-                        file: "data/maps/triangles/start_bg_e.fus"
-                        visible: mapvar("start_blocker")
-                    :
-                        bg
-                        file: "data/maps/triangles/start_bg_E.fus"
-                        visible: not mapvar("start_blocker")
                     :
                         bg
                         file: "data/maps/triangles/start_bg_e2.fus"
@@ -98,11 +89,6 @@ submaps:
                     #: "data/maps/triangles/recs/bigroller000.fus" "cya"
                     #: "data/maps/triangles/recs/bigroller000.fus" "grn" 650
                     #: "data/maps/triangles/recs/bigroller000.fus" "prp" 1110
-            :
-                file: "data/maps/triangles/start_blocker.fus"
-                visible: not mapvar("start_blocker")
-                pos: (-2 10)
-                mapper: ("triple")
             :
                 file: "data/maps/triangles/start_blocker2.fus"
                 visible: not mapvar("start_blocker2")

@@ -1,8 +1,5 @@
 parts:
     "R": actor "actor/aibig_roller.fus"
-    "s": recording "data/recs/switch.fus"
-        vars:
-            "key": "start_blocker"
     "t": recording "data/recs/switch.fus"
         vars:
             "key": "start2_blocker"
@@ -40,7 +37,7 @@ collmap:
     ;;                                                                               \     /                               /
     ;;    .   .   .   .   .   .   .   .   .   .   .   + - +   .   + - +   +   .   .   + - +   .   .   .   .   .   .   .   .
     ;;                                                 \*/       /     \   \
-    ;;      .  (+)- + - +   .   + - + - !   .   .   .   +   .   +   +   +   +   + - + - + - + - +   .   .   . - +   .   +     [s^3]
+    ;;      .  (+)- + - +   .   + - + - +   .   .   .   +   .   +   +   +   +   + - + - + - + - +   .   .   . - +   .   +
     ;;                                   \                         /*\   \     /                                 \     /
     ;;    .   .   + - +   .   .   +   .   +   .   .   .   .   .   + - +   + - +   .   .   .   .   .   .   .   .   +   +
     ;;                                     \                                                                         /
