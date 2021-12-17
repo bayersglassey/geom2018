@@ -74,31 +74,32 @@ shapes:
             : "tri" (1 0 0 0) 11 f eval: 1 + 8 + 2
             : "sq"  (1 0 0 0)  1 f eval: 1 + 8 + 1
 
-    $PREFIX NS "_head_spike":
-        prismels:
-            : "tri" (0 1 1 0) 10 f eval: 1 + 8 + 5
+    $IF PLAYER_SPIKEY:
+        $PREFIX NS "_head_spike":
+            prismels:
+                : "tri" (0 1 1 0) 10 f eval: 1 + 8 + 5
 
-    $PREFIX NS "_head_spike_long":
-        prismels:
-            : "sq"  (0 1 1 0) 10 f eval: 1 + 0 + 5
-            : "tri" (0 2 1 0) 10 f eval: 1 + 8 + 5
+        $PREFIX NS "_head_spike_long":
+            prismels:
+                : "sq"  (0 1 1 0) 10 f eval: 1 + 0 + 5
+                : "tri" (0 2 1 0) 10 f eval: 1 + 8 + 5
 
-    $PREFIX NS "head_spikes":
-        shapes:
-            : $PREFIX NS "_head_spike" (0 0 0 0)  0 f
-            : $PREFIX NS "_head_spike" (0 0 0 0)  2 f
-            : $PREFIX NS "_head_spike" (0 0 0 0)  4 f
-            : $PREFIX NS "_head_spike" (0 0 0 0)  6 f
+        $PREFIX NS "head_spikes":
+            shapes:
+                : $PREFIX NS "_head_spike" (0 0 0 0)  0 f
+                : $PREFIX NS "_head_spike" (0 0 0 0)  2 f
+                : $PREFIX NS "_head_spike" (0 0 0 0)  4 f
+                : $PREFIX NS "_head_spike" (0 0 0 0)  6 f
 
-    $PREFIX NS "head_spikes_extended":
-        shapes:
-            : $PREFIX NS "_head_spike_long" (0 0 0 0)  0 f
-            : $PREFIX NS "_head_spike"      (0 0 0 0)  1 f
-            : $PREFIX NS "_head_spike_long" (0 0 0 0)  2 f
-            : $PREFIX NS "_head_spike"      (0 0 0 0)  3 f
-            : $PREFIX NS "_head_spike_long" (0 0 0 0)  4 f
-            : $PREFIX NS "_head_spike"      (0 0 0 0)  5 f
-            : $PREFIX NS "_head_spike_long" (0 0 0 0)  6 f
+        $PREFIX NS "head_spikes_extended":
+            shapes:
+                : $PREFIX NS "_head_spike_long" (0 0 0 0)  0 f
+                : $PREFIX NS "_head_spike"      (0 0 0 0)  1 f
+                : $PREFIX NS "_head_spike_long" (0 0 0 0)  2 f
+                : $PREFIX NS "_head_spike"      (0 0 0 0)  3 f
+                : $PREFIX NS "_head_spike_long" (0 0 0 0)  4 f
+                : $PREFIX NS "_head_spike"      (0 0 0 0)  5 f
+                : $PREFIX NS "_head_spike_long" (0 0 0 0)  6 f
 
     $PREFIX NS "eye":
         prismels:
