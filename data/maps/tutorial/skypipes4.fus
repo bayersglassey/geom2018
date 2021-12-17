@@ -2,6 +2,9 @@ $SET_STR DOOR: lines:
     ;;
     ;;
     ;;    Go through the door!
+    ;;
+    ;;
+    ;;       ...but how do you get to it?..
 
 text: if mapvar("skypipes4_eye_a_open") then $GET_STR DOOR else null
 parts:

@@ -1,45 +1,15 @@
 $SET_STR SAVEPOINT_C: lines:
     ;;
-    ;;  If you ever feel stuck,
-    ;;    press "1" to return
+    ;;    Press "1" to return
     ;;      to where you last saved.
     ;;
     ;;           (Try it now!)
-$SET_STR REMEMBER: lines:
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
+$SET_STR REMEMBER: lines: at(45 37)
     ;;   Remember,
     ;;   touch this
     ;;   to save.
     ;;
-    ;;
-    ;;        Keep going!
+    ;;      Keep going!
 $SET_STR ONWARD: lines:
     ;;Onward and upward!
 

@@ -12,7 +12,7 @@ $SET_STR KEEP_GOING: lines:
     ;;
     ;;
     ;;
-    ;;  Keep going!
+    ;;                                Keep going!
 $SET_STR ALMOST_THERE: lines:
     ;;         Almost there...
 

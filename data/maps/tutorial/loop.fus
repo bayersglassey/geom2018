@@ -1,16 +1,9 @@
-$SET_STR UH_OH: lines: at(31 16)
-    ;;Uh oh.
-$SET_STR LETTING_ONE_GO: lines: at(38 3)
+$SET_STR LETTING_ONE_GO: lines: at(37 3)
     ;;They're
-    ;;letting
-    ;;one
-    ;;   go...
+    ;;releasing
+    ;;  a
+    ;; spider?..
 
-text:
-    if all:
-        mapvar("made_it_underneath")
-        mapvar("loop_eye_a_open")
-    then $GET_STR UH_OH else null
 text:
     if all:
         mapvar("made_it_underneath")

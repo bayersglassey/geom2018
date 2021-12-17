@@ -3,9 +3,11 @@ $SET_STR NEED_TO_JUMP: lines:
     ;;
     ;;Press the up arrow key to leap forwards!
 $SET_STR A_SPIDER: lines: at(35 20)
-    ;;A spider?..
-    ;;  sending you out,
-    ;;    are they?..
+    ;;  A spider?..
+    ;;
+    ;;    are they
+    ;;    releasing
+    ;;       you?..
 $SET_STR NEED_TO_UNDERNEATH: lines:
     ;;    Sometimes you'll need to travel upside down.
     ;;    Don't worry about it!
