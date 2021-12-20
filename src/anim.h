@@ -280,6 +280,7 @@ typedef struct state_effect_goto {
     const char *name;
     bool immediate;
     bool delay;
+    int add_delay;
 } state_effect_goto_t;
 
 typedef struct state_effect_call {

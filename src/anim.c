@@ -464,9 +464,13 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         }
 
         bool delay = false;
+        int add_delay = 0;
         if(GOT("delay")){
             NEXT
             delay = true;
+            if(GOT_INT){
+                GET_INT(add_delay)
+            }
         }
 
         OPEN
@@ -478,6 +482,7 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         effect->u.gotto.name = goto_name;
         effect->u.gotto.immediate = immediate;
         effect->u.gotto.delay = delay;
+        effect->u.gotto.add_delay = add_delay;
 
         CLOSE
     }else if(GOT("call")){

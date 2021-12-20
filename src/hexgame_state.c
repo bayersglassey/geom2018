@@ -101,7 +101,8 @@ int state_effect_goto_apply_to_body(state_effect_goto_t *gotto,
     err = body_set_state(body, gotto->name, false);
     if(err)return err;
     if(gotto->delay && body->state){
-        body->cooldown = _get_rgraph_delay(body->state->rgraph);
+        body->cooldown = _get_rgraph_delay(body->state->rgraph)
+            + gotto->add_delay;
     }
     return 0;
 }
@@ -114,7 +115,8 @@ int state_effect_goto_apply_to_actor(state_effect_goto_t *gotto,
     err = actor_set_state(actor, gotto->name);
     if(err)return err;
     if(gotto->delay && actor->state){
-        actor->wait = _get_rgraph_delay(actor->state->rgraph);
+        actor->wait = _get_rgraph_delay(actor->state->rgraph)
+            + gotto->add_delay;
     }
     return 0;
 }
