@@ -104,14 +104,6 @@ static int _parse_collmsg_handler(stateset_t *stateset, fus_lexer_t *lexer,
     char *msg;
     GET_STR(msg)
 
-    collmsg_handler_t *found_handler = stateset_get_collmsg_handler(
-        stateset, msg);
-    if(found_handler){
-        fprintf(stderr, "Can't redefine handler \"%s\" in stateset \"%s\"\n",
-            msg, stateset->filename);
-        return 2;
-    }
-
     collmsg_handler_init(handler, msg);
 
     OPEN
@@ -230,16 +222,6 @@ hexcollmap_t *stateset_get_collmap(stateset_t *stateset, const char *name){
     for(int i = 0; i < stateset->collmaps_len; i++){
         stateset_collmap_entry_t *entry = stateset->collmaps[i];
         if(!strcmp(entry->name, name))return entry->collmap;
-    }
-    return NULL;
-}
-
-collmsg_handler_t *stateset_get_collmsg_handler(stateset_t *stateset,
-    const char *msg
-){
-    for(int i = 0; i < stateset->collmsg_handlers_len; i++){
-        collmsg_handler_t *handler = &stateset->collmsg_handlers[i];
-        if(!strcmp(handler->msg, msg))return handler;
     }
     return NULL;
 }

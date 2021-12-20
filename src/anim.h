@@ -354,8 +354,6 @@ void stateset_cleanup(stateset_t *stateset);
 int stateset_init(stateset_t *stateset, const char *filename);
 void stateset_dump(stateset_t *stateset, FILE *file, int depth);
 hexcollmap_t *stateset_get_collmap(stateset_t *stateset, const char *name);
-collmsg_handler_t *stateset_get_collmsg_handler(stateset_t *stateset,
-    const char *msg);
 stateset_proc_t *stateset_get_proc(stateset_t *stateset, const char *name);
 int stateset_load(stateset_t *stateset, const char *filename, vars_t *vars,
     prismelrenderer_t *prend, vecspace_t *space);
