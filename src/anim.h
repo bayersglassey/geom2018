@@ -228,6 +228,7 @@ enum state_effect_type {
     STATE_EFFECT_TYPE_GOTO,
     STATE_EFFECT_TYPE_CALL,
     STATE_EFFECT_TYPE_DELAY,
+    STATE_EFFECT_TYPE_ADD_DELAY,
     STATE_EFFECT_TYPE_SPAWN,
     STATE_EFFECT_TYPE_PLAY,
     STATE_EFFECT_TYPE_DIE,
@@ -256,6 +257,7 @@ static const char *state_effect_type_name(int type){
         case STATE_EFFECT_TYPE_GOTO: return "goto";
         case STATE_EFFECT_TYPE_CALL: return "call";
         case STATE_EFFECT_TYPE_DELAY: return "delay";
+        case STATE_EFFECT_TYPE_ADD_DELAY: return "add_delay";
         case STATE_EFFECT_TYPE_SPAWN: return "spawn";
         case STATE_EFFECT_TYPE_PLAY: return "play";
         case STATE_EFFECT_TYPE_DIE: return "die";
@@ -296,7 +298,6 @@ typedef struct state_effect {
     int type; /* enum state_effect_type */
     union {
         const char *var_name;
-        int delay;
         state_effect_goto_t gotto;
         state_effect_call_t call;
         int dead; /* enum body_dead */

@@ -495,13 +495,16 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
     }else if(GOT("delay")){
         NEXT
         OPEN
-
-        int delay;
-        GET_INT(delay)
-
         effect->type = STATE_EFFECT_TYPE_DELAY;
-        effect->u.delay = delay;
-
+        err = valexpr_parse(&effect->u.expr, lexer);
+        if(err)return err;
+        CLOSE
+    }else if(GOT("add_delay")){
+        NEXT
+        OPEN
+        effect->type = STATE_EFFECT_TYPE_ADD_DELAY;
+        err = valexpr_parse(&effect->u.expr, lexer);
+        if(err)return err;
         CLOSE
     }else if(GOT("spawn")){
         NEXT
@@ -1124,6 +1127,8 @@ void state_cond_dump(state_cond_t *cond, FILE *file, int depth){
 void state_effect_cleanup(state_effect_t *effect){
     switch(effect->type){
         case STATE_EFFECT_TYPE_PRINT:
+        case STATE_EFFECT_TYPE_DELAY:
+        case STATE_EFFECT_TYPE_ADD_DELAY:
             valexpr_cleanup(&effect->u.expr);
             break;
         case STATE_EFFECT_TYPE_RELOCATE:

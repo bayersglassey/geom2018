@@ -517,12 +517,25 @@ int state_effect_apply(state_effect_t *effect,
         }
         break;
     }
-    case STATE_EFFECT_TYPE_DELAY: {
+    case STATE_EFFECT_TYPE_DELAY:
+    case STATE_EFFECT_TYPE_ADD_DELAY: {
+        int *delay_ptr;
         if(actor){
-            actor->wait = effect->u.delay;
+            delay_ptr = &actor->wait;
         }else{
             CHECK_BODY
-            body->cooldown = effect->u.delay;
+            delay_ptr = &body->cooldown;
+        }
+
+        valexpr_context_t valexpr_context = {0};
+        err = _get_vars(context, &valexpr_context);
+        if(err)return err;
+
+        int delay = valexpr_get_int(&effect->u.expr, &valexpr_context);
+        if(effect->type == STATE_EFFECT_TYPE_ADD_DELAY){
+            *delay_ptr += delay;
+        }else{
+            *delay_ptr = delay;
         }
         break;
     }
