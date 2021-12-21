@@ -40,6 +40,15 @@ static int dump_effect(stateset_t *stateset, state_effect_t *effect,
             fprintf(file, "    \"%p\" -> \"%p\";\n", parent, proc);
             break;
         }
+        case STATE_EFFECT_TYPE_SPAWN: {
+            state_effect_spawn_t *spawn = &effect->u.spawn;
+            for(int i = 0; i < spawn->effects_len; i++){
+                state_effect_t *effect = spawn->effects[i];
+                err = dump_effect(stateset, effect, parent, file);
+                if(err)return err;
+            }
+            break;
+        }
         case STATE_EFFECT_TYPE_GOTO: {
             state_effect_goto_t *gotto = &effect->u.gotto;
             state_t *state = stateset_get_state(stateset, gotto->name);
