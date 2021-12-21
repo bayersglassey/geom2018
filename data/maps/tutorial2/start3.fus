@@ -18,7 +18,7 @@ $SET_STR DANGER: lines:
     ;;
     ;;
     ;;
-    ;; Everything with be okay.
+    ;; Everything will be okay.
     ;;   Keep going.
 
 spawn: (0 0) -1 y
