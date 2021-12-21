@@ -82,13 +82,13 @@ submaps:
                 pos: eval: (19 0) + (19 -1) + (24 17) + (28 12)
                 camera: (9 4)
                 recs:
-                    : "data/maps/tutorial/recs/eyeplayer000.fus"
+                    : "data/maps/tutorial/recs/eyespider000.fus"
             :
                 file: "data/maps/tutorial/skypipes3.fus"
                 pos: eval: (19 0) + (19 -1) + (24 17) + (28 12) + (27 10)
                 camera: (9 0)
                 recs:
-                    : "data/maps/tutorial/recs/eyeplayer001.fus"
+                    : "data/maps/tutorial/recs/eyespider001.fus"
             :
                 file: "data/maps/tutorial/skypipes4.fus"
                 pos: eval: (19 0) + (19 -1) + (24 17) + (28 12) + (27 10) + (25 3)

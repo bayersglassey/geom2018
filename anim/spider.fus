@@ -1,0 +1,3 @@
+
+$SET_STR NS spider_
+import "anim/_spider.fus"

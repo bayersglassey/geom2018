@@ -26,7 +26,7 @@ shapes:
         text: "geomfont1" "Load"
     "txt_exit":
         text: "geomfont1" "Quit"
-    "txt_players":
+    "txt_spiders":
         text: "geomfont1" "Players"
     "txt_tutorial1":
         text: "geomfont1" "Tu"

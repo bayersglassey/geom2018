@@ -503,7 +503,7 @@ int hexgame_reset_player(hexgame_t *game, player_t *player,
                 Hexgame does not actually have enough information
                 to do RESET_HARD properly.
                 In particular, test_app is the thing which knows the default
-                stateset_filename (e.g. "anim/player.fus").
+                stateset_filename (e.g. "anim/spider.fus").
                 See: test_app_set_players, app->stateset_filename
                 ...so I think we want to get rid of RESET_HARD and turn it
                 into a separate function, which lives in test_app_game.c

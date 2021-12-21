@@ -19,7 +19,7 @@ static test_app_t *get_test_app();
 
 
 const char* DEFAULT_PREND_FILENAME = "data/test.fus";
-const char* DEFAULT_STATESET_FILENAME = "anim/player.fus";
+const char* DEFAULT_STATESET_FILENAME = "anim/spider.fus";
 const char* ENV_DEVEL = "HEXGAME_DEVEL";
 const int DEFAULT_PLAYERS = 2;
 const int DEFAULT_PLAYERS_PLAYING = 1;

@@ -19,7 +19,7 @@ submaps:
                 rot: 0
                 turn: y
             :
-                anim: "anim/aimerplayer.fus"
+                anim: "anim/aimerspider.fus"
                 pos: (-10 -9)
                 rot: 0
                 turn: n

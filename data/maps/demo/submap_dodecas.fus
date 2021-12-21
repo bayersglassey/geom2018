@@ -2,16 +2,16 @@
 mapper: ("double")
 
 recs:
-    : "data/maps/demo/recs/dodecas_000.fus" "player_cpu"
-    : "data/maps/demo/recs/dodecas_001.fus" "player_cpu"
+    : "data/maps/demo/recs/dodecas_000.fus" "spider_cpu"
+    : "data/maps/demo/recs/dodecas_001.fus" "spider_cpu"
     : "data/maps/demo/recs/dodecas_hexroller_000.fus"
-    : "data/maps/demo/recs/dodecas_hexroller_001.fus" "player_cpu"
+    : "data/maps/demo/recs/dodecas_hexroller_001.fus" "spider_cpu"
 
 actors:
-    : (21 -15) 5 y "actor/airollerplayer.fus" "player_cpu"
+    : (21 -15) 5 y "actor/airollerspider.fus" "spider_cpu"
 
 vars:
-    "eyeplayer_dodecas_ran_away_1": F
+    "eyespider_dodecas_ran_away_1": F
 
     nosave "fisheye_eye_a_open": F
     nosave "fisheye_eye_b_open": F

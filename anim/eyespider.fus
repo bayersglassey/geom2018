@@ -1,0 +1,4 @@
+
+$SET_STR NS eyespider_
+$SET_BOOL SPIDER_EYE
+import "anim/_spider.fus"

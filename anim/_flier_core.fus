@@ -1,7 +1,7 @@
 
 # Expected vars:
 # ANIM_NS (str), e.g. "flier_", ""
-# RGRAPH_NS (str), e.g. "flierplayer_", ""
+# RGRAPH_NS (str), e.g. "flierspider_", ""
 
 
 #$SET_BOOL ONLY_STICK_IF_NOT_SHIFT
@@ -21,7 +21,7 @@ $PREFIX ANIM_NS hover:
     # ROTATE B #
     ############
 
-    $IF PLAYER_FLIER:
+    $IF SPIDER_FLIER:
         if:
             key: wasdown b
             key: not wasdown f
@@ -78,7 +78,7 @@ $PREFIX ANIM_NS hover:
     # ROTATE F #
     ############
 
-    $IF PLAYER_FLIER:
+    $IF SPIDER_FLIER:
         if:
             key: wasdown f
             key: not wasdown b
@@ -133,7 +133,7 @@ $PREFIX ANIM_NS hover:
     # STRAIGHT #
     ############
 
-    $IF PLAYER_FLIER:
+    $IF SPIDER_FLIER:
         if:
             key: wasdown u
             $IF ONLY_STICK_IF_NOT_SHIFT:
@@ -189,7 +189,7 @@ $PREFIX ANIM_NS fly:
         ;;   */*\*
 
     # DOESN'T WORK BECAUSE NO WAY TO KNOW WHETHER WE SHOULD TURN OR NOT:
-    #$IF PLAYER_FLIER:
+    #$IF SPIDER_FLIER:
     #    if:
     #        coll: water any yes
     #            ;;   .   .

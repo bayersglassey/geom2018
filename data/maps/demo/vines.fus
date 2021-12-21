@@ -1,20 +1,20 @@
 parts:
     "E": recording "data/recs/mini_eye_crouch.fus"
         vars:
-            "key": "eyeplayer_vines_ran_away_3"
-            "antikey": "eyeplayer_vines_ran_away_4"
+            "key": "eyespider_vines_ran_away_3"
+            "antikey": "eyespider_vines_ran_away_4"
             "appear": T
-            "respawn_mapvar": "eyeplayer_vines_mini_eye_respawn"
+            "respawn_mapvar": "eyespider_vines_mini_eye_respawn"
     "h": recording "data/recs/hotspot.fus"
         vars:
-            "key": "player_passed_vines"
+            "key": "spider_passed_vines"
     "H": recording "data/recs/hotspot.fus"
         vars:
-            "counter": "player_leaving_vines"
+            "counter": "spider_leaving_vines"
             "max_cooldown": 15
     "A": recording "data/recs/hotspot.fus"
         vars:
-            "counter": "player_leaving_vines_for_real"
+            "counter": "spider_leaving_vines_for_real"
             "max_cooldown": 15
 default_vert: "s"
 default_edge: "s"

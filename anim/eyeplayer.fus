@@ -1,4 +1,0 @@
-
-$SET_STR NS eyeplayer_
-$SET_BOOL PLAYER_EYE
-import "anim/_player.fus"

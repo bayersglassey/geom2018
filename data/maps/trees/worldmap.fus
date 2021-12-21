@@ -88,12 +88,12 @@ submaps:
                         camera: (10 -10)
                         doors:
                             :
-                                anim: "anim/rollerplayer.fus"
+                                anim: "anim/rollerspider.fus"
                                 pos: (181 43)
                                 rot: 0
                                 turn: y
                             :
-                                anim: "anim/spikeyplayer.fus"
+                                anim: "anim/spikeyspider.fus"
                                 pos: (179 36)
                                 rot: 0
                                 turn: y

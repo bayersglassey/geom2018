@@ -7,7 +7,7 @@ vars:
     # it should transfer it to us by calling our accept_carryable proc)
     "accept_carryable": "mini_eye"
 
-    # If set to T, we open even if a player isn't nearby
+    # If set to T, we open even if a spider isn't nearby
     "auto_open": F
 
     # The collmsg (or stateset filename) of bodies we will look at

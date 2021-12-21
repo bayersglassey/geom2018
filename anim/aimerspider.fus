@@ -1,0 +1,4 @@
+
+$SET_BOOL SPIDER_AIMER
+$SET_STR NS aimerspider_
+import "anim/_spider.fus"

@@ -5,7 +5,7 @@ parts:
             "key": "guide_passed_start2"
     "A": recording "data/recs/hotspot.fus"
         vars:
-            "counter": "player_leaving_vines_for_real"
+            "counter": "spider_leaving_vines_for_real"
             "max_cooldown": 15
 collmap:
     ;;

@@ -1,6 +1,6 @@
 
 # Expected vars:
-# NS (str), e.g. "player_", ""
+# NS (str), e.g. "spider_", ""
 
 $SET_STR NS ""
 

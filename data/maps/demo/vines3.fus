@@ -2,7 +2,7 @@ spawn: (0 -1) 3 y
 parts:
     "h": recording "data/recs/hotspot.fus"
         vars:
-            "key": "player_passed_vines2"
+            "key": "spider_passed_vines2"
     "a": recording "data/recs/hotspot.fus"
         vars:
             "counter": "vines3_fluff_a"

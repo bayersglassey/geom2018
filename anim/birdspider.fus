@@ -1,0 +1,9 @@
+
+$SET_STR NS birdspider_
+$SET_BOOL SPIDER_BIRD
+import "anim/_spider.fus"
+
+$SET_STR ANIM_NS bird_
+$SET_STR RGRAPH_NS birdspider_
+$SET_BOOL SPIDER_BIRD
+import "anim/_bird.fus"

@@ -4,15 +4,15 @@ palette: "data/maps/demo/pals/vines.fus"
 tileset: "data/maps/demo/tilesets/water.fus"
 
 actors:
-    : "actor/hermit/actor.fus" "player_cpu"
+    : "actor/hermit/actor.fus" "spider_cpu"
 
 vars:
-    "eyeplayer_vines_ran_away_1": F
-    "eyeplayer_vines_ran_away_2": F
-    "eyeplayer_vines_ran_away_3": F
-    "eyeplayer_vines_ran_away_4": F
-    nosave "eyeplayer_vines_looking": F
-    nosave "eyeplayer_vines_mini_eye_respawn": 0
+    "eyespider_vines_ran_away_1": F
+    "eyespider_vines_ran_away_2": F
+    "eyespider_vines_ran_away_3": F
+    "eyespider_vines_ran_away_4": F
+    nosave "eyespider_vines_looking": F
+    nosave "eyespider_vines_mini_eye_respawn": 0
 
     # Hotspots for showing "fluff" (flavour text)
     nosave "vines2_fluff_a": 0
@@ -24,10 +24,10 @@ vars:
 
     "jungle_cage": F
     "vines3_door": F
-    "player_passed_vines": F
-    "player_passed_vines2": F
-    nosave "player_leaving_vines": 0
-    nosave "player_leaving_vines_for_real": 0
+    "spider_passed_vines": F
+    "spider_passed_vines2": F
+    nosave "spider_leaving_vines": 0
+    nosave "spider_leaving_vines_for_real": 0
 
 
 $SET_STR VINES_HIDING: lines: at(25 3)
@@ -130,18 +130,18 @@ submaps:
         file: "data/maps/demo/vines.fus"
         text:
             if all:
-                mapvar("eyeplayer_vines_ran_away_1")
-                mapvar("eyeplayer_vines_looking")
+                mapvar("eyespider_vines_ran_away_1")
+                mapvar("eyespider_vines_looking")
             then $GET_STR VINES_HIDING
             else if all:
-                mapvar("eyeplayer_vines_ran_away_2")
-                not mapvar("eyeplayer_vines_ran_away_4")
+                mapvar("eyespider_vines_ran_away_2")
+                not mapvar("eyespider_vines_ran_away_4")
             then
-                if > mapvar("eyeplayer_vines_mini_eye_respawn") 0
+                if > mapvar("eyespider_vines_mini_eye_respawn") 0
                 then
-                    if > mapvar("player_leaving_vines_for_real") 0
+                    if > mapvar("spider_leaving_vines_for_real") 0
                     then $GET_STR VINES_AAA
-                    else if > mapvar("player_leaving_vines") 0
+                    else if > mapvar("spider_leaving_vines") 0
                     then $GET_STR VINES_NOT_OUT_THERE
                     else $GET_STR VINES_THANKS
                 else $GET_STR VINES_TAKE_ME
@@ -151,13 +151,13 @@ submaps:
         file: "data/maps/demo/vines2.fus"
         text:
             if all:
-                mapvar("eyeplayer_vines_ran_away_3")
-                not mapvar("eyeplayer_vines_ran_away_4")
-                == mapvar("eyeplayer_vines_mini_eye_respawn") 0
+                mapvar("eyespider_vines_ran_away_3")
+                not mapvar("eyespider_vines_ran_away_4")
+                == mapvar("eyespider_vines_mini_eye_respawn") 0
             then $GET_STR VINES_COME_BACK
             else null
         text:
-            if > mapvar("eyeplayer_vines_mini_eye_respawn") 0
+            if > mapvar("eyespider_vines_mini_eye_respawn") 0
             then
                 if > mapvar("vines2_fluff_a") 0
                 then $GET_STR VINES2_FLUFF_A
@@ -174,7 +174,7 @@ submaps:
             :
                 file: "data/maps/demo/vines3.fus"
                 text:
-                    if > mapvar("eyeplayer_vines_mini_eye_respawn") 0
+                    if > mapvar("eyespider_vines_mini_eye_respawn") 0
                     then
                         if > mapvar("vines3_fluff_a") 0
                         then $GET_STR VINES3_FLUFF_A
@@ -202,9 +202,9 @@ submaps:
             :
                 file: "data/maps/demo/vines4.fus"
                 text:
-                    if mapvar("eyeplayer_vines_ran_away_4")
+                    if mapvar("eyespider_vines_ran_away_4")
                     then $GET_STR VINES4_FLUFF_B
-                    else if > mapvar("eyeplayer_vines_mini_eye_respawn") 0
+                    else if > mapvar("eyespider_vines_mini_eye_respawn") 0
                     then $GET_STR VINES4_FLUFF_A
                     else null
                 pos: (-40 4)
@@ -228,7 +228,7 @@ submaps:
                 tileset: "data/tileset1.fus"
                 recs:
                     : "data/maps/demo/recs/jungle2_bird000.fus"
-                    : "data/maps/demo/recs/jungle3_bird000.fus" "player_cpu"
+                    : "data/maps/demo/recs/jungle3_bird000.fus" "spider_cpu"
                     : "data/maps/demo/recs/jungle5_bird000.fus"
                 submaps:
                     :

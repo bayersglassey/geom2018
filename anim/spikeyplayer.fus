@@ -1,4 +1,0 @@
-
-$SET_STR NS spikeyplayer_
-$SET_BOOL PLAYER_SPIKEY
-import "anim/_player.fus"

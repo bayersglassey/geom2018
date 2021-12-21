@@ -341,7 +341,7 @@ Issue with that is our crappy "event system"...
     anim/coin.fus:
         on "collect": collected
 
-    anim/player.fus:
+    anim/spider.fus:
         collmsgs: "collect"
 
 ...no way to get "code" to run for player when they actually collect something.
@@ -354,7 +354,7 @@ I believe we want something like:
         on "collect":
             goto immediate: collected
 
-    anim/player.fus:
+    anim/spider.fus:
         collmsgs:
             "collect":
                 inc: coins_collected
@@ -364,7 +364,7 @@ camera_render would check player's body's variables?..
 Variables with a certain prefix are printed?..
 Or stateset has a list of variables to be printed, and their labels?..
 
-    anim/player.fus:
+    anim/spider.fus:
 
         display:
             int coins_collected
@@ -375,7 +375,7 @@ Or stateset has a list of variables to be printed, and their labels?..
             goto immediate: dead
 
         $SET_STR NS player_
-        import "anim/_player.fus"
+        import "anim/_spider.fus"
 
 
 Can a body's vars be made to affect how its rgraph is rendered?..
@@ -431,7 +431,7 @@ Aug 6, 2020:
 Aug 23, 2020:
 -------------
 
-* MAKE AIPLAYER CUSTOMIZABLE
+* MAKE AISPIDER CUSTOMIZABLE
     * "timid" variant, doesn't make big jumps, can therefore be confined to e.g. left part of spidertown...
     * The chance percentages could be int vars...
     * Separate chances for running vs "running off the edge"?..

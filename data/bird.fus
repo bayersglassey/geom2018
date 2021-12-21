@@ -1,8 +1,8 @@
 
 $SET_STR NS ""
-$UNSET_BOOL PLAYER_BIRD
+$UNSET_BOOL SPIDER_BIRD
 import "data/_bird.fus"
 
-$SET_STR NS "birdplayer_"
-$SET_BOOL PLAYER_BIRD
+$SET_STR NS "birdspider_"
+$SET_BOOL SPIDER_BIRD
 import "data/_bird.fus"

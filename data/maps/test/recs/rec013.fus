@@ -1,4 +1,4 @@
-anim: "anim/player.fus"
+anim: "anim/spider.fus"
 state: "crawl"
 pos: ( -3 -19)
 rot: 3

@@ -3,4 +3,4 @@ create_body:
         play: "actor/rec/aicoin_beast.fus"
         goto: mainloop
 
-import "actor/_aiplayer.fus"
+import "actor/_aispider.fus"

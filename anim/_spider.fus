@@ -1,0 +1,356 @@
+
+# Expected vars:
+# NS (str), e.g. "spider_"
+# SPIDER_AIMER (bool)
+# SPIDER_BIRD (bool)
+# SPIDER_FLIER (bool)
+# SPIDER_SPIKEY (bool)
+# SPIDER_ROLLER (bool)
+# SPIDER_EYE (bool)
+
+# NOTE: make sure "stand" is the first anim, so any imports
+# should go below it
+
+$IF SPIDER_SPIKEY:
+    $SET_STR SPIT_FUS "anim/spikeyspit.fus"
+$IF !SPIDER_SPIKEY:
+    $SET_STR SPIT_FUS "anim/spit.fus"
+
+
+$SET_INT ROLLER_STAND_DELAY 0
+
+$SET_STR STATE_STEP_UP step
+$SET_STR STATE_LAND step
+$SET_STR STATE_LAND_UP step
+
+
+collmsgs: "touch" "enter_door"
+on "crush": goto: dead
+
+
+$IF !SPIDER_EYE: on "carryable":
+    # "me" is a spider, "you" is a carryable thing (e.g. coin, food)
+
+    if: not: exists myvar("carrying")
+    then:
+        # Transfer some vars from carryable thing to the spider who
+        # will now be "carrying it"
+        set myvar("carrying"): yourvar("carryable")
+        set myvar("carrying_respawn_mapvar"): yourvar("respawn_mapvar")
+        set myvar("carrying_rgraph"): yourvar("carryable_rgraph")
+        set_label "carrying": myvar("carrying_rgraph")
+
+        # Increment a mapvar tracking how many of this thing are
+        # being carried
+        if: exists myvar("carrying_respawn_mapvar")
+        then: inc mapvar(myvar("carrying_respawn_mapvar"))
+
+        # When a thing is carried, it is "collected"
+        as you:
+            goto immediate: _collected
+
+
+proc _spawn_spit:
+    # "me" is spider, "you" is spider's newly-spawned spit
+
+    if: exists myvar("carrying")
+    then:
+        # Transfer the thing we're carrying over to our spit
+
+        # Set spit's "carrying" to spider's "carrying"
+        as you:
+            set myvar("carrying"): yourvar("carrying")
+            set myvar("carrying_respawn_mapvar"): yourvar("carrying_respawn_mapvar")
+            set myvar("carrying_rgraph"): yourvar("carrying_rgraph")
+            set_label "carrying": myvar("carrying_rgraph")
+
+        # Unset spider's "carrying"
+        set myvar("carrying"): null
+        set_label "carrying": null
+
+proc spit:
+    spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f do:
+        call: _spawn_spit
+    goto delay: spit
+
+proc looking_up_spit:
+    spawn: $GET_STR SPIT_FUS "fly" (1 0) 1 f do:
+        call: _spawn_spit
+    goto delay: looking_up_spit
+
+proc crawl_spit:
+    spawn: $GET_STR SPIT_FUS "crouch_fly" (0 0) 0 f do:
+        call: _spawn_spit
+    goto delay: crawl_spit
+
+proc crawl_looking_up_spit:
+    spawn: $GET_STR SPIT_FUS "crouch_fly" (1 0) 1 f do:
+        call: _spawn_spit
+    goto delay: crawl_looking_up_spit
+
+proc swim_spit:
+    spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f do:
+        call: _spawn_spit
+    goto delay: swim_spit
+
+
+collmap "stand":
+    ;;   .   .
+    ;;   *\*/*
+    ;; . - + - .
+    ;;   */*\*
+    ;;  (.)  .
+collmap "crawl":
+    ;;     .
+    ;;     *
+    ;;  (.)  .
+
+stand:
+    rgraph: $PREFIX NS "stand"
+    hitbox: collmap("stand")
+
+    # Can't stand on nothing
+    if:
+        coll: any no
+            ;;  (+)- +
+    then:
+        move: 1 0
+        goto immediate: start_jump
+
+    # Spit
+    if:
+        key: wentdown y
+    then:
+        call: spit
+
+    # Turn into roller
+    $IF SPIDER_ROLLER:
+        if:
+            key: wentdown x
+        then:
+            goto: roller_stand
+            delay: $GET_INT ROLLER_STAND_DELAY
+
+    # Turn into bird
+    $IF SPIDER_BIRD:
+        if:
+            key: wentdown x
+            coll: all no
+                ;;   .   .
+                ;;   *\*/*
+                ;; . - + - .
+                ;;   */*\*
+                ;;   . - .
+                ;;   *\*/*
+                ;; . - + - .
+                ;;   */*\*
+                ;;  (.)  .
+        then:
+            goto: bird_crawl
+            delay: 1
+
+    # Blink
+    $IF SPIDER_EYE:
+        if:
+            key: wasdown x
+        then:
+            goto delay: eye_closing
+
+    # Crawl
+    if:
+        key: isdown d
+    then:
+        goto delay: crawling
+
+    # Stepping and jumping
+    import "anim/_spider_move.state.fus"
+
+    # Turn
+    if:
+        key: isdown b
+    then:
+        move: 1 0
+        turn
+        goto delay: turn
+
+    # Look up
+    $IF SPIDER_AIMER:
+        if:
+            key: isdown x
+        then:
+            goto: look_up
+
+look_up:
+    rgraph: $PREFIX NS "look_up"
+    hitbox: collmap("stand")
+    if() then: goto: looking_up
+
+looking_up:
+    rgraph: $PREFIX NS "looking_up"
+    hitbox: collmap("stand")
+
+    if:
+        key: wentdown y
+    then:
+        call: looking_up_spit
+
+    if:
+        key: wasdown u
+        coll: all no
+            ;;    *\*/*
+            ;;    - + -
+            ;;       \*
+            ;;
+            ;;
+            ;; ( )
+    then:
+        move: 1 0
+        rot: 1
+        goto immediate: start_jump
+
+    if: key: isdown f
+    then: goto immediate: stand
+
+    if: key: isdown b
+    then: goto immediate: stand
+
+    if:
+        key: isdown d
+    then:
+        goto delay: crawling_looking_up
+
+    if: key: not isdown x
+    then: goto: stand
+
+spit:
+    rgraph: $PREFIX NS "spit"
+    hitbox: collmap("stand")
+    if() then: goto: stand
+
+looking_up_spit:
+    rgraph: $PREFIX NS "looking_up_spit"
+    hitbox: collmap("stand")
+    if() then: goto: looking_up
+
+start_jump:
+
+    $IF SPIDER_FLIER:
+        if:
+            key: wasdown x
+            coll: all no
+                ;;       \*/*
+                ;;        + -
+                ;;       /*\*
+                ;; ( )
+        then:
+            goto: flier_fly
+            move: 2 1
+            delay: 2
+
+    if:
+        coll: water any yes collmap("stand")
+    then:
+        goto delay: swim_jump
+
+    if() then:
+        goto delay: jump
+
+jump:
+    # NOTE: the only "goto: jump" is in "start_jump", which checks whether
+    # we're in water, and does "goto: jump" or "goto: swim_jump"
+    # accordingly.
+    # Therefore, if we're in "jump", then we can safely assume we're not in
+    # water without checking.
+
+    unsafe
+    rgraph: $PREFIX NS "jump"
+    hitbox: collmap("stand")
+
+    # Landing, jumping, crashing
+    import "anim/_spider_jump.state.fus"
+
+step_down:
+    rgraph: $PREFIX NS "step"
+    hitbox:
+        ;;   .   .   .
+        ;;   *\*/*\*/*
+        ;; . - + - + - .
+        ;;   */*\*/*\*
+        ;;   .  (.)  .
+
+    if:
+        key: wentdown y
+    then:
+        call: spit
+
+    $IF SPIDER_ROLLER:
+        if:
+            key: wentdown x
+        then:
+            goto: roller_stand
+            delay: $GET_INT ROLLER_STAND_DELAY
+
+    if() then: goto: stand
+
+step:
+    rgraph: $PREFIX NS "step"
+    hitbox: collmap("stand")
+
+    if:
+        key: wentdown y
+    then:
+        call: spit
+
+    $IF SPIDER_ROLLER:
+        if:
+            key: wentdown x
+        then:
+            goto: roller_stand
+            delay: $GET_INT ROLLER_STAND_DELAY
+
+    if() then: goto: stand
+
+turn:
+    rgraph: $PREFIX NS "turn"
+    hitbox: collmap("stand")
+
+    if() then: goto immediate: step
+
+sleep:
+    rgraph: $PREFIX NS "sleep"
+    hitbox: collmap("crawl")
+    if: any:
+        key: isdown u
+        key: isdown d
+        key: isdown l
+        key: isdown r
+    then: goto: crawl
+
+$IF SPIDER_EYE:
+    eye_closing:
+        rgraph: $PREFIX NS "eye_closing"
+        hitbox: collmap("stand")
+        if() then: goto: eye_closed
+    eye_unclosing:
+        rgraph: $PREFIX NS "eye_unclosing"
+        hitbox: collmap("stand")
+        if() then: goto: stand
+    eye_closed:
+        rgraph: $PREFIX NS "eye_closed"
+        hitbox: collmap("stand")
+        if:
+            key: not isdown x
+        then: goto delay: eye_unclosing
+
+mostly_dead:
+    rgraph: "dead_cycle"
+    unsafe
+    if() then: die mostly
+
+dead:
+    rgraph: "dead_cycle"
+    unsafe
+    if() then: die
+
+import "anim/_spider_crawl.fus"
+import "anim/_spider_swim.fus"

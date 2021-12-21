@@ -5,16 +5,16 @@ palette: "data/pal1.fus"
 tileset: "data/tileset1.fus"
 
 actors:
-    : "actor/guide/actor.fus" "player_cpu"
-    : "actor/eyeplayer_tunnels.fus"
-    : "actor/eyeplayer_dodecas.fus"
-    : "actor/eyeplayer_vines.fus"
+    : "actor/guide/actor.fus" "spider_cpu"
+    : "actor/eyespider_tunnels.fus"
+    : "actor/eyespider_dodecas.fus"
+    : "actor/eyespider_vines.fus"
 
 vars:
     "guide_passed_start": F
     "guide_passed_start2": F
 
-    "eyeplayer_tunnels_ran_away_1": F
+    "eyespider_tunnels_ran_away_1": F
 
 
 $SET_STR START3_SPIDERS: lines: at(17 5)
@@ -39,8 +39,8 @@ submaps:
                 file: "data/maps/demo/start3.fus"
                 text:
                     if all:
-                        mapvar("eyeplayer_vines_ran_away_2")
-                        > mapvar("eyeplayer_vines_mini_eye_respawn") 0
+                        mapvar("eyespider_vines_ran_away_2")
+                        > mapvar("eyespider_vines_mini_eye_respawn") 0
                     then $GET_STR START3_SPIDERS
                     else null
                 pos: (2 15)
@@ -89,7 +89,7 @@ submaps:
                         palette: "data/maps/demo/pals/tunnels.fus"
                         doors:
                             :
-                                anim: "anim/rollerplayer.fus"
+                                anim: "anim/rollerspider.fus"
                                 pos: (70 10)
                                 rot: 0
                                 turn: n

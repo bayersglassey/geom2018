@@ -6,9 +6,9 @@ palette: "data/pal1.fus"
 tileset: "data/tileset1.fus"
 
 actors:
-    #: (0 0) 0 n "actor/aiplayer.fus" "player_cpu"
-    #: (14 1) 1 n "actor/aibird.fus" "player_cpu"
-    #: (-6 -11) 4 y "actor/aibig_roller.fus" "player_cpu"
+    #: (0 0) 0 n "actor/aispider.fus" "spider_cpu"
+    #: (14 1) 1 n "actor/aibird.fus" "spider_cpu"
+    #: (-6 -11) 4 y "actor/aibig_roller.fus" "spider_cpu"
 
 submaps:
     :

@@ -1,6 +1,6 @@
 
 # Expected vars:
-# NS (str), e.g. "player_", ""
+# NS (str), e.g. "spider_", ""
 
 shapes:
 
@@ -35,10 +35,10 @@ shapes:
         shapes:
             : $PREFIX NS "_roller_body_hollow_third" (0 0 0 0) 0 f
         prismels:
-            $IF PLAYER_ROLLER:
+            $IF SPIDER_ROLLER:
                 : "tri" ( 0 0 0 0)  0 f eval: 1 + 8 + 4
                 : "tri" ( 0 0 0 0)  2 f eval: 1 + 8 + 4
-            $IF !PLAYER_ROLLER:
+            $IF !SPIDER_ROLLER:
                 : "tri" ( 0 0 0 0)  0 f eval: 1 + 8 + 3
                 : "tri" ( 0 0 0 0)  2 f eval: 1 + 8 + 3
 
@@ -76,7 +76,7 @@ shapes:
         shapes:
             : $PREFIX NS "roller_body" (0 0 0 0) 0 f
             : $PREFIX NS "roller_foot" (0 0 0 0) 0 f
-        $IF PLAYER_ROLLER:
+        $IF SPIDER_ROLLER:
             labels:
                 : "carrying" eval((2 2 1 0) + (1 0 0 0)) 1 f
             prismels:

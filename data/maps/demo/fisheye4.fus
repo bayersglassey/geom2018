@@ -28,15 +28,15 @@ parts:
     "T": "data/maps/demo/tiles/hex_vec4/fisheye_big2tri.fus"
     "A": recording "data/recs/eye.fus"
         vars:
-            "key_anim": "anim/player.fus"
+            "key_anim": "anim/spider.fus"
             "opened_key": "fisheye_eye_a_open"
     "B": recording "data/recs/eye.fus"
         vars:
-            "key_anim": "anim/rollerplayer.fus"
+            "key_anim": "anim/rollerspider.fus"
             "opened_key": "fisheye_eye_b_open"
     "d": recording "data/recs/door.fus"
         vars:
-            "anim": "anim/rollerplayer.fus"
+            "anim": "anim/rollerspider.fus"
             "location": "fisheye_location_a"
     "l": location "fisheye_location_a"
 collmap:

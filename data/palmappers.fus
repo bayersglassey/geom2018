@@ -1,14 +1,14 @@
 
 palmappers:
 
-    "player_cpu":
+    "spider_cpu":
           :
 
-         # This palmapper is used to mark cpu players, so you can tell
+         # This palmapper is used to mark cpu spiders, so you can tell
          # yourself apart from them.
          #
          # NOTE: we don't change blacks, whites, or reds (because the demo
-         # map's palettes have a pulsating animated red for use with player's
+         # map's palettes have a pulsating animated red for use with spider's
          # eye)
 
          1:

@@ -1,7 +1,7 @@
 
 # Expected variables:
 # ANIM_NS (str), e.g. "bird_", ""
-# RGRAPH_NS (str): e.g. "player_", ""
+# RGRAPH_NS (str): e.g. "spider_", ""
 
 #$SET_BOOL CRAWL_MOVE
 
@@ -329,7 +329,7 @@ $PREFIX ANIM_NS crawl:
         ;;   */*\*
         ;;  (.)  .
 
-    $IF PLAYER_BIRD:
+    $IF SPIDER_BIRD:
         if:
             key: not isdown x
             coll: all yes

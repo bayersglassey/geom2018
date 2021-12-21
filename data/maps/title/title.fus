@@ -2,7 +2,7 @@ parts:
     "T": shape "txt_title"
     "X": shape "txt_new_game"
     "Y": shape "txt_continue"
-    "Z": shape "txt_players"
+    "Z": shape "txt_spiders"
     "x": shape "txt_tutorial1"
     "y": shape "txt_tutorial2"
     "z": shape "txt_tutorial3"

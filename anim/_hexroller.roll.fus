@@ -1,7 +1,7 @@
 
 # Expected vars:
 # ANIM_NS (str), e.g. "hexroller_", ""
-# RGRAPH_NS (str), e.g. "hexrollerplayer_", ""
+# RGRAPH_NS (str), e.g. "hexrollerspider_", ""
 # R0, R1, R4, R5 (str), e.g. "", "_R1", ..., "_R5"
 
 

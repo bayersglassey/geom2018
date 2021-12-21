@@ -42,7 +42,7 @@ stand:
         goto delay: crawling
 
     # Stepping and jumping
-    import "anim/_player_move.state.fus"
+    import "anim/_spider_move.state.fus"
 
     if:
         key: isdown b
@@ -125,7 +125,7 @@ crawl:
         goto delay: uncrawling
 
     # Crawling
-    import "anim/_player_crawl.anim.fus"
+    import "anim/_spider_crawl.anim.fus"
 
     # Turn
     if:
@@ -177,7 +177,7 @@ jump:
         ;;  (.)  .
 
     # Landing, jumping, crashing
-    import "anim/_player_jump.state.fus"
+    import "anim/_spider_jump.state.fus"
 
 collected:
     rgraph: "dead_once"

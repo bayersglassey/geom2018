@@ -1,7 +1,7 @@
 
 # Expected vars:
 # ANIM_NS (str), e.g. "hexroller_", ""
-# RGRAPH_NS (str), e.g. "hexrollerplayer_", ""
+# RGRAPH_NS (str), e.g. "hexrollerspider_", ""
 
 collmsgs: "solid"
 

@@ -2,14 +2,14 @@
 pos: (40 60)
 camera: (0 0)
 recs:
-    : "data/maps/demo/recs/test_003.fus" "player_cpu"
+    : "data/maps/demo/recs/test_003.fus" "spider_cpu"
     : "data/maps/demo/recs/test_flier_000.fus"
 
 actors:
-    : (42 75) 0 y "actor/aiplayer.fus" "player_cpu"
-    : (55 67) 0 y "actor/aiplayer.fus" "player_cpu"
-    : (51 78) 2 n "actor/aiplayer.fus" "player_cpu"
-    : (47 52) 0 n "actor/aiplayer.fus" "player_cpu"
+    : (42 75) 0 y "actor/aispider.fus" "spider_cpu"
+    : (55 67) 0 y "actor/aispider.fus" "spider_cpu"
+    : (51 78) 2 n "actor/aispider.fus" "spider_cpu"
+    : (47 52) 0 n "actor/aispider.fus" "spider_cpu"
 
 vars:
     "map3_blocker": F

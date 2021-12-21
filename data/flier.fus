@@ -21,14 +21,14 @@ shapes:
 
 
 
-$SET_STR PLAYER_HEAD "player_head"
+$SET_STR SPIDER_HEAD "spider_head"
 $SET_STR NS ""
-$UNSET_BOOL PLAYER_FLIER
+$UNSET_BOOL SPIDER_FLIER
 import "data/_flier.fus"
 
-$SET_STR PLAYER_HEAD "flierplayer_head"
-$SET_STR NS "flierplayer_"
-$SET_BOOL PLAYER_FLIER
+$SET_STR SPIDER_HEAD "flierspider_head"
+$SET_STR NS "flierspider_"
+$SET_BOOL SPIDER_FLIER
 import "data/_flier.fus"
 
 
