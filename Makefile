@@ -7,7 +7,7 @@ LIBS += $(shell sdl2-config --libs) -lm
 
 PROGS = \
  bin/lexertool bin/collmaptool bin/hexpicturetest bin/sdltest bin/directorytest \
- bin/prendtool bin/demo bin/minieditor bin/geomtool
+ bin/prendtool bin/demo bin/minieditor bin/geomtool bin/animtool
 
 TESTS = \
  bin/lexertest bin/frozenstringtest bin/geomtest bin/stringstoretest bin/varstest
@@ -29,7 +29,9 @@ SDL_OFILES = \
  src/hexmap.o src/hexmap_submap_create_rgraph.o \
  src/hexgame.o src/hexgame_body.o src/hexgame_player.o src/hexgame_recording.o \
  src/hexgame_state.o src/hexgame_actor.o \
- src/hexgame_savelocation.o \
+ src/hexgame_savelocation.o
+
+TEST_APP_OFILES = \
  src/test_app.o src/test_app_console.o src/test_app_game.o src/test_app_editor.o \
  src/test_app_list.o src/test_app_commands.o \
  src/test_app_list_choices.o src/test_app_list_maps.o src/test_app_list_submaps.o \
@@ -90,7 +92,7 @@ bin/prendtool: src/main/prendtool.o $(OFILES) $(SDL_OFILES)
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
-bin/demo: src/main/demo.o $(OFILES) $(SDL_OFILES)
+bin/demo: src/main/demo.o $(OFILES) $(SDL_OFILES) $(TEST_APP_OFILES)
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
@@ -99,5 +101,9 @@ bin/minieditor: src/main/minieditor.o $(OFILES) $(SDL_OFILES)
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 bin/geomtool: src/main/geomtool.o $(OFILES)
+	mkdir -p bin
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
+
+bin/animtool: src/main/animtool.o $(OFILES) $(SDL_OFILES)
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
