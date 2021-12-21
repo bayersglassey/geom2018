@@ -14,17 +14,17 @@ uncrawling:
     hitbox: collmap("stand")
     if() then: goto: stand
 
-crawling_looking_up:
+$IF SPIDER_AIMER: crawling_looking_up:
     rgraph: $PREFIX NS "crawling_looking_up"
     hitbox: collmap("stand")
     if() then: goto: crawl_looking_up
 
-uncrawling_looking_up:
+$IF SPIDER_AIMER: uncrawling_looking_up:
     rgraph: $PREFIX NS "uncrawling_looking_up"
     hitbox: collmap("stand")
     if() then: goto: looking_up
 
-crawl_looking_up:
+$IF SPIDER_AIMER: crawl_looking_up:
     rgraph: $PREFIX NS "crawl_looking_up"
     hitbox: collmap("crawl")
     $IF SPIDER_SPIKEY: on "crush": goto delay: crawl_shielding
@@ -59,7 +59,7 @@ crawl_spit:
     $IF SPIDER_SPIKEY: on "crush": goto delay: crawl_shielding
     if() then: goto: crawl
 
-crawl_looking_up_spit:
+$IF SPIDER_AIMER: crawl_looking_up_spit:
     rgraph: $PREFIX NS "crawl_looking_up_spit"
     hitbox: collmap("crawl")
     $IF SPIDER_SPIKEY: on "crush": goto delay: crawl_shielding
@@ -162,7 +162,7 @@ crawl:
         then:
             goto: crawl_look_up
 
-crawl_look_up:
+$IF SPIDER_AIMER: crawl_look_up:
     rgraph: $PREFIX NS "crawl_look_up"
     hitbox: collmap("crawl")
     $IF SPIDER_SPIKEY: on "crush": goto delay: crawl_shielding

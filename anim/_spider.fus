@@ -73,7 +73,7 @@ proc spit:
         call: _spawn_spit
     goto delay: spit
 
-proc looking_up_spit:
+$IF SPIDER_AIMER: proc looking_up_spit:
     spawn: $GET_STR SPIT_FUS "fly" (1 0) 1 f do:
         call: _spawn_spit
     goto delay: looking_up_spit
@@ -83,7 +83,7 @@ proc crawl_spit:
         call: _spawn_spit
     goto delay: crawl_spit
 
-proc crawl_looking_up_spit:
+$IF SPIDER_AIMER: proc crawl_looking_up_spit:
     spawn: $GET_STR SPIT_FUS "crouch_fly" (1 0) 1 f do:
         call: _spawn_spit
     goto delay: crawl_looking_up_spit
@@ -180,12 +180,12 @@ stand:
         then:
             goto: look_up
 
-look_up:
+$IF SPIDER_AIMER: look_up:
     rgraph: $PREFIX NS "look_up"
     hitbox: collmap("stand")
     if() then: goto: looking_up
 
-looking_up:
+$IF SPIDER_AIMER: looking_up:
     rgraph: $PREFIX NS "looking_up"
     hitbox: collmap("stand")
 
@@ -227,7 +227,7 @@ spit:
     hitbox: collmap("stand")
     if() then: goto: stand
 
-looking_up_spit:
+$IF SPIDER_AIMER: looking_up_spit:
     rgraph: $PREFIX NS "looking_up_spit"
     hitbox: collmap("stand")
     if() then: goto: looking_up
