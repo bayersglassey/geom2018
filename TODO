@@ -1116,3 +1116,22 @@ Dec 15, 2021:
     * one of the three eyeplayers at start of maps/demo wants you to bring
       it a roller... or maybe bring you to the big_roller at entrance to
       maps/triangles???
+
+
+Dec 21, 2021:
+-------------
+
+* start4 in tutorial2: add a coin in top-left to make it clear you can get up there
+
+* your spit can go through e.g. rollers moving towards it (the two bodies pass
+    through each other). so we need spit's hitbox to extend behind it.
+    but I think we used to have that and removed it, because it meant you
+    could hit things through walls... *WHEN THE SPIT BOUNCED!*
+    so we probably need to add a "bounce" state which lasts for 1 frame
+    and whose hitbox doesn't extend behind
+
+* spikeyspider: when he gets hit, eyes no longer recognize him, so they close
+    (so, state "crawl_shielding" is missing the "touch" collmsg or something)
+
+* data/maps/tutorial3/start.fus: eyes should give you a hint, like
+    "jump right through the middle!" or something
