@@ -1,4 +1,10 @@
 
+# Expected variables:
+# STATE_STEP (str)
+# STATE_STEP_UP (str)
+# STATE_START_JUMP (str)
+
+
 # Land up
 if:
     coll: all yes
@@ -8,7 +14,7 @@ if:
 then:
     move: 1 0
     rot: 1
-    goto delay: $GET_SYM STATE_LAND_UP
+    goto delay: $GET_SYM STATE_STEP_UP
 
 # Forced jump up
 if:
@@ -21,7 +27,7 @@ if:
 then:
     move: 1 0
     rot: 1
-    goto immediate: start_jump
+    goto immediate: $GET_SYM STATE_START_JUMP
 
 # Land
 if:
@@ -35,7 +41,7 @@ if:
         ;; ( )  + - +
 then:
     move: 1 0
-    goto delay: $GET_SYM STATE_LAND
+    goto delay: $GET_SYM STATE_STEP
 
 # Continue jump
 if:
@@ -46,7 +52,7 @@ if:
         ;; ( )
 then:
     move: 1 0
-    goto immediate: start_jump
+    goto immediate: $GET_SYM STATE_START_JUMP
 
 # Crash
 if() then:

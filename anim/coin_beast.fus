@@ -1,7 +1,12 @@
 
+$SET_STR STATE_STEP step
 $SET_STR STATE_STEP_UP step_up
-$SET_STR STATE_LAND step
-$SET_STR STATE_LAND_UP step_up
+$SET_STR STATE_STEP_DOWN step_down
+$SET_STR STATE_START_JUMP start_jump
+$SET_STR STATE_RUN_STEP step
+$SET_STR STATE_RUN_STEP_UP step_up
+$SET_STR STATE_RUN_STEP_DOWN step_down
+$SET_STR STATE_RUN_START_JUMP start_jump
 
 $SET_BOOL NO_COLLECT_ON_TOUCH
 
@@ -125,7 +130,7 @@ crawl:
         goto delay: uncrawling
 
     # Crawling
-    import "anim/_spider_crawl.anim.fus"
+    import "anim/_spider_crawl.state.fus"
 
     # Turn
     if:

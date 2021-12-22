@@ -115,7 +115,7 @@ crawl:
         goto delay: uncrawling
 
     # Crawling
-    import "anim/_spider_crawl.anim.fus"
+    import "anim/_spider_crawl.state.fus"
 
     # Roll over a gap
     $IF SPIDER_ROLLER:

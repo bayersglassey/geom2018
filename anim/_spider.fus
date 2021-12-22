@@ -19,9 +19,16 @@ $IF !SPIDER_SPIKEY:
 
 $SET_INT ROLLER_STAND_DELAY 0
 
+$SET_STR STATE_STAND stand
+$SET_STR STATE_STEP step
 $SET_STR STATE_STEP_UP step
-$SET_STR STATE_LAND step
-$SET_STR STATE_LAND_UP step
+$SET_STR STATE_STEP_DOWN step_down
+$SET_STR STATE_START_JUMP start_jump
+$SET_STR STATE_RUN_STEP run_step
+$SET_STR STATE_RUN_STEP_UP run_step
+$SET_STR STATE_RUN_STEP_DOWN run_step_down
+$SET_STR STATE_RUN_START_JUMP run_start_jump
+$SET_STR STATE_JUMP jump
 
 
 collmsgs: "touch" "enter_door"
@@ -105,80 +112,10 @@ collmap "crawl":
     ;;     *
     ;;  (.)  .
 
-stand:
-    rgraph: $PREFIX NS "stand"
-    hitbox: collmap("stand")
 
-    # Can't stand on nothing
-    if:
-        coll: any no
-            ;;  (+)- +
-    then:
-        move: 1 0
-        goto immediate: start_jump
+$UNSET_BOOL RUNNING
+import "anim/_spider_stand.fus"
 
-    # Spit
-    if:
-        key: wentdown y
-    then:
-        call: spit
-
-    # Turn into roller
-    $IF SPIDER_ROLLER:
-        if:
-            key: wentdown x
-        then:
-            goto: roller_stand
-            delay: $GET_INT ROLLER_STAND_DELAY
-
-    # Turn into bird
-    $IF SPIDER_BIRD:
-        if:
-            key: wentdown x
-            coll: all no
-                ;;   .   .
-                ;;   *\*/*
-                ;; . - + - .
-                ;;   */*\*
-                ;;   . - .
-                ;;   *\*/*
-                ;; . - + - .
-                ;;   */*\*
-                ;;  (.)  .
-        then:
-            goto: bird_crawl
-            delay: 1
-
-    # Blink
-    $IF SPIDER_EYE:
-        if:
-            key: wasdown x
-        then:
-            goto delay: eye_closing
-
-    # Crawl
-    if:
-        key: isdown d
-    then:
-        goto delay: crawling
-
-    # Stepping and jumping
-    import "anim/_spider_move.state.fus"
-
-    # Turn
-    if:
-        key: isdown b
-    then:
-        move: 1 0
-        turn
-        goto delay: turn
-
-    # Look up
-    $IF SPIDER_AIMER:
-        if:
-            key: isdown x
-        then:
-            goto: look_up
 
 $IF SPIDER_AIMER: look_up:
     rgraph: $PREFIX NS "look_up"
@@ -232,84 +169,6 @@ $IF SPIDER_AIMER: looking_up_spit:
     hitbox: collmap("stand")
     if() then: goto: looking_up
 
-start_jump:
-
-    $IF SPIDER_FLIER:
-        if:
-            key: wasdown x
-            coll: all no
-                ;;       \*/*
-                ;;        + -
-                ;;       /*\*
-                ;; ( )
-        then:
-            goto: flier_fly
-            move: 2 1
-            delay: 2
-
-    if:
-        coll: water any yes collmap("stand")
-    then:
-        goto delay: swim_jump
-
-    if() then:
-        goto delay: jump
-
-jump:
-    # NOTE: the only "goto: jump" is in "start_jump", which checks whether
-    # we're in water, and does "goto: jump" or "goto: swim_jump"
-    # accordingly.
-    # Therefore, if we're in "jump", then we can safely assume we're not in
-    # water without checking.
-
-    unsafe
-    rgraph: $PREFIX NS "jump"
-    hitbox: collmap("stand")
-
-    # Landing, jumping, crashing
-    import "anim/_spider_jump.state.fus"
-
-step_down:
-    rgraph: $PREFIX NS "step"
-    hitbox:
-        ;;   .   .   .
-        ;;   *\*/*\*/*
-        ;; . - + - + - .
-        ;;   */*\*/*\*
-        ;;   .  (.)  .
-
-    if:
-        key: wentdown y
-    then:
-        call: spit
-
-    $IF SPIDER_ROLLER:
-        if:
-            key: wentdown x
-        then:
-            goto: roller_stand
-            delay: $GET_INT ROLLER_STAND_DELAY
-
-    if() then: goto: stand
-
-step:
-    rgraph: $PREFIX NS "step"
-    hitbox: collmap("stand")
-
-    if:
-        key: wentdown y
-    then:
-        call: spit
-
-    $IF SPIDER_ROLLER:
-        if:
-            key: wentdown x
-        then:
-            goto: roller_stand
-            delay: $GET_INT ROLLER_STAND_DELAY
-
-    if() then: goto: stand
-
 turn:
     rgraph: $PREFIX NS "turn"
     hitbox: collmap("stand")
@@ -354,3 +213,4 @@ dead:
 
 import "anim/_spider_crawl.fus"
 import "anim/_spider_swim.fus"
+import "anim/_spider_run.fus"

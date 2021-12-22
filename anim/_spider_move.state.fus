@@ -1,4 +1,12 @@
 
+# Expected variables:
+# STATE_STEP (str)
+# STATE_STEP_UP (str)
+# STATE_STEP_DOWN (str)
+# STATE_RUN_START_JUMP (str)
+# STATE_START_JUMP (str)
+
+
 # Jump up
 $IF SPIDER_AIMER:
     if:
@@ -14,7 +22,7 @@ $IF SPIDER_AIMER:
     then:
         move: 1 0
         rot: 1
-        goto immediate: start_jump
+        goto immediate: $GET_SYM STATE_START_JUMP
 
 # Jump
 if:
@@ -26,7 +34,10 @@ if:
         ;; ( )
 then:
     move: 1 0
-    goto immediate: start_jump
+    if:
+        key: wasdown f
+    then: goto immediate: $GET_SYM STATE_RUN_START_JUMP
+    else: goto immediate: $GET_SYM STATE_START_JUMP
 
 # Step up
 if:
@@ -52,7 +63,7 @@ if:
         ;; ( )
 then:
     move: 1 0
-    goto delay: step
+    goto delay: $GET_SYM STATE_STEP
 
 # Step down
 if:
@@ -70,7 +81,7 @@ if:
 then:
     move: 1 0
     rot: -1
-    goto delay: step_down
+    goto delay: $GET_SYM STATE_STEP_DOWN
 
 # Forced jump up
 if:
@@ -82,7 +93,7 @@ if:
 then:
     move: 1 0
     rot: 1
-    goto immediate: start_jump
+    goto immediate: $GET_SYM STATE_START_JUMP
 
 # Forced jump
 if:
@@ -94,4 +105,4 @@ if:
         ;; ( )
 then:
     move: 1 0
-    goto immediate: start_jump
+    goto immediate: $GET_SYM STATE_START_JUMP
