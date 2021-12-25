@@ -1,0 +1,11 @@
+unit: 3 2 0 -1
+spawn: "data/maps/playarea/start.fus"
+palette: "data/pal1.fus"
+tileset: "data/tileset1.fus"
+
+submaps:
+    :
+        file: "data/maps/playarea/start.fus"
+        pos: (0 0)
+        camera: (5 0)
+        mapper: ("triple")
