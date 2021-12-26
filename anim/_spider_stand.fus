@@ -17,6 +17,15 @@ $GET_SYM STATE_STAND:
     rgraph: $PREFIX NS $GET_STR STATE_STAND
     hitbox: collmap("stand")
 
+    # Stop running if we're not holding forward, or if we try to
+    # turn around
+    $IF RUNNING:
+        if: any:
+            key: wasdown b
+            not: key: isdown f
+        then:
+            goto immediate: stop_running
+
     # Can't stand on nothing
     if:
         coll: any no
@@ -87,8 +96,6 @@ $GET_SYM STATE_STAND:
             key: isdown x
         then:
             goto: look_up
-
-    $IF RUNNING: if() then: goto: stand
 
 $GET_SYM STATE_START_JUMP:
 

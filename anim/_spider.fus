@@ -175,6 +175,58 @@ turn:
 
     if() then: goto immediate: step
 
+stop_running:
+    # (Expected to be "goto immediate"'d to)
+    #
+    # We were running, but now we should stop somehow.
+    # Try to take a (regular, non-running) step forwards, to give a sense
+    # of inertia.
+
+    # Step up
+    if:
+        coll: all yes
+            ;;        +
+            ;;       /
+            ;; ( )  +
+    then:
+        move: 1 0
+        rot: 1
+        goto delay: step
+
+    # Step
+    if:
+        coll: all yes
+            ;; ( )  + - +
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        move: 1 0
+        goto delay: step
+
+    # Step down
+    if:
+        coll: all yes
+            ;; ( )  +
+            ;;       \
+            ;;        +
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*/*
+            ;; ( )    - + -
+            ;;        */*\*
+    then:
+        move: 1 0
+        rot: -1
+        goto delay: step_down
+
+    # If we can't take a step forward, then just go to the non-running
+    # "stand" state.
+    if() then: goto: stand
+
 sleep:
     rgraph: $PREFIX NS "sleep"
     hitbox: collmap("crawl")
