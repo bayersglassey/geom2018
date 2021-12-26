@@ -18,10 +18,15 @@ $GET_SYM STATE_STAND:
     hitbox: collmap("stand")
 
     # Stop running if we're not holding forward, or if we try to
-    # turn around
+    # do almost anything other than jump
+    # (don't stop running if we try to e.g. spit, because it won't
+    # have the desired effect... the stop_running state will play,
+    # but then you won't spit, because "went_down x" or whatever is
+    # not true)
     $IF RUNNING:
         if: any:
             key: wasdown b
+            key: wasdown d
             not: key: isdown f
         then:
             goto immediate: stop_running
@@ -97,6 +102,11 @@ $GET_SYM STATE_STAND:
         then:
             goto: look_up
 
+    $IF RUNNING:
+        # If we didn't do anything else, then just go to the non-running
+        # "stand" state.
+        if() then: goto: stand
+
 $GET_SYM STATE_START_JUMP:
 
     $IF SPIDER_FLIER:
@@ -143,6 +153,20 @@ $GET_SYM STATE_STEP_DOWN:
         ;;   */*\*/*\*
         ;;   .  (.)  .
 
+    # Stop running if we're not holding forward, or if we try to
+    # do almost anything other than jump
+    # (don't stop running if we try to e.g. spit, because it won't
+    # have the desired effect... the stop_running state will play,
+    # but then you won't spit, because "went_down x" or whatever is
+    # not true)
+    $IF RUNNING:
+        if: any:
+            key: wasdown b
+            key: wasdown d
+            not: key: isdown f
+        then:
+            goto immediate: stop_running
+
     if:
         key: wentdown y
     then:
@@ -160,6 +184,20 @@ $GET_SYM STATE_STEP_DOWN:
 $GET_SYM STATE_STEP:
     rgraph: $PREFIX NS $GET_STR STATE_STEP
     hitbox: collmap("stand")
+
+    # Stop running if we're not holding forward, or if we try to
+    # do almost anything other than jump
+    # (don't stop running if we try to e.g. spit, because it won't
+    # have the desired effect... the stop_running state will play,
+    # but then you won't spit, because "went_down x" or whatever is
+    # not true)
+    $IF RUNNING:
+        if: any:
+            key: wasdown b
+            key: wasdown d
+            not: key: isdown f
+        then:
+            goto immediate: stop_running
 
     if:
         key: wentdown y
