@@ -12,7 +12,7 @@
 #define SCH 768
 
 /* How many milliseconds we want each frame to last */
-#define DELAY_GOAL 30
+#define DEFAULT_DELAY_GOAL 30
 
 
 static test_app_t *get_test_app();
@@ -122,14 +122,16 @@ void print_help(FILE *file){
         "   -a   --anim   FILE    Stateset filename (default: %s)\n"
         "   -m   --map    FILE    Map filename (default: NULL)\n"
         "   -sm  --submap FILE    Submap filename (default: NULL)\n"
-        "   -d   --devel          Developer mode\n"
+        "   -D   --devel          Developer mode\n"
         "                         (You can also use env var %s)\n"
+        "   -d   --delay     N    Delay goal (in milliseconds) (default: %i)\n"
         "   -p   --players   N    Number of players (default: %i)\n"
         "   -l   --load           Load/continue game immediately (skip title screen)\n"
         "        --minimap_alt    Use alternate minimap\n"
         "        --dont_cache_bitmaps\n"
         "                         ...low-level hokey-pokery, should probably get rid of this option\n"
-        , DEFAULT_PREND_FILENAME, DEFAULT_STATESET_FILENAME, ENV_DEVEL, DEFAULT_PLAYERS_PLAYING
+        , DEFAULT_PREND_FILENAME, DEFAULT_STATESET_FILENAME, ENV_DEVEL,
+        DEFAULT_DELAY_GOAL, DEFAULT_PLAYERS_PLAYING
     );
 }
 
@@ -152,6 +154,7 @@ bool cache_bitmaps = true;
 bool developer_mode = false;
 int n_players = DEFAULT_PLAYERS;
 int n_players_playing = DEFAULT_PLAYERS_PLAYING;
+int delay_goal = DEFAULT_DELAY_GOAL;
 bool load_game = false;
 SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL;
@@ -159,7 +162,7 @@ SDL_Renderer *renderer = NULL;
 static test_app_t *get_test_app(){
     test_app_t *app = calloc(1, sizeof(*app));
     if(!app){ perror("calloc"); return NULL; }
-    int err = test_app_init(app, SCW, SCH, DELAY_GOAL,
+    int err = test_app_init(app, SCW, SCH, delay_goal,
         window, renderer, prend_filename, stateset_filename,
         hexmap_filename, submap_filename, developer_mode,
         minimap_alt, cache_bitmaps,
@@ -228,8 +231,16 @@ int main(int n_args, char *args[]){
             }
             arg = args[arg_i];
             submap_filename = arg;
-        }else if(!strcmp(arg, "-d") || !strcmp(arg, "--devel")){
+        }else if(!strcmp(arg, "-D") || !strcmp(arg, "--devel")){
             developer_mode = true;
+        }else if(!strcmp(arg, "-d") || !strcmp(arg, "--delay")){
+            arg_i++;
+            if(arg_i >= n_args){
+                fprintf(stderr, "Missing int after %s\n", arg);
+                goto parse_failure;
+            }
+            arg = args[arg_i];
+            delay_goal = atoi(arg);
         }else if(!strcmp(arg, "-p") || !strcmp(arg, "--players")){
             arg_i++;
             if(arg_i >= n_args){
