@@ -11,6 +11,8 @@
 # NOTE: make sure "stand" is the first anim, so any imports
 # should go below it
 
+$SET_BOOL DISABLE_RUNNING # !!! DISABLED FOR NOW
+
 $IF SPIDER_SPIKEY:
     $SET_STR SPIT_FUS "anim/spikeyspit.fus"
 $IF !SPIDER_SPIKEY:

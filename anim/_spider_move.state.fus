@@ -35,6 +35,7 @@ if:
 then:
     move: 1 0
     if:
+        $IF DISABLE_RUNNING: false
         key: wasdown f
     then: goto immediate: $GET_SYM STATE_RUN_START_JUMP
     else: goto immediate: $GET_SYM STATE_START_JUMP
