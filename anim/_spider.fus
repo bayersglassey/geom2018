@@ -173,9 +173,7 @@ turn:
     rgraph: $PREFIX NS "turn"
     hitbox: collmap("stand")
 
-    if() then:
-        no_key_reset
-        goto immediate: step
+    if() then: goto immediate: step
 
 stop_running:
     # (Expected to be "goto immediate"'d to)

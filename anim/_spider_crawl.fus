@@ -222,9 +222,7 @@ crawl_turn:
     hitbox: collmap("crawl")
     $IF SPIDER_SPIKEY: on "crush": goto delay: crawl_shielding
 
-    if() then:
-        no_key_reset
-        goto immediate: crawl_step
+    if() then: goto immediate: crawl_step
 
 $IF SPIDER_SPIKEY: crawl_shielding:
     rgraph: $PREFIX NS "crawl_shielding"
