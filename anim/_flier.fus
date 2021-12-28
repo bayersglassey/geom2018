@@ -12,7 +12,7 @@ born:
 
     if:
         key: wasdown b
-        key: not wasdown f
+        key: not isdown f
     then:
         rot: 1
         move: 1 0
@@ -20,7 +20,7 @@ born:
 
     if:
         key: wasdown f
-        key: not wasdown b
+        key: not isdown b
     then:
         rot: -1
         move: 1 0

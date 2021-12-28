@@ -24,7 +24,7 @@ $PREFIX ANIM_NS hover:
     $IF SPIDER_FLIER:
         if:
             key: wasdown b
-            key: not wasdown f
+            key: not isdown f
             $IF ONLY_STICK_IF_NOT_SHIFT:
                 key: not isdown x
             coll: all yes
@@ -40,7 +40,7 @@ $PREFIX ANIM_NS hover:
 
     if:
         key: wasdown b
-        key: not wasdown f
+        key: not isdown f
         coll: all no
             ;;  *\*/*
             ;;  - + -
@@ -54,7 +54,7 @@ $PREFIX ANIM_NS hover:
 
     if:
         key: wasdown b
-        key: not wasdown f
+        key: not isdown f
         coll: all no
             ;;     \*/*
             ;; ( )  + -
@@ -67,7 +67,7 @@ $PREFIX ANIM_NS hover:
 
     if:
         key: wasdown b
-        key: not wasdown f
+        key: not isdown f
     then:
         rot: 1
         goto: $PREFIX ANIM_NS fly
@@ -81,7 +81,7 @@ $PREFIX ANIM_NS hover:
     $IF SPIDER_FLIER:
         if:
             key: wasdown f
-            key: not wasdown b
+            key: not isdown b
             $IF ONLY_STICK_IF_NOT_SHIFT:
                 key: not isdown x
             coll: all yes
@@ -95,7 +95,7 @@ $PREFIX ANIM_NS hover:
 
     if:
         key: wasdown f
-        key: not wasdown b
+        key: not isdown b
         coll: all no
             ;; ( )
             ;;     /*
@@ -109,7 +109,7 @@ $PREFIX ANIM_NS hover:
 
     if:
         key: wasdown f
-        key: not wasdown b
+        key: not isdown b
         coll: all no
             ;;     \*/*
             ;; ( )  + -
@@ -122,7 +122,7 @@ $PREFIX ANIM_NS hover:
 
     if:
         key: wasdown f
-        key: not wasdown b
+        key: not isdown b
     then:
         rot: -1
         goto: $PREFIX ANIM_NS fly

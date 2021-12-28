@@ -7,7 +7,7 @@ stand:
     # (+)- +
 
     if:
-        key: isdown u
+        key: wasdown u
         coll: all yes
             ;;        +
             ;;
@@ -19,7 +19,7 @@ stand:
         delay: 1
 
     if:
-        key: isdown f
+        key: wasdown f
         key: not isdown b
         coll: all yes
             ;; ( )  +
@@ -30,8 +30,8 @@ stand:
         delay: 1
 
     if:
-        key: isdown u
-        key: isdown f
+        key: wasdown u
+        key: wasdown f
         key: not isdown b
         coll: all yes
             ;; ( )  .   +
@@ -45,7 +45,7 @@ stand:
         delay: 1
 
     if:
-        key: isdown f
+        key: wasdown f
         key: not isdown b
         coll: all no
             ;;       /*
@@ -56,7 +56,7 @@ stand:
         delay: 1
 
     if:
-        key: isdown b
+        key: wasdown b
         key: not isdown f
     then:
         turn
@@ -72,8 +72,8 @@ stand_flipped:
     #  (+)- +
 
     if:
-        key: isdown d
-        key: isdown f
+        key: wasdown d
+        key: wasdown f
         key: not isdown b
         coll: all no
             ;; ( )-
@@ -83,7 +83,7 @@ stand_flipped:
         delay: 1
 
     if:
-        key: isdown f
+        key: wasdown f
         key: not isdown b
         coll: all yes
             ;; ( )  +
@@ -94,7 +94,7 @@ stand_flipped:
         delay: 1
 
     if:
-        key: isdown f
+        key: wasdown f
         key: not isdown b
         coll: all no
             ;; ( )-
@@ -104,7 +104,7 @@ stand_flipped:
         delay: 1
 
     if:
-        key: isdown b
+        key: wasdown b
         key: not isdown f
     then:
         turn

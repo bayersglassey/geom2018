@@ -23,9 +23,9 @@ swim_jump:
 
     if:
         any:
-            key: isdown f
-            key: isdown u
-            key: isdown d
+            key: wasdown f
+            key: wasdown u
+            key: wasdown d
         coll: all yes
             ;;        +
             ;;       /
@@ -37,9 +37,9 @@ swim_jump:
 
     if:
         any:
-            key: isdown f
-            key: isdown u
-            key: isdown d
+            key: wasdown f
+            key: wasdown u
+            key: wasdown d
         coll: any yes
             ;;        +
             ;;       /
@@ -58,9 +58,9 @@ swim_jump:
 
     if:
         any:
-            key: isdown f
-            key: isdown u
-            key: isdown d
+            key: wasdown f
+            key: wasdown u
+            key: wasdown d
         coll: any yes
             ;;       \
             ;;        +
@@ -78,9 +78,9 @@ swim_jump:
 
     if:
         any:
-            key: isdown f
-            key: isdown u
-            key: isdown d
+            key: wasdown f
+            key: wasdown u
+            key: wasdown d
         coll: all no
             ;;       \*/*
             ;;        + -
@@ -105,9 +105,9 @@ swim:
 
     if:
         any:
-            key: isdown f
-            key: isdown u
-            key: isdown d
+            key: wasdown f
+            key: wasdown u
+            key: wasdown d
         coll: all yes
             ;;        +
             ;;       /
@@ -119,11 +119,11 @@ swim:
 
     if:
         any:
-            key: isdown f
-            key: isdown u
-            key: isdown d
+            key: wasdown f
+            key: wasdown u
+            key: wasdown d
         any:
-            key: isdown u
+            key: wasdown u
             coll: any yes
                 ;;        +
                 ;;       /
@@ -142,11 +142,11 @@ swim:
 
     if:
         any:
-            key: isdown f
-            key: isdown u
-            key: isdown d
+            key: wasdown f
+            key: wasdown u
+            key: wasdown d
         any:
-            key: isdown d
+            key: wasdown d
             coll: any yes
                 ;;       \
                 ;;        +
@@ -164,9 +164,9 @@ swim:
 
     if:
         any:
-            key: isdown f
-            key: isdown u
-            key: isdown d
+            key: wasdown f
+            key: wasdown u
+            key: wasdown d
         coll: all no
             ;;       \*/*
             ;;        + -
@@ -177,7 +177,7 @@ swim:
         goto immediate: start_jump
 
     if:
-        key: isdown b
+        key: wasdown b
     then:
         move: 1 0
         turn

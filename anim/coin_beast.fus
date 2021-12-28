@@ -42,7 +42,7 @@ stand:
         goto immediate: start_jump
 
     if:
-        key: isdown d
+        key: wasdown d
     then:
         goto delay: crawling
 
@@ -50,7 +50,7 @@ stand:
     import "anim/_spider_move.state.fus"
 
     if:
-        key: isdown b
+        key: wasdown b
     then:
         move: 1 0
         turn
@@ -134,7 +134,7 @@ crawl:
 
     # Turn
     if:
-        key: isdown b
+        key: wasdown b
     then:
         move: 1 0
         turn

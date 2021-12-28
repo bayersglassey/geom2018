@@ -44,10 +44,10 @@ $IF SPIDER_AIMER: crawl_looking_up:
     then:
         goto delay: uncrawling_looking_up
 
-    if: key: isdown f
+    if: key: wasdown f
     then: goto immediate: crawl
 
-    if: key: isdown b
+    if: key: wasdown b
     then: goto immediate: crawl
 
     if: key: not isdown x
@@ -120,7 +120,7 @@ crawl:
     # Roll over a gap
     $IF SPIDER_ROLLER:
         if:
-            key: isdown f
+            key: wasdown f
             coll: all no
                 ;;     \*
                 ;; (.)  .
@@ -134,7 +134,7 @@ crawl:
     # Roll into a corner
     $IF SPIDER_ROLLER:
         if:
-            key: isdown f
+            key: wasdown f
             coll: all yes
                 ;;    +
                 ;;     \
@@ -147,7 +147,7 @@ crawl:
 
     # Turn
     if:
-        key: isdown b
+        key: wasdown b
     then:
         move: 1 0
         turn
@@ -158,7 +158,7 @@ crawl:
     $IF SPIDER_AIMER:
         if:
             key: not isdown f
-            key: isdown x
+            key: wasdown x
         then:
             goto: crawl_look_up
 

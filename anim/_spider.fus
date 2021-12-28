@@ -145,14 +145,14 @@ $IF SPIDER_AIMER: looking_up:
         rot: 1
         goto immediate: start_jump
 
-    if: key: isdown f
+    if: key: wasdown f
     then: goto immediate: stand
 
-    if: key: isdown b
+    if: key: wasdown b
     then: goto immediate: stand
 
     if:
-        key: isdown d
+        key: wasdown d
     then:
         goto delay: crawling_looking_up
 
@@ -233,10 +233,10 @@ sleep:
     rgraph: $PREFIX NS "sleep"
     hitbox: collmap("crawl")
     if: any:
-        key: isdown u
-        key: isdown d
-        key: isdown l
-        key: isdown r
+        key: wasdown u
+        key: wasdown d
+        key: wasdown l
+        key: wasdown r
     then: goto: crawl
 
 $IF SPIDER_EYE:

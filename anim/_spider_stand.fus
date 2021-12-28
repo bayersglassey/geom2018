@@ -27,7 +27,7 @@ $GET_SYM STATE_STAND:
         if: any:
             key: wasdown b
             key: wasdown d
-            not: key: isdown f
+            key: not isdown f
         then:
             goto immediate: stop_running
 
@@ -80,7 +80,7 @@ $GET_SYM STATE_STAND:
 
     # Crawl
     if:
-        key: isdown d
+        key: wasdown d
     then:
         goto delay: crawling
 
@@ -89,7 +89,7 @@ $GET_SYM STATE_STAND:
 
     # Turn
     if:
-        key: isdown b
+        key: wasdown b
     then:
         move: 1 0
         turn
@@ -98,7 +98,7 @@ $GET_SYM STATE_STAND:
     # Look up
     $IF SPIDER_AIMER:
         if:
-            key: isdown x
+            key: wasdown x
         then:
             goto: look_up
 
@@ -163,7 +163,7 @@ $GET_SYM STATE_STEP_DOWN:
         if: any:
             key: wasdown b
             key: wasdown d
-            not: key: isdown f
+            key: not isdown f
         then:
             goto immediate: stop_running
 
@@ -195,7 +195,7 @@ $GET_SYM STATE_STEP:
         if: any:
             key: wasdown b
             key: wasdown d
-            not: key: isdown f
+            key: not isdown f
         then:
             goto immediate: stop_running
 

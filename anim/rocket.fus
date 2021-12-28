@@ -21,7 +21,7 @@ stand:
         goto delay: turn_down
 
     if:
-        key: isdown f
+        key: wasdown f
     then:
         move: 1 0
         goto delay: forward

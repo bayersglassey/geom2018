@@ -133,7 +133,7 @@ $PREFIX ANIM_NS stand:
         # Roll forward (not holding d)
         key: not isdown d
         key: not isdown b
-        key: isdown f
+        key: wasdown f
         any:
             coll: any yes
                 ;; ( )  +
@@ -149,7 +149,7 @@ $PREFIX ANIM_NS stand:
     if:
         # Spin around forward (possibly holding d)
         key: not isdown b
-        key: isdown f
+        key: wasdown f
         all:
             coll: all no
                 ;; ( )- .
@@ -165,7 +165,7 @@ $PREFIX ANIM_NS stand:
     if:
         # Roll forward (possibly holding d)
         key: not isdown b
-        key: isdown f
+        key: wasdown f
         any:
             coll: any yes
                 ;; ( )  +
@@ -185,7 +185,7 @@ $PREFIX ANIM_NS stand:
     if:
         # Turn around
         key: not isdown f
-        key: isdown b
+        key: wasdown b
     then:
         turn
         rot: 2
@@ -218,7 +218,7 @@ $PREFIX ANIM_NS grab:
 
     $IF FLIPPY_GRAB:
         if:
-            key: isdown f
+            key: wasdown f
             key: not isdown b
             any:
                 coll: any yes
@@ -235,7 +235,7 @@ $PREFIX ANIM_NS grab:
 
     $IF STICKY_GRAB:
         if:
-            key: isdown f
+            key: wasdown f
             key: not isdown b
             coll: any yes
                 ;; ( )  .   +
@@ -255,7 +255,7 @@ $PREFIX ANIM_NS grab:
 
     $IF FLIPPY_GRAB:
         if:
-            key: isdown f
+            key: wasdown f
             key: not isdown b
             any:
                 coll: any yes
@@ -290,7 +290,7 @@ $PREFIX ANIM_NS grab:
             delay: 1
 
     if:
-        key: isdown f
+        key: wasdown f
         key: not isdown b
         any:
             coll: any yes
@@ -328,7 +328,7 @@ $PREFIX ANIM_NS grab:
         delay: 1
 
     if:
-        key: isdown f
+        key: wasdown f
         key: not isdown b
         coll: all no
             ;;       /*
@@ -345,7 +345,7 @@ $PREFIX ANIM_NS grab:
 
     $IF GRAB_WHEN_TURNING:
         if:
-            key: isdown b
+            key: wasdown b
             key: not isdown f
             coll: any yes
                 ;;    .   +
@@ -370,7 +370,7 @@ $PREFIX ANIM_NS grab:
             delay: 1
 
     if:
-        key: isdown b
+        key: wasdown b
         key: not isdown f
     then:
         turn
@@ -387,14 +387,14 @@ $PREFIX ANIM_NS grab_flipped:
 
     if:
         key: not isdown u
-        key: isdown f
+        key: wasdown f
     then:
         goto: $PREFIX ANIM_NS stand
         delay: 1
 
     if:
         key: not isdown u
-        key: isdown b
+        key: wasdown b
     then:
         goto: $PREFIX ANIM_NS stand
         turn
@@ -402,8 +402,8 @@ $PREFIX ANIM_NS grab_flipped:
         delay: 1
 
     if:
-        key: isdown d
-        key: isdown f
+        key: wasdown d
+        key: wasdown f
         key: not isdown b
         coll: all no
             ;; ( )-
@@ -417,7 +417,7 @@ $PREFIX ANIM_NS grab_flipped:
         delay: 1
 
     if:
-        key: isdown f
+        key: wasdown f
         key: not isdown b
         any:
             coll: any yes
@@ -433,7 +433,7 @@ $PREFIX ANIM_NS grab_flipped:
         delay: 1
 
     if:
-        key: isdown f
+        key: wasdown f
         key: not isdown b
         coll: all no
             ;; ( )-
@@ -447,7 +447,7 @@ $PREFIX ANIM_NS grab_flipped:
         delay: 1
 
     if:
-        key: isdown b
+        key: wasdown b
         key: not isdown f
     then:
         turn

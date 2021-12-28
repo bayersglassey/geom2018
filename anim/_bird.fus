@@ -30,24 +30,24 @@ $PREFIX ANIM_NS stand:
         ;;  (.)  .
 
     if:
-        key: isdown u
+        key: wasdown u
     then:
         goto: $PREFIX ANIM_NS stand_wings
 
     if:
-        key: isdown d
+        key: wasdown d
     then:
         goto: $PREFIX ANIM_NS crawl_arrive
         delay: 1
 
     if:
-        key: isdown f
+        key: wasdown f
     then:
         goto: $PREFIX ANIM_NS step
         delay: 1
 
     if:
-        key: isdown b
+        key: wasdown b
     then:
         goto: $PREFIX ANIM_NS turn
         delay: $GET_INT TURN_DELAY
@@ -355,7 +355,7 @@ $PREFIX ANIM_NS crawl:
 
     $IF CRAWL_MOVE:
         if:
-            key: isdown f
+            key: wasdown f
             coll: all yes
                 ;;        +
                 ;;
@@ -366,7 +366,7 @@ $PREFIX ANIM_NS crawl:
             delay: 2
 
         if:
-            key: isdown f
+            key: wasdown f
             coll: all yes
                 ;; ( )  +   +
             coll: all no
@@ -379,7 +379,7 @@ $PREFIX ANIM_NS crawl:
             delay: 2
 
         if:
-            key: isdown f
+            key: wasdown f
             coll: all yes
                 ;; ( )  +
                 ;;
@@ -396,7 +396,7 @@ $PREFIX ANIM_NS crawl:
             delay: 2
 
     if:
-        key: isdown b
+        key: wasdown b
     then:
         goto: $PREFIX ANIM_NS crawl_turn
         delay: $GET_INT TURN_DELAY
@@ -456,14 +456,14 @@ $PREFIX ANIM_NS stand_wings:
         goto: $PREFIX ANIM_NS stand
 
     if:
-        key: isdown f
+        key: wasdown f
     then:
         goto: $PREFIX ANIM_NS fly
         move: 1 0
         delay: $GET_INT FLY_DELAY
 
     if:
-        key: isdown b
+        key: wasdown b
     then:
         goto: $PREFIX ANIM_NS turn_wings
         delay: $GET_INT TURN_DELAY
@@ -562,14 +562,14 @@ $PREFIX ANIM_NS flying:
         goto: $PREFIX ANIM_NS stand_wings
 
     if:
-        key: isdown f
+        key: wasdown f
     then:
         goto: $PREFIX ANIM_NS fly
         move: 1 0
         delay: $GET_INT FLY_DELAY
 
     if:
-        key: isdown b
+        key: wasdown b
     then:
         goto: $PREFIX ANIM_NS turn_flying
         delay: $GET_INT TURN_DELAY

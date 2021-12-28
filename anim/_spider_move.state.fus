@@ -41,7 +41,7 @@ then:
 
 # Step up
 if:
-    key: isdown f
+    key: wasdown f
     coll: all yes
         ;;        +
         ;;       /
@@ -53,7 +53,7 @@ then:
 
 # Step
 if:
-    key: isdown f
+    key: wasdown f
     coll: all yes
         ;; ( )  + - +
     coll: all no
@@ -67,7 +67,7 @@ then:
 
 # Step down
 if:
-    key: isdown f
+    key: wasdown f
     coll: all yes
         ;; ( )  +
         ;;       \
@@ -85,7 +85,7 @@ then:
 
 # Forced jump up
 if:
-    key: isdown f
+    key: wasdown f
     coll: any yes
         ;;        +
         ;;       /
@@ -97,7 +97,7 @@ then:
 
 # Forced jump
 if:
-    key: isdown f
+    key: wasdown f
     coll: all no
         ;;       \*/*
         ;;        + -

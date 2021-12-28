@@ -30,13 +30,13 @@ $SUFFIX R0 $PREFIX ANIM_NS stand:
             set myvar("d"): F
             set myvar("f"): F
             set myvar("b"): F
-            if: key: isdown u
+            if: key: wasdown u
             then: set myvar("u"): T
-            if: key: isdown d
+            if: key: wasdown d
             then: set myvar("d"): T
-            if: key: isdown f
+            if: key: wasdown f
             then: set myvar("f"): T
-            if: key: isdown b
+            if: key: wasdown b
             then: set myvar("b"): T
             continue
 

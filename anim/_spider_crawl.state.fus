@@ -1,7 +1,7 @@
 
 # Crawl up
 if:
-    key: isdown f
+    key: wasdown f
     coll: all no
         ;;     \*
         ;; ( )
@@ -17,7 +17,7 @@ then:
 
 # Crawl forwards
 if:
-    key: isdown f
+    key: wasdown f
     coll: all yes
         ;; ( )  + - +
     coll: all no
@@ -30,7 +30,7 @@ then:
 
 # Crawl down
 if:
-    key: isdown f
+    key: wasdown f
     coll: all yes
         ;; ( )  +
         ;;       \

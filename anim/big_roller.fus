@@ -36,7 +36,7 @@ stand:
         # Rolling forward (not holding d)
         key: not isdown d
         key: not isdown b
-        key: isdown f
+        key: wasdown f
         coll: all yes
             ;; ( )  .   +
     then:
@@ -47,7 +47,7 @@ stand:
     if:
         # Spinning around forward (possibly holding d)
         key: not isdown b
-        key: isdown f
+        key: wasdown f
         coll: all no
             ;; ( )- + -
             ;;    */*\*
@@ -59,7 +59,7 @@ stand:
     if:
         # Rolling forward (possibly holding d)
         key: not isdown b
-        key: isdown f
+        key: wasdown f
         coll: all yes
             ;; ( )  .   +
     then:
@@ -69,7 +69,7 @@ stand:
 
     if:
         key: not isdown f
-        key: isdown b
+        key: wasdown b
     then:
         turn
         rot: 2
