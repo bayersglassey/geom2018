@@ -389,6 +389,11 @@ int state_effect_apply(state_effect_t *effect,
 
     switch(effect->type){
     case STATE_EFFECT_TYPE_NOOP: break;
+    case STATE_EFFECT_TYPE_NO_KEY_RESET: {
+        CHECK_BODY
+        body->no_key_reset = true;
+        break;
+    }
     case STATE_EFFECT_TYPE_PRINT: {
         valexpr_context_t valexpr_context = {0};
         err = _get_vars(context, &valexpr_context);

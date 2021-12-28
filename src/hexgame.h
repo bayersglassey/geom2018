@@ -178,6 +178,7 @@ typedef struct body {
 
     int frame_i;
     int cooldown;
+    bool no_key_reset; /* don't reset keyinfo when cooldown reaches zero */
     int dead; /* enum body_dead */
     bool safe; /* lets player know it should update its safe_location */
     bool remove;

@@ -407,6 +407,9 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
     if(GOT("noop")){
         NEXT
         effect->type = STATE_EFFECT_TYPE_NOOP;
+    }else if(GOT("no_key_reset")){
+        NEXT
+        effect->type = STATE_EFFECT_TYPE_NO_KEY_RESET;
     }else if(GOT("print")){
         NEXT
         OPEN

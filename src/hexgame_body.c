@@ -140,6 +140,7 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
     body->state = NULL;
     body->frame_i = 0;
     body->cooldown = 0;
+    body->no_key_reset = false;
     body->dead = BODY_NOT_DEAD;
     body->safe = false;
     body->remove = false;
@@ -781,12 +782,20 @@ int body_step(body_t *body, hexgame_t *game){
         err = body_handle_rules(body, NULL);
         if(err)return err;
 
-        /* Start of new frame, no keys have gone down yet.
-        Note this only happens after cooldown is finished, which allows
-        for simple "buffering" of keypresses. */
-        for(int i = 0; i < KEYINFO_KEYS; i++){
-            body->keyinfo.wasdown[i] = body->keyinfo.isdown[i];
-            body->keyinfo.wentdown[i] = false;}
+        if(body->no_key_reset) {
+            /* States can choose to prevent keys from being reset at the
+            end of cooldown, so that "buffering" of keypresses lasts through
+            those states to the ones they transition to */
+            body->no_key_reset = false;
+        }else{
+            /* Start of new frame, no keys have gone down yet.
+            Note this only happens after cooldown is finished, which allows
+            for simple "buffering" of keypresses. */
+            for(int i = 0; i < KEYINFO_KEYS; i++){
+                body->keyinfo.wasdown[i] = body->keyinfo.isdown[i];
+                body->keyinfo.wentdown[i] = false;
+            }
+        }
     }
 
     /* Figure out current submap */

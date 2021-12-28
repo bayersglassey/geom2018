@@ -220,6 +220,7 @@ typedef struct state_cond {
 
 enum state_effect_type {
     STATE_EFFECT_TYPE_NOOP,
+    STATE_EFFECT_TYPE_NO_KEY_RESET,
     STATE_EFFECT_TYPE_PRINT,
     STATE_EFFECT_TYPE_MOVE,
     STATE_EFFECT_TYPE_ROT,
@@ -249,6 +250,7 @@ enum state_effect_type {
 static const char *state_effect_type_name(int type){
     switch(type){
         case STATE_EFFECT_TYPE_NOOP: return "noop";
+        case STATE_EFFECT_TYPE_NO_KEY_RESET: return "no_key_reset";
         case STATE_EFFECT_TYPE_PRINT: return "print";
         case STATE_EFFECT_TYPE_MOVE: return "move";
         case STATE_EFFECT_TYPE_ROT: return "rot";
