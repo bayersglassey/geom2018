@@ -394,15 +394,14 @@ int test_app_mainloop_step(test_app_t *app){
     err = palette_step(&app->palette);
     if(err)return err;
 
+    /* Consume events right before using them in hexgame_step
+    (so e.g. we have most up-to-date information about which keys
+    were pressed) */
+    err = test_app_poll_events(app);
+    if(err)return err;
+
     if(app->hexgame_running){
         err = hexgame_step(game);
-        if(err)return err;
-    }
-
-    if(app->list){
-        err = test_app_step_list(app);
-        if(err)return err;
-        err = test_app_render_list(app);
         if(err)return err;
     }
 
@@ -412,8 +411,13 @@ int test_app_mainloop_step(test_app_t *app){
     err = test_app_render(app);
     if(err)return err;
 
-    err = test_app_poll_events(app);
-    if(err)return err;
+    if(app->list){
+        err = test_app_step_list(app);
+        if(err)return err;
+
+        err = test_app_render_list(app);
+        if(err)return err;
+    }
 
     return 0;
 }
