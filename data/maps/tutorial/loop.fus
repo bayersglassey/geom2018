@@ -1,29 +1,14 @@
-$SET_STR LETTING_ONE_GO: lines: at(37 3)
-    ;;They're
-    ;;releasing
-    ;;  a
-    ;; spider?..
-
-text:
-    if all:
-        mapvar("made_it_underneath")
-        mapvar("loop_eye_b_open")
-    then $GET_STR LETTING_ONE_GO else null
-
 parts:
     "a": recording "data/recs/eye.fus"
         vars:
             "opened_key": "loop_eye_a_open"
-    "b": recording "data/recs/eye.fus"
-        vars:
-            "opened_key": "loop_eye_b_open"
 collmap:
     ;;
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                                   * * *
     ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                                   * * * * * *                   * * *
-    ;;   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .     [b^3]
+    ;;   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .     [a^3]
     ;;                                         * * *                   * * */
     ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   .
     ;;                 * * * * *                                       * * *\
@@ -37,7 +22,7 @@ collmap:
     ;;                     * * *        \                 /
     ;;   .   .   .   .   .   .   .   .   +   .   .   .   +   .   .   .   .   .   .   .   .
     ;;                     * * *          \             /                    * * *\
-    ;;     .   .   .   ?   .   .   .   .   .   .   .   +   .   .   .   .   .   .   + - +      [a]
+    ;;     .   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   + - +
     ;;                     * * *                      /                      * * * * * *\
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - .
     ;;                     * * *                             * * *                 * * * * * *
