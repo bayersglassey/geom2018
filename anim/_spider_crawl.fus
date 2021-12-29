@@ -148,6 +148,7 @@ crawl:
     # Turn
     if:
         key: wasdown b
+        key: not isdown f
     then:
         move: 1 0
         turn
