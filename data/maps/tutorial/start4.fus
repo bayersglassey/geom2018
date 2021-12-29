@@ -1,21 +1,3 @@
-$SET_STR NEED_TO_JUMP: lines:
-    ;;Sometimes you'll need to jump.
-    ;;
-    ;;Press the up arrow key to leap forwards!
-$SET_STR A_SPIDER: lines: at(35 20)
-    ;;  A spider?..
-    ;;
-    ;;    are they
-    ;;    releasing
-    ;;       you?..
-$SET_STR NEED_TO_UNDERNEATH: lines:
-    ;;    Sometimes you'll need to travel upside down.
-    ;;    Don't worry about it!
-    ;;   Keep going.
-
-text: if mapvar("start4_eye_a_open") then if mapvar("made_it_underneath") then null else $GET_STR NEED_TO_JUMP else null
-text: if mapvar("start4_eye_b_open") then $GET_STR NEED_TO_UNDERNEATH else null
-text: if mapvar("start4_eye_c_open") then $GET_STR A_SPIDER else null
 parts:
     "e": recording "data/recs/eye.fus"
     "a": recording "data/recs/eye.fus"
@@ -29,24 +11,24 @@ parts:
     "c": recording "data/recs/eye.fus"
         vars:
             "antikey": "made_it_underneath"
-            "opened_key": "start4_eye_c_open"
     "h": recording "data/recs/hotspot.fus"
         vars:
             "key": "made_it_underneath"
 collmap:
+    ;;
     ;;                  .   .   .   .   .   + - + - +   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                                     /* * * * *\
-    ;;                .   .   + - +   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .
+    ;;                .   .   + - +   .   .   .   .   +   + - +   .   .   .   .   .   .   .   .   .   .
     ;;                       /* * *\        * * * * *    /* * *\
-    ;;                  .   .   .   .   .   .   .   .   .   .   .   . - +   .   . - +   .   .   .   .
-    ;;                        * * *                       * * *     * * *\      * * *\
-    ;;                . - +   .   .   .   .   .   .   .   .   .   .   .   +   .   .   + - +   .   .   + - +
-    ;;                * * *\                                        * * */      * * * * * *\         /* * *\
-    ;;                  ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +     [a]
-    ;;                * * *                                                           * * *           * * */
-    ;;                .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                  .   .   .   .   .   .   .   .   .   .   +   + - +   .   + - +   .   .   .   .   .
+    ;;                        * * *                       * * *    /* * *\      * * *\
+    ;;                . - +   .   .   .   .   .   .   .   .   .   .   .   +   .   .   + - +   .   .   .   .   + - +
+    ;;                * * *\                                        * * */      * * * * * *\                 /* * *\
+    ;;                  ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   +    [a]
+    ;;                * * *                                                           * * *                  \* * */
+    ;;                .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;;                  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;                  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
     ;;                .   .   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .
     ;;                                               /* * *\
@@ -66,13 +48,13 @@ collmap:
     ;;                                                 /                     \         /         \
     ;;            .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   +   .   +   .   .   +   .
     ;;                * * *                            \                     /* * * * *\         /
-    ;;              .   .   .   .   .   .   .   .   .   + - + - + - + - + - !   .   .   + - + - +   .                  [c^3]
+    ;;              .   .   .   .   .   .   .   .   .   + - + - + - + - + - !   .   .   + - + - +   .                  [c]
     ;;               \* * *                                               * * * * * * * * *
     ;;                + - .   .   .   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .
     ;;                    * * *                              /     \        * * * * * * *
     ;;                  .   .   .   .   .   .   .   .   .   +   .   +   .   .   .   .   .   .   .   .
     ;;                   \* * *                            /       /
-    ;;                .   + - .   .   .   .   .   .   .   +   .   +   .   .   .   .   .   .   .   .   ?                    [h]
+    ;;                .   + - .   .   .   .   .   .   .   +   .   +   .   .   +   .   .   +   .   .   !                       [h]
     ;;                   /* * *                            \     /
     ;;                  .   .   .   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                   \* * *

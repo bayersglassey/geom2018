@@ -1,24 +1,3 @@
-$SET_STR SAVEPOINT_A: lines:
-    ;;
-    ;;  Touch this to save.
-$SET_STR SAVEPOINT_B: lines:
-    ;;
-    ;;
-    ;;
-    ;;    You will reappear there if you... run into trouble.
-$SET_STR KEEP_GOING: lines:
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;                                Keep going!
-$SET_STR ALMOST_THERE: lines:
-    ;;         Almost there...
-
-text: if mapvar("start2_eye_a_open") then if mapvar("made_it_underneath") then $GET_STR ALMOST_THERE else $GET_STR SAVEPOINT_A else null
-text: if mapvar("start2_eye_b_open") then if mapvar("made_it_underneath") then $GET_STR ALMOST_THERE else $GET_STR SAVEPOINT_B else null
-text: if mapvar("start2_eye_c_open") then if mapvar("made_it_underneath") then $GET_STR ALMOST_THERE else $GET_STR KEEP_GOING else null
 parts:
     "a": recording "data/recs/eye.fus"
         vars:
@@ -45,9 +24,9 @@ collmap:
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                 * * *       * * *
     ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;                                 * * *
+    ;;
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;                                 * * *
+    ;;
     ;;     .   .   .   .   .   .   .   .   .   .   .   + - + - +   .   .   .   .   .   .
     ;;                                                /         \
     ;;   + -(+)- + - + - + - +   .   .   .   .   .   +   ?   .   +   .   .   .   .   .   .     [b]
@@ -55,7 +34,7 @@ collmap:
     ;;     .   + - + - +   ?   +   .   .   .   .   +   .   .   .   + - +   .   .   .   .      [a]
     ;;                  \       \                 /                   /
     ;;   .   .   .   .   + - + - +   .   .   .   + - + - + - + - + - +   .   .   .   .   .
-    ;;                            \      S      /
+    ;;                            \             /
     ;;     .   .   .   .   .   .   + - + - + - +   .   .   .   .   .   .   .   .   .   .
     ;;
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .

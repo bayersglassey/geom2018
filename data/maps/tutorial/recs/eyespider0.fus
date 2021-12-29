@@ -1,0 +1,47 @@
+
+collmap "detect":
+    ;;       .   .   .   .
+    ;;       *\*/*\*/*\*/*
+    ;;     . - + - + - + - .
+    ;;     *\*/*\*/*\*/*\*/*
+    ;;   . - + - + - + - + - .
+    ;;   *\*/*\*/*\*/*\*/*\*/*
+    ;; . - + - + - + - + - + - .
+    ;;   */*\*/*\*/*\*/*\*/*\*
+    ;;   . - + -(+)- + - + - .
+    ;;     */*\*/*\*/*\*/*\*
+    ;;     . - + - + - + - .
+    ;;       */*\*/*\*/*\*
+    ;;       .   .   .   .
+
+collmap "detect_partial":
+    ;;       .   .   .   .
+    ;;       *\*/*\*/*\*/*
+    ;;     . - + - + - + - .
+    ;;     *\*/*\*/*\*/*\*/*
+    ;;   . - + - + - + - + - .
+    ;;   *\*/*\*/*\*/*\*/*\*/*
+    ;; . - + - + - + - + - + - .
+    ;;   */*\*/*\*/*\*/*\*/*\*
+    ;;   . - + -(+)- + - + - .
+
+init:
+    if() then:
+        play: "data/maps/tutorial/recs/eyespider0_a.fus"
+        goto: start
+
+start:
+    if:
+        coll: bodies("touch") any yes collmap("detect")
+    then:
+        play: "data/maps/tutorial/recs/eyespider0_b.fus"
+        goto: start2
+
+start2:
+    if:
+        coll: bodies("touch") any yes collmap("detect_partial")
+    then:
+        play: "data/maps/tutorial/recs/eyespider0_c.fus"
+        goto: start3
+
+start3:

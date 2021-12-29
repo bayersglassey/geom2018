@@ -38,7 +38,9 @@ $SET_STR STATE_RUN_START_JUMP run_start_jump
 $SET_STR STATE_JUMP jump
 
 
-collmsgs: "touch" "enter_door"
+collmsgs:
+    $IF !SPIDER_EYE: "touch"
+    $IF !SPIDER_EYE: "enter_door"
 on "crush": goto: dead
 
 

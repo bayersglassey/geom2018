@@ -1,0 +1,29 @@
+
+collmap "detect":
+    ;;       .   .   .   .
+    ;;       *\*/*\*/*\*/*
+    ;;     . - + - + - + - .
+    ;;     *\*/*\*/*\*/*\*/*
+    ;;   . - + - + - + - + - .
+    ;;   *\*/*\*/*\*/*\*/*\*/*
+    ;; . - + - + - + - + - + - .
+    ;;   */*\*/*\*/*\*/*\*/*\*
+    ;;   . - + -(+)- + - + - .
+    ;;     */*\*/*\*/*\*/*\*
+    ;;     . - + - + - + - .
+    ;;       */*\*/*\*/*\*
+    ;;       .   .   .   .
+
+init:
+    if() then:
+        play: "data/maps/tutorial/recs/eyespider1_a.fus"
+        goto: start
+
+start:
+    if:
+        coll: bodies("touch") any yes collmap("detect")
+    then:
+        play: "data/maps/tutorial/recs/eyespider1_b.fus"
+        goto: start2
+
+start2:

@@ -1,26 +1,9 @@
-$SET_STR GREETING_A: lines:
-    ;;
-    ;;
-    ;;
-    ;;                  Why, hello there.
-$SET_STR GREETING_B: lines:
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;                                   You made it...
-$SET_STR GREETING_C: lines:
-    ;;
-    ;;
-    ;;                                           Keep going!
-$SET_STR TOO_FAR: lines:
-    ;;
-    ;;                             Too far!
+$SET_STR GREETING_A: lines: at(28 28)
+    ;;Hello.
+$SET_STR TOO_FAR: lines: at(18 19)
+    ;;Too far!
 
 text: if mapvar("start_eye_a_open") then if mapvar("made_it_underneath") then $GET_STR TOO_FAR else $GET_STR GREETING_A else null
-text: if mapvar("start_eye_b_open") then if mapvar("made_it_underneath") then $GET_STR TOO_FAR else $GET_STR GREETING_B else null
-text: if mapvar("start_eye_c_open") then if mapvar("made_it_underneath") then $GET_STR TOO_FAR else $GET_STR GREETING_C else null
 parts:
     "a": recording "data/recs/eye.fus"
         vars:
@@ -50,9 +33,9 @@ collmap:
     ;;          .   .   .   .   .   .   .   .   .   .   .   .   +   .   + - + - + - +   .   .   .   .   .
     ;;                    * * *                                /                     \
     ;;        .   .   .   .   + - + -(+)- + - + - + - + - + - +   ?   .   .   .   .   + - + - + - + - +   .   [a]
-    ;;                      */                                                                   /
-    ;;          .   .   .   +   .   .   .   .   .   .   .   + - + - + - + - +   .   + - +   ?   +   .   .       [c]
-    ;;                       \                             /                 \     /     \     /
+    ;;                * * * */                                                                   /
+    ;;          .   .   .   +   .   .   .   .   .   .   .   + - + - + - + - +   .   + - +   ?   +   .   .       [c^3]
+    ;;                * * *  \                             /                 \     /     \     /
     ;;        .   .   .   .   + - + - +   .   .   + - + - +   .   .   .   .   +   +   .   + - +   .   .   .
     ;;                                 \         /                           /     \
     ;;          .   .   .   .   .   .   + - + - +   .   .   .   .   .   .   +   .   +   .   .   .   .   .

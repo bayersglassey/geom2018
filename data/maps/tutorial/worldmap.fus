@@ -19,7 +19,6 @@ vars:
     nosave "loop_eye_b_open": 0
     nosave "start4_eye_a_open": 0
     nosave "start4_eye_b_open": 0
-    nosave "start4_eye_c_open": 0
     nosave "skypipes_eye_a_open": 0
     nosave "skypipes4_eye_a_open": 0
 
@@ -55,6 +54,15 @@ submaps:
                 file: "data/maps/tutorial/start4.fus"
                 pos: eval: (19 0) + (19 -1) + (19 -6) + (19 -3)
                 camera: (9 -2)
+                submaps:
+                    :
+                        file: "data/maps/tutorial/start4b.fus"
+                        pos: (30 10)
+                        camera: (-2 6)
+                    :
+                        file: "data/maps/tutorial/start4c.fus"
+                        pos: eval: (30 10) + (-8 15)
+                        camera: (-10 0)
             :
                 file: "data/maps/tutorial/start5.fus"
                 pos: eval: (19 0) + (19 -1) + (19 -6) + (19 -3) + (19 -5)
@@ -70,7 +78,7 @@ submaps:
                 submaps:
                     :
                         file: "data/maps/tutorial/skyblocker.fus"
-                        pos: eval: (25 2)
+                        pos: eval: (25 2) + (-2 -1)
                     :
                         file: "data/maps/tutorial/skyblocker2.fus"
                         pos: eval: (25 2) + (8 0)
@@ -81,14 +89,14 @@ submaps:
                 file: "data/maps/tutorial/skypipes2.fus"
                 pos: eval: (19 0) + (19 -1) + (24 17) + (28 12)
                 camera: (9 4)
-                recs:
-                    : "data/maps/tutorial/recs/eyespider000.fus"
+                actors:
+                    : "data/maps/tutorial/recs/eyespider0.fus"
             :
                 file: "data/maps/tutorial/skypipes3.fus"
                 pos: eval: (19 0) + (19 -1) + (24 17) + (28 12) + (27 10)
                 camera: (9 0)
-                recs:
-                    : "data/maps/tutorial/recs/eyespider001.fus"
+                actors:
+                    : "data/maps/tutorial/recs/eyespider1.fus"
             :
                 file: "data/maps/tutorial/skypipes4.fus"
                 pos: eval: (19 0) + (19 -1) + (24 17) + (28 12) + (27 10) + (25 3)
