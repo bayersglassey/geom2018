@@ -17,90 +17,11 @@ $GET_SYM STATE_STAND:
     rgraph: $PREFIX NS $GET_STR STATE_STAND
     hitbox: collmap("stand")
 
-    # Stop running if we're not holding forward, or if we try to
-    # do almost anything other than jump
-    # (don't stop running if we try to e.g. spit, because it won't
-    # have the desired effect... the stop_running state will play,
-    # but then you won't spit, because "went_down x" or whatever is
-    # not true)
-    $IF RUNNING:
-        if: any:
-            key: wasdown b
-            key: wasdown d
-            key: not isdown f
-        then:
-            goto immediate: stop_running
-
-    # Can't stand on nothing
-    if:
-        coll: any no
-            ;;  (+)- +
-    then:
-        move: 1 0
-        goto immediate: $GET_SYM STATE_START_JUMP
-
-    # Spit
-    if:
-        key: wentdown y
-    then:
-        call: spit
-
-    # Turn into roller
-    $IF SPIDER_ROLLER:
-        if:
-            key: wentdown x
-        then:
-            goto: roller_stand
-            delay: $GET_INT ROLLER_STAND_DELAY
-
-    # Turn into bird
-    $IF SPIDER_BIRD:
-        if:
-            key: wentdown x
-            coll: all no
-                ;;   .   .
-                ;;   *\*/*
-                ;; . - + - .
-                ;;   */*\*
-                ;;   . - .
-                ;;   *\*/*
-                ;; . - + - .
-                ;;   */*\*
-                ;;  (.)  .
-        then:
-            goto: bird_crawl
-            delay: 1
-
-    # Blink
-    $IF SPIDER_EYE:
-        if:
-            key: wasdown x
-        then:
-            goto delay: eye_closing
-
-    # Crawl
-    if:
-        key: wasdown d
-    then:
-        goto delay: crawling
+    import "anim/_spider_stand.state.fus"
 
     # Stepping and jumping
-    import "anim/_spider_move.state.fus"
-
-    # Turn
-    if:
-        key: wasdown b
-    then:
-        move: 1 0
-        turn
-        goto delay: turn
-
-    # Look up
-    $IF SPIDER_AIMER:
-        if:
-            key: wasdown x
-        then:
-            goto: look_up
+    import "anim/_spider_jump.state.fus"
+    import "anim/_spider_step.state.fus"
 
     $IF RUNNING:
         # If we didn't do anything else, then just go to the non-running
@@ -142,7 +63,7 @@ $GET_SYM STATE_JUMP:
     hitbox: collmap("stand")
 
     # Landing, jumping, crashing
-    import "anim/_spider_jump.state.fus"
+    import "anim/_spider_jumping.state.fus"
 
 $GET_SYM STATE_STEP_DOWN:
     rgraph: $PREFIX NS $GET_STR STATE_STEP
@@ -153,31 +74,8 @@ $GET_SYM STATE_STEP_DOWN:
         ;;   */*\*/*\*
         ;;   .  (.)  .
 
-    # Stop running if we're not holding forward, or if we try to
-    # do almost anything other than jump
-    # (don't stop running if we try to e.g. spit, because it won't
-    # have the desired effect... the stop_running state will play,
-    # but then you won't spit, because "went_down x" or whatever is
-    # not true)
-    $IF RUNNING:
-        if: any:
-            key: wasdown b
-            key: wasdown d
-            key: not isdown f
-        then:
-            goto immediate: stop_running
-
-    if:
-        key: wentdown y
-    then:
-        call: spit
-
-    $IF SPIDER_ROLLER:
-        if:
-            key: wentdown x
-        then:
-            goto: roller_stand
-            delay: $GET_INT ROLLER_STAND_DELAY
+    import "anim/_spider_stand.state.fus"
+    import "anim/_spider_jump.state.fus"
 
     if() then: goto: $GET_SYM STATE_STAND
 
@@ -185,30 +83,7 @@ $GET_SYM STATE_STEP:
     rgraph: $PREFIX NS $GET_STR STATE_STEP
     hitbox: collmap("stand")
 
-    # Stop running if we're not holding forward, or if we try to
-    # do almost anything other than jump
-    # (don't stop running if we try to e.g. spit, because it won't
-    # have the desired effect... the stop_running state will play,
-    # but then you won't spit, because "went_down x" or whatever is
-    # not true)
-    $IF RUNNING:
-        if: any:
-            key: wasdown b
-            key: wasdown d
-            key: not isdown f
-        then:
-            goto immediate: stop_running
-
-    if:
-        key: wentdown y
-    then:
-        call: spit
-
-    $IF SPIDER_ROLLER:
-        if:
-            key: wentdown x
-        then:
-            goto: roller_stand
-            delay: $GET_INT ROLLER_STAND_DELAY
+    import "anim/_spider_stand.state.fus"
+    import "anim/_spider_jump.state.fus"
 
     if() then: goto: $GET_SYM STATE_STAND

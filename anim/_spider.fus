@@ -175,6 +175,22 @@ turn:
     rgraph: $PREFIX NS "turn"
     hitbox: collmap("stand")
 
+    # Jump
+    if:
+        key: wasdown u
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        move: 1 0
+        if:
+            $IF DISABLE_RUNNING: false
+            key: wasdown f
+        then: goto immediate: $GET_SYM STATE_RUN_START_JUMP
+        else: goto immediate: $GET_SYM STATE_START_JUMP
+
     if() then: goto immediate: step
 
 stop_running:

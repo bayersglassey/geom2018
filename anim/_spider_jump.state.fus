@@ -1,50 +1,29 @@
 
 # Expected variables:
-# STATE_STEP (str)
-# STATE_STEP_UP (str)
+# STATE_RUN_START_JUMP (str)
 # STATE_START_JUMP (str)
 
 
-# Land up
-if:
-    coll: all yes
-        ;;        +
-        ;;       /
-        ;; ( )  +
-then:
-    move: 1 0
-    rot: 1
-    goto delay: $GET_SYM STATE_STEP_UP
+# Jump up
+$IF SPIDER_AIMER:
+    if:
+        key: wasdown x
+        key: wasdown u
+        coll: all no
+            ;;    *\*/*
+            ;;    - + -
+            ;;       \*
+            ;;
+            ;;
+            ;; ( )
+    then:
+        move: 1 0
+        rot: 1
+        goto immediate: $GET_SYM STATE_START_JUMP
 
-# Forced jump up
+# Jump
 if:
-    coll: all yes
-        ;; ( )  +
-    coll: any yes
-        ;;        +
-        ;;       /
-        ;; ( )
-then:
-    move: 1 0
-    rot: 1
-    goto immediate: $GET_SYM STATE_START_JUMP
-
-# Land
-if:
-    key: not isdown u
-    coll: all no
-        ;;       \*/*
-        ;;        + -
-        ;;       /*\*
-        ;; ( )
-    coll: all yes
-        ;; ( )  + - +
-then:
-    move: 1 0
-    goto delay: $GET_SYM STATE_STEP
-
-# Continue jump
-if:
+    key: wasdown u
     coll: all no
         ;;       \*/*
         ;;        + -
@@ -52,8 +31,8 @@ if:
         ;; ( )
 then:
     move: 1 0
-    goto immediate: $GET_SYM STATE_START_JUMP
-
-# Crash
-if() then:
-    goto delay: mostly_dead
+    if:
+        $IF DISABLE_RUNNING: false
+        key: wasdown f
+    then: goto immediate: $GET_SYM STATE_RUN_START_JUMP
+    else: goto immediate: $GET_SYM STATE_START_JUMP

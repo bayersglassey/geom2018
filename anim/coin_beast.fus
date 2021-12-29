@@ -34,27 +34,9 @@ stand:
         ;;   */*\*
         ;;  (.)  .
 
-    if:
-        coll: any no
-            ;;  (+)- +
-    then:
-        move: 1 0
-        goto immediate: start_jump
-
-    if:
-        key: wasdown d
-    then:
-        goto delay: crawling
-
     # Stepping and jumping
-    import "anim/_spider_move.state.fus"
-
-    if:
-        key: wasdown b
-    then:
-        move: 1 0
-        turn
-        goto delay: turn
+    import "anim/_spider_jump.state.fus"
+    import "anim/_spider_step.state.fus"
 
 turn:
     rgraph: "coin_beast_turn"
@@ -182,7 +164,7 @@ jump:
         ;;  (.)  .
 
     # Landing, jumping, crashing
-    import "anim/_spider_jump.state.fus"
+    import "anim/_spider_jumping.state.fus"
 
 collected:
     rgraph: "dead_once"

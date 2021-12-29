@@ -1,0 +1,59 @@
+
+# Expected variables:
+# STATE_STEP (str)
+# STATE_STEP_UP (str)
+# STATE_START_JUMP (str)
+
+
+# Land up
+if:
+    coll: all yes
+        ;;        +
+        ;;       /
+        ;; ( )  +
+then:
+    move: 1 0
+    rot: 1
+    goto delay: $GET_SYM STATE_STEP_UP
+
+# Forced jump up
+if:
+    coll: all yes
+        ;; ( )  +
+    coll: any yes
+        ;;        +
+        ;;       /
+        ;; ( )
+then:
+    move: 1 0
+    rot: 1
+    goto immediate: $GET_SYM STATE_START_JUMP
+
+# Land
+if:
+    key: not isdown u
+    coll: all no
+        ;;       \*/*
+        ;;        + -
+        ;;       /*\*
+        ;; ( )
+    coll: all yes
+        ;; ( )  + - +
+then:
+    move: 1 0
+    goto delay: $GET_SYM STATE_STEP
+
+# Continue jump
+if:
+    coll: all no
+        ;;       \*/*
+        ;;        + -
+        ;;       /*\*
+        ;; ( )
+then:
+    move: 1 0
+    goto immediate: $GET_SYM STATE_START_JUMP
+
+# Crash
+if() then:
+    goto delay: mostly_dead

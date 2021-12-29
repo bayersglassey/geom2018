@@ -1,0 +1,93 @@
+
+# Expected to be imported by the "stand", "step", "step_down" states.
+# This allows the actions in this file to be "buffered" during
+# stepping animations (e.g. buffering a jump while stepping).
+# Also, as of this writing, the "turn" state does a "goto immediate"
+# into "step" state, so it also allows buffering of all these
+# actions.
+
+
+
+
+# Stop running if we're not holding forward, or if we try to
+# do almost anything other than jump
+# (don't stop running if we try to e.g. spit, because it won't
+# have the desired effect... the stop_running state will play,
+# but then you won't spit, because "went_down x" or whatever is
+# not true)
+$IF RUNNING:
+    if: any:
+        key: wasdown b
+        key: wasdown d
+        key: not isdown f
+    then:
+        goto immediate: stop_running
+
+# Can't stand on nothing
+if:
+    coll: any no
+        ;;  (+)- +
+then:
+    move: 1 0
+    goto immediate: $GET_SYM STATE_START_JUMP
+
+# Spit
+$IF SPIDER:
+    if:
+        key: wentdown y
+    then:
+        call: spit
+
+# Turn into roller
+$IF SPIDER_ROLLER:
+    if:
+        key: wentdown x
+    then:
+        goto: roller_stand
+        delay: $GET_INT ROLLER_STAND_DELAY
+
+# Turn into bird
+$IF SPIDER_BIRD:
+    if:
+        key: wentdown x
+        coll: all no
+            ;;   .   .
+            ;;   *\*/*
+            ;; . - + - .
+            ;;   */*\*
+            ;;   . - .
+            ;;   *\*/*
+            ;; . - + - .
+            ;;   */*\*
+            ;;  (.)  .
+    then:
+        goto: bird_crawl
+        delay: 1
+
+# Blink
+$IF SPIDER_EYE:
+    if:
+        key: wasdown x
+    then:
+        goto delay: eye_closing
+
+# Crawl
+if:
+    key: wasdown d
+then:
+    goto delay: crawling
+
+# Turn
+if:
+    key: wasdown b
+then:
+    move: 1 0
+    turn
+    goto delay: turn
+
+# Look up
+$IF SPIDER_AIMER:
+    if:
+        key: wasdown x
+    then:
+        goto: look_up

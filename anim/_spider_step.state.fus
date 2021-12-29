@@ -3,42 +3,8 @@
 # STATE_STEP (str)
 # STATE_STEP_UP (str)
 # STATE_STEP_DOWN (str)
-# STATE_RUN_START_JUMP (str)
 # STATE_START_JUMP (str)
 
-
-# Jump up
-$IF SPIDER_AIMER:
-    if:
-        key: wasdown x
-        key: wasdown u
-        coll: all no
-            ;;    *\*/*
-            ;;    - + -
-            ;;       \*
-            ;;
-            ;;
-            ;; ( )
-    then:
-        move: 1 0
-        rot: 1
-        goto immediate: $GET_SYM STATE_START_JUMP
-
-# Jump
-if:
-    key: wasdown u
-    coll: all no
-        ;;       \*/*
-        ;;        + -
-        ;;       /*\*
-        ;; ( )
-then:
-    move: 1 0
-    if:
-        $IF DISABLE_RUNNING: false
-        key: wasdown f
-    then: goto immediate: $GET_SYM STATE_RUN_START_JUMP
-    else: goto immediate: $GET_SYM STATE_START_JUMP
 
 # Step up
 if:
