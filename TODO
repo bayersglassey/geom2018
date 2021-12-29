@@ -1135,3 +1135,59 @@ Dec 21, 2021:
 
 * data/maps/tutorial3/start.fus: eyes should give you a hint, like
     "jump right through the middle!" or something
+
+
+Dec 23, 2021:
+-------------
+
+Forget about telling a story.
+That's never actually what I wanted to do with this.
+The toturial was originally much more honest: its sole purpose was for me to
+describe to the player how to play.
+Now it's all mixed up with eyeballs and whatnot.
+It's good that we got some features and anims and so forth added during the
+process of adding eyeballs, but let's take them out -- or at least tone them
+down.
+Eyeballs can stay, perhaps; but get rid of the "release you" talk.
+I still need to find a way to give a certain kind of person "a reason to play",
+but it should be something straightforward and honest.
+
+*** I don't want a lot of text and half-baked "story" distracting people from
+    the "geometric" ideas, which were the original focus of this game.
+
+Which parts of the game do I like, and why?
+
+
+Dec 28, 2021:
+-------------
+
+anim/*.fus: state/proc/etc names shouldn't be syms, they should be str.
+So instead of this:
+
+    proc whatever:
+        ...etc...
+
+    stand:
+        ...etc...
+        call: whatever
+        goto: crawl
+
+...it should be:
+
+    proc "whatever":
+        ...etc...
+
+    state "stand":
+        ...etc...
+        call: "whatever"
+        goto: "crawl"
+
+
+Maybe rename anim/_{spider -> spiderlike}_{move,crawl,jump}.state.fus?..
+Since they are also used here:
+
+    anim/coin_beast.fus
+    50:    import "anim/_spider_step.state.fus"
+    133:    import "anim/_spider_crawl.state.fus"
+    185:    import "anim/_spider_jumping.state.fus"
+
