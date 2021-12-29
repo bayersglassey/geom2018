@@ -17,6 +17,7 @@ $GET_SYM STATE_STAND:
     rgraph: $PREFIX NS $GET_STR STATE_STAND
     hitbox: collmap("stand")
 
+    # Crawling, turning
     import "anim/_spider_stand.state.fus"
 
     # Stepping and jumping
@@ -74,6 +75,7 @@ $GET_SYM STATE_STEP_DOWN:
         ;;   */*\*/*\*
         ;;   .  (.)  .
 
+    # Crawling, turning, jumping
     import "anim/_spider_stand.state.fus"
     import "anim/_spider_jump.state.fus"
 
@@ -83,6 +85,7 @@ $GET_SYM STATE_STEP:
     rgraph: $PREFIX NS $GET_STR STATE_STEP
     hitbox: collmap("stand")
 
+    # Crawling, turning, jumping
     import "anim/_spider_stand.state.fus"
     import "anim/_spider_jump.state.fus"
 

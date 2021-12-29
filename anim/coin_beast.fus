@@ -34,6 +34,9 @@ stand:
         ;;   */*\*
         ;;  (.)  .
 
+    # Crawling, turning
+    import "anim/_spider_stand.state.fus"
+
     # Stepping and jumping
     import "anim/_spider_jump.state.fus"
     import "anim/_spider_step.state.fus"
@@ -46,7 +49,12 @@ turn:
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto immediate: stand
+
+    # Crawling, turning, jumping
+    import "anim/_spider_stand.state.fus"
+    import "anim/_spider_jump.state.fus"
+
+    if() then: goto: stand
 
 step:
     rgraph: "coin_beast_step"
@@ -56,7 +64,12 @@ step:
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto immediate: stand
+
+    # Crawling, turning, jumping
+    import "anim/_spider_stand.state.fus"
+    import "anim/_spider_jump.state.fus"
+
+    if() then: goto: stand
 
 step_up:
     rgraph: "coin_beast_step_up"
@@ -66,7 +79,12 @@ step_up:
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto immediate: stand
+
+    # Crawling, turning, jumping
+    import "anim/_spider_stand.state.fus"
+    import "anim/_spider_jump.state.fus"
+
+    if() then: goto: stand
 
 step_down:
     rgraph: "coin_beast_step_down"
@@ -76,7 +94,12 @@ step_down:
         ;; . - + - . - .
         ;;   */*\*/*\*
         ;;   .  (.)  .
-    if() then: goto immediate: stand
+
+    # Crawling, turning, jumping
+    import "anim/_spider_stand.state.fus"
+    import "anim/_spider_jump.state.fus"
+
+    if() then: goto: stand
 
 appear_crouch:
     rgraph: "dead_once_crouch_reversed"

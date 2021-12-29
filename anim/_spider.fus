@@ -11,6 +11,11 @@
 # NOTE: make sure "stand" is the first anim, so any imports
 # should go below it
 
+
+# So we know we're not just a "spiderlike" thing, e.g. coin_beast
+$SET_BOOL SPIDER
+
+
 $SET_BOOL DISABLE_RUNNING # !!! DISABLED FOR NOW
 
 $IF SPIDER_SPIKEY:
