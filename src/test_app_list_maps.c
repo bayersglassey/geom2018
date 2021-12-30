@@ -16,7 +16,7 @@
 const char *test_app_list_maps_options[] = {
     "List bodies",
     "List submaps",
-    "List recordings (TODO)",
+    "Reveal entire minimap",
     NULL
 };
 
@@ -67,6 +67,13 @@ int test_app_list_maps_select_item(test_app_list_t *list){
     switch(data->options_index){
         case 0: return test_app_open_list_bodies(data->app, NULL, map);
         case 1: return test_app_open_list_submaps(data->app, NULL, map);
+        case 2: {
+            for(int i = 0; i < map->submaps_len; i++){
+                hexmap_submap_t *submap = map->submaps[i];
+                submap->visited = true;
+            }
+            break;
+        }
         default: break;
     }
     return 0;
