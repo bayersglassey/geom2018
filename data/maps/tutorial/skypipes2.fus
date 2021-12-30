@@ -1,3 +1,6 @@
+$SET_STR WATCH: lines: at(28 20)
+    ;;Watch.
+text: if mapvar("eyespider0_speak") then $GET_STR WATCH else null
 collmap:
     ;;
     ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
