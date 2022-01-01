@@ -1,6 +1,7 @@
 
 unit: 3 2 0 -1
 spawn: "data/maps/tutorial2/start.fus"
+#spawn: "data/maps/tutorial2/entrance.fus"
 palette: "data/maps/trees/pals/trees.fus"
 tileset: "data/tileset1.fus"
 vars:
@@ -42,60 +43,70 @@ submaps:
         submaps:
             : submaps:
                 :
+                    file: "data/maps/tutorial2/entrance.fus"
+                    pos: (-20 0)
+                    camera: (0 0)
+            : submaps:
+                :
                     bg
                     file: "data/maps/tutorial2/start_bg.fus"
-                    pos: eval: (0 0)
+                    pos: (0 0)
                     tileset: "data/tileset1_bg.fus"
                 :
                     file: "data/maps/tutorial2/start.fus"
-                    pos: eval: (0 0)
+                    pos: (0 0)
                     camera: (15 0)
                     submaps:
                         :
                             file: "data/maps/tutorial2/start_blocker.fus"
                             visible: not mapvar("start_solved")
-                            pos: eval: (0 0) + (13 -7)
+                            pos: (13 -7)
                         :
                             file: "data/maps/tutorial2/start_unblocked.fus"
                             visible: mapvar("start_solved")
-                            pos: eval: (0 0) + (13 -7)
+                            pos: (13 -7)
             : submaps:
                 :
                     bg
                     file: "data/maps/tutorial2/start2_bg.fus"
-                    pos: eval: (28 0)
+                    pos: (28 0)
                     tileset: "data/tileset1_bg.fus"
                 :
                     file: "data/maps/tutorial2/start2.fus"
-                    pos: eval: (28 0)
+                    pos: (28 0)
                     camera: (8 0)
+                    submaps:
+                        :
+                            file: "data/maps/tutorial2/start2_blocker.fus"
+                            visible: not mapvar("coin_e")
+                            pos: (0 5)
             : submaps:
                 :
                     bg
                     file: "data/maps/tutorial2/start3b_bg.fus"
-                    pos: eval: (0 0) + (13 -9) + (-1 -12)
+                    pos: eval: (13 -9) + (-1 -12)
                     tileset: "data/tileset1_bg.fus"
                 :
                     file: "data/maps/tutorial2/start3.fus"
-                    pos: eval: (0 0) + (13 -9)
+                    pos: eval: (13 -9)
                     camera: (-4 -8)
                 :
                     file: "data/maps/tutorial2/start3b.fus"
-                    pos: eval: (0 0) + (13 -9) + (-1 -12)
+                    pos: eval: (13 -9) + (-1 -12)
                     camera: (-5 -6)
                 :
                     file: "data/maps/tutorial2/start3b_blocker.fus"
                     visible: not mapvar("start3b_solved")
-                    pos: eval: (0 0) + (13 -9) + (-1 -12) + (-22 -17)
+                    pos: eval: (13 -9) + (-1 -12) + (-22 -17)
             : submaps:
                 :
                     bg
                     file: "data/maps/tutorial2/start4_bg.fus"
-                    pos: eval: (0 0) + (13 -9) + (-1 -12) + (-29 -19)
+                    pos: eval: (13 -9) + (-1 -12) + (-29 -19)
                     tileset: "data/tileset1_bg.fus"
                 :
                     file: "data/maps/tutorial2/start4.fus"
-                    pos: eval: (0 0) + (13 -9) + (-1 -12) + (-29 -19)
+                    pos: eval: (13 -9) + (-1 -12) + (-29 -19)
                     camera: (-8 6)
                     submaps:
                         :
