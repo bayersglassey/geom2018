@@ -6,7 +6,7 @@
 
 # Jump up
 if:
-    expr: myvar("is_spider_aimer")
+    expr: myvar("is_aimerspider")
     key: wasdown x
     key: wasdown u
     coll: all no

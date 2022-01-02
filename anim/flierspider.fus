@@ -1,8 +1,6 @@
 
-vars:
-    "is_spider_flier": T
-
 $SET_STR NS flierspider_
+$SET_BOOL SPIDER_FLIER
 import "anim/_spider.fus"
 
 $SET_STR ANIM_NS flier_

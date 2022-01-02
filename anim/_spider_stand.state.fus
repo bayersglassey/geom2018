@@ -40,7 +40,7 @@ $IF SPIDER:
 
 # Turn into roller
 if:
-    expr: myvar("is_spider_roller")
+    expr: myvar("is_rollerspider")
     key: wentdown x
 then:
     goto: roller_stand
@@ -48,7 +48,7 @@ then:
 
 # Turn into bird
 if:
-    expr: myvar("is_spider_bird")
+    expr: myvar("is_birdspider")
     key: wentdown x
     coll: all no
         ;;   .   .
@@ -88,7 +88,7 @@ then:
 
 # Look up
 if:
-    expr: myvar("is_spider_aimer")
+    expr: myvar("is_aimerspider")
     key: wasdown x
 then:
     goto: look_up

@@ -1,6 +1,4 @@
 
-vars:
-    "is_spider_aimer": T
-
 $SET_STR NS aimerspider_
+$SET_BOOL SPIDER_AIMER
 import "anim/_spider.fus"

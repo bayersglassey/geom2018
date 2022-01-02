@@ -1,6 +1,4 @@
 
-vars:
-    "is_spider_spikey": T
-
 $SET_STR NS spikeyspider_
+$SET_BOOL SPIDER_SPIKEY
 import "anim/_spider.fus"

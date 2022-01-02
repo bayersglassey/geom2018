@@ -969,74 +969,8 @@ Since they are also used here:
 Jan 1, 2022:
 ------------
 
-myvar("is_spider_roller"), myvar("is_spider_flier"), myvar("is_spider_bird"): presumably don't work
+myvar("is_rollerspider"), myvar("is_flierspider"), myvar("is_birdspider"): presumably don't work
 with anim/*spider.fus other than the ones they're intended for use with, because the others will be
 missing the imports of anim/_roller.fus, anim/_flier_core.fus, anim/_bird.fus, etc.
 So: can we use labels to introduce visual changes, instead of requiring separate statesets?..
 
-
-
-SAVING & LOADING THE GAME -- OVERHAUL:
-
-    * The thing you save/load is called a "game"
-        * Except we need a better technical term for it :P
-    * Touching a save point saves the current game
-    * Touching a door of type "new_game" starts a new game (so e.g. if you go to "NEW" on the title screen after having
-        saved during the tutorial, you can't reload back into the tutorial)
-    * The number of players is part of the game?..
-    * In any case, only player 0 can use savepoints?.. other players respawn at player 0's location (or... last save point)?..
-
-
-src/hexgame_savelocation.[ch]:
-
-    Currently hexgame_savelocation_{save,load} is saving/loading the following things:
-        * The passed hexgame_savelocation_t *savelocation
-        * The passed hexgame_t *game's vars, maps, and map->vars for each map
-    ...that's not quite right, we need to save e.g. body's vars as well.
-    And it's a hack that we're pretending that this is a single data structure,
-    when it's actually treating THE ENTIRE GAME AND ITS MAPS as part of the data. O_o
-
-    The actual data structure (as defined in hexgame_savelocation.h) is:
-
-        typedef struct hexgame_savelocation {
-            hexgame_location_t loc;
-            const char *map_filename;
-            const char *stateset_filename;
-            const char *state_name;
-        } hexgame_savelocation_t;
-
-    We use this structure in the following places:
-
-        hexmap_door.u.location /* type == HEXMAP_DOOR_TYPE_RESPAWN or HEXMAP_DOOR_TYPE_NEW_GAME */
-        player.respawn_location
-        player.safe_location
-        player_use_savepoint -> player_save
-        player_reload -> player_load
-
-    ...ok I think the deal is:
-
-        * There are multiple kinds of "saving" going on
-        * player.respawn_location and player.safe_location shouldn't have anything to do with vars, maps, etc
-        * Touching a savepoint should update player.respawn_location *AND* save the game's state
-        * The game's state includes:
-            * Players (all of them?.. or just the "main" player, "player 1"?..)
-                * player->respawn_location
-                * player->body.vars
-            * game->vars
-            * game->maps
-                * map->vars
-
-...also, when all of this is done,
-
-    !!! WE NEED TO MAKE SURE THAT SAVING & RELOADING DOESN'T RESULT IN YOU BEING STUCK !!!
-
-...for instance, if you carry a mini_eye, then shoot it, and save while it's in the air,
-and then reload the game, we need to make sure the mini_eye isn't permanently gone.
-
-    ...HOWEVER, AN ALTERNATE APPROACH IS:
-
-        * Don't save body->vars, just map->vars
-        * So if you are carrying something, the relevant mapvars should be marked nosave
-        * !!! THIS IS DE FACTO WHAT WE HAVE STARTED DOING !!!
-        * ...but it's not good enough. I now want to use the is_spider_* myvars.
-            * I need "nosave" body vars...

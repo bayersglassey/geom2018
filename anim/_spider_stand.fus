@@ -32,7 +32,7 @@ $GET_SYM STATE_STAND:
 $GET_SYM STATE_START_JUMP:
 
     if:
-        expr: myvar("is_spider_flier")
+        expr: myvar("is_flierspider")
         key: wasdown x
         coll: all no
             ;;       \*/*

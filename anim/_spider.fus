@@ -1,6 +1,11 @@
 
 # Expected vars:
 # NS (str), e.g. "spider_"
+# SPIDER_AIMER (bool)
+# SPIDER_BIRD (bool)
+# SPIDER_FLIER (bool)
+# SPIDER_SPIKEY (bool)
+# SPIDER_ROLLER (bool)
 # SPIDER_EYE (bool)
 
 # NOTE: make sure "stand" is the first anim, so any imports
@@ -26,6 +31,19 @@ $SET_STR STATE_RUN_STEP_UP run_step
 $SET_STR STATE_RUN_STEP_DOWN run_step_down
 $SET_STR STATE_RUN_START_JUMP run_start_jump
 $SET_STR STATE_JUMP jump
+
+
+vars:
+    "is_rollerspider": F
+    $IF SPIDER_ROLLER: "is_rollerspider": T
+    "is_aimerspider": F
+    $IF SPIDER_AIMER: "is_aimerspider": T
+    "is_spikeyspider": F
+    $IF SPIDER_SPIKEY: "is_spikeyspider": T
+    "is_flierspider": F
+    $IF SPIDER_FLIER: "is_flierspider": T
+    "is_birdspider": F
+    $IF SPIDER_BIRD: "is_birdspider": T
 
 
 collmsgs:
@@ -78,7 +96,7 @@ proc set_spit_anim:
     # We don't have functions, just procedures.
     # This procedure acts like a function in that it "returns" a value
     # in myvar("spit_anim").
-    if: expr: myvar("is_spider_spikey")
+    if: expr: myvar("is_spikeyspider")
     then: set myvar("spit_anim"): "anim/spikeyspit.fus"
     else: set myvar("spit_anim"): "anim/spit.fus"
 

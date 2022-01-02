@@ -6,7 +6,7 @@
 
 
 proc crawl_crush:
-    if: expr: myvar("is_spider_spikey")
+    if: expr: myvar("is_spikeyspider")
     then: goto delay: crawl_shielding
 
 
@@ -85,7 +85,7 @@ crawl:
 
     # Turn into roller
     if:
-        expr: myvar("is_spider_roller")
+        expr: myvar("is_rollerspider")
         key: wentdown x
     then:
         goto: roller_stand
@@ -93,7 +93,7 @@ crawl:
 
     # Turn into bird
     if:
-        expr: myvar("is_spider_bird")
+        expr: myvar("is_birdspider")
         key: wentdown x
         coll: all no
             ;;   .   .
@@ -125,7 +125,7 @@ crawl:
 
     # Roll over a gap
     if:
-        expr: myvar("is_spider_roller")
+        expr: myvar("is_rollerspider")
         key: wasdown f
         coll: all no
             ;;     \*
@@ -139,7 +139,7 @@ crawl:
 
     # Roll into a corner
     if:
-        expr: myvar("is_spider_roller")
+        expr: myvar("is_rollerspider")
         key: wasdown f
         coll: all yes
             ;;    +
@@ -163,7 +163,7 @@ crawl:
 
     # Look up
     if:
-        expr: myvar("is_spider_aimer")
+        expr: myvar("is_aimerspider")
         key: not isdown f
         key: wasdown x
     then:
@@ -189,7 +189,7 @@ crawl_step_down:
         call: crawl_spit
 
     if:
-        expr: myvar("is_spider_roller")
+        expr: myvar("is_rollerspider")
         key: wentdown x
     then:
         goto: roller_stand
@@ -213,7 +213,7 @@ crawl_step:
         call: crawl_spit
 
     if:
-        expr: myvar("is_spider_roller")
+        expr: myvar("is_rollerspider")
         key: wentdown x
     then:
         goto: roller_stand
