@@ -4,6 +4,8 @@
 #include <stdbool.h>
 
 #include "hexgame_location.h"
+#include "lexer.h"
+#include "stringstore.h"
 
 struct hexgame;
 
@@ -20,10 +22,8 @@ void hexgame_savelocation_cleanup(hexgame_savelocation_t *location);
 void hexgame_savelocation_set(hexgame_savelocation_t *location, vecspace_t *space,
     vec_t pos, rot_t rot, bool turn, const char *map_filename,
     const char *stateset_filename, const char *state_name);
-int hexgame_savelocation_save(const char *filename,
-    hexgame_savelocation_t *location, struct hexgame *game);
-int hexgame_savelocation_load(const char *filename,
-    hexgame_savelocation_t *location, struct hexgame *game,
-    bool *file_found_ptr);
+void hexgame_savelocation_write(hexgame_savelocation_t *location, FILE *file);
+int hexgame_savelocation_parse(hexgame_savelocation_t *location,
+    fus_lexer_t *lexer, stringstore_t *filename_store, stringstore_t *name_store);
 
 #endif

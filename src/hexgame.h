@@ -281,6 +281,9 @@ int player_init(player_t *player, struct hexgame *game, int keymap,
     vec_t respawn_pos, rot_t respawn_rot, bool respawn_turn,
     const char *respawn_map_filename, const char *respawn_filename);
 
+int player_save(player_t *player, const char *filename);
+int player_load(player_t *player, const char *filename,
+    bool *file_not_found_ptr);
 int player_get_index(player_t *player);
 void hexgame_player_dump(player_t *player, int depth);
 int player_reload(player_t *player);

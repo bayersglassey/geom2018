@@ -1010,8 +1010,8 @@ src/hexgame_savelocation.[ch]:
         hexmap_door.u.location /* type == HEXMAP_DOOR_TYPE_RESPAWN or HEXMAP_DOOR_TYPE_NEW_GAME */
         player.respawn_location
         player.safe_location
-        player_use_savepoint -> hexgame_savelocation_save
-        player_reload -> hexgame_savelocation_load
+        player_use_savepoint -> player_save
+        player_reload -> player_load
 
     ...ok I think the deal is:
 
@@ -1038,3 +1038,5 @@ and then reload the game, we need to make sure the mini_eye isn't permanently go
         * Don't save body->vars, just map->vars
         * So if you are carrying something, the relevant mapvars should be marked nosave
         * !!! THIS IS DE FACTO WHAT WE HAVE STARTED DOING !!!
+        * ...but it's not good enough. I now want to use the is_spider_* myvars.
+            * I need "nosave" body vars...

@@ -6,13 +6,10 @@
 
 #include "geom.h"
 #include "hexgame_savelocation.h"
-#include "hexgame.h"
-#include "file_utils.h"
+#include "stringstore.h"
 #include "lexer.h"
 #include "lexer_macros.h"
 #include "write.h"
-#include "var_utils.h"
-#include "hexgame_vars_props.h"
 
 
 #ifdef __EMSCRIPTEN__
@@ -45,83 +42,24 @@ void hexgame_savelocation_set(hexgame_savelocation_t *location, vecspace_t *spac
     location->state_name = state_name;
 }
 
-int hexgame_savelocation_save(const char *filename,
-    hexgame_savelocation_t *location, hexgame_t *game
-){
-    FILE *f = fopen(filename, "w");
-    if(f == NULL){
-        fprintf(stderr, "Couldn't save player to %s: ", filename);
-        perror(NULL);
-        return 2;
-    }
-    fprintf(f, "%i %i %i %c ", location->loc.pos[0], location->loc.pos[1],
+void hexgame_savelocation_write(hexgame_savelocation_t *location, FILE *file){
+    fprintf(file, "%i %i %i %c ", location->loc.pos[0], location->loc.pos[1],
         location->loc.rot, location->loc.turn? 'y': 'n');
-    fus_write_str(f, location->map_filename);
+    fus_write_str(file, location->map_filename);
     if(location->stateset_filename){
-        putc(' ', f);
-        fus_write_str(f, location->stateset_filename);
+        putc(' ', file);
+        fus_write_str(file, location->stateset_filename);
         if(location->state_name){
-            putc(' ', f);
-            fus_write_str(f, location->state_name);
+            putc(' ', file);
+            fus_write_str(file, location->state_name);
         }
     }
-    fputc('\n', f);
-
-    fprintf(f, "vars:\n");
-    vars_write(&game->vars, f, 4*1);
-
-    fprintf(f, "maps:\n");
-    /* !!! THIS IS A BIT OF A HACK!!!
-    ...instead of hexgame_savelocation_t being a self-contained data
-    structure, its save method here is dumping stuff from game->vars
-    and game->maps. */
-    for(int i = 0; i < game->maps_len; i++){
-        hexmap_t *map = game->maps[i];
-        fprintf(f, "    ");
-        fus_write_str(f, map->name);
-        fprintf(f, ":\n");
-        fprintf(f, "        vars:\n");
-
-        /* Don't write the vars which say they shouldn't be saved. */
-        var_props_t nowrite_props_mask = 1 << HEXGAME_VARS_PROP_NOSAVE;
-        vars_write_with_mask(&map->vars, f, 4*3, nowrite_props_mask);
-    }
-
-    fclose(f);
-
-#   ifdef __EMSCRIPTEN__
-    /* Needed to actually save the IDBFS data to browser's indexedDb. */
-    emccdemo_syncfs();
-#   endif
-
-    return 0;
 }
 
-int hexgame_savelocation_load(const char *filename,
-    hexgame_savelocation_t *location, hexgame_t *game,
-    bool *file_found_ptr
+int hexgame_savelocation_parse(hexgame_savelocation_t *location,
+    fus_lexer_t *lexer, stringstore_t *filename_store, stringstore_t *name_store
 ){
     INIT
-
-    prismelrenderer_t *prend = game->prend;
-
-    char *text = load_file(filename);
-    if(file_found_ptr)*file_found_ptr = true;
-    if(text == NULL){
-        fprintf(stderr, "Couldn't load location from %s: ", filename);
-
-        /* Indicate to caller that reason for returning a failure code
-        of 2 is missing file.
-        So caller can choose to treat that situation as something other
-        than an outright error. */
-        if(file_found_ptr)*file_found_ptr = false;
-
-        return 2;
-    }
-
-    fus_lexer_t _lexer, *lexer=&_lexer;
-    err = fus_lexer_init(lexer, text, filename);
-    if(err)return err;
 
     int x, y;
     rot_t rot;
@@ -134,50 +72,12 @@ int hexgame_savelocation_load(const char *filename,
     GET_INT(y)
     GET_INT(rot)
     GET_YN(turn)
-    GET_STR_CACHED(map_filename, &prend->filename_store)
+    GET_STR_CACHED(map_filename, filename_store)
     if(!DONE){
-        GET_STR_CACHED(stateset_filename, &prend->filename_store)
+        GET_STR_CACHED(stateset_filename, filename_store)
         if(!DONE){
-            GET_STR_CACHED(state_name, &prend->name_store)
+            GET_STR_CACHED(state_name, name_store)
         }
-    }
-
-    if(GOT("vars")){
-        NEXT
-        OPEN
-        err = vars_parse(&game->vars, lexer);
-        if(err)return err;
-        CLOSE
-    }
-
-    /* !!! THIS IS A BIT OF A HACK!!!
-    ...instead of hexgame_savelocation_t being a self-contained data
-    structure, its load method here is loading stuff from game->maps. */
-    if(GOT("maps")){
-        NEXT
-        OPEN
-        while(1){
-            if(GOT(")"))break;
-            const char *name;
-            GET_STR_CACHED(name, &prend->name_store)
-
-            hexmap_t *map;
-            err = hexgame_get_or_load_map(game, name, &map);
-            if(err)return err;
-
-            OPEN
-            {
-                if(GOT("vars")){
-                    NEXT
-                    OPEN
-                    err = vars_parse(&map->vars, lexer);
-                    if(err)return err;
-                    CLOSE
-                }
-            }
-            CLOSE
-        }
-        NEXT
     }
 
     location->loc.pos[0] = x;
@@ -187,9 +87,6 @@ int hexgame_savelocation_load(const char *filename,
     location->map_filename = map_filename;
     location->stateset_filename = stateset_filename;
     location->state_name = state_name;
-
-    fus_lexer_cleanup(lexer);
-    free(text);
-    return err;
+    return 0;
 }
 
