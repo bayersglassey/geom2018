@@ -1,11 +1,6 @@
 
 # Expected vars:
 # NS (str), e.g. "spider_"
-# SPIDER_AIMER (bool)
-# SPIDER_BIRD (bool)
-# SPIDER_FLIER (bool)
-# SPIDER_SPIKEY (bool)
-# SPIDER_ROLLER (bool)
 # SPIDER_EYE (bool)
 
 # NOTE: make sure "stand" is the first anim, so any imports
@@ -17,11 +12,6 @@ $SET_BOOL SPIDER
 
 
 $SET_BOOL DISABLE_RUNNING # !!! DISABLED FOR NOW
-
-$IF SPIDER_SPIKEY:
-    $SET_STR SPIT_FUS "anim/spikeyspit.fus"
-$IF !SPIDER_SPIKEY:
-    $SET_STR SPIT_FUS "anim/spit.fus"
 
 
 $SET_INT ROLLER_STAND_DELAY 0
@@ -84,28 +74,41 @@ proc _spawn_spit:
         set myvar("carrying"): null
         set_label "carrying": null
 
+proc set_spit_anim:
+    # We don't have functions, just procedures.
+    # This procedure acts like a function in that it "returns" a value
+    # in myvar("spit_anim").
+    if: expr: myvar("is_spider_spikey")
+    then: set myvar("spit_anim"): "anim/spikeyspit.fus"
+    else: set myvar("spit_anim"): "anim/spit.fus"
+
 proc spit:
-    spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f do:
+    call: set_spit_anim
+    spawn: myvar("spit_anim") "fly" (0 0) 0 f do:
         call: _spawn_spit
     goto delay: spit
 
-$IF SPIDER_AIMER: proc looking_up_spit:
-    spawn: $GET_STR SPIT_FUS "fly" (1 0) 1 f do:
+proc looking_up_spit:
+    call: set_spit_anim
+    spawn: myvar("spit_anim") "fly" (1 0) 1 f do:
         call: _spawn_spit
     goto delay: looking_up_spit
 
 proc crawl_spit:
-    spawn: $GET_STR SPIT_FUS "crouch_fly" (0 0) 0 f do:
+    call: set_spit_anim
+    spawn: myvar("spit_anim") "crouch_fly" (0 0) 0 f do:
         call: _spawn_spit
     goto delay: crawl_spit
 
-$IF SPIDER_AIMER: proc crawl_looking_up_spit:
-    spawn: $GET_STR SPIT_FUS "crouch_fly" (1 0) 1 f do:
+proc crawl_looking_up_spit:
+    call: set_spit_anim
+    spawn: myvar("spit_anim") "crouch_fly" (1 0) 1 f do:
         call: _spawn_spit
     goto delay: crawl_looking_up_spit
 
 proc swim_spit:
-    spawn: $GET_STR SPIT_FUS "fly" (0 0) 0 f do:
+    call: set_spit_anim
+    spawn: myvar("spit_anim") "fly" (0 0) 0 f do:
         call: _spawn_spit
     goto delay: swim_spit
 
@@ -126,12 +129,12 @@ $UNSET_BOOL RUNNING
 import "anim/_spider_stand.fus"
 
 
-$IF SPIDER_AIMER: look_up:
+look_up:
     rgraph: $PREFIX NS "look_up"
     hitbox: collmap("stand")
     if() then: goto: looking_up
 
-$IF SPIDER_AIMER: looking_up:
+looking_up:
     rgraph: $PREFIX NS "looking_up"
     hitbox: collmap("stand")
 
@@ -173,7 +176,7 @@ spit:
     hitbox: collmap("stand")
     if() then: goto: stand
 
-$IF SPIDER_AIMER: looking_up_spit:
+looking_up_spit:
     rgraph: $PREFIX NS "looking_up_spit"
     hitbox: collmap("stand")
     if() then: goto: looking_up

@@ -22,7 +22,7 @@
 # GOTO_GRABBED: when you grab something, you stay grabbed until
 # letting go of "f"
 #
-# SPIDER_ROLLER: we are a rollerspider
+# SPIDER: we are a rollerspider
 #
 
 
@@ -44,7 +44,7 @@ $SET_BOOL FLIPPY_GRAB
 #$SET_BOOL FLIPPY_GRAB
 
 
-$IF SPIDER_ROLLER: $SET_BOOL NOGRAB
+$IF SPIDER: $SET_BOOL NOGRAB
 
 
 $PREFIX ANIM_NS stand:
@@ -59,7 +59,7 @@ $PREFIX ANIM_NS stand:
     ################################################
     # rollerspider turning back into spider
 
-    $IF SPIDER_ROLLER:
+    $IF SPIDER:
         if:
             key: not isdown x
             coll: all yes

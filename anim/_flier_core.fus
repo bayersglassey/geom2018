@@ -21,7 +21,7 @@ $PREFIX ANIM_NS hover:
     # ROTATE B #
     ############
 
-    $IF SPIDER_FLIER:
+    $IF SPIDER:
         if:
             key: wasdown b
             key: not isdown f
@@ -78,7 +78,7 @@ $PREFIX ANIM_NS hover:
     # ROTATE F #
     ############
 
-    $IF SPIDER_FLIER:
+    $IF SPIDER:
         if:
             key: wasdown f
             key: not isdown b
@@ -133,7 +133,7 @@ $PREFIX ANIM_NS hover:
     # STRAIGHT #
     ############
 
-    $IF SPIDER_FLIER:
+    $IF SPIDER:
         if:
             key: wasdown u
             $IF ONLY_STICK_IF_NOT_SHIFT:
@@ -189,7 +189,7 @@ $PREFIX ANIM_NS fly:
         ;;   */*\*
 
     # DOESN'T WORK BECAUSE NO WAY TO KNOW WHETHER WE SHOULD TURN OR NOT:
-    #$IF SPIDER_FLIER:
+    #$IF SPIDER:
     #    if:
     #        coll: water any yes
     #            ;;   .   .

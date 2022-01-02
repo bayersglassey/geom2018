@@ -1,9 +1,11 @@
 
+vars:
+    "is_spider_roller": T
+
 $SET_STR NS rollerspider_
-$SET_BOOL SPIDER_ROLLER
 import "anim/_spider.fus"
 
 $SET_STR ANIM_NS roller_
 $SET_STR RGRAPH_NS rollerspider_
-$SET_BOOL SPIDER_ROLLER
+$SET_BOOL SPIDER
 import "anim/_roller.fus"

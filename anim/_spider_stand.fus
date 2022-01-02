@@ -31,18 +31,18 @@ $GET_SYM STATE_STAND:
 
 $GET_SYM STATE_START_JUMP:
 
-    $IF SPIDER_FLIER:
-        if:
-            key: wasdown x
-            coll: all no
-                ;;       \*/*
-                ;;        + -
-                ;;       /*\*
-                ;; ( )
-        then:
-            goto: flier_fly
-            move: 2 1
-            delay: 2
+    if:
+        expr: myvar("is_spider_flier")
+        key: wasdown x
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        goto: flier_fly
+        move: 2 1
+        delay: 2
 
     if:
         coll: water any yes collmap("stand")

@@ -39,30 +39,30 @@ $IF SPIDER:
         call: spit
 
 # Turn into roller
-$IF SPIDER_ROLLER:
-    if:
-        key: wentdown x
-    then:
-        goto: roller_stand
-        delay: $GET_INT ROLLER_STAND_DELAY
+if:
+    expr: myvar("is_spider_roller")
+    key: wentdown x
+then:
+    goto: roller_stand
+    delay: $GET_INT ROLLER_STAND_DELAY
 
 # Turn into bird
-$IF SPIDER_BIRD:
-    if:
-        key: wentdown x
-        coll: all no
-            ;;   .   .
-            ;;   *\*/*
-            ;; . - + - .
-            ;;   */*\*
-            ;;   . - .
-            ;;   *\*/*
-            ;; . - + - .
-            ;;   */*\*
-            ;;  (.)  .
-    then:
-        goto: bird_crawl
-        delay: 1
+if:
+    expr: myvar("is_spider_bird")
+    key: wentdown x
+    coll: all no
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;   . - .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
+then:
+    goto: bird_crawl
+    delay: 1
 
 # Blink
 $IF SPIDER_EYE:
@@ -87,8 +87,8 @@ then:
     goto delay: turn
 
 # Look up
-$IF SPIDER_AIMER:
-    if:
-        key: wasdown x
-    then:
-        goto: look_up
+if:
+    expr: myvar("is_spider_aimer")
+    key: wasdown x
+then:
+    goto: look_up

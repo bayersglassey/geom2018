@@ -473,7 +473,7 @@ shapes:
             $IF !SPIDER_EYE:
                 : $PREFIX NS "crawl_step" (0 0 0 0) 0 f
 
-    $IF SPIDER_SPIKEY: $PREFIX NS "crawl_shielding":
+    $PREFIX NS "crawl_shielding":
         animation: cycle 5
         shapes:
             : $PREFIX NS "crawl_head" ( 2  1  2  0)  0 f 0 (0 1)

@@ -4,6 +4,12 @@
 # Expected vars:
 # NS (str), e.g. "spider_"
 
+
+proc crawl_crush:
+    if: expr: myvar("is_spider_spikey")
+    then: goto delay: crawl_shielding
+
+
 crawling:
     rgraph: $PREFIX NS "crawling"
     hitbox: collmap("stand")
@@ -14,20 +20,20 @@ uncrawling:
     hitbox: collmap("stand")
     if() then: goto: stand
 
-$IF SPIDER_AIMER: crawling_looking_up:
+crawling_looking_up:
     rgraph: $PREFIX NS "crawling_looking_up"
     hitbox: collmap("stand")
     if() then: goto: crawl_looking_up
 
-$IF SPIDER_AIMER: uncrawling_looking_up:
+uncrawling_looking_up:
     rgraph: $PREFIX NS "uncrawling_looking_up"
     hitbox: collmap("stand")
     if() then: goto: looking_up
 
-$IF SPIDER_AIMER: crawl_looking_up:
+crawl_looking_up:
     rgraph: $PREFIX NS "crawl_looking_up"
     hitbox: collmap("crawl")
-    $IF SPIDER_SPIKEY: on "crush": goto delay: crawl_shielding
+    on "crush": call: crawl_crush
 
     if:
         key: wentdown y
@@ -56,20 +62,20 @@ $IF SPIDER_AIMER: crawl_looking_up:
 crawl_spit:
     rgraph: $PREFIX NS "crawl_spit"
     hitbox: collmap("crawl")
-    $IF SPIDER_SPIKEY: on "crush": goto delay: crawl_shielding
+    on "crush": call: crawl_crush
     if() then: goto: crawl
 
-$IF SPIDER_AIMER: crawl_looking_up_spit:
+crawl_looking_up_spit:
     rgraph: $PREFIX NS "crawl_looking_up_spit"
     hitbox: collmap("crawl")
-    $IF SPIDER_SPIKEY: on "crush": goto delay: crawl_shielding
+    on "crush": call: crawl_crush
     if() then: goto: crawl_looking_up
 
 crawl:
     rgraph: $PREFIX NS "crawl"
     hitbox: collmap("crawl")
 
-    $IF SPIDER_SPIKEY: on "crush": goto delay: crawl_shielding
+    on "crush": call: crawl_crush
 
     # Spit
     if:
@@ -78,30 +84,30 @@ crawl:
         call: crawl_spit
 
     # Turn into roller
-    $IF SPIDER_ROLLER:
-        if:
-            key: wentdown x
-        then:
-            goto: roller_stand
-            delay: $GET_INT ROLLER_STAND_DELAY
+    if:
+        expr: myvar("is_spider_roller")
+        key: wentdown x
+    then:
+        goto: roller_stand
+        delay: $GET_INT ROLLER_STAND_DELAY
 
     # Turn into bird
-    $IF SPIDER_BIRD:
-        if:
-            key: wentdown x
-            coll: all no
-                ;;   .   .
-                ;;   *\*/*
-                ;; . - + - .
-                ;;   */*\*
-                ;;   . - .
-                ;;   *\*/*
-                ;; . - + - .
-                ;;   */*\*
-                ;;  (.)  .
-        then:
-            goto: bird_crawl
-            delay: 1
+    if:
+        expr: myvar("is_spider_bird")
+        key: wentdown x
+        coll: all no
+            ;;   .   .
+            ;;   *\*/*
+            ;; . - + - .
+            ;;   */*\*
+            ;;   . - .
+            ;;   *\*/*
+            ;; . - + - .
+            ;;   */*\*
+            ;;  (.)  .
+    then:
+        goto: bird_crawl
+        delay: 1
 
     # Uncrawl
     if:
@@ -118,32 +124,32 @@ crawl:
     import "anim/_spider_crawl.state.fus"
 
     # Roll over a gap
-    $IF SPIDER_ROLLER:
-        if:
-            key: wasdown f
-            coll: all no
-                ;;     \*
-                ;; (.)  .
-        then:
-            goto: roller_stand
-            move: 1 0
-            turn
-            rot: 1
-            delay: $GET_INT ROLLER_STAND_DELAY
+    if:
+        expr: myvar("is_spider_roller")
+        key: wasdown f
+        coll: all no
+            ;;     \*
+            ;; (.)  .
+    then:
+        goto: roller_stand
+        move: 1 0
+        turn
+        rot: 1
+        delay: $GET_INT ROLLER_STAND_DELAY
 
     # Roll into a corner
-    $IF SPIDER_ROLLER:
-        if:
-            key: wasdown f
-            coll: all yes
-                ;;    +
-                ;;     \
-                ;; (.)  +
-        then:
-            goto: crawl_step
-            move: 1 0
-            rot: 2
-            delay: 2
+    if:
+        expr: myvar("is_spider_roller")
+        key: wasdown f
+        coll: all yes
+            ;;    +
+            ;;     \
+            ;; (.)  +
+    then:
+        goto: crawl_step
+        move: 1 0
+        rot: 2
+        delay: 2
 
     # Turn
     if:
@@ -156,17 +162,17 @@ crawl:
         delay: 2
 
     # Look up
-    $IF SPIDER_AIMER:
-        if:
-            key: not isdown f
-            key: wasdown x
-        then:
-            goto: crawl_look_up
+    if:
+        expr: myvar("is_spider_aimer")
+        key: not isdown f
+        key: wasdown x
+    then:
+        goto: crawl_look_up
 
-$IF SPIDER_AIMER: crawl_look_up:
+crawl_look_up:
     rgraph: $PREFIX NS "crawl_look_up"
     hitbox: collmap("crawl")
-    $IF SPIDER_SPIKEY: on "crush": goto delay: crawl_shielding
+    on "crush": call: crawl_crush
     if() then: goto: crawl_looking_up
 
 crawl_step_down:
@@ -175,19 +181,19 @@ crawl_step_down:
         ;;    .   .
         ;;    *\*/*
         ;;  . -(.)  .
-    $IF SPIDER_SPIKEY: on "crush": goto delay: crawl_shielding
+    on "crush": call: crawl_crush
 
     if:
         key: wentdown y
     then:
         call: crawl_spit
 
-    $IF SPIDER_ROLLER:
-        if:
-            key: wentdown x
-        then:
-            goto: roller_stand
-            delay: $GET_INT ROLLER_STAND_DELAY
+    if:
+        expr: myvar("is_spider_roller")
+        key: wentdown x
+    then:
+        goto: roller_stand
+        delay: $GET_INT ROLLER_STAND_DELAY
 
     if() then: goto: crawl
 
@@ -199,19 +205,19 @@ crawl_step:
         ;;    .   .
         ;;      */*
         ;;     (.)  .
-    $IF SPIDER_SPIKEY: on "crush": goto delay: crawl_shielding
+    on "crush": call: crawl_crush
 
     if:
         key: wentdown y
     then:
         call: crawl_spit
 
-    $IF SPIDER_ROLLER:
-        if:
-            key: wentdown x
-        then:
-            goto: roller_stand
-            delay: $GET_INT ROLLER_STAND_DELAY
+    if:
+        expr: myvar("is_spider_roller")
+        key: wentdown x
+    then:
+        goto: roller_stand
+        delay: $GET_INT ROLLER_STAND_DELAY
 
     if() then: goto: crawl
 
@@ -221,11 +227,11 @@ crawl_turn:
     # to being crushed)
     rgraph: $PREFIX NS "crawl_turn"
     hitbox: collmap("crawl")
-    $IF SPIDER_SPIKEY: on "crush": goto delay: crawl_shielding
+    on "crush": call: crawl_crush
 
     if() then: goto immediate: crawl_step
 
-$IF SPIDER_SPIKEY: crawl_shielding:
+crawl_shielding:
     rgraph: $PREFIX NS "crawl_shielding"
     # (No hitbox: we are invincible)
     if:

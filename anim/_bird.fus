@@ -329,7 +329,7 @@ $PREFIX ANIM_NS crawl:
         ;;   */*\*
         ;;  (.)  .
 
-    $IF SPIDER_BIRD:
+    $IF SPIDER:
         if:
             key: not isdown x
             coll: all yes
