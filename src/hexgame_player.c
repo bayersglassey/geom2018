@@ -248,6 +248,12 @@ static int player_use_door(player_t *player, hexmap_door_t *door){
     return 0;
 }
 
+static void _write_vars(vars_t *vars, FILE *file, int depth){
+    /* Don't write the vars which say they shouldn't be saved. */
+    var_props_t nowrite_props_mask = 1 << HEXGAME_VARS_PROP_NOSAVE;
+    vars_write_with_mask(vars, file, depth * 4, nowrite_props_mask);
+}
+
 int player_save(player_t *player, const char *filename){
     int err;
 
@@ -258,14 +264,30 @@ int player_save(player_t *player, const char *filename){
         return 2;
     }
 
+    body_t *body = player->body;
+    if(!body){
+        /* ??? */
+        fprintf(stderr, "Can't save without a body!\n");
+        return 2;
+    }
+
     hexgame_savelocation_t *location = &player->respawn_location;
     hexgame_t *game = player->game;
 
-    hexgame_savelocation_write(location, file);
-    fputc('\n', file);
+    {
+        fprintf(file, "body:\n");
+        fputs("    ", file);
+        hexgame_savelocation_write(location, file);
+        fputc('\n', file);
+        fputs("    vars:\n", file);
+        _write_vars(&body->vars, file, 2);
+    }
 
-    fprintf(file, "vars:\n");
-    vars_write(&game->vars, file, 4*1);
+    {
+        fprintf(file, "game:\n");
+        fprintf(file, "    vars:\n");
+        _write_vars(&game->vars, file, 2);
+    }
 
     fprintf(file, "maps:\n");
     for(int i = 0; i < game->maps_len; i++){
@@ -274,10 +296,7 @@ int player_save(player_t *player, const char *filename){
         fus_write_str(file, map->name);
         fprintf(file, ":\n");
         fprintf(file, "        vars:\n");
-
-        /* Don't write the vars which say they shouldn't be saved. */
-        var_props_t nowrite_props_mask = 1 << HEXGAME_VARS_PROP_NOSAVE;
-        vars_write_with_mask(&map->vars, file, 4*3, nowrite_props_mask);
+        _write_vars(&map->vars, file, 3);
     }
 
     fclose(file);
@@ -294,6 +313,11 @@ int player_load(player_t *player, const char *filename,
     bool *file_not_found_ptr
 ){
     int err;
+
+    if(!player->body){
+        fprintf(stderr, "%s: no body\n", __func__);
+        return 2;
+    }
 
     char *text = load_file(filename);
     if(text == NULL){
@@ -315,21 +339,35 @@ int player_load(player_t *player, const char *filename,
     hexgame_t *game = player->game;
     prismelrenderer_t *prend = game->prend;
 
-    err = hexgame_savelocation_parse(&player->respawn_location, lexer,
-        &prend->filename_store, &prend->name_store);
-    if(err)return err;
+    GET("body")
+    OPEN
+    {
+        err = hexgame_savelocation_parse(&player->respawn_location, lexer,
+            &prend->filename_store, &prend->name_store);
+        if(err)return err;
 
-    if(GOT("vars")){
-        NEXT
+        GET("vars")
+        OPEN
+        err = vars_parse(&player->body->vars, lexer);
+        if(err)return err;
+        CLOSE
+    }
+    CLOSE
+
+    GET("game")
+    OPEN
+    {
+        GET("vars")
         OPEN
         err = vars_parse(&game->vars, lexer);
         if(err)return err;
         CLOSE
     }
+    CLOSE
 
-    if(GOT("maps")){
-        NEXT
-        OPEN
+    GET("maps")
+    OPEN
+    {
         while(1){
             if(GOT(")"))break;
             const char *name;
@@ -341,18 +379,16 @@ int player_load(player_t *player, const char *filename,
 
             OPEN
             {
-                if(GOT("vars")){
-                    NEXT
-                    OPEN
-                    err = vars_parse(&map->vars, lexer);
-                    if(err)return err;
-                    CLOSE
-                }
+                GET("vars")
+                OPEN
+                err = vars_parse(&map->vars, lexer);
+                if(err)return err;
+                CLOSE
             }
             CLOSE
         }
-        NEXT
     }
+    CLOSE
 
     fus_lexer_cleanup(lexer);
     free(text);
