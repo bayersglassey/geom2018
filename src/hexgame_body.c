@@ -14,6 +14,7 @@
 #include "util.h"
 #include "write.h"
 #include "var_utils.h"
+#include "hexgame_vars_props.h"
 
 
 
@@ -131,7 +132,7 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
     valexpr_set_literal_bool(&body->visible_expr, true);
     body->visible_not = false;
 
-    vars_init(&body->vars);
+    vars_init_with_props(&body->vars, hexgame_vars_prop_names);
 
     ARRAY_INIT(body->label_mappings)
 

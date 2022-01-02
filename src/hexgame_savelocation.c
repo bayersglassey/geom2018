@@ -12,6 +12,7 @@
 #include "lexer_macros.h"
 #include "write.h"
 #include "var_utils.h"
+#include "hexgame_vars_props.h"
 
 
 #ifdef __EMSCRIPTEN__
@@ -82,7 +83,7 @@ int hexgame_savelocation_save(const char *filename,
         fprintf(f, "        vars:\n");
 
         /* Don't write the vars which say they shouldn't be saved. */
-        var_props_t nowrite_props_mask = 1 << HEXMAP_VARS_PROP_NOSAVE;
+        var_props_t nowrite_props_mask = 1 << HEXGAME_VARS_PROP_NOSAVE;
         vars_write_with_mask(&map->vars, f, 4*3, nowrite_props_mask);
     }
 

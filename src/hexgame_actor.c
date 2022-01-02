@@ -12,6 +12,7 @@
 #include "prismelrenderer.h"
 #include "array.h"
 #include "util.h"
+#include "hexgame_vars_props.h"
 
 
 
@@ -27,7 +28,7 @@ int actor_init(actor_t *actor, hexmap_t *map, body_t *body,
 
     memset(actor, 0, sizeof(*actor));
 
-    vars_init(&actor->vars);
+    vars_init_with_props(&actor->vars, hexgame_vars_prop_names);
 
     /* NOTE: body may be NULL */
     actor->body = body;

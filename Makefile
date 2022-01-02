@@ -20,7 +20,7 @@ OFILES = \
  src/vars.o src/var_utils.o src/valexpr.c \
  src/geom.o src/vec4.o src/hexspace.o src/bounds.o src/hexbox.o src/hexgame_location.o \
  src/font.o src/console.o src/directory.o src/directory_shell.o \
- src/hexpicture.o src/generic_printf.o
+ src/hexpicture.o src/generic_printf.o src/hexgame_vars_props.o
 
 SDL_OFILES = \
  src/prismelrenderer.o src/prismelrenderer_parse.o \

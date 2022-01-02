@@ -12,6 +12,7 @@
 #include "vars.h"
 #include "geom.h"
 #include "hexspace.h"
+#include "hexgame_vars_props.h"
 
 
 /********************
@@ -36,8 +37,8 @@ void hexmap_recording_init(hexmap_recording_t *recording, int type,
     valexpr_set_literal_bool(&recording->visible_expr, true);
     recording->visible_not = false;
 
-    vars_init(&recording->vars);
-    vars_init(&recording->bodyvars);
+    vars_init_with_props(&recording->vars, hexgame_vars_prop_names);
+    vars_init_with_props(&recording->bodyvars, hexgame_vars_prop_names);
 }
 
 int hexmap_recording_clone(hexmap_recording_t *recording1,

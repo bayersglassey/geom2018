@@ -15,7 +15,7 @@
 #include "lexer.h"
 #include "lexer_macros.h"
 #include "var_utils.h"
-
+#include "hexgame_vars_props.h"
 
 
 /**********
@@ -398,9 +398,7 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     game->set_players_callback = set_players_callback;
     game->exit_callback = exit_callback;
 
-    static const char *prop_names[HEXMAP_VARS_PROPS + 1] =
-        {HEXMAP_VARS_PROP_NAMES, NULL};
-    vars_init_with_props(&game->vars, prop_names);
+    vars_init_with_props(&game->vars, hexgame_vars_prop_names);
 
     ARRAY_INIT(game->worldmaps)
     ARRAY_INIT(game->maps)

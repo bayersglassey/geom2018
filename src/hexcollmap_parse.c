@@ -17,6 +17,7 @@
 #include "geom.h"
 #include "hexspace.h"
 #include "hexbox.h"
+#include "hexgame_vars_props.h"
 
 
 static void _debug_print_line(const char *line, int x, int y){
@@ -757,9 +758,9 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
     bool visible_not = false;
 
     vars_t vars;
-    vars_init(&vars);
+    vars_init_with_props(&vars, hexgame_vars_prop_names);
     vars_t bodyvars;
-    vars_init(&bodyvars);
+    vars_init_with_props(&bodyvars, hexgame_vars_prop_names);
 
     OPEN
     {

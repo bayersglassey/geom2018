@@ -19,6 +19,7 @@
 #include "hexspace.h"
 #include "hexgame_location.h"
 #include "prismelrenderer.h"
+#include "hexgame_vars_props.h"
 
 
 const char *hexmap_door_type_msg(int door_type){
@@ -278,9 +279,7 @@ int hexmap_init(hexmap_t *map, hexgame_t *game, const char *name,
     map->prend = prend;
     vec_cpy(prend->space->dims, map->unit, unit);
 
-    static const char *prop_names[HEXMAP_VARS_PROPS + 1] =
-        {HEXMAP_VARS_PROP_NAMES, NULL};
-    vars_init_with_props(&map->vars, prop_names);
+    vars_init_with_props(&map->vars, hexgame_vars_prop_names);
 
     ARRAY_INIT(map->bodies)
     ARRAY_INIT(map->submaps)
@@ -506,9 +505,9 @@ static int _hexmap_parse(hexmap_t *map, fus_lexer_t *lexer,
             int frame_offset = 0;
             trf_t trf;
             vars_t vars;
-            vars_init(&vars);
+            vars_init_with_props(&vars, hexgame_vars_prop_names);
             vars_t bodyvars;
-            vars_init(&bodyvars);
+            vars_init_with_props(&bodyvars, hexgame_vars_prop_names);
             bool relative; /* unused here -- only used when parsing submaps */
             valexpr_t visible_expr;
             bool visible_not;
@@ -1015,9 +1014,9 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
             int frame_offset = 0;
             trf_t trf;
             vars_t vars;
-            vars_init(&vars);
+            vars_init_with_props(&vars, hexgame_vars_prop_names);
             vars_t bodyvars;
-            vars_init(&bodyvars);
+            vars_init_with_props(&bodyvars, hexgame_vars_prop_names);
             bool relative;
             valexpr_t visible_expr;
             bool visible_not;

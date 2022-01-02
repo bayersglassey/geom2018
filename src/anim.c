@@ -13,6 +13,7 @@
 #include "lexer.h"
 #include "lexer_macros.h"
 #include "var_utils.h"
+#include "hexgame_vars_props.h"
 
 
 static void _print_tabs(FILE *file, int depth){
@@ -204,7 +205,7 @@ int stateset_init(stateset_t *stateset, const char *filename){
     ARRAY_INIT(stateset->procs)
     ARRAY_INIT(stateset->states)
     ARRAY_INIT(stateset->collmaps)
-    vars_init(&stateset->vars);
+    vars_init_with_props(&stateset->vars, hexgame_vars_prop_names);
     stateset->debug_collision = false;
     return 0;
 }
