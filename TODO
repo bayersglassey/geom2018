@@ -640,8 +640,6 @@ and edit them by hand. Hand-curate, if you will.
 Dec 11, 2020:
 -------------
 
-Currently impossible to return from vines area??
-
 LOOK FURTHER INTO EMSCRIPTEN!!!
 It actually seems to work really well.
 But how can we e.g. stop window from scrolling when player hits arrow keys?..
@@ -682,30 +680,7 @@ Maybe:
 ...?
 
 
-TIG FEEDBACK:
-* "When your character is upside down the buttons don't flip so you can press left and move right,
-press up and jump down. Also the goal wasn't clear: I was sort of chasing the other character that
-was there at the beginning for a while and then I gave up on that b/c there was very little feedback."
-    * So, maybe we need more standard menus including options for controls, including an option to
-    flip controls based on your orientation?..
-        * Could that even work?.. I think the best we could do would be to map jump/crouch to
-        something other than up/down, to avoid confusion.
-        * Maybe what we need is more of a tutorial.
-
-collmaptool has --rot but no --flip!.. add it plz!
-
-
-Dec 24, 2020:
--------------
-
-* SAVING & LOADING THE GAME -- OVERHAUL:
-    * The thing you save/load is called a "game"
-        * Except we need a better technical term for it :P
-    * Touching a save point saves the current game
-    * Touching a door of type "new_game" starts a new game (so e.g. if you go to "NEW" on the title screen after having
-        saved during the tutorial, you can't reload back into the tutorial)
-    * The number of players is part of the game?..
-    * In any case, only player 0 can use savepoints?.. other players respawn at player 0's location (or... last save point)?..
+* collmaptool has --rot but no --flip!.. add it plz!
 
 
 Dec 25, 2020:
@@ -742,15 +717,6 @@ display the "You jumped off the map!" message.
 Instead, maybe add a new value for body->dead?..
 (currently there is MOSTLY_DEAD and ALL_DEAD, maybe we want OUT_OF_BOUNDS)
 
-* ROLLERS CARRYING COINS!..
-    * Can be extended to death_rollers carrying coins.
-        * big_rollers?.. hexrollers?..
-    * How do we implement it?
-        * Requires state->rgraph to depend on a myvar... use state->rgraph_name_expr?..
-        * Take a different approach and attach a coin to a roller?..
-            * Attach where?.. would probably want "bindpoints" or something, i.e. named points within an rgraph...
-    * For now, instead of rollers carrying coins, can just have a "coin creature", which can run around, and be collected.
-
 
 Mar 20, 2021:
 -------------
@@ -771,8 +737,6 @@ Mar 20, 2021:
             => THIS PROBABLY MAKES THE MOST SENSE.
 
 * Add a "gamma" setting or something, so that palette colours are brighter by default.
-
-* TWO BODIES CAN COLLECT THE SAME COIN!!!!
 
 
 Aug 31, 2021:
@@ -911,22 +875,6 @@ Current tree of possible areas you can go, starting at maps/demo:
   If you come across them, they explain something to you.
 
 
-Nov 2, 2021:
-------------
-
-* body_t should have a mapping from strings to strings, to be used as a
-    mapping from label names to rgraph names.
-    The idea being that, for each label in the mapping, the corresponding rgraph is
-    rendered at that label's position.
-    And then how do we interact with labels inside anims?..
-    We could go crazy and add mylabel(...), yourlabel(...) to valexpr, similar to
-    myvar(...), yourvar(...).
-    But that would be painful and ganky.
-    Easier to just add 2 effect types:
-        unset_label VALEXPR
-        set_label VALEXPR: VALEXPR
-
-
 Nov 3, 2021:
 ------------
 
@@ -942,10 +890,6 @@ Nov 3, 2021:
 Nov 4, 2021:
 ------------
 
-* vars_t should probably have a stringstore which it uses for its keys?..
-    * as far as values are concerned, it's up to caller to decide whether to use
-      const_str or str values
-
 * Handy thing:
 
     shopt -s globstar
@@ -953,91 +897,95 @@ Nov 4, 2021:
     sed -i 's/GET(")")/CLOSE/' **/*.c
 
 
-Nov 5, 2021:
+Dec 13, 2021:
+-------------
+
+* procs should be able to live on states as well as stateset...
+* coinlike things should know how to remove themselves when their key becomes F (or antikey becomes T)?..
+    * Need this for when mapvar("eyeplayer_vines_ran_away_4") becomes T, then mini_eye should disappear
+
+
+Dec 14, 2021:
+-------------
+
+Concerning turning into non-spider things, e.g. rollers...
+That's not gonna interact well with e.g. myvars("carrying"), eh?
+So we either need to call a certain proc when transforming, or... uh... something else.
+
+
+Dec 21, 2021:
+-------------
+
+* start4 in tutorial2: add a coin in top-left to make it clear you can get up there
+
+* your spit can go through e.g. rollers moving towards it (the two bodies pass
+    through each other). so we need spit's hitbox to extend behind it.
+    but I think we used to have that and removed it, because it meant you
+    could hit things through walls... *WHEN THE SPIT BOUNCED!*
+    so we probably need to add a "bounce" state which lasts for 1 frame
+    and whose hitbox doesn't extend behind
+
+* spikeyspider: when he gets hit, eyes no longer recognize him, so they close
+    (so, state "crawl_shielding" is missing the "touch" collmsg or something)
+
+* data/maps/tutorial3/start.fus: eyes should give you a hint, like
+    "jump right through the middle!" or something
+
+
+Dec 28, 2021:
+-------------
+
+anim/*.fus: state/proc/etc names shouldn't be syms, they should be str.
+So instead of this:
+
+    proc whatever:
+        ...etc...
+
+    stand:
+        ...etc...
+        call: whatever
+        goto: crawl
+
+...it should be:
+
+    proc "whatever":
+        ...etc...
+
+    state "stand":
+        ...etc...
+        call: "whatever"
+        goto: "crawl"
+
+
+Maybe rename anim/_{spider -> spiderlike}_{move,crawl,jump}.state.fus?..
+Since they are also used here:
+
+    anim/coin_beast.fus
+    50:    import "anim/_spider_step.state.fus"
+    133:    import "anim/_spider_crawl.state.fus"
+    185:    import "anim/_spider_jumping.state.fus"
+
+
+Jan 1, 2022:
 ------------
 
-* vars and stringstores
-    * keys can obviously be names (as opposed to filenames)
-    * vals aren't obviously names or filenames
-    * currently, in hexgame, vars_t is modified (exclusively?) via valexpr_t
-        * string values are therefore stored as "literals" owned by valexprs
-        * src/hexgame_state.c: state_effect_apply:
-            case STATE_EFFECT_TYPE_{INC,DEC,SET}:
-                * uses valexpr_set on &effect->u.set.var_expr to get a val_t* for the "lvalue"
-                * uses valexpr_get on &effect->u.set.val_expr to get a val_t* for the "rvalue"
-                * {INC,DEC} do val_get_int on the rvalue, then val_set_int on the lvalue
-                * SET does val_copy from the rvalue to the lvalue
-                    * !!! val_copy for VAL_TYPE_STR uses strdup!..
-                        * so this is what we might like to "fix"...
-                        * currently, vals are only copied around, but we might eventually
-                          want to add support for concat, etc
-                          So, any stringstore stuff we implement should work with that.
-                          If we had VAL_TYPE_NAME and VAL_TYPE_FILENAME, that could work.
-                          But that's... obviously ganky.
-                          Instead, it probably makes most sense to have one stringstore
-                          used by all vars_t and valexpr_t in hexgame.
-                          According to: nano $(ack -l "  vars_t" src/*.h)
-                          ...the places we use vars_t in hexgame are:
-
-                            hexmap_recording_t:
-                                vars
-                                bodyvars
-                            hexcollmap_part_t:
-                                vars
-                                bodyvars
-                            body_t:
-                                vars
-                            actor_t:
-                                vars
-                            hexgame_t:
-                                vars
-                            hexmap_t:
-                                vars
-
-                        * Ok, I think this is what makes sense:
-                            * Have one stringstore for vars (vars_store)
-                            * It's used for all keys
-                                * Would need to add support for var_t not owning its keys!
-                            * It's used for all parsed vals
-                                * With VAL_TYPE_STR
-                            * If we add dynamically-generated vals (e.g. "concat" etc),
-                              maybe don't use the stringstore?..
-                                * So, use VAL_TYPE_STR with an owned string (val->s)?..
-                                * !!! I'm not sure about this. Anyway, it doesn't really
-                                  matter right now.
-
-* recording_t should have vars, so e.g. data/recs/coin_crouch.fus should have state "init" and
-  vars: "crouch": T, whereas currently it has state "crouch".
-
-
-Dec 10, 2021:
--------------
-
-Make it so you can carry eyeplayers.
-They turn into tiny eyes while you carry them.
-=> Added: anim/mini_eye.fus
-So something like, the 3 eyeplayers who run away at the start of demo,
-if you meet one, it opens its eye and faces you while you're close, then
-closes it if you're far away.
-But if you start exploring in the right direction, it runs after you and
-says "take me with you!" and turns into a tiny rotating eye. O_o
-So you pick it up and bring it somewhere.
-If you spit the eye, and it hits a wall & explodes, it just
-reappears where it was before.
-So what is it you're supposed to actually spit the eyes onto?..
-=> Either the holes eyes currently live in (their "border"), or the little
-   bodies they run around on as eyeplayers.
-
-Also, spiders in dodecas area should be collecting food and spitting
-it onto... some kind of a creature... which has an "eat" animation?..
-Or maybe a spider with an animation where it catches the food, and puts
-it away somewhere. Like in a giant bag. O_o
-Uhhhhh hmmmmmmm......
+myvar("is_spider_roller"), myvar("is_spider_flier"), myvar("is_spider_bird"): presumably don't work
+with anim/*spider.fus other than the ones they're intended for use with, because the others will be
+missing the imports of anim/_roller.fus, anim/_flier_core.fus, anim/_bird.fus, etc.
+So: can we use labels to introduce visual changes, instead of requiring separate statesets?..
 
 
 
-Dec 11, 2021:
--------------
+SAVING & LOADING THE GAME -- OVERHAUL:
+
+    * The thing you save/load is called a "game"
+        * Except we need a better technical term for it :P
+    * Touching a save point saves the current game
+    * Touching a door of type "new_game" starts a new game (so e.g. if you go to "NEW" on the title screen after having
+        saved during the tutorial, you can't reload back into the tutorial)
+    * The number of players is part of the game?..
+    * In any case, only player 0 can use savepoints?.. other players respawn at player 0's location (or... last save point)?..
+
 
 src/hexgame_savelocation.[ch]:
 
@@ -1090,104 +1038,3 @@ and then reload the game, we need to make sure the mini_eye isn't permanently go
         * Don't save body->vars, just map->vars
         * So if you are carrying something, the relevant mapvars should be marked nosave
         * !!! THIS IS DE FACTO WHAT WE HAVE STARTED DOING !!!
-
-
-Dec 13, 2021:
--------------
-
-* procs should be able to live on states as well as stateset...
-* Probably also want a STATE_COND for whether yourvars exists (i.e. whether your_body != NULL)
-* coinlike things should know how to remove themselves when their key becomes F (or antikey becomes T)?..
-    * Need this for when mapvar("eyeplayer_vines_ran_away_4") becomes T, then mini_eye should disappear
-
-
-Dec 14, 2021:
--------------
-
-Concerning turning into non-spider things, e.g. rollers...
-That's not gonna interact well with e.g. myvars("carrying"), eh?
-So we either need to call a certain proc when transforming, or... uh... something else.
-
-
-Dec 15, 2021:
--------------
-
-* eyerollers, eyebirds: eyes can take over rollers/birds as needed?..
-    * one of the three eyeplayers at start of maps/demo wants you to bring
-      it a roller... or maybe bring you to the big_roller at entrance to
-      maps/triangles???
-
-
-Dec 21, 2021:
--------------
-
-* start4 in tutorial2: add a coin in top-left to make it clear you can get up there
-
-* your spit can go through e.g. rollers moving towards it (the two bodies pass
-    through each other). so we need spit's hitbox to extend behind it.
-    but I think we used to have that and removed it, because it meant you
-    could hit things through walls... *WHEN THE SPIT BOUNCED!*
-    so we probably need to add a "bounce" state which lasts for 1 frame
-    and whose hitbox doesn't extend behind
-
-* spikeyspider: when he gets hit, eyes no longer recognize him, so they close
-    (so, state "crawl_shielding" is missing the "touch" collmsg or something)
-
-* data/maps/tutorial3/start.fus: eyes should give you a hint, like
-    "jump right through the middle!" or something
-
-
-Dec 23, 2021:
--------------
-
-Forget about telling a story.
-That's never actually what I wanted to do with this.
-The toturial was originally much more honest: its sole purpose was for me to
-describe to the player how to play.
-Now it's all mixed up with eyeballs and whatnot.
-It's good that we got some features and anims and so forth added during the
-process of adding eyeballs, but let's take them out -- or at least tone them
-down.
-Eyeballs can stay, perhaps; but get rid of the "release you" talk.
-I still need to find a way to give a certain kind of person "a reason to play",
-but it should be something straightforward and honest.
-
-*** I don't want a lot of text and half-baked "story" distracting people from
-    the "geometric" ideas, which were the original focus of this game.
-
-Which parts of the game do I like, and why?
-
-
-Dec 28, 2021:
--------------
-
-anim/*.fus: state/proc/etc names shouldn't be syms, they should be str.
-So instead of this:
-
-    proc whatever:
-        ...etc...
-
-    stand:
-        ...etc...
-        call: whatever
-        goto: crawl
-
-...it should be:
-
-    proc "whatever":
-        ...etc...
-
-    state "stand":
-        ...etc...
-        call: "whatever"
-        goto: "crawl"
-
-
-Maybe rename anim/_{spider -> spiderlike}_{move,crawl,jump}.state.fus?..
-Since they are also used here:
-
-    anim/coin_beast.fus
-    50:    import "anim/_spider_step.state.fus"
-    133:    import "anim/_spider_crawl.state.fus"
-    185:    import "anim/_spider_jumping.state.fus"
-
