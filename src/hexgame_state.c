@@ -548,15 +548,47 @@ int state_effect_apply(state_effect_t *effect,
     }
     case STATE_EFFECT_TYPE_SPAWN: {
         CHECK_BODY
+        valexpr_context_t valexpr_context = {0};
+        err = _get_vars(context, &valexpr_context);
+        if(err)return err;
+
         state_effect_spawn_t *spawn = &effect->u.spawn;
 
-        /* TODO: look up palmapper from spawn->palmapper_name */
         palettemapper_t *palmapper = NULL;
+        if(spawn->palmapper_name){
+            palmapper = prismelrenderer_get_palmapper(prend,
+                spawn->palmapper_name);
+            if(!palmapper){
+                RULE_PERROR()
+                fprintf(stderr, "Couldn't find palmapper: %s\n",
+                    spawn->palmapper_name);
+                return 2;
+            }
+        }
+
+        const char *stateset_filename = valexpr_get_str(
+            &spawn->stateset_filename_expr, &valexpr_context);
+        if(!stateset_filename){
+            RULE_PERROR()
+            fprintf(stderr, "Couldn't get value for expression: ");
+            valexpr_fprintf(&spawn->stateset_filename_expr, stderr);
+            fputc('\n', stderr);
+            return 2;
+        }
+
+        const char *state_name = valexpr_get_str(
+            &spawn->state_name_expr, &valexpr_context);
+        if(!state_name){
+            RULE_PERROR()
+            fprintf(stderr, "Couldn't get value for expression: ");
+            valexpr_fprintf(&spawn->state_name_expr, stderr);
+            fputc('\n', stderr);
+            return 2;
+        }
 
         body_t *new_body;
         err = body_add_body(body, &new_body,
-            spawn->stateset_filename,
-            spawn->state_name, palmapper,
+            stateset_filename, state_name, palmapper,
             spawn->loc.pos, spawn->loc.rot, spawn->loc.turn);
         if(err)return err;
 

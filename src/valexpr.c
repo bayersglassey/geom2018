@@ -462,12 +462,12 @@ TYPE valexpr_get_##VAL_TYPE(valexpr_t *expr, \
     val_t *result; \
     int err = valexpr_get(expr, context, &result); \
     if(err){ \
-        fprintf(stderr, "Error while getting %s from valexpr\n", \
+        fprintf(stderr, "Error while getting %s from valexpr: ", \
             #TYPE); \
+        valexpr_fprintf(expr, stderr); \
+        fputc('\n', stderr); \
         return 0; \
     }else if(!result){ \
-        fprintf(stderr, "Val not found while getting %s from valexpr\n", \
-            #TYPE); \
         return 0; \
     } \
     return val_get_##VAL_TYPE(result); \

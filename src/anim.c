@@ -519,8 +519,10 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         OPEN
 
         state_effect_spawn_t spawn = {0};
-        GET_STR_CACHED(spawn.stateset_filename, &prend->filename_store)
-        GET_STR_CACHED(spawn.state_name, &prend->name_store)
+        err = valexpr_parse(&spawn.stateset_filename_expr, lexer);
+        if(err)return err;
+        err = valexpr_parse(&spawn.state_name_expr, lexer);
+        if(err)return err;
         OPEN
         GET_INT(spawn.loc.pos[0])
         GET_INT(spawn.loc.pos[1])
@@ -1154,6 +1156,8 @@ void state_effect_cleanup(state_effect_t *effect){
             valexpr_cleanup(&effect->u.set.val_expr);
             break;
         case STATE_EFFECT_TYPE_SPAWN:
+            valexpr_cleanup(&effect->u.spawn.stateset_filename_expr);
+            valexpr_cleanup(&effect->u.spawn.state_name_expr);
             ARRAY_FREE_PTR(state_effect_t*, effect->u.spawn.effects,
                 state_effect_cleanup)
             break;
