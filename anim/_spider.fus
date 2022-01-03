@@ -45,6 +45,10 @@ vars:
     "is_birdspider": F
     $IF SPIDER_BIRD: "is_birdspider": T
 
+    nosave "carrying": null
+    nosave "carrying_respawn_mapvar": null
+    nosave "carrying_rgraph": null
+
 
 collmsgs:
     $IF !SPIDER_EYE: "touch"

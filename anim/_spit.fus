@@ -5,6 +5,12 @@
 $SET_INT MAX_AGE 100
 
 
+vars:
+    nosave "carrying": null
+    nosave "carrying_respawn_mapvar": null
+    nosave "carrying_rgraph": null
+
+
 proc on_collide:
     # me: spit
     # you: thing we collided with
