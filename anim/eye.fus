@@ -13,7 +13,7 @@ vars:
     # The collmsg (or stateset filename) of bodies we will look at
     "key_anim": "touch"
 
-proc accept_carryable:
+proc "accept_carryable":
     # me: an eye
     # you: spit which is carrying a mini_eye
 

@@ -78,7 +78,7 @@ $IF !SPIDER_EYE: on "carryable":
             goto immediate: _collected
 
 
-proc _spawn_spit:
+proc "_spawn_spit":
     # "me" is spider, "you" is spider's newly-spawned spit
 
     if: exists myvar("carrying")
@@ -96,7 +96,7 @@ proc _spawn_spit:
         set myvar("carrying"): null
         set_label "carrying": null
 
-proc set_spit_anim:
+proc "set_spit_anim":
     # We don't have functions, just procedures.
     # This procedure acts like a function in that it "returns" a value
     # in myvar("spit_anim").
@@ -104,31 +104,31 @@ proc set_spit_anim:
     then: set myvar("spit_anim"): "anim/spikeyspit.fus"
     else: set myvar("spit_anim"): "anim/spit.fus"
 
-proc spit:
+proc "spit":
     call: set_spit_anim
     spawn: myvar("spit_anim") "fly" (0 0) 0 f do:
         call: _spawn_spit
     goto delay: spit
 
-proc looking_up_spit:
+proc "looking_up_spit":
     call: set_spit_anim
     spawn: myvar("spit_anim") "fly" (1 0) 1 f do:
         call: _spawn_spit
     goto delay: looking_up_spit
 
-proc crawl_spit:
+proc "crawl_spit":
     call: set_spit_anim
     spawn: myvar("spit_anim") "crouch_fly" (0 0) 0 f do:
         call: _spawn_spit
     goto delay: crawl_spit
 
-proc crawl_looking_up_spit:
+proc "crawl_looking_up_spit":
     call: set_spit_anim
     spawn: myvar("spit_anim") "crouch_fly" (1 0) 1 f do:
         call: _spawn_spit
     goto delay: crawl_looking_up_spit
 
-proc swim_spit:
+proc "swim_spit":
     call: set_spit_anim
     spawn: myvar("spit_anim") "fly" (0 0) 0 f do:
         call: _spawn_spit

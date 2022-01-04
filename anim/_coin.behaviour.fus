@@ -3,7 +3,7 @@ $IF !NO_COLLECT_ON_SPIT: on "spit": goto immediate: _collected
 $IF !NO_COLLECT_ON_TOUCH: on "touch": goto immediate: _collected
 
 
-proc while_collected:
+proc "while_collected":
     # What we do every frame after we have been collected
     # (Basically, wait to potentially respawn)
 

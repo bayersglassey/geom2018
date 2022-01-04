@@ -124,7 +124,7 @@ static int _parse_stateset_proc(stateset_t *stateset, fus_lexer_t *lexer,
     INIT
 
     const char *name;
-    GET_NAME_CACHED(name, &prend->name_store)
+    GET_STR_CACHED(name, &prend->name_store)
 
     stateset_proc_t *found_proc = stateset_get_proc(stateset, name);
     if(found_proc){

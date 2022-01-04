@@ -11,7 +11,7 @@ vars:
     nosave "carrying_rgraph": null
 
 
-proc on_collide:
+proc "on_collide":
     # me: spit
     # you: thing we collided with
 
@@ -28,7 +28,7 @@ proc on_collide:
 
     call: on_death
 
-proc on_death:
+proc "on_death":
     if: exists myvar("carrying")
     then:
         # This spit is carrying something

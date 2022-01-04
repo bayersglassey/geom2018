@@ -5,7 +5,7 @@
 # NS (str), e.g. "spider_"
 
 
-proc crawl_crush:
+proc "crawl_crush":
     if: expr: myvar("is_spikeyspider")
     then: goto delay: crawl_shielding
 
