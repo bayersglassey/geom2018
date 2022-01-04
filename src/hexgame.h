@@ -396,6 +396,8 @@ typedef int exit_callback_t(struct hexgame *game, player_t *player);
 
 typedef struct hexgame {
     int frame_i;
+    int unpauseable_frame_i;
+        /* For animations which continue when game is paused */
     int show_minimap;
         /* HACK: show_minimap is used as both a bool and an int.
         It's a bool in that it controls whether minimap is shown; but
@@ -452,6 +454,7 @@ int hexgame_reset_player_by_keymap(hexgame_t *game, int keymap,
 int hexgame_reset_players(hexgame_t *game, int reset_level,
     hexmap_t *reset_map);
 int hexgame_process_event(hexgame_t *game, SDL_Event *event);
+int hexgame_unpauseable_step(hexgame_t *game);
 int hexgame_step(hexgame_t *game);
 int hexgame_step_cameras(hexgame_t *game);
 

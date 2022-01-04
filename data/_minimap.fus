@@ -99,3 +99,15 @@ shapes:
     "minimap.water":
         prismels:
             : "tri" (0 0 0 0)  0 f eval: 1 + 0 + 1
+
+    "minimap.marker":
+        animation: cycle 6
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval(1 + 8 + 7) (0 3)
+            $IF ALT:
+                : "vert" (0 0 0 0)  0 f eval(1 + 8 + 7) (3 3)
+                : "vert" (1 0 0 0)  0 f eval(1 + 8 + 7) (3 3)
+                : "vert" (0 0 1 0)  0 f eval(1 + 8 + 7) (3 3)
+                : "edge" (0 0 0 0)  0 f eval(1 + 8 + 7) (3 3)
+                : "edge" (0 0 0 0)  2 f eval(1 + 8 + 7) (3 3)
+                : "edge" (1 0 0 0)  4 f eval(1 + 8 + 7) (3 3)

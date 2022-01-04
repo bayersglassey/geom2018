@@ -208,6 +208,33 @@ int camera_step(camera_t *camera){
     return 0;
 }
 
+static int _render_rgraph(rendergraph_t *rgraph,
+    vec_ptr_t rgraph_pos, rot_t rgraph_rot, flip_t rgraph_flip, int frame_i,
+    vec_ptr_t pos_mul,
+    vec_t camera_renderpos, prismelmapper_t *mapper,
+    SDL_Surface *surface,
+    SDL_Palette *pal, int x0, int y0, int zoom
+){
+    int err;
+
+    prismelrenderer_t *prend = rgraph->prend;
+    vecspace_t *prend_space = prend->space; /* vec4 or vec4_alt */
+
+    vec_t pos;
+    vec4_vec_from_hexspace(pos, rgraph_pos);
+    vec_sub(prend_space->dims, pos, camera_renderpos);
+    if(pos_mul)vec_mul(prend_space, pos, pos_mul);
+
+    rot_t rot = vec4_rot_from_hexspace(rgraph_rot);
+    flip_t flip = rgraph_flip;
+
+    return rendergraph_render(
+        rgraph,
+        surface, pal, prend,
+        x0, y0, zoom,
+        pos, rot, flip, frame_i, mapper);
+}
+
 static int camera_render_map(camera_t *camera,
     vec_t camera_renderpos, prismelmapper_t *mapper, bool minimap,
     SDL_Surface *surface,
@@ -222,6 +249,18 @@ static int camera_render_map(camera_t *camera,
         game->minimap_prend: game->prend;
     vecspace_t *prend_space = prend->space; /* vec4 or vec4_alt */
 
+    rot_t rot = 0; /* rot_inv(map_space->rot_max, camera->rot) */
+    flip_t flip = false;
+    int frame_i = minimap? game->unpauseable_frame_i: game->frame_i;
+
+    vec_ptr_t pos_mul = NULL;
+    if(minimap){
+        /* rgraph_minimap's unit is the space's actual unit vector */
+    }else{
+        /* rgraph_map's unit is map->unit */
+        pos_mul = camera->map->unit;
+    }
+
     /* Render map's submaps */
     for(int i = 0; i < map->submaps_len; i++){
         hexmap_submap_t *submap = map->submaps[i];
@@ -233,36 +272,41 @@ static int camera_render_map(camera_t *camera,
         if(err)return err;
         if(!visible)continue;
 
-#ifdef GEOM_ONLY_RENDER_CUR_SUBMAP
-        if(!minimap && submap != camera->cur_submap)continue;
-#endif
-
         if(minimap && !submap->solid)continue;
 
-        vec_t pos;
-        vec4_vec_from_hexspace(pos, submap->pos);
-        vec_sub(prend_space->dims, pos, camera_renderpos);
-
-        rot_t rot = vec4_rot_from_hexspace(0);
-        //rot_t rot = vec4_rot_from_hexspace(
-        //    rot_inv(map_space->rot_max, camera->rot));
-        flip_t flip = false;
-        int frame_i = game->frame_i;
-
-        if(minimap){
-            /* rgraph_minimap's unit is the space's actual unit vector */
-        }else{
-            /* rgraph_map's unit is map->unit */
-            vec_mul(prend_space, pos, camera->map->unit);
-        }
-
-        err = rendergraph_render(
+        err = _render_rgraph(
             minimap? submap->rgraph_minimap: submap->rgraph_map,
-            surface, pal, prend,
-            x0, y0, zoom,
-            pos, rot, flip, frame_i, mapper);
+            submap->pos, rot, flip, frame_i, pos_mul,
+            camera_renderpos, mapper, surface,
+            pal, x0, y0, zoom);
         if(err)return err;
     }
+
+    if(minimap){
+        static const char *marker_rgraph_name = "minimap.marker";
+        rendergraph_t *marker_rgraph = prismelrenderer_get_rendergraph(
+            prend, marker_rgraph_name);
+        if(!marker_rgraph){
+            fprintf(stderr, "Couldn't find rgraph: %s\n",
+                marker_rgraph_name);
+            return 2;
+        }
+
+        for(int i = 0; i < game->players_len; i++){
+            player_t *player = game->players[i];
+            if(!player->body)continue;
+
+            trf_t trf;
+            hexgame_location_init_trf(&player->body->loc, &trf);
+
+            err = _render_rgraph(
+                marker_rgraph,
+                trf.add, trf.rot, trf.flip, frame_i, pos_mul,
+                camera_renderpos, mapper, surface,
+                pal, x0, y0, zoom);
+        }
+    }
+
     return 0;
 }
 
@@ -301,10 +345,6 @@ int camera_render(camera_t *camera,
         /* Render map's bodies */
         for(int i = 0; i < map->bodies_len; i++){
             body_t *body = map->bodies[i];
-
-#ifdef GEOM_ONLY_RENDER_CUR_SUBMAP
-            if(body->cur_submap != camera->cur_submap)continue;
-#endif
 
             bool visible;
             err = body_is_visible(body, &visible);
@@ -385,6 +425,7 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     int err;
 
     game->frame_i = 0;
+    game->unpauseable_frame_i = 0;
     game->prend = prend;
     game->space = &hexspace; /* NOT the same as prend->space! */
 
@@ -585,6 +626,12 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event){
         err = player_process_event(player, event);
         if(err)return err;
     }
+    return 0;
+}
+
+int hexgame_unpauseable_step(hexgame_t *game){
+    game->unpauseable_frame_i++;
+    if(game->unpauseable_frame_i == MAX_FRAME_I)game->unpauseable_frame_i = 0;
     return 0;
 }
 
