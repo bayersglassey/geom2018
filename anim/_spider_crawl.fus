@@ -7,38 +7,38 @@
 
 proc "crawl_crush":
     if: expr: myvar("is_spikeyspider")
-    then: goto delay: crawl_shielding
+    then: goto delay: "crawl_shielding"
 
 
 state "crawling":
     rgraph: $PREFIX NS "crawling"
     hitbox: collmap("stand")
-    if() then: goto: crawl
+    if() then: goto: "crawl"
 
 state "uncrawling":
     rgraph: $PREFIX NS "uncrawling"
     hitbox: collmap("stand")
-    if() then: goto: stand
+    if() then: goto: "stand"
 
 state "crawling_looking_up":
     rgraph: $PREFIX NS "crawling_looking_up"
     hitbox: collmap("stand")
-    if() then: goto: crawl_looking_up
+    if() then: goto: "crawl_looking_up"
 
 state "uncrawling_looking_up":
     rgraph: $PREFIX NS "uncrawling_looking_up"
     hitbox: collmap("stand")
-    if() then: goto: looking_up
+    if() then: goto: "looking_up"
 
 state "crawl_looking_up":
     rgraph: $PREFIX NS "crawl_looking_up"
     hitbox: collmap("crawl")
-    on "crush": call: crawl_crush
+    on "crush": call: "crawl_crush"
 
     if:
         key: wentdown y
     then:
-        call: crawl_looking_up_spit
+        call: "crawl_looking_up_spit"
 
     if:
         key: not isdown d
@@ -48,47 +48,47 @@ state "crawl_looking_up":
             ;;  */ \*
             ;; ( )
     then:
-        goto delay: uncrawling_looking_up
+        goto delay: "uncrawling_looking_up"
 
     if: key: wasdown f
-    then: goto immediate: crawl
+    then: goto immediate: "crawl"
 
     if: key: wasdown b
-    then: goto immediate: crawl
+    then: goto immediate: "crawl"
 
     if: key: not isdown x
-    then: goto: crawl
+    then: goto: "crawl"
 
 state "crawl_spit":
     rgraph: $PREFIX NS "crawl_spit"
     hitbox: collmap("crawl")
-    on "crush": call: crawl_crush
-    if() then: goto: crawl
+    on "crush": call: "crawl_crush"
+    if() then: goto: "crawl"
 
 state "crawl_looking_up_spit":
     rgraph: $PREFIX NS "crawl_looking_up_spit"
     hitbox: collmap("crawl")
-    on "crush": call: crawl_crush
-    if() then: goto: crawl_looking_up
+    on "crush": call: "crawl_crush"
+    if() then: goto: "crawl_looking_up"
 
 state "crawl":
     rgraph: $PREFIX NS "crawl"
     hitbox: collmap("crawl")
 
-    on "crush": call: crawl_crush
+    on "crush": call: "crawl_crush"
 
     # Spit
     if:
         key: wentdown y
     then:
-        call: crawl_spit
+        call: "crawl_spit"
 
     # Turn into roller
     if:
         expr: myvar("is_rollerspider")
         key: wentdown x
     then:
-        goto: roller_stand
+        goto: "roller_stand"
         delay: $GET_INT ROLLER_STAND_DELAY
 
     # Turn into bird
@@ -106,7 +106,7 @@ state "crawl":
             ;;   */*\*
             ;;  (.)  .
     then:
-        goto: bird_crawl
+        goto: "bird_crawl"
         delay: 1
 
     # Uncrawl
@@ -118,7 +118,7 @@ state "crawl":
             ;;  */ \*
             ;; ( )
     then:
-        goto delay: uncrawling
+        goto delay: "uncrawling"
 
     # Crawling
     import "anim/_spider_crawl.state.fus"
@@ -131,7 +131,7 @@ state "crawl":
             ;;     \*
             ;; (.)  .
     then:
-        goto: roller_stand
+        goto: "roller_stand"
         move: 1 0
         turn
         rot: 1
@@ -146,7 +146,7 @@ state "crawl":
             ;;     \
             ;; (.)  +
     then:
-        goto: crawl_step
+        goto: "crawl_step"
         move: 1 0
         rot: 2
         delay: 2
@@ -158,7 +158,7 @@ state "crawl":
     then:
         move: 1 0
         turn
-        goto: crawl_turn
+        goto: "crawl_turn"
         delay: 2
 
     # Look up
@@ -167,13 +167,13 @@ state "crawl":
         key: not isdown f
         key: wasdown x
     then:
-        goto: crawl_look_up
+        goto: "crawl_look_up"
 
 state "crawl_look_up":
     rgraph: $PREFIX NS "crawl_look_up"
     hitbox: collmap("crawl")
-    on "crush": call: crawl_crush
-    if() then: goto: crawl_looking_up
+    on "crush": call: "crawl_crush"
+    if() then: goto: "crawl_looking_up"
 
 state "crawl_step_down":
     rgraph: $PREFIX NS "crawl_step"
@@ -181,21 +181,21 @@ state "crawl_step_down":
         ;;    .   .
         ;;    *\*/*
         ;;  . -(.)  .
-    on "crush": call: crawl_crush
+    on "crush": call: "crawl_crush"
 
     if:
         key: wentdown y
     then:
-        call: crawl_spit
+        call: "crawl_spit"
 
     if:
         expr: myvar("is_rollerspider")
         key: wentdown x
     then:
-        goto: roller_stand
+        goto: "roller_stand"
         delay: $GET_INT ROLLER_STAND_DELAY
 
-    if() then: goto: crawl
+    if() then: goto: "crawl"
 
 state "crawl_step":
     # If you make changes to this, you'll probably want to make same
@@ -205,21 +205,21 @@ state "crawl_step":
         ;;    .   .
         ;;      */*
         ;;     (.)  .
-    on "crush": call: crawl_crush
+    on "crush": call: "crawl_crush"
 
     if:
         key: wentdown y
     then:
-        call: crawl_spit
+        call: "crawl_spit"
 
     if:
         expr: myvar("is_rollerspider")
         key: wentdown x
     then:
-        goto: roller_stand
+        goto: "roller_stand"
         delay: $GET_INT ROLLER_STAND_DELAY
 
-    if() then: goto: crawl
+    if() then: goto: "crawl"
 
 state "crawl_turn":
     # Like crawl_step, but without the extended hitbox
@@ -227,12 +227,12 @@ state "crawl_turn":
     # to being crushed)
     rgraph: $PREFIX NS "crawl_turn"
     hitbox: collmap("crawl")
-    on "crush": call: crawl_crush
+    on "crush": call: "crawl_crush"
 
-    if() then: goto immediate: crawl_step
+    if() then: goto immediate: "crawl_step"
 
 state "crawl_shielding":
     rgraph: $PREFIX NS "crawl_shielding"
     # (No hitbox: we are invincible)
     if:
-    then: goto: crawl
+    then: goto: "crawl"

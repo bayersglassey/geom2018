@@ -24,9 +24,9 @@ proc "on_collide":
         if:
             exists yourvar("accept_carryable")
             expr: == yourvar("accept_carryable") myvar("carrying")
-        then: as you: call: accept_carryable
+        then: as you: call: "accept_carryable"
 
-    call: on_death
+    call: "on_death"
 
 proc "on_death":
     if: exists myvar("carrying")
@@ -53,11 +53,11 @@ state "fly":
         ;;  (.)  .
 
     on "crush":
-        call: on_collide
-        goto: dead
+        call: "on_collide"
+        goto: "dead"
     on "solid":
-        call: on_collide
-        goto: dead
+        call: "on_collide"
+        goto: "dead"
 
     if:
     then:
@@ -73,8 +73,8 @@ state "fly":
             ;;
             ;;  ( )  .
     then:
-        call: on_death
-        goto delay: dead
+        call: "on_death"
+        goto delay: "dead"
 
     if:
         coll: all yes
@@ -99,11 +99,11 @@ state "crouch_fly":
         ;; (.)  .   .
 
     on "crush":
-        call: on_collide
-        goto: crouch_dead
+        call: "on_collide"
+        goto: "crouch_dead"
     on "solid":
-        call: on_collide
-        goto: crouch_dead
+        call: "on_collide"
+        goto: "crouch_dead"
 
     if:
     then:
@@ -117,8 +117,8 @@ state "crouch_fly":
             ;;    *\*
             ;; ( )  .
     then:
-        call: on_death
-        goto delay: crouch_dead
+        call: "on_death"
+        goto delay: "crouch_dead"
 
     if:
         coll: all yes

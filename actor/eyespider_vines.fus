@@ -40,18 +40,18 @@ state "create_body":
     if:
         expr: mapvar("eyespider_vines_ran_away_2")
     then:
-        goto immediate: start3_remove
+        goto immediate: "start3_remove"
 
     if:
         expr: mapvar("eyespider_vines_ran_away_1")
     then:
         play: "data/maps/demo/recs/eyespider_vines_wait_2.fus"
-        goto immediate: start2
+        goto immediate: "start2"
 
     if:
     then:
         play: "data/maps/demo/recs/eyespider_vines_wait_1.fus"
-        goto immediate: start
+        goto immediate: "start"
 
 state "start":
     if:
@@ -60,7 +60,7 @@ state "start":
     then:
         set mapvar("eyespider_vines_ran_away_1"): T
         play: "data/maps/demo/recs/eyespider_vines_run_away_1.fus"
-        goto: start2
+        goto: "start2"
 
 state "start2":
 
@@ -69,13 +69,13 @@ state "start2":
     then:
         play: "data/maps/demo/recs/eyespider_vines_run_away_1_looking.fus"
         set mapvar("eyespider_vines_looking"): T
-        goto: start2_looking
+        goto: "start2_looking"
 
     if: expr: mapvar("spider_passed_vines")
     then:
         set mapvar("eyespider_vines_ran_away_2"): T
         play: "data/maps/demo/recs/eyespider_vines_run_away_2.fus"
-        goto: start3
+        goto: "start3"
 
 state "start2_looking":
     # There is *NOT* a spider next to us
@@ -83,7 +83,7 @@ state "start2_looking":
     then:
         play: "data/maps/demo/recs/eyespider_vines_run_away_1_unlooking.fus"
         set mapvar("eyespider_vines_looking"): F
-        goto: start2
+        goto: "start2"
 
 state "start3":
     if() then:
@@ -91,11 +91,11 @@ state "start3":
 
         # Delay long enough for the mini_eye to play its "appear" animation
         delay: 11
-        goto: start3_remove
+        goto: "start3_remove"
 
 state "start3_remove":
     if() then:
         remove
-        goto: start3_removed
+        goto: "start3_removed"
 
 state "start3_removed":

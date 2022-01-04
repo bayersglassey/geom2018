@@ -1,7 +1,7 @@
 state "create_body":
     if() then:
         play: "actor/rec/aiwater_roller.fus"
-        goto: mainloop
+        goto: "mainloop"
 
 $UNSET_BOOL BIGROLLER
 

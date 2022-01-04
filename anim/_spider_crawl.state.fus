@@ -12,7 +12,7 @@ if:
 then:
     move: 1 0
     rot: 1
-    goto: crawl_step
+    goto: "crawl_step"
     delay: 2
 
 # Crawl forwards
@@ -25,7 +25,7 @@ if:
         ;; (.)  .
 then:
     move: 1 0
-    goto: crawl_step
+    goto: "crawl_step"
     delay: 2
 
 # Crawl down
@@ -42,5 +42,5 @@ if:
 then:
     move: 1 0
     rot: -1
-    goto: crawl_step_down
+    goto: "crawl_step_down"
     delay: 2

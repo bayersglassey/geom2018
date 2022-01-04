@@ -2,7 +2,7 @@
 state "create_body":
     if() then:
         play: "actor/hermit/recs/trapped.fus"
-        goto: trapped
+        goto: "trapped"
 
 state "trapped":
     if:
@@ -16,7 +16,7 @@ state "trapped":
         play: "actor/hermit/recs/trapped.fus"
     if() then:
         play: "actor/hermit/recs/escape1.fus"
-        goto: escape1_wait
+        goto: "escape1_wait"
 
 state "escape1_wait":
     if:
@@ -33,13 +33,13 @@ state "escape1_wait":
             ;;    (.)  .   .   .   .   .       + - +
     then:
         play: "actor/hermit/recs/escape2.fus"
-        goto: open_door
+        goto: "open_door"
     if() then:
         play: "actor/hermit/recs/escape1_wait.fus"
 
 state "open_door":
     if() then:
         set mapvar("vines3_door"): T
-        goto: escaped
+        goto: "escaped"
 
 state "escaped":

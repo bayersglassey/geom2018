@@ -11,11 +11,11 @@ state "init":
             exists myvar("counter")
             expr: mapvar(myvar("counter"))
     then:
-        goto immediate: touched
+        goto immediate: "touched"
 
     if:
     then:
-        goto immediate: waiting
+        goto immediate: "waiting"
 
 state "waiting":
     rgraph: "hotspot_waiting"
@@ -35,7 +35,7 @@ state "waiting":
         if: exists myvar("max_cooldown")
         then: set myvar("cooldown"): myvar("max_cooldown")
 
-        goto: touched
+        goto: "touched"
 
 state "touched":
     rgraph: "hotspot_touched"
@@ -62,4 +62,4 @@ state "touched":
             if: exists myvar("counter")
             then: dec mapvar(myvar("counter"))
 
-            goto: waiting
+            goto: "waiting"

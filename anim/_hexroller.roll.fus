@@ -53,7 +53,7 @@ state $SUFFIX R0 $PREFIX ANIM_NS "stand":
     then:
         move: 2 2
         rot: 2
-        goto: $SUFFIX R3 $PREFIX ANIM_NS stand
+        goto: $SUFFIX R3 $PREFIX ANIM_NS "stand"
         delay: $GET_INT DELAY
 
     if:
@@ -67,7 +67,7 @@ state $SUFFIX R0 $PREFIX ANIM_NS "stand":
     then:
         move: 2 1
         rot: 2
-        goto: $SUFFIX R4 $PREFIX ANIM_NS stand
+        goto: $SUFFIX R4 $PREFIX ANIM_NS "stand"
 
     if:
         not: expr: myvar("b")
@@ -77,7 +77,7 @@ state $SUFFIX R0 $PREFIX ANIM_NS "stand":
     then:
         move: 1 0
         rot: 1
-        goto: $SUFFIX R5 $PREFIX ANIM_NS stand
+        goto: $SUFFIX R5 $PREFIX ANIM_NS "stand"
 
     if:
         not: expr: myvar("b")

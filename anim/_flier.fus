@@ -8,7 +8,7 @@ state "born":
             ;;  -(+)-
             ;;  */*\*
     then:
-        goto: hover
+        goto: "hover"
 
     if:
         key: wasdown b

@@ -1,13 +1,13 @@
 
 state "create_body":
     if: expr: mapvar("guide_passed_start2")
-    then: goto immediate: start3
+    then: goto immediate: "start3"
 
     if: expr: mapvar("guide_passed_start")
-    then: goto immediate: start2
+    then: goto immediate: "start2"
 
     if:
-    then: goto immediate: start
+    then: goto immediate: "start"
 
 state "start":
     if: any:
@@ -22,7 +22,7 @@ state "start":
             ;;        .   .   .   .
     then:
         play: "actor/guide/rec/start_to_start2.fus"
-        goto: start2
+        goto: "start2"
     if() then:
         play: "actor/guide/rec/start.fus"
 
@@ -30,7 +30,7 @@ state "start2":
     if: expr: mapvar("guide_passed_start2")
     then:
         play: "actor/guide/rec/start2_to_start3.fus"
-        goto: start3
+        goto: "start3"
     if() then:
         play: "actor/guide/rec/start2.fus"
 
@@ -44,7 +44,7 @@ state "start3":
             ;;  (+)- + - + - + - +
     then:
         play: "actor/guide/rec/start3_to_dodecas_0_0.fus"
-        goto: dodecas_0_0
+        goto: "dodecas_0_0"
     if() then:
         play: "actor/guide/rec/start3.fus"
 

@@ -11,19 +11,19 @@ $SET_STR STATE_RUN_START_JUMP start_jump
 $SET_BOOL NO_COLLECT_ON_TOUCH
 
 
-on "crush": goto: dead
+on "crush": goto: "dead"
 
 import "anim/_coin.behaviour.fus"
 
 state "_crouch":
-    if() then: goto: crawl
+    if() then: goto: "crawl"
 
 state "_stand":
-    if() then: goto: stand
+    if() then: goto: "stand"
 
 state "appear":
     rgraph: "dead_once_reversed"
-    if() then: goto: stand
+    if() then: goto: "stand"
 
 state "stand":
     rgraph: "coin_beast_stand"
@@ -54,7 +54,7 @@ state "turn":
     import "anim/_spider_stand.state.fus"
     import "anim/_spider_jump.state.fus"
 
-    if() then: goto: stand
+    if() then: goto: "stand"
 
 state "step":
     rgraph: "coin_beast_step"
@@ -69,7 +69,7 @@ state "step":
     import "anim/_spider_stand.state.fus"
     import "anim/_spider_jump.state.fus"
 
-    if() then: goto: stand
+    if() then: goto: "stand"
 
 state "step_up":
     rgraph: "coin_beast_step_up"
@@ -84,7 +84,7 @@ state "step_up":
     import "anim/_spider_stand.state.fus"
     import "anim/_spider_jump.state.fus"
 
-    if() then: goto: stand
+    if() then: goto: "stand"
 
 state "step_down":
     rgraph: "coin_beast_step_down"
@@ -99,11 +99,11 @@ state "step_down":
     import "anim/_spider_stand.state.fus"
     import "anim/_spider_jump.state.fus"
 
-    if() then: goto: stand
+    if() then: goto: "stand"
 
 state "appear_crouch":
     rgraph: "dead_once_crouch_reversed"
-    if() then: goto: crawl
+    if() then: goto: "crawl"
 
 state "crawling":
     rgraph: "coin_beast_crawling"
@@ -113,7 +113,7 @@ state "crawling":
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto: crawl
+    if() then: goto: "crawl"
 
 state "crawl":
     rgraph: "coin_beast_crawl"
@@ -132,7 +132,7 @@ state "crawl":
             ;;   */ \*
             ;;  (.)  .
     then:
-        goto delay: uncrawling
+        goto delay: "uncrawling"
 
     # Crawling
     import "anim/_spider_crawl.state.fus"
@@ -151,7 +151,7 @@ state "crawl_step":
         ;;    .   .
         ;;      */*
         ;;     (.)  .
-    if() then: goto: crawl
+    if() then: goto: "crawl"
 
 state "crawl_step_down":
     rgraph: "coin_beast_crawl_step_down"
@@ -159,7 +159,7 @@ state "crawl_step_down":
         ;;    .   .
         ;;    *\*/*
         ;;  . -(.)  .
-    if() then: goto: crawl
+    if() then: goto: "crawl"
 
 state "uncrawling":
     rgraph: "coin_beast_uncrawling"
@@ -169,11 +169,11 @@ state "uncrawling":
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto: stand
+    if() then: goto: "stand"
 
 state "start_jump":
     if() then:
-        goto: jump
+        goto: "jump"
         delay: 2
 
 state "jump":
@@ -194,7 +194,7 @@ state "collected":
     unsafe
     if() then:
         # Do whatever it is coin-like things do while they've been collected...
-        call: while_collected
+        call: "while_collected"
         continue
     if() then: die
 

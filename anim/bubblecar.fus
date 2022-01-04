@@ -31,7 +31,7 @@ state "stand_r0":
     then:
         turn
         rot: -1
-        goto: stand_r2
+        goto: "stand_r2"
         delay: 4
 
     if:
@@ -84,14 +84,14 @@ state "stand_r0":
             ;;                 .   .
     then:
         move: 2 1
-        goto: stand_r3
+        goto: "stand_r3"
         delay: 4
 
     if:
         key: wasdown f
     then:
         rot: -1
-        goto: stand_r2
+        goto: "stand_r2"
         delay: 4
 
 state "stand_r1":
@@ -126,7 +126,7 @@ state "stand_r1":
     then:
         turn
         rot: -1
-        goto: stand_r1
+        goto: "stand_r1"
         delay: 4
 
     if:
@@ -179,14 +179,14 @@ state "stand_r1":
             ;;                 .   .
     then:
         move: 2 1
-        goto: stand_r0
+        goto: "stand_r0"
         delay: 4
 
     if:
         key: wasdown f
     then:
         rot: -1
-        goto: stand_r3
+        goto: "stand_r3"
         delay: 4
 
 state "stand_r2":
@@ -221,7 +221,7 @@ state "stand_r2":
     then:
         turn
         rot: -1
-        goto: stand_r0
+        goto: "stand_r0"
         delay: 4
 
     if:
@@ -274,14 +274,14 @@ state "stand_r2":
             ;;                 .   .
     then:
         move: 2 1
-        goto: stand_r1
+        goto: "stand_r1"
         delay: 4
 
     if:
         key: wasdown f
     then:
         rot: -1
-        goto: stand_r0
+        goto: "stand_r0"
         delay: 4
 
 state "stand_r3":
@@ -316,7 +316,7 @@ state "stand_r3":
     then:
         turn
         rot: -1
-        goto: stand_r3
+        goto: "stand_r3"
         delay: 4
 
     if:
@@ -369,12 +369,12 @@ state "stand_r3":
             ;;                 .   .
     then:
         move: 2 1
-        goto: stand_r2
+        goto: "stand_r2"
         delay: 4
 
     if:
         key: wasdown f
     then:
         rot: -1
-        goto: stand_r1
+        goto: "stand_r1"
         delay: 4

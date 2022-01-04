@@ -14,7 +14,7 @@ if:
 then:
     move: 1 0
     rot: 1
-    goto delay: $GET_SYM STATE_STEP_UP
+    goto delay: $GET_STR STATE_STEP_UP
 
 # Forced jump up
 if:
@@ -27,7 +27,7 @@ if:
 then:
     move: 1 0
     rot: 1
-    goto immediate: $GET_SYM STATE_START_JUMP
+    goto immediate: $GET_STR STATE_START_JUMP
 
 # Land
 if:
@@ -41,7 +41,7 @@ if:
         ;; ( )  + - +
 then:
     move: 1 0
-    goto delay: $GET_SYM STATE_STEP
+    goto delay: $GET_STR STATE_STEP
 
 # Continue jump
 if:
@@ -52,8 +52,8 @@ if:
         ;; ( )
 then:
     move: 1 0
-    goto immediate: $GET_SYM STATE_START_JUMP
+    goto immediate: $GET_STR STATE_START_JUMP
 
 # Crash
 if() then:
-    goto delay: mostly_dead
+    goto delay: "mostly_dead"

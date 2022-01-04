@@ -480,7 +480,7 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         OPEN
 
         const char *goto_name;
-        GET_NAME_CACHED(goto_name, &prend->name_store)
+        GET_STR_CACHED(goto_name, &prend->name_store)
 
         effect->type = STATE_EFFECT_TYPE_GOTO;
         effect->u.gotto.name = goto_name;
@@ -495,7 +495,7 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         OPEN
 
         const char *name;
-        GET_NAME_CACHED(name, &prend->name_store)
+        GET_STR_CACHED(name, &prend->name_store)
 
         effect->type = STATE_EFFECT_TYPE_CALL;
         effect->u.call.name = name;

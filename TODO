@@ -352,7 +352,7 @@ I believe we want something like:
 
     anim/coin.fus:
         on "collect":
-            goto immediate: collected
+            goto immediate: "collected"
 
     anim/spider.fus:
         collmsgs:
@@ -372,7 +372,7 @@ Or stateset has a list of variables to be printed, and their labels?..
             "collect":
                 inc: coins_collected
         on "crush":
-            goto immediate: dead
+            goto immediate: "dead"
 
         $SET_STR NS player_
         import "anim/_spider.fus"
@@ -943,8 +943,8 @@ So instead of this:
 
     stand:
         ...etc...
-        call: whatever
-        goto: crawl
+        call: "whatever"
+        goto: "crawl"
 
 ...it should be:
 
@@ -955,15 +955,6 @@ So instead of this:
         ...etc...
         call: "whatever"
         goto: "crawl"
-
-
-Maybe rename anim/_{spider -> spiderlike}_{move,crawl,jump}.state.fus?..
-Since they are also used here:
-
-    anim/coin_beast.fus
-    50:    import "anim/_spider_step.state.fus"
-    133:    import "anim/_spider_crawl.state.fus"
-    185:    import "anim/_spider_jumping.state.fus"
 
 
 Jan 1, 2022:

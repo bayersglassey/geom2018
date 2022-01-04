@@ -81,7 +81,7 @@ state "closed":
         any:
             expr: myvar("auto_open")
             coll: bodies(myvar("key_anim")) any yes collmap("opening")
-    then: goto delay: opening
+    then: goto delay: "opening"
 
 state "opening":
     rgraph: "eye_opening"
@@ -90,7 +90,7 @@ state "opening":
         if: exists myvar("opened_key")
         then:
             inc mapvar(myvar("opened_key"))
-        goto: open
+        goto: "open"
 
 state "open":
     rgraph: "eye_open"
@@ -106,25 +106,25 @@ state "open":
         not: any:
             expr: myvar("auto_open")
             coll: bodies(myvar("key_anim")) any yes collmap("opening")
-    then: goto delay: closing
+    then: goto delay: "closing"
 
     if:
         coll: bodies(myvar("key_anim")) any yes collmap("looking")
         not: coll: bodies(myvar("key_anim")) any yes collmap("looking_l")
         not: coll: bodies(myvar("key_anim")) any yes collmap("looking_d")
-    then: goto delay: looking
+    then: goto delay: "looking"
 
     if:
         not: coll: bodies(myvar("key_anim")) any yes collmap("looking")
         coll: bodies(myvar("key_anim")) any yes collmap("looking_l")
         not: coll: bodies(myvar("key_anim")) any yes collmap("looking_d")
-    then: goto delay: looking_l
+    then: goto delay: "looking_l"
 
     if:
         not: coll: bodies(myvar("key_anim")) any yes collmap("looking")
         not: coll: bodies(myvar("key_anim")) any yes collmap("looking_l")
         coll: bodies(myvar("key_anim")) any yes collmap("looking_d")
-    then: goto delay: looking_d
+    then: goto delay: "looking_d"
 
 state "closing":
     rgraph: "eye_closing"
@@ -133,7 +133,7 @@ state "closing":
         if: exists myvar("opened_key")
         then:
             dec mapvar(myvar("opened_key"))
-        goto: closed
+        goto: "closed"
 
 # "anim/_eye_looking.fus":
 # Provides states looking, unlooking, look (with suffix indicated

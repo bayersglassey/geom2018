@@ -5,12 +5,12 @@
 state $SUFFIX LOOK_SUFFIX "looking":
     rgraph: $SUFFIX LOOK_SUFFIX "eye_looking"
     hitbox: collmap("hitbox")
-    if() then: goto: $SUFFIX LOOK_SUFFIX look
+    if() then: goto: $SUFFIX LOOK_SUFFIX "look"
 
 state $SUFFIX LOOK_SUFFIX "unlooking":
     rgraph: $SUFFIX LOOK_SUFFIX "eye_unlooking"
     hitbox: collmap("hitbox")
-    if() then: goto: open
+    if() then: goto: "open"
 
 state $SUFFIX LOOK_SUFFIX "look":
     rgraph: $SUFFIX LOOK_SUFFIX "eye_look"
@@ -24,4 +24,4 @@ state $SUFFIX LOOK_SUFFIX "look":
             exists myvar("antikey")
             expr: mapvar(myvar("antikey"))
         not: coll: bodies(myvar("key_anim")) any yes collmap($SUFFIX LOOK_SUFFIX "looking")
-    then: goto delay: $SUFFIX LOOK_SUFFIX unlooking
+    then: goto delay: $SUFFIX LOOK_SUFFIX "unlooking"

@@ -26,12 +26,12 @@ state "create_body":
         expr: mapvar("eyespider_dodecas_ran_away_1")
     then:
         play: "data/maps/demo/recs/eyespider_dodecas_wait_2.fus"
-        goto immediate: start2
+        goto immediate: "start2"
 
     if:
     then:
         play: "data/maps/demo/recs/eyespider_dodecas_wait_1.fus"
-        goto immediate: start
+        goto immediate: "start"
 
 state "start":
     if:
@@ -39,6 +39,6 @@ state "start":
     then:
         set mapvar("eyespider_dodecas_ran_away_1"): T
         play: "data/maps/demo/recs/eyespider_dodecas_run_away_1.fus"
-        goto: start2
+        goto: "start2"
 
 state "start2":

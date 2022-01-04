@@ -11,32 +11,32 @@ state "stand":
     then:
         move: 1 0
         rot: 1
-        goto delay: turn_up
+        goto delay: "turn_up"
 
     if:
         key: wasdown d
     then:
         move: 1 0
         rot: -1
-        goto delay: turn_down
+        goto delay: "turn_down"
 
     if:
         key: wasdown f
     then:
         move: 1 0
-        goto delay: forward
+        goto delay: "forward"
 
 state "forward":
     rgraph: "rocket_forward"
     unsafe flying
-    if() then: goto: stand
+    if() then: goto: "stand"
 
 state "turn_up":
     rgraph: "rocket_turn_up"
     unsafe flying
-    if() then: goto: stand
+    if() then: goto: "stand"
 
 state "turn_down":
     rgraph: "rocket_turn_down"
     unsafe flying
-    if() then: goto: stand
+    if() then: goto: "stand"

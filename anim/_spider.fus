@@ -53,7 +53,7 @@ vars:
 collmsgs:
     $IF !SPIDER_EYE: "touch"
     $IF !SPIDER_EYE: "enter_door"
-on "crush": goto: dead
+on "crush": goto: "dead"
 
 
 $IF !SPIDER_EYE: on "carryable":
@@ -75,7 +75,7 @@ $IF !SPIDER_EYE: on "carryable":
 
         # When a thing is carried, it is "collected"
         as you:
-            goto immediate: _collected
+            goto immediate: "_collected"
 
 
 proc "_spawn_spit":
@@ -105,34 +105,34 @@ proc "set_spit_anim":
     else: set myvar("spit_anim"): "anim/spit.fus"
 
 proc "spit":
-    call: set_spit_anim
+    call: "set_spit_anim"
     spawn: myvar("spit_anim") "fly" (0 0) 0 f do:
-        call: _spawn_spit
-    goto delay: spit
+        call: "_spawn_spit"
+    goto delay: "spit"
 
 proc "looking_up_spit":
-    call: set_spit_anim
+    call: "set_spit_anim"
     spawn: myvar("spit_anim") "fly" (1 0) 1 f do:
-        call: _spawn_spit
-    goto delay: looking_up_spit
+        call: "_spawn_spit"
+    goto delay: "looking_up_spit"
 
 proc "crawl_spit":
-    call: set_spit_anim
+    call: "set_spit_anim"
     spawn: myvar("spit_anim") "crouch_fly" (0 0) 0 f do:
-        call: _spawn_spit
-    goto delay: crawl_spit
+        call: "_spawn_spit"
+    goto delay: "crawl_spit"
 
 proc "crawl_looking_up_spit":
-    call: set_spit_anim
+    call: "set_spit_anim"
     spawn: myvar("spit_anim") "crouch_fly" (1 0) 1 f do:
-        call: _spawn_spit
-    goto delay: crawl_looking_up_spit
+        call: "_spawn_spit"
+    goto delay: "crawl_looking_up_spit"
 
 proc "swim_spit":
-    call: set_spit_anim
+    call: "set_spit_anim"
     spawn: myvar("spit_anim") "fly" (0 0) 0 f do:
-        call: _spawn_spit
-    goto delay: swim_spit
+        call: "_spawn_spit"
+    goto delay: "swim_spit"
 
 
 collmap "stand":
@@ -154,7 +154,7 @@ import "anim/_spider_stand.fus"
 state "look_up":
     rgraph: $PREFIX NS "look_up"
     hitbox: collmap("stand")
-    if() then: goto: looking_up
+    if() then: goto: "looking_up"
 
 state "looking_up":
     rgraph: $PREFIX NS "looking_up"
@@ -163,7 +163,7 @@ state "looking_up":
     if:
         key: wentdown y
     then:
-        call: looking_up_spit
+        call: "looking_up_spit"
 
     if:
         key: wasdown u
@@ -177,31 +177,31 @@ state "looking_up":
     then:
         move: 1 0
         rot: 1
-        goto immediate: start_jump
+        goto immediate: "start_jump"
 
     if: key: wasdown f
-    then: goto immediate: stand
+    then: goto immediate: "stand"
 
     if: key: wasdown b
-    then: goto immediate: stand
+    then: goto immediate: "stand"
 
     if:
         key: wasdown d
     then:
-        goto delay: crawling_looking_up
+        goto delay: "crawling_looking_up"
 
     if: key: not isdown x
-    then: goto: stand
+    then: goto: "stand"
 
 state "spit":
     rgraph: $PREFIX NS "spit"
     hitbox: collmap("stand")
-    if() then: goto: stand
+    if() then: goto: "stand"
 
 state "looking_up_spit":
     rgraph: $PREFIX NS "looking_up_spit"
     hitbox: collmap("stand")
-    if() then: goto: looking_up
+    if() then: goto: "looking_up"
 
 state "turn":
     rgraph: $PREFIX NS "turn"
@@ -220,10 +220,10 @@ state "turn":
         if:
             $IF DISABLE_RUNNING: false
             key: wasdown f
-        then: goto immediate: $GET_SYM STATE_RUN_START_JUMP
-        else: goto immediate: $GET_SYM STATE_START_JUMP
+        then: goto immediate: $GET_STR STATE_RUN_START_JUMP
+        else: goto immediate: $GET_STR STATE_START_JUMP
 
-    if() then: goto immediate: step
+    if() then: goto immediate: "step"
 
 state "stop_running":
     # (Expected to be "goto immediate"'d to)
@@ -241,7 +241,7 @@ state "stop_running":
     then:
         move: 1 0
         rot: 1
-        goto delay: step
+        goto delay: "step"
 
     # Step
     if:
@@ -254,7 +254,7 @@ state "stop_running":
             ;; ( )
     then:
         move: 1 0
-        goto delay: step
+        goto delay: "step"
 
     # Step down
     if:
@@ -271,11 +271,11 @@ state "stop_running":
     then:
         move: 1 0
         rot: -1
-        goto delay: step_down
+        goto delay: "step_down"
 
     # If we can't take a step forward, then just go to the non-running
     # "stand" state.
-    if() then: goto: stand
+    if() then: goto: "stand"
 
 state "sleep":
     rgraph: $PREFIX NS "sleep"
@@ -285,23 +285,23 @@ state "sleep":
         key: wasdown d
         key: wasdown l
         key: wasdown r
-    then: goto: crawl
+    then: goto: "crawl"
 
 $IF SPIDER_EYE:
     state "eye_closing":
         rgraph: $PREFIX NS "eye_closing"
         hitbox: collmap("stand")
-        if() then: goto: eye_closed
+        if() then: goto: "eye_closed"
     state "eye_unclosing":
         rgraph: $PREFIX NS "eye_unclosing"
         hitbox: collmap("stand")
-        if() then: goto: stand
+        if() then: goto: "stand"
     state "eye_closed":
         rgraph: $PREFIX NS "eye_closed"
         hitbox: collmap("stand")
         if:
             key: not isdown x
-        then: goto delay: eye_unclosing
+        then: goto delay: "eye_unclosing"
 
 state "mostly_dead":
     rgraph: "dead_cycle"

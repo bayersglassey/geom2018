@@ -114,7 +114,7 @@ state "mainloop":
         key: up f
         key: down d
         set myvar("crawl_time"): 0
-        goto: mainloop_crawl
+        goto: "mainloop_crawl"
 
 
     if:
@@ -225,7 +225,7 @@ state "mainloop_crawl":
     then:
         key: up f
         key: up d
-        goto: mainloop
+        goto: "mainloop"
 
 
     # Always walk straight ahead if we can
@@ -268,7 +268,7 @@ state "mainloop_crawl":
     then:
         key: up f
         key: up d
-        goto: mainloop
+        goto: "mainloop"
 
 
     # Turn around if we're stuck

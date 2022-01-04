@@ -13,7 +13,7 @@ state $PREFIX ANIM_NS "init":
         set myvar("f"): F
         set myvar("b"): F
         set myvar("speed"): 0
-        goto immediate: $PREFIX ANIM_NS stand
+        goto immediate: $PREFIX ANIM_NS "stand"
 
 
 $SET_STR R0 ""

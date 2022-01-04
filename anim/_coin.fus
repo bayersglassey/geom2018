@@ -2,18 +2,18 @@
 import "anim/_coin.behaviour.fus"
 
 state "_crouch":
-    if() then: goto: crouch
+    if() then: goto: "crouch"
 
 state "_stand":
-    if() then: goto: stand
+    if() then: goto: "stand"
 
 state "appear":
     rgraph: "dead_once_centered_reversed"
-    if() then: goto: stand
+    if() then: goto: "stand"
 
 state "appear_crouch":
     rgraph: "dead_once_crouch_reversed"
-    if() then: goto: crouch
+    if() then: goto: "crouch"
 
 state "stand":
     rgraph: $GET_STR RGRAPH_STAND
@@ -31,5 +31,5 @@ state "collected":
     rgraph: "dead_once_centered"
     if() then:
         # Do whatever it is coin-like things do while they've been collected...
-        call: while_collected
+        call: "while_collected"
         continue

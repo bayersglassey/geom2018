@@ -21,7 +21,7 @@ $IF RUNNING:
         key: wasdown d
         key: not isdown f
     then:
-        goto immediate: stop_running
+        goto immediate: "stop_running"
 
 # Can't stand on nothing
 if:
@@ -29,21 +29,21 @@ if:
         ;;  (+)- +
 then:
     move: 1 0
-    goto immediate: $GET_SYM STATE_START_JUMP
+    goto immediate: $GET_STR STATE_START_JUMP
 
 # Spit
 $IF SPIDER:
     if:
         key: wentdown y
     then:
-        call: spit
+        call: "spit"
 
 # Turn into roller
 if:
     expr: myvar("is_rollerspider")
     key: wentdown x
 then:
-    goto: roller_stand
+    goto: "roller_stand"
     delay: $GET_INT ROLLER_STAND_DELAY
 
 # Turn into bird
@@ -61,7 +61,7 @@ if:
         ;;   */*\*
         ;;  (.)  .
 then:
-    goto: bird_crawl
+    goto: "bird_crawl"
     delay: 1
 
 # Blink
@@ -69,13 +69,13 @@ $IF SPIDER_EYE:
     if:
         key: wasdown x
     then:
-        goto delay: eye_closing
+        goto delay: "eye_closing"
 
 # Crawl
 if:
     key: wasdown d
 then:
-    goto delay: crawling
+    goto delay: "crawling"
 
 # Turn
 if:
@@ -84,11 +84,11 @@ if:
 then:
     move: 1 0
     turn
-    goto delay: turn
+    goto delay: "turn"
 
 # Look up
 if:
     expr: myvar("is_aimerspider")
     key: wasdown x
 then:
-    goto: look_up
+    goto: "look_up"

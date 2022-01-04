@@ -27,7 +27,7 @@ state $GET_STR STATE_STAND:
     $IF RUNNING:
         # If we didn't do anything else, then just go to the non-running
         # "stand" state.
-        if() then: goto: stand
+        if() then: goto: "stand"
 
 state $GET_STR STATE_START_JUMP:
 
@@ -40,21 +40,21 @@ state $GET_STR STATE_START_JUMP:
             ;;       /*\*
             ;; ( )
     then:
-        goto: flier_fly
+        goto: "flier_fly"
         move: 2 1
         delay: 2
 
     if:
         coll: water any yes collmap("stand")
     then:
-        goto delay: swim_jump
+        goto delay: "swim_jump"
 
     if() then:
-        goto delay: $GET_SYM STATE_JUMP
+        goto delay: $GET_STR STATE_JUMP
 
 state $GET_STR STATE_JUMP:
-    # NOTE: the only "goto: jump" is in "start_jump", which checks whether
-    # we're in water, and does "goto: jump" or "goto: swim_jump"
+    # NOTE: the only "goto: "jump"" is in "start_jump", which checks whether
+    # we're in water, and does "goto: jump" or "goto: "swim_jump""
     # accordingly.
     # Therefore, if we're in "jump", then we can safely assume we're not in
     # water without checking.
@@ -79,7 +79,7 @@ state $GET_STR STATE_STEP_DOWN:
     import "anim/_spider_stand.state.fus"
     import "anim/_spider_jump.state.fus"
 
-    if() then: goto: $GET_SYM STATE_STAND
+    if() then: goto: $GET_STR STATE_STAND
 
 state $GET_STR STATE_STEP:
     rgraph: $PREFIX NS $GET_STR STATE_STEP
@@ -89,4 +89,4 @@ state $GET_STR STATE_STEP:
     import "anim/_spider_stand.state.fus"
     import "anim/_spider_jump.state.fus"
 
-    if() then: goto: $GET_SYM STATE_STAND
+    if() then: goto: $GET_STR STATE_STAND

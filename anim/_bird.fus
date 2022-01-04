@@ -10,7 +10,7 @@ $SET_INT FLY_DELAY 2
 
 
 on "spikeyspit":
-    goto: $PREFIX ANIM_NS turn
+    goto: $PREFIX ANIM_NS "turn"
     delay: $GET_INT TURN_DELAY
 
 
@@ -32,24 +32,24 @@ state $PREFIX ANIM_NS "stand":
     if:
         key: wasdown u
     then:
-        goto: $PREFIX ANIM_NS stand_wings
+        goto: $PREFIX ANIM_NS "stand_wings"
 
     if:
         key: wasdown d
     then:
-        goto: $PREFIX ANIM_NS crawl_arrive
+        goto: $PREFIX ANIM_NS "crawl_arrive"
         delay: 1
 
     if:
         key: wasdown f
     then:
-        goto: $PREFIX ANIM_NS step
+        goto: $PREFIX ANIM_NS "step"
         delay: 1
 
     if:
         key: wasdown b
     then:
-        goto: $PREFIX ANIM_NS turn
+        goto: $PREFIX ANIM_NS "turn"
         delay: $GET_INT TURN_DELAY
 
 state $PREFIX ANIM_NS "turn":
@@ -68,7 +68,7 @@ state $PREFIX ANIM_NS "turn":
     if() then:
         move: 1 0
         turn
-        goto: $PREFIX ANIM_NS turn_arrive
+        goto: $PREFIX ANIM_NS "turn_arrive"
         delay: 1
 
 state $PREFIX ANIM_NS "step":
@@ -92,7 +92,7 @@ state $PREFIX ANIM_NS "step":
         false
         key: not isdown f
     then:
-        goto: $PREFIX ANIM_NS step_rev
+        goto: $PREFIX ANIM_NS "step_rev"
         delay: 2
 
     if:
@@ -113,7 +113,7 @@ state $PREFIX ANIM_NS "step":
     then:
         move: 3 1
         rot: 1
-        goto: $PREFIX ANIM_NS step_rot_up_arrive
+        goto: $PREFIX ANIM_NS "step_rot_up_arrive"
         delay: 2
 
     if:
@@ -133,7 +133,7 @@ state $PREFIX ANIM_NS "step":
             ;;        .   .
     then:
         move: 1 -1
-        goto: $PREFIX ANIM_NS step_down_arrive
+        goto: $PREFIX ANIM_NS "step_down_arrive"
         delay: 2
 
     if:
@@ -155,7 +155,7 @@ state $PREFIX ANIM_NS "step":
             ;; ( )  .
     then:
         move: 2 1
-        goto: $PREFIX ANIM_NS step_up_arrive
+        goto: $PREFIX ANIM_NS "step_up_arrive"
         delay: 2
 
     if:
@@ -176,7 +176,7 @@ state $PREFIX ANIM_NS "step":
     then:
         move: 1 0
         rot: -1
-        goto: $PREFIX ANIM_NS step_rot_down_arrive
+        goto: $PREFIX ANIM_NS "step_rot_down_arrive"
         delay: 2
 
     if:
@@ -194,11 +194,11 @@ state $PREFIX ANIM_NS "step":
             ;;  (.)  .   .
     then:
         move: 1 0
-        goto: $PREFIX ANIM_NS step_arrive
+        goto: $PREFIX ANIM_NS "step_arrive"
         delay: 2
 
     if() then:
-        goto: $PREFIX ANIM_NS step_rev
+        goto: $PREFIX ANIM_NS "step_rev"
         delay: 2
 
 state $PREFIX ANIM_NS "turn_arrive":
@@ -214,7 +214,7 @@ state $PREFIX ANIM_NS "turn_arrive":
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto: $PREFIX ANIM_NS stand
+    if() then: goto: $PREFIX ANIM_NS "stand"
 
 state $PREFIX ANIM_NS "step_rev":
     rgraph: $PREFIX RGRAPH_NS "bird_step_rev"
@@ -229,7 +229,7 @@ state $PREFIX ANIM_NS "step_rev":
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto: $PREFIX ANIM_NS stand
+    if() then: goto: $PREFIX ANIM_NS "stand"
 
 state $PREFIX ANIM_NS "step_rot_up_arrive":
     rgraph: $PREFIX RGRAPH_NS "bird_step_rot_up_arrive"
@@ -244,7 +244,7 @@ state $PREFIX ANIM_NS "step_rot_up_arrive":
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto: $PREFIX ANIM_NS stand
+    if() then: goto: $PREFIX ANIM_NS "stand"
 
 state $PREFIX ANIM_NS "step_arrive":
     rgraph: $PREFIX RGRAPH_NS "bird_step_arrive"
@@ -259,7 +259,7 @@ state $PREFIX ANIM_NS "step_arrive":
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto: $PREFIX ANIM_NS stand
+    if() then: goto: $PREFIX ANIM_NS "stand"
 
 state $PREFIX ANIM_NS "step_down_arrive":
     rgraph: $PREFIX RGRAPH_NS "bird_step_down_arrive"
@@ -274,7 +274,7 @@ state $PREFIX ANIM_NS "step_down_arrive":
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto: $PREFIX ANIM_NS stand
+    if() then: goto: $PREFIX ANIM_NS "stand"
 
 state $PREFIX ANIM_NS "step_up_arrive":
     rgraph: $PREFIX RGRAPH_NS "bird_step_up_arrive"
@@ -289,7 +289,7 @@ state $PREFIX ANIM_NS "step_up_arrive":
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto: $PREFIX ANIM_NS stand
+    if() then: goto: $PREFIX ANIM_NS "stand"
 
 state $PREFIX ANIM_NS "step_rot_down_arrive":
     rgraph: $PREFIX RGRAPH_NS "bird_step_rot_down_arrive"
@@ -304,7 +304,7 @@ state $PREFIX ANIM_NS "step_rot_down_arrive":
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto: $PREFIX ANIM_NS stand
+    if() then: goto: $PREFIX ANIM_NS "stand"
 
 state $PREFIX ANIM_NS "crawl_arrive":
     rgraph: $PREFIX RGRAPH_NS "bird_crawl_arrive"
@@ -317,7 +317,7 @@ state $PREFIX ANIM_NS "crawl_arrive":
         ;;  (.)  .
 
     if:
-    then: goto: $PREFIX ANIM_NS crawl
+    then: goto: $PREFIX ANIM_NS "crawl"
 
 state $PREFIX ANIM_NS "crawl":
     rgraph: $PREFIX RGRAPH_NS "bird_crawl"
@@ -335,7 +335,7 @@ state $PREFIX ANIM_NS "crawl":
             coll: all yes
                 ;; (+)- +
         then:
-            goto: crawl
+            goto: "crawl"
 
     if:
         key: not isdown d
@@ -351,7 +351,7 @@ state $PREFIX ANIM_NS "crawl":
             ;;  ( )  .
     then:
         delay: 1
-        goto: $PREFIX ANIM_NS crawl_stand
+        goto: $PREFIX ANIM_NS "crawl_stand"
 
     $IF CRAWL_MOVE:
         if:
@@ -398,7 +398,7 @@ state $PREFIX ANIM_NS "crawl":
     if:
         key: wasdown b
     then:
-        goto: $PREFIX ANIM_NS crawl_turn
+        goto: $PREFIX ANIM_NS "crawl_turn"
         delay: $GET_INT TURN_DELAY
 
 state $PREFIX ANIM_NS "crawl_turn":
@@ -412,7 +412,7 @@ state $PREFIX ANIM_NS "crawl_turn":
     if() then:
         move: 1 0
         turn
-        goto: $PREFIX ANIM_NS crawl_turn_arrive
+        goto: $PREFIX ANIM_NS "crawl_turn_arrive"
         delay: 1
 
 state $PREFIX ANIM_NS "crawl_turn_arrive":
@@ -423,7 +423,7 @@ state $PREFIX ANIM_NS "crawl_turn_arrive":
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto: $PREFIX ANIM_NS crawl
+    if() then: goto: $PREFIX ANIM_NS "crawl"
 
 state $PREFIX ANIM_NS "crawl_stand":
     rgraph: $PREFIX RGRAPH_NS "bird_crawl_stand"
@@ -440,7 +440,7 @@ state $PREFIX ANIM_NS "crawl_stand":
         ;;  (.)  .
 
     if:
-    then: goto: $PREFIX ANIM_NS stand
+    then: goto: $PREFIX ANIM_NS "stand"
 
 
 ####################
@@ -453,19 +453,19 @@ state $PREFIX ANIM_NS "stand_wings":
     if:
         key: not isdown u
     then:
-        goto: $PREFIX ANIM_NS stand
+        goto: $PREFIX ANIM_NS "stand"
 
     if:
         key: wasdown f
     then:
-        goto: $PREFIX ANIM_NS fly
+        goto: $PREFIX ANIM_NS "fly"
         move: 1 0
         delay: $GET_INT FLY_DELAY
 
     if:
         key: wasdown b
     then:
-        goto: $PREFIX ANIM_NS turn_wings
+        goto: $PREFIX ANIM_NS "turn_wings"
         delay: $GET_INT TURN_DELAY
 
 state $PREFIX ANIM_NS "turn_wings":
@@ -484,7 +484,7 @@ state $PREFIX ANIM_NS "turn_wings":
     if() then:
         move: 1 0
         turn
-        goto: $PREFIX ANIM_NS turn_arrive_wings
+        goto: $PREFIX ANIM_NS "turn_arrive_wings"
         delay: 1
 
 state $PREFIX ANIM_NS "turn_arrive_wings":
@@ -500,7 +500,7 @@ state $PREFIX ANIM_NS "turn_arrive_wings":
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
-    if() then: goto: $PREFIX ANIM_NS stand_wings
+    if() then: goto: $PREFIX ANIM_NS "stand_wings"
 
 state $PREFIX ANIM_NS "fly":
     rgraph: $PREFIX RGRAPH_NS "bird_fly"
@@ -518,7 +518,7 @@ state $PREFIX ANIM_NS "fly":
         ;;
         ;;  (.)  .
     if() then:
-        goto: $PREFIX ANIM_NS flying
+        goto: $PREFIX ANIM_NS "flying"
 
 state $PREFIX ANIM_NS "flying":
     rgraph: $PREFIX RGRAPH_NS "bird_flying"
@@ -559,19 +559,19 @@ state $PREFIX ANIM_NS "flying":
             ;;   */*\*
             ;;  (.)  .
     then:
-        goto: $PREFIX ANIM_NS stand_wings
+        goto: $PREFIX ANIM_NS "stand_wings"
 
     if:
         key: wasdown f
     then:
-        goto: $PREFIX ANIM_NS fly
+        goto: $PREFIX ANIM_NS "fly"
         move: 1 0
         delay: $GET_INT FLY_DELAY
 
     if:
         key: wasdown b
     then:
-        goto: $PREFIX ANIM_NS turn_flying
+        goto: $PREFIX ANIM_NS "turn_flying"
         delay: $GET_INT TURN_DELAY
 
 state $PREFIX ANIM_NS "turn_flying":
@@ -592,7 +592,7 @@ state $PREFIX ANIM_NS "turn_flying":
     if() then:
         move: 1 0
         turn
-        goto: $PREFIX ANIM_NS turn_arrive_flying
+        goto: $PREFIX ANIM_NS "turn_arrive_flying"
         delay: 1
 
 state $PREFIX ANIM_NS "turn_arrive_flying":
@@ -610,4 +610,4 @@ state $PREFIX ANIM_NS "turn_arrive_flying":
         ;; .   .   .
         ;;
         ;;  (.)  .
-    if() then: goto: $PREFIX ANIM_NS flying
+    if() then: goto: $PREFIX ANIM_NS "flying"

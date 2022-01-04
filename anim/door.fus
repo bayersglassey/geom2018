@@ -45,7 +45,7 @@ state "closed":
             expr: mapvar(myvar("key"))
         not: coll: bodies("touch") any yes collmap("cooldown")
     then:
-        goto: open
+        goto: "open"
 
 state "open":
     rgraph: "door"
@@ -62,10 +62,10 @@ state "open":
             yourvar("anim")
             yourvar("anim_state")
 
-        goto: closed
+        goto: "closed"
 
     if:
         exists myvar("key")
         not: expr: mapvar(myvar("key"))
     then:
-        goto: closed
+        goto: "closed"

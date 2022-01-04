@@ -35,7 +35,7 @@ state $PREFIX ANIM_NS "hover":
             move: 0 1
             turn
             rot: 3
-            goto: crawl
+            goto: "crawl"
             delay: 2
 
     if:
@@ -49,7 +49,7 @@ state $PREFIX ANIM_NS "hover":
     then:
         rot: 1
         move: 1 0
-        goto: $PREFIX ANIM_NS fly
+        goto: $PREFIX ANIM_NS "fly"
         delay: 1
 
     if:
@@ -62,7 +62,7 @@ state $PREFIX ANIM_NS "hover":
     then:
         move: 1 0
         rot: 1
-        goto: $PREFIX ANIM_NS fly
+        goto: $PREFIX ANIM_NS "fly"
         delay: 1
 
     if:
@@ -70,7 +70,7 @@ state $PREFIX ANIM_NS "hover":
         key: not isdown f
     then:
         rot: 1
-        goto: $PREFIX ANIM_NS fly
+        goto: $PREFIX ANIM_NS "fly"
         delay: 1
 
 
@@ -90,7 +90,7 @@ state $PREFIX ANIM_NS "hover":
                 ;;  . - .
         then:
             move: -1 -1
-            goto: crawl
+            goto: "crawl"
             delay: 2
 
     if:
@@ -104,7 +104,7 @@ state $PREFIX ANIM_NS "hover":
     then:
         rot: -1
         move: 1 0
-        goto: $PREFIX ANIM_NS fly
+        goto: $PREFIX ANIM_NS "fly"
         delay: 1
 
     if:
@@ -117,7 +117,7 @@ state $PREFIX ANIM_NS "hover":
     then:
         move: 1 0
         rot: -1
-        goto: $PREFIX ANIM_NS fly
+        goto: $PREFIX ANIM_NS "fly"
         delay: 1
 
     if:
@@ -125,7 +125,7 @@ state $PREFIX ANIM_NS "hover":
         key: not isdown b
     then:
         rot: -1
-        goto: $PREFIX ANIM_NS fly
+        goto: $PREFIX ANIM_NS "fly"
         delay: 1
 
 
@@ -147,7 +147,7 @@ state $PREFIX ANIM_NS "hover":
         then:
             move: 0 -1
             rot: 1
-            goto: crawl
+            goto: "crawl"
             delay: 2
 
         if:
@@ -164,7 +164,7 @@ state $PREFIX ANIM_NS "hover":
             move: 1 1
             rot: 2
             turn
-            goto: crawl
+            goto: "crawl"
             delay: 2
 
     if:
@@ -175,7 +175,7 @@ state $PREFIX ANIM_NS "hover":
             ;;     /*\*
     then:
         move: 1 0
-        goto: $PREFIX ANIM_NS fly
+        goto: $PREFIX ANIM_NS "fly"
         delay: 0
 
 
@@ -199,9 +199,9 @@ state $PREFIX ANIM_NS "fly":
     #            ;;   .   .
     #    then:
     #        move: -1 -1
-    #        goto: swim_jump
+    #        goto: "swim_jump"
     #        delay: 4
 
     if:
     then:
-        goto: $PREFIX ANIM_NS hover
+        goto: $PREFIX ANIM_NS "hover"

@@ -1,7 +1,7 @@
 state "create_body":
     if() then:
         play: "actor/rec/aibig_roller.fus"
-        goto: mainloop
+        goto: "mainloop"
 
 $SET_BOOL BIGROLLER
 

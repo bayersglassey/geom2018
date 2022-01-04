@@ -8,11 +8,11 @@ state "swim_spit":
     rgraph: $PREFIX NS "swim_spit"
     hitbox: collmap("stand")
     unsafe
-    if() then: goto: swim
+    if() then: goto: "swim"
 
 state "swim_jump":
-    # NOTE: the only "goto: swim_jump" is in "start_jump", which checks
-    # whether we're in water, and does "goto: jump" or "goto: swim_jump"
+    # NOTE: the only "goto: "swim_jump"" is in "start_jump", which checks
+    # whether we're in water, and does "goto: jump" or "goto: "swim_jump""
     # accordingly.
     # Therefore, if we're in "swim_jump", then we can safely assume we're in
     # water without checking.
@@ -33,7 +33,7 @@ state "swim_jump":
     then:
         move: 1 0
         rot: 1
-        goto delay: step
+        goto delay: "step"
 
     if:
         any:
@@ -54,7 +54,7 @@ state "swim_jump":
     then:
         move: 2 1
         rot: 1
-        goto immediate: start_jump
+        goto immediate: "start_jump"
 
     if:
         any:
@@ -74,7 +74,7 @@ state "swim_jump":
     then:
         move: 0 0
         rot: -1
-        goto immediate: start_jump
+        goto immediate: "start_jump"
 
     if:
         any:
@@ -88,10 +88,10 @@ state "swim_jump":
             ;; ( )
     then:
         move: 1 0
-        goto immediate: start_jump
+        goto immediate: "start_jump"
 
     if() then:
-        goto immediate: swim
+        goto immediate: "swim"
 
 state "swim":
     rgraph: $PREFIX NS "swim"
@@ -101,7 +101,7 @@ state "swim":
     if:
         key: wentdown y
     then:
-        call: swim_spit
+        call: "swim_spit"
 
     if:
         any:
@@ -115,7 +115,7 @@ state "swim":
     then:
         move: 1 0
         rot: 1
-        goto delay: step
+        goto delay: "step"
 
     if:
         any:
@@ -138,7 +138,7 @@ state "swim":
     then:
         move: 2 1
         rot: 1
-        goto immediate: start_jump
+        goto immediate: "start_jump"
 
     if:
         any:
@@ -160,7 +160,7 @@ state "swim":
     then:
         move: 0 0
         rot: -1
-        goto immediate: start_jump
+        goto immediate: "start_jump"
 
     if:
         any:
@@ -174,7 +174,7 @@ state "swim":
             ;; ( )
     then:
         move: 1 0
-        goto immediate: start_jump
+        goto immediate: "start_jump"
 
     if:
         key: wasdown b
@@ -187,5 +187,5 @@ state "swim":
         coll: all yes
             ;; (+)- +
     then:
-        goto: stand
+        goto: "stand"
         delay: 2

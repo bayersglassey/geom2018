@@ -1,6 +1,6 @@
 
-$IF !NO_COLLECT_ON_SPIT: on "spit": goto immediate: _collected
-$IF !NO_COLLECT_ON_TOUCH: on "touch": goto immediate: _collected
+$IF !NO_COLLECT_ON_SPIT: on "spit": goto immediate: "_collected"
+$IF !NO_COLLECT_ON_TOUCH: on "touch": goto immediate: "_collected"
 
 
 proc "while_collected":
@@ -11,13 +11,13 @@ proc "while_collected":
     if: exists myvar("respawn_mapvar")
     then:
         if: expr: <= mapvar(myvar("respawn_mapvar")) 0
-        then: goto immediate: init
+        then: goto immediate: "init"
 
     # Respawn based on a timer
     if: exists myvar("respawn_in")
     then:
         if: expr: <= myvar("respawn_in") 0
-        then: goto immediate: init
+        then: goto immediate: "init"
         else: dec myvar("respawn_in")
 
 
@@ -27,7 +27,7 @@ state "init":
         exists myvar("collected_key")
         expr: mapvar(myvar("collected_key"))
     then:
-        goto: collected
+        goto: "collected"
 
     if() then:
         if:
@@ -37,7 +37,7 @@ state "init":
             not:
                 exists myvar("antikey")
                 expr: mapvar(myvar("antikey"))
-        then: goto immediate: _appear
+        then: goto immediate: "_appear"
         else:
             # Do nothing; so, our state will remain "init",
             # so we will be invisible, and each frame we will
@@ -51,15 +51,15 @@ state "_appear":
         if:
             exists myvar("crouch")
             expr: myvar("crouch")
-        then: goto delay: appear_crouch
-        else: goto delay: appear
+        then: goto delay: "appear_crouch"
+        else: goto delay: "appear"
 
     if() then:
         if:
             exists myvar("crouch")
             expr: myvar("crouch")
-        then: goto immediate: _crouch
-        else: goto immediate: _stand
+        then: goto immediate: "_crouch"
+        else: goto immediate: "_stand"
 
 state "_collected":
     if() then:
@@ -76,4 +76,4 @@ state "_collected":
         then: set myvar("respawn_in"): myvar("respawn_time")
         $IF RESPAWN_TIME: else: set myvar("respawn_in"): $GET_INT RESPAWN_TIME
 
-        goto: collected
+        goto: "collected"

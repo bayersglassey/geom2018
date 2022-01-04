@@ -1,6 +1,6 @@
 state "create_body":
     if() then:
         play: "actor/rec/aispider.fus"
-        goto: mainloop
+        goto: "mainloop"
 
 import "actor/_aispider.fus"
