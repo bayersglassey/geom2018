@@ -1,5 +1,5 @@
 
-stand_r0:
+state "stand_r0":
     rgraph: "bubblecar_r0"
     collmsgs: "crush"
     hitbox:
@@ -94,7 +94,7 @@ stand_r0:
         goto: stand_r2
         delay: 4
 
-stand_r1:
+state "stand_r1":
     rgraph: "bubblecar_r1"
     collmsgs: "crush"
     hitbox:
@@ -189,7 +189,7 @@ stand_r1:
         goto: stand_r3
         delay: 4
 
-stand_r2:
+state "stand_r2":
     rgraph: "bubblecar_r2"
     collmsgs: "crush"
     hitbox:
@@ -284,7 +284,7 @@ stand_r2:
         goto: stand_r0
         delay: 4
 
-stand_r3:
+state "stand_r3":
     rgraph: "bubblecar_r3"
     collmsgs: "crush"
     hitbox:

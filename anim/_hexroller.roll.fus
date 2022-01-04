@@ -5,7 +5,7 @@
 # R0, R1, R4, R5 (str), e.g. "", "_R1", ..., "_R5"
 
 
-$SUFFIX R0 $PREFIX ANIM_NS stand:
+state $SUFFIX R0 $PREFIX ANIM_NS "stand":
     rgraph: $SUFFIX R0 $PREFIX RGRAPH_NS "hexroller"
     hitbox:
         ;;   .   .

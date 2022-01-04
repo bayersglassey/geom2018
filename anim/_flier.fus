@@ -1,5 +1,5 @@
 
-born:
+state "born":
     rgraph: "flier_born"
 
     if:
@@ -35,6 +35,6 @@ born:
 
 import "anim/_flier_core.fus"
 
-dead:
+state "dead":
     rgraph: "dead_cycle"
     if() then: die

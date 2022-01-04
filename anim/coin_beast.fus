@@ -15,17 +15,17 @@ on "crush": goto: dead
 
 import "anim/_coin.behaviour.fus"
 
-_crouch:
+state "_crouch":
     if() then: goto: crawl
 
-_stand:
+state "_stand":
     if() then: goto: stand
 
-appear:
+state "appear":
     rgraph: "dead_once_reversed"
     if() then: goto: stand
 
-stand:
+state "stand":
     rgraph: "coin_beast_stand"
     hitbox:
         ;;   .   .
@@ -41,7 +41,7 @@ stand:
     import "anim/_spider_jump.state.fus"
     import "anim/_spider_step.state.fus"
 
-turn:
+state "turn":
     rgraph: "coin_beast_turn"
     hitbox:
         ;;   .   .
@@ -56,7 +56,7 @@ turn:
 
     if() then: goto: stand
 
-step:
+state "step":
     rgraph: "coin_beast_step"
     hitbox:
         ;;   .   .
@@ -71,7 +71,7 @@ step:
 
     if() then: goto: stand
 
-step_up:
+state "step_up":
     rgraph: "coin_beast_step_up"
     hitbox:
         ;;   .   .
@@ -86,7 +86,7 @@ step_up:
 
     if() then: goto: stand
 
-step_down:
+state "step_down":
     rgraph: "coin_beast_step_down"
     hitbox:
         ;;   .   .   .
@@ -101,11 +101,11 @@ step_down:
 
     if() then: goto: stand
 
-appear_crouch:
+state "appear_crouch":
     rgraph: "dead_once_crouch_reversed"
     if() then: goto: crawl
 
-crawling:
+state "crawling":
     rgraph: "coin_beast_crawling"
     hitbox:
         ;;   .   .
@@ -115,7 +115,7 @@ crawling:
         ;;  (.)  .
     if() then: goto: crawl
 
-crawl:
+state "crawl":
     rgraph: "coin_beast_crawl"
     hitbox:
         ;;     .
@@ -145,7 +145,7 @@ crawl:
         turn
         delay: 1
 
-crawl_step:
+state "crawl_step":
     rgraph: "coin_beast_crawl_step"
     hitbox:
         ;;    .   .
@@ -153,7 +153,7 @@ crawl_step:
         ;;     (.)  .
     if() then: goto: crawl
 
-crawl_step_down:
+state "crawl_step_down":
     rgraph: "coin_beast_crawl_step_down"
     hitbox:
         ;;    .   .
@@ -161,7 +161,7 @@ crawl_step_down:
         ;;  . -(.)  .
     if() then: goto: crawl
 
-uncrawling:
+state "uncrawling":
     rgraph: "coin_beast_uncrawling"
     hitbox:
         ;;   .   .
@@ -171,12 +171,12 @@ uncrawling:
         ;;  (.)  .
     if() then: goto: stand
 
-start_jump:
+state "start_jump":
     if() then:
         goto: jump
         delay: 2
 
-jump:
+state "jump":
     rgraph: "coin_beast_jump"
     unsafe
     hitbox:
@@ -189,7 +189,7 @@ jump:
     # Landing, jumping, crashing
     import "anim/_spider_jumping.state.fus"
 
-collected:
+state "collected":
     rgraph: "dead_once"
     unsafe
     if() then:
@@ -198,12 +198,12 @@ collected:
         continue
     if() then: die
 
-mostly_dead:
+state "mostly_dead":
     rgraph: "dead_cycle"
     unsafe
     if() then: die mostly
 
-dead:
+state "dead":
     rgraph: "dead_cycle"
     unsafe
     if() then: die

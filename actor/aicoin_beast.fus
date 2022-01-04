@@ -1,4 +1,4 @@
-create_body:
+state "create_body":
     if() then:
         play: "actor/rec/aicoin_beast.fus"
         goto: mainloop

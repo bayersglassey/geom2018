@@ -47,7 +47,7 @@ $SET_BOOL FLIPPY_GRAB
 $IF SPIDER: $SET_BOOL NOGRAB
 
 
-$PREFIX ANIM_NS stand:
+state $PREFIX ANIM_NS "stand":
     rgraph: $PREFIX RGRAPH_NS "roller"
     hitbox:
         ;;    .
@@ -193,7 +193,7 @@ $PREFIX ANIM_NS stand:
 
 
 
-$PREFIX ANIM_NS turn:
+state $PREFIX ANIM_NS "turn":
     # When bumped, turn around
     if:
     then:
@@ -201,7 +201,7 @@ $PREFIX ANIM_NS turn:
         goto: $PREFIX ANIM_NS stand
 
 
-$PREFIX ANIM_NS grab:
+state $PREFIX ANIM_NS "grab":
     # Rolling around with your pseudopod stuck out
 
     rgraph: $PREFIX RGRAPH_NS "roller_grab"
@@ -378,7 +378,7 @@ $PREFIX ANIM_NS grab:
         delay: 1
 
 
-$PREFIX ANIM_NS grab_flipped:
+state $PREFIX ANIM_NS "grab_flipped":
     rgraph: $PREFIX RGRAPH_NS "roller_grab_flipped"
     hitbox:
         ;; .   .
@@ -455,7 +455,7 @@ $PREFIX ANIM_NS grab_flipped:
         delay: 1
 
 
-$PREFIX ANIM_NS grabbed:
+state $PREFIX ANIM_NS "grabbed":
     rgraph: $PREFIX RGRAPH_NS "roller_grab"
     hitbox:
         ;;    .   .

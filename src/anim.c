@@ -752,6 +752,124 @@ static int _state_parse_rule(state_t *state, fus_lexer_t *lexer,
     return 0;
 }
 
+static int _state_parse(state_t *state, fus_lexer_t *lexer,
+    prismelrenderer_t *prend, vecspace_t *space
+){
+    int err;
+
+    stateset_t *stateset = state->stateset;
+
+    /* Parse state properties */
+    while(1){
+        if(GOT("rgraph")){
+            const char *rgraph_name;
+            NEXT
+            OPEN
+            GET_STR_CACHED(rgraph_name, &prend->name_store)
+            CLOSE
+            state->rgraph = prismelrenderer_get_rendergraph(
+                prend, rgraph_name);
+            if(state->rgraph == NULL){
+                fus_lexer_err_info(lexer);
+                fprintf(stderr, "Couldn't find shape: %s\n", rgraph_name);
+                return 2;}
+            continue;
+        }
+        if(GOT("unsafe")){
+            NEXT
+            state->safe = false;
+            continue;
+        }
+        if(GOT("flying")){
+            NEXT
+            state->flying = true;
+            continue;
+        }
+        if(GOT("collmsgs")){
+            NEXT
+            OPEN
+            while(!GOT(")")){
+                char *msg;
+                GET_STR(msg)
+                ARRAY_PUSH(char*, state->collmsgs, msg)
+            }
+            NEXT
+            continue;
+        }
+        if(GOT("hitbox")){
+            NEXT
+            OPEN
+
+            hexcollmap_t *own_collmap;
+            hexcollmap_t *collmap;
+            err = _parse_collmap(stateset, lexer, prend, space,
+                &own_collmap, &collmap);
+            if(err)return err;
+
+            state->own_hitbox = own_collmap;
+            state->hitbox = collmap;
+
+            CLOSE
+            continue;
+        }
+        if(GOT("on")){
+            NEXT
+            collmsg_handler_t handler;
+            err = _parse_collmsg_handler(stateset, lexer, &handler,
+                prend, space);
+            if(err)return err;
+            ARRAY_PUSH(collmsg_handler_t, state->collmsg_handlers, handler)
+            continue;
+        }
+        break;
+    }
+
+    /* Parse rules */
+    while(1){
+        if(GOT(")"))break;
+
+        if(GOT("import")){
+            NEXT
+
+            /* We use _fus_lexer_get_str to avoid calling fus_lexer_next until after
+            the call to fus_lexer_init_with_vars is done, to make sure we don't modify
+            lexer->vars first */
+            char *filename;
+            err = _fus_lexer_get_str(lexer, &filename);
+            if(err)return err;
+
+            char *text = load_file(filename);
+            if(text == NULL)return 1;
+
+            fus_lexer_t sublexer;
+            err = fus_lexer_init_with_vars(&sublexer, text, filename,
+                lexer->vars);
+            if(err)return err;
+
+            while(!fus_lexer_done(&sublexer)){
+                err = _state_parse_rule(state, &sublexer, prend, space);
+                if(err)return err;
+            }
+
+            /* We now call fus_lexer_next manually, see call to _fus_lexer_get_str
+            above */
+            err = fus_lexer_next(lexer);
+            if(err)return err;
+
+            fus_lexer_cleanup(&sublexer);
+            free(filename);
+            free(text);
+            continue;
+        }
+
+        err = _state_parse_rule(state, lexer, prend, space);
+        if(err)return err;
+    }
+    NEXT
+
+    return 0;
+}
+
 static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
     prismelrenderer_t *prend, vecspace_t *space
 ){
@@ -760,7 +878,7 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
 
     INIT
 
-    while(true){
+    while(!DONE){
         if(GOT("debug_collision")){
             NEXT
             stateset->debug_collision = true;
@@ -851,19 +969,6 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             entry->name = name;
             continue;
         }
-        if(GOT("end_headers")){
-            /* This weird thing is just so, theoretically, you could use a
-            "reserved keyword" like "collmsgs" or "on" as a state name.
-            Although that would be an awful idea. Please don't do that. */
-            NEXT
-            break;
-        }
-        break;
-    }
-
-    while(1){
-        if(DONE)break;
-
         if(GOT("import")){
             NEXT
 
@@ -899,124 +1004,22 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             free(text);
             continue;
         }
+        if(GOT("state")){
+            NEXT
+            const char *name;
+            GET_STR_CACHED(name, &prend->name_store)
+            OPEN
 
-        const char *name;
-        GET_NAME_CACHED(name, &prend->name_store)
-        OPEN
-
-        ARRAY_PUSH_NEW(state_t*, stateset->states, state)
-        err = state_init(state, stateset, name);
-        if(err)return err;
-
-        /* Parse state properties */
-        while(1){
-            if(GOT("rgraph")){
-                const char *rgraph_name;
-                NEXT
-                OPEN
-                GET_STR_CACHED(rgraph_name, &prend->name_store)
-                CLOSE
-                state->rgraph = prismelrenderer_get_rendergraph(
-                    prend, rgraph_name);
-                if(state->rgraph == NULL){
-                    fus_lexer_err_info(lexer);
-                    fprintf(stderr, "Couldn't find shape: %s\n", rgraph_name);
-                    return 2;}
-                continue;
-            }
-            if(GOT("unsafe")){
-                NEXT
-                state->safe = false;
-                continue;
-            }
-            if(GOT("flying")){
-                NEXT
-                state->flying = true;
-                continue;
-            }
-            if(GOT("collmsgs")){
-                NEXT
-                OPEN
-                while(!GOT(")")){
-                    char *msg;
-                    GET_STR(msg)
-                    ARRAY_PUSH(char*, state->collmsgs, msg)
-                }
-                NEXT
-                continue;
-            }
-            if(GOT("hitbox")){
-                NEXT
-                OPEN
-
-                hexcollmap_t *own_collmap;
-                hexcollmap_t *collmap;
-                err = _parse_collmap(stateset, lexer, prend, space,
-                    &own_collmap, &collmap);
-                if(err)return err;
-
-                state->own_hitbox = own_collmap;
-                state->hitbox = collmap;
-
-                CLOSE
-                continue;
-            }
-            if(GOT("on")){
-                NEXT
-                collmsg_handler_t handler;
-                err = _parse_collmsg_handler(stateset, lexer, &handler,
-                    prend, space);
-                if(err)return err;
-                ARRAY_PUSH(collmsg_handler_t, state->collmsg_handlers, handler)
-                continue;
-            }
-            break;
-        }
-
-        /* Parse rules */
-        while(1){
-            if(GOT(")"))break;
-
-            if(GOT("import")){
-                NEXT
-
-                /* We use _fus_lexer_get_str to avoid calling fus_lexer_next until after
-                the call to fus_lexer_init_with_vars is done, to make sure we don't modify
-                lexer->vars first */
-                char *filename;
-                err = _fus_lexer_get_str(lexer, &filename);
-                if(err)return err;
-
-                char *text = load_file(filename);
-                if(text == NULL)return 1;
-
-                fus_lexer_t sublexer;
-                err = fus_lexer_init_with_vars(&sublexer, text, filename,
-                    lexer->vars);
-                if(err)return err;
-
-                while(!fus_lexer_done(&sublexer)){
-                    err = _state_parse_rule(state, &sublexer, prend, space);
-                    if(err)return err;
-                }
-
-                /* We now call fus_lexer_next manually, see call to _fus_lexer_get_str
-                above */
-                err = fus_lexer_next(lexer);
-                if(err)return err;
-
-                fus_lexer_cleanup(&sublexer);
-                free(filename);
-                free(text);
-                continue;
-            }
-
-            err = _state_parse_rule(state, lexer, prend, space);
+            ARRAY_PUSH_NEW(state_t*, stateset->states, state)
+            err = state_init(state, stateset, name);
             if(err)return err;
+
+            err = _state_parse(state, lexer, prend, space);
+            if(err)return err;
+            continue;
         }
-        NEXT
+        return UNEXPECTED(NULL);
     }
-    NEXT
     return 0;
 }
 

@@ -7,7 +7,7 @@
 #$SET_BOOL ONLY_STICK_IF_NOT_SHIFT
 
 
-$PREFIX ANIM_NS hover:
+state $PREFIX ANIM_NS "hover":
     rgraph: $PREFIX RGRAPH_NS "flier"
     unsafe
     flying
@@ -179,7 +179,7 @@ $PREFIX ANIM_NS hover:
         delay: 0
 
 
-$PREFIX ANIM_NS fly:
+state $PREFIX ANIM_NS "fly":
     rgraph: $PREFIX RGRAPH_NS "flier_fly"
     unsafe
     flying

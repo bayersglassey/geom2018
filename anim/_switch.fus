@@ -13,7 +13,7 @@ collmap "hitbox":
     ;;     *
     ;;  (.)- .
 
-init:
+state "init":
     if:
         expr: mapvar(myvar("key"))
     then:
@@ -23,7 +23,7 @@ init:
     then:
         goto immediate: switch_off
 
-switch_off:
+state "switch_off":
     rgraph: $PREFIX RGRAPH_PREFIX "off"
     hitbox: collmap("hitbox")
     on "spit":
@@ -31,13 +31,13 @@ switch_off:
         goto: switching_on
         delay: $GET_INT DELAY
 
-switching_on:
+state "switching_on":
     rgraph: $PREFIX RGRAPH_PREFIX "on"
     hitbox: collmap("hitbox")
     if:
     then: goto: switch_on
 
-switch_on:
+state "switch_on":
     rgraph: $PREFIX RGRAPH_PREFIX "on"
     hitbox: collmap("hitbox")
     $IF !ONEWAY: on "spit":
@@ -45,7 +45,7 @@ switch_on:
         goto: switching_off
         delay: $GET_INT DELAY
 
-switching_off:
+state "switching_off":
     rgraph: $PREFIX RGRAPH_PREFIX "off"
     hitbox: collmap("hitbox")
     if:

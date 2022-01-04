@@ -4,13 +4,13 @@
 # Expected vars:
 # NS (str), e.g. "spider_"
 
-swim_spit:
+state "swim_spit":
     rgraph: $PREFIX NS "swim_spit"
     hitbox: collmap("stand")
     unsafe
     if() then: goto: swim
 
-swim_jump:
+state "swim_jump":
     # NOTE: the only "goto: swim_jump" is in "start_jump", which checks
     # whether we're in water, and does "goto: jump" or "goto: swim_jump"
     # accordingly.
@@ -93,7 +93,7 @@ swim_jump:
     if() then:
         goto immediate: swim
 
-swim:
+state "swim":
     rgraph: $PREFIX NS "swim"
     hitbox: collmap("stand")
     unsafe

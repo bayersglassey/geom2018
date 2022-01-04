@@ -1,4 +1,4 @@
-create_body:
+state "create_body":
     if() then:
         play: "actor/rec/airollerspider.fus"
         goto: mainloop

@@ -21,7 +21,7 @@ collmap "detect":
     ;;           \*/*\*/*\*/*\*/*\*/*\*/
     ;;            + - + - + - + - + - +
 
-create_body:
+state "create_body":
     if:
         expr: mapvar("eyespider_tunnels_ran_away_1")
     then:
@@ -33,7 +33,7 @@ create_body:
         play: "data/maps/demo/recs/eyespider_tunnels_wait_1.fus"
         goto immediate: start
 
-start:
+state "start":
     if:
         coll: bodies("spit") any yes collmap("detect")
     then:
@@ -41,4 +41,4 @@ start:
         play: "data/maps/demo/recs/eyespider_tunnels_run_away_1.fus"
         goto: start2
 
-start2:
+state "start2":

@@ -10,27 +10,27 @@ proc crawl_crush:
     then: goto delay: crawl_shielding
 
 
-crawling:
+state "crawling":
     rgraph: $PREFIX NS "crawling"
     hitbox: collmap("stand")
     if() then: goto: crawl
 
-uncrawling:
+state "uncrawling":
     rgraph: $PREFIX NS "uncrawling"
     hitbox: collmap("stand")
     if() then: goto: stand
 
-crawling_looking_up:
+state "crawling_looking_up":
     rgraph: $PREFIX NS "crawling_looking_up"
     hitbox: collmap("stand")
     if() then: goto: crawl_looking_up
 
-uncrawling_looking_up:
+state "uncrawling_looking_up":
     rgraph: $PREFIX NS "uncrawling_looking_up"
     hitbox: collmap("stand")
     if() then: goto: looking_up
 
-crawl_looking_up:
+state "crawl_looking_up":
     rgraph: $PREFIX NS "crawl_looking_up"
     hitbox: collmap("crawl")
     on "crush": call: crawl_crush
@@ -59,19 +59,19 @@ crawl_looking_up:
     if: key: not isdown x
     then: goto: crawl
 
-crawl_spit:
+state "crawl_spit":
     rgraph: $PREFIX NS "crawl_spit"
     hitbox: collmap("crawl")
     on "crush": call: crawl_crush
     if() then: goto: crawl
 
-crawl_looking_up_spit:
+state "crawl_looking_up_spit":
     rgraph: $PREFIX NS "crawl_looking_up_spit"
     hitbox: collmap("crawl")
     on "crush": call: crawl_crush
     if() then: goto: crawl_looking_up
 
-crawl:
+state "crawl":
     rgraph: $PREFIX NS "crawl"
     hitbox: collmap("crawl")
 
@@ -169,13 +169,13 @@ crawl:
     then:
         goto: crawl_look_up
 
-crawl_look_up:
+state "crawl_look_up":
     rgraph: $PREFIX NS "crawl_look_up"
     hitbox: collmap("crawl")
     on "crush": call: crawl_crush
     if() then: goto: crawl_looking_up
 
-crawl_step_down:
+state "crawl_step_down":
     rgraph: $PREFIX NS "crawl_step"
     hitbox:
         ;;    .   .
@@ -197,7 +197,7 @@ crawl_step_down:
 
     if() then: goto: crawl
 
-crawl_step:
+state "crawl_step":
     # If you make changes to this, you'll probably want to make same
     # changes to crawl_turn
     rgraph: $PREFIX NS "crawl_step"
@@ -221,7 +221,7 @@ crawl_step:
 
     if() then: goto: crawl
 
-crawl_turn:
+state "crawl_turn":
     # Like crawl_step, but without the extended hitbox
     # (so you can turn around in-place while crouching, without exposing yourself
     # to being crushed)
@@ -231,7 +231,7 @@ crawl_turn:
 
     if() then: goto immediate: crawl_step
 
-crawl_shielding:
+state "crawl_shielding":
     rgraph: $PREFIX NS "crawl_shielding"
     # (No hitbox: we are invincible)
     if:

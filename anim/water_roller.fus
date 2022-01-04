@@ -6,6 +6,6 @@ $SET_STR RGRAPH_NS "water_"
 $SET_BOOL WATER_ROLLER
 import "anim/_roller.fus"
 
-dead:
+state "dead":
     rgraph: "dead_cycle"
     if() then: die

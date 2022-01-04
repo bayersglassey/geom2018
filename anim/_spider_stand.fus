@@ -13,7 +13,7 @@
 # STATE_JUMP (str)
 
 
-$GET_SYM STATE_STAND:
+state $GET_STR STATE_STAND:
     rgraph: $PREFIX NS $GET_STR STATE_STAND
     hitbox: collmap("stand")
 
@@ -29,7 +29,7 @@ $GET_SYM STATE_STAND:
         # "stand" state.
         if() then: goto: stand
 
-$GET_SYM STATE_START_JUMP:
+state $GET_STR STATE_START_JUMP:
 
     if:
         expr: myvar("is_flierspider")
@@ -52,7 +52,7 @@ $GET_SYM STATE_START_JUMP:
     if() then:
         goto delay: $GET_SYM STATE_JUMP
 
-$GET_SYM STATE_JUMP:
+state $GET_STR STATE_JUMP:
     # NOTE: the only "goto: jump" is in "start_jump", which checks whether
     # we're in water, and does "goto: jump" or "goto: swim_jump"
     # accordingly.
@@ -66,7 +66,7 @@ $GET_SYM STATE_JUMP:
     # Landing, jumping, crashing
     import "anim/_spider_jumping.state.fus"
 
-$GET_SYM STATE_STEP_DOWN:
+state $GET_STR STATE_STEP_DOWN:
     rgraph: $PREFIX NS $GET_STR STATE_STEP
     hitbox:
         ;;   .   .   .
@@ -81,7 +81,7 @@ $GET_SYM STATE_STEP_DOWN:
 
     if() then: goto: $GET_SYM STATE_STAND
 
-$GET_SYM STATE_STEP:
+state $GET_STR STATE_STEP:
     rgraph: $PREFIX NS $GET_STR STATE_STEP
     hitbox: collmap("stand")
 

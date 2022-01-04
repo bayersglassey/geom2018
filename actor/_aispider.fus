@@ -1,7 +1,7 @@
 
 # May be used for spider *or* coin_beast!
 
-mainloop:
+state "mainloop":
     # Main AI loop
 
     if() then:
@@ -205,7 +205,7 @@ mainloop:
         delay: 6
 
 
-mainloop_crawl:
+state "mainloop_crawl":
 
     if() then:
         key: up b

@@ -2,7 +2,7 @@
 
 $SET_INT DELAY 2
 
-stand:
+state "stand":
     rgraph: "rocket"
     unsafe flying
 
@@ -26,17 +26,17 @@ stand:
         move: 1 0
         goto delay: forward
 
-forward:
+state "forward":
     rgraph: "rocket_forward"
     unsafe flying
     if() then: goto: stand
 
-turn_up:
+state "turn_up":
     rgraph: "rocket_turn_up"
     unsafe flying
     if() then: goto: stand
 
-turn_down:
+state "turn_down":
     rgraph: "rocket_turn_down"
     unsafe flying
     if() then: goto: stand

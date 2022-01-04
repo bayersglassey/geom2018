@@ -1,7 +1,7 @@
 
 collmsgs: "crush"
 
-stand:
+state "stand":
     rgraph: "big_roller"
     hitbox:
         ;;      .
@@ -75,14 +75,14 @@ stand:
         rot: 2
         delay: 1
 
-turn:
+state "turn":
     # When bumped, turn around
     if:
     then:
         confused: toggle
         goto: stand
 
-grab:
+state "grab":
     rgraph: "big_roller_grab"
     hitbox:
         ;;      .   .   .

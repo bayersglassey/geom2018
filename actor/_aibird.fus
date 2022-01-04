@@ -1,5 +1,5 @@
 
-mainloop:
+state "mainloop":
 
     if:
     then:

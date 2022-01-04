@@ -8,7 +8,7 @@
 #  int GRAB
 #  int TURN
 
-mainloop:
+state "mainloop":
 
     if:
     then:

@@ -36,7 +36,7 @@ collmap "detect_small":
     ;;      \*/*\*/*\*/*\*/
     ;;       + - + - + - +
 
-create_body:
+state "create_body":
     if:
         expr: mapvar("eyespider_vines_ran_away_2")
     then:
@@ -53,7 +53,7 @@ create_body:
         play: "data/maps/demo/recs/eyespider_vines_wait_1.fus"
         goto immediate: start
 
-start:
+state "start":
     if:
         # There is spit nearby
         coll: bodies("spit") any yes collmap("detect")
@@ -62,7 +62,7 @@ start:
         play: "data/maps/demo/recs/eyespider_vines_run_away_1.fus"
         goto: start2
 
-start2:
+state "start2":
 
     # There is a spider next to us
     if: coll: bodies("touch") any yes collmap("detect_small")
@@ -77,7 +77,7 @@ start2:
         play: "data/maps/demo/recs/eyespider_vines_run_away_2.fus"
         goto: start3
 
-start2_looking:
+state "start2_looking":
     # There is *NOT* a spider next to us
     if: not: coll: bodies("touch") any yes collmap("detect_small")
     then:
@@ -85,7 +85,7 @@ start2_looking:
         set mapvar("eyespider_vines_looking"): F
         goto: start2
 
-start3:
+state "start3":
     if() then:
         set mapvar("eyespider_vines_ran_away_3"): T
 
@@ -93,9 +93,9 @@ start3:
         delay: 11
         goto: start3_remove
 
-start3_remove:
+state "start3_remove":
     if() then:
         remove
         goto: start3_removed
 
-start3_removed:
+state "start3_removed":

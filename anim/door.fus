@@ -35,7 +35,7 @@ vars:
     "anim_state": null
 
 
-closed:
+state "closed":
     rgraph: "doorframe"
     hitbox: collmap("hitbox")
 
@@ -47,7 +47,7 @@ closed:
     then:
         goto: open
 
-open:
+state "open":
     rgraph: "door"
     hitbox: collmap("hitbox")
 

@@ -2,7 +2,7 @@
 # Expected vars at runtime:
 # * key (str)
 
-init:
+state "init":
     if: any:
         all:
             exists myvar("key")
@@ -17,7 +17,7 @@ init:
     then:
         goto immediate: waiting
 
-waiting:
+state "waiting":
     rgraph: "hotspot_waiting"
     hitbox:
         ;;   .   .
@@ -37,7 +37,7 @@ waiting:
 
         goto: touched
 
-touched:
+state "touched":
     rgraph: "hotspot_touched"
     hitbox:
         ;;   .   .

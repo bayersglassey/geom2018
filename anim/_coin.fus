@@ -1,33 +1,33 @@
 
 import "anim/_coin.behaviour.fus"
 
-_crouch:
+state "_crouch":
     if() then: goto: crouch
 
-_stand:
+state "_stand":
     if() then: goto: stand
 
-appear:
+state "appear":
     rgraph: "dead_once_centered_reversed"
     if() then: goto: stand
 
-appear_crouch:
+state "appear_crouch":
     rgraph: "dead_once_crouch_reversed"
     if() then: goto: crouch
 
-stand:
+state "stand":
     rgraph: $GET_STR RGRAPH_STAND
     hitbox:
         ;;  (+)
 
-crouch:
+state "crouch":
     rgraph: $GET_STR RGRAPH_CROUCH
     hitbox:
         ;;     .
         ;;     *
         ;;  (.)  .
 
-collected:
+state "collected":
     rgraph: "dead_once_centered"
     if() then:
         # Do whatever it is coin-like things do while they've been collected...

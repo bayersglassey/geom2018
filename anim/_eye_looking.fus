@@ -2,17 +2,17 @@
 # Expected variables:
 # LOOK_SUFFIX (str), one of "_l", "", "_d"
 
-$SUFFIX LOOK_SUFFIX looking:
+state $SUFFIX LOOK_SUFFIX "looking":
     rgraph: $SUFFIX LOOK_SUFFIX "eye_looking"
     hitbox: collmap("hitbox")
     if() then: goto: $SUFFIX LOOK_SUFFIX look
 
-$SUFFIX LOOK_SUFFIX unlooking:
+state $SUFFIX LOOK_SUFFIX "unlooking":
     rgraph: $SUFFIX LOOK_SUFFIX "eye_unlooking"
     hitbox: collmap("hitbox")
     if() then: goto: open
 
-$SUFFIX LOOK_SUFFIX look:
+state $SUFFIX LOOK_SUFFIX "look":
     rgraph: $SUFFIX LOOK_SUFFIX "eye_look"
     hitbox: collmap("hitbox")
 

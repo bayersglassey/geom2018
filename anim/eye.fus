@@ -67,7 +67,7 @@ collmap "looking":
 collmap "looking_l": collmap("looking") ^  2
 collmap "looking_d": collmap("looking") ^ -2
 
-closed:
+state "closed":
     rgraph: "eye_closed"
     hitbox: collmap("hitbox")
 
@@ -83,7 +83,7 @@ closed:
             coll: bodies(myvar("key_anim")) any yes collmap("opening")
     then: goto delay: opening
 
-opening:
+state "opening":
     rgraph: "eye_opening"
     hitbox: collmap("hitbox")
     if() then:
@@ -92,7 +92,7 @@ opening:
             inc mapvar(myvar("opened_key"))
         goto: open
 
-open:
+state "open":
     rgraph: "eye_open"
     hitbox: collmap("hitbox")
 
@@ -126,7 +126,7 @@ open:
         coll: bodies(myvar("key_anim")) any yes collmap("looking_d")
     then: goto delay: looking_d
 
-closing:
+state "closing":
     rgraph: "eye_closing"
     hitbox: collmap("hitbox")
     if() then:

@@ -42,7 +42,7 @@ proc on_death:
         set myvar("carrying"): null
 
 
-fly:
+state "fly":
     rgraph: $PREFIX RGRAPH_NS "spit_fly"
     collmsgs: "spit" $IF SPIKEY("spikeyspit")
     hitbox:
@@ -90,7 +90,7 @@ fly:
     if() then:
         move: 1 0
 
-crouch_fly:
+state "crouch_fly":
     rgraph: $PREFIX RGRAPH_NS "spit_crouch_fly"
     collmsgs: "spit" $IF SPIKEY("spikeyspit")
     hitbox:
@@ -132,10 +132,10 @@ crouch_fly:
     if() then:
         move: 1 0
 
-dead:
+state "dead":
     rgraph: "dead_once"
     if() then: remove
 
-crouch_dead:
+state "crouch_dead":
     rgraph: "dead_once_crouch"
     if() then: remove

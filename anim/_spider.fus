@@ -151,12 +151,12 @@ $UNSET_BOOL RUNNING
 import "anim/_spider_stand.fus"
 
 
-look_up:
+state "look_up":
     rgraph: $PREFIX NS "look_up"
     hitbox: collmap("stand")
     if() then: goto: looking_up
 
-looking_up:
+state "looking_up":
     rgraph: $PREFIX NS "looking_up"
     hitbox: collmap("stand")
 
@@ -193,17 +193,17 @@ looking_up:
     if: key: not isdown x
     then: goto: stand
 
-spit:
+state "spit":
     rgraph: $PREFIX NS "spit"
     hitbox: collmap("stand")
     if() then: goto: stand
 
-looking_up_spit:
+state "looking_up_spit":
     rgraph: $PREFIX NS "looking_up_spit"
     hitbox: collmap("stand")
     if() then: goto: looking_up
 
-turn:
+state "turn":
     rgraph: $PREFIX NS "turn"
     hitbox: collmap("stand")
 
@@ -225,7 +225,7 @@ turn:
 
     if() then: goto immediate: step
 
-stop_running:
+state "stop_running":
     # (Expected to be "goto immediate"'d to)
     #
     # We were running, but now we should stop somehow.
@@ -277,7 +277,7 @@ stop_running:
     # "stand" state.
     if() then: goto: stand
 
-sleep:
+state "sleep":
     rgraph: $PREFIX NS "sleep"
     hitbox: collmap("crawl")
     if: any:
@@ -288,27 +288,27 @@ sleep:
     then: goto: crawl
 
 $IF SPIDER_EYE:
-    eye_closing:
+    state "eye_closing":
         rgraph: $PREFIX NS "eye_closing"
         hitbox: collmap("stand")
         if() then: goto: eye_closed
-    eye_unclosing:
+    state "eye_unclosing":
         rgraph: $PREFIX NS "eye_unclosing"
         hitbox: collmap("stand")
         if() then: goto: stand
-    eye_closed:
+    state "eye_closed":
         rgraph: $PREFIX NS "eye_closed"
         hitbox: collmap("stand")
         if:
             key: not isdown x
         then: goto delay: eye_unclosing
 
-mostly_dead:
+state "mostly_dead":
     rgraph: "dead_cycle"
     unsafe
     if() then: die mostly
 
-dead:
+state "dead":
     rgraph: "dead_cycle"
     unsafe
     if() then: die

@@ -22,7 +22,7 @@ proc while_collected:
 
 
 # Default anim: init
-init:
+state "init":
     if:
         exists myvar("collected_key")
         expr: mapvar(myvar("collected_key"))
@@ -43,7 +43,7 @@ init:
             # so we will be invisible, and each frame we will
             # retry all these checks.
 
-_appear:
+state "_appear":
     if:
         exists myvar("appear")
         expr: myvar("appear")
@@ -61,7 +61,7 @@ _appear:
         then: goto immediate: _crouch
         else: goto immediate: _stand
 
-_collected:
+state "_collected":
     if() then:
         if: exists myvar("collected_key")
         then:

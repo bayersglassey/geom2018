@@ -6,7 +6,7 @@
 collmsgs: "solid"
 
 
-$PREFIX ANIM_NS init:
+state $PREFIX ANIM_NS "init":
     if() then:
         set myvar("u"): F
         set myvar("d"): F
