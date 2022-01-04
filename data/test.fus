@@ -2,6 +2,7 @@
 import "data/palmappers.fus"
 
 import "data/prismels.fus"
+import "data/prismel_shapes.fus"
 import "data/double.fus"
 import "data/curvy.fus"
 import "data/dodecas.fus"

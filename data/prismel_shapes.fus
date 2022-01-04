@@ -1,0 +1,25 @@
+
+shapes:
+
+    "empty":
+        prismels:
+
+    "vert":
+        prismels:
+            : "vert"  (0 0 0 0)  0 f 2
+
+    "edge":
+        prismels:
+            : "edge"  (0 0 0 0)  0 f 2
+
+    "sq":
+        prismels:
+            : "sq"  (0 0 0 0)  0 f 2
+
+    "tri":
+        prismels:
+            : "tri" (0 0 0 0)  0 f 2
+
+    "dia":
+        prismels:
+            : "dia" (0 0 0 0)  0 f 2

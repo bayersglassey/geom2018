@@ -251,20 +251,17 @@ static int camera_render_map(camera_t *camera,
 
         if(minimap){
             /* rgraph_minimap's unit is the space's actual unit vector */
-            err = rendergraph_render(submap->rgraph_minimap, surface,
-                pal, prend,
-                x0, y0, zoom,
-                pos, rot, flip, frame_i, NULL);
-            if(err)return err;
         }else{
             /* rgraph_map's unit is map->unit */
             vec_mul(prend_space, pos, camera->map->unit);
-            err = rendergraph_render(submap->rgraph_map, surface,
-                pal, prend,
-                x0, y0, zoom,
-                pos, rot, flip, frame_i, mapper);
-            if(err)return err;
         }
+
+        err = rendergraph_render(
+            minimap? submap->rgraph_minimap: submap->rgraph_map,
+            surface, pal, prend,
+            x0, y0, zoom,
+            pos, rot, flip, frame_i, mapper);
+        if(err)return err;
     }
     return 0;
 }
@@ -286,7 +283,9 @@ int camera_render(camera_t *camera,
 
     /* Figure out which prismelmapper to use when rendering */
     prismelmapper_t *mapper = NULL;
-    if(camera->mapper != NULL){
+    if(game->show_minimap){
+        zoom = 2;
+    }else if(camera->mapper != NULL){
         mapper = camera->mapper;
     }else if(camera->cur_submap != NULL){
         mapper = camera->cur_submap->mapper;
