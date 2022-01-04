@@ -589,41 +589,6 @@ Nov 21, 2020:
     At very least, we'd need to worry about rgraph's index changing, so we'd need to save
     its name, then reload, then look up that name again.
 
-* I want it to be possible for hexmap_submaps (and maybe hexmaps) to change during gameplay.
-    * E.g. switches
-        * Flipped by spitting at them (finally, a use for spit!)
-        * Can have effects on map, like toggling whether a certain submap is present
-            * START WITH THIS, PROBABLY QUICK AND EASY
-        * More interesting effects: editing a submap's tiles
-        * Maybe coins can finally have a purpose?.. just as "keys" to open doors?.. but laaame
-            * Still though, makes sense: "collect all coins in this room to progress" :P
-
-        * Example use for switches: in trees/bubbles3-1.fus with the big_roller, would be cool
-        to be able to flip a switch toggling existence of a "bridge" or "door" to some other
-        area, so you can get rid of the big_roller.
-        Except have multiple copies of the current structure (like, the "room" which the big_roller
-        rolls around in and outside of) with slight differences, e.g. first one has 1 big_roller,
-        next one has 2 big_rollers, maybe one has death_rollers, etc.
-        And by flipping switches, you can cause all those enemies to move between the rooms.
-
-
-Dec 7, 2020:
-------------
-
-NOW THAT MAPVARS ARE PART OF WHAT'S SAVED... save points should be activated if you changed
-any mapvars????
-(Not just if "the distance from your last savepoint is more than 3" or whatever we check now)
-...so, we want a mapvars_diff function or something?
-...oooof, no, because we're diffing against the contents of saves/0.txt or whatever. GAH
-...see hexgame_savelocation_{save,load}.
-...properest solution is to add a "dict" of maps and their vars to hexgame_savelocation_t. :P
-
-Respawning still doesn't restore your stateset to what it was?..
-...sometimes it does... maybe I was confused one time?..
-
-Triangles area: the prize is becoming a big_roller???
-(Errrr, big_rollerplayer?..)
-
 
 Dec 10, 2020:
 -------------
@@ -887,16 +852,6 @@ Nov 3, 2021:
     https://forums.tigsource.com/index.php?topic=1733.msg1432473#msg1432473
 
 
-Nov 4, 2021:
-------------
-
-* Handy thing:
-
-    shopt -s globstar
-    sed -i 's/GET("(")/OPEN/' **/*.c
-    sed -i 's/GET(")")/CLOSE/' **/*.c
-
-
 Dec 13, 2021:
 -------------
 
@@ -910,7 +865,8 @@ Dec 14, 2021:
 
 Concerning turning into non-spider things, e.g. rollers...
 That's not gonna interact well with e.g. myvars("carrying"), eh?
-So we either need to call a certain proc when transforming, or... uh... something else.
+So we either need to call a certain proc when transforming, or... uh... do something else.
+=> Maybe... switch bodies?
 
 
 Dec 21, 2021:
@@ -932,31 +888,6 @@ Dec 21, 2021:
     "jump right through the middle!" or something
 
 
-Dec 28, 2021:
--------------
-
-anim/*.fus: state/proc/etc names shouldn't be syms, they should be str.
-So instead of this:
-
-    proc whatever:
-        ...etc...
-
-    stand:
-        ...etc...
-        call: "whatever"
-        goto: "crawl"
-
-...it should be:
-
-    proc "whatever":
-        ...etc...
-
-    state "stand":
-        ...etc...
-        call: "whatever"
-        goto: "crawl"
-
-
 Jan 1, 2022:
 ------------
 
@@ -965,3 +896,14 @@ with anim/*spider.fus other than the ones they're intended for use with, because
 missing the imports of anim/_roller.fus, anim/_flier_core.fus, anim/_bird.fus, etc.
 So: can we use labels to introduce visual changes, instead of requiring separate statesets?..
 
+
+Jan 3, 2021:
+------------
+
+NOW THAT MAPVARS ARE PART OF WHAT'S SAVED... save points should be activated if you changed
+any mapvars????
+(Not just if "the distance from your last savepoint is more than 3" or whatever we check now)
+...so, we want a mapvars_diff function or something?
+...oooof, no, because we're diffing against the contents of saves/0.txt or whatever. GAH
+...see hexgame_savelocation_{save,load}.
+...properest solution is to add a "dict" of maps and their vars to hexgame_savelocation_t. :P
