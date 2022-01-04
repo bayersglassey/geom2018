@@ -396,7 +396,11 @@ typedef int exit_callback_t(struct hexgame *game, player_t *player);
 
 typedef struct hexgame {
     int frame_i;
-    bool show_minimap;
+    int show_minimap;
+        /* HACK: show_minimap is used as both a bool and an int.
+        It's a bool in that it controls whether minimap is shown; but
+        it's also an int in that when nonzeo, it represents the zoom
+        of the minimap. */
     hexmap_tileset_t minimap_tileset;
 
     vars_t vars;

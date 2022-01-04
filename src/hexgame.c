@@ -284,7 +284,8 @@ int camera_render(camera_t *camera,
     /* Figure out which prismelmapper to use when rendering */
     prismelmapper_t *mapper = NULL;
     if(game->show_minimap){
-        zoom = 2;
+        /* HACK: show_minimap is both a "boolean" and a zoom value. */
+        zoom = game->show_minimap;
     }else if(camera->mapper != NULL){
         mapper = camera->mapper;
     }else if(camera->cur_submap != NULL){
@@ -292,7 +293,7 @@ int camera_render(camera_t *camera,
     }
 
     err = camera_render_map(camera,
-        camera_renderpos, mapper, game->show_minimap,
+        camera_renderpos, mapper, game->show_minimap? true: false,
         surface, pal, x0, y0, zoom);
     if(err)return err;
 
@@ -389,7 +390,7 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
 
     game->minimap_prend = minimap_prend;
 
-    game->show_minimap = false;
+    game->show_minimap = 0;
 
     game->app = app;
     game->new_game_callback = new_game_callback;

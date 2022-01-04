@@ -400,7 +400,7 @@ int test_app_mainloop_step(test_app_t *app){
     err = test_app_poll_events(app);
     if(err)return err;
 
-    if(app->hexgame_running){
+    if(app->hexgame_running && !app->hexgame.show_minimap){
         err = hexgame_step(game);
         if(err)return err;
     }

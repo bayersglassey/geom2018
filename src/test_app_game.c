@@ -204,7 +204,9 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
                 if(err)return err;
             }
         }else if(event->key.keysym.sym == SDLK_TAB){
-            game->show_minimap = true;
+            /* Cycle between 3 values: 0 means don't show minimap, and
+            1 and 2 are zoom values. */
+            game->show_minimap = (game->show_minimap + 1) % 3;
         }else if(event->key.keysym.sym == SDLK_F6 && app->developer_mode){
             /* Hack, we really want to force camera->mapper to NULL, but
             instead we assume the existence of this mapper called "single" */
@@ -315,9 +317,7 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
             }
         }
     }else if(event->type == SDL_KEYUP){
-        if(event->key.keysym.sym == SDLK_TAB){
-            game->show_minimap = false;
-        }if(event->key.keysym.sym == SDLK_F6 && app->developer_mode){
+        if(event->key.keysym.sym == SDLK_F6 && app->developer_mode){
             app->camera_mapper = NULL;
         }
     }
