@@ -22,9 +22,9 @@ submaps:
                     :
                         continue
                     :
-                        spiders 1
+                        players 1
                     :
-                        spiders 2
+                        players 2
                     :
                         map: "data/maps/wilderness/worldmap.fus"
                         pos: (0 0)
