@@ -27,30 +27,30 @@ submaps:
         pos: (0 0)
         mapper: ("triple")
         submaps:
-            :
+            "entrance":
                 file: "data/maps/tutorial/entrance.fus"
                 pos: eval: (-4 9)
                 camera: (5 3)
                 mapper: ("quadruple")
-            :
+            "start":
                 file: "data/maps/tutorial/start.fus"
                 pos: eval: (0 0)
                 camera: (8 0)
                 mapper: ("quadruple")
-            :
+            "start2":
                 file: "data/maps/tutorial/start2.fus"
                 pos: eval: (19 0)
                 camera: (9 0)
-            :
+            "start3":
                 file: "data/maps/tutorial/start3.fus"
                 pos: eval: (19 0) + (19 -1)
                 camera: (9 0)
-            :
+            "loop":
                 file: "data/maps/tutorial/loop.fus"
                 pos: eval: (19 0) + (19 -1) + (19 -6)
                 camera: (9 4)
                 mapper: ("quadruple")
-            :
+            "start4":
                 file: "data/maps/tutorial/start4.fus"
                 pos: eval: (19 0) + (19 -1) + (19 -6) + (19 -3)
                 camera: (9 -2)
@@ -63,7 +63,7 @@ submaps:
                         file: "data/maps/tutorial/start4c.fus"
                         pos: eval: (30 10) + (-8 15)
                         camera: (-10 0)
-            :
+            "start5":
                 file: "data/maps/tutorial/start5.fus"
                 pos: eval: (19 0) + (19 -1) + (19 -6) + (19 -3) + (19 -5)
                 camera: (3 0)
@@ -71,7 +71,7 @@ submaps:
         pos: (0 0)
         mapper: ("triple")
         submaps:
-            :
+            "skypipes":
                 file: "data/maps/tutorial/skypipes.fus"
                 pos: eval: (19 0) + (19 -1) + (24 17)
                 camera: (8 0)
@@ -85,19 +85,19 @@ submaps:
                     :
                         file: "data/maps/tutorial/skyblocker2.fus"
                         pos: eval: (25 2) + (8 0) + (12 0)
-            :
+            "skypipes2":
                 file: "data/maps/tutorial/skypipes2.fus"
                 pos: eval: (19 0) + (19 -1) + (24 17) + (28 12)
                 camera: (9 4)
                 actors:
                     : "data/maps/tutorial/recs/eyespider0.fus"
-            :
+            "skypipes3":
                 file: "data/maps/tutorial/skypipes3.fus"
                 pos: eval: (19 0) + (19 -1) + (24 17) + (28 12) + (27 10)
                 camera: (9 0)
                 actors:
                     : "data/maps/tutorial/recs/eyespider1.fus"
-            :
+            "skypipes4":
                 file: "data/maps/tutorial/skypipes4.fus"
                 pos: eval: (19 0) + (19 -1) + (24 17) + (28 12) + (27 10) + (25 3)
                 camera: (10 0)

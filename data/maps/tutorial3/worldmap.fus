@@ -107,12 +107,12 @@ $SET_STR FINAL_RELEASE6: lines: at(29 36)
     ;;Good.
 
 submaps:
-    :
+    "floaty_start":
         file: "data/maps/tutorial3/floaty_start.fus"
         pos: eval: (-7 0)
         camera: (0 0)
         mapper: ("quadruple")
-    :
+    "start":
         file: "data/maps/tutorial3/start.fus"
         text: if mapvar("start_eye_a_open") then if mapvar("switch1") then null else $GET_STR ITS_YOU else null
         text: if mapvar("start_eye_b_open") then if mapvar("switch1") then null else $GET_STR LAST_THINGS else null
@@ -173,12 +173,12 @@ submaps:
                         file: "data/maps/tutorial3/start_exit_blocker.fus"
                         inherit_text
                         visible: not mapvar("final_switch")
-    :
-        file: "data/maps/tutorial3/blocker.fus"
-        pos: eval: (0 0) + (-8 -20)
-        rot: 3
-        mapper: ("triple")
-    :
+            "blocker":
+                file: "data/maps/tutorial3/blocker.fus"
+                pos: (-8 -20)
+                rot: 3
+                mapper: ("triple")
+    "start2":
         file: "data/maps/tutorial3/start.fus"
         text:
             if any:
@@ -208,7 +208,7 @@ submaps:
                 file: "data/maps/tutorial3/start_save.fus"
                 visible: not mapvar("switch1")
                 inherit_rot
-    :
+    "start3":
         file: "data/maps/tutorial3/start.fus"
         text:
             if any:
@@ -269,7 +269,7 @@ submaps:
                         not mapvar("switch2")
                     then T else F
                 pos: (-1 4)
-    :
+    "start4":
         file: "data/maps/tutorial3/start.fus"
         pos: eval: (0 0) + (11 -14) + (7 -16) + (0 -12)
         rot: 3
@@ -283,12 +283,12 @@ submaps:
                 file: "data/maps/tutorial3/start4_switched.fus"
                 visible: mapvar("switch1")
                 pos: (-5 -2)
-    :
-        file: "data/maps/tutorial3/blocker.fus"
-        pos: eval: (0 0) + (11 -14) + (7 -16) + (0 -12) + (-30 0)
-        rot: 4
-        mapper: ("triple")
-    :
+            "blocker4":
+                file: "data/maps/tutorial3/blocker.fus"
+                pos: (-30 0)
+                rot: 4
+                mapper: ("triple")
+    "start5":
         file: "data/maps/tutorial3/start.fus"
         text:
             if any:

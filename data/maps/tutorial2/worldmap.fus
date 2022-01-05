@@ -41,12 +41,12 @@ submaps:
         pos: (0 0)
         mapper: ("triple")
         submaps:
-            : submaps:
+            "entrance": submaps:
                 :
                     file: "data/maps/tutorial2/entrance.fus"
                     pos: (-20 0)
                     camera: (0 0)
-            : submaps:
+            "start": submaps:
                 :
                     bg
                     file: "data/maps/tutorial2/start_bg.fus"
@@ -65,7 +65,7 @@ submaps:
                             file: "data/maps/tutorial2/start_unblocked.fus"
                             visible: mapvar("start_solved")
                             pos: (13 -7)
-            : submaps:
+            "start2": submaps:
                 :
                     bg
                     file: "data/maps/tutorial2/start2_bg.fus"
@@ -80,7 +80,7 @@ submaps:
                             file: "data/maps/tutorial2/start2_blocker.fus"
                             visible: not mapvar("coin_e")
                             pos: (0 5)
-            : submaps:
+            "start3": submaps:
                 :
                     bg
                     file: "data/maps/tutorial2/start3b_bg.fus"
@@ -98,7 +98,7 @@ submaps:
                     file: "data/maps/tutorial2/start3b_blocker.fus"
                     visible: not mapvar("start3b_solved")
                     pos: eval: (13 -9) + (-1 -12) + (-22 -17)
-            : submaps:
+            "start4": submaps:
                 :
                     bg
                     file: "data/maps/tutorial2/start4_bg.fus"
