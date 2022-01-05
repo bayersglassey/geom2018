@@ -188,6 +188,9 @@ void hexgame_body_dump(body_t *body, int depth){
     fprintf(stderr, "submap: %s\n",
         body->cur_submap->filename);
     print_tabs(stderr, depth);
+    if(body->cur_submap->group)fprintf(stderr, "submap group: %s\n",
+        body->cur_submap->group->name);
+    print_tabs(stderr, depth);
     fprintf(stderr, "global vars:\n");
     vars_write(&body->game->vars, stderr, TAB_SPACES * (depth + 1));
     print_tabs(stderr, depth);
