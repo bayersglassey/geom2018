@@ -126,7 +126,7 @@ $SET_STR VINES4_FLUFF_B: lines: at(6 7)
 
 
 submaps:
-    :
+    "vines":
         file: "data/maps/demo/vines.fus"
         text:
             if all:
@@ -147,7 +147,7 @@ submaps:
                 else $GET_STR VINES_TAKE_ME
             else null
         camera: (-7 5)
-    :
+    "vines2":
         file: "data/maps/demo/vines2.fus"
         text:
             if all:
@@ -171,7 +171,7 @@ submaps:
         camera: (-7 3)
         mapper: ("quadruple")
         submaps:
-            :
+            "vines2":
                 file: "data/maps/demo/vines3.fus"
                 text:
                     if > mapvar("eyespider_vines_mini_eye_respawn") 0
@@ -199,7 +199,7 @@ submaps:
                         file: "data/maps/demo/vines3_blocker.fus"
                         visible: not mapvar("vines3_door")
                         pos: (-8 13)
-            :
+            "vines2":
                 file: "data/maps/demo/vines4.fus"
                 text:
                     if mapvar("eyespider_vines_ran_away_4")
@@ -209,7 +209,7 @@ submaps:
                     else null
                 pos: (-40 4)
                 camera: (0 0)
-            :
+            "vines2":
                 pos: (-40 4)
                 camera: (-10 -10)
                 tileset: "data/tileset1.fus"
@@ -220,7 +220,7 @@ submaps:
                         tileset: "data/tileset1_bg.fus"
                     :
                         file: "data/maps/demo/jungle.fus"
-            :
+            "jungle":
                 pos: eval: (-40 4) + (-6 -18)
                 camera: (0 -8)
                 mapper: ("triple")
@@ -243,21 +243,21 @@ submaps:
                                 pos: (1 8)
                                 rot: 0
                                 turn: n
-            :
+            "jungle":
                 file: "data/maps/demo/jungle3.fus"
                 pos: eval: (-40 4) + (-6 -18) + (15 -8)
                 camera: (6 0)
                 mapper: ("triple")
                 palette: "data/maps/demo/pals/vines.fus"
                 tileset: "data/maps/demo/tilesets/water.fus"
-            :
+            "jungle":
                 file: "data/maps/demo/jungle4.fus"
                 pos: eval: (-40 4) + (-6 -18) + (10 -16)
                 camera: (0 0)
                 mapper: ("triple")
                 palette: "data/maps/demo/pals/vines.fus"
                 tileset: "data/maps/demo/tilesets/water.fus"
-            :
+            "jungle5":
                 pos: eval: (-40 4) + (-6 -18) + (15 -8) + (24 7)
                 camera: follow
                 mapper: ("solid_curvy")

@@ -22,20 +22,20 @@ $SET_STR START3_SPIDERS: lines: at(17 5)
 
 
 submaps:
-    :
+    "start":
         file: "data/maps/demo/start.fus"
         pos: (0 0)
         camera: (6 4)
         mapper: ("quadruple")
         palette: "data/maps/demo/pals/start.fus"
-    :
+    "start2":
         file: "data/maps/demo/start2.fus"
         pos: (7 11)
         camera: (5 4)
         mapper: ("quadruple")
         palette: "data/maps/demo/pals/start.fus"
         submaps:
-            :
+            "start3":
                 file: "data/maps/demo/start3.fus"
                 text:
                     if all:
@@ -48,14 +48,14 @@ submaps:
                 mapper: ("triple")
                 tileset: "data/maps/demo/tilesets/shiny.fus"
                 submaps:
-                    :
+                    "start4":
                         file: "data/maps/demo/start4.fus"
                         pos: (19 6)
                         camera: (5 5)
                         mapper: ("quadruple")
                         tileset: "data/maps/demo/tilesets/shiny.fus"
                     : import "data/maps/demo/submap_vines.fus"
-            :
+            "pebbles":
                 file: "data/maps/demo/pebbles.fus"
                 pos: (15 -2)
                 camera: (3 1)
@@ -68,20 +68,20 @@ submaps:
                         mapper: ("triple")
                         submaps:
                             : import "data/maps/demo/submap_dodecas.fus"
-            :
+            "pebbles":
                 file: "data/maps/demo/pebbles2.fus"
                 pos: (22 9)
                 camera: (4 0)
                 mapper: ("solid_curvy")
                 submaps:
-                    :
+                    "tunnels":
                         file: "data/maps/demo/tunnels.fus"
                         pos: (13 1)
                         #camera: follow
                         camera: (6 -5)
                         mapper: ("triple")
                         palette: "data/maps/demo/pals/tunnels.fus"
-                    :
+                    "tunnels3":
                         file: "data/maps/demo/tunnels3.fus"
                         pos: eval: (13 1) + (30 -5)
                         camera: (0 0)
@@ -93,7 +93,7 @@ submaps:
                                 pos: (70 10)
                                 rot: 0
                                 turn: n
-                    :
+                    "tunnels2":
                         file: "data/maps/demo/tunnels2.fus"
                         pos: eval: (13 1) + (18 8)
                         camera: (0 5)

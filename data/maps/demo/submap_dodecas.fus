@@ -18,37 +18,37 @@ vars:
     nosave "big_switch": T
 
 submaps:
-    :
+    "dodecas":
         file: "data/maps/demo/dodecas_bg.fus"
         pos: (-55 -60)
-    :
+    "dodecas":
         file: "data/maps/demo/dodecas_bg2.fus"
         pos: (20 -65)
-    :
+    "dodecas":
         file: "data/maps/demo/dodecas_0_0.fus"
         pos: (1 -6)
         camera: (0 -4)
-    :
+    "dodecas":
         file: "data/maps/demo/dodecas_0_-1.fus"
         pos: (-27 -15)
         camera: (0 -4)
-    :
+    "dodecas":
         file: "data/maps/demo/dodecas_1_0.fus"
         pos: (0 -28)
         camera: (0 -4)
-    :
+    "dodecas":
         file: "data/maps/demo/dodecas_1_-1.fus"
         pos: (-22 -30)
         camera: (0 -4)
-    :
+    "dodecas":
         file: "data/maps/demo/dodecas_2_0.fus"
         pos: (0 -48)
         camera: (0 -4)
-    :
+    "dodecas":
         file: "data/maps/demo/dodecas_2_-1.fus"
         pos: (-22 -50)
         camera: (0 -4)
-    :
+    "fisheye":
         pos: (20 -50)
         submaps:
             :
