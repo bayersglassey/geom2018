@@ -297,6 +297,20 @@ int player_save(player_t *player, const char *filename){
         fprintf(file, ":\n");
         fprintf(file, "        vars:\n");
         _write_vars(&map->vars, file, 3);
+        fprintf(file, "        submaps:\n");
+        for(int j = 0; j < map->submap_groups_len; j++){
+            hexmap_submap_group_t *group = map->submap_groups[j];
+
+            /* FOR NOW, since group->visited is the only thing we save,
+            just skip unvisited groups */
+            if(!group->visited)continue;
+
+            fprintf(file, "            ");
+            fus_write_str(file, group->name);
+            fprintf(file, ":\n");
+            fprintf(file, "                visited: %c\n",
+                group->visited? 't': 'n');
+        }
     }
 
     fclose(file);
@@ -367,26 +381,52 @@ int player_load(player_t *player, const char *filename,
 
     GET("maps")
     OPEN
-    {
-        while(1){
-            if(GOT(")"))break;
-            const char *name;
-            GET_STR_CACHED(name, &prend->name_store)
+    while(!GOT(")")){
+        const char *name;
+        GET_STR_CACHED(name, &prend->name_store)
 
-            hexmap_t *map;
-            err = hexgame_get_or_load_map(game, name, &map);
-            if(err)return err;
+        hexmap_t *map;
+        err = hexgame_get_or_load_map(game, name, &map);
+        if(err)return err;
 
+        OPEN
+        {
+            GET("vars")
             OPEN
-            {
-                GET("vars")
+            err = vars_parse(&map->vars, lexer);
+            if(err)return err;
+            CLOSE
+
+            GET("submaps")
+            OPEN
+            while(!GOT(")")){
+                const char *name;
+                GET_STR_CACHED(name, &prend->name_store)
+
+                hexmap_submap_group_t *group = hexmap_get_submap_group(
+                    map, name);
+                if(!group){
+                    fprintf(stderr, "WARNING: "
+                        "couldn't find submap group \"%s\" in map \"%s\"\n",
+                        name, map->name);
+                    fprintf(stderr,
+                        "...maybe this save file is from an old version?\n");
+                    PARSE_SILENT
+                    continue;
+                }
+
                 OPEN
-                err = vars_parse(&map->vars, lexer);
-                if(err)return err;
+                {
+                    GET("visited")
+                    OPEN
+                    GET_BOOL(group->visited)
+                    CLOSE
+                }
                 CLOSE
             }
             CLOSE
         }
+        CLOSE
     }
     CLOSE
 
