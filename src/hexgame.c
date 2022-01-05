@@ -265,7 +265,7 @@ static int camera_render_map(camera_t *camera,
     for(int i = 0; i < map->submaps_len; i++){
         hexmap_submap_t *submap = map->submaps[i];
 
-        if(minimap && !submap->visited)continue;
+        if(minimap && !hexmap_submap_is_visited(submap))continue;
 
         bool visible;
         err = hexmap_submap_is_visible(submap, &visible);

@@ -721,7 +721,7 @@ int body_update_cur_submap(body_t *body){
 
         /* Player-controlled bodies help uncover the minimap */
         player_t *player = body_get_player(body);
-        if(player)new_submap->visited = true;
+        if(player)hexmap_submap_visit(new_submap);
     }
 
     return 0;

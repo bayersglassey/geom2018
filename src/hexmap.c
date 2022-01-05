@@ -252,6 +252,8 @@ void hexmap_cleanup(hexmap_t *map){
     ARRAY_FREE_PTR(body_t*, map->bodies, body_cleanup)
 
     ARRAY_FREE_PTR(hexmap_submap_t*, map->submaps, hexmap_submap_cleanup)
+    ARRAY_FREE_PTR(hexmap_submap_group_t*, map->submap_groups,
+        hexmap_submap_group_cleanup)
     ARRAY_FREE_PTR(hexmap_recording_t*, map->recordings,
         hexmap_recording_cleanup)
     ARRAY_FREE_PTR(palette_t*, map->palettes, palette_cleanup)
@@ -283,6 +285,7 @@ int hexmap_init(hexmap_t *map, hexgame_t *game, const char *name,
 
     ARRAY_INIT(map->bodies)
     ARRAY_INIT(map->submaps)
+    ARRAY_INIT(map->submap_groups)
     ARRAY_INIT(map->recordings)
     ARRAY_INIT(map->palettes)
     ARRAY_INIT(map->tilesets)
@@ -296,6 +299,31 @@ hexgame_location_t *hexmap_get_location(hexmap_t *map, const char *name){
         if(!strcmp(location->name, name))return &location->loc;
     }
     return NULL;
+}
+
+hexmap_submap_group_t *hexmap_get_submap_group(hexmap_t *map,
+    const char *name
+){
+    for(int i = 0; i < map->submap_groups_len; i++){
+        hexmap_submap_group_t *group = map->submap_groups[i];
+        if(!strcmp(group->name, name))return group;
+    }
+    return NULL;
+}
+
+int hexmap_get_or_add_submap_group(hexmap_t *map, const char *name,
+    hexmap_submap_group_t **group_ptr
+){
+
+    hexmap_submap_group_t *group = hexmap_get_submap_group(map, name);
+    if(!group){
+        ARRAY_PUSH_NEW(hexmap_submap_group_t*, map->submap_groups, new_group)
+        hexmap_submap_group_init(new_group, name);
+        group = new_group;
+    }
+
+    *group_ptr = group;
+    return 0;
 }
 
 static int hexmap_parse_recording(fus_lexer_t *lexer, prismelrenderer_t *prend,
@@ -546,6 +574,15 @@ static int _hexmap_parse(hexmap_t *map, fus_lexer_t *lexer,
         OPEN
         while(1){
             if(GOT(")"))break;
+
+            hexmap_submap_group_t *group = context->submap_group;
+            if(GOT_STR){
+                const char *group_name;
+                GET_STR_CACHED(group_name, &prend->name_store)
+                err = hexmap_get_or_add_submap_group(map, group_name, &group);
+                if(err)return err;
+            }
+
             OPEN
 
             if(GOT("import")){
@@ -566,7 +603,7 @@ static int _hexmap_parse(hexmap_t *map, fus_lexer_t *lexer,
                     lexer->vars);
                 if(err)return err;
 
-                err = hexmap_parse_submap(map, &sublexer, context);
+                err = hexmap_parse_submap(map, &sublexer, context, group);
                 if(err)return err;
 
                 if(!fus_lexer_done(&sublexer)){
@@ -582,7 +619,7 @@ static int _hexmap_parse(hexmap_t *map, fus_lexer_t *lexer,
                 free(filename);
                 free(text);
             }else{
-                err = hexmap_parse_submap(map, lexer, context);
+                err = hexmap_parse_submap(map, lexer, context, group);
                 if(err)return err;
             }
 
@@ -627,6 +664,12 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, const char *name,
 
     hexmap_submap_parser_context_t context;
     hexmap_submap_parser_context_init(&context, NULL);
+
+    /* The "root" submap group (to which submaps belong by default) */
+    hexmap_submap_group_t *root_group;
+    err = hexmap_get_or_add_submap_group(map, "", &root_group);
+    if(err)return err;
+    context.submap_group = root_group;
 
     /* default palette */
     {
@@ -792,7 +835,8 @@ static int hexmap_populate_submap_doors(hexmap_t *map,
 }
 
 int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
-    hexmap_submap_parser_context_t *parent_context
+    hexmap_submap_parser_context_t *parent_context,
+    hexmap_submap_group_t *group
 ){
     int err;
     vecspace_t *space = map->space;
@@ -806,6 +850,8 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
 
     hexmap_submap_parser_context_t _context, *context=&_context;
     hexmap_submap_parser_context_init(context, parent_context);
+
+    context->submap_group = group;
 
     if(GOT("bg")){
         NEXT
@@ -1431,6 +1477,17 @@ void hexmap_door_cleanup(hexmap_door_t *door){
     }
 }
 
+void hexmap_submap_group_cleanup(hexmap_submap_group_t *group){
+    /* Nothin */
+}
+
+void hexmap_submap_group_init(hexmap_submap_group_t *group,
+    const char *name
+){
+    group->name = name;
+    group->visited = false;
+}
+
 void hexmap_submap_cleanup(hexmap_submap_t *submap){
     ARRAY_FREE_PTR(valexpr_t*, submap->text_exprs, valexpr_cleanup)
     valexpr_cleanup(&submap->visible_expr);
@@ -1473,15 +1530,23 @@ int hexmap_submap_init_from_parser_context(hexmap_t *map,
     submap->rgraph_map = NULL;
     submap->rgraph_minimap = NULL;
 
+    submap->group = context->submap_group;
     submap->mapper = context->mapper;
     submap->palette = context->palette;
     submap->tileset = context->tileset;
 
     ARRAY_INIT(submap->doors)
 
-    submap->visited = false;
-
     return 0;
+}
+
+void hexmap_submap_visit(hexmap_submap_t *submap){
+    if(submap->group)submap->group->visited = true;
+}
+
+bool hexmap_submap_is_visited(hexmap_submap_t *submap){
+    if(!submap->group)return true;
+    return submap->group->visited;
 }
 
 int hexmap_submap_is_visible(hexmap_submap_t *submap, bool *visible_ptr){
@@ -1569,6 +1634,7 @@ void hexmap_submap_parser_context_init(hexmap_submap_parser_context_t *context,
     ARRAY_INIT(context->text_exprs)
 
     context->parent = parent;
+    context->submap_group = parent? parent->submap_group: NULL;
     context->mapper = parent? parent->mapper: NULL;
     context->palette = parent? parent->palette: NULL;
     context->tileset = parent? parent->tileset: NULL;

@@ -472,7 +472,7 @@ static int _test_app_command_visit_all(test_app_t *app, fus_lexer_t *lexer, bool
         hexmap_t *map = game->maps[i];
         for(int j = 0; j < map->submaps_len; j++){
             hexmap_submap_t *submap = map->submaps[j];
-            submap->visited = true;
+            hexmap_submap_visit(submap);
         }
     }
     return 0;

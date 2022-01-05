@@ -70,7 +70,7 @@ int test_app_list_maps_select_item(test_app_list_t *list){
         case 2: {
             for(int i = 0; i < map->submaps_len; i++){
                 hexmap_submap_t *submap = map->submaps[i];
-                submap->visited = true;
+                hexmap_submap_visit(submap);
             }
             break;
         }

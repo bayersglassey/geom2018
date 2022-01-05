@@ -104,6 +104,13 @@ typedef struct hexmap_door {
         actual positions. */
 } hexmap_door_t;
 
+typedef struct hexmap_submap_group {
+    const char *name;
+
+    bool visited;
+        /* Controls whether this group's submaps show up on minimap */
+} hexmap_submap_group_t;
+
 typedef struct hexmap_submap {
     bool solid;
     vec_t pos;
@@ -117,9 +124,8 @@ typedef struct hexmap_submap {
     hexcollmap_t collmap;
     ARRAY_DECL(hexmap_door_t*, doors)
 
-    bool visited; /* Controls whether this submap shows up on minimap */
-
     /* Weakrefs */
+    hexmap_submap_group_t *group;
     struct hexmap *map;
     rendergraph_t *rgraph_map;
     rendergraph_t *rgraph_minimap;
@@ -141,6 +147,7 @@ typedef struct hexmap_submap_parser_context {
     ARRAY_DECL(struct valexpr*, text_exprs)
 
     /* Weakrefs */
+    hexmap_submap_group_t *submap_group;
     struct hexmap_submap_parser_context *parent;
     prismelmapper_t *mapper;
     palette_t *palette;
@@ -159,6 +166,7 @@ typedef struct hexmap {
 
     ARRAY_DECL(struct body*, bodies)
     ARRAY_DECL(hexmap_submap_t*, submaps)
+    ARRAY_DECL(hexmap_submap_group_t*, submap_groups)
     ARRAY_DECL(hexmap_recording_t*, recordings)
     ARRAY_DECL(palette_t*, palettes)
     ARRAY_DECL(hexmap_tileset_t*, tilesets)
@@ -175,12 +183,17 @@ void hexmap_cleanup(hexmap_t *map);
 int hexmap_init(hexmap_t *map, struct hexgame *game, const char *name,
     vec_t unit);
 hexgame_location_t *hexmap_get_location(hexmap_t *map, const char *name);
+hexmap_submap_group_t *hexmap_get_submap_group(hexmap_t *map,
+    const char *name);
+int hexmap_get_or_add_submap_group(hexmap_t *map, const char *name,
+    hexmap_submap_group_t **group_ptr);
 int hexmap_load(hexmap_t *map, struct hexgame *game, const char *filename,
     vars_t *vars);
 int hexmap_parse(hexmap_t *map, struct hexgame *game, const char *name,
     fus_lexer_t *lexer);
 int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
-    hexmap_submap_parser_context_t *parent_context);
+    hexmap_submap_parser_context_t *parent_context,
+    hexmap_submap_group_t *group);
 int hexmap_get_submap_index(hexmap_t *map, hexmap_submap_t *submap);
 int hexmap_get_or_create_palette(hexmap_t *map, const char *name,
     palette_t **palette_ptr);
@@ -198,10 +211,15 @@ int hexmap_step(hexmap_t *map);
 int hexmap_refresh_vars(hexmap_t *map);
 
 void hexmap_door_cleanup(hexmap_door_t *door);
+void hexmap_submap_group_cleanup(hexmap_submap_group_t *group);
+void hexmap_submap_group_init(hexmap_submap_group_t *group,
+    const char *name);
 void hexmap_submap_cleanup(hexmap_submap_t *submap);
 int hexmap_submap_init_from_parser_context(hexmap_t *map,
     hexmap_submap_t *submap, const char *filename,
     hexmap_submap_parser_context_t *context);
+void hexmap_submap_visit(hexmap_submap_t *submap);
+bool hexmap_submap_is_visited(hexmap_submap_t *submap);
 int hexmap_submap_is_visible(hexmap_submap_t *submap, bool *visible_ptr);
 int hexmap_submap_is_solid(hexmap_submap_t *submap, bool *solid_ptr);
 int hexmap_submap_create_rgraph_map(hexmap_submap_t *submap);

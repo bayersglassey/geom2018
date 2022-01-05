@@ -58,6 +58,10 @@ int test_app_list_submaps_render(test_app_list_t *list){
         vecspace_t *space = map->space;
 
         WRITE_FIELD(submap, filename)
+        if(submap->group){
+            WRITE_FIELD(submap, group->name)
+            WRITE_FIELD_BOOL(submap, group->visited)
+        }
         WRITE_FIELD_BOOL(submap, solid)
         WRITE_FIELD_VEC(submap, space->dims, pos)
         WRITE_FIELD_VEC(submap, space->dims, camera_pos)
