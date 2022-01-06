@@ -46,7 +46,7 @@ vars:
     $IF SPIDER_BIRD: "is_birdspider": T
 
     nosave "carrying": null
-    nosave "carrying_respawn_mapvar": null
+    nosave "carrying_respawn_counter": null
     nosave "carrying_rgraph": null
 
 
@@ -64,14 +64,14 @@ $IF !SPIDER_EYE: on "carryable":
         # Transfer some vars from carryable thing to the spider who
         # will now be "carrying it"
         set myvar("carrying"): yourvar("carryable")
-        set myvar("carrying_respawn_mapvar"): yourvar("respawn_mapvar")
+        set myvar("carrying_respawn_counter"): yourvar("respawn_counter")
         set myvar("carrying_rgraph"): yourvar("carryable_rgraph")
         set_label "carrying": myvar("carrying_rgraph")
 
-        # Increment a mapvar tracking how many of this thing are
+        # Increment a var tracking how many of this thing are
         # being carried
-        if: exists myvar("carrying_respawn_mapvar")
-        then: inc mapvar(myvar("carrying_respawn_mapvar"))
+        if: exists myvar("carrying_respawn_counter")
+        then: inc globalvar(myvar("carrying_respawn_counter"))
 
         # When a thing is carried, it is "collected"
         as you:
@@ -88,7 +88,7 @@ proc "_spawn_spit":
         # Set spit's "carrying" to spider's "carrying"
         as you:
             set myvar("carrying"): yourvar("carrying")
-            set myvar("carrying_respawn_mapvar"): yourvar("carrying_respawn_mapvar")
+            set myvar("carrying_respawn_counter"): yourvar("carrying_respawn_counter")
             set myvar("carrying_rgraph"): yourvar("carrying_rgraph")
             set_label "carrying": myvar("carrying_rgraph")
 

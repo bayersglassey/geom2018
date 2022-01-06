@@ -4,7 +4,7 @@ parts:
             "key": "eyespider_vines_ran_away_3"
             "antikey": "eyespider_vines_ran_away_4"
             "appear": T
-            "respawn_mapvar": "eyespider_vines_mini_eye_respawn"
+            "respawn_counter": "eyespider_vines_mini_eye_respawn"
     "h": recording "data/recs/hotspot.fus"
         vars:
             "key": "spider_passed_vines"
