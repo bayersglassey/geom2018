@@ -26,9 +26,13 @@
 #define GET_ATTR_YN(ATTR, P, OPT) DO(fus_lexer_get_attr_yn(lexer, (ATTR), (&P), (OPT)))
 #define GET_ATTR_YESNO(ATTR, P, OPT) DO(fus_lexer_get_attr_yesno(lexer, (ATTR), (&P), (OPT)))
 #define GET_INT_FANCY(P) DO(fus_lexer_get_int_fancy(lexer, (&P)))
+#define UNEXPECTED(S) fus_lexer_unexpected(lexer, S)
+
+
+/* NOTE: the following require #include "geom_lexer_utils.h" */
 #define GET_VEC(SPACE, VEC) DO(fus_lexer_get_vec(lexer, SPACE, VEC))
 #define GET_TRF(SPACE, TRF) DO(fus_lexer_get_trf(lexer, SPACE, &(TRF)))
-#define UNEXPECTED(S) fus_lexer_unexpected(lexer, S)
+
 
 #define _GET_CACHED(P, _GET_EXPR, STORE) { \
     char *__str; \

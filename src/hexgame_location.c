@@ -8,6 +8,7 @@
 #include "hexgame_location.h"
 #include "hexspace.h"
 #include "lexer.h"
+#include "geom_lexer_utils.h"
 
 
 static void _print_tabs(FILE *file, int indent){

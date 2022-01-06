@@ -12,6 +12,7 @@
 #include "prismelrenderer.h"
 #include "hexpicture.h"
 #include "vec4.h"
+#include "geom_lexer_utils.h"
 
 
 

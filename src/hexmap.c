@@ -20,6 +20,7 @@
 #include "hexgame_location.h"
 #include "prismelrenderer.h"
 #include "hexgame_vars_props.h"
+#include "geom_lexer_utils.h"
 
 
 const char *hexmap_door_type_msg(int door_type){

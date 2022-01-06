@@ -8,6 +8,7 @@
 #include "../vec4.h"
 #include "../lexer.h"
 #include "../file_utils.h"
+#include "../geom_lexer_utils.h"
 
 #define LINE_LEN 200
 

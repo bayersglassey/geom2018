@@ -15,6 +15,7 @@
 #include "util.h"
 #include "write.h"
 #include "var_utils.h"
+#include "geom_lexer_utils.h"
 
 
 const char *recording_action_msg(int action){

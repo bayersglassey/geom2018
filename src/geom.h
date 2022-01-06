@@ -7,8 +7,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "lexer.h"
-
 
 #ifndef MAX_VEC_DIMS
 #   define MAX_VEC_DIMS 4
@@ -81,10 +79,5 @@ void trf_apply(const vecspace_t *space, trf_t *t, trf_t *s);
 void trf_apply_inv(const vecspace_t *space, trf_t *t, trf_t *s);
 void trf_apply_separately(const vecspace_t *space, trf_t *t,
     vec_t add, rot_t rot, flip_t flip);
-
-
-int fus_lexer_eval_vec(fus_lexer_t *lexer, vecspace_t *space, vec_t vec);
-int fus_lexer_get_vec(fus_lexer_t *lexer, vecspace_t *space, vec_t vec);
-int fus_lexer_get_trf(fus_lexer_t *lexer, vecspace_t *space, trf_t *trf);
 
 #endif

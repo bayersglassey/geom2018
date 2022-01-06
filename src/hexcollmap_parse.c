@@ -18,6 +18,7 @@
 #include "hexspace.h"
 #include "hexbox.h"
 #include "hexgame_vars_props.h"
+#include "geom_lexer_utils.h"
 
 
 static void _debug_print_line(const char *line, int x, int y){
