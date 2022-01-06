@@ -460,16 +460,29 @@ int body_move_to_map(body_t *body, hexmap_t *map){
     return 0;
 }
 
+static var_t *_get_nosave_var(vars_t *vars, const char *name){
+    var_t *var = vars_get_or_add(vars, name);
+    if(var == NULL)return NULL;
+
+    /* Mark var as being nosave */
+    var->props |= 1 << HEXGAME_VARS_PROP_NOSAVE;
+    return var;
+}
 int body_refresh_vars(body_t *body){
     int err;
     vars_t *vars = &body->vars;
 
-    var_t *var = vars_get_or_add(vars, ".turn");
-    if(var == NULL)return 1;
-    val_set_bool(&var->value, body->loc.turn);
+    var_t *var_turn = _get_nosave_var(vars, ".turn");
+    if(var_turn == NULL)return 1;
+    val_set_bool(&var_turn->value, body->loc.turn);
 
-    /* Mark ".turn" as being nosave */
-    var->props |= 1 << HEXGAME_VARS_PROP_NOSAVE;
+    var_t *var_state = _get_nosave_var(vars, ".state");
+    if(var_state == NULL)return 1;
+    if(body->state != NULL){
+        val_set_const_str(&var_state->value, body->state->name);
+    }else{
+        val_set_null(&var_state->value);
+    }
 
     return 0;
 }
