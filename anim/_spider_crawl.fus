@@ -233,6 +233,7 @@ state "crawl_turn":
 
 state "crawl_shielding":
     rgraph: $PREFIX NS "crawl_shielding"
-    # (No hitbox: we are invincible)
+    hitbox: collmap("crawl")
+    on "crush": # Do nothing
     if:
     then: goto: "crawl"
