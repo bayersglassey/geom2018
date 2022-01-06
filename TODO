@@ -101,114 +101,12 @@ then we could specify on which frames the given rules of an actor state
 should be run.
 
 
-Dec 11, 2018:
--------------
-
-Current objectives:
-
-    * Improve "actors"...
-        * better recording tools
-            * play/pause, step forward/back
-            * recording format: multiple "keyframes"
-            * split recording into 2 (insert keyframe)
-        * actor states have a pos
-        * actor states run through ruleset on multiple frames
-        * actor variables
-        * special actions which affect map
-            * e.g. make a "door" appear in water house
-    * Diggable tiles?
-    * Rideable birds?
-
-
 Dec 17, 2018:
 -------------
 
 Palette transitions which are intended to be "instantaneous"
 (e.g. if !game->smooth_scroll || game->reset_camera) actually lag
 behind camera pos by 1 frame.
-
-
-Dec 24, 2018:
--------------
-
-Currently spider -> roller transformation is kinda hacky
-
-    * Can we make doors which are only visible to rollers? Too hacky!
-
-    * Can we have doors better indicate their effect?
-        E.g. after submap is loaded, if its door_stateset_filename is non-NULL,
-        change it in some way, perhaps adding a body of the proper anim
-        with no recording, so it just stands there showing you what you
-        will become...
-
-    * Perhaps we design the dodecas area such that rollers can't escape.
-        That way we just need to add a "roller -> player" door somewhere
-        within it.
-        Like on the other side of a puzzle which can't be passed by
-        spiders...
-        It should be at the far left side where the other rollers are,
-        so they act as a hint that you should head there as a roller!..
-        THEY COULD BE ACTORS WHICH DETECT A FELLOW ROLLER ENTERING THE
-        AREA!...
-        *hyperventilating slightly*
-
-
-Dec 31, 2018:
--------------
-
-vars:
-
-    Should be saved in recordings.
-    So e.g. we can set vars of recordings in data/maps by editing the files.
-
-    We want new getter/setter conds and effects:
-        if:
-            eval: get "x" < 3
-            eval: get "name" == "joe"
-            eval: get "is_active"
-        then:
-            set "x": get "x" + 1
-
-    For "coll" cond with "bodies", we want something like:
-        coll:
-            bodies
-            count: >= 3
-            where: get his "x" < 3
-            where: get his "name" == "joe"
-            where: get his "group" == get my "group"
-            where: get his "is_active" and: not get his "is_dead"
-            ;; .....
-
-    We also want some way for a state to affect other bodies:
-        for bodies:
-            where: get his "group" == get my "group"
-            coll:
-                ;; ....
-        do:
-            # If you only have 1 thing to do:
-            set his "x": 3
-
-            # If you have multiple things to do:
-            : set his "x": 3
-            : set my "guy": get his "name"
-
-    Can we have a "do" block for each stateset, run when it's loaded?
-    (So e.g. player/roller/whatever can have certain vars always set)
-
-    TODO: How do we implement "crushing" with this?
-        for bodies:
-            where: get his "crushable"
-            coll: ...
-        do:
-            set his state: "dead_cycle"
-
-    We could implement "pickups" too, e.g.:
-        for bodies:
-            where: get his "uses_pickups"
-            coll: ...
-        do:
-            : set his "heat": get his "heat" + 10
-            : die
 
 
 Sep 28, 2019:
@@ -294,109 +192,12 @@ Mar 29, 2020:
 * "Fruit/flower" coins which grow on little plants
 
 
-May 17, 2020:
--------------
-
-VALGRIND ISSUES:
-    * hexmap_parse_submap: palette_filename
-    * ...etc... JUST RUN THIS:
-        valgrind --leak-check=full --track-origins=yes ./main 2>valgrind.log
-    * So basically, a lot of fus_lexer strings are left lying around.
-    * And a lot of X11 crap.
-    * BUT ALSO:
-        * calloc in console_init (console.c:28) in test_app_init (test_app.c:210)
-        * calloc in console_init (console.c:32) in test_app_init (test_app.c:210)
-        * And:
-            ==4434==    at 0x4C2FA1E: calloc (vg_replace_malloc.c:711)
-            ==4434==    by 0x413059: load_file (util.c:55)
-            ==4434==    by 0x408DB9: _stateset_parse (anim.c:335)
-
-
 Jun 15, 2020:
 -------------
 
 Keep it simple... I want more places to play in
 Dodecas is probably my favourite, more like that plz.
 Mix hexas + bigtris, birds + bigrollers.
-
-
-Aug 2, 2020:
-------------
-
-
-Spit needs to eventually disappear on its own, otherwise spitting repeatedly into empty space eventually slows down the game
--> OK DONE, but watching list_bodies in the console, looks like dying doesn't actually remove a body.
-    ...which probably makes sense sometimes?.. but for spit needs to be totally removed.
-    Well anyway, not having a bunch of spit doing collision checks every frame should be an improvement, good enough for now.
-
-
-GET WATER_ROLLER WORKING BETTERER
-...then throw some in "water" map
-
-
-Anything fun we can do with body->vars now that we can "inc" etc?..
-E.g. collected "coins" are counted and can be... spent somehow.
-Issue with that is our crappy "event system"...
-
-    anim/coin.fus:
-        on "collect": collected
-
-    anim/spider.fus:
-        collmsgs: "collect"
-
-...no way to get "code" to run for player when they actually collect something.
-...errr wait, can we just have a corresponding "collectible" message sent by coin to player???
-Ok ok, but even then, the only thing we can do when an event fires is a "goto".
-We want an arbitrary state_effect_t.
-I believe we want something like:
-
-    anim/coin.fus:
-        on "collect":
-            goto immediate: "collected"
-
-    anim/spider.fus:
-        collmsgs:
-            "collect":
-                inc: coins_collected
-
-Question: how would we display e.g. that "coins_collected" variable?..
-camera_render would check player's body's variables?..
-Variables with a certain prefix are printed?..
-Or stateset has a list of variables to be printed, and their labels?..
-
-    anim/spider.fus:
-
-        display:
-            int coins_collected
-        collmsgs:
-            "collect":
-                inc: coins_collected
-        on "crush":
-            goto immediate: "dead"
-
-        $SET_STR NS player_
-        import "anim/_spider.fus"
-
-
-Can a body's vars be made to affect how its rgraph is rendered?..
-
-
-SOMETHING FUN:
-    Rollers can collect 1 "coin".
-    Then they are seen to be carrying it.
-    However, player can "steal" it by shooting or running into it.
-
-
-
-Way from console to move to another map?
-How about being able to respawn at arbitrary savepoints within current map?
-
-
-When you get crushed, you respawn... but keep your current stateset, even if you had a different one
-when your respawn point was last set!
-So e.g. you can travel a long ways, and get a new body, and then keep that new body even
-if you get crushed in it.
-Which could ruin puzzles whose purpose is to go in somewhere, get a new body, and make it out alive...
 
 
 Aug 4, 2020:
@@ -419,15 +220,6 @@ Aug 4, 2020:
                 * So that probably only makes sense for animations which are already split up into actors.
 
 
-Aug 6, 2020:
-------------
-
-* Aiming up should be a "special ability" of some spider variant.
-    * Or possibly... a "pickup"?.. one of few such pickups.
-    * Another pickup: ABILITY TO VIEW THE MINIMAP (with tab)
-        * This is per hexmap?.. so one minimap pickup per hexmap?..
-
-
 Aug 23, 2020:
 -------------
 
@@ -435,8 +227,6 @@ Aug 23, 2020:
     * "timid" variant, doesn't make big jumps, can therefore be confined to e.g. left part of spidertown...
     * The chance percentages could be int vars...
     * Separate chances for running vs "running off the edge"?..
-
-* airoller... aibigroller... etc
 
 
 Aug 23, 2020:
@@ -447,20 +237,16 @@ Aug 23, 2020:
     * Make it so when birdplayer is a bird, he's not crushed by birds.
         * Cheapo way to do it: when birdplayer is bird, he has no hitbox.
         So he neither crushes nor is crushed.
+        * Future Ben says: modern way is to use a proc, e.g.
+            on "crush": call: "crushed"
+        ...and the "crushed" proc does whatever magic you want to change
+        crushing behaviour based on whether you're a birdplayer or whatever.
     * Have this area eventually combine with big triangles area.
     * Is there a "big_trangleplayer"?.. :P
     * Finish up anim/bubblecar.fus!..
     * jungle_aiplayer gets crushed by birds :'(
         * Add a special "invincible" thing to bodies?..
         * (Currently just implicit when body->recording is playing...)
-
-
-Aug 25, 2020:
--------------
-
-* Split geom_lexer.c off from geom.c?.. otherwise geom.c depends on lexer.c which is silly.
-
-* Fix our weirdo "touching savepoint" code... these days we can save your anim+state+pos+rot+turn, so just use hitbox.
 
 
 Aug 29, 2020:
@@ -474,15 +260,10 @@ Sep 1, 2020:
 * aiplayer jumps into walls & explodes sometimes. Not ideal.
 * after you pass big_roller in triangles world, he goes "crazed" and comes after you?..
     * so we... have anim/_big_roller.fus and pass it an IS_CRAZED bool?.. :P
-* use hexbox_t with hexcollmap_t so collmaptool can rotate maps!
-    * then do so with wastes/start.fus, etc
 
 
 Sep 5, 2020:
 ------------
-
-* Need a way for rollers to get out of dodecas section without hexrollers doing so...
-    * data/maps/demo/pebbles3.fus
 
 * Spikeyplayer puzzle!.. there's one already (data/maps/trees/bubbles3-0.fus) where you become rollerplayer,
 then become spikeyplayer, then can get through a place with 4 deathrollers.
@@ -533,47 +314,20 @@ enter   +   .   .
         +
 
 
-Player 2 can't be crushed?!?!?!
-(See bird on data/maps/wastes/start2.fus
-
-
 ** Need a way to make actors invincible -- we've got that hardcoded thing with recordings,
 I want to replace that with an explicit thing, maybe can be set by a recording, but
 if so, needs to last once recording stops and actor takes over
     * We already have rec->reacts, is that all we need?.. but make it body->reacts?..
 
-** redo big_roller recording in triangles area!
-
-
-** We need player->respawn_stateset_filename
-    Don't we have this now?.. maybe it's just not used?..
-
 ** Render hexmap submaps' hexboxes for debugging purposes...
     * Instead of trying to render the outlines, we could e.g. render all tiles
         a solid colour while some button was held down?..
-
-** map-level vars and "global" (game-level) vars.
-    * Can be saved/loaded (i.e. in respawn.txt)
-    * actors don't need to create a body!.. (this is already true)
-        so if they had map/game-level vars to play with, we could start doing neat stuff
-    * one var type stores bodies?.. so you can look up bodies by name... (per map?.. per game?..)
-    * turn "visibility" of submaps on/off. And that can be saved/loaded (in respawn.txt).
 
 ** roller: still uses the old "turn" movement style while "u" is held??? (whlie "grabbing")
 
 
 Oct 11, 2020:
 -------------
-
-* Goal of game: find spider town.
-* Secondary/optional goal: "lead" the other spiders to spider town.
-* Start of game: you can follow one of a number of other spiders, who guide/follow you through certain parts of the map.
-    * The existing "guide" actor is for dodecas area...
-    * One for "vines", "jungle"...
-        * That guy will open the "hermit's hut" for you?? Or like... rescue the hermit??
-    * One for tunnels...
-        * Will show you to "pseudo" spidertown up top of demo map?.. and thence to trees?..
-        * Actually maybe you meet someone partway through trees?..
 
 * Extend trees worldmap at data/maps/trees/bubbles3-1.fus, going below-right, adding right-sloping tree.
     * Also: instead of trying to get this bubbles3-1.fus etc area "right", just copy-paste
@@ -755,6 +509,9 @@ Oct 2, 2021:
   ...this can be weird when a door/savepoint looks like it's "on the ceiling".
   Then you can't get into it if you're crouching on the ceiling.
 
+  NOTE: this is fixed if you use anim/door.fus instead of 'D' tiles!..
+  The anim door is vastly superior in every way. TODO: get rid of 'D' tiles...
+
 * VISUAL CLUE SHOWING YOUR SPAWN LOCATION
     * (At least, showing last-touched savepoint)
 
@@ -789,39 +546,6 @@ MEMORY SAVING MEASURES:
       (E.g. as left by "."s)
 
 
-Oct 12, 2021:
--------------
-
-Current tree of possible areas you can go, starting at maps/demo:
-* demo (start)
-    * vines
-        * jungle
-            * water
-                * [unlock... door in hermit's house?..]
-            * [turn into spikeyplayer?..]
-            * [save the hermit, unlocking... door at end of water?..]
-            * [new area, "birds"?..]
-    * pebbles
-        * tunnels
-            * [turn into rollerplayer?..]
-            * wilderness
-                * [what do you do here?..]
-            * mini-spidertown (mapxx etc)
-                * "dark spidertown" (maps/test)
-                    * [solve secret_path "puzzle"]
-                    * maps/test/worldmap_minimal.fus
-                        * [turn into aimerplayer]
-                * spidertown
-                    * trees
-                        * [turn into spikeyplayer]
-                        * [turn into rollerplayer]
-        * dodecas
-            * [secret shortcut to jungle?.. or should we patch that?.. probably]
-            * fisheye
-                * triangles
-                * [turn into roller?..]
-
-
 * Add things spiders can roll?..
     * In dodecas area, spiders can be hunting (spitting at some animals till they turn
       to rollable "food"), or collecting rollable whatevers... and somehow these are
@@ -833,11 +557,6 @@ Current tree of possible areas you can go, starting at maps/demo:
     * Maybe... this actor can use spikey spiders?..
       Feels kind of like cheating, but otherwise we need a way for the actor to distinguish
       the safe and unsafe areas.
-
-* Let's say we keep the current thing: "guide" spider chases away some eyespiders from start2.
-  They go hide in various places.
-  (BTW, let's add a new one to leftmost part of dodecas area.)
-  If you come across them, they explain something to you.
 
 
 Nov 3, 2021:
@@ -872,17 +591,12 @@ So we either need to call a certain proc when transforming, or... uh... do somet
 Dec 21, 2021:
 -------------
 
-* start4 in tutorial2: add a coin in top-left to make it clear you can get up there
-
 * your spit can go through e.g. rollers moving towards it (the two bodies pass
     through each other). so we need spit's hitbox to extend behind it.
     but I think we used to have that and removed it, because it meant you
     could hit things through walls... *WHEN THE SPIT BOUNCED!*
     so we probably need to add a "bounce" state which lasts for 1 frame
     and whose hitbox doesn't extend behind
-
-* spikeyspider: when he gets hit, eyes no longer recognize him, so they close
-    (so, state "crawl_shielding" is missing the "touch" collmsg or something)
 
 * data/maps/tutorial3/start.fus: eyes should give you a hint, like
     "jump right through the middle!" or something
@@ -895,15 +609,3 @@ myvar("is_rollerspider"), myvar("is_flierspider"), myvar("is_birdspider"): presu
 with anim/*spider.fus other than the ones they're intended for use with, because the others will be
 missing the imports of anim/_roller.fus, anim/_flier_core.fus, anim/_bird.fus, etc.
 So: can we use labels to introduce visual changes, instead of requiring separate statesets?..
-
-
-Jan 3, 2021:
-------------
-
-NOW THAT MAPVARS ARE PART OF WHAT'S SAVED... save points should be activated if you changed
-any mapvars????
-(Not just if "the distance from your last savepoint is more than 3" or whatever we check now)
-...so, we want a mapvars_diff function or something?
-...oooof, no, because we're diffing against the contents of saves/0.txt or whatever. GAH
-...see hexgame_savelocation_{save,load}.
-...properest solution is to add a "dict" of maps and their vars to hexgame_savelocation_t. :P
