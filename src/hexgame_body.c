@@ -464,8 +464,12 @@ int body_refresh_vars(body_t *body){
     int err;
     vars_t *vars = &body->vars;
 
-    err = vars_set_bool(vars, ".turn", body->loc.turn);
-    if(err)return err;
+    var_t *var = vars_get_or_add(vars, ".turn");
+    if(var == NULL)return 1;
+    val_set_bool(&var->value, body->loc.turn);
+
+    /* Mark ".turn" as being nosave */
+    var->props |= 1 << HEXGAME_VARS_PROP_NOSAVE;
 
     return 0;
 }
