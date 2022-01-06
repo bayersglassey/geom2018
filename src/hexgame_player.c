@@ -38,6 +38,7 @@ int player_init(player_t *player, hexgame_t *game, int keymap,
     player->game = game;
     player->keymap = keymap;
     player->body = NULL;
+    player->savepoint_cooldown = 0;
 
     for(int i = 0; i < KEYINFO_KEYS; i++)player->key_code[i] = 0;
     if(keymap == 0){
@@ -458,6 +459,8 @@ int player_step(player_t *player, hexgame_t *game){
 
     body_t *body = player->body;
 
+    if(player->savepoint_cooldown > 0)player->savepoint_cooldown--;
+
     /* If no body, do nothing */
     if(!body)return 0;
 
@@ -504,23 +507,25 @@ int player_step(player_t *player, hexgame_t *game){
         hexmap_submap_t *door_submap = collision.door.submap;
         hexmap_submap_t *water_submap = collision.water.submap;
 
-        if(!body->state->safe){
-            /* Don't save in an unsafe position, like flying through the air */
-            savepoint_submap = NULL;
+        bool touching_savepoint =
+            savepoint_submap != NULL &&
+
+            /* Don't save in an unsafe position, like flying through
+            the air */
+            body->state->safe;
+
+        bool use_savepoint =
+            touching_savepoint &&
+
+            /* Don't save if we just did not too long ago */
+            player->savepoint_cooldown == 0;
+
+        if(touching_savepoint){
+            /* Set a cooldown until we can use the savepoint again */
+            player->savepoint_cooldown = PLAYER_SAVEPOINT_COOLDOWN;
         }
 
-        if(savepoint_submap){
-            /* Don't use the savepoint if it's already our respawn point!
-            In particular, I want to avoid screen flashing white if e.g.
-            player turns around in-place.
-            HACK: we check distance between body's current position and
-            player's respawn position. */
-            int dist = hexspace_dist(body->loc.pos, player->respawn_location.loc.pos);
-            bool at_respawn = dist <= 2;
-            if(at_respawn)savepoint_submap = NULL;
-        }
-
-        if(savepoint_submap){
+        if(use_savepoint){
             err = player_use_savepoint(player);
             if(err)return err;
         }

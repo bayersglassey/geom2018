@@ -263,10 +263,15 @@ int body_record_keyup(body_t *body, int key_i);
  * PLAYER *
  **********/
 
+/* Ticks after touching a savepoint until you can use it again */
+#define PLAYER_SAVEPOINT_COOLDOWN 10
+
 typedef struct player {
     hexgame_savelocation_t respawn_location;
     hexgame_savelocation_t safe_location;
     const char *respawn_filename;
+
+    int savepoint_cooldown;
 
     int keymap;
     SDL_Keycode key_code[KEYINFO_KEYS];
