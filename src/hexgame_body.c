@@ -183,7 +183,7 @@ void hexgame_body_dump(body_t *body, int depth){
     print_tabs(stderr, depth);
     fprintf(stderr, "index: %i\n", body_get_index(body));
     print_tabs(stderr, depth);
-    fprintf(stderr, "map: %s\n", body->map->name);
+    fprintf(stderr, "map: %s\n", body->map->filename);
     print_tabs(stderr, depth);
     fprintf(stderr, "submap: %s\n",
         body->cur_submap->filename);

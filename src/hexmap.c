@@ -265,7 +265,7 @@ void hexmap_cleanup(hexmap_t *map){
     vars_cleanup(&map->vars);
 }
 
-int hexmap_init(hexmap_t *map, hexgame_t *game, const char *name,
+int hexmap_init(hexmap_t *map, hexgame_t *game, const char *filename,
     vec_t unit
 ){
     int err;
@@ -273,7 +273,7 @@ int hexmap_init(hexmap_t *map, hexgame_t *game, const char *name,
     prismelrenderer_t *prend = game->prend;
     vecspace_t *space = &hexspace;
 
-    map->name = name;
+    map->filename = filename;
     map->game = game;
     map->space = space;
     hexgame_location_zero(&map->spawn);
@@ -631,7 +631,7 @@ static int _hexmap_parse(hexmap_t *map, fus_lexer_t *lexer,
     return 0;
 }
 
-int hexmap_parse(hexmap_t *map, hexgame_t *game, const char *name,
+int hexmap_parse(hexmap_t *map, hexgame_t *game, const char *filename,
     fus_lexer_t *lexer
 ){
     INIT
@@ -648,7 +648,7 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, const char *name,
     CLOSE
 
     /* init the map */
-    err = hexmap_init(map, game, name, unit);
+    err = hexmap_init(map, game, filename, unit);
     if(err)return err;
 
     /* parse spawn point */
@@ -765,7 +765,7 @@ static int hexmap_parse_door(hexmap_t *map, hexmap_submap_t *submap,
         }else{
             /* Non-null door->u.location.map_filename indicates player should
             "teleport" to door->u.location */
-            door->u.location.map_filename = map->name;
+            door->u.location.map_filename = map->filename;
         }
 
         if(GOT("anim")){
@@ -827,7 +827,7 @@ static int hexmap_populate_submap_doors(hexmap_t *map,
         fprintf(stderr,
             "Map (%s) and collmap (%s) disagree on number of doors: "
             "%i != %i\n",
-            map->name, submap->filename,
+            map->filename, submap->filename,
             submap->doors_len, n_doors);
         return 2;
     }

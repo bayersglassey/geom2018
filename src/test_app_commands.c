@@ -100,7 +100,7 @@ static int _test_app_command_list_worldmaps(test_app_t *app, fus_lexer_t *lexer,
     int worldmap_index = 0;
     for(int i = 0; i < game->worldmaps_len; i++){
         const char *worldmap = game->worldmaps[i];
-        if(!strcmp(worldmap, map->name)){
+        if(!strcmp(worldmap, map->filename)){
             worldmap_index = i;
             break;
         }
@@ -146,7 +146,7 @@ static int _test_app_command_add_player(test_app_t *app, fus_lexer_t *lexer, boo
     /* HACK: we just grab maps[0] */
     hexmap_t *map = game->maps[0];
     hexgame_location_t spawn = map->spawn;
-    const char *respawn_map_filename = map->name;
+    const char *respawn_map_filename = map->filename;
     if(game->players_len > 0){
         /* HACK: we just grab players[0] */
         player_t *player = game->players[0];

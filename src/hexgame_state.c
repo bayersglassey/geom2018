@@ -487,7 +487,7 @@ int state_effect_apply(state_effect_t *effect,
                 RULE_PERROR()
                 fprintf(stderr,
                     "Couldn't find location \"%s\" for map \"%s\"\n",
-                    loc_name, new_map->name);
+                    loc_name, new_map->filename);
                 return 2;
             }
         }

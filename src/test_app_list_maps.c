@@ -53,7 +53,7 @@ int test_app_list_maps_render(test_app_list_t *list){
     _console_write_bar(console, data->index, data->length);
     hexmap_t *map = data->item;
     if(map != NULL){
-        _console_write_field(console, "Name", map->name);
+        _console_write_field(console, "Filename", map->filename);
         _console_write_options(console, data->options,
             data->options_index, data->options_length);
     }

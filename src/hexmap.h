@@ -157,7 +157,7 @@ typedef struct hexmap_submap_parser_context {
 const char *submap_camera_type_msg(int camera_type);
 
 typedef struct hexmap {
-    const char *name;
+    const char *filename;
 
     vars_t vars;
 
@@ -180,7 +180,7 @@ typedef struct hexmap {
 
 
 void hexmap_cleanup(hexmap_t *map);
-int hexmap_init(hexmap_t *map, struct hexgame *game, const char *name,
+int hexmap_init(hexmap_t *map, struct hexgame *game, const char *filename,
     vec_t unit);
 hexgame_location_t *hexmap_get_location(hexmap_t *map, const char *name);
 hexmap_submap_group_t *hexmap_get_submap_group(hexmap_t *map,
@@ -189,7 +189,7 @@ int hexmap_get_or_add_submap_group(hexmap_t *map, const char *name,
     hexmap_submap_group_t **group_ptr);
 int hexmap_load(hexmap_t *map, struct hexgame *game, const char *filename,
     vars_t *vars);
-int hexmap_parse(hexmap_t *map, struct hexgame *game, const char *name,
+int hexmap_parse(hexmap_t *map, struct hexgame *game, const char *filename,
     fus_lexer_t *lexer);
 int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
     hexmap_submap_parser_context_t *parent_context,

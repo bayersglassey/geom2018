@@ -191,7 +191,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 
         err = player_init(player, game, i,
             spawn.pos, spawn.rot, spawn.turn,
-            map->name, respawn_filename);
+            map->filename, respawn_filename);
         if(err)return err;
     }
 

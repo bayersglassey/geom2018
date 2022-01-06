@@ -124,14 +124,14 @@ static int _player_set_location(player_t *player, hexgame_savelocation_t *locati
 static int player_set_respawn(player_t *player){
     body_t *body = player->body;
     return _player_set_location(player, &player->respawn_location,
-        body->loc.pos, body->loc.rot, body->loc.turn, body->map->name,
+        body->loc.pos, body->loc.rot, body->loc.turn, body->map->filename,
         body->stateset.filename, body->state->name);
 }
 
 static int player_set_safe_location(player_t *player){
     body_t *body = player->body;
     return _player_set_location(player, &player->safe_location,
-        body->loc.pos, body->loc.rot, body->loc.turn, body->map->name,
+        body->loc.pos, body->loc.rot, body->loc.turn, body->map->filename,
         body->stateset.filename, body->state->name);
 }
 
@@ -293,7 +293,7 @@ int player_save(player_t *player, const char *filename){
     for(int i = 0; i < game->maps_len; i++){
         hexmap_t *map = game->maps[i];
         fprintf(file, "    ");
-        fus_write_str(file, map->name);
+        fus_write_str(file, map->filename);
         fprintf(file, ":\n");
         fprintf(file, "        vars:\n");
         _write_vars(&map->vars, file, 3);
@@ -408,7 +408,7 @@ int player_load(player_t *player, const char *filename,
                 if(!group){
                     fprintf(stderr, "WARNING: "
                         "couldn't find submap group \"%s\" in map \"%s\"\n",
-                        name, map->name);
+                        name, map->filename);
                     fprintf(stderr,
                         "...maybe this save file is from an old version?\n");
                     PARSE_SILENT
