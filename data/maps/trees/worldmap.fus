@@ -1,4 +1,4 @@
-
+name: "trees"
 unit: 3 2 0 -1
 spawn: (-1 0)
 palette: "data/maps/trees/pals/trees.fus"

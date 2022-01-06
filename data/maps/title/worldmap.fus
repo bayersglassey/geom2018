@@ -1,4 +1,4 @@
-
+name: "title"
 unit: 3 2 0 -1
 spawn: "data/maps/title/title.fus"
 #spawn: "data/maps/demo/bubblecar_test.fus"

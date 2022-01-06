@@ -638,6 +638,11 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, const char *filename,
 
     prismelrenderer_t *prend = game->prend;
 
+    GET("name")
+    OPEN
+    GET_STR_CACHED(map->name, &prend->name_store)
+    CLOSE
+
     /* parse unit */
     vec_t unit;
     GET("unit")

@@ -1,4 +1,4 @@
-
+name: "death_place"
 unit: 3 2 0 -1
 spawn: "data/maps/death_place/end.fus"
 palette: "data/pal1.fus"

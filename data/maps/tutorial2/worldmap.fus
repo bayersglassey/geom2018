@@ -1,4 +1,4 @@
-
+name: "tutorial2"
 unit: 3 2 0 -1
 spawn: "data/maps/tutorial2/start.fus"
 #spawn: "data/maps/tutorial2/entrance.fus"

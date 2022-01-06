@@ -158,6 +158,7 @@ const char *submap_camera_type_msg(int camera_type);
 
 typedef struct hexmap {
     const char *filename;
+    const char *name;
 
     vars_t vars;
 

@@ -1,4 +1,4 @@
-
+name: "water"
 unit: 3 2 0 -1
 spawn: "data/maps/water/start.fus"
 #palette: "data/pal1.fus"

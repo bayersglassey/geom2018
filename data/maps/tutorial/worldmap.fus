@@ -1,4 +1,4 @@
-
+name: "tutorial"
 unit: 3 2 0 -1
 spawn: "data/maps/tutorial/entrance.fus"
 palette: "data/pal1.fus"

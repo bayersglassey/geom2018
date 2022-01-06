@@ -1,4 +1,4 @@
-
+name: "spidertown"
 unit: 3 2 0 -1
 spawn: (0 0)
 palette: "data/maps/trees/pals/trees.fus"

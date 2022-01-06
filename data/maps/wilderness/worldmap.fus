@@ -1,4 +1,4 @@
-
+name: "wilderness"
 unit: 3 2 0 -1
 spawn: "data/maps/wilderness/start.fus"
 palette: "data/pal1.fus"
