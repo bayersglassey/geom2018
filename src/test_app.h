@@ -16,6 +16,7 @@
 #include "hexmap.h"
 #include "hexgame.h"
 #include "test_app_list.h"
+#include "test_app_menu.h"
 #include "minieditor.h"
 
 
@@ -55,6 +56,7 @@ typedef struct test_app {
     geomfont_t *geomfont;
     console_t console;
     minieditor_t editor;
+    test_app_menu_t menu;
 
     stateset_t stateset;
     hexgame_t hexgame;

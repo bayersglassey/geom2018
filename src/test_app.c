@@ -65,6 +65,7 @@ void test_app_cleanup(test_app_t *app){
     hexgame_cleanup(&app->hexgame);
     font_cleanup(&app->font);
     minieditor_cleanup(&app->editor);
+    test_app_menu_cleanup(&app->menu);
     if(app->list){
         test_app_list_cleanup(app->list);
         free(app->list);
@@ -237,6 +238,8 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         &app->font, app->geomfont, &app->prend,
         app->delay_goal, app->scw, app->sch);
 
+    test_app_menu_init(&app->menu, app);
+
     app->list = NULL;
 
     if(load_game){
@@ -403,9 +406,13 @@ int test_app_mainloop_step(test_app_t *app){
     err = hexgame_unpauseable_step(game);
     if(err)return err;
 
-    if(app->hexgame_running && !app->hexgame.show_minimap){
+    if(app->hexgame.show_minimap){
+        /* Minimap doesn't need to do anything each frame */
+    }else if(app->hexgame_running){
         err = hexgame_step(game);
         if(err)return err;
+    }else{
+        /* Menu doesn't need to do anything each frame */
     }
 
     err = hexgame_step_cameras(game);

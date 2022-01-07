@@ -170,7 +170,15 @@ int test_app_render_game(test_app_t *app){
     if(app->show_console){
         err = test_app_blit_console(app, 0, app->lines_printed * app->font.char_h);
         if(err)return err;
-    }else if(!showed_dead_msg && !game->show_minimap){
+    }else if(showed_dead_msg){
+        /* We already rendered (showed) a "dead message" above, so nothing to
+        do here. */
+    }else if(game->show_minimap){
+        /* Rendering of the minimap is handled, interestingly, by
+        camera_render, which was already called above */
+    }else if(!app->hexgame_running){
+        test_app_menu_render(&app->menu);
+    }else{
         hexmap_submap_t *submap = app->camera->cur_submap;
         if(submap){
             for(int i = 0; i < submap->text_exprs_len; i++){

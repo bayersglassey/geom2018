@@ -36,7 +36,7 @@ TEST_APP_OFILES = \
  src/test_app_list.o src/test_app_commands.o \
  src/test_app_list_choices.o src/test_app_list_maps.o src/test_app_list_submaps.o \
  src/test_app_list_bodies.o src/test_app_list_players.o src/test_app_list_actors.o \
- src/test_app_list_recording.o src/test_app_list_utils.o
+ src/test_app_list_recording.o src/test_app_list_utils.o src/test_app_menu.o
 
 .PHONY: all clean check www
 
