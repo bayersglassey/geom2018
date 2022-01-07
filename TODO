@@ -609,3 +609,55 @@ myvar("is_rollerspider"), myvar("is_flierspider"), myvar("is_birdspider"): presu
 with anim/*spider.fus other than the ones they're intended for use with, because the others will be
 missing the imports of anim/_roller.fus, anim/_flier_core.fus, anim/_bird.fus, etc.
 So: can we use labels to introduce visual changes, instead of requiring separate statesets?..
+
+
+Jan 6, 2021:
+------------
+
+Let's just make a bunch of maps, yeah?
+And let's start the game somewhere were you can pick them.
+Like a little hub world.
+But one of the places is the tutorial.
+Or... multiple tutorials.
+
+We need a menu, accessible from start of game or anytime thereafter,
+where you can e.g. start a new game, or load an existing save.
+
+By the way, having a separate save per player but they get loaded "simultaneously"
+is weird and not gonna work.
+Multiplayer takes a backseat for now, okay? Second player can join first player's
+game, but can't save on their own.
+Also, only first player can set the current savepoint?..
+So... uhhh... we don't want player->savelocation anymore? O_o
+BUT THAT'S NOT GONNA WORK, because savelocation includes stateset and state.
+Hmmmm long story short, multiplayer takes a backseat for now.
+
+Anyway, we want "save slots".
+
+The menu's structure should be:
+
+    TITLE
+    * New game
+    * Load game
+
+    LOAD GAME
+    * Slot 1
+    * Slot 2
+    * ...
+    * Slot N
+
+    PAUSED
+    * Continue
+    * Exit to title
+
+TODO: currently we have the following ways to track test_app's "state":
+    * app->hexgame_running
+    * app->hexgame.show_minimap
+...we need to change that to support the following states:
+    * Game is running
+    * Game is paused (F5)
+        * Developer mode only!.. allows frame step via PgUp
+    * Game is paused + menu is showing
+        * Activated by... Enter key?..
+    * Game is paused + minimap is showing
+        * Different minimap zooms within this
