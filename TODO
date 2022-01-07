@@ -651,13 +651,11 @@ The menu's structure should be:
     * Exit to title
 
 TODO: currently we have the following ways to track test_app's "state":
+    * app->mode (TEST_APP_MODE_GAME, TEST_APP_MODE_EDITOR)
     * app->hexgame_running
     * app->hexgame.show_minimap
-...we need to change that to support the following states:
-    * Game is running
-    * Game is paused (F5)
-        * Developer mode only!.. allows frame step via PgUp
-    * Game is paused + menu is showing
-        * Activated by... Enter key?..
-    * Game is paused + minimap is showing
-        * Different minimap zooms within this
+    * app->show_console
+    * app->process_console
+
+...now I'm adding:
+    * app->show_menu

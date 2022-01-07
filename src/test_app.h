@@ -26,7 +26,7 @@
 
 
 
-enum {
+enum test_app_mode {
     TEST_APP_MODE_GAME,
     TEST_APP_MODE_EDITOR,
     TEST_APP_MODES
@@ -68,7 +68,8 @@ typedef struct test_app {
     bool show_console; /* console is visible */
     bool process_console; /* console is grabbing input */
     int lines_printed; /* How many lines we've printed so far this frame */
-    int mode;
+    int mode; /* enum test_app_mode */
+    bool show_menu;
 
     bool loop;
 

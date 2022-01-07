@@ -30,32 +30,33 @@ void test_app_menu_cleanup(test_app_menu_t *menu){
 }
 
 void test_app_menu_init(test_app_menu_t *menu, test_app_t *app){
-    menu->screen_i = TEST_APP_MENU_SCREEN_TITLE;
-    menu->option_i = 0;
-
     menu->app = app;
+    test_app_menu_set_screen(menu, TEST_APP_MENU_SCREEN_TITLE);
+}
+
+void test_app_menu_set_screen(test_app_menu_t *menu, int screen_i){
+    menu->screen_i = screen_i;
+    menu->option_i = 0;
 }
 
 void test_app_menu_up(test_app_menu_t *menu){
-    if(menu->screen_i > 0)menu->screen_i--;
-    else menu->screen_i = TEST_APP_MENU_SCREENS - 1;
+    int n_options = _get_n_options(menu);
+    if(menu->option_i > 0)menu->option_i--;
+    else menu->option_i = n_options - 1;
 }
 
 void test_app_menu_down(test_app_menu_t *menu){
-    if(menu->screen_i < TEST_APP_MENU_SCREENS - 1)menu->screen_i++;
-    else menu->screen_i = 0;
+    int n_options = _get_n_options(menu);
+    if(menu->option_i < n_options - 1)menu->option_i++;
+    else menu->option_i = 0;
 }
 
 void test_app_menu_left(test_app_menu_t *menu){
-    int n_options = _get_n_options(menu);
-    if(menu->option_i < n_options - 1)menu->option_i++;
-    else menu->option_i = 0;
+    /* Does nothing for now */
 }
 
 void test_app_menu_right(test_app_menu_t *menu){
-    int n_options = _get_n_options(menu);
-    if(menu->option_i < n_options - 1)menu->option_i++;
-    else menu->option_i = 0;
+    /* Does nothing for now */
 }
 
 void test_app_menu_render(test_app_menu_t *menu){

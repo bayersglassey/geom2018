@@ -121,23 +121,9 @@ static int _print_text_expr(test_app_t *app, hexmap_submap_t *submap,
     return 0;
 }
 
-int test_app_render_game(test_app_t *app){
+static bool _show_dead_msgs(test_app_t *app, bool *showed_dead_msg_ptr){
     int err;
-
     hexgame_t *game = &app->hexgame;
-
-    RET_IF_SDL_NZ(SDL_FillRect(app->surface, NULL, 255));
-
-    if(app->camera_mapper){
-        /* camera->mapper is set to NULL at start of each step, it's up
-        to us to set it if desired before calling camera_render */
-        app->camera->mapper = app->camera_mapper;
-    }
-    err = camera_render(app->camera,
-        app->surface,
-        app->sdl_palette, app->scw/2, app->sch/2,
-        1 /* app->zoom */);
-    if(err)return err;
 
     bool showed_dead_msg = false;
     for(int i = 0; i < game->players_len; i++){
@@ -167,30 +153,63 @@ int test_app_render_game(test_app_t *app){
         }
     }
 
+    *showed_dead_msg_ptr = showed_dead_msg;
+    return 0;
+}
+
+int test_app_render_game(test_app_t *app){
+    int err;
+
+    hexgame_t *game = &app->hexgame;
+
+    RET_IF_SDL_NZ(SDL_FillRect(app->surface, NULL, 255));
+
+    if(app->camera_mapper){
+        /* camera->mapper is set to NULL at start of each step, it's up
+        to us to set it if desired before calling camera_render */
+        app->camera->mapper = app->camera_mapper;
+    }
+
+    /* NOTE: camera_render takes care of rendering the minimap if
+    game->show_minimap is truthy */
+    err = camera_render(app->camera,
+        app->surface,
+        app->sdl_palette, app->scw/2, app->sch/2,
+        1 /* app->zoom */);
+    if(err)return err;
+
     if(app->show_console){
         err = test_app_blit_console(app, 0, app->lines_printed * app->font.char_h);
         if(err)return err;
-    }else if(showed_dead_msg){
-        /* We already rendered (showed) a "dead message" above, so nothing to
-        do here. */
+    }
+
+    if(app->show_menu){
+        test_app_menu_render(&app->menu);
     }else if(game->show_minimap){
         /* Rendering of the minimap is handled, interestingly, by
         camera_render, which was already called above */
-    }else if(!app->hexgame_running){
-        test_app_menu_render(&app->menu);
     }else{
-        hexmap_submap_t *submap = app->camera->cur_submap;
-        if(submap){
-            for(int i = 0; i < submap->text_exprs_len; i++){
-                valexpr_t *text_expr = submap->text_exprs[i];
-                err = _print_text_expr(app, submap, text_expr);
-                if(err)return err;
-            }
-            hexcollmap_t *collmap = &submap->collmap;
-            for(int i = 0; i < collmap->text_exprs_len; i++){
-                valexpr_t *text_expr = collmap->text_exprs[i];
-                err = _print_text_expr(app, submap, text_expr);
-                if(err)return err;
+
+        /* Show messages like "you hit a wall!", "you were crushed!" etc */
+        bool showed_dead_msg;
+        err = _show_dead_msgs(app, &showed_dead_msg);
+        if(err)return err;
+
+        if(!showed_dead_msg){
+            /* Show submap texts */
+            hexmap_submap_t *submap = app->camera->cur_submap;
+            if(submap){
+                for(int i = 0; i < submap->text_exprs_len; i++){
+                    valexpr_t *text_expr = submap->text_exprs[i];
+                    err = _print_text_expr(app, submap, text_expr);
+                    if(err)return err;
+                }
+                hexcollmap_t *collmap = &submap->collmap;
+                for(int i = 0; i < collmap->text_exprs_len; i++){
+                    valexpr_t *text_expr = collmap->text_exprs[i];
+                    err = _print_text_expr(app, submap, text_expr);
+                    if(err)return err;
+                }
             }
         }
     }

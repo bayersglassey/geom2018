@@ -201,6 +201,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->show_console = false;
     app->process_console = false;
     app->mode = TEST_APP_MODE_GAME;
+    app->show_menu = false;
 
     /* Player 0 gets a body right off the bat, everyone else has to
     wait for him to choose multiplayer mode.
@@ -311,12 +312,33 @@ static int test_app_render(test_app_t *app){
     return 0;
 }
 
+static int test_app_process_event_menu(test_app_t *app, SDL_Event *event){
+    int err;
+    test_app_menu_t *menu = &app->menu;
+    if(event->type == SDL_KEYDOWN){
+        if(event->key.keysym.sym == SDLK_UP){
+            test_app_menu_up(menu);
+        }else if(event->key.keysym.sym == SDLK_DOWN){
+            test_app_menu_down(menu);
+        }else if(event->key.keysym.sym == SDLK_LEFT){
+            test_app_menu_left(menu);
+        }else if(event->key.keysym.sym == SDLK_RIGHT){
+            test_app_menu_right(menu);
+        }else if(event->key.keysym.sym == SDLK_RETURN){
+            /* TODO */
+            app->show_menu = false;
+        }
+    }
+    return 0;
+}
+
 static int test_app_poll_events(test_app_t *app){
     int err;
 
     hexgame_t *game = &app->hexgame;
 
     bool dont_process_console_this_frame = false;
+    bool dont_process_menu_this_frame = false;
 
     SDL_Event _event, *event = &_event;
     while(SDL_PollEvent(event)){
@@ -330,6 +352,12 @@ static int test_app_poll_events(test_app_t *app){
             if(event->key.keysym.sym == SDLK_ESCAPE){
                 app->loop = false;
                 break;
+            }else if(event->key.keysym.sym == SDLK_RETURN){
+                if(!app->show_menu){
+                    test_app_menu_set_screen(&app->menu, TEST_APP_MENU_SCREEN_PAUSED);
+                    app->show_menu = true;
+                    dont_process_menu_this_frame = true;
+                }
             }else if(event->key.keysym.sym == SDLK_F5 && app->developer_mode){
                 app->hexgame_running = !app->hexgame_running;
             }else if(event->key.keysym.sym == SDLK_BACKQUOTE && app->developer_mode){
@@ -359,6 +387,12 @@ static int test_app_poll_events(test_app_t *app){
                 malloc_stats();
 #endif
             }
+        }
+
+        if(app->show_menu && !dont_process_menu_this_frame){
+            err = test_app_process_event_menu(app, event);
+            if(err)return err;
+            continue;
         }
 
         if(app->process_console){

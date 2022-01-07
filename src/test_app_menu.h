@@ -12,7 +12,7 @@ enum test_app_menu_screen {
     TEST_APP_MENU_SCREEN_LOAD_GAME,
     TEST_APP_MENU_SCREEN_PAUSED,
     TEST_APP_MENU_SCREENS
-} test_app_menu_screen_t;
+};
 
 
 typedef struct test_app_menu {
@@ -26,6 +26,7 @@ typedef struct test_app_menu {
 
 void test_app_menu_cleanup(test_app_menu_t *menu);
 void test_app_menu_init(test_app_menu_t *menu, struct test_app *app);
+void test_app_menu_set_screen(test_app_menu_t *menu, int screen_i);
 void test_app_menu_up(test_app_menu_t *menu);
 void test_app_menu_down(test_app_menu_t *menu);
 void test_app_menu_left(test_app_menu_t *menu);
