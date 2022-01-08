@@ -392,10 +392,7 @@ static int test_app_poll_events(test_app_t *app){
         if(app->show_menu && !dont_process_menu_this_frame){
             err = test_app_process_event_menu(app, event);
             if(err)return err;
-            continue;
-        }
-
-        if(app->process_console){
+        }else if(app->process_console){
             if(app->list){
                 err = test_app_process_event_list(app, event);
                 if(err)return err;
@@ -403,19 +400,40 @@ static int test_app_poll_events(test_app_t *app){
                 err = test_app_process_event_console(app, event);
                 if(err)return err;
             }
-            continue;
-        }
-
-        if(app->mode == TEST_APP_MODE_GAME){
+        }else if(app->mode == TEST_APP_MODE_GAME){
+            /* Handle special keypresses (F1-F12, etc) */
             err = test_app_process_event_game(app, event);
             if(err)return err;
+
+            /* Handle players' keypresses */
+            err = hexgame_process_event(game, event);
+            if(err)return err;
         }else if(app->mode == TEST_APP_MODE_EDITOR){
+            /* Handle special keypresses (arrow keys, etc) */
             err = test_app_process_event_editor(app, event);
             if(err)return err;
         }
+    }
 
-        err = hexgame_process_event(game, event);
-        if(err)return err;
+    if(
+        app->mode != TEST_APP_MODE_GAME ||
+        app->show_menu ||
+        app->hexgame.show_minimap ||
+        app->process_console
+        /* NOTE: *don't* look at app->hexgame_running for this check -- that's
+        the F5 pause, and we want to be able to e.g. observe keyinfo in the
+        console while paused. */
+    ){
+        /* Reset players' keypresses
+        (so that e.g. if you're holding right, and then enter the menu,
+        then when you exit the menu, your character isn't stuck running
+        to the right until you tap right... knowaddamean?) */
+        for(int i = 0; i < app->hexgame.players_len; i++){
+            player_t *player = app->hexgame.players[i];
+            body_t *body = player->body;
+            if(!body)continue;
+            keyinfo_reset(&body->keyinfo);
+        }
     }
 
     return 0;
@@ -440,7 +458,9 @@ int test_app_mainloop_step(test_app_t *app){
     err = hexgame_unpauseable_step(game);
     if(err)return err;
 
-    if(app->hexgame.show_minimap){
+    if(app->show_menu){
+        /* Menu doesn't need to do anything each frame */
+    }else if(app->hexgame.show_minimap){
         /* Minimap doesn't need to do anything each frame */
     }else if(app->hexgame_running){
         err = hexgame_step(game);
