@@ -391,14 +391,6 @@ int camera_render(camera_t *camera,
  * HEXGAME *
  ***********/
 
-struct hexgame;
-typedef int new_game_callback_t(struct hexgame *game, player_t *player,
-    const char *map_filename);
-typedef int continue_callback_t(struct hexgame *game, player_t *player);
-typedef int set_players_callback_t(struct hexgame *game, player_t *player,
-    int n_players);
-typedef int exit_callback_t(struct hexgame *game, player_t *player);
-
 typedef struct hexgame {
     int frame_i;
     int unpauseable_frame_i;
@@ -425,14 +417,6 @@ typedef struct hexgame {
     vecspace_t *space;
         /* should always be hexspace!
         NOT the same as prend->space! */
-    void *app;
-        /* app: the application which is running this game.
-        The game isn't allowed to know anything about it, but it is
-        used in some callbacks. */
-    new_game_callback_t *new_game_callback;
-    continue_callback_t *continue_callback;
-    set_players_callback_t *set_players_callback;
-    exit_callback_t *exit_callback;
 } hexgame_t;
 
 
@@ -441,12 +425,7 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     const char *worldmaps_filename,
     prismelrenderer_t *minimap_prend,
     const char *minimap_tileset_filename,
-    const char *map_filename,
-    void *app,
-    new_game_callback_t *new_game_callback,
-    continue_callback_t *continue_callback,
-    set_players_callback_t *set_players_callback,
-    exit_callback_t *exit_callback);
+    const char *map_filename);
 int hexgame_load_map(hexgame_t *game, const char *map_filename,
     hexmap_t **map_ptr);
 int hexgame_get_or_load_map(hexgame_t *game, const char *map_filename,

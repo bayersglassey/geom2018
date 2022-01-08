@@ -415,12 +415,7 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     const char *worldmaps_filename,
     prismelrenderer_t *minimap_prend,
     const char *minimap_tileset_filename,
-    const char *map_filename,
-    void *app,
-    new_game_callback_t *new_game_callback,
-    continue_callback_t *continue_callback,
-    set_players_callback_t *set_players_callback,
-    exit_callback_t *exit_callback
+    const char *map_filename
 ){
     int err;
 
@@ -432,12 +427,6 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     game->minimap_prend = minimap_prend;
 
     game->show_minimap = 0;
-
-    game->app = app;
-    game->new_game_callback = new_game_callback;
-    game->continue_callback = continue_callback;
-    game->set_players_callback = set_players_callback;
-    game->exit_callback = exit_callback;
 
     vars_init_with_props(&game->vars, hexgame_vars_prop_names);
 

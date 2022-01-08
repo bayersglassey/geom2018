@@ -70,11 +70,6 @@ int test_app_list_submaps_render(test_app_list_t *list){
         WRITE_FIELD(submap, palette->name)
         WRITE_FIELD(submap, tileset->name)
         WRITE_FIELD(submap, mapper->name)
-        for(int i = 0; i < submap->doors_len; i++){
-            hexmap_door_t *door = submap->doors[i];
-            _console_write_field(console, "door",
-                hexmap_door_type_msg(door->type));
-        }
 
         _console_write_options(console, data->options,
             data->options_index, data->options_length);

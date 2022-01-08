@@ -209,43 +209,11 @@ int player_process_event(player_t *player, SDL_Event *event){
 
 static int player_use_door(player_t *player, hexmap_door_t *door){
     int err;
-
     body_t *body = player->body;
-    hexmap_t *map = body->map;
-    vecspace_t *space = map->space;
-    hexgame_t *game = body->game;
-
-    if(door->type == HEXMAP_DOOR_TYPE_NEW_GAME){
-        err = game->new_game_callback(game, player,
-            door->u.location.map_filename);
-        if(err)return err;
-    }else if(door->type == HEXMAP_DOOR_TYPE_CONTINUE){
-        err = game->continue_callback(game, player);
-        if(err)return err;
-    }else if(door->type == HEXMAP_DOOR_TYPE_PLAYERS){
-        err = game->set_players_callback(game, player,
-            door->u.n_players);
-        if(err)return err;
-    }else if(door->type == HEXMAP_DOOR_TYPE_EXIT){
-        err = game->exit_callback(game, player);
-        if(err)return err;
-    }else if(door->type == HEXMAP_DOOR_TYPE_CAMERA_MAPPER){
-        prismelmapper_t *mapper = prismelrenderer_get_mapper(game->prend,
-            door->u.mapper_name);
-        if(mapper == NULL){
-            fprintf(stderr, "%s: Couldn't find camera mapper: %s\n",
-                __func__, door->u.mapper_name);
-            return 2;
-        }
-        FOREACH_BODY_CAMERA(body, camera, {
-            camera->mapper = mapper;
-        })
-    }else if(door->type == HEXMAP_DOOR_TYPE_RESPAWN){
-        err = body_relocate(body, door->u.location.map_filename,
-            &door->u.location.loc, door->u.location.stateset_filename,
-            door->u.location.state_name);
-        if(err)return err;
-    }
+    err = body_relocate(body, door->location.map_filename,
+        &door->location.loc, door->location.stateset_filename,
+        door->location.state_name);
+    if(err)return err;
     return 0;
 }
 

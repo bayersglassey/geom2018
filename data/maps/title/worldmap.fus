@@ -16,16 +16,6 @@ submaps:
                 text: "\n\n     Hey!\n   Heeey!\n  New to the game? Hold left to start the tutorial!\n"
                 doors:
                     :
-                        new_game "data/maps/demo/worldmap.fus"
-                    :
-                        new_game "data/maps/tutorial/worldmap.fus"
-                    :
-                        continue
-                    :
-                        players 1
-                    :
-                        players 2
-                    :
                         map: "data/maps/wilderness/worldmap.fus"
                         pos: (0 0)
                         rot: 0

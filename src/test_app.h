@@ -114,12 +114,6 @@ void test_app_hide_console(test_app_t *app);
 
 
 /* test_app_game.c */
-int test_app_exit_callback(hexgame_t *game, player_t *player);
-int test_app_set_players_callback(hexgame_t *game, player_t *player,
-    int n_players);
-int test_app_continue_callback(hexgame_t *game, player_t *player);
-int test_app_new_game_callback(hexgame_t *game, player_t *player,
-    const char *map_filename);
 int test_app_set_players(test_app_t *app, int n_players);
 int test_app_process_event_game(test_app_t *app, SDL_Event *event);
 int test_app_render_game(test_app_t *app);

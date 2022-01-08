@@ -75,26 +75,8 @@ typedef struct hexmap_collision {
  * HEXMAP *
  **********/
 
-enum hexmap_door_type {
-    HEXMAP_DOOR_TYPE_DUD,
-    HEXMAP_DOOR_TYPE_RESPAWN,
-    HEXMAP_DOOR_TYPE_NEW_GAME,
-    HEXMAP_DOOR_TYPE_CONTINUE,
-    HEXMAP_DOOR_TYPE_PLAYERS,
-    HEXMAP_DOOR_TYPE_EXIT,
-    HEXMAP_DOOR_TYPE_CAMERA_MAPPER,
-    HEXMAP_DOOR_TYPES
-};
-
-const char *hexmap_door_type_msg(int door_type);
-
 typedef struct hexmap_door {
-    int type; /* enum hexmap_door_type */
-    union {
-        hexgame_savelocation_t location; /* type == HEXMAP_DOOR_TYPE_RESPAWN or HEXMAP_DOOR_TYPE_NEW_GAME */
-        int n_players; /* type == HEXMAP_DOOR_TYPE_PLAYERS */
-        const char *mapper_name; /* type == HEXMAP_DOOR_TYPE_CAMERA_MAPPER */
-    } u;
+    hexgame_savelocation_t location;
 
     /* Weakrefs */
     hexcollmap_elem_t *elem;

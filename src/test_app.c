@@ -72,6 +72,22 @@ void test_app_cleanup(test_app_t *app){
     }
 }
 
+static int _load_game(hexgame_t *game){
+    int err;
+    for(int i = 0; i < game->players_len; i++){
+        player_t *player = game->players[i];
+        if(!player->body){
+            /* This can definitely happen, e.g. generally 2 players are
+            created at start of game, but only player 0 has a body...
+            unless "--players 2" is supplied at commandline, or player
+            0 touches the 2-player door, etc). */
+            continue;
+        }
+        err = player_reload(player);
+        if(err)return err;
+    }
+    return 0;
+}
 
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
@@ -147,11 +163,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         "data/worldmaps.fus",
         minimap_prend,
         "data/tileset_minimap.fus",
-        app->hexmap_filename, app,
-        &test_app_new_game_callback,
-        &test_app_continue_callback,
-        &test_app_set_players_callback,
-        &test_app_exit_callback);
+        app->hexmap_filename);
     if(err)return err;
 
     hexmap_t *map = game->maps[0];
@@ -203,9 +215,6 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->mode = TEST_APP_MODE_GAME;
     app->show_menu = false;
 
-    /* Player 0 gets a body right off the bat, everyone else has to
-    wait for him to choose multiplayer mode.
-    (See set_players_callback) */
     err = test_app_set_players(app, n_players_playing);
     if(err)return err;
 
@@ -246,7 +255,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     if(load_game){
         /* Load game immediately, instead of starting at title screen and
         having to jump into the "LOAD" door or whatever. */
-        err = test_app_continue_callback(game, player0);
+        err = _load_game(game);
         if(err)return err;
     }
 

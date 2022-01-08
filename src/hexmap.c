@@ -23,20 +23,6 @@
 #include "geom_lexer_utils.h"
 
 
-const char *hexmap_door_type_msg(int door_type){
-    switch(door_type){
-        case HEXMAP_DOOR_TYPE_DUD: return "Dud";
-        case HEXMAP_DOOR_TYPE_RESPAWN: return "Respawn";
-        case HEXMAP_DOOR_TYPE_NEW_GAME: return "New Game";
-        case HEXMAP_DOOR_TYPE_CONTINUE: return "Continue";
-        case HEXMAP_DOOR_TYPE_PLAYERS: return "Players";
-        case HEXMAP_DOOR_TYPE_EXIT: return "Exit";
-        case HEXMAP_DOOR_TYPE_CAMERA_MAPPER: return "Camera Mapper";
-        default: return "Unknown";
-    }
-}
-
-
 /******************
  * HEXMAP TILESET *
  ******************/
@@ -735,68 +721,40 @@ static int hexmap_parse_door(hexmap_t *map, hexmap_submap_t *submap,
 
     vecspace_t *space = map->space;
 
-    if(GOT("dud")){
+    if(GOT("map")){
         NEXT
-        door->type = HEXMAP_DOOR_TYPE_DUD;
-    }else if(GOT("new_game")){
-        NEXT
-        door->type = HEXMAP_DOOR_TYPE_NEW_GAME;
-        GET_STR_CACHED(door->u.location.map_filename,
-            &prend->filename_store)
-    }else if(GOT("continue")){
-        NEXT
-        door->type = HEXMAP_DOOR_TYPE_CONTINUE;
-    }else if(GOT("players")){
-        NEXT
-        door->type = HEXMAP_DOOR_TYPE_PLAYERS;
-        GET_INT(door->u.n_players)
-    }else if(GOT("exit")){
-        NEXT
-        door->type = HEXMAP_DOOR_TYPE_EXIT;
-    }else if(GOT("camera_mapper")){
-        NEXT
-        door->type = HEXMAP_DOOR_TYPE_CAMERA_MAPPER;
         OPEN
-        GET_STR_CACHED(door->u.mapper_name, &prend->name_store)
+        GET_STR_CACHED(door->location.map_filename,
+            &prend->filename_store)
         CLOSE
     }else{
-        door->type = HEXMAP_DOOR_TYPE_RESPAWN;
+        /* Non-null door->location.map_filename indicates player should
+        "teleport" to door->location */
+        door->location.map_filename = map->filename;
+    }
 
-        if(GOT("map")){
-            NEXT
-            OPEN
-            GET_STR_CACHED(door->u.location.map_filename,
-                &prend->filename_store)
-            CLOSE
-        }else{
-            /* Non-null door->u.location.map_filename indicates player should
-            "teleport" to door->u.location */
-            door->u.location.map_filename = map->filename;
-        }
-
-        if(GOT("anim")){
-            NEXT
-            OPEN
-            GET_STR_CACHED(door->u.location.stateset_filename,
-                &prend->filename_store)
-            CLOSE
-        }
-
-        GET("pos")
+    if(GOT("anim")){
+        NEXT
         OPEN
-        GET_VEC(space, door->u.location.loc.pos)
-        CLOSE
-
-        GET("rot")
-        OPEN
-        GET_INT(door->u.location.loc.rot)
-        CLOSE
-
-        GET("turn")
-        OPEN
-        GET_YN(door->u.location.loc.turn)
+        GET_STR_CACHED(door->location.stateset_filename,
+            &prend->filename_store)
         CLOSE
     }
+
+    GET("pos")
+    OPEN
+    GET_VEC(space, door->location.loc.pos)
+    CLOSE
+
+    GET("rot")
+    OPEN
+    GET_INT(door->location.loc.rot)
+    CLOSE
+
+    GET("turn")
+    OPEN
+    GET_YN(door->location.loc.turn)
+    CLOSE
 
     return 0;
 }
@@ -1473,14 +1431,7 @@ const char *submap_camera_type_msg(int camera_type){
 }
 
 void hexmap_door_cleanup(hexmap_door_t *door){
-    switch(door->type){
-        case HEXMAP_DOOR_TYPE_RESPAWN:
-        case HEXMAP_DOOR_TYPE_NEW_GAME:
-            hexgame_savelocation_cleanup(&door->u.location);
-            break;
-        default:
-            break;
-    }
+    hexgame_savelocation_cleanup(&door->location);
 }
 
 void hexmap_submap_group_cleanup(hexmap_submap_group_t *group){

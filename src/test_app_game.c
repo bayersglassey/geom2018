@@ -8,51 +8,6 @@
 
 
 
-/********************
-* HEXGAME CALLBACKS *
-********************/
-
-int test_app_new_game_callback(hexgame_t *game, player_t *player,
-    const char *map_filename
-){
-    int err;
-    hexmap_t *map;
-    err = hexgame_get_or_load_map(game, map_filename, &map);
-    if(err)return err;
-    return hexgame_reset_players(game, RESET_HARD, map);
-}
-
-int test_app_continue_callback(hexgame_t *game, player_t *player){
-    int err;
-    for(int i = 0; i < game->players_len; i++){
-        player_t *player = game->players[i];
-        if(!player->body){
-            /* This can definitely happen, e.g. generally 2 players are
-            created at start of game, but only player 0 has a body...
-            unless "--players 2" is supplied at commandline, or player
-            0 touches the 2-player door, etc). */
-            continue;
-        }
-        err = player_reload(player);
-        if(err)return err;
-    }
-    return 0;
-}
-
-int test_app_set_players_callback(hexgame_t *game, player_t *player,
-    int n_players
-){
-    test_app_t *app = game->app;
-    return test_app_set_players(app, n_players);
-}
-
-int test_app_exit_callback(hexgame_t *game, player_t *player){
-    test_app_t *app = game->app;
-    app->loop = false;
-    return 0;
-}
-
-
 
 /****************
 * TEST_APP.GAME *
