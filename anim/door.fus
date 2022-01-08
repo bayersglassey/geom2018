@@ -32,8 +32,19 @@ vars:
     "location": null
     "map": null
     "anim": null
-    "anim_state": null
+    "state": null
 
+
+state "init":
+    if: any:
+        not: exists myvar("key")
+        expr: mapvar(myvar("key"))
+    then:
+        goto immediate: "open"
+
+    if:
+    then:
+        goto immediate: "closed"
 
 state "closed":
     rgraph: "doorframe"
@@ -60,7 +71,7 @@ state "open":
             yourvar("location")
             yourvar("map")
             yourvar("anim")
-            yourvar("anim_state")
+            yourvar("state")
 
         goto: "closed"
 
