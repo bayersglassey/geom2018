@@ -1,0 +1,43 @@
+
+parts:
+    "c": "data/maps/test/bighex_corner.fus"
+    "r": actor "actor/airoller.fus"
+    "s": recording "data/recs/switch.fus"
+        vars:
+            "key": "map3_blocker"
+    "l": location "spidertown_exit"
+    "D": recording "data/recs/door.fus"
+        vars:
+            "map": "data/maps/spidertown/worldmap.fus"
+            "location": "start"
+
+collmap:
+    ;;                         .                           .
+    ;;
+    ;;                           + - + - +       .   . - .
+    ;;                          /         \         /* * *\
+    ;;                         +           +   .   .   ?   .            [c]
+    ;;                        /           /         \* * */
+    ;;                       +       + - +       .   . - .   .
+    ;;                        \     /   /*\
+    ;;                         + - +   + - +   +       .
+    ;;                                  \*/*\   \
+    ;;                   .               + - +   +       ! - + - +      [r]
+    ;;                                    \*/   /*\     /         \
+    ;;                 .   .   .   +   .   !   + - +   +   +       +      [s^2]
+    ;;                              \     /     \*/*\   \   \       \
+    ;;               .   ?   .   ?   + - +   .   + - +   +   +       +    [c^2] [D]
+    ;;                                            \*/   /   /       /
+    ;;                 .       + - + - + -(!)- +   +   +   + - +   +      [l]
+    ;; *\*/*                            \*/*\*/*\     /         \ /
+    ;; - + - +           .   .           + - + - + - +           +
+    ;; */                                         \*/
+    ;; +                                           +   .   .
+    ;;  \
+    ;;   + - +   .   .   .   + - + - + - +   + - +   .       .
+    ;;                        \           \
+    ;;                         +           +       .   ?   .             [c^4]
+    ;;                          \         /
+    ;;                           + - + - +       .   .   .
+    ;;
+    ;;                         .                           .

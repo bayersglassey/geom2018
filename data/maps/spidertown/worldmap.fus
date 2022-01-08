@@ -21,19 +21,7 @@ submaps:
         pos: ( 21  21)
         tileset: "data/maps/trees/tilesets/trees_dark.fus"
     :
-        file: "data/maps/test/map3xx.fus"
+        file: "data/maps/spidertown/map3xx.fus"
         pos: (0 0)
         camera: (0 4)
         mapper: ("double")
-        doors:
-            :
-                map: "data/maps/trees/worldmap.fus"
-                pos: (1 1)
-                rot: 0
-                turn: n
-            :
-                map: "data/maps/demo/worldmap.fus"
-                pos: (40 60)
-                rot: 0
-                turn: n
-

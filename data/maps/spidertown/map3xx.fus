@@ -1,4 +1,14 @@
-
+parts:
+    "D": recording "data/recs/door.fus"
+        vars:
+            "map": "data/maps/trees/worldmap.fus"
+            "location": "start"
+    "E": recording "data/recs/door.fus"
+        vars:
+            "map": "data/maps/demo/worldmap.fus"
+            "location": "spidertown_exit"
+    "l": location "trees_exit"
+    "s": location "start"
 collmap:
     ;;
     ;;
@@ -19,8 +29,8 @@ collmap:
     ;;               /                                             \     /   / \     /                                        *\
     ;;          + - +           .       .   .               .   .   + - +   + - +   +       +                       .           +
     ;;         /                                                                     \       \                                */
-    ;;        +               +       .   .                   +               .   .   +       + - + - +               .       +
-    ;;         \             /                               / \                     / \               \  D
+    ;;        +               +       .   .                   +               .   .   +       ! - + - +   ?           .       +      [l][D]
+    ;;         \             /                               / \                     / \               \
     ;;          + - +       +       +   .   +               +   + - +   .   + - +   +   +               + - +           +   .
     ;;               \       \     /       /*\             /       /       /   /     \ /*\               \ /             \
     ;;                +       +   +       + - + - +       +       +       + - +   .   + - +               +               +
@@ -59,9 +69,9 @@ collmap:
     ;;                                                         \     /                                 \*/           /*
     ;;                                                          + - +               .                   +           + -
     ;;                                                                                                             /*
-    ;;                                                            .       +           .       + - +   .           + -
-    ;;                                                                   / \              D  /     \             /*\*
-    ;;                                                              + - +   + - +       + - +       +         - +
+    ;;                                                            .       +           .   ?   + - +   .           + -       [E]
+    ;;                                                                   / \                 /     \             /*\*
+    ;;                                                              + - +   + - !       + - +       +         - +         [s~^3]
     ;;                                                               \           \       \         /
     ;;                                                                +           +       +       +
     ;;                                                                 \         /       /       /

@@ -17,16 +17,10 @@ vars:
 
 submaps:
     "spidertown":
-        file: "data/maps/test/map3.fus"
+        file: "data/maps/demo/map3.fus"
         pos: (0 0)
         camera: (0 4)
         mapper: ("triple")
-        doors:
-            :
-                map: "data/maps/spidertown/worldmap.fus"
-                pos: (0 0)
-                rot: 0
-                turn: n
         submaps:
             :
                 file: "data/maps/test/map3_blocker.fus"

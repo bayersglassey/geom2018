@@ -20,12 +20,6 @@ submaps:
                 tileset: "data/maps/trees/tilesets/trees_dark.fus"
             :
                 file: "data/maps/trees/start.fus"
-                doors:
-                    :
-                        map: "data/maps/spidertown/worldmap.fus"
-                        pos: (15 16)
-                        rot: 0
-                        turn: n
     :
         pos: (32 10)
         camera: (0 0)
