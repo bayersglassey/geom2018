@@ -650,12 +650,29 @@ The menu's structure should be:
     * Continue
     * Exit to title
 
-TODO: currently we have the following ways to track test_app's "state":
+Okay, previously we had the following ways to track test_app's "state":
     * app->mode (TEST_APP_MODE_GAME, TEST_APP_MODE_EDITOR)
     * app->hexgame_running
     * app->hexgame.show_minimap
     * app->show_console
     * app->process_console
 
-...now I'm adding:
+...now I've added:
     * app->show_menu
+
+
+
+Jan 7, 2021:
+------------
+
+* show_minimap should live on test_app, not hexgame
+  (i.e. app->hexgame.show_minimap should be changed to app->show_minimap)
+
+* Remove hexmap_door_t (and the magic 'D' tile)
+    How many 'D' tile doors are there to replace?
+
+        $ ack -l '[ /\\]D[ /\\]' data/maps/ | wc -l
+        17
+
+    ...not too bad. :O
+
