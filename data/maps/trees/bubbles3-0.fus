@@ -1,5 +1,16 @@
+spawn: (4 -8) 0 n
 parts:
     "r": recording "data/maps/wilderness/recs/roller000.fus"
+    "A": recording "data/recs/door.fus"
+        vars:
+            "location": "bubbles_transform_a"
+            "anim": "anim/rollerspider.fus"
+    "B": recording "data/recs/door.fus"
+        vars:
+            "location": "bubbles_transform_b"
+            "anim": "anim/spikeyspider.fus"
+    "a": location "bubbles_transform_a"
+    "b": location "bubbles_transform_b"
 
 collmap:
     ;;
@@ -29,10 +40,10 @@ collmap:
     ;;                                             * * *      /        w w w w w w w w w w w w w w
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .
     ;;                                             * * *      \          w w w w w w w w w w w w w            \
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   + - + - + - +   .   .
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   + - + - ! - +   .   .   [a~^3]
     ;;                                                          \                                                           \
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .
-    ;;                                                           * * *\                                                       \      D
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   ?   [A]
+    ;;                                                           * * *\                                                       \
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   + - + - + - +   + - + - +
     ;;                                                           * * *                                              \       \           \
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   +   .   .   + - +
@@ -43,8 +54,8 @@ collmap:
     ;;                                                                \ /       /                 \     /                         \     /   /
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   . - +   +   +   .   .   .   .   +   +   .   + - + - +   .   .   + - +   +
     ;;                                                                / \ /     \                   \ /       /         \                 /
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   +   .   .   .   .   +   .   +   .   .   + - +   .   .   +
-    ;;                                                                   *\                                 /                 \  D      /
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   +   .   .   .   .   +   .   +   .   .   + - !   ?   .   +   [b~^3][B]
+    ;;                                                                   *\                                 /                 \         /
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   .   ! - +   .   + - +   .   .   .   .   + - + - +          [r]
     ;;                                                                   * *\             /     \     /
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   ! - + - + - +   .   + - +   .   .   .   .   .   .   .           [r]

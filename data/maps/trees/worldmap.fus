@@ -80,17 +80,6 @@ submaps:
                         file: "data/maps/trees/bubbles3-0.fus"
                         pos: eval: (25 7) + (19 0) + (25 12)
                         camera: (10 -10)
-                        doors:
-                            :
-                                anim: "anim/rollerspider.fus"
-                                pos: (181 43)
-                                rot: 0
-                                turn: y
-                            :
-                                anim: "anim/spikeyspider.fus"
-                                pos: (179 36)
-                                rot: 0
-                                turn: y
                     :
                         file: "data/maps/trees/bubbles3-1.fus"
                         pos: eval: (25 7) + (19 0) + (4 -9)
