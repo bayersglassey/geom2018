@@ -672,7 +672,9 @@ Jan 7, 2021:
     How many 'D' tile doors are there to replace?
 
         $ ack -l '[ /\\]D[ /\\]' data/maps/ | wc -l
-        17
+        10
 
     ...not too bad. :O
+    To find more:
 
+        $ nano $(ack -l '[ /\\]D[ /\\]' data/maps/ | head -n 1)
