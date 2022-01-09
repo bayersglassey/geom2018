@@ -14,22 +14,11 @@ submaps:
             :
                 file: "data/maps/title/title.fus"
                 text: "\n\n     Hey!\n   Heeey!\n  New to the game? Hold left to start the tutorial!\n"
-                doors:
-                    :
-                        map: "data/maps/wilderness/worldmap.fus"
-                        pos: (0 0)
-                        rot: 0
-                        turn: n
             :
                 file: "data/maps/title/secret.fus"
                 pos: (20 -14)
                 camera: follow
                 mapper: ("solid_curvy")
-                doors:
-                    :
-                        pos: (-19 -12)
-                        rot: 0
-                        turn: n
             :
                 file: "data/maps/demo/bubblecar_test.fus"
                 pos: (50 50)
