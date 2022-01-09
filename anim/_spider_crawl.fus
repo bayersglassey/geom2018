@@ -8,6 +8,7 @@
 proc "crawl_crush":
     if: expr: myvar("is_spikeyspider")
     then: goto delay: "crawl_shielding"
+    else: goto: "dead"
 
 
 state "crawling":
