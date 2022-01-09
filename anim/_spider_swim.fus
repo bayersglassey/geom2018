@@ -11,8 +11,8 @@ state "swim_spit":
     if() then: goto: "swim"
 
 state "swim_jump":
-    # NOTE: the only "goto: "swim_jump"" is in "start_jump", which checks
-    # whether we're in water, and does "goto: jump" or "goto: "swim_jump""
+    # NOTE: the only goto: "swim_jump" is in "start_jump", which checks
+    # whether we're in water, and does goto: "jump" or goto: "swim_jump"
     # accordingly.
     # Therefore, if we're in "swim_jump", then we can safely assume we're in
     # water without checking.
@@ -23,9 +23,9 @@ state "swim_jump":
 
     if:
         any:
-            key: wasdown f
-            key: wasdown u
-            key: wasdown d
+            key: isdown f
+            key: isdown u
+            key: isdown d
         coll: all yes
             ;;        +
             ;;       /
@@ -37,9 +37,9 @@ state "swim_jump":
 
     if:
         any:
-            key: wasdown f
-            key: wasdown u
-            key: wasdown d
+            key: isdown f
+            key: isdown u
+            key: isdown d
         coll: any yes
             ;;        +
             ;;       /
@@ -58,9 +58,9 @@ state "swim_jump":
 
     if:
         any:
-            key: wasdown f
-            key: wasdown u
-            key: wasdown d
+            key: isdown f
+            key: isdown u
+            key: isdown d
         coll: any yes
             ;;       \
             ;;        +
@@ -78,9 +78,9 @@ state "swim_jump":
 
     if:
         any:
-            key: wasdown f
-            key: wasdown u
-            key: wasdown d
+            key: isdown f
+            key: isdown u
+            key: isdown d
         coll: all no
             ;;       \*/*
             ;;        + -
@@ -105,9 +105,9 @@ state "swim":
 
     if:
         any:
-            key: wasdown f
-            key: wasdown u
-            key: wasdown d
+            key: isdown f
+            key: isdown u
+            key: isdown d
         coll: all yes
             ;;        +
             ;;       /
@@ -119,11 +119,11 @@ state "swim":
 
     if:
         any:
-            key: wasdown f
-            key: wasdown u
-            key: wasdown d
+            key: isdown f
+            key: isdown u
+            key: isdown d
         any:
-            key: wasdown u
+            key: isdown u
             coll: any yes
                 ;;        +
                 ;;       /
@@ -142,11 +142,11 @@ state "swim":
 
     if:
         any:
-            key: wasdown f
-            key: wasdown u
-            key: wasdown d
+            key: isdown f
+            key: isdown u
+            key: isdown d
         any:
-            key: wasdown d
+            key: isdown d
             coll: any yes
                 ;;       \
                 ;;        +
@@ -164,9 +164,9 @@ state "swim":
 
     if:
         any:
-            key: wasdown f
-            key: wasdown u
-            key: wasdown d
+            key: isdown f
+            key: isdown u
+            key: isdown d
         coll: all no
             ;;       \*/*
             ;;        + -
@@ -177,7 +177,7 @@ state "swim":
         goto immediate: "start_jump"
 
     if:
-        key: wasdown b
+        key: isdown b
     then:
         move: 1 0
         turn
