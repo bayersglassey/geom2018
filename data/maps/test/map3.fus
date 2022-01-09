@@ -5,6 +5,10 @@ parts:
     "s": recording "data/recs/switch.fus"
         vars:
             "key": "map3_blocker"
+    "D": recording "data/recs/door.fus"
+        vars:
+            "map": "data/maps/demo/worldmap.fus"
+            "location": "test_exit"
 
 collmap:
     ;;                         .                           .
@@ -21,8 +25,8 @@ collmap:
     ;;                                    \*/   /*\     /         \
     ;;                 .   .   .   +   .   !   + - +   +   +       +      [s^2]
     ;;                              \     /     \*/*\   \   \       \
-    ;;               .   ?   .       + - +   .   + - +   +   +       +    [c^2]
-    ;;                           D                \*/   /   /       /
+    ;;               .   ?   .   ?   + - +   .   + - +   +   +       +    [c^2][D]
+    ;;                                            \*/   /   /       /
     ;;                 .       + - + - + -(+)- +   +   +   + - +   +
     ;; *\*/*                            \*/*\*/*\     /         \ /
     ;; - + - +           .   .           + - + - + - +           +

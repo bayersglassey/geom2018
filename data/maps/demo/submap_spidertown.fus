@@ -35,14 +35,8 @@ submaps:
         mapper: ("double")
         submaps:
             :
-                file: "data/maps/test/map3x.fus"
+                file: "data/maps/demo/map3x.fus"
                 pos: (1 10)
-                doors:
-                    :
-                        map: "data/maps/test/worldmap.fus"
-                        pos: (0 0)
-                        rot: 0
-                        turn: n
             :
                 file: "data/maps/test/map3x_blocker.fus"
                 visible: not mapvar("map3x_blocker")

@@ -4,6 +4,14 @@ parts:
     "s": recording "data/recs/switch.fus"
         vars:
             "key": "map3_end_blocker"
+    "E": recording "data/recs/door.fus"
+        vars:
+            "map": "data/maps/test/worldmap.fus"
+            "location": "test_exit"
+    "D": recording "data/recs/door.fus"
+        vars:
+            "location": "puzzle"
+            "anim": "anim/aimerspider.fus"
 
 collmap:
     ;;                                 .                           .
@@ -20,8 +28,8 @@ collmap:
     ;;                                          /*\*/   /*\     /         \
     ;;                         .   .   .   +   + - +   + - +   +   +       +
     ;;                                      \ /*\*/     \*/*\   \   \       \
-    ;;                       .   ?   .       + - +   .   + - +   +   +       +    [c^2]
-    ;;                                   D                \*/   /   /       /
+    ;;                       .   ?   .   ?   + - +   .   + - +   +   +       +    [c^2] [E]
+    ;;                                                    \*/   /   /       /
     ;;     + - +               .       + - + - + -(+)- +   +   +   + - +   +
     ;;    /     \*/*                            \*/*\*/*\     /         \ /
     ;;   !       + - +           .   .           + - + - + - +           +       [s^5]
@@ -40,7 +48,7 @@ collmap:
     ;;
     ;;                             .       +       .
     ;;                                   */
-    ;;                   .   .   .       +       +
-    ;;                                   *\  D  /*
+    ;;                   .   .   .       +   ?   +    [D]
+    ;;                                   *\     /*
     ;;                                     + - +
     ;;                                       *

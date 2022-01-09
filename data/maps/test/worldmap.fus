@@ -14,12 +14,6 @@ submaps:
         pos: (0 0)
         camera: (0 4)
         mapper: ("triple")
-        doors:
-            :
-                map: "data/maps/demo/worldmap.fus"
-                pos: (61 85)
-                rot: 0
-                turn: n
         submaps:
             :
                 file: "data/maps/test/map3_blocker.fus"
@@ -36,12 +30,6 @@ submaps:
             :
                 file: "data/maps/test/map3x.fus"
                 pos: (1 10)
-                doors:
-                    :
-                        map: "data/maps/test/worldmap_minimal.fus"
-                        pos: (0 0)
-                        rot: 0
-                        turn: n
             :
                 file: "data/maps/test/map3x_blocker.fus"
                 visible: not mapvar("map3x_blocker2")

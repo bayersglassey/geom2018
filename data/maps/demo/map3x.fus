@@ -5,7 +5,7 @@ parts:
             "key": "map3x_blocker"
     "D": recording "data/recs/door.fus"
         vars:
-            "map": "data/maps/test/worldmap_minimal.fus"
+            "map": "data/maps/test/worldmap.fus"
     "e": location "test_exit"
 
 collmap:
@@ -24,7 +24,7 @@ collmap:
     ;;                        \     /   /*\
     ;;                 .   .   + - +   + - +  %+       +       +               .         [1]
     ;;                                  \*/*\  %\                                        [1]
-    ;;                   +               + - +  %+       + - ! - +               .       [1]   [e~^3]
+    ;;                   +               + - +  %+       ! - + - +               .       [1]   [e]
     ;;                  / \             /*\*/  %/*\     /         \                      [111]
     ;; +               +   ! - +   +   + - +  %+ - +   +   +       +             % +  [r][121]      [1]
     ;; *\             /       /     \ /*\*/    %\*/*\   \   \       \            %  \    [11211]    [2]

@@ -12,17 +12,6 @@ submaps:
         pos: (0 0)
         camera: (0 4)
         mapper: ("triple")
-        doors:
-            :
-                map: "data/maps/test/worldmap.fus"
-                pos: (22 25)
-                rot: 0
-                turn: y
-            :
-                anim: "anim/aimerspider.fus"
-                pos: (-10 -9)
-                rot: 0
-                turn: n
         recs:
             : "data/maps/test/recs/worldmap_minimal_bird_000.fus"
             : "data/maps/test/recs/worldmap_minimal_bird_001.fus"
