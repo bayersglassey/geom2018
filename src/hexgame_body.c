@@ -501,6 +501,8 @@ int body_relocate(body_t *body, const char *map_filename,
         err = hexgame_get_or_load_map(game,
             map_filename, &new_map);
         if(err)return err;
+
+        if(loc == NULL)loc = &new_map->spawn;
     }
 
     if(loc == NULL)loc = &body->loc;
