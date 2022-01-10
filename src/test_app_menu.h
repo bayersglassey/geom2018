@@ -31,6 +31,7 @@ void test_app_menu_up(test_app_menu_t *menu);
 void test_app_menu_down(test_app_menu_t *menu);
 void test_app_menu_left(test_app_menu_t *menu);
 void test_app_menu_right(test_app_menu_t *menu);
+int test_app_menu_select(test_app_menu_t *menu);
 void test_app_menu_render(test_app_menu_t *menu);
 
 #endif

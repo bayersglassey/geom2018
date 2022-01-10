@@ -59,6 +59,54 @@ void test_app_menu_right(test_app_menu_t *menu){
     /* Does nothing for now */
 }
 
+int test_app_menu_select(test_app_menu_t *menu){
+    int err;
+    test_app_t *app = menu->app;
+    switch(menu->screen_i){
+        case TEST_APP_MENU_SCREEN_TITLE:
+            switch(menu->option_i){
+                case 0: /* NEW GAME */
+                    fprintf(stderr, "TODO: new game\n");
+                    app->show_menu = false;
+                    break;
+                case 1: /* LOAD GAME */
+                    test_app_menu_set_screen(menu,
+                        TEST_APP_MENU_SCREEN_LOAD_GAME);
+                    break;
+                default:
+                    fprintf(stderr, "Unrecognized option: %i\n",
+                        menu->option_i);
+                    return 2;
+            }
+            break;
+        case TEST_APP_MENU_SCREEN_LOAD_GAME:
+            fprintf(stderr, "TODO: load slot %i\n", menu->option_i);
+            app->show_menu = false;
+            break;
+        case TEST_APP_MENU_SCREEN_PAUSED:
+            switch(menu->option_i){
+                case 0: /* CONTINUE */
+                    app->show_menu = false;
+                    break;
+                case 1: /* EXIT TO TITLE */
+                    fprintf(stderr, "TODO: exit to title\n");
+                    test_app_menu_set_screen(menu,
+                        TEST_APP_MENU_SCREEN_TITLE);
+                    break;
+                default:
+                    fprintf(stderr, "Unrecognized option: %i\n",
+                        menu->option_i);
+                    return 2;
+            }
+            break;
+        default:
+            fprintf(stderr, "Unrecognized menu screen: %i\n",
+                menu->screen_i);
+            return 2;
+    }
+    return 0;
+}
+
 void test_app_menu_render(test_app_menu_t *menu){
     test_app_t *app = menu->app;
     const char *title = test_app_menu_titles[menu->screen_i];

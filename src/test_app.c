@@ -334,8 +334,7 @@ static int test_app_process_event_menu(test_app_t *app, SDL_Event *event){
         }else if(event->key.keysym.sym == SDLK_RIGHT){
             test_app_menu_right(menu);
         }else if(event->key.keysym.sym == SDLK_RETURN){
-            /* TODO */
-            app->show_menu = false;
+            test_app_menu_select(menu);
         }
     }
     return 0;
