@@ -179,12 +179,17 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
     hexgame_t *game = &app->hexgame;
 
     if(event->type == SDL_KEYDOWN){
-        if(event->key.keysym.sym == SDLK_PAGEUP && app->developer_mode){
+        if(event->key.keysym.sym == SDLK_F5 && app->developer_mode){
+            app->hexgame_running = !app->hexgame_running;
+        }else if(event->key.keysym.sym == SDLK_PAGEUP && app->developer_mode){
             if(!app->hexgame_running){
                 /* Do 1 step */
                 err = hexgame_step(&app->hexgame);
                 if(err)return err;
             }
+        }else if(event->key.keysym.sym == SDLK_RETURN){
+            test_app_menu_set_screen(&app->menu, TEST_APP_MENU_SCREEN_PAUSED);
+            app->show_menu = true;
         }else if(event->key.keysym.sym == SDLK_TAB){
             /* Cycle between 3 values: 0 means don't show minimap, and
             1 and 2 are zoom values. */

@@ -347,46 +347,76 @@ static int test_app_poll_events(test_app_t *app){
     hexgame_t *game = &app->hexgame;
 
     bool dont_process_console_this_frame = false;
-    bool dont_process_menu_this_frame = false;
 
     SDL_Event _event, *event = &_event;
     while(SDL_PollEvent(event)){
 
-        if(event->type == SDL_QUIT){
+        /* Quit immediately if we're asked to */
+        if(event->type == SDL_QUIT || (
+            event->type == SDL_KEYDOWN &&
+            event->key.keysym.sym == SDLK_ESCAPE
+        )){
             app->loop = false;
             break;
         }
 
-        if(event->type == SDL_KEYDOWN){
-            if(event->key.keysym.sym == SDLK_ESCAPE){
-                app->loop = false;
-                break;
-            }else if(event->key.keysym.sym == SDLK_RETURN){
-                if(!app->show_menu){
-                    test_app_menu_set_screen(&app->menu, TEST_APP_MENU_SCREEN_PAUSED);
-                    app->show_menu = true;
-                    dont_process_menu_this_frame = true;
-                }
-            }else if(event->key.keysym.sym == SDLK_F5 && app->developer_mode){
-                app->hexgame_running = !app->hexgame_running;
-            }else if(event->key.keysym.sym == SDLK_BACKQUOTE && app->developer_mode){
-                dont_process_console_this_frame = true;
-                if(event->key.keysym.mod & KMOD_CTRL){
-                    if(app->show_console){
-                        if(!app->process_console){
-                            console_write_line(&app->console, "Console started");
-                            test_app_start_console(app);
-                        }else{
-                            test_app_stop_console(app);
-                            console_newline(&app->console);
-                            console_write_line(&app->console, "Console stopped");
-                        }
+        /* Menu can steal the keyboard
+        (*before* checking for console activation/deactivation with
+        SDLK_BACKQUOTE...) */
+        if(app->show_menu){
+            err = test_app_process_event_menu(app, event);
+            if(err)return err;
+            continue;
+        }
+
+        /* Handle activating/deactivating console */
+        if(
+            app->developer_mode &&
+            event->type == SDL_KEYDOWN &&
+            (event->key.keysym.sym == SDLK_BACKQUOTE)
+        ){
+            if(event->key.keysym.mod & KMOD_CTRL){
+                if(app->show_console){
+                    if(!app->process_console){
+                        console_write_line(&app->console, "Console started");
+                        test_app_start_console(app);
+                    }else{
+                        test_app_stop_console(app);
+                        console_newline(&app->console);
+                        console_write_line(&app->console, "Console stopped");
                     }
-                }else{
-                    if(app->show_console)test_app_hide_console(app);
-                    else test_app_show_console(app);
                 }
-            }else if(event->key.keysym.sym == SDLK_F11 && app->developer_mode){
+            }else{
+                if(app->show_console)test_app_hide_console(app);
+                else test_app_show_console(app);
+            }
+
+            /* We use this to avoid writing a backtick to the console.
+            But wait, you say -- can't we just avoid sending this SDL_KEYDOWN
+            event to console?..
+            In fact, no!.. because the console looks at SDL_TEXTINPUT events
+            instead... */
+            dont_process_console_this_frame = true;
+
+            continue;
+        }
+
+        /* Console can steal the keyboard */
+        if(app->process_console){
+            if(app->list){
+                err = test_app_process_event_list(app, event);
+                if(err)return err;
+            }else if(!dont_process_console_this_frame){
+                err = test_app_process_event_console(app, event);
+                if(err)return err;
+            }
+            continue;
+        }
+
+        /* Handle various "special keys" valid for game or editor mode
+        (if keyboard wasn't stolen by menu/console...) */
+        if(event->type == SDL_KEYDOWN){
+            if(event->key.keysym.sym == SDLK_F11 && app->developer_mode){
                 printf("Frame rendered in: %i ms\n", app->took);
                 printf("  (Aiming for sub-%i ms)\n", app->delay_goal);
 
@@ -398,18 +428,7 @@ static int test_app_poll_events(test_app_t *app){
             }
         }
 
-        if(app->show_menu && !dont_process_menu_this_frame){
-            err = test_app_process_event_menu(app, event);
-            if(err)return err;
-        }else if(app->process_console){
-            if(app->list){
-                err = test_app_process_event_list(app, event);
-                if(err)return err;
-            }else if(!dont_process_console_this_frame){
-                err = test_app_process_event_console(app, event);
-                if(err)return err;
-            }
-        }else if(app->mode == TEST_APP_MODE_GAME){
+        if(app->mode == TEST_APP_MODE_GAME){
             /* Handle special keypresses (F1-F12, etc) */
             err = test_app_process_event_game(app, event);
             if(err)return err;
@@ -425,7 +444,10 @@ static int test_app_poll_events(test_app_t *app){
     }
 
     if(
+
+        /* Don't know if we really care about this one */
         app->mode != TEST_APP_MODE_GAME ||
+
         app->show_menu ||
         app->hexgame.show_minimap ||
         app->process_console
