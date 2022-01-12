@@ -415,7 +415,7 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     const char *worldmaps_filename,
     prismelrenderer_t *minimap_prend,
     const char *minimap_tileset_filename,
-    const char *map_filename
+    const char *map_filename, hexmap_t **map_ptr
 ){
     int err;
 
@@ -448,13 +448,11 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
         return 2;
     }
 
-    /* Default map to load is first worldmap */
-    if(map_filename == NULL)map_filename = game->worldmaps[0];
-
     hexmap_t *map;
     err = hexgame_load_map(game, map_filename, &map);
     if(err)return err;
 
+    *map_ptr = map;
     return 0;
 }
 
@@ -523,19 +521,6 @@ int hexgame_reset_player(hexgame_t *game, player_t *player,
             * RESET_TO_SAFETY: player->safe_location
 
             * RESET_SOFT: player->respawn_location
-
-            * RESET_HARD: start of game
-
-                ! ! ! WARNING ! ! !
-
-                Hexgame does not actually have enough information
-                to do RESET_HARD properly.
-                In particular, test_app is the thing which knows the default
-                stateset_filename (e.g. "anim/spider.fus").
-                See: test_app_set_players, app->stateset_filename
-                ...so I think we want to get rid of RESET_HARD and turn it
-                into a separate function, which lives in test_app_game.c
-                or something.
     */
 
     /* WARNING: this function calls body_respawn, which calls
@@ -549,28 +534,17 @@ int hexgame_reset_player(hexgame_t *game, player_t *player,
     /* If no body, do nothing */
     if(!body)return 0;
 
-    if(reset_level == RESET_HARD){
-        /* Respawn at start of game.
-        (WARNING: has no way to know what stateset to use, we probably
-        want to turn this into a separate function controlled by
-        test_app.) */
-        hexmap_t *map = reset_map? reset_map: game->maps[0];
-        hexgame_location_t *spawn = &map->spawn;
-        err = body_respawn(body, spawn->pos, spawn->rot, spawn->turn, map);
-        if(err)return err;
-    }else{
-        hexgame_savelocation_t *location = reset_level == RESET_SOFT?
-            &player->respawn_location:
-            &player->safe_location;
+    hexgame_savelocation_t *location = reset_level == RESET_SOFT?
+        &player->respawn_location:
+        &player->safe_location;
 
-        err = player_reload_from_location(player, location);
-        if(err)return err;
+    err = player_reload_from_location(player, location);
+    if(err)return err;
 
-        const char *stateset_filename = location->stateset_filename;
-        const char *state_name = location->state_name;
-        err = body_set_stateset(body, stateset_filename, state_name);
-        if(err)return err;
-    }
+    const char *stateset_filename = location->stateset_filename;
+    const char *state_name = location->state_name;
+    err = body_set_stateset(body, stateset_filename, state_name);
+    if(err)return err;
 
     body_reset_cameras(body);
     body_flash_cameras(body, 255, 255, 255, 30);

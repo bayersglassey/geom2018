@@ -20,6 +20,11 @@
 #include "minieditor.h"
 
 
+extern const char *TEST_MAP_HEXMAP_FILENAME_TITLE;
+extern const char *TEST_MAP_HEXMAP_FILENAME_NEW_GAME;
+extern const char *TEST_MAP_HEXMAP_FILENAME_DEFAULT;
+
+
 #define TEST_APP_CONSOLE_START_TEXT "> "
 #define TEST_APP_CONSOLE_W 60
 #define TEST_APP_CONSOLE_H 35
@@ -45,8 +50,6 @@ typedef struct test_app {
 
     const char *prend_filename;
     const char *stateset_filename;
-    const char *hexmap_filename;
-    const char *submap_filename;
 
     palette_t palette;
     SDL_Palette *sdl_palette;
@@ -70,15 +73,20 @@ typedef struct test_app {
     int lines_printed; /* How many lines we've printed so far this frame */
     int mode; /* enum test_app_mode */
     bool show_menu;
-
     bool loop;
+        /* the mainloop continues while this is true
+        (so, once false, app quits) */
+
     bool restart;
         /* Set to true to cause app to restart next frame */
-    int save_slot;
+    int restart_save_slot;
         /* When app->restart is true, this indicates which save slot to
         load from (or -1 for no save slot). */
+    const char *restart_hexmap_filename;
+        /* When app->restart is true, this indicates which map to load
+        into &app->hexgame initially */
 
-    char _recording_filename[200];
+    char _recording_filename[200]; /* HACKY :'( */
 
     test_app_list_t *list;
 } test_app_t;
@@ -94,7 +102,9 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     const char *submap_filename, bool developer_mode,
     bool minimap_alt, bool cache_bitmaps,
     int n_players, int n_players_playing, bool load_game);
-void test_app_restart(test_app_t *app, int save_slot);
+void test_app_set_quit(test_app_t *app);
+void test_app_set_restart_map(test_app_t *app, const char *hexmap_filename);
+void test_app_set_restart_save_slot(test_app_t *app, int save_slot);
 int test_app_mainloop(test_app_t *app);
 int test_app_mainloop_step(test_app_t *app);
 const char *test_app_get_last_recording_filename(test_app_t *app);

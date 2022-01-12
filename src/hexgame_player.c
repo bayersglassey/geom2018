@@ -18,6 +18,11 @@
 #include "hexgame_vars_props.h"
 
 
+#ifdef __EMSCRIPTEN__
+void emccdemo_syncfs();
+#endif
+
+
 static void print_tabs(FILE *file, int depth){
     for(int i = 0; i < depth; i++)fprintf(file, "  ");
 }

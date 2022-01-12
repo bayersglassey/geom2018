@@ -187,7 +187,7 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
                 err = hexgame_step(&app->hexgame);
                 if(err)return err;
             }
-        }else if(event->key.keysym.sym == SDLK_RETURN){
+        }else if(event->key.keysym.sym == SDLK_ESCAPE){
             test_app_menu_set_screen(&app->menu, TEST_APP_MENU_SCREEN_PAUSED);
             app->show_menu = true;
         }else if(event->key.keysym.sym == SDLK_TAB){

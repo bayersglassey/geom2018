@@ -181,12 +181,6 @@ int main(int n_args, char *args[]){
     stateset_filename = DEFAULT_STATESET_FILENAME;
     developer_mode = get_bool_env(ENV_DEVEL);
 
-#ifdef __EMSCRIPTEN__
-    /* Override some defaults if we're running in the browser (and therefore
-    aren't getting any commandline arguments) */
-    load_game = true;
-#endif
-
     /* The classic */
     srand(time(0));
 

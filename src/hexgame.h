@@ -22,11 +22,10 @@
 #define DEBUG_RECORDINGS false
 
 /* RESET_TO_SAFETY is to player->safe_location, RESET_SOFT is to
-player->respawn_location, RESET_HARD is to start of game. */
+player->respawn_location. */
 enum reset_level {
     RESET_TO_SAFETY,
-    RESET_SOFT,
-    RESET_HARD
+    RESET_SOFT
 };
 
 
@@ -425,7 +424,7 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     const char *worldmaps_filename,
     prismelrenderer_t *minimap_prend,
     const char *minimap_tileset_filename,
-    const char *map_filename);
+    const char *map_filename, hexmap_t **map_ptr);
 int hexgame_load_map(hexgame_t *game, const char *map_filename,
     hexmap_t **map_ptr);
 int hexgame_get_or_load_map(hexgame_t *game, const char *map_filename,

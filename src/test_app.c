@@ -24,6 +24,11 @@
 
 const char *RECORDING_FILENAME_TEMPLATE = "recs/000.fus";
 
+/* These are declared as extern in test_app.h */
+const char *TEST_MAP_HEXMAP_FILENAME_TITLE = "data/maps/title/worldmap.fus";
+const char *TEST_MAP_HEXMAP_FILENAME_NEW_GAME = "data/maps/tutorial/worldmap.fus";
+const char *TEST_MAP_HEXMAP_FILENAME_DEFAULT = "data/maps/demo/worldmap.fus";
+
 
 /*******************
 * STATIC UTILITIES *
@@ -75,19 +80,20 @@ void test_app_cleanup(test_app_t *app){
 static int test_app_init_game(test_app_t *app,
     prismelrenderer_t *prend,
     prismelrenderer_t *minimap_prend,
-    int n_players, int n_players_playing
+    int n_players, int n_players_playing,
+    const char *hexmap_filename, const char *submap_filename
 ){
     int err;
 
     hexgame_t *game = &app->hexgame;
+    hexmap_t *map;
     err = hexgame_init(game, prend,
         "data/worldmaps.fus",
         minimap_prend,
         "data/tileset_minimap.fus",
-        app->hexmap_filename);
+        hexmap_filename, &map);
     if(err)return err;
 
-    hexmap_t *map = game->maps[0];
     vecspace_t *space = map->space;
 
     for(int i = 0; i < n_players; i++){
@@ -103,7 +109,6 @@ static int test_app_init_game(test_app_t *app,
         hexgame_location_t spawn = map->spawn;
 
         /* Maybe get respawn_pos from a submap */
-        const char *submap_filename = app->submap_filename;
         if(submap_filename != NULL){
             hexmap_submap_t *spawn_submap = NULL;
             for(int i = 0; i < map->submaps_len; i++){
@@ -193,8 +198,6 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->renderer = renderer;
     app->prend_filename = prend_filename;
     app->stateset_filename = stateset_filename;
-    app->hexmap_filename = hexmap_filename;
-    app->submap_filename = submap_filename;
 
     strcpy(app->_recording_filename, RECORDING_FILENAME_TEMPLATE);
 
@@ -243,18 +246,33 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         TEST_APP_CONSOLE_W, TEST_APP_CONSOLE_H, 20000);
     if(err)return err;
 
+    app->list = NULL;
+
+    test_app_menu_init(&app->menu, app);
+    if(hexmap_filename == NULL){
+        app->show_menu = true;
+        hexmap_filename = TEST_MAP_HEXMAP_FILENAME_TITLE;
+        submap_filename = NULL;
+    }else{
+        app->show_menu = false;
+        /* Show menu, unless someone provided the --map option at
+        the commandline for debugging purposes */
+    }
+
     err = test_app_init_game(app, prend, minimap_prend,
-        n_players, n_players_playing);
+        n_players, n_players_playing,
+        hexmap_filename, submap_filename);
     if(err)return err;
 
     app->loop = true;
     app->restart = false;
-    app->save_slot = -1;
+    app->restart_save_slot = -1;
+    app->restart_hexmap_filename = NULL;
+
     app->hexgame_running = true;
     app->show_console = false;
     app->process_console = false;
     app->mode = TEST_APP_MODE_GAME;
-    app->show_menu = false;
     app->camera_mapper = NULL;
 
     minieditor_init(&app->editor,
@@ -262,10 +280,6 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         app->prend_filename,
         &app->font, app->geomfont, &app->prend,
         app->delay_goal, app->scw, app->sch);
-
-    test_app_menu_init(&app->menu, app);
-
-    app->list = NULL;
 
     if(load_game){
         /* Load game immediately, instead of starting at title screen and
@@ -278,9 +292,57 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 }
 
 
-void test_app_restart(test_app_t *app, int save_slot){
+void test_app_set_quit(test_app_t *app){
+    app->loop = false;
+}
+
+static void _test_app_set_restart(test_app_t *app, int save_slot,
+    const char *hexmap_filename
+){
     app->restart = true;
-    app->save_slot = save_slot;
+    app->restart_save_slot = save_slot;
+    app->restart_hexmap_filename = hexmap_filename;
+}
+
+void test_app_set_restart_map(test_app_t *app, const char *hexmap_filename){
+    _test_app_set_restart(app, -1, hexmap_filename);
+}
+
+void test_app_set_restart_save_slot(test_app_t *app, int save_slot){
+    _test_app_set_restart(app, save_slot, NULL);
+}
+
+static int test_app_restart(test_app_t *app){
+    int err;
+    hexgame_t *game = &app->hexgame;
+
+    prismelrenderer_t *prend = game->prend;
+    prismelrenderer_t *minimap_prend = game->minimap_prend;
+    int n_players = game->players_len;
+
+    int n_players_playing = 0;
+    for(int i = 0; i < game->players_len; i++){
+        player_t *player = game->players[i];
+        if(player->body)n_players_playing++;
+    }
+
+    const char *hexmap_filename = app->restart_hexmap_filename;
+    if(!hexmap_filename)hexmap_filename = TEST_MAP_HEXMAP_FILENAME_DEFAULT;
+
+    hexgame_cleanup(game);
+    err = test_app_init_game(app, prend, minimap_prend,
+        n_players, n_players_playing,
+        hexmap_filename, NULL);
+    if(err)return err;
+
+    if(app->restart_save_slot >= 0){
+        /* TODO: implement different save slots */
+        err = _load_game(game);
+        if(err)return err;
+    }
+
+    app->restart = false;
+    return 0;
 }
 
 int test_app_mainloop(test_app_t *app){
@@ -356,8 +418,11 @@ static int test_app_process_event_menu(test_app_t *app, SDL_Event *event){
             test_app_menu_left(menu);
         }else if(event->key.keysym.sym == SDLK_RIGHT){
             test_app_menu_right(menu);
+        }else if(event->key.keysym.sym == SDLK_ESCAPE){
+            test_app_menu_back(menu);
         }else if(event->key.keysym.sym == SDLK_RETURN){
-            test_app_menu_select(menu);
+            err = test_app_menu_select(menu);
+            if(err)return err;
         }
     }
     return 0;
@@ -374,11 +439,8 @@ static int test_app_poll_events(test_app_t *app){
     while(SDL_PollEvent(event)){
 
         /* Quit immediately if we're asked to */
-        if(event->type == SDL_QUIT || (
-            event->type == SDL_KEYDOWN &&
-            event->key.keysym.sym == SDLK_ESCAPE
-        )){
-            app->loop = false;
+        if(event->type == SDL_QUIT){
+            test_app_set_quit(app);
             break;
         }
 
@@ -498,28 +560,8 @@ int test_app_mainloop_step(test_app_t *app){
     hexgame_t *game = &app->hexgame;
 
     if(app->restart){
-        prismelrenderer_t *prend = game->prend;
-        prismelrenderer_t *minimap_prend = game->minimap_prend;
-        int n_players = game->players_len;
-
-        int n_players_playing = 0;
-        for(int i = 0; i < game->players_len; i++){
-            player_t *player = game->players[i];
-            if(player->body)n_players_playing++;
-        }
-
-        hexgame_cleanup(game);
-        err = test_app_init_game(app, prend, minimap_prend,
-            n_players, n_players_playing);
+        err = test_app_restart(app);
         if(err)return err;
-
-        if(app->save_slot >= 0){
-            /* TODO: implement different save slots */
-            err = _load_game(game);
-            if(err)return err;
-        }
-
-        app->restart = false;
     }
 
     err = palette_update_sdl_palette(&app->palette, app->sdl_palette);
@@ -536,7 +578,7 @@ int test_app_mainloop_step(test_app_t *app){
     err = hexgame_unpauseable_step(game);
     if(err)return err;
 
-    if(app->show_menu){
+    if(app->show_menu && test_app_menu_pauses_game(&app->menu)){
         /* Menu doesn't need to do anything each frame */
     }else if(app->hexgame.show_minimap){
         /* Minimap doesn't need to do anything each frame */
