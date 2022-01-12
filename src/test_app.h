@@ -72,6 +72,11 @@ typedef struct test_app {
     bool show_menu;
 
     bool loop;
+    bool restart;
+        /* Set to true to cause app to restart next frame */
+    int save_slot;
+        /* When app->restart is true, this indicates which save slot to
+        load from (or -1 for no save slot). */
 
     char _recording_filename[200];
 
@@ -89,6 +94,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     const char *submap_filename, bool developer_mode,
     bool minimap_alt, bool cache_bitmaps,
     int n_players, int n_players_playing, bool load_game);
+void test_app_restart(test_app_t *app, int save_slot);
 int test_app_mainloop(test_app_t *app);
 int test_app_mainloop_step(test_app_t *app);
 const char *test_app_get_last_recording_filename(test_app_t *app);

@@ -72,6 +72,91 @@ void test_app_cleanup(test_app_t *app){
     }
 }
 
+static int test_app_init_game(test_app_t *app,
+    prismelrenderer_t *prend,
+    prismelrenderer_t *minimap_prend,
+    int n_players, int n_players_playing
+){
+    int err;
+
+    hexgame_t *game = &app->hexgame;
+    err = hexgame_init(game, prend,
+        "data/worldmaps.fus",
+        minimap_prend,
+        "data/tileset_minimap.fus",
+        app->hexmap_filename);
+    if(err)return err;
+
+    hexmap_t *map = game->maps[0];
+    vecspace_t *space = map->space;
+
+    for(int i = 0; i < n_players; i++){
+        char *_respawn_filename = generate_respawn_filename(
+            NULL, i, NULL);
+        if(!_respawn_filename)return 1;
+        const char *respawn_filename = stringstore_get_donate(
+            &prend->filename_store, _respawn_filename);
+        if(!respawn_filename)return 1;
+
+        ARRAY_PUSH_NEW(player_t*, game->players, player)
+
+        hexgame_location_t spawn = map->spawn;
+
+        /* Maybe get respawn_pos from a submap */
+        const char *submap_filename = app->submap_filename;
+        if(submap_filename != NULL){
+            hexmap_submap_t *spawn_submap = NULL;
+            for(int i = 0; i < map->submaps_len; i++){
+                hexmap_submap_t *submap = map->submaps[i];
+                if(strcmp(submap->filename, submap_filename) == 0){
+                    spawn_submap = submap; break;}
+            }
+            if(spawn_submap == NULL){
+                fprintf(stderr, "Couldn't find submap with filename: %s\n",
+                    submap_filename);
+                return 2;}
+
+            hexgame_location_t *spawn_submap_spawn =
+                &spawn_submap->collmap.spawn;
+
+            spawn = *spawn_submap_spawn;
+            vec_add(space->dims, spawn.pos, spawn_submap->pos);
+        }
+
+        err = player_init(player, game, i,
+            spawn.pos, spawn.rot, spawn.turn,
+            map->filename, respawn_filename);
+        if(err)return err;
+    }
+
+    err = test_app_set_players(app, n_players_playing);
+    if(err)return err;
+
+    /* Find player0 */
+    player_t *player0 = NULL;
+    for(int i = 0; i < game->players_len; i++){
+        player_t *player = game->players[i];
+        if(player->keymap != 0)continue;
+        player0 = player;
+        break;
+    }
+    if(player0 == NULL){
+        fprintf(stderr, "Couldn't find player 0\n");
+        return 2;
+    }
+
+    {
+        /* Create camera */
+        ARRAY_PUSH_NEW(camera_t*, game->cameras, camera)
+        err = camera_init(camera, game, map, player0->body);
+        if(err)return err;
+
+        app->camera = camera;
+    }
+
+    return 0;
+}
+
 static int _load_game(hexgame_t *game){
     int err;
     for(int i = 0; i < game->players_len; i++){
@@ -158,88 +243,18 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         TEST_APP_CONSOLE_W, TEST_APP_CONSOLE_H, 20000);
     if(err)return err;
 
-    hexgame_t *game = &app->hexgame;
-    err = hexgame_init(game, prend,
-        "data/worldmaps.fus",
-        minimap_prend,
-        "data/tileset_minimap.fus",
-        app->hexmap_filename);
+    err = test_app_init_game(app, prend, minimap_prend,
+        n_players, n_players_playing);
     if(err)return err;
 
-    hexmap_t *map = game->maps[0];
-    vecspace_t *space = map->space;
-
-    for(int i = 0; i < n_players; i++){
-        char *_respawn_filename = generate_respawn_filename(
-            NULL, i, NULL);
-        if(!_respawn_filename)return 1;
-        const char *respawn_filename = stringstore_get_donate(
-            &prend->filename_store, _respawn_filename);
-        if(!respawn_filename)return 1;
-
-        ARRAY_PUSH_NEW(player_t*, game->players, player)
-
-        hexgame_location_t spawn = map->spawn;
-
-        /* Maybe get respawn_pos from a submap */
-        const char *submap_filename = app->submap_filename;
-        if(submap_filename != NULL){
-            hexmap_submap_t *spawn_submap = NULL;
-            for(int i = 0; i < map->submaps_len; i++){
-                hexmap_submap_t *submap = map->submaps[i];
-                if(strcmp(submap->filename, submap_filename) == 0){
-                    spawn_submap = submap; break;}
-            }
-            if(spawn_submap == NULL){
-                fprintf(stderr, "Couldn't find submap with filename: %s\n",
-                    submap_filename);
-                return 2;}
-
-            hexgame_location_t *spawn_submap_spawn =
-                &spawn_submap->collmap.spawn;
-
-            spawn = *spawn_submap_spawn;
-            vec_add(space->dims, spawn.pos, spawn_submap->pos);
-        }
-
-        err = player_init(player, game, i,
-            spawn.pos, spawn.rot, spawn.turn,
-            map->filename, respawn_filename);
-        if(err)return err;
-    }
-
     app->loop = true;
+    app->restart = false;
+    app->save_slot = -1;
     app->hexgame_running = true;
     app->show_console = false;
     app->process_console = false;
     app->mode = TEST_APP_MODE_GAME;
     app->show_menu = false;
-
-    err = test_app_set_players(app, n_players_playing);
-    if(err)return err;
-
-    /* Find player0 */
-    player_t *player0 = NULL;
-    for(int i = 0; i < game->players_len; i++){
-        player_t *player = game->players[i];
-        if(player->keymap != 0)continue;
-        player0 = player;
-        break;
-    }
-    if(player0 == NULL){
-        fprintf(stderr, "Couldn't find player 0\n");
-        return 2;
-    }
-
-    {
-        /* Create camera */
-        ARRAY_PUSH_NEW(camera_t*, game->cameras, camera)
-        err = camera_init(camera, game, map, player0->body);
-        if(err)return err;
-
-        app->camera = camera;
-    }
-
     app->camera_mapper = NULL;
 
     minieditor_init(&app->editor,
@@ -255,7 +270,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     if(load_game){
         /* Load game immediately, instead of starting at title screen and
         having to jump into the "LOAD" door or whatever. */
-        err = _load_game(game);
+        err = _load_game(&app->hexgame);
         if(err)return err;
     }
 
@@ -263,7 +278,15 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 }
 
 
+void test_app_restart(test_app_t *app, int save_slot){
+    app->restart = true;
+    app->save_slot = save_slot;
+}
+
 int test_app_mainloop(test_app_t *app){
+    /* Mainloop when running "imperatively" as opposed to using callbacks.
+    If callbacks are used (e.g. Emscripten), you should figure out some other
+    way to periodically call test_app_mainloop_step. */
     while(app->loop){
         Uint32 tick0 = SDL_GetTicks();
 
@@ -473,6 +496,31 @@ int test_app_mainloop_step(test_app_t *app){
     int err;
 
     hexgame_t *game = &app->hexgame;
+
+    if(app->restart){
+        prismelrenderer_t *prend = game->prend;
+        prismelrenderer_t *minimap_prend = game->minimap_prend;
+        int n_players = game->players_len;
+
+        int n_players_playing = 0;
+        for(int i = 0; i < game->players_len; i++){
+            player_t *player = game->players[i];
+            if(player->body)n_players_playing++;
+        }
+
+        hexgame_cleanup(game);
+        err = test_app_init_game(app, prend, minimap_prend,
+            n_players, n_players_playing);
+        if(err)return err;
+
+        if(app->save_slot >= 0){
+            /* TODO: implement different save slots */
+            err = _load_game(game);
+            if(err)return err;
+        }
+
+        app->restart = false;
+    }
 
     err = palette_update_sdl_palette(&app->palette, app->sdl_palette);
     if(err)return err;

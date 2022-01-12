@@ -66,7 +66,7 @@ int test_app_menu_select(test_app_menu_t *menu){
         case TEST_APP_MENU_SCREEN_TITLE:
             switch(menu->option_i){
                 case 0: /* NEW GAME */
-                    fprintf(stderr, "TODO: new game\n");
+                    test_app_restart(app, -1);
                     app->show_menu = false;
                     break;
                 case 1: /* LOAD GAME */
@@ -80,7 +80,7 @@ int test_app_menu_select(test_app_menu_t *menu){
             }
             break;
         case TEST_APP_MENU_SCREEN_LOAD_GAME:
-            fprintf(stderr, "TODO: load slot %i\n", menu->option_i);
+            test_app_restart(app, menu->option_i);
             app->show_menu = false;
             break;
         case TEST_APP_MENU_SCREEN_PAUSED:
@@ -89,7 +89,6 @@ int test_app_menu_select(test_app_menu_t *menu){
                     app->show_menu = false;
                     break;
                 case 1: /* EXIT TO TITLE */
-                    fprintf(stderr, "TODO: exit to title\n");
                     test_app_menu_set_screen(menu,
                         TEST_APP_MENU_SCREEN_TITLE);
                     break;
