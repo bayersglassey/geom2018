@@ -921,8 +921,9 @@ static int parse_geomfonts(prismelrenderer_t *prend, fus_lexer_t *lexer){
             GET_VEC(prend->space, vy)
 
             ARRAY_PUSH_NEW(geomfont_t*, prend->geomfonts, geomfont)
-            err = geomfont_init(geomfont, name, font,
-                prend, prismel_name, vx, vy);
+            geomfont_init(geomfont, name, font, prend);
+            err = geomfont_init_chars_from_sq_prismel(geomfont,
+                prismel_name, vx, vy);
             if(err)return err;
         }
         CLOSE

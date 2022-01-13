@@ -7,9 +7,9 @@
 
 #include "font.h"
 #include "geom.h"
-#include "prismelrenderer.h"
 
 struct prismelmapper;
+struct prismelrenderer;
 
 
 /**********
@@ -29,8 +29,10 @@ typedef struct geomfont {
 } geomfont_t;
 
 void geomfont_cleanup(geomfont_t *geomfont);
-int geomfont_init(geomfont_t *geomfont, const char *name, font_t *font,
-    struct prismelrenderer *prend, const char *prismel_name,
+void geomfont_init(geomfont_t *geomfont, const char *name, font_t *font,
+    struct prismelrenderer *prend);
+int geomfont_init_chars_from_sq_prismel(geomfont_t *geomfont,
+    const char *prismel_name,
     vec_t vx, vec_t vy);
 int geomfont_render_printf(geomfont_t *geomfont,
     SDL_Surface *surface, SDL_Palette *pal,

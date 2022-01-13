@@ -38,16 +38,23 @@ void geomfont_cleanup(geomfont_t *geomfont){
     /* Nuthin */
 }
 
-int geomfont_init(geomfont_t *geomfont, const char *name, font_t *font,
-    prismelrenderer_t *prend, const char *prismel_name,
-    vec_t vx, vec_t vy
+void geomfont_init(geomfont_t *geomfont, const char *name, font_t *font,
+    prismelrenderer_t *prend
 ){
-    int err = 0;
-    vecspace_t *space = prend->space;
-
     geomfont->name = name;
     geomfont->font = font;
     geomfont->prend = prend;
+}
+
+int geomfont_init_chars_from_sq_prismel(geomfont_t *geomfont,
+    const char *prismel_name,
+    vec_t vx, vec_t vy
+){
+    int err = 0;
+    font_t *font = geomfont->font;
+    prismelrenderer_t *prend = geomfont->prend;
+    vecspace_t *space = prend->space;
+
     vec_cpy(space->dims, geomfont->vx, vx);
     vec_cpy(space->dims, geomfont->vy, vy);
 

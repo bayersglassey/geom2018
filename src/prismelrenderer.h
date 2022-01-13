@@ -13,7 +13,9 @@
 #include "array.h"
 #include "rendergraph.h"
 #include "font.h"
-#include "geomfont.h"
+
+
+struct geomfont;
 
 
 /***********

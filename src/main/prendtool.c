@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include "../prismelrenderer.h"
+#include "../geomfont.h"
 #include "../directory.h"
 #include "../directory_shell.h"
 #include "../vec4.h"
