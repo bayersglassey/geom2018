@@ -611,58 +611,7 @@ missing the imports of anim/_roller.fus, anim/_flier_core.fus, anim/_bird.fus, e
 So: can we use labels to introduce visual changes, instead of requiring separate statesets?..
 
 
-Jan 6, 2021:
-------------
-
-Let's just make a bunch of maps, yeah?
-And let's start the game somewhere were you can pick them.
-Like a little hub world.
-But one of the places is the tutorial.
-Or... multiple tutorials.
-
-We need a menu, accessible from start of game or anytime thereafter,
-where you can e.g. start a new game, or load an existing save.
-
-By the way, having a separate save per player but they get loaded "simultaneously"
-is weird and not gonna work.
-Multiplayer takes a backseat for now, okay? Second player can join first player's
-game, but can't save on their own.
-Also, only first player can set the current savepoint?..
-So... uhhh... we don't want player->savelocation anymore? O_o
-BUT THAT'S NOT GONNA WORK, because savelocation includes stateset and state.
-Hmmmm long story short, multiplayer takes a backseat for now.
-
-Anyway, we want "save slots".
-
-The menu's structure should be:
-
-    TITLE
-    * New game
-    * Load game
-
-    LOAD GAME
-    * Slot 1
-    * Slot 2
-    * ...
-    * Slot N
-
-    PAUSED
-    * Continue
-    * Exit to title
-
-Okay, previously we had the following ways to track test_app's "state":
-    * app->mode (TEST_APP_MODE_GAME, TEST_APP_MODE_EDITOR)
-    * app->hexgame_running
-    * app->hexgame.show_minimap
-    * app->show_console
-    * app->process_console
-
-...now I've added:
-    * app->show_menu
-
-
-
-Jan 7, 2021:
+Jan 7, 2022:
 ------------
 
 * show_minimap should live on test_app, not hexgame
@@ -678,3 +627,34 @@ Jan 7, 2021:
     To find more:
 
         $ nano $(ack -l '[ /\\]D[ /\\]' data/maps/ | head -n 1)
+
+
+Jan 12, 2022:
+-------------
+
+* At title screen, can we make it so players aren't even created?..
+  So there are only recordings/actors running around.
+  Ok, but currently test_app_init_game looks for players[0] and points
+  the camera at it.
+  => ok, this is working, but we need to add a default submap or default
+     mapper to hexmap_t...
+
+* geomfont: add a geomfont using sq & tri prismels combined.
+  Somehow this should be defined using hexpictures.
+
+* need app->save_slot, which is used when *saving as well as loading*.
+  So no more app->restart_save_slot.
+  Instead, have app->state, which can be RUNNING, QUIT, NEW, LOAD, etc.
+  As opposed to the current multiple bools, i.e. app->quit, app->restart... and maybe
+  app->hexgame_running?.. maybe turn that into a PAUSED state?.. although I don't think
+  there's actually any benefit to doing that yet.
+
+* We need versioned save formats
+  And... we won't know whether format was ok in menu_select, we'll have to wait for
+  test_app_restart, yeah?
+  So what will that function do when it discovers the problem?..
+  Open a menu screen, I suppose?..
+
+* The distinction between n_players and n_players_playing is weird...
+  Can we remove it? I assume it's just there so we can set up controls for 2 players
+  in a hardcoded way or something?
