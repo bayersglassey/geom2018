@@ -80,7 +80,7 @@ void test_app_cleanup(test_app_t *app){
 static int test_app_init_game(test_app_t *app,
     prismelrenderer_t *prend,
     prismelrenderer_t *minimap_prend,
-    int n_players, int n_players_playing,
+    int n_players,
     const char *hexmap_filename, const char *submap_filename
 ){
     int err;
@@ -134,7 +134,7 @@ static int test_app_init_game(test_app_t *app,
         if(err)return err;
     }
 
-    err = test_app_set_players(app, n_players_playing);
+    err = test_app_set_players(app, n_players);
     if(err)return err;
 
     /* Find player0 */
@@ -181,7 +181,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     const char *stateset_filename, const char *hexmap_filename,
     const char *submap_filename, bool developer_mode,
     bool minimap_alt, bool cache_bitmaps,
-    int n_players, int n_players_playing, bool load_game
+    int n_players, bool load_game
 ){
     int err;
 
@@ -190,7 +190,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->delay_goal = delay_goal;
     app->took = 0;
     app->developer_mode = developer_mode;
-    app->n_players_playing = n_players_playing;
+    app->n_players = n_players;
 
     app->window = window;
     app->renderer = renderer;
@@ -256,7 +256,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         thing */
         hexmap_filename = TEST_MAP_HEXMAP_FILENAME_TITLE;
         submap_filename = NULL;
-        n_players_playing = 0;
+        n_players = 0;
     }else{
         /* Don't show menu if someone provided the --map option at
         the commandline for debugging purposes */
@@ -264,8 +264,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     }
 
     err = test_app_init_game(app, prend, minimap_prend,
-        n_players, n_players_playing,
-        hexmap_filename, submap_filename);
+        n_players, hexmap_filename, submap_filename);
     if(err)return err;
 
     app->state = TEST_APP_STATE_RUNNING;
@@ -299,22 +298,19 @@ static int test_app_restart(test_app_t *app){
     hexgame_t *game = &app->hexgame;
     prismelrenderer_t *prend = game->prend;
     prismelrenderer_t *minimap_prend = game->minimap_prend;
-    int n_players = game->players_len;
-    int n_players_playing = app->n_players_playing;
+    int n_players = app->n_players;
     hexgame_cleanup(game);
 
     const char *hexmap_filename = TEST_MAP_HEXMAP_FILENAME_DEFAULT;
     if(app->state == TEST_APP_STATE_TITLE_SCREEN){
         hexmap_filename = TEST_MAP_HEXMAP_FILENAME_TITLE;
         n_players = 0;
-        n_players_playing = 0;
     }else if(app->state == TEST_APP_STATE_NEW_GAME){
         hexmap_filename = TEST_MAP_HEXMAP_FILENAME_NEW_GAME;
     }
 
     err = test_app_init_game(app, prend, minimap_prend,
-        n_players, n_players_playing,
-        hexmap_filename, NULL);
+        n_players, hexmap_filename, NULL);
     if(err)return err;
 
     if(app->state == TEST_APP_STATE_LOAD_GAME){

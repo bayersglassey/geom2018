@@ -76,7 +76,7 @@ typedef struct test_app {
     prismelmapper_t *camera_mapper;
 
     bool developer_mode;
-    int n_players_playing;
+    int n_players;
     bool hexgame_running;
     bool show_editor_controls;
     bool show_console; /* console is visible */
@@ -100,7 +100,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     const char *stateset_filename, const char *hexmap_filename,
     const char *submap_filename, bool developer_mode,
     bool minimap_alt, bool cache_bitmaps,
-    int n_players, int n_players_playing, bool load_game);
+    int n_players, bool load_game);
 int test_app_mainloop(test_app_t *app);
 int test_app_mainloop_step(test_app_t *app);
 const char *test_app_get_last_recording_filename(test_app_t *app);

@@ -21,8 +21,7 @@ static test_app_t *get_test_app();
 const char* DEFAULT_PREND_FILENAME = "data/test.fus";
 const char* DEFAULT_STATESET_FILENAME = "anim/spider.fus";
 const char* ENV_DEVEL = "HEXGAME_DEVEL";
-const int DEFAULT_PLAYERS = 2;
-const int DEFAULT_PLAYERS_PLAYING = 1;
+const int DEFAULT_PLAYERS = 1;
 
 
 #ifdef __EMSCRIPTEN__
@@ -136,7 +135,7 @@ void print_help(FILE *file){
         "        --dont_cache_bitmaps\n"
         "                         ...low-level hokey-pokery, should probably get rid of this option\n"
         , DEFAULT_PREND_FILENAME, DEFAULT_STATESET_FILENAME, ENV_DEVEL,
-        DEFAULT_DELAY_GOAL, DEFAULT_PLAYERS_PLAYING
+        DEFAULT_DELAY_GOAL, DEFAULT_PLAYERS
     );
 }
 
@@ -158,7 +157,6 @@ bool minimap_alt = true;
 bool cache_bitmaps = true;
 bool developer_mode = false;
 int n_players = DEFAULT_PLAYERS;
-int n_players_playing = DEFAULT_PLAYERS_PLAYING;
 int delay_goal = DEFAULT_DELAY_GOAL;
 bool load_game = false;
 SDL_Window *window = NULL;
@@ -171,7 +169,7 @@ static test_app_t *get_test_app(){
         window, renderer, prend_filename, stateset_filename,
         hexmap_filename, submap_filename, developer_mode,
         minimap_alt, cache_bitmaps,
-        n_players, n_players_playing, load_game);
+        n_players, load_game);
     if(err){
         free(app);
         return NULL;
@@ -248,11 +246,10 @@ int main(int n_args, char *args[]){
             }
             arg = args[arg_i];
             n_players = atoi(arg);
-            n_players_playing = n_players;
-            if(n_players_playing <= 0){
+            if(n_players <= 0){
                 fprintf(stderr,
                     "Number of players must be greater than 0. Got: %i\n",
-                    n_players_playing);
+                    n_players);
                 goto parse_failure;
             }
             fprintf(stderr, "Number of players set to %i\n", n_players);
