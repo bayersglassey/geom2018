@@ -632,29 +632,24 @@ Jan 7, 2022:
 Jan 12, 2022:
 -------------
 
-* At title screen, can we make it so players aren't even created?..
-  So there are only recordings/actors running around.
-  Ok, but currently test_app_init_game looks for players[0] and points
-  the camera at it.
-  => ok, this is working, but we need to add a default submap or default
-     mapper to hexmap_t...
-
 * geomfont: add a geomfont using sq & tri prismels combined.
   Somehow this should be defined using hexpictures.
 
-* need app->save_slot, which is used when *saving as well as loading*.
-  So no more app->restart_save_slot.
-  Instead, have app->state, which can be RUNNING, QUIT, NEW, LOAD, etc.
-  As opposed to the current multiple bools, i.e. app->quit, app->restart... and maybe
-  app->hexgame_running?.. maybe turn that into a PAUSED state?.. although I don't think
-  there's actually any benefit to doing that yet.
+* need to actually make use of the different save slots
+  ...and need to pick a save slot when starting new game
+  ...so then... need a message warning will override existing slot?..
+  ...or, remove distinction between new/load games, and replace with
+  two options: one to "play game", where you pick a save slot, and it
+  either loads it or starts new game, and other option is to delete a
+  save slot's data.
+  I think we need to load some information from each save slot before
+  even displaying them... so like, when app is loaded...
+  Maybe we can display your character that way, like with your actual
+  stateset and labels.
 
 * We need versioned save formats
   And... we won't know whether format was ok in menu_select, we'll have to wait for
-  test_app_restart, yeah?
+  test_app_restart, yeah? (UNLESS we load some information from each save slot
+  before displaying them, see above)
   So what will that function do when it discovers the problem?..
   Open a menu screen, I suppose?..
-
-* The distinction between n_players and n_players_playing is weird...
-  Can we remove it? I assume it's just there so we can set up controls for 2 players
-  in a hardcoded way or something?
