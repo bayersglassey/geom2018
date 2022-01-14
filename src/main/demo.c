@@ -92,7 +92,7 @@ void emccdemo_step(void *arg){
 
     if(app->state == TEST_APP_STATE_QUIT){
         fprintf(stderr, "%s: Quitting...\n", __func__);
-        exit(0);
+        emscripten_force_exit(0);
     }
 
     Uint32 tick1 = SDL_GetTicks();
@@ -110,7 +110,7 @@ void emccdemo_step(void *arg){
     int e = test_app_mainloop_step(app);
     if(e){
         fprintf(stderr, "%s: Exiting with error: %i\n", __func__, e);
-        exit(e);
+        emscripten_force_exit(e);
     }
 }
 #endif
