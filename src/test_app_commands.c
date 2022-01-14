@@ -55,7 +55,7 @@ static void test_app_command_write_to_console(
 ********************/
 
 static int _test_app_command_exit(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    app->loop = false;
+    app->state = TEST_APP_STATE_QUIT;
     return 0;
 }
 

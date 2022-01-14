@@ -91,6 +91,11 @@ void emccdemo_start(){
 void emccdemo_step(void *arg){
     test_app_t *app = arg;
 
+    if(app->state == TEST_APP_STATE_QUIT){
+        fprintf(stderr, "%s: Quitting...\n", __func__);
+        exit(0);
+    }
+
     Uint32 tick1 = SDL_GetTicks();
     Uint32 took = tick1 - tick0;
 

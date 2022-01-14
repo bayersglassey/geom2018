@@ -1,0 +1,14 @@
+name: "title_menu"
+unit: 3 2 0 -1
+spawn: "data/maps/title/title_menu.fus"
+palette: "data/pal1.fus"
+tileset: "data/tileset1.fus"
+
+submaps:
+    :
+        pos: (0 0)
+        camera: (2 0)
+        mapper: ("triple")
+        submaps:
+            :
+                file: "data/maps/title/title_menu.fus"

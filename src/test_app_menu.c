@@ -84,8 +84,7 @@ int test_app_menu_select(test_app_menu_t *menu){
         case TEST_APP_MENU_SCREEN_TITLE:
             switch(menu->option_i){
                 case 0: /* NEW GAME */
-                    test_app_set_restart_map(app,
-                        TEST_MAP_HEXMAP_FILENAME_NEW_GAME);
+                    app->state = TEST_APP_STATE_NEW_GAME;
                     app->show_menu = false;
                     break;
                 case 1: /* LOAD GAME */
@@ -93,7 +92,7 @@ int test_app_menu_select(test_app_menu_t *menu){
                         TEST_APP_MENU_SCREEN_LOAD_GAME);
                     break;
                 case 2: /* QUIT */
-                    test_app_set_quit(app);
+                    app->state = TEST_APP_STATE_QUIT;
                     app->show_menu = false;
                     break;
                 default:
@@ -106,7 +105,8 @@ int test_app_menu_select(test_app_menu_t *menu){
             if(menu->option_i == _get_n_options(menu) - 1){
                 test_app_menu_back(menu);
             }else{
-                test_app_set_restart_save_slot(app, menu->option_i);
+                app->state = TEST_APP_STATE_LOAD_GAME;
+                app->save_slot = menu->option_i;
                 app->show_menu = false;
             }
             break;
@@ -118,11 +118,10 @@ int test_app_menu_select(test_app_menu_t *menu){
                 case 1: /* EXIT TO TITLE */
                     test_app_menu_set_screen(menu,
                         TEST_APP_MENU_SCREEN_TITLE);
-                    test_app_set_restart_map(app,
-                        TEST_MAP_HEXMAP_FILENAME_TITLE);
+                    app->state = TEST_APP_STATE_TITLE_SCREEN;
                     break;
                 case 2: /* QUIT */
-                    test_app_set_quit(app);
+                    app->state = TEST_APP_STATE_QUIT;
                     app->show_menu = false;
                     break;
                 default:

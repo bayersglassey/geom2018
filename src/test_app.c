@@ -25,7 +25,7 @@
 const char *RECORDING_FILENAME_TEMPLATE = "recs/000.fus";
 
 /* These are declared as extern in test_app.h */
-const char *TEST_MAP_HEXMAP_FILENAME_TITLE = "data/maps/title/worldmap.fus";
+const char *TEST_MAP_HEXMAP_FILENAME_TITLE = "data/maps/title/worldmap_menu.fus";
 const char *TEST_MAP_HEXMAP_FILENAME_NEW_GAME = "data/maps/tutorial/worldmap.fus";
 const char *TEST_MAP_HEXMAP_FILENAME_DEFAULT = "data/maps/demo/worldmap.fus";
 
@@ -145,15 +145,12 @@ static int test_app_init_game(test_app_t *app,
         player0 = player;
         break;
     }
-    if(player0 == NULL){
-        fprintf(stderr, "Couldn't find player 0\n");
-        return 2;
-    }
 
     {
         /* Create camera */
+        body_t *body = player0? player0->body: NULL;
         ARRAY_PUSH_NEW(camera_t*, game->cameras, camera)
-        err = camera_init(camera, game, map, player0->body);
+        err = camera_init(camera, game, map, body);
         if(err)return err;
 
         app->camera = camera;
@@ -193,6 +190,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->delay_goal = delay_goal;
     app->took = 0;
     app->developer_mode = developer_mode;
+    app->n_players_playing = n_players_playing;
 
     app->window = window;
     app->renderer = renderer;
@@ -251,12 +249,18 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     test_app_menu_init(&app->menu, app);
     if(hexmap_filename == NULL){
         app->show_menu = true;
+
+        /* HACK: should do *basically* the same thing as test_app_restart
+        when app->state == TEST_APP_STATE_NEW_GAME...
+        TODO: factor out some common code and make it *actually* the same
+        thing */
         hexmap_filename = TEST_MAP_HEXMAP_FILENAME_TITLE;
         submap_filename = NULL;
+        n_players_playing = 0;
     }else{
-        app->show_menu = false;
-        /* Show menu, unless someone provided the --map option at
+        /* Don't show menu if someone provided the --map option at
         the commandline for debugging purposes */
+        app->show_menu = false;
     }
 
     err = test_app_init_game(app, prend, minimap_prend,
@@ -264,10 +268,8 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         hexmap_filename, submap_filename);
     if(err)return err;
 
-    app->loop = true;
-    app->restart = false;
-    app->restart_save_slot = -1;
-    app->restart_hexmap_filename = NULL;
+    app->state = TEST_APP_STATE_RUNNING;
+    app->save_slot = 0;
 
     app->hexgame_running = true;
     app->show_console = false;
@@ -292,56 +294,36 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 }
 
 
-void test_app_set_quit(test_app_t *app){
-    app->loop = false;
-}
-
-static void _test_app_set_restart(test_app_t *app, int save_slot,
-    const char *hexmap_filename
-){
-    app->restart = true;
-    app->restart_save_slot = save_slot;
-    app->restart_hexmap_filename = hexmap_filename;
-}
-
-void test_app_set_restart_map(test_app_t *app, const char *hexmap_filename){
-    _test_app_set_restart(app, -1, hexmap_filename);
-}
-
-void test_app_set_restart_save_slot(test_app_t *app, int save_slot){
-    _test_app_set_restart(app, save_slot, NULL);
-}
-
 static int test_app_restart(test_app_t *app){
     int err;
     hexgame_t *game = &app->hexgame;
-
     prismelrenderer_t *prend = game->prend;
     prismelrenderer_t *minimap_prend = game->minimap_prend;
     int n_players = game->players_len;
+    int n_players_playing = app->n_players_playing;
+    hexgame_cleanup(game);
 
-    int n_players_playing = 0;
-    for(int i = 0; i < game->players_len; i++){
-        player_t *player = game->players[i];
-        if(player->body)n_players_playing++;
+    const char *hexmap_filename = TEST_MAP_HEXMAP_FILENAME_DEFAULT;
+    if(app->state == TEST_APP_STATE_TITLE_SCREEN){
+        hexmap_filename = TEST_MAP_HEXMAP_FILENAME_TITLE;
+        n_players = 0;
+        n_players_playing = 0;
+    }else if(app->state == TEST_APP_STATE_NEW_GAME){
+        hexmap_filename = TEST_MAP_HEXMAP_FILENAME_NEW_GAME;
     }
 
-    const char *hexmap_filename = app->restart_hexmap_filename;
-    if(!hexmap_filename)hexmap_filename = TEST_MAP_HEXMAP_FILENAME_DEFAULT;
-
-    hexgame_cleanup(game);
     err = test_app_init_game(app, prend, minimap_prend,
         n_players, n_players_playing,
         hexmap_filename, NULL);
     if(err)return err;
 
-    if(app->restart_save_slot >= 0){
+    if(app->state == TEST_APP_STATE_LOAD_GAME){
         /* TODO: implement different save slots */
         err = _load_game(game);
         if(err)return err;
     }
 
-    app->restart = false;
+    app->state = TEST_APP_STATE_RUNNING;
     return 0;
 }
 
@@ -349,7 +331,7 @@ int test_app_mainloop(test_app_t *app){
     /* Mainloop when running "imperatively" as opposed to using callbacks.
     If callbacks are used (e.g. Emscripten), you should figure out some other
     way to periodically call test_app_mainloop_step. */
-    while(app->loop){
+    while(app->state != TEST_APP_STATE_QUIT){
         Uint32 tick0 = SDL_GetTicks();
 
         int err = test_app_mainloop_step(app);
@@ -440,7 +422,7 @@ static int test_app_poll_events(test_app_t *app){
 
         /* Quit immediately if we're asked to */
         if(event->type == SDL_QUIT){
-            test_app_set_quit(app);
+            app->state = TEST_APP_STATE_QUIT;
             break;
         }
 
@@ -559,7 +541,13 @@ int test_app_mainloop_step(test_app_t *app){
 
     hexgame_t *game = &app->hexgame;
 
-    if(app->restart){
+    while(app->state != TEST_APP_STATE_RUNNING){
+        if(app->state == TEST_APP_STATE_QUIT){
+            /* This shouldn't really happen; app's mainloop step shouldn't
+            even be called if app is quitting */
+            fprintf(stderr, "ERROR: app state was QUIT at entry to step\n");
+            return 2;
+        }
         err = test_app_restart(app);
         if(err)return err;
     }

@@ -125,7 +125,7 @@ int test_app_render_game(test_app_t *app){
         app->camera->mapper = app->camera_mapper;
     }
 
-    /* NOTE: camera_render takes care of rendering the minimap if
+    /* NOTE/HACK: camera_render takes care of rendering the minimap if
     game->show_minimap is truthy */
     err = camera_render(app->camera,
         app->surface,

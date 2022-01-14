@@ -18,6 +18,10 @@
 #include "hexgame_vars_props.h"
 
 
+
+#define DEFAULT_PALETTE_FILENAME "data/pal1.fus"
+
+
 /**********
  * CAMERA *
  **********/
@@ -75,12 +79,10 @@ void camera_colors_flash_white(camera_t *camera, int percent){
 
 static int camera_colors_step(camera_t *camera, palette_t *palette){
     int err;
-    if(camera->cur_submap != NULL){
-        err = palette_update_colors(palette, camera->colors,
-            camera->colors_fade, HEXGAME_MAX_COLORS_FADE);
-        if(err)return err;
-        if(camera->colors_fade < HEXGAME_MAX_COLORS_FADE)camera->colors_fade++;
-    }
+    err = palette_update_colors(palette, camera->colors,
+        camera->colors_fade, HEXGAME_MAX_COLORS_FADE);
+    if(err)return err;
+    if(camera->colors_fade < HEXGAME_MAX_COLORS_FADE)camera->colors_fade++;
     return 0;
 }
 
@@ -136,10 +138,16 @@ int camera_step(camera_t *camera){
     }
 #endif
 
+    palette_t *palette;
     if(camera->cur_submap != NULL){
-        err = camera_colors_step(camera, camera->cur_submap->palette);
+        palette = camera->cur_submap->palette;
+    }else{
+        const char *palette_name = DEFAULT_PALETTE_FILENAME;
+        err = hexmap_get_or_create_palette(map, palette_name, &palette);
         if(err)return err;
     }
+    err = camera_colors_step(camera, palette);
+    if(err)return err;
 
     /* Set camera */
     int camera_type = CAMERA_TYPE_STATIC;

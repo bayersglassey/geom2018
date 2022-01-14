@@ -31,6 +31,15 @@ extern const char *TEST_MAP_HEXMAP_FILENAME_DEFAULT;
 
 
 
+enum test_app_state {
+    TEST_APP_STATE_RUNNING,
+    TEST_APP_STATE_TITLE_SCREEN,
+    TEST_APP_STATE_NEW_GAME,
+    TEST_APP_STATE_LOAD_GAME,
+    TEST_APP_STATE_QUIT,
+    TEST_APP_STATES
+};
+
 enum test_app_mode {
     TEST_APP_MODE_GAME,
     TEST_APP_MODE_EDITOR,
@@ -42,7 +51,6 @@ typedef struct test_app {
     int scw, sch;
     int delay_goal;
     Uint32 took;
-    bool developer_mode;
 
     SDL_Window *window;
     SDL_Renderer *renderer;
@@ -60,35 +68,26 @@ typedef struct test_app {
     console_t console;
     minieditor_t editor;
     test_app_menu_t menu;
+    test_app_list_t *list;
 
     stateset_t stateset;
     hexgame_t hexgame;
     camera_t *camera;
     prismelmapper_t *camera_mapper;
 
+    bool developer_mode;
+    int n_players_playing;
     bool hexgame_running;
     bool show_editor_controls;
     bool show_console; /* console is visible */
     bool process_console; /* console is grabbing input */
     int lines_printed; /* How many lines we've printed so far this frame */
+    int state; /* enum test_app_state */
     int mode; /* enum test_app_mode */
     bool show_menu;
-    bool loop;
-        /* the mainloop continues while this is true
-        (so, once false, app quits) */
-
-    bool restart;
-        /* Set to true to cause app to restart next frame */
-    int restart_save_slot;
-        /* When app->restart is true, this indicates which save slot to
-        load from (or -1 for no save slot). */
-    const char *restart_hexmap_filename;
-        /* When app->restart is true, this indicates which map to load
-        into &app->hexgame initially */
+    int save_slot;
 
     char _recording_filename[200]; /* HACKY :'( */
-
-    test_app_list_t *list;
 } test_app_t;
 
 
@@ -102,9 +101,6 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     const char *submap_filename, bool developer_mode,
     bool minimap_alt, bool cache_bitmaps,
     int n_players, int n_players_playing, bool load_game);
-void test_app_set_quit(test_app_t *app);
-void test_app_set_restart_map(test_app_t *app, const char *hexmap_filename);
-void test_app_set_restart_save_slot(test_app_t *app, int save_slot);
 int test_app_mainloop(test_app_t *app);
 int test_app_mainloop_step(test_app_t *app);
 const char *test_app_get_last_recording_filename(test_app_t *app);

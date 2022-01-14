@@ -4,6 +4,7 @@ worldmaps:
     : "data/maps/tutorial2/worldmap.fus"
     : "data/maps/tutorial3/worldmap.fus"
     : "data/maps/title/worldmap.fus"
+    : "data/maps/title/worldmap_menu.fus"
     : "data/maps/wastes/worldmap.fus"
     : "data/maps/demo/worldmap.fus"
     : "data/maps/triangles/worldmap.fus"
