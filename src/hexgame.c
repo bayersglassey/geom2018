@@ -19,9 +19,6 @@
 
 
 
-#define DEFAULT_PALETTE_FILENAME "data/pal1.fus"
-
-
 /**********
  * CAMERA *
  **********/
@@ -138,13 +135,9 @@ int camera_step(camera_t *camera){
     }
 #endif
 
-    palette_t *palette;
+    palette_t *palette = map->default_palette;
     if(camera->cur_submap != NULL){
         palette = camera->cur_submap->palette;
-    }else{
-        const char *palette_name = DEFAULT_PALETTE_FILENAME;
-        err = hexmap_get_or_create_palette(map, palette_name, &palette);
-        if(err)return err;
     }
     err = camera_colors_step(camera, palette);
     if(err)return err;
@@ -342,6 +335,8 @@ int camera_render(camera_t *camera,
         mapper = camera->mapper;
     }else if(camera->cur_submap != NULL){
         mapper = camera->cur_submap->mapper;
+    }else{
+        mapper = map->default_mapper;
     }
 
     err = camera_render_map(camera,

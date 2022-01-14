@@ -270,6 +270,10 @@ int hexmap_init(hexmap_t *map, hexgame_t *game, const char *filename,
 
     vars_init_with_props(&map->vars, hexgame_vars_prop_names);
 
+    map->default_palette = NULL;
+    map->default_tileset = NULL;
+    map->default_mapper = NULL;
+
     ARRAY_INIT(map->bodies)
     ARRAY_INIT(map->submaps)
     ARRAY_INIT(map->submap_groups)
@@ -658,10 +662,12 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, const char *filename,
     hexmap_submap_parser_context_init(&context, NULL);
 
     /* The "root" submap group (to which submaps belong by default) */
-    hexmap_submap_group_t *root_group;
-    err = hexmap_get_or_add_submap_group(map, "", &root_group);
-    if(err)return err;
-    context.submap_group = root_group;
+    {
+        hexmap_submap_group_t *root_group;
+        err = hexmap_get_or_add_submap_group(map, "", &root_group);
+        if(err)return err;
+        context.submap_group = root_group;
+    }
 
     /* default palette */
     {
@@ -670,8 +676,9 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, const char *filename,
         OPEN
         GET_STR_CACHED(palette_filename, &prend->filename_store)
         err = hexmap_get_or_create_palette(map, palette_filename,
-            &context.palette);
+            &map->default_palette);
         if(err)return err;
+        context.palette = map->default_palette;
         CLOSE
     }
 
@@ -682,14 +689,31 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, const char *filename,
         OPEN
         GET_STR_CACHED(tileset_filename, &prend->filename_store)
         err = hexmap_get_or_create_tileset(map, tileset_filename,
-            &context.tileset);
+            &map->default_tileset);
         if(err)return err;
+        context.tileset = map->default_tileset;
+        CLOSE
+    }
+
+    /* default mapper */
+    if(GOT("mapper")){
+        const char *mapper_filename;
+        NEXT
+        OPEN
+        err = fus_lexer_get_mapper(lexer, map->prend, NULL,
+            &map->default_mapper);
+        if(err)return err;
+        context.mapper = map->default_mapper;
         CLOSE
     }
 
     /* Parse actors, vars, submaps... */
     err = _hexmap_parse(map, lexer, &context);
     if(err)return err;
+
+    if(!DONE){
+        return UNEXPECTED("end of file");
+    }
 
     /* maybe get spawn point from a submap */
     if(spawn_filename != NULL){

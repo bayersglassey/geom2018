@@ -159,6 +159,9 @@ typedef struct hexmap {
     struct hexgame *game;
     vecspace_t *space; /* Always hexspace! */
     prismelrenderer_t *prend;
+    palette_t *default_palette;
+    hexmap_tileset_t *default_tileset;
+    prismelmapper_t *default_mapper;
 } hexmap_t;
 
 
