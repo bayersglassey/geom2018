@@ -35,11 +35,17 @@
         margin-right: auto;
         font-weight: bold;
         color: rgb(120, 120, 120);
+        background-color: white;
       }
 
       #progress {
         height: 20px;
         width: 30px;
+        background-color: white;
+      }
+
+      #goodbye {
+        background-color: white;
       }
     </style>
   </head>
@@ -53,6 +59,10 @@
     
     <div class="emscripten_border">
       <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+      <div class="emscripten" id="goodbye" style="display: none">
+        <h2>Thanks for playing!</h2>
+        <a href="/">Back to homepage</a>
+      </div>
     </div>
 
     <script type='text/javascript'>
@@ -63,6 +73,16 @@
         arguments: [],
         preRun: [],
         postRun: [],
+        onExit: function() {
+          var canvas = document.getElementById('canvas');
+          var goodbye = document.getElementById('goodbye');
+          // NOTE: don't try canvas.getContext('2d'), because it might return null,
+          // because Emscripten may already have called it with a different context
+          // type, e.g. canvas.getContext('webgl')
+          // ...so instead, we just hide it. :P
+          canvas.style.display = 'none';
+          goodbye.style.display = '';
+        },
         print: (function() {
           var element = document.getElementById('output');
           if (element) element.value = ''; // clear browser cache
@@ -85,7 +105,9 @@
           if (0) { // XXX disabled for safety typeof dump == 'function') {
             dump(text + '\n'); // fast, straight to the real console
           } else {
-            console.error(text);
+            // console.log instead of console.error, because in C we use stderr
+            // for general logging, not just for errors.
+            console.log(text);
           }
         },
         canvas: (function() {
