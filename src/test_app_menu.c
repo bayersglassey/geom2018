@@ -10,16 +10,16 @@
 
 
 const char *test_app_menu_titles[TEST_APP_MENU_SCREENS] = {
-    "Spider Game", "Load Game", "Paused"};
+    "Spider Game", "New Game", "Load Game", "Paused"};
 int test_app_menu_parents[TEST_APP_MENU_SCREENS] = {
-    -1, TEST_APP_MENU_SCREEN_TITLE, -1};
+    -1, TEST_APP_MENU_SCREEN_TITLE, TEST_APP_MENU_SCREEN_TITLE, -1};
 bool _test_app_menu_pauses_game[TEST_APP_MENU_SCREENS] = {
-    false, false, true};
+    false, false, false, true};
 const char *_title_options[] = {"New game", "Load game", "Quit game", NULL};
-const char *_load_game_options[] = {"Slot 1", "Slot 2", "Slot 3", "Back to title screen", NULL};
+const char *_save_slot_options[] = {"Slot 1", "Slot 2", "Slot 3", "Back to title screen", NULL};
 const char *_paused_options[] = {"Continue", "Exit to title screen", "Quit game", NULL};
 const char **test_app_menu_options[TEST_APP_MENU_SCREENS] = {
-    _title_options, _load_game_options, _paused_options};
+    _title_options, _save_slot_options, _save_slot_options, _paused_options};
 
 
 static int _get_n_options(test_app_menu_t *menu){
@@ -84,8 +84,8 @@ int test_app_menu_select(test_app_menu_t *menu){
         case TEST_APP_MENU_SCREEN_TITLE:
             switch(menu->option_i){
                 case 0: /* NEW GAME */
-                    app->state = TEST_APP_STATE_NEW_GAME;
-                    app->show_menu = false;
+                    test_app_menu_set_screen(menu,
+                        TEST_APP_MENU_SCREEN_NEW_GAME);
                     break;
                 case 1: /* LOAD GAME */
                     test_app_menu_set_screen(menu,
@@ -99,6 +99,15 @@ int test_app_menu_select(test_app_menu_t *menu){
                     fprintf(stderr, "Unrecognized option: %i\n",
                         menu->option_i);
                     return 2;
+            }
+            break;
+        case TEST_APP_MENU_SCREEN_NEW_GAME:
+            if(menu->option_i == _get_n_options(menu) - 1){
+                test_app_menu_back(menu);
+            }else{
+                app->state = TEST_APP_STATE_NEW_GAME;
+                app->save_slot = menu->option_i;
+                app->show_menu = false;
             }
             break;
         case TEST_APP_MENU_SCREEN_LOAD_GAME:
