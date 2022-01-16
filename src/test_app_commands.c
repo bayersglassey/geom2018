@@ -134,62 +134,6 @@ static int _test_app_command_list_actors(test_app_t *app, fus_lexer_t *lexer, bo
     return test_app_open_list_actors(app);
 }
 
-static int _test_app_command_add_player(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    int err;
-
-    const char *stateset_filename = app->stateset_filename;
-    if(!DONE){
-        GET_STR_CACHED(stateset_filename, &app->prend.filename_store)
-    }
-
-    hexgame_t *game = &app->hexgame;
-    /* HACK: we just grab maps[0] */
-    hexmap_t *map = game->maps[0];
-    hexgame_location_t spawn = map->spawn;
-    const char *respawn_map_filename = map->filename;
-    if(game->players_len > 0){
-        /* HACK: we just grab players[0] */
-        player_t *player = game->players[0];
-        spawn = player->respawn_location.loc;
-        respawn_map_filename = player->respawn_location.map_filename;
-    }
-
-    hexmap_t *respawn_map;
-    err = hexgame_get_or_load_map(game, respawn_map_filename,
-        &respawn_map);
-    if(err)return err;
-
-    int keymap = -1;
-    for(int i = 0; i < game->players_len; i++){
-        player_t *player = game->players[i];
-        if(player->keymap > keymap)keymap = player->keymap;
-    }
-    keymap++;
-
-    ARRAY_PUSH_NEW(body_t*, respawn_map->bodies, body)
-    err = body_init(body, game, respawn_map, stateset_filename,
-        NULL, NULL);
-    if(err)return err;
-
-    ARRAY_PUSH_NEW(player_t*, game->players, player)
-    err = player_init(player, game, keymap,
-        spawn.pos, spawn.rot, spawn.turn, respawn_map_filename,
-        NULL);
-    if(err)return err;
-
-    /* Attach body to player */
-    player->body = body;
-
-    /* Move body to the respawn location */
-    err = body_respawn(body, spawn.pos, spawn.rot, spawn.turn, map);
-    if(err)return err;
-
-    return 0;
-lexer_err:
-    *lexer_err_ptr = true;
-    return 0;
-}
-
 static int _test_app_command_edit_player(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
     int err;
     int player_i = 0;
@@ -496,7 +440,6 @@ test_app_command_t _test_app_commands[] = {
     COMMAND(list_bodies, "lb", NULL),
     COMMAND(list_players, "lp", NULL),
     COMMAND(list_actors, "la", NULL),
-    COMMAND(add_player, "ap", "[STATESET]"),
     COMMAND(edit_player, "ep", "[PLAYER_INDEX] [STATESET]"),
     COMMAND(save_player, "sp", "[PLAYER_INDEX]"),
     COMMAND(play_recording, "pc", "[FILENAME]"),
