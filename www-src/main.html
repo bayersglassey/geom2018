@@ -46,6 +46,11 @@
 
       #goodbye {
         background-color: white;
+        margin-bottom: 15px;
+      }
+      #errors {
+        background-color: white;
+        margin-bottom: 15px;
       }
     </style>
   </head>
@@ -58,11 +63,15 @@
     </div>
     
     <div class="emscripten_border">
-      <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+      <div class="emscripten" id="errors" style="display: none">
+        <h2>Exited with errors:</h2>
+        <textarea id="errOutput"  rows=20 cols=80></textarea>
+      </div>
       <div class="emscripten" id="goodbye" style="display: none">
         <h2>Thanks for playing!</h2>
         <a href="/">Back to homepage</a>
       </div>
+      <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
     </div>
 
     <script type='text/javascript'>
@@ -73,15 +82,22 @@
         arguments: [],
         preRun: [],
         postRun: [],
-        onExit: function() {
+        onExit: function(exitCode) {
           var canvas = document.getElementById('canvas');
           var goodbye = document.getElementById('goodbye');
-          // NOTE: don't try canvas.getContext('2d'), because it might return null,
-          // because Emscripten may already have called it with a different context
-          // type, e.g. canvas.getContext('webgl')
-          // ...so instead, we just hide it. :P
-          canvas.style.display = 'none';
-          goodbye.style.display = '';
+          var errors = document.getElementById('errors');
+
+          if (exitCode == 0) {
+            // NOTE: don't try canvas.getContext('2d'), because it might return null,
+            // because Emscripten may already have called it with a different context
+            // type, e.g. canvas.getContext('webgl')
+            // ...so instead, we just hide it. :P
+            canvas.style.display = 'none';
+
+            goodbye.style.display = '';
+          } else {
+            errors.style.display = '';
+          }
         },
         print: (function() {
           var element = document.getElementById('output');
@@ -100,16 +116,24 @@
             }
           };
         })(),
-        printErr: function(text) {
-          if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
-          if (0) { // XXX disabled for safety typeof dump == 'function') {
-            dump(text + '\n'); // fast, straight to the real console
-          } else {
-            // console.log instead of console.error, because in C we use stderr
-            // for general logging, not just for errors.
-            console.log(text);
-          }
-        },
+        printErr: (function() {
+          var element = document.getElementById('errOutput');
+          if (element) element.value = ''; // clear browser cache
+          return function(text) {
+            if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+            if (0) { // XXX disabled for safety typeof dump == 'function') {
+              dump(text + '\n'); // fast, straight to the real console
+            } else {
+              // console.log instead of console.error, because in C we use stderr
+              // for general logging, not just for errors.
+              console.log(text);
+              if (element) {
+                element.value += text + "\n";
+                element.scrollTop = element.scrollHeight; // focus on bottom
+              }
+            }
+          };
+        })(),
         canvas: (function() {
           var canvas = document.getElementById('canvas');
 
