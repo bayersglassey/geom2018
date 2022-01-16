@@ -21,39 +21,13 @@
 #include "hexgame.h"
 #include "hexspace.h"
 #include "generic_printf.h"
+#include "save_slots.h"
 
 const char *RECORDING_FILENAME_TEMPLATE = "recs/000.fus";
 
 /* These are declared as extern in test_app.h */
 const char *TEST_MAP_HEXMAP_FILENAME_TITLE = "data/maps/title/worldmap_menu.fus";
 const char *TEST_MAP_HEXMAP_FILENAME_NEW_GAME = "data/maps/tutorial/worldmap.fus";
-const char *TEST_MAP_HEXMAP_FILENAME_DEFAULT = "data/maps/demo/worldmap.fus";
-
-
-/*******************
-* STATIC UTILITIES *
-*******************/
-
-static char *generate_respawn_filename(const char *base_name, int i, const char *ext){
-    /* Generate a name, e.g. "saves/1.txt" */
-
-    /* Defaults */
-    if(base_name == NULL)base_name = "saves/";
-    if(ext == NULL)ext = ".txt";
-
-    int base_name_len = strlen(base_name);
-    int i_len = strlen_of_int(i);
-    int ext_len = strlen(ext);
-    int filename_len = base_name_len + i_len + ext_len;
-    char *filename = malloc(sizeof(*filename) * (filename_len + 1));
-    if(filename == NULL)return NULL;
-    strcpy(filename, base_name);
-    strncpy_of_int(filename + base_name_len, i, i_len);
-    strcpy(filename + base_name_len + i_len, ext);
-    filename[filename_len] = '\0';
-    return filename;
-}
-
 
 
 /***********
@@ -77,65 +51,112 @@ void test_app_cleanup(test_app_t *app){
     }
 }
 
-static int test_app_init_game(test_app_t *app,
-    prismelrenderer_t *prend,
-    prismelrenderer_t *minimap_prend,
-    int n_players,
+static hexgame_save_callback_t _save_callback;
+static int _save_callback(hexgame_t *game){
+    test_app_t *app = (test_app_t *)game->save_callback_data;
+    const char *filename = get_save_slot_filename(app->save_slot);
+    return hexgame_save(game, filename);
+}
+static int _test_app_restart(test_app_t *app,
+    prismelrenderer_t *prend, prismelrenderer_t *minimap_prend,
     const char *hexmap_filename, const char *submap_filename
 ){
     int err;
-
     hexgame_t *game = &app->hexgame;
+
+    int n_players = app->n_players;
+
+    bool force_new_game = false;
+    if(app->state == TEST_APP_STATE_TITLE_SCREEN){
+        hexmap_filename = TEST_MAP_HEXMAP_FILENAME_TITLE;
+        n_players = 0;
+    }else if(hexmap_filename){
+        /* Caller wants to start the game immediately on a specific map */
+        force_new_game = true;
+    }else{
+        /* Default map */
+        hexmap_filename = TEST_MAP_HEXMAP_FILENAME_NEW_GAME;
+    }
+
     hexmap_t *map;
     err = hexgame_init(game, prend,
         "data/worldmaps.fus",
         minimap_prend,
         "data/tileset_minimap.fus",
-        hexmap_filename, &map);
+        hexmap_filename, &map,
+        &_save_callback, app);
     if(err)return err;
 
-    vecspace_t *space = map->space;
+    int new_state = TEST_APP_STATE_RUNNING;
 
-    for(int i = 0; i < n_players; i++){
-        char *_respawn_filename = generate_respawn_filename(
-            NULL, i, NULL);
-        if(!_respawn_filename)return 1;
-        const char *respawn_filename = stringstore_get_donate(
-            &prend->filename_store, _respawn_filename);
-        if(!respawn_filename)return 1;
+    if(
+        app->state == TEST_APP_STATE_START_GAME &&
+        !force_new_game &&
+        get_save_slot_file_exists(app->save_slot)
+    ){
+        const char *save_filename = get_save_slot_filename(app->save_slot);
+        bool bad_version = false;
+        err = hexgame_load(&app->hexgame, save_filename, &bad_version);
+        if(bad_version){
+            test_app_menu_set_screen(&app->menu,
+                TEST_APP_MENU_SCREEN_TITLE);
+            app->show_menu = true;
+            app->menu.message =
+                "The save file format has changed.\n"
+                "You need to load this save file with the\n"
+                "old version of the game.\n"
+                "You can also delete the save file and start\n"
+                "a new game.";
+            new_state = TEST_APP_STATE_TITLE_SCREEN;
+        }else if(err)return err;
+    }else{
+        /* Add players */
+        for(int i = 0; i < n_players; i++){
+            ARRAY_PUSH_NEW(player_t*, game->players, player)
 
-        ARRAY_PUSH_NEW(player_t*, game->players, player)
+            hexgame_location_t spawn = map->spawn;
 
-        hexgame_location_t spawn = map->spawn;
+            /* Maybe get respawn_pos from a submap */
+            if(submap_filename != NULL){
+                hexmap_submap_t *spawn_submap = NULL;
+                for(int i = 0; i < map->submaps_len; i++){
+                    hexmap_submap_t *submap = map->submaps[i];
+                    if(strcmp(submap->filename, submap_filename) == 0){
+                        spawn_submap = submap; break;}
+                }
+                if(spawn_submap == NULL){
+                    fprintf(stderr, "Couldn't find submap with filename: %s\n",
+                        submap_filename);
+                    return 2;}
 
-        /* Maybe get respawn_pos from a submap */
-        if(submap_filename != NULL){
-            hexmap_submap_t *spawn_submap = NULL;
-            for(int i = 0; i < map->submaps_len; i++){
-                hexmap_submap_t *submap = map->submaps[i];
-                if(strcmp(submap->filename, submap_filename) == 0){
-                    spawn_submap = submap; break;}
+                hexgame_location_t *spawn_submap_spawn =
+                    &spawn_submap->collmap.spawn;
+
+                spawn = *spawn_submap_spawn;
+                vec_add(map->space->dims, spawn.pos, spawn_submap->pos);
             }
-            if(spawn_submap == NULL){
-                fprintf(stderr, "Couldn't find submap with filename: %s\n",
-                    submap_filename);
-                return 2;}
 
-            hexgame_location_t *spawn_submap_spawn =
-                &spawn_submap->collmap.spawn;
+            hexgame_savelocation_t respawn_location;
+            hexgame_savelocation_set(&respawn_location, map->space,
+                spawn.pos, spawn.rot, spawn.turn, map->filename,
+                NULL, NULL);
 
-            spawn = *spawn_submap_spawn;
-            vec_add(space->dims, spawn.pos, spawn_submap->pos);
+            err = player_init(player, game, i, &respawn_location);
+            if(err)return err;
         }
 
-        err = player_init(player, game, i,
-            spawn.pos, spawn.rot, spawn.turn,
-            map->filename, respawn_filename);
-        if(err)return err;
-    }
+        /* Spawn bodies for all players */
+        for(int i = 0; i < game->players_len; i++){
+            player_t *player = game->players[i];
 
-    err = test_app_set_players(app, n_players);
-    if(err)return err;
+            /* Set this here so player_spawn_body will use it below */
+            player->respawn_location.stateset_filename =
+                app->stateset_filename;
+
+            err = player_spawn_body(player);
+            if(err)return err;
+        }
+    }
 
     /* Find player0 */
     player_t *player0 = NULL;
@@ -156,24 +177,16 @@ static int test_app_init_game(test_app_t *app,
         app->camera = camera;
     }
 
+    app->state = new_state;
     return 0;
 }
-
-static int _load_game(hexgame_t *game){
+static int test_app_restart(test_app_t *app){
     int err;
-    for(int i = 0; i < game->players_len; i++){
-        player_t *player = game->players[i];
-        if(!player->body){
-            /* This can definitely happen, e.g. generally 2 players are
-            created at start of game, but only player 0 has a body...
-            unless "--players 2" is supplied at commandline, or player
-            0 touches the 2-player door, etc). */
-            continue;
-        }
-        err = player_reload(player);
-        if(err)return err;
-    }
-    return 0;
+    hexgame_t *game = &app->hexgame;
+    prismelrenderer_t *prend = game->prend;
+    prismelrenderer_t *minimap_prend = game->minimap_prend;
+    hexgame_cleanup(game);
+    return _test_app_restart(app, prend, minimap_prend, NULL, NULL);
 }
 
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
@@ -181,7 +194,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     const char *stateset_filename, const char *hexmap_filename,
     const char *submap_filename, bool developer_mode,
     bool minimap_alt, bool cache_bitmaps,
-    int n_players, bool load_game
+    int n_players, int save_slot
 ){
     int err;
 
@@ -246,26 +259,13 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 
     app->list = NULL;
 
+    minieditor_init(&app->editor,
+        app->surface, app->sdl_palette,
+        app->prend_filename,
+        &app->font, app->geomfont, &app->prend,
+        app->delay_goal, app->scw, app->sch);
+
     test_app_menu_init(&app->menu, app);
-    if(hexmap_filename == NULL){
-        app->show_menu = true;
-
-        /* HACK: should do *basically* the same thing as test_app_restart
-        when app->state == TEST_APP_STATE_NEW_GAME...
-        TODO: factor out some common code and make it *actually* the same
-        thing */
-        hexmap_filename = TEST_MAP_HEXMAP_FILENAME_TITLE;
-        submap_filename = NULL;
-        n_players = 0;
-    }else{
-        /* Don't show menu if someone provided the --map option at
-        the commandline for debugging purposes */
-        app->show_menu = false;
-    }
-
-    err = test_app_init_game(app, prend, minimap_prend,
-        n_players, hexmap_filename, submap_filename);
-    if(err)return err;
 
     app->state = TEST_APP_STATE_RUNNING;
     app->save_slot = 0;
@@ -276,51 +276,23 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->mode = TEST_APP_MODE_GAME;
     app->camera_mapper = NULL;
 
-    minieditor_init(&app->editor,
-        app->surface, app->sdl_palette,
-        app->prend_filename,
-        &app->font, app->geomfont, &app->prend,
-        app->delay_goal, app->scw, app->sch);
-
-    if(load_game){
-        /* Load game immediately, instead of starting at title screen and
-        having to jump into the "LOAD" door or whatever. */
-        err = _load_game(&app->hexgame);
-        if(err)return err;
+    if(save_slot >= 0){
+        /* Load game immediately, for debugging purposes */
+        app->state = TEST_APP_STATE_START_GAME;
+        app->save_slot = save_slot;
+        app->show_menu = false;
+    }else if(hexmap_filename){
+        /* Load game immediately, for debugging purposes */
+        app->state = TEST_APP_STATE_START_GAME;
+        app->show_menu = false;
+    }else{
+        app->state = TEST_APP_STATE_TITLE_SCREEN;
+        submap_filename = NULL;
+        app->show_menu = true;
     }
 
-    return 0;
-}
-
-
-static int test_app_restart(test_app_t *app){
-    int err;
-    hexgame_t *game = &app->hexgame;
-    prismelrenderer_t *prend = game->prend;
-    prismelrenderer_t *minimap_prend = game->minimap_prend;
-    int n_players = app->n_players;
-    hexgame_cleanup(game);
-
-    const char *hexmap_filename = TEST_MAP_HEXMAP_FILENAME_DEFAULT;
-    if(app->state == TEST_APP_STATE_TITLE_SCREEN){
-        hexmap_filename = TEST_MAP_HEXMAP_FILENAME_TITLE;
-        n_players = 0;
-    }else if(app->state == TEST_APP_STATE_NEW_GAME){
-        hexmap_filename = TEST_MAP_HEXMAP_FILENAME_NEW_GAME;
-    }
-
-    err = test_app_init_game(app, prend, minimap_prend,
-        n_players, hexmap_filename, NULL);
-    if(err)return err;
-
-    if(app->state == TEST_APP_STATE_LOAD_GAME){
-        /* TODO: implement different save slots */
-        err = _load_game(game);
-        if(err)return err;
-    }
-
-    app->state = TEST_APP_STATE_RUNNING;
-    return 0;
+    return _test_app_restart(app, prend, minimap_prend,
+        hexmap_filename, submap_filename);
 }
 
 int test_app_mainloop(test_app_t *app){

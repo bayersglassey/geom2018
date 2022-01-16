@@ -446,7 +446,6 @@ Mar 20, 2021:
 
         hexgame_savelocation_t respawn_location;
         hexgame_savelocation_t safe_location;
-        char *respawn_filename;
 
         ...we could maybe move safe_location from player to body?..
         ...or we could move {respawn,safe}_location into a new struct, and
@@ -629,27 +628,8 @@ Jan 7, 2022:
         $ nano $(ack -l '[ /\\]D[ /\\]' data/maps/ | head -n 1)
 
 
-Jan 12, 2022:
+Jan 16, 2022:
 -------------
 
 * geomfont: add a geomfont using sq & tri prismels combined.
   Somehow this should be defined using hexpictures.
-
-* need to actually make use of the different save slots
-  ...and need to pick a save slot when starting new game
-  ...so then... need a message warning will override existing slot?..
-  ...or, remove distinction between new/load games, and replace with
-  two options: one to "play game", where you pick a save slot, and it
-  either loads it or starts new game, and other option is to delete a
-  save slot's data.
-  I think we need to load some information from each save slot before
-  even displaying them... so like, when app is loaded...
-  Maybe we can display your character that way, like with your actual
-  stateset and labels.
-
-* We need versioned save formats
-  And... we won't know whether format was ok in menu_select, we'll have to wait for
-  test_app_restart, yeah? (UNLESS we load some information from each save slot
-  before displaying them, see above)
-  So what will that function do when it discovers the problem?..
-  Open a menu screen, I suppose?..

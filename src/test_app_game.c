@@ -13,44 +13,6 @@
 * TEST_APP.GAME *
 ****************/
 
-
-int test_app_set_players(test_app_t *app, int n_players){
-    /* Specifically, sets up n_players players with bodies */
-    int err;
-    hexgame_t *game = &app->hexgame;
-    for(int i = 0; i < n_players; i++){
-        player_t *player = game->players[i];
-        if(player->body != NULL)continue;
-
-        hexmap_t *respawn_map;
-        err = hexgame_get_or_load_map(player->game,
-            player->respawn_location.map_filename, &respawn_map);
-        if(err)return err;
-
-        /* Set player->body */
-        if(i >= n_players){
-            player->body = NULL;
-            continue;
-        }else{
-            ARRAY_PUSH_NEW(body_t*, respawn_map->bodies, body)
-            err = body_init(body, player->game, respawn_map,
-                app->stateset_filename, NULL, NULL);
-            if(err)return err;
-
-            /* Attach body to player */
-            player->body = body;
-
-            /* Move body to the respawn location */
-            err = body_respawn(body,
-                player->respawn_location.loc.pos, player->respawn_location.loc.rot,
-                player->respawn_location.loc.turn, respawn_map);
-            if(err)return err;
-        }
-    }
-    return 0;
-}
-
-
 static int _print_text_expr(test_app_t *app, hexmap_submap_t *submap,
     valexpr_t *text_expr
 ){

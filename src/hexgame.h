@@ -268,7 +268,6 @@ int body_record_keyup(body_t *body, int key_i);
 typedef struct player {
     hexgame_savelocation_t respawn_location;
     hexgame_savelocation_t safe_location;
-    const char *respawn_filename;
 
     int savepoint_cooldown;
 
@@ -282,15 +281,11 @@ typedef struct player {
 
 void player_cleanup(player_t *player);
 int player_init(player_t *player, struct hexgame *game, int keymap,
-    vec_t respawn_pos, rot_t respawn_rot, bool respawn_turn,
-    const char *respawn_map_filename, const char *respawn_filename);
+    hexgame_savelocation_t *respawn_location);
 
-int player_save(player_t *player, const char *filename);
-int player_load(player_t *player, const char *filename,
-    bool *file_not_found_ptr);
 int player_get_index(player_t *player);
 void hexgame_player_dump(player_t *player, int depth);
-int player_reload(player_t *player);
+int player_spawn_body(player_t *player);
 int player_reload_from_location(player_t *player,
     hexgame_savelocation_t *location);
 int player_process_event(player_t *player, SDL_Event *event);
@@ -390,6 +385,9 @@ int camera_render(camera_t *camera,
  * HEXGAME *
  ***********/
 
+struct hexgame;
+typedef int hexgame_save_callback_t(struct hexgame *game);
+
 typedef struct hexgame {
     int frame_i;
     int unpauseable_frame_i;
@@ -409,6 +407,9 @@ typedef struct hexgame {
     ARRAY_DECL(player_t*, players)
     ARRAY_DECL(actor_t*, actors)
 
+    hexgame_save_callback_t *save_callback;
+    void *save_callback_data;
+
     /* Weakrefs: */
     prismelrenderer_t *prend;
     prismelrenderer_t *minimap_prend;
@@ -424,7 +425,8 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     const char *worldmaps_filename,
     prismelrenderer_t *minimap_prend,
     const char *minimap_tileset_filename,
-    const char *map_filename, hexmap_t **map_ptr);
+    const char *map_filename, hexmap_t **map_ptr,
+    hexgame_save_callback_t *save_callback, void *save_callback_data);
 int hexgame_load_map(hexgame_t *game, const char *map_filename,
     hexmap_t **map_ptr);
 int hexgame_get_or_load_map(hexgame_t *game, const char *map_filename,

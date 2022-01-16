@@ -34,8 +34,7 @@ extern const char *TEST_MAP_HEXMAP_FILENAME_DEFAULT;
 enum test_app_state {
     TEST_APP_STATE_RUNNING,
     TEST_APP_STATE_TITLE_SCREEN,
-    TEST_APP_STATE_NEW_GAME,
-    TEST_APP_STATE_LOAD_GAME,
+    TEST_APP_STATE_START_GAME,
     TEST_APP_STATE_QUIT,
     TEST_APP_STATES
 };
@@ -100,7 +99,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     const char *stateset_filename, const char *hexmap_filename,
     const char *submap_filename, bool developer_mode,
     bool minimap_alt, bool cache_bitmaps,
-    int n_players, bool load_game);
+    int n_players, int save_slot);
 int test_app_mainloop(test_app_t *app);
 int test_app_mainloop_step(test_app_t *app);
 const char *test_app_get_last_recording_filename(test_app_t *app);
@@ -126,7 +125,6 @@ void test_app_hide_console(test_app_t *app);
 
 
 /* test_app_game.c */
-int test_app_set_players(test_app_t *app, int n_players);
 int test_app_process_event_game(test_app_t *app, SDL_Event *event);
 int test_app_render_game(test_app_t *app);
 

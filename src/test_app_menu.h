@@ -9,8 +9,8 @@ struct test_app;
 
 enum test_app_menu_screen {
     TEST_APP_MENU_SCREEN_TITLE,
-    TEST_APP_MENU_SCREEN_NEW_GAME,
-    TEST_APP_MENU_SCREEN_LOAD_GAME,
+    TEST_APP_MENU_SCREEN_START_GAME,
+    TEST_APP_MENU_SCREEN_DELETE_GAME,
     TEST_APP_MENU_SCREEN_PAUSED,
     TEST_APP_MENU_SCREENS
 };
@@ -19,6 +19,8 @@ enum test_app_menu_screen {
 typedef struct test_app_menu {
     int screen_i; /* test_app_menu_screen_t */
     int option_i;
+
+    const char *message;
 
     /* Weakrefs: */
     struct test_app *app;

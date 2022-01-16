@@ -7,20 +7,7 @@
 #include "hexgame.h"
 #include "anim.h"
 #include "hexmap.h"
-#include "hexspace.h"
-#include "prismelrenderer.h"
 #include "array.h"
-#include "util.h"
-#include "write.h"
-#include "lexer.h"
-#include "lexer_macros.h"
-#include "var_utils.h"
-#include "hexgame_vars_props.h"
-
-
-#ifdef __EMSCRIPTEN__
-void emccdemo_syncfs();
-#endif
 
 
 static void print_tabs(FILE *file, int depth){
@@ -35,8 +22,7 @@ void player_cleanup(player_t *player){
 }
 
 int player_init(player_t *player, hexgame_t *game, int keymap,
-    vec_t respawn_pos, rot_t respawn_rot, bool respawn_turn,
-    const char *respawn_map_filename, const char *respawn_filename
+    hexgame_savelocation_t *respawn_location
 ){
     int err;
 
@@ -62,29 +48,8 @@ int player_init(player_t *player, hexgame_t *game, int keymap,
         player->key_code[KEYINFO_KEY_R] = SDLK_d;
     }
 
-    hexmap_t *map;
-    err = hexgame_get_or_load_map(game, respawn_map_filename, &map);
-    if(err)return err;
-    vecspace_t *space = map->space;
-    if(respawn_pos == NULL){
-        hexgame_location_t *spawn = &map->spawn;
-        respawn_pos = spawn->pos;
-        respawn_rot = spawn->rot;
-        respawn_turn = spawn->turn;
-    }
-
-    hexgame_savelocation_init(&player->respawn_location);
-    hexgame_savelocation_set(&player->respawn_location, space,
-        respawn_pos, respawn_rot, respawn_turn, respawn_map_filename,
-        NULL, NULL);
-
-    hexgame_savelocation_init(&player->safe_location);
-    hexgame_savelocation_set(&player->safe_location, space,
-        respawn_pos, respawn_rot, respawn_turn, respawn_map_filename,
-        NULL, NULL);
-
-    player->respawn_filename = respawn_filename;
-
+    player->respawn_location = *respawn_location;
+    player->safe_location = *respawn_location;
     return 0;
 }
 
@@ -141,27 +106,36 @@ static int player_set_safe_location(player_t *player){
         body->stateset.filename, body->state->name);
 }
 
-int player_reload(player_t *player){
-    /* Reload player's location from file */
+int player_spawn_body(player_t *player){
     int err;
 
-    if(!player->body){
-        fprintf(stderr, "%s: no body\n", __func__);
+    if(player->body != NULL){
+        fprintf(stderr, "Player %i already has a body\n",
+            player_get_index(player));
         return 2;
     }
 
-    /* Attempt to load file */
-    bool file_not_found = false;
-    err = player_load(player, player->respawn_filename, &file_not_found);
-    if(err && !file_not_found)return err;
+    hexmap_t *respawn_map;
+    err = hexgame_get_or_load_map(player->game,
+        player->respawn_location.map_filename, &respawn_map);
+    if(err)return err;
 
-    /* If save file doesn't exist, just reset player.
-    (This is what happens if you press "1" at start of game.) */
-    if(file_not_found){
-        return hexgame_reset_player(player->game, player, RESET_SOFT, NULL);
-    }
+    /* Set player->body */
+    ARRAY_PUSH_NEW(body_t*, respawn_map->bodies, body)
+    err = body_init(body, player->game, respawn_map,
+        player->respawn_location.stateset_filename, NULL, NULL);
+    if(err)return err;
 
-    return player_reload_from_location(player, &player->respawn_location);
+    /* Attach body to player */
+    player->body = body;
+
+    /* Move body to the respawn location */
+    err = body_respawn(body,
+        player->respawn_location.loc.pos, player->respawn_location.loc.rot,
+        player->respawn_location.loc.turn, respawn_map);
+    if(err)return err;
+
+    return 0;
 }
 
 int player_reload_from_location(player_t *player,
@@ -222,193 +196,6 @@ static int player_use_door(player_t *player, hexmap_door_t *door){
     return 0;
 }
 
-static void _write_vars(vars_t *vars, FILE *file, int depth){
-    /* Don't write the vars which say they shouldn't be saved. */
-    var_props_t nowrite_props_mask = 1 << HEXGAME_VARS_PROP_NOSAVE;
-    vars_write_with_mask(vars, file, depth * 4, nowrite_props_mask);
-}
-
-int player_save(player_t *player, const char *filename){
-    int err;
-
-    FILE *file = fopen(filename, "w");
-    if(file == NULL){
-        fprintf(stderr, "Couldn't save game to %s: ", filename);
-        perror(NULL);
-        return 2;
-    }
-
-    body_t *body = player->body;
-    if(!body){
-        /* ??? */
-        fprintf(stderr, "Can't save without a body!\n");
-        return 2;
-    }
-
-    hexgame_savelocation_t *location = &player->respawn_location;
-    hexgame_t *game = player->game;
-
-    {
-        fprintf(file, "body:\n");
-        fputs("    ", file);
-        hexgame_savelocation_write(location, file);
-        fputc('\n', file);
-        fputs("    vars:\n", file);
-        _write_vars(&body->vars, file, 2);
-    }
-
-    {
-        fprintf(file, "game:\n");
-        fprintf(file, "    vars:\n");
-        _write_vars(&game->vars, file, 2);
-    }
-
-    fprintf(file, "maps:\n");
-    for(int i = 0; i < game->maps_len; i++){
-        hexmap_t *map = game->maps[i];
-        fprintf(file, "    ");
-        fus_write_str(file, map->filename);
-        fprintf(file, ":\n");
-        fprintf(file, "        vars:\n");
-        _write_vars(&map->vars, file, 3);
-        fprintf(file, "        submaps:\n");
-        for(int j = 0; j < map->submap_groups_len; j++){
-            hexmap_submap_group_t *group = map->submap_groups[j];
-
-            /* FOR NOW, since group->visited is the only thing we save,
-            just skip unvisited groups */
-            if(!group->visited)continue;
-
-            fprintf(file, "            ");
-            fus_write_str(file, group->name);
-            fprintf(file, ":\n");
-            fprintf(file, "                visited: %c\n",
-                group->visited? 't': 'n');
-        }
-    }
-
-    fclose(file);
-
-#   ifdef __EMSCRIPTEN__
-    /* Needed to actually save the IDBFS data to browser's indexedDb. */
-    emccdemo_syncfs();
-#   endif
-
-    return 0;
-}
-
-int player_load(player_t *player, const char *filename,
-    bool *file_not_found_ptr
-){
-    int err;
-
-    if(!player->body){
-        fprintf(stderr, "%s: no body\n", __func__);
-        return 2;
-    }
-
-    char *text = load_file(filename);
-    if(text == NULL){
-        fprintf(stderr, "Couldn't load game from %s\n", filename);
-
-        /* Indicate to caller that the reason for returning a failure code
-        is a missing file.
-        So caller can choose to treat that situation as something other
-        than an outright error. */
-        *file_not_found_ptr = true;
-
-        return 2;
-    }
-
-    fus_lexer_t _lexer, *lexer=&_lexer;
-    err = fus_lexer_init(lexer, text, filename);
-    if(err)return err;
-
-    hexgame_t *game = player->game;
-    prismelrenderer_t *prend = game->prend;
-
-    GET("body")
-    OPEN
-    {
-        err = hexgame_savelocation_parse(&player->respawn_location, lexer,
-            &prend->filename_store, &prend->name_store);
-        if(err)return err;
-
-        GET("vars")
-        OPEN
-        err = vars_parse(&player->body->vars, lexer);
-        if(err)return err;
-        CLOSE
-    }
-    CLOSE
-
-    GET("game")
-    OPEN
-    {
-        GET("vars")
-        OPEN
-        err = vars_parse(&game->vars, lexer);
-        if(err)return err;
-        CLOSE
-    }
-    CLOSE
-
-    GET("maps")
-    OPEN
-    while(!GOT(")")){
-        const char *name;
-        GET_STR_CACHED(name, &prend->name_store)
-
-        hexmap_t *map;
-        err = hexgame_get_or_load_map(game, name, &map);
-        if(err)return err;
-
-        OPEN
-        {
-            GET("vars")
-            OPEN
-            err = vars_parse(&map->vars, lexer);
-            if(err)return err;
-            CLOSE
-
-            GET("submaps")
-            OPEN
-            while(!GOT(")")){
-                const char *name;
-                GET_STR_CACHED(name, &prend->name_store)
-
-                hexmap_submap_group_t *group = hexmap_get_submap_group(
-                    map, name);
-                if(!group){
-                    fprintf(stderr, "WARNING: "
-                        "couldn't find submap group \"%s\" in map \"%s\"\n",
-                        name, map->filename);
-                    fprintf(stderr,
-                        "...maybe this save file is from an old version?\n");
-                    PARSE_SILENT
-                    continue;
-                }
-
-                OPEN
-                {
-                    GET("visited")
-                    OPEN
-                    GET_BOOL(group->visited)
-                    CLOSE
-                }
-                CLOSE
-            }
-            CLOSE
-        }
-        CLOSE
-    }
-    CLOSE
-
-    fus_lexer_cleanup(lexer);
-    free(text);
-    return 0;
-}
-
 int player_use_savepoint(player_t *player){
     int err;
 
@@ -417,12 +204,16 @@ int player_use_savepoint(player_t *player){
     if(err)return err;
 
     /* Save player's new respawn location */
-    if(player->respawn_filename != NULL){
-        player_save(player, player->respawn_filename);
-    }
+    err = player->game->save_callback(player->game);
+    if(err)return err;
+
+    hexgame_t *game = player->game;
 
     /* Flash screen white so player knows something happened */
-    body_flash_cameras(player->body, 255, 255, 255, 30);
+    for(int i = 0; i < game->cameras_len; i++){
+        camera_t *camera = game->cameras[i];
+        camera_colors_flash(camera, 255, 255, 255, 30);
+    }
 
     return 0;
 }

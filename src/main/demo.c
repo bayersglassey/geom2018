@@ -6,6 +6,7 @@
 #include <SDL2/SDL.h>
 
 #include "../test_app.h"
+#include "../save_slots.h"
 
 
 #define SCW 1024
@@ -158,7 +159,7 @@ bool cache_bitmaps = true;
 bool developer_mode = false;
 int n_players = DEFAULT_PLAYERS;
 int delay_goal = DEFAULT_DELAY_GOAL;
-bool load_game = false;
+int save_slot = -1;
 SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL;
 
@@ -169,7 +170,7 @@ static test_app_t *get_test_app(){
         window, renderer, prend_filename, stateset_filename,
         hexmap_filename, submap_filename, developer_mode,
         minimap_alt, cache_bitmaps,
-        n_players, load_game);
+        n_players, save_slot);
     if(err){
         free(app);
         return NULL;
@@ -252,9 +253,20 @@ int main(int n_args, char *args[]){
                     n_players);
                 goto parse_failure;
             }
-            fprintf(stderr, "Number of players set to %i\n", n_players);
         }else if(!strcmp(arg, "-l") || !strcmp(arg, "--load")){
-            load_game = true;
+            arg_i++;
+            if(arg_i >= n_args){
+                fprintf(stderr, "Missing int after %s\n", arg);
+                goto parse_failure;
+            }
+            arg = args[arg_i];
+            save_slot = atoi(arg);
+            if(save_slot < 0 || save_slot >= SAVE_SLOTS){
+                fprintf(stderr,
+                    "Save slot must be in [0..%i). Got: %i\n",
+                    SAVE_SLOTS, save_slot);
+                goto parse_failure;
+            }
         }else if(!strcmp(arg, "--minimap_alt")){
             minimap_alt = !minimap_alt;
         }else if(!strcmp(arg, "--dont_cache_bitmaps")){

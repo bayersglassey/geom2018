@@ -418,7 +418,8 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     const char *worldmaps_filename,
     prismelrenderer_t *minimap_prend,
     const char *minimap_tileset_filename,
-    const char *map_filename, hexmap_t **map_ptr
+    const char *map_filename, hexmap_t **map_ptr,
+    hexgame_save_callback_t *save_callback, void *save_callback_data
 ){
     int err;
 
@@ -430,6 +431,9 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     game->minimap_prend = minimap_prend;
 
     game->show_minimap = 0;
+
+    game->save_callback = save_callback;
+    game->save_callback_data = save_callback_data;
 
     vars_init_with_props(&game->vars, hexgame_vars_prop_names);
 
@@ -526,8 +530,8 @@ int hexgame_reset_player(hexgame_t *game, player_t *player,
             * RESET_SOFT: player->respawn_location
     */
 
-    /* WARNING: this function calls body_respawn, which calls
-    body_move_to_map, which modifies map->bodies for two maps.
+    /* WARNING: this function may move a body between maps, modifying
+    map->bodies for those maps.
     So if caller is trying to loop over map->bodies in the usual way,
     the behaviour of that loop is probably gonna be super wrong. */
 
