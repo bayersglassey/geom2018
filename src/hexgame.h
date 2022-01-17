@@ -410,6 +410,8 @@ typedef struct hexgame {
     hexgame_save_callback_t *save_callback;
     void *save_callback_data;
 
+    bool animate_palettes;
+
     /* Weakrefs: */
     prismelrenderer_t *prend;
     prismelrenderer_t *minimap_prend;

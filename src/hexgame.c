@@ -106,34 +106,25 @@ int camera_step(camera_t *camera){
                 if(err)return err;
             }
 
-#ifndef DONT_ANIMATE_PALETTE
-            if(!camera->should_reset){
+            if(game->animate_palettes && !camera->should_reset){
                 /* Smoothly transition between old & new palettes */
                 camera->colors_fade = 0;
             }
-#endif
         }
     }
 
     hexmap_t *map = camera->map;
     vecspace_t *space = map->space;
 
-#ifndef DONT_ANIMATE_PALETTE
     /* Animate palette */
-    /* NOTE: compiling with -DDONT_ANIMATE_PALETTE is useful for producing
-    animated GIF gameplay clips, since our palette changes are too subtle
-    for my GIF capturing software (byzanz), leading to periodic flashes of
-    different colours. */
-
     /* NOTE: The following call to palette_step shouldn't be in here.
     This means palettes are updated once for every camera which is looking
     at them, which makes no sense, but will work ok so long as we only
     have 1 camera. */
-    if(camera->cur_submap != NULL){
+    if(game->animate_palettes && camera->cur_submap != NULL){
         err = palette_step(camera->cur_submap->palette);
         if(err)return err;
     }
-#endif
 
     palette_t *palette = map->default_palette;
     if(camera->cur_submap != NULL){
@@ -434,6 +425,8 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
 
     game->save_callback = save_callback;
     game->save_callback_data = save_callback_data;
+
+    game->animate_palettes = true;
 
     vars_init_with_props(&game->vars, hexgame_vars_prop_names);
 

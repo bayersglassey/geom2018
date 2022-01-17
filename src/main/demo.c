@@ -135,6 +135,9 @@ void print_help(FILE *file){
         "        --minimap_alt    Use alternate minimap\n"
         "        --dont_cache_bitmaps\n"
         "                         ...low-level hokey-pokery, should probably get rid of this option\n"
+        "        --dont_animate_palettes\n"
+        "                         Don't animate the colour palettes; improves the quality of\n"
+        "                         gameplay recordings saved as GIFs\n"
         , DEFAULT_PREND_FILENAME, DEFAULT_STATESET_FILENAME, ENV_DEVEL,
         DEFAULT_DELAY_GOAL, DEFAULT_PLAYERS
     );
@@ -156,6 +159,7 @@ const char *hexmap_filename = NULL;
 const char *submap_filename = NULL;
 bool minimap_alt = true;
 bool cache_bitmaps = true;
+bool animate_palettes = true;
 bool developer_mode = false;
 int n_players = DEFAULT_PLAYERS;
 int delay_goal = DEFAULT_DELAY_GOAL;
@@ -169,7 +173,7 @@ static test_app_t *get_test_app(){
     int err = test_app_init(app, SCW, SCH, delay_goal,
         window, renderer, prend_filename, stateset_filename,
         hexmap_filename, submap_filename, developer_mode,
-        minimap_alt, cache_bitmaps,
+        minimap_alt, cache_bitmaps, animate_palettes,
         n_players, save_slot);
     if(err){
         free(app);
@@ -271,6 +275,8 @@ int main(int n_args, char *args[]){
             minimap_alt = !minimap_alt;
         }else if(!strcmp(arg, "--dont_cache_bitmaps")){
             cache_bitmaps = false;
+        }else if(!strcmp(arg, "--dont_animate_palettes")){
+            animate_palettes = false;
         }else{
             fprintf(stderr, "Unrecognized option: %s\n", arg);
             goto parse_failure;

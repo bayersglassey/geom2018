@@ -86,6 +86,7 @@ static int _test_app_restart(test_app_t *app,
         hexmap_filename, &map,
         &_save_callback, app);
     if(err)return err;
+    game->animate_palettes = app->animate_palettes;
 
     int new_state = TEST_APP_STATE_RUNNING;
 
@@ -193,7 +194,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
     const char *stateset_filename, const char *hexmap_filename,
     const char *submap_filename, bool developer_mode,
-    bool minimap_alt, bool cache_bitmaps,
+    bool minimap_alt, bool cache_bitmaps, bool animate_palettes,
     int n_players, int save_slot
 ){
     int err;
@@ -204,6 +205,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->took = 0;
     app->developer_mode = developer_mode;
     app->n_players = n_players;
+    app->animate_palettes = animate_palettes;
 
     app->window = window;
     app->renderer = renderer;

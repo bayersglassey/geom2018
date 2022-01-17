@@ -76,6 +76,7 @@ typedef struct test_app {
 
     bool developer_mode;
     int n_players;
+    bool animate_palettes;
     bool hexgame_running;
     bool show_editor_controls;
     bool show_console; /* console is visible */
@@ -93,12 +94,11 @@ typedef struct test_app {
 
 
 void test_app_cleanup(test_app_t *app);
-void test_app_init_input(test_app_t *app);
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
     const char *stateset_filename, const char *hexmap_filename,
     const char *submap_filename, bool developer_mode,
-    bool minimap_alt, bool cache_bitmaps,
+    bool minimap_alt, bool cache_bitmaps, bool animate_palettes,
     int n_players, int save_slot);
 int test_app_mainloop(test_app_t *app);
 int test_app_mainloop_step(test_app_t *app);
