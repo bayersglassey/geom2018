@@ -49,6 +49,8 @@ vars:
     nosave "carrying_respawn_counter": null
     nosave "carrying_rgraph": null
 
+    nosave "spit_anim": null
+
 
 collmsgs:
     $IF !SPIDER_EYE: "touch"
