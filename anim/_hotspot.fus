@@ -1,0 +1,59 @@
+
+# Expected collmaps:
+# * "hitbox"
+
+# Expected vars at runtime:
+# * key (str)
+
+state "init":
+    if: any:
+        all:
+            exists myvar("key")
+            expr: mapvar(myvar("key"))
+        all:
+            exists myvar("counter")
+            expr: mapvar(myvar("counter"))
+    then:
+        goto immediate: "touched"
+
+    if:
+    then:
+        goto immediate: "waiting"
+
+state "waiting":
+    rgraph: "hotspot_waiting"
+    hitbox: collmap("hitbox")
+
+    on "touch":
+        if: exists myvar("key")
+        then: set mapvar(myvar("key")): T
+
+        if: exists myvar("counter")
+        then: inc mapvar(myvar("counter"))
+
+        if: exists myvar("max_cooldown")
+        then: set myvar("cooldown"): myvar("max_cooldown")
+
+        goto: "touched"
+
+state "touched":
+    rgraph: "hotspot_touched"
+    hitbox: collmap("hitbox")
+
+    on "touch":
+        # As long as we're being touched, keep our cooldown at max
+        if: exists myvar("max_cooldown")
+        then: set myvar("cooldown"): myvar("max_cooldown")
+
+    if: exists myvar("cooldown")
+    then:
+        dec myvar("cooldown")
+        if: expr: <= myvar("cooldown") 0
+        then:
+            if: exists myvar("key")
+            then: set mapvar(myvar("key")): F
+
+            if: exists myvar("counter")
+            then: dec mapvar(myvar("counter"))
+
+            goto: "waiting"
