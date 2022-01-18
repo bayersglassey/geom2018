@@ -633,3 +633,42 @@ Jan 16, 2022:
 
 * geomfont: add a geomfont using sq & tri prismels combined.
   Somehow this should be defined using hexpictures.
+
+
+Jan 17, 2021:
+-------------
+
+* add a spider type / ability: swing around edges?.. so like:
+
+  From here:          To here:
+
+    .   +                 +
+       /         =>      /
+     (+)               (+)  .
+
+
+* add a spider type / ability: walk on "spikes"?.. so like:
+
+    You can walk around this
+    "spiky hexagon" while *not* crawling:
+
+            +   +
+             \ /
+          + - + - +
+             / \
+            +   +
+
+    ...so actually, maybe it doesn't
+    have anything to do with "spikes",
+    rather "vertices with no edges between them":
+
+            +   +
+
+          +   .   +
+
+            +   +
+
+    ...yeah, that's cool.
+    Then we can have "walkways" made of vertices,
+    and you can crouch under them or walk over them.
+
