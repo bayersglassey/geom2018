@@ -19,7 +19,7 @@ $SET_STR HEYYY: lines: at(2 2)
 submaps:
     :
         pos: (0 0)
-        camera: (0 0)
+        camera: (2 2)
         mapper: ("triple")
         submaps:
             :
@@ -33,3 +33,10 @@ submaps:
             :
                 file: "data/maps/title/title.fus"
                 text: if mapvar("heyyy") then $GET_STR HEYYY else null
+    :
+        pos: (-16 -15)
+        submaps:
+            :
+                file: "data/maps/title/title3.fus"
+                camera: (0 0)
+                mapper: ("double")
