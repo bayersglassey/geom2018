@@ -1,9 +1,20 @@
 name: "title"
 unit: 3 2 0 -1
 spawn: "data/maps/title/title.fus"
-#spawn: "data/maps/demo/bubblecar_test.fus"
 palette: "data/pal1.fus"
 tileset: "data/tileset1.fus"
+
+vars:
+    nosave "heyyy": 0
+
+
+$SET_STR HEYYY: lines: at(2 2)
+    ;;     Hey!
+    ;; Heeey!
+    ;;New to the game?
+    ;;
+    ;;  Hold left to enter the blue door
+    ;;  and start the tutorial!
 
 submaps:
     :
@@ -13,13 +24,4 @@ submaps:
         submaps:
             :
                 file: "data/maps/title/title.fus"
-                text: "\n\n     Hey!\n   Heeey!\n  New to the game? Hold left to start the tutorial!\n"
-            :
-                file: "data/maps/title/secret.fus"
-                pos: (20 -14)
-                camera: follow
-                mapper: ("solid_curvy")
-            :
-                file: "data/maps/demo/bubblecar_test.fus"
-                pos: (50 50)
-                camera: (0 0)
+                text: if mapvar("heyyy") then $GET_STR HEYYY else null

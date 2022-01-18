@@ -20,19 +20,9 @@ shapes:
             : "_txt_title" (0 0 0 0)  9 f 0 (18 2)
             : "_txt_title" (0 0 0 0) 10 f 0 (20 2)
             : "_txt_title" (0 0 0 0) 11 f 0 (22 2)
-    "txt_new_game":
-        text: "geomfont1" "New"
-    "txt_continue":
-        text: "geomfont1" "Load"
-    "txt_exit":
-        text: "geomfont1" "Quit"
-    "txt_spiders":
-        text: "geomfont1" "Players"
     "txt_tutorial1":
         text: "geomfont1" "Tu"
     "txt_tutorial2":
         text: "geomfont1" "to"
     "txt_tutorial3":
         text: "geomfont1" "rial"
-    "txt_secret":
-        text: "geomfont1" "Secret Room..."

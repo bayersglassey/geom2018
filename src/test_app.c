@@ -27,7 +27,7 @@ const char *RECORDING_FILENAME_TEMPLATE = "recs/000.fus";
 
 /* These are declared as extern in test_app.h */
 const char *TEST_MAP_HEXMAP_FILENAME_TITLE = "data/maps/title/worldmap_menu.fus";
-const char *TEST_MAP_HEXMAP_FILENAME_NEW_GAME = "data/maps/tutorial/worldmap.fus";
+const char *TEST_MAP_HEXMAP_FILENAME_NEW_GAME = "data/maps/title/worldmap.fus";
 
 
 /***********
