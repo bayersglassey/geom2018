@@ -131,7 +131,8 @@ void print_help(FILE *file){
         "                         (You can also use env var %s)\n"
         "   -d   --delay     N    Delay goal (in milliseconds) (default: %i)\n"
         "   -p   --players   N    Number of players (default: %i)\n"
-        "   -l   --load           Load/continue game immediately (skip title screen)\n"
+        "   -l   --load_game SLOT Load saved game immediately on startup\n"
+        "   -n   --new_game  SLOT Start a new game (delete save slot and start)\n"
         "        --minimap_alt    Use alternate minimap\n"
         "        --dont_cache_bitmaps\n"
         "                         ...low-level hokey-pokery, should probably get rid of this option\n"
@@ -183,7 +184,7 @@ static test_app_t *get_test_app(){
 }
 
 int main(int n_args, char *args[]){
-    int e = 0;
+    int err = 0;
 
     prend_filename = DEFAULT_PREND_FILENAME;
     stateset_filename = DEFAULT_STATESET_FILENAME;
@@ -257,7 +258,12 @@ int main(int n_args, char *args[]){
                     n_players);
                 goto parse_failure;
             }
-        }else if(!strcmp(arg, "-l") || !strcmp(arg, "--load")){
+        }else if(
+            !strcmp(arg, "-l") || !strcmp(arg, "--load_game") ||
+            !strcmp(arg, "-n") || !strcmp(arg, "--new_game")
+        ){
+            bool load_game =
+                (arg[1] == '-' && arg[2] == 'l') || arg[1] == 'l';
             arg_i++;
             if(arg_i >= n_args){
                 fprintf(stderr, "Missing int after %s\n", arg);
@@ -270,6 +276,16 @@ int main(int n_args, char *args[]){
                     "Save slot must be in [0..%i). Got: %i\n",
                     SAVE_SLOTS, save_slot);
                 goto parse_failure;
+            }
+            if(!load_game){
+                int err2 = delete_save_slot(save_slot);
+                if(err2){
+                    /* Presumably there was just nothing saved in that slot,
+                    so we don't exit with an error, we just print a
+                    warning. */
+                    fprintf(stderr, "WARNING: couldn't delete save slot %i\n",
+                        save_slot);
+                }
             }
         }else if(!strcmp(arg, "--minimap_alt")){
             minimap_alt = !minimap_alt;
@@ -290,7 +306,7 @@ int main(int n_args, char *args[]){
     }
 
     if(SDL_Init(SDL_INIT_VIDEO)){
-        e = 1;
+        err = 1;
         fprintf(stderr, "SDL_Init error: %s\n", SDL_GetError());
     }else{
         window = SDL_CreateWindow("Spider Game",
@@ -298,7 +314,7 @@ int main(int n_args, char *args[]){
             SCW, SCH, window_flags);
 
         if(!window){
-            e = 1;
+            err = 1;
             fprintf(stderr, "SDL_CreateWindow error: %s\n",
                 SDL_GetError());
         }else{
@@ -306,7 +322,7 @@ int main(int n_args, char *args[]){
                 SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
             if(!renderer){
-                e = 1;
+                err = 1;
                 fprintf(stderr, "SDL_CreateRenderer error: %s\n",
                     SDL_GetError());
             }else{
@@ -324,10 +340,10 @@ int main(int n_args, char *args[]){
 #endif
                 test_app_t *app = get_test_app();
                 if(app == NULL){
-                    e = 1;
+                    err = 1;
                     fprintf(stderr, "Couldn't init test app\n");
                 }else{
-                    e = test_app_mainloop(app);
+                    err = test_app_mainloop(app);
                     fprintf(stderr, "Cleaning up...\n");
                     test_app_cleanup(app);
                     free(app);
@@ -338,6 +354,7 @@ int main(int n_args, char *args[]){
         }
         SDL_Quit();
     }
-    fprintf(stderr, "Exiting with code: %i\n", e);
-    return e;
+
+    fprintf(stderr, "Exiting with code: %i\n", err);
+    return err;
 }
