@@ -370,7 +370,8 @@ int vars_copy(vars_t *vars1, vars_t *vars2){
         err = val_copy(&var1->value, &var2->value);
         if(err)return err;
 
-        var1->props = var2->props;
+        /* Once set, props are not *removed* by "copying over" them */
+        var1->props |= var2->props;
     }
     return 0;
 }
