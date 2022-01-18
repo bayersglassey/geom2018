@@ -13,15 +13,23 @@ $SET_STR HEYYY: lines: at(2 2)
     ;; Heeey!
     ;;New to the game?
     ;;
-    ;;  Hold left to enter the blue door
-    ;;  and start the tutorial!
+    ;;  Go LEFT and touch the BLUE PORTAL
+    ;;  to start the tutorial!
 
 submaps:
     :
         pos: (0 0)
-        camera: (2 0)
+        camera: (0 0)
         mapper: ("triple")
         submaps:
+            :
+                bg
+                file: "data/maps/title/title_bg.fus"
+                tileset: "data/tileset1_bg.fus"
+            :
+                file: "data/maps/title/title2.fus"
+                camera: (8 -5)
+                mapper: ("double")
             :
                 file: "data/maps/title/title.fus"
                 text: if mapvar("heyyy") then $GET_STR HEYYY else null
