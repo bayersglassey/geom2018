@@ -1,6 +1,10 @@
 
 collmap "hitbox":
-    ;;  (+)
+    ;;   .   .
+    ;;   *\*/*
+    ;; . -(+)- .
+    ;;   */*\*
+    ;;   .   .
 
 # The "cooldown" hitbox is for after a door is used by a body, the
 # door closes until all bodies are outside this hitbox.
