@@ -29,11 +29,17 @@ bool save_slot_file_exists[SAVE_SLOTS] = {0};
 
 
 
-static int _get_n_options(test_app_menu_t *menu){
-    const char **options = test_app_menu_options[menu->screen_i];
+static const char **_get_options(test_app_menu_t *menu){
+    return test_app_menu_options[menu->screen_i];
+}
+static int _count_options(const char **options){
     int i = 0;
     while(options[i])i++;
     return i;
+}
+static int _get_n_options(test_app_menu_t *menu){
+    const char **options = _get_options(menu);
+    return _count_options(options);
 }
 
 void test_app_menu_cleanup(test_app_menu_t *menu){
@@ -54,7 +60,7 @@ void test_app_menu_set_screen(test_app_menu_t *menu, int screen_i){
     menu->screen_i = screen_i;
     menu->option_i = 0;
 
-    const char **options = test_app_menu_options[menu->screen_i];
+    const char **options = _get_options(menu);
     if(options == _save_slot_options){
         for(int i = 0; i < SAVE_SLOTS; i++){
             /* Check and cache whether each save slot has a
@@ -177,7 +183,7 @@ static void _render_option(test_app_menu_t *menu, int i, int col,
     test_app_t *app = menu->app;
 
     if(!option){
-        const char **options = test_app_menu_options[menu->screen_i];
+        const char **options = _get_options(menu);
         option = options[i];
     }
 
@@ -189,8 +195,8 @@ static void _render_option(test_app_menu_t *menu, int i, int col,
 void test_app_menu_render(test_app_menu_t *menu){
     test_app_t *app = menu->app;
     const char *title = test_app_menu_titles[menu->screen_i];
-    const char **options = test_app_menu_options[menu->screen_i];
-    int n_options = _get_n_options(menu);
+    const char **options = _get_options(menu);
+    int n_options = _count_options(options);
 
     int col = 10;
     app->lines_printed += 10;
