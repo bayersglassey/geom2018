@@ -27,16 +27,5 @@ submaps:
                 file: "data/maps/title/title_bg.fus"
                 tileset: "data/tileset1_bg.fus"
             :
-                file: "data/maps/title/title2.fus"
-                camera: (8 -5)
-                mapper: ("double")
-            :
                 file: "data/maps/title/title.fus"
                 text: if mapvar("heyyy") then $GET_STR HEYYY else null
-    :
-        pos: (-16 -15)
-        submaps:
-            :
-                file: "data/maps/title/title3.fus"
-                camera: (0 0)
-                mapper: ("double")
