@@ -635,7 +635,7 @@ Jan 16, 2022:
   Somehow this should be defined using hexpictures.
 
 
-Jan 17, 2021:
+Jan 17, 2022:
 -------------
 
 * add a spider type / ability: swing around edges?.. so like:
@@ -671,4 +671,72 @@ Jan 17, 2021:
     ...yeah, that's cool.
     Then we can have "walkways" made of vertices,
     and you can crouch under them or walk over them.
+
+
+Jan 18, 2022:
+-------------
+
+Saved vs non-saved labels:
+Currently label_mappings are not saved.
+However, we want some (like the ones to be used for different "types" of spider)
+to be saved, while others (like "carrying") should not be saved.
+
+    * One approach is to remove label_mappings, and just use vars.
+      E.g. we could add a new prop to vars... something like:
+
+        label "label:head": "spikes"
+        nosave label "carrying": null
+
+      However, the nice thing about label_mappings is that we can look up the rgraph
+      when the label is set, and store a pointer to that rgraph in the mapping.
+
+      If we want to use vars with a "label" prop and still cache pointers to rgraphs,
+      I guess we could do that in a separate structure... so actually, still label_mappings,
+      but now before using it, we need to update it against body's vars.
+      So, for each "label" var, make sure it has a corresponding mapping, whose rgraph's
+      name is correct... and for each mapping, make sure it has a corresponding var.
+      That seems... not great, but better than scanning the array of rgraphs every
+      frame for every "label" var.
+
+      The ideal thing would be to have a "hook" for when body's vars are set.
+      Could we... add this to vars_t itself?? Yes.
+      And so what would this look like?
+
+        int body_var_modified(vars_t *vars, var_t *var){
+            int err;
+            body_t *body = (body_t*)vars->data;
+            if(var->props & PROPS_LABEL){
+                const char *label_name = var->name;
+                const char *rgraph_name = val_get_str(&var->val);
+                if(!rgraph_name){
+                    err = body_unset_label_mapping(body, label_name);
+                    if(err)return err;
+                }else{
+                    rendergraph_t *rgraph = prismelrenderer_get_rgraph(&body->game->prend, rgraph_name);
+                    if(!rgraph){
+                        fprintf(stderr, "Couldn't find rgraph: %s\n", rgraph_name);
+                        body_dump(body, 0);
+                        return 2;
+                    }
+                    err = body_set_label_mapping(body, label_name, rgraph);
+                    if(err)return err;
+                }
+            }
+            return 0;
+        }
+
+    ...dayyum, that look nice
+    ...okayyy, but it's don't work becaus we don't use vars_set_* for set myvar("blala"), we
+    ultimately call val_set_*.
+    Right? Like by the time we even have a val, we've lost our reference to whatever vars we got it from.
+    This all happens in valexpr_eval.
+
+
+Jan 19, 2022:
+-------------
+
+* Currently statesets are loaded from file all the time, with no caching... so, add a cache, e.g.:
+
+        err = hexgame_get_or_load_stateset(game, filename, &stateset);
+        if(err)return err;
 
