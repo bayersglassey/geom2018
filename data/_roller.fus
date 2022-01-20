@@ -78,7 +78,7 @@ shapes:
             : $PREFIX NS "roller_foot" (0 0 0 0) 0 f
         $IF SPIDER_ROLLER:
             labels:
-                : "carrying" eval((2 2 1 0) + (1 0 0 0)) 1 f
+                : "carrying_rgraph" eval((2 2 1 0) + (1 0 0 0)) 1 f
             prismels:
                 # Player's "nose"
                 : "tri" (2 2 1 0) 2 f eval: 1 + 8 + 2

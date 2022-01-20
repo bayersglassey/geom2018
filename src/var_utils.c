@@ -190,6 +190,8 @@ int vars_parse(vars_t *vars, fus_lexer_t *lexer){
         var->props = props;
         err = val_parse(&var->value, lexer);
         if(err)return err;
+        err = vars_callback(vars, var);
+        if(err)return err;
         CLOSE
 
         free(name);

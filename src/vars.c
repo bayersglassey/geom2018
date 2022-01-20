@@ -226,6 +226,9 @@ void vars_init_with_props(vars_t *vars, const char **prop_names){
     if(prop_names)while(prop_names[prop_names_len] != NULL)prop_names_len++;
     vars->prop_names = prop_names;
     vars->prop_names_len = prop_names_len;
+
+    vars->callback = NULL;
+    vars->callback_data = NULL;
 }
 
 static void _vars_dumpvar(vars_t *vars, var_t *var){
@@ -331,31 +334,31 @@ int vars_set_null(vars_t *vars, const char *key){
     var_t *var = vars_get_or_add(vars, key);
     if(var == NULL)return 1;
     val_set_null(&var->value);
-    return 0;
+    return vars_callback(vars, var);
 }
 int vars_set_bool(vars_t *vars, const char *key, bool b){
     var_t *var = vars_get_or_add(vars, key);
     if(var == NULL)return 1;
     val_set_bool(&var->value, b);
-    return 0;
+    return vars_callback(vars, var);
 }
 int vars_set_int(vars_t *vars, const char *key, int i){
     var_t *var = vars_get_or_add(vars, key);
     if(var == NULL)return 1;
     val_set_int(&var->value, i);
-    return 0;
+    return vars_callback(vars, var);
 }
 int vars_set_str(vars_t *vars, const char *key, char *s){
     var_t *var = vars_get_or_add(vars, key);
     if(var == NULL)return 1;
     val_set_str(&var->value, s);
-    return 0;
+    return vars_callback(vars, var);
 }
 int vars_set_const_str(vars_t *vars, const char *key, const char *s){
     var_t *var = vars_get_or_add(vars, key);
     if(var == NULL)return 1;
     val_set_const_str(&var->value, s);
-    return 0;
+    return vars_callback(vars, var);
 }
 
 int vars_copy(vars_t *vars1, vars_t *vars2){
@@ -376,3 +379,7 @@ int vars_copy(vars_t *vars1, vars_t *vars2){
     return 0;
 }
 
+int vars_callback(vars_t *vars, var_t *var){
+    if(vars->callback)return vars->callback(vars, var);
+    return 0;
+}

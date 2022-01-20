@@ -40,6 +40,9 @@ typedef struct var {
     var_props_t props; /* Bit array */
 } var_t;
 
+struct vars;
+typedef int vars_callback_t(struct vars *vars, var_t *var);
+
 typedef struct vars {
     /* NOTE: vars_t must guarantee that:
 
@@ -80,6 +83,9 @@ typedef struct vars {
         The index of each prop in this array corresponds to a bit in the
         var->props bit array.
         (So, for each var, each prop can be either active or not.) */
+
+    vars_callback_t *callback;
+    void *callback_data;
 } vars_t;
 
 
@@ -132,6 +138,7 @@ int vars_set_str(vars_t *vars, const char *key, char *s);
 int vars_set_const_str(vars_t *vars, const char *key, const char *s);
 
 int vars_copy(vars_t *vars1, vars_t *vars2);
+int vars_callback(vars_t *vars, var_t *var);
 
 
 #endif

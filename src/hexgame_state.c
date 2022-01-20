@@ -283,11 +283,11 @@ int state_cond_match(state_cond_t *cond,
         err = _get_vars(context, &valexpr_context);
         if(err)return err;
 
-        val_t *val;
-        err = valexpr_get(&cond->u.valexpr, &valexpr_context, &val);
+        valexpr_result_t result = {0};
+        err = valexpr_get(&cond->u.valexpr, &valexpr_context, &result);
         if(err)return err;
 
-        matched = val != NULL && val->type != VAL_TYPE_NULL;
+        matched = result.val != NULL && result.val->type != VAL_TYPE_NULL;
         break;
     }
     default: {
@@ -399,9 +399,10 @@ int state_effect_apply(state_effect_t *effect,
         err = _get_vars(context, &valexpr_context);
         if(err)return err;
 
-        val_t *val;
-        err = valexpr_get(&effect->u.expr, &valexpr_context, &val);
+        valexpr_result_t result = {0};
+        err = valexpr_get(&effect->u.expr, &valexpr_context, &result);
         if(err)return err;
+        val_t *val = result.val;
         if(val == NULL){
             RULE_PERROR()
             fprintf(stderr, "Couldn't get value for expression: ");
@@ -454,17 +455,17 @@ int state_effect_apply(state_effect_t *effect,
 #       define GET_VALEXPR_STR(STR, EXPR) \
         const char *STR = NULL; \
         { \
-            val_t *val; \
-            err = valexpr_get(EXPR, &valexpr_context, &val); \
+            valexpr_result_t result = {0}; \
+            err = valexpr_get(EXPR, &valexpr_context, &result); \
             if(err)return err; \
-            if(val == NULL){ \
+            if(result.val == NULL){ \
                 RULE_PERROR() \
                 fprintf(stderr, "Couldn't get value for " #STR " expression: "); \
                 valexpr_fprintf(EXPR, stderr); \
                 fputc('\n', stderr); \
                 return 2; \
             } \
-            STR = val_get_str(val); \
+            STR = val_get_str(result.val); \
         }
         GET_VALEXPR_STR(loc_name, &effect->u.relocate.loc_expr)
         GET_VALEXPR_STR(map_filename, &effect->u.relocate.map_filename_expr)
@@ -653,13 +654,20 @@ int state_effect_apply(state_effect_t *effect,
         err = _get_vars(context, &valexpr_context);
         if(err)return err;
 
-        val_t *var_val;
+        valexpr_result_t var_result = {0};
         err = valexpr_set(&effect->u.set.var_expr, &valexpr_context,
-            &var_val);
+            &var_result);
         if(err)return err;
-        /* NOTE: valexpr_set guarantees that we find (or create, if
-        necessary) a val, so we don't need to check whether var_val is
-        NULL. */
+        vars_t *vars = var_result.vars;
+        var_t *var = var_result.var;
+        if(!vars){
+            RULE_PERROR()
+            fprintf(stderr, "Couldn't get var for expression: ");
+            valexpr_fprintf(&effect->u.set.val_expr, stderr);
+            fputc('\n', stderr);
+            fprintf(stderr, "...maybe you tried to assign to a literal?..\n");
+            return 2;
+        }
 
         if(effect->type == STATE_EFFECT_TYPE_UNSET){
             /* TODO: decide whether we want to "fix" this (although it might
@@ -672,10 +680,11 @@ int state_effect_apply(state_effect_t *effect,
                 "it just sets them to null.\n");
         }
 
-        val_t *val_val;
+        valexpr_result_t val_result = {0};
         err = valexpr_get(&effect->u.set.val_expr, &valexpr_context,
-            &val_val);
+            &val_result);
         if(err)return err;
+        val_t *val_val = val_result.val;
         if(val_val == NULL){
             RULE_PERROR()
             fprintf(stderr, "Couldn't get value for expression: ");
@@ -700,94 +709,18 @@ int state_effect_apply(state_effect_t *effect,
             }
             int inc = val_get_int(val_val);
             if(effect->type == STATE_EFFECT_TYPE_DEC)inc = -inc;
-            val_set_int(var_val, val_get_int(var_val) + inc);
+
+            val_set_int(&var->value, val_get_int(&var->value) + inc);
+            err = vars_callback(vars, var);
+            if(err)return err;
         }else{
             /* STATE_EFFECT_TYPE_SET */
-            err = val_copy(var_val, val_val);
+            err = val_copy(&var->value, val_val);
+            if(err)return err;
+            err = vars_callback(vars, var);
             if(err)return err;
         }
-        break;
-    }
-    case STATE_EFFECT_TYPE_SET_LABEL: {
-        valexpr_context_t valexpr_context = {0};
-        err = _get_vars(context, &valexpr_context);
-        if(err)return err;
 
-        val_t *label_name_val;
-        err = valexpr_get(&effect->u.set.var_expr, &valexpr_context,
-            &label_name_val);
-        if(err)return err;
-        const char *_label_name = label_name_val?
-            val_get_str(label_name_val): NULL;
-        if(_label_name == NULL){
-            RULE_PERROR()
-            fprintf(stderr, "Couldn't get value for label name: ");
-            valexpr_fprintf(&effect->u.set.var_expr, stderr);
-            fputc('\n', stderr);
-            if(label_name_val != NULL){
-                fprintf(stderr, "(Found the val, but it wasn't a string: ");
-                val_fprintf(label_name_val, stderr);
-                fputs(")\n", stderr);
-            }
-            return 2;
-        }
-
-        /* _label_name might belong to a val of type VAL_TYPE_STR, which
-        might get freed later, so we convert to a const char* owned by a
-        stringstore here. */
-        const char *label_name = stringstore_get(&prend->name_store,
-            _label_name);
-        if(!label_name)return 1;
-
-        val_t *rgraph_name_val;
-        err = valexpr_get(&effect->u.set.val_expr, &valexpr_context,
-            &rgraph_name_val);
-        if(err)return err;
-
-        /* We are ok if either:
-            * we got a str val
-            * we got null val
-        */
-        bool ok = true;
-        const char *rgraph_name = NULL;
-        if(!rgraph_name_val){
-            ok = false;
-        }else if(rgraph_name_val->type == VAL_TYPE_NULL){
-            /* This is ok */
-        }else{
-            rgraph_name = val_get_str(rgraph_name_val);
-            if(!rgraph_name)ok = false;
-        }
-
-        if(!ok){
-            RULE_PERROR()
-            fprintf(stderr, "Couldn't get value for rgraph name: ");
-            valexpr_fprintf(&effect->u.set.val_expr, stderr);
-            fputc('\n', stderr);
-            if(rgraph_name_val != NULL){
-                fprintf(stderr, "(Found the val, but it wasn't a str or null: ");
-                val_fprintf(rgraph_name_val, stderr);
-                fputs(")\n", stderr);
-            }
-            return 2;
-        }
-
-        /* Early exit if we're unsetting a label */
-        if(rgraph_name_val->type == VAL_TYPE_NULL){
-            err = body_unset_label_mapping(body, label_name);
-            if(err)return err;
-            break;
-        }
-
-        rendergraph_t *rgraph = prismelrenderer_get_rgraph(prend, rgraph_name);
-        if(!rgraph){
-            RULE_PERROR()
-            fprintf(stderr, "Couldn't find rgraph: %s\n", rgraph_name);
-            return 2;
-        }
-
-        err = body_set_label_mapping(body, label_name, rgraph);
-        if(err)return err;
         break;
     }
     case STATE_EFFECT_TYPE_IF: {

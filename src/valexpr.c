@@ -286,17 +286,13 @@ int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer){
 
 
 int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
-    val_t **result_ptr, bool set
+    valexpr_result_t *result, bool set
 ){
     int err;
 
-    /* To be returned. It *MAY BE NULL* if e.g. we can't find the variable
-    referred to! */
-    val_t *result = NULL;
-
     switch(expr->type){
         case VALEXPR_TYPE_LITERAL: {
-            result = &expr->u.val;
+            result->val = &expr->u.val;
             break;
         }
         case VALEXPR_TYPE_YOURVAR:
@@ -315,9 +311,10 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
                 return 2;
             }
 
-            val_t *key_val;
-            err = valexpr_get(expr->u.key_expr, context, &key_val);
+            valexpr_result_t key_result = {0};
+            err = valexpr_get(expr->u.key_expr, context, &key_result);
             if(err)return err;
+            val_t *key_val = key_result.val;
             if(!key_val){
                 fprintf(stderr,
                     "valexpr_eval: Couldn't get key value\n");
@@ -344,12 +341,14 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
                 /* If we're getting this value... */
                 var = vars_get(vars, key);
                 if(!var){
-                    /* ...if it doesn't exist, return result=NULL */
+                    /* ...return result->val = NULL */
                     break;
                 }
             }
 
-            result = &var->value;
+            result->val = &var->value;
+            result->var = var;
+            result->vars = vars;
             break;
         }
         case VALEXPR_TYPE_IF: {
@@ -359,11 +358,11 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
 
             if(cond){
                 err = valexpr_eval(expr->u.if_expr.then_expr,
-                    context, &result, set);
+                    context, result, set);
                 if(err)return err;
             }else{
                 err = valexpr_eval(expr->u.if_expr.else_expr,
-                    context, &result, set);
+                    context, result, set);
                 if(err)return err;
             }
             break;
@@ -379,7 +378,7 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
                     sub_context.myvars = context->yourvars;
 
                     err = valexpr_eval(expr->u.as.sub_expr,
-                        &sub_context, &result, set);
+                        &sub_context, result, set);
                     if(err)return err;
                     break;
                 }
@@ -391,9 +390,10 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
             break;
         }
         case VALEXPR_TYPE_OP: {
-            val_t *val1;
-            err = valexpr_get(expr->u.op.sub_expr1, context, &val1);
+            valexpr_result_t result1 = {0};
+            err = valexpr_get(expr->u.op.sub_expr1, context, &result1);
             if(err)return err;
+            val_t *val1 = result1.val;
             if(val1 == NULL){
                 fprintf(stderr, "Couldn't get value for LHS: ");
                 valexpr_fprintf(expr->u.op.sub_expr1, stderr);
@@ -401,9 +401,10 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
                 return 2;
             }
 
-            val_t *val2;
-            err = valexpr_get(expr->u.op.sub_expr2, context, &val2);
+            valexpr_result_t result2 = {0};
+            err = valexpr_get(expr->u.op.sub_expr2, context, &result2);
             if(err)return err;
+            val_t *val2 = result2.val;
             if(val2 == NULL){
                 fprintf(stderr, "Couldn't get value for RHS: ");
                 valexpr_fprintf(expr->u.op.sub_expr2, stderr);
@@ -424,7 +425,7 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
                     return 2;
             }
 
-            result = b? &val_true: &val_false;
+            result->val = b? &val_true: &val_false;
             break;
         }
         default: {
@@ -433,24 +434,24 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
             return 2;
         }
     }
-    *result_ptr = result;
+
     return 0;
 }
 
 
 int valexpr_get(valexpr_t *expr, valexpr_context_t *context,
-    val_t **result_ptr
+    valexpr_result_t *result
 ){
-    /* NOTE: Caller needs to check whether *result_ptr is NULL. */
-    return valexpr_eval(expr, context, result_ptr, false);
+    /* NOTE: Caller needs to check whether result->val is NULL. */
+    return valexpr_eval(expr, context, result, false);
 }
 
 int valexpr_set(valexpr_t *expr, valexpr_context_t *context,
-    val_t **result_ptr
+    valexpr_result_t *result
 ){
     /* NOTE: valexpr_set guarantees that we find (or create, if necessary)
-    a val, so caller doesn't need to check whether *result_ptr is NULL. */
-    return valexpr_eval(expr, context, result_ptr, true);
+    a val, so caller doesn't need to check whether result->val is NULL. */
+    return valexpr_eval(expr, context, result, true);
 }
 
 
@@ -459,7 +460,7 @@ int valexpr_set(valexpr_t *expr, valexpr_context_t *context,
 TYPE valexpr_get_##VAL_TYPE(valexpr_t *expr, \
     valexpr_context_t *context \
 ){ \
-    val_t *result; \
+    valexpr_result_t result = {0}; \
     int err = valexpr_get(expr, context, &result); \
     if(err){ \
         fprintf(stderr, "Error while getting %s from valexpr: ", \
@@ -467,10 +468,10 @@ TYPE valexpr_get_##VAL_TYPE(valexpr_t *expr, \
         valexpr_fprintf(expr, stderr); \
         fputc('\n', stderr); \
         return 0; \
-    }else if(!result){ \
+    }else if(!result.val){ \
         return 0; \
     } \
-    return val_get_##VAL_TYPE(result); \
+    return val_get_##VAL_TYPE(result.val); \
 }
 VALEXPR_GET_TYPE(bool, bool)
 VALEXPR_GET_TYPE(int, int)

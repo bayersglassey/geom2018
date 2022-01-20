@@ -62,7 +62,7 @@ int player_get_index(player_t *player){
     return -1;
 }
 
-void hexgame_player_dump(player_t *player, int depth){
+void player_dump(player_t *player, int depth){
     print_tabs(stderr, depth);
     if(player->keymap >= 0)fprintf(stderr, "Player %i\n", player->keymap);
     else fprintf(stderr, "CPU Player\n");
@@ -74,7 +74,7 @@ void hexgame_player_dump(player_t *player, int depth){
     if(body){
         print_tabs(stderr, depth);
         fprintf(stderr, "body:\n");
-        hexgame_body_dump(body, depth + 1);
+        body_dump(body, depth + 1);
     }else{
         print_tabs(stderr, depth);
         fprintf(stderr, "no body!\n");

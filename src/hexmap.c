@@ -1535,8 +1535,8 @@ int hexmap_submap_is_visible(hexmap_submap_t *submap, bool *visible_ptr){
 
     /* NOTE: visible by default. */
     bool visible = true;
-    val_t *result;
     {
+        valexpr_result_t result = {0};
         valexpr_context_t context = {
             .mapvars = &submap->map->vars,
             .globalvars = &submap->map->game->vars
@@ -1547,10 +1547,10 @@ int hexmap_submap_is_visible(hexmap_submap_t *submap, bool *visible_ptr){
                 "Error while evaluating visibility for submap: %s\n",
                 submap->filename);
             return err;
-        }else if(!result){
+        }else if(!result.val){
             /* Val not found: use default visible value */
         }else{
-            visible = val_get_bool(result);
+            visible = val_get_bool(result.val);
         }
     }
 

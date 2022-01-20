@@ -114,6 +114,36 @@ void body_cleanup(body_t *body){
         body_label_mapping_cleanup)
 }
 
+static vars_callback_t body_vars_callback;
+static int body_vars_callback(vars_t *vars, var_t *var){
+    int err;
+    body_t *body = (body_t*)vars->callback_data;
+    player_t *player = body_get_player(body);
+    if(player)fprintf(stderr, "Var changed: %s\n", var->key);
+    if(var->props & (1 << HEXGAME_VARS_PROP_LABEL)){
+        const char *label_name = var->key;
+        const char *rgraph_name = val_get_str(&var->value);
+        if(player)fprintf(stderr, "...it's a label: %s\n", rgraph_name? rgraph_name: "(null)");
+        if(!rgraph_name){
+            err = body_unset_label_mapping(body, label_name);
+            if(err)return err;
+        }else{
+            rendergraph_t *rgraph = prismelrenderer_get_rgraph(
+                body->game->prend, rgraph_name);
+            if(!rgraph){
+                fprintf(stderr, "Couldn't find rgraph: %s\n", rgraph_name);
+                fprintf(stderr, "...while updating label var: %s\n", var->key);
+                fprintf(stderr, "...dumping body:\n");
+                body_dump(body, 1);
+                return 2;
+            }
+            err = body_set_label_mapping(body, label_name, rgraph);
+            if(err)return err;
+        }
+    }
+    return 0;
+}
+
 int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
     const char *stateset_filename, const char *state_name,
     palettemapper_t *palmapper
@@ -133,6 +163,8 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
     body->visible_not = false;
 
     vars_init_with_props(&body->vars, hexgame_vars_prop_names);
+    body->vars.callback = &body_vars_callback;
+    body->vars.callback_data = (void*)body;
 
     ARRAY_INIT(body->label_mappings)
 
@@ -179,18 +211,22 @@ int body_get_index(body_t *body){
     return -1;
 }
 
-void hexgame_body_dump(body_t *body, int depth){
+void body_dump(body_t *body, int depth){
     print_tabs(stderr, depth);
     fprintf(stderr, "index: %i\n", body_get_index(body));
     print_tabs(stderr, depth);
     fprintf(stderr, "map: %s\n", body->map->filename);
     print_tabs(stderr, depth);
-    fprintf(stderr, "submap: %s\n",
-        body->cur_submap->filename);
-    print_tabs(stderr, depth);
-    if(body->cur_submap->group)fprintf(stderr, "submap group: %s\n",
-        body->cur_submap->group->name);
-    print_tabs(stderr, depth);
+
+    hexmap_submap_t *submap = body->cur_submap;
+    if(submap){
+        fprintf(stderr, "submap: %s\n", submap->filename);
+        print_tabs(stderr, depth);
+        if(submap->group)fprintf(stderr, "submap group: %s\n",
+            submap->group->name);
+        print_tabs(stderr, depth);
+    }
+
     fprintf(stderr, "global vars:\n");
     vars_write(&body->game->vars, stderr, TAB_SPACES * (depth + 1));
     print_tabs(stderr, depth);
@@ -222,7 +258,7 @@ int body_is_visible(body_t *body, bool *visible_ptr){
     /* NOTE: visible by default. */
     bool visible = true;
 
-    val_t *result;
+    valexpr_result_t result = {0};
     valexpr_context_t context = {
         .myvars = &body->vars,
         .mapvars = &body->map->vars,
@@ -232,12 +268,12 @@ int body_is_visible(body_t *body, bool *visible_ptr){
     if(err){
         fprintf(stderr,
             "Error while evaluating visibility for body:\n");
-        hexgame_body_dump(body, 0);
+        body_dump(body, 0);
         return err;
-    }else if(!result){
+    }else if(!result.val){
         /* Val not found: use default visible value */
     }else{
-        visible = val_get_bool(result);
+        visible = val_get_bool(result.val);
     }
 
     if(body->visible_not)visible = !visible;
@@ -475,6 +511,13 @@ int body_refresh_vars(body_t *body){
     var_t *var_turn = _get_nosave_var(vars, ".turn");
     if(var_turn == NULL)return 1;
     val_set_bool(&var_turn->value, body->loc.turn);
+    /*
+    ...we don't bother calling the following, because we know these
+    aren't "label vars" (in the sense of HEXGAME_VARS_PROP_LABEL), so
+    body->vars.callback (i.e. body_vars_callback) doesn't care about them.
+     err = vars_callback(vars, var_turn);
+     if(err)return err;
+    */
 
     var_t *var_state = _get_nosave_var(vars, ".state");
     if(var_state == NULL)return 1;
@@ -483,6 +526,13 @@ int body_refresh_vars(body_t *body){
     }else{
         val_set_null(&var_state->value);
     }
+    /*
+    ...we don't bother calling the following, because we know these
+    aren't "label vars" (in the sense of HEXGAME_VARS_PROP_LABEL), so
+    body->vars.callback (i.e. body_vars_callback) doesn't care about them.
+     err = vars_callback(vars, var_state);
+     if(err)return err;
+    */
 
     return 0;
 }

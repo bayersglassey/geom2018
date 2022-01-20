@@ -199,7 +199,7 @@ void body_cleanup(body_t *body);
 int body_init(body_t *body, struct hexgame *game, hexmap_t *map,
     const char *stateset_filename, const char *state_name,
     palettemapper_t *palmapper);
-void hexgame_body_dump(body_t *body, int depth);
+void body_dump(body_t *body, int depth);
 int body_is_visible(body_t *body, bool *visible_ptr);
 int body_get_index(body_t *body);
 bool body_is_done_for(body_t *body);
@@ -284,7 +284,7 @@ int player_init(player_t *player, struct hexgame *game, int keymap,
     hexgame_savelocation_t *respawn_location);
 
 int player_get_index(player_t *player);
-void hexgame_player_dump(player_t *player, int depth);
+void player_dump(player_t *player, int depth);
 int player_spawn_body(player_t *player);
 int player_reload_from_location(player_t *player,
     hexgame_savelocation_t *location);

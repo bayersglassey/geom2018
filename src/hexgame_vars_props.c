@@ -4,5 +4,6 @@
 
 const char *hexgame_vars_prop_names[HEXGAME_VARS_PROPS + 1] = {
     "nosave",
+    "label",
     NULL
 };

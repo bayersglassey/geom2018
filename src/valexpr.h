@@ -129,6 +129,19 @@ typedef struct valexpr_context {
 } valexpr_context_t;
 
 
+typedef struct valexpr_result {
+    /* May be NULL. */
+    val_t *val;
+
+    /* The following are both NULL if val is NULL.
+    If val is not NULL, the following are either both NULL, or both
+    non-NULL. */
+    vars_t *vars;
+    var_t *var;
+
+} valexpr_result_t;
+
+
 void valexpr_cleanup(valexpr_t *expr);
 int valexpr_copy(valexpr_t *expr1, valexpr_t *expr2);
 void valexpr_fprintf(valexpr_t *expr, FILE *file);
@@ -138,11 +151,11 @@ void valexpr_set_literal_int(valexpr_t *expr, int i);
 void valexpr_set_literal_str(valexpr_t *expr, const char *s);
 int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer);
 int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
-    val_t **result_ptr, bool set);
+    valexpr_result_t *result, bool set);
 int valexpr_get(valexpr_t *expr, valexpr_context_t *context,
-    val_t **result_ptr);
+    valexpr_result_t *result);
 int valexpr_set(valexpr_t *expr, valexpr_context_t *context,
-    val_t **result_ptr);
+    valexpr_result_t *result);
 
 bool valexpr_get_bool(valexpr_t *expr, valexpr_context_t *context);
 int valexpr_get_int(valexpr_t *expr, valexpr_context_t *context);

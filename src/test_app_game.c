@@ -17,7 +17,7 @@ static int _print_text_expr(test_app_t *app, hexmap_submap_t *submap,
     valexpr_t *text_expr
 ){
     int err;
-    val_t *result;
+    valexpr_result_t result = {0};
     valexpr_context_t context = {
         .mapvars = &submap->map->vars,
         .globalvars = &submap->map->game->vars
@@ -31,7 +31,7 @@ static int _print_text_expr(test_app_t *app, hexmap_submap_t *submap,
         fputc('\n', stderr);
         return err;
     }
-    const char *text = val_get_str(result);
+    const char *text = val_get_str(result.val);
     if(text){
         test_app_printf(app, 0, 0, text);
     }
@@ -252,7 +252,7 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
                     if(!player->body)continue;
                     stateset_dump(&player->body->stateset, stderr, 0);
                 }else{
-                    hexgame_player_dump(player, 0);
+                    player_dump(player, 0);
                 }
             }
         }else if(!event->key.repeat){
