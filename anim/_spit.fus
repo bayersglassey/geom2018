@@ -8,7 +8,7 @@ $SET_INT MAX_AGE 100
 vars:
     nosave "carrying": null
     nosave "carrying_respawn_counter": null
-    nosave label "carrying_rgraph": null
+    nosave label "label:carrying": null
 
 
 proc "on_collide":

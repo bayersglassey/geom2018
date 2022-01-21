@@ -6,7 +6,7 @@ shapes:
 
     $PREFIX NS "_spit":
         labels:
-            : "carrying_rgraph" (0 0 0 0) 0 f
+            : "label:carrying" (0 0 0 0) 0 f
         prismels:
             : "tri" (0 0 0 0)  0 f eval(1 + 0 + 7)
             : "tri" (0 0 0 0)  2 f eval(1 + 0 + 7)

@@ -112,7 +112,7 @@ shapes:
 
     $PREFIX NS "_head":
         labels:
-            : "carrying_rgraph" (1 1 1 0) 0 f
+            : "label:carrying" (1 1 1 0) 0 f
         $IF SPIDER_ROLLER:
             shapes:
                 : "_roller_body_hollow" (0 0 0 0)  0 f

@@ -47,7 +47,7 @@ vars:
 
     nosave "carrying": null
     nosave "carrying_respawn_counter": null
-    nosave label "carrying_rgraph": null
+    nosave label "label:carrying": null
 
     nosave "spit_anim": null
 
@@ -67,7 +67,7 @@ $IF !SPIDER_EYE: on "carryable":
         # will now be "carrying it"
         set myvar("carrying"): yourvar("carryable")
         set myvar("carrying_respawn_counter"): yourvar("respawn_counter")
-        set myvar("carrying_rgraph"): yourvar("carryable_rgraph")
+        set myvar("label:carrying"): yourvar("carryable_rgraph")
 
         # Increment a var tracking how many of this thing are
         # being carried
@@ -90,11 +90,11 @@ proc "_spawn_spit":
         as you:
             set myvar("carrying"): yourvar("carrying")
             set myvar("carrying_respawn_counter"): yourvar("carrying_respawn_counter")
-            set myvar("carrying_rgraph"): yourvar("carrying_rgraph")
+            set myvar("label:carrying"): yourvar("label:carrying")
 
         # Unset spider's "carrying"
         set myvar("carrying"): null
-        set myvar("carrying_rgraph"): null
+        set myvar("label:carrying"): null
 
 proc "set_spit_anim":
     # We don't have functions, just procedures.
