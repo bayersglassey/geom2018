@@ -45,6 +45,9 @@ vars:
     "is_birdspider": F
     $IF SPIDER_BIRD: "is_birdspider": T
 
+    label "label:head_spikes": null
+    label "label:head_spikes_extended": null
+
     nosave "carrying": null
     nosave "carrying_respawn_counter": null
     nosave label "label:carrying": null
