@@ -375,11 +375,24 @@ int vars_copy(vars_t *vars1, vars_t *vars2){
 
         /* Once set, props are not *removed* by "copying over" them */
         var1->props |= var2->props;
+
+        err = vars_callback(vars1, var1);
+        if(err)return err;
     }
     return 0;
 }
 
 int vars_callback(vars_t *vars, var_t *var){
     if(vars->callback)return vars->callback(vars, var);
+    return 0;
+}
+
+int vars_callback_all(vars_t *vars){
+    int err;
+    for(int i = 0; i < vars->vars_len; i++){
+        var_t *var = vars->vars[i];
+        err = vars_callback(vars, var);
+        if(err)return err;
+    }
     return 0;
 }

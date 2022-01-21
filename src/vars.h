@@ -139,6 +139,6 @@ int vars_set_const_str(vars_t *vars, const char *key, const char *s);
 
 int vars_copy(vars_t *vars1, vars_t *vars2);
 int vars_callback(vars_t *vars, var_t *var);
-
+int vars_callback_all(vars_t *vars);
 
 #endif
