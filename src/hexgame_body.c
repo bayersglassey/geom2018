@@ -118,12 +118,9 @@ static vars_callback_t body_vars_callback;
 static int body_vars_callback(vars_t *vars, var_t *var){
     int err;
     body_t *body = (body_t*)vars->callback_data;
-    player_t *player = body_get_player(body);
-    if(player)fprintf(stderr, "Var changed: %s\n", var->key);
     if(var->props & (1 << HEXGAME_VARS_PROP_LABEL)){
         const char *label_name = var->key;
         const char *rgraph_name = val_get_str(&var->value);
-        if(player)fprintf(stderr, "...it's a label: %s\n", rgraph_name? rgraph_name: "(null)");
         if(!rgraph_name){
             err = body_unset_label_mapping(body, label_name);
             if(err)return err;
