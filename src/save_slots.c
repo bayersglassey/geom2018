@@ -195,7 +195,7 @@ int hexgame_load(hexgame_t *game, const char *filename,
         CLOSE
 
         vars_t body_vars;
-        vars_init(&body_vars);
+        vars_init_with_props(&body_vars, hexgame_vars_prop_names);
 
         bool got_body = false;
         if(GOT("body")){
