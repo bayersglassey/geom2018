@@ -855,7 +855,11 @@ static int _state_parse(state_t *state, fus_lexer_t *lexer,
 
             while(!fus_lexer_done(&sublexer)){
                 err = _state_parse_rule(state, &sublexer, prend, space);
-                if(err)return err;
+                if(err){
+                    fus_lexer_err_info(lexer);
+                    fprintf(stderr, "...while importing here.\n");
+                    return err;
+                }
             }
 
             /* We now call fus_lexer_next manually, see call to _fus_lexer_get_str
@@ -995,10 +999,17 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             if(err)return err;
 
             err = _stateset_parse(stateset, &sublexer, prend, space);
-            if(err)return err;
+            if(err){
+                fus_lexer_err_info(lexer);
+                fprintf(stderr, "...while importing here.\n");
+                return err;
+            }
 
             if(!fus_lexer_done(&sublexer)){
-                return fus_lexer_unexpected(&sublexer, "end of file");
+                err = fus_lexer_unexpected(&sublexer, "end of file");
+                fus_lexer_err_info(lexer);
+                fprintf(stderr, "...while importing here.\n");
+                return err;
             }
 
             /* We now call fus_lexer_next manually, see call to _fus_lexer_get_str

@@ -600,10 +600,17 @@ static int _hexmap_parse(hexmap_t *map, fus_lexer_t *lexer,
                 if(err)return err;
 
                 err = hexmap_parse_submap(map, &sublexer, context, group);
-                if(err)return err;
+                if(err){
+                    fus_lexer_err_info(lexer);
+                    fprintf(stderr, "...while importing here.\n");
+                    return err;
+                }
 
                 if(!fus_lexer_done(&sublexer)){
-                    return fus_lexer_unexpected(&sublexer, "end of file");
+                    err = fus_lexer_unexpected(&sublexer, "end of file");
+                    fus_lexer_err_info(lexer);
+                    fprintf(stderr, "...while importing here.\n");
+                    return err;
                 }
 
                 /* We now call fus_lexer_next manually, see call to _fus_lexer_get_str

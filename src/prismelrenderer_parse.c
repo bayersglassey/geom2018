@@ -982,7 +982,11 @@ int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer){
             if(err)return err;
 
             err = prismelrenderer_load(prend, filename, lexer->vars);
-            if(err)return err;
+            if(err){
+                fus_lexer_err_info(lexer);
+                fprintf(stderr, "...while importing here.\n");
+                return err;
+            }
 
             /* We now call fus_lexer_next manually, see call to _fus_lexer_get_str
             above */

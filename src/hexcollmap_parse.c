@@ -983,10 +983,17 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
             err = _hexcollmap_parse_with_parts(collmap, &sublexer,
                 default_vert_c, default_edge_c, default_face_c,
                 parts, parts_len, name_store, filename_store);
-            if(err)return err;
+            if(err){
+                fus_lexer_err_info(lexer);
+                fprintf(stderr, "...while importing here.\n");
+                return err;
+            }
 
             if(!fus_lexer_done(&sublexer)){
-                return fus_lexer_unexpected(&sublexer, "end of file");
+                err = fus_lexer_unexpected(&sublexer, "end of file");
+                fus_lexer_err_info(lexer);
+                fprintf(stderr, "...while importing here.\n");
+                return err;
             }
 
             /* We now call fus_lexer_next manually, see call to _fus_lexer_get_str
