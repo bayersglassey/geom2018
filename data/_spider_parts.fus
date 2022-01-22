@@ -1,12 +1,7 @@
 
 # Expected vars:
 # NS (str), e.g. "spider_"
-# SPIDER_AIMER (bool)
-# SPIDER_SPIKEY (bool)
-# SPIDER_ROLLER (bool)
-# SPIDER_FLIER (bool)
-# SPIDER_BIRD (bool)
-# SPIDER_EYE (bool)
+# EYESPIDER (bool)
 
 
 shapes:
@@ -39,14 +34,19 @@ shapes:
     # | /
     # +-
 
+
+    ################################
+    # "label:bleg"
+    # "label:fleg"
+
     $PREFIX NS "bleg":
-        $IF SPIDER_EYE:
+        $IF EYESPIDER:
             # Just changing the colours
             prismels:
                 : "tri" (  0 -1  0  0) 11 f eval: 1 + 8 + 1
                 : "sq"  (  0 -1 -1  0) 11 f eval: 1 + 0 + 1
                 : "tri" (  0 -1 -1 -1)  1 f eval: 1 + 0 + 1
-        $IF !SPIDER_EYE:
+        $IF !EYESPIDER:
             prismels:
                 : "tri" (  0 -1  0  0) 11 f eval: 1 + 8 + 5
                 : "sq"  (  0 -1 -1  0) 11 f eval: 1 + 8 + 3
@@ -55,9 +55,13 @@ shapes:
     $PREFIX NS "fleg":
         shapes:
             # For historical reasons, "bleg" and "fleg" look exactly the same,
-            # just "fleg" is usually rotated 180 degrees wherever its used...
+            # just "fleg" is usually rotated 180 degrees wherever it's used...
             # However, they're separate in case we ever want to tweak one.
             : $PREFIX NS "bleg" (0 0 0 0) 0 f
+
+
+    ################################
+    # "label:_head"
 
     $PREFIX NS "_head_sixth":
         #      _ +
@@ -69,6 +73,24 @@ shapes:
             : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 1
             : "tri" (1 0 0 0) 11 f eval: 1 + 8 + 2
             : "sq"  (1 0 0 0)  1 f eval: 1 + 8 + 1
+
+    $PREFIX NS "_head":
+        shapes:
+            : $PREFIX NS "_head_sixth" (0 0 0 0)  0 f
+            : $PREFIX NS "_head_sixth" (0 0 0 0)  2 f
+            : $PREFIX NS "_head_sixth" (0 0 0 0)  4 f
+            : $PREFIX NS "_head_sixth" (0 0 0 0)  6 f
+            : $PREFIX NS "_head_sixth" (0 0 0 0)  8 f
+            : $PREFIX NS "_head_sixth" (0 0 0 0) 10 f
+
+    $PREFIX NS "_head_roller":
+        shapes:
+            : "_roller_body_hollow" (0 0 0 0)  0 f
+
+
+    ################################
+    # "label:head_spikes"
+    # "label:head_spikes_extended"
 
     $PREFIX NS "_head_spike":
         prismels:
@@ -96,6 +118,10 @@ shapes:
             : $PREFIX NS "_head_spike"      (0 0 0 0)  5 f
             : $PREFIX NS "_head_spike_long" (0 0 0 0)  6 f
 
+
+    ################################
+    # "label:eye"
+
     $PREFIX NS "eye":
         prismels:
             : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 4
@@ -105,76 +131,102 @@ shapes:
             : "tri" (0 0 0 0)  8 f eval: 1 + 8 + 4
             : "tri" (0 0 0 0) 10 f eval: 1 + 8 + 4
 
-    $PREFIX NS "_head":
-        labels:
-            : "label:carrying" (1 1 1 0) 0 f
-        $IF SPIDER_ROLLER:
-            shapes:
-                : "_roller_body_hollow" (0 0 0 0)  0 f
-        $IF !SPIDER_ROLLER:
-            shapes:
-                : $PREFIX NS "_head_sixth" (0 0 0 0)  0 f
-                : $PREFIX NS "_head_sixth" (0 0 0 0)  2 f
-                : $PREFIX NS "_head_sixth" (0 0 0 0)  4 f
-                : $PREFIX NS "_head_sixth" (0 0 0 0)  6 f
-                : $PREFIX NS "_head_sixth" (0 0 0 0)  8 f
-                : $PREFIX NS "_head_sixth" (0 0 0 0) 10 f
-            $IF SPIDER_AIMER:
-                prismels:
-                    : "sq"  (-1 -1  0  0)  3 f eval: 1 + 8 + 1
-            $IF SPIDER_FLIER:
-                prismels:
-                    : "dia" (-1  0  1  1)  6 f eval: 1 + 8 + 1
-                    : "tri" (-1 -1  0  0)  3 f eval: 1 + 8 + 1
-                    : "dia" ( 0  0 -1 -1)  5 f eval: 1 + 8 + 1
+
+    ################################
+    # "label:nose"
 
     $PREFIX NS "nose":
         prismels:
-            $IF SPIDER_AIMER:
-                : "sq"  (0 0 0 0) 0 f eval: 1 + 8 + 1
-                : "sq"  (1 0 0 0) 0 f eval: 1 + 8 + 2
-                : "tri" (2 0 0 0) 1 f eval: 1 + 8 + 1
-            $IF !SPIDER_AIMER:
-                : "sq"  (0 0 0 0) 0 f eval: 1 + 8 + 1
-                : "tri" (1 0 0 0) 1 f eval: 1 + 8 + 2
+            : "sq"  (0 0 0 0) 0 f eval: 1 + 8 + 1
+            : "tri" (1 0 0 0) 1 f eval: 1 + 8 + 2
+
+    $PREFIX NS "nose_aimer":
+        prismels:
+            : "sq"  (0 0 0 0) 0 f eval: 1 + 8 + 1
+            : "sq"  (1 0 0 0) 0 f eval: 1 + 8 + 2
+            : "tri" (2 0 0 0) 1 f eval: 1 + 8 + 1
+
+
+    ################################
+    # "label:headbump"
+    #
+    # NOTE: The headbump is an optional bump on the *back* of the head.
+    # So, if you were to animate spider's head turning, you could try to
+    # have the bump disappear behind the head, while the nose passes
+    # in front, or something.
+
+    $PREFIX NS "headbump_aimer":
+        prismels:
+            : "sq"  (-1 -1  0  0)  3 f eval: 1 + 8 + 1
+
+    $PREFIX NS "headbump_flier":
+        prismels:
+            : "dia" (-1  0  1  1)  6 f eval: 1 + 8 + 1
+            : "tri" (-1 -1  0  0)  3 f eval: 1 + 8 + 1
+            : "dia" ( 0  0 -1 -1)  5 f eval: 1 + 8 + 1
+
+
+    ################################
+    # "label:head"
+    # "label:crawl_head"
+    # "label:sleep_head"
+
+    $PREFIX NS "_head_base":
+        # All the basic stuff on a head.
+        labels:
+            : "label:_head"                (0 0 0  0) 0 f
+            : "label:nose"                 (1 1 0 -1) 0 f
+            : "label:headbump"             (0 0 0  0) 0 f
+            : "label:head_spikes"          (0 0 0  0) 0 f
 
     $PREFIX NS "head":
-        $IF SPIDER_EYE:
+        $IF EYESPIDER:
             shapes:
                 : "_eye_look" (0 0 0 0) 11 f
-        $IF !SPIDER_EYE:
+        $IF !EYESPIDER:
             shapes:
-                : $PREFIX NS "_head" (0 0 0 0) 0 f
-                : $PREFIX NS "eye" (0 0 0 0)  0 f
-                : $PREFIX NS "nose" (1 1 0 -1) 0 f
+                : $PREFIX NS "_head_base" (0 0 0 0) 0 f
             labels:
+                : "label:eye" (0 0 0 0)  0 f
                 : "label:head_spikes" (0 0 0 0)  0 f
+        labels:
+            : "label:carrying"  (1 1 1  0) 0 f
 
     $PREFIX NS "crawl_head":
-        $IF SPIDER_EYE:
+        $IF EYESPIDER:
             shapes:
                 : "_eye_look" (0 0 0 0) 0 f
-        $IF !SPIDER_EYE:
+        $IF !EYESPIDER:
             shapes:
-                : $PREFIX NS "_head" (0 0 0 0) 0 f
-                : $PREFIX NS "eye" (0 0 0 0)  0 f
-                : $PREFIX NS "nose" (1 1 0 -1) 0 f
+                : $PREFIX NS "_head_base" (0 0 0 0) 0 f
             labels:
+                : "label:eye" (0 0 0 0)  0 f
                 : "label:head_spikes_extended" (0 0 0 0)  0 f
+        labels:
+            : "label:carrying"  (1 1 1  0) 0 f
 
     $PREFIX NS "sleep_head":
-        $IF SPIDER_EYE:
+        $IF EYESPIDER:
             shapes:
                 : "_eye_closed" (0 0 0 0) 0 f
-        $IF !SPIDER_EYE:
+        $IF !EYESPIDER:
             shapes:
-                : $PREFIX NS "_head" (0 0 0 0) 0 f
-                # No eye (it's "closed")
-                : $PREFIX NS "nose" (1 1 0 -1) 0 f
+                : $PREFIX NS "_head_base" (0 0 0 0) 0 f
             labels:
-                : "label:head_spikes" (0 0 0 0)  0 f
 
-    $IF SPIDER_EYE:
+                # No eye (it's "closed" because we're sleeping)
+                #: "label:eye" (0 0 0 0)  0 f
+
+                : "label:head_spikes" (0 0 0 0)  0 f
+        labels:
+            : "label:carrying"  (1 1 1  0) 0 f
+
+
+
+$IF EYESPIDER:
+    # eyespider-specific rgraphs
+    shapes:
+
         $PREFIX NS "eye_closing":
             animation: cycle 6
             shapes:
@@ -184,14 +236,18 @@ shapes:
                 : "_eye_opening_2"   ( 0  1  3  1)  0 f 0 ( 3  1)
                 : "_eye_opening_1"   ( 0  1  3  1)  0 f 0 ( 4  1)
                 : "_eye_closed"      ( 0  1  3  1)  0 f 0 ( 5  1)
-                : $PREFIX NS "bleg"  ( 0  1  1  1)  0 f
-                : $PREFIX NS "fleg"  ( 2  1  1  1)  6 t
+            labels:
+                : "label:bleg"  ( 0  1  1  1)  0 f
+                : "label:fleg"  ( 2  1  1  1)  6 t
+
         $PREFIX NS "eye_unclosing":
             animation: cycle $PREFIX NS "eye_closing"
             shapes:
                 : $PREFIX NS "eye_closing" (0 0 0 0) 0 f 0+r
+
         $PREFIX NS "eye_closed":
             shapes:
                 : "_eye_closed"      ( 0  1  3  1)  0 f
-                : $PREFIX NS "bleg"  ( 0  1  1  1)  0 f
-                : $PREFIX NS "fleg"  ( 2  1  1  1)  6 t
+            labels:
+                : "label:bleg"  ( 0  1  1  1)  0 f
+                : "label:fleg"  ( 2  1  1  1)  6 t

@@ -84,14 +84,6 @@ state "crawl":
     then:
         call: "crawl_spit"
 
-    # Turn into roller
-    if:
-        expr: myvar("is_rollerspider")
-        key: wentdown x
-    then:
-        goto: "roller_stand"
-        delay: $GET_INT ROLLER_STAND_DELAY
-
     # Turn into bird
     if:
         expr: myvar("is_birdspider")
@@ -189,13 +181,6 @@ state "crawl_step_down":
     then:
         call: "crawl_spit"
 
-    if:
-        expr: myvar("is_rollerspider")
-        key: wentdown x
-    then:
-        goto: "roller_stand"
-        delay: $GET_INT ROLLER_STAND_DELAY
-
     if() then: goto: "crawl"
 
 state "crawl_step":
@@ -212,13 +197,6 @@ state "crawl_step":
         key: wentdown y
     then:
         call: "crawl_spit"
-
-    if:
-        expr: myvar("is_rollerspider")
-        key: wentdown x
-    then:
-        goto: "roller_stand"
-        delay: $GET_INT ROLLER_STAND_DELAY
 
     if() then: goto: "crawl"
 

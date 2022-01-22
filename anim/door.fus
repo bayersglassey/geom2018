@@ -37,6 +37,7 @@ vars:
     "map": null
     "anim": null
     "state": null
+    "set_bool": null
 
 
 state "init":
@@ -76,6 +77,13 @@ state "open":
             yourvar("map")
             yourvar("anim")
             yourvar("state")
+
+        # Set a boolean variable and call the "update_vars" proc
+        # (NOTE: this is a bit of a hack... or not?..)
+        if: exists myvar("set_bool")
+        then: as you:
+            set myvar(yourvar("set_bool")): T
+            call: "update_vars"
 
         goto: "closed"
 

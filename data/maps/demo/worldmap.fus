@@ -89,7 +89,7 @@ submaps:
                         palette: "data/maps/demo/pals/tunnels.fus"
                         doors:
                             :
-                                anim: "anim/rollerspider.fus"
+                                anim: "anim/rollerspider.fus"  # TODO: set "is_rollerplayer" instead
                                 pos: (70 10)
                                 rot: 0
                                 turn: n

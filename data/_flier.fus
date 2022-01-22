@@ -1,14 +1,14 @@
 
 # Expected vars:
-# SPIDER_HEAD (str), e.g. "spider_head"
+# SPIDER (bool)
 # NS (str), e.g. "spider_", ""
 
 shapes:
 
     $PREFIX NS "flier_head":
         shapes:
-            : $GET_STR SPIDER_HEAD (0 0 0 0) 0 f
-            #$IF SPIDER_FLIER:
+            : "spider_head" (0 0 0 0) 0 f
+            #$IF SPIDER:
             #    : $PREFIX NS "bleg"  ( 0  0 -2  0) -2 f 0
             #    : $PREFIX NS "bleg"  ( 2  0 -2  0) -1 f 0
 

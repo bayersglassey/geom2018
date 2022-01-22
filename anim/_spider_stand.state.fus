@@ -38,14 +38,6 @@ $IF SPIDER:
     then:
         call: "spit"
 
-# Turn into roller
-if:
-    expr: myvar("is_rollerspider")
-    key: wentdown x
-then:
-    goto: "roller_stand"
-    delay: $GET_INT ROLLER_STAND_DELAY
-
 # Turn into bird
 if:
     expr: myvar("is_birdspider")
@@ -65,7 +57,7 @@ then:
     delay: 1
 
 # Blink
-$IF SPIDER_EYE:
+$IF EYESPIDER:
     if:
         key: wasdown x
     then:

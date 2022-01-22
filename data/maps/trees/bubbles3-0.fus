@@ -4,11 +4,11 @@ parts:
     "A": recording "data/recs/door.fus"
         vars:
             "location": "bubbles_transform_a"
-            "anim": "anim/rollerspider.fus"
+            "anim": "anim/rollerspider.fus"  # TODO: set "is_rollerplayer" instead
     "B": recording "data/recs/door.fus"
         vars:
             "location": "bubbles_transform_b"
-            "anim": "anim/spikeyspider.fus"
+            "anim": "anim/spikeyspider.fus" # TODO: set "is_spikeyplayer" instead
     "a": location "bubbles_transform_a"
     "b": location "bubbles_transform_b"
 

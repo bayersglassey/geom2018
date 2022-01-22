@@ -1,8 +1,0 @@
-
-$SET_STR NS spikeyspider_
-$SET_BOOL SPIDER_SPIKEY
-import "anim/_spider.fus"
-
-vars:
-    label "label:head_spikes": "spider_head_spikes"
-    label "label:head_spikes_extended": "spider_head_spikes_extended"

@@ -35,10 +35,10 @@ shapes:
         shapes:
             : $PREFIX NS "_roller_body_hollow_third" (0 0 0 0) 0 f
         prismels:
-            $IF SPIDER_ROLLER:
+            $IF SPIDER:
                 : "tri" ( 0 0 0 0)  0 f eval: 1 + 8 + 4
                 : "tri" ( 0 0 0 0)  2 f eval: 1 + 8 + 4
-            $IF !SPIDER_ROLLER:
+            $IF !SPIDER:
                 : "tri" ( 0 0 0 0)  0 f eval: 1 + 8 + 3
                 : "tri" ( 0 0 0 0)  2 f eval: 1 + 8 + 3
 
@@ -76,7 +76,7 @@ shapes:
         shapes:
             : $PREFIX NS "roller_body" (0 0 0 0) 0 f
             : $PREFIX NS "roller_foot" (0 0 0 0) 0 f
-        $IF SPIDER_ROLLER:
+        $IF SPIDER:
             labels:
                 : "label:carrying" eval((2 2 1 0) + (1 0 0 0)) 1 f
             prismels:

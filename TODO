@@ -690,3 +690,15 @@ Read this paper ("Graph Drawing by Force-directed Placement"):
 
     https://reingold.co/force-directed.pdf
 
+
+Jan 22, 2022:
+-------------
+
+In anim/_bird.fus there is:
+
+    on "spikeyspit":
+        goto: $PREFIX ANIM_NS "turn"
+        delay: $GET_INT TURN_DELAY
+
+...which, when you have "is_spikeyplayer": T, and shoot a spikey spit, causes it
+to hit you, and you turn around and become a bird. O_o

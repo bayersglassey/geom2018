@@ -8,7 +8,9 @@ recs:
     : "data/maps/demo/recs/dodecas_hexroller_001.fus" "spider_cpu"
 
 actors:
-    : (21 -15) 5 y "actor/airollerspider.fus" "spider_cpu"
+    : (21 -15) 5 y "actor/aispider.fus" "spider_cpu"
+        vars:
+            "is_rollerspider": T
 
 vars:
     "eyespider_dodecas_ran_away_1": F

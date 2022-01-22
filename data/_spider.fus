@@ -1,12 +1,7 @@
 
 # Expected vars:
 # NS (str), e.g. "spider_"
-# SPIDER_AIMER (bool)
-# SPIDER_SPIKEY (bool)
-# SPIDER_ROLLER (bool)
-# SPIDER_FLIER (bool)
-# SPIDER_BIRD (bool)
-# SPIDER_EYE (bool)
+# EYESPIDER (bool)
 
 
 import "data/_spider_parts.fus"
@@ -43,7 +38,7 @@ shapes:
 
     $PREFIX NS "turn":
         animation: cycle $PREFIX NS "step"
-        $IF SPIDER_EYE:
+        $IF EYESPIDER:
             shapes:
                 : "_eye_open"        (-1  0  3  1)  0 f 0 ( 0  1)
                 : "_eye_open"        ( 0  0  3  1)  0 f 0 ( 1  1)
@@ -51,7 +46,7 @@ shapes:
             labels:
                 : "label:bleg"  (-1  1  1  1)  0 f
                 : "label:fleg"  ( 2  1  1  1)  6 t
-        $IF !SPIDER_EYE:
+        $IF !EYESPIDER:
             shapes:
                 : $PREFIX NS "step" (0 0 0 0) 0 f
 
@@ -277,7 +272,7 @@ shapes:
 
     $PREFIX NS "crawl_turn":
         animation: cycle $PREFIX NS "crawl_step"
-        $IF SPIDER_EYE:
+        $IF EYESPIDER:
             shapes:
                 : "_eye_open" (-1  0  2  1)  1 f  0 (0 1)
                 : "_eye_open" ( 0  0  2  1)  1 f  0 (1 1)
@@ -287,7 +282,7 @@ shapes:
                 : "label:fleg"  ( 2  1  1  2)  7 t  (0 1)
                 : "label:fleg"  ( 3  1  1  2)  6 t  (1 1)
                 : "label:fleg"  ( 3  1  1  1)  6 t  (2 1)
-        $IF !SPIDER_EYE:
+        $IF !EYESPIDER:
             shapes:
                 : $PREFIX NS "crawl_step" (0 0 0 0) 0 f
 

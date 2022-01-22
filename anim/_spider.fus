@@ -1,12 +1,7 @@
 
 # Expected vars:
 # NS (str), e.g. "spider_"
-# SPIDER_AIMER (bool)
-# SPIDER_BIRD (bool)
-# SPIDER_FLIER (bool)
-# SPIDER_SPIKEY (bool)
-# SPIDER_ROLLER (bool)
-# SPIDER_EYE (bool)
+# EYESPIDER (bool)
 
 # NOTE: make sure "stand" is the first anim, so any imports
 # should go below it
@@ -35,24 +30,28 @@ $SET_STR STATE_JUMP jump
 
 vars:
     "is_rollerspider": F
-    $IF SPIDER_ROLLER: "is_rollerspider": T
     "is_aimerspider": F
-    $IF SPIDER_AIMER: "is_aimerspider": T
     "is_spikeyspider": F
-    $IF SPIDER_SPIKEY: "is_spikeyspider": T
     "is_flierspider": F
-    $IF SPIDER_FLIER: "is_flierspider": T
     "is_birdspider": F
-    $IF SPIDER_BIRD: "is_birdspider": T
 
-    nosave label "label:head": null
-    nosave label "label:crawl_head": null
-    nosave label "label:sleep_head": null
-    nosave label "label:fleg": null
-    nosave label "label:bleg": null
+    # Labels which *don't* depend on "is_*spider" vars
+    # (These labels are moved around to animate the spider)
+    nosave label "label:head": $PREFIX NS "head"
+    nosave label "label:crawl_head": $PREFIX NS "crawl_head"
+    nosave label "label:sleep_head": $PREFIX NS "sleep_head"
+    nosave label "label:fleg": $PREFIX NS "fleg"
+    nosave label "label:bleg": $PREFIX NS "bleg"
 
-    label "label:head_spikes": null
-    label "label:head_spikes_extended": null
+    # Labels which *do* depend on "is_*spider" vars
+    # (These labels are set by proc "update_vars", and are used
+    # to customize the spider's appearance)
+    nosave label "label:_head": null
+    nosave label "label:eye": null
+    nosave label "label:nose": null
+    nosave label "label:headbump": null
+    nosave label "label:head_spikes": null
+    nosave label "label:head_spikes_extended": null
 
     nosave "carrying": null
     nosave "carrying_respawn_counter": null
@@ -60,26 +59,46 @@ vars:
 
     nosave "spit_anim": null
 
-proc onload "set_labels":
-    set myvar("label:head"): $PREFIX NS "head"
-    set myvar("label:crawl_head"): $PREFIX NS "crawl_head"
-    set myvar("label:sleep_head"): $PREFIX NS "sleep_head"
-    set myvar("label:fleg"): $PREFIX NS "fleg"
-    set myvar("label:bleg"): $PREFIX NS "bleg"
+proc onload "update_vars":
+    # Sets various vars which depend on the "is_*spider" vars.
 
+    # Defaults:
+    set myvar("label:_head"): $PREFIX NS "_head"
+    set myvar("label:eye"): $PREFIX NS "eye"
+    set myvar("label:nose"): $PREFIX NS "nose"
+    set myvar("label:headbump"): null
+    set myvar("label:head_spikes"): null
+    set myvar("label:head_spikes_extended"): null
+
+    # Overriding the defaults depending on what kind(s) of spider we are:
+    if: expr: myvar("is_rollerspider")
+    then:
+        set myvar("label:_head"): $PREFIX NS "_head_roller"
+    if: expr: myvar("is_aimerspider")
+    then:
+        set myvar("label:nose"): $PREFIX NS "nose_aimer"
+        set myvar("label:headbump"): $PREFIX NS "headbump_aimer"
+    if: expr: myvar("is_flierspider")
+    then:
+        set myvar("label:headbump"): $PREFIX NS "headbump_flier"
     if: expr: myvar("is_spikeyspider")
     then:
         set myvar("label:head_spikes"): $PREFIX NS "head_spikes"
         set myvar("label:head_spikes_extended"): $PREFIX NS "head_spikes_extended"
 
+    # Set myvar("spit_anim")
+    if: expr: myvar("is_spikeyspider")
+    then: set myvar("spit_anim"): "anim/spikeyspit.fus"
+    else: set myvar("spit_anim"): "anim/spit.fus"
+
 
 collmsgs:
-    $IF !SPIDER_EYE: "touch"
-    $IF !SPIDER_EYE: "enter_door"
+    $IF !EYESPIDER: "touch"
+    $IF !EYESPIDER: "enter_door"
 on "crush": goto: "dead"
 
 
-$IF !SPIDER_EYE: on "carryable":
+$IF !EYESPIDER: on "carryable":
     # "me" is a spider, "you" is a carryable thing (e.g. coin, food)
 
     if: not: exists myvar("carrying")
@@ -117,40 +136,27 @@ proc "_spawn_spit":
         set myvar("carrying"): null
         set myvar("label:carrying"): null
 
-proc "set_spit_anim":
-    # We don't have functions, just procedures.
-    # This procedure acts like a function in that it "returns" a value
-    # in myvar("spit_anim").
-    if: expr: myvar("is_spikeyspider")
-    then: set myvar("spit_anim"): "anim/spikeyspit.fus"
-    else: set myvar("spit_anim"): "anim/spit.fus"
-
 proc "spit":
-    call: "set_spit_anim"
     spawn: myvar("spit_anim") "fly" (0 0) 0 f do:
         call: "_spawn_spit"
     goto delay: "spit"
 
 proc "looking_up_spit":
-    call: "set_spit_anim"
     spawn: myvar("spit_anim") "fly" (1 0) 1 f do:
         call: "_spawn_spit"
     goto delay: "looking_up_spit"
 
 proc "crawl_spit":
-    call: "set_spit_anim"
     spawn: myvar("spit_anim") "crouch_fly" (0 0) 0 f do:
         call: "_spawn_spit"
     goto delay: "crawl_spit"
 
 proc "crawl_looking_up_spit":
-    call: "set_spit_anim"
     spawn: myvar("spit_anim") "crouch_fly" (1 0) 1 f do:
         call: "_spawn_spit"
     goto delay: "crawl_looking_up_spit"
 
 proc "swim_spit":
-    call: "set_spit_anim"
     spawn: myvar("spit_anim") "fly" (0 0) 0 f do:
         call: "_spawn_spit"
     goto delay: "swim_spit"
@@ -308,7 +314,7 @@ state "sleep":
         key: wasdown r
     then: goto: "crawl"
 
-$IF SPIDER_EYE:
+$IF EYESPIDER:
     state "eye_closing":
         rgraph: $PREFIX NS "eye_closing"
         hitbox: collmap("stand")
