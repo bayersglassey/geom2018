@@ -1036,9 +1036,10 @@ int body_collide_against_body(body_t *body, body_t *body_other){
 
 static int _render_rgraph_and_labels(
     rendergraph_t *rgraph, SDL_Surface *surface,
-    SDL_Palette *pal, int x0, int y0, int zoom, int frame_i,
+    SDL_Palette *pal, prismelrenderer_t *prend,
+    int x0, int y0, int zoom, int frame_i,
     vec_t rendered_pos, rot_t rendered_rot, flip_t rendered_flip,
-    prismelrenderer_t *prend, prismelmapper_t *mapper,
+    prismelmapper_t *mapper,
     int label_mappings_len, body_label_mapping_t **label_mappings
 ){
     int err;
@@ -1087,12 +1088,12 @@ static int _render_rgraph_and_labels(
                     label_rgraph->animation_type,
                     label_rgraph->n_frames, mapping->frame_i);
 
-                /* Render label's rgraph */
-                err = rendergraph_render(label_rgraph, surface,
-                    pal, prend,
-                    x0, y0, zoom,
+                /* Recurse: render label's rgraph, and its labels */
+                err = _render_rgraph_and_labels(label_rgraph, surface,
+                    pal, prend, x0, y0, zoom, label_frame_i,
                     label_trf.add, label_trf.rot, label_trf.flip,
-                    label_frame_i, mapper);
+                    mapper,
+                    label_mappings_len, label_mappings);
                 if(err)return err;
             }
         }
@@ -1139,9 +1140,9 @@ int body_render(body_t *body,
     vec_mul(rgraph_space, rendered_pos, map->unit);
 
     return _render_rgraph_and_labels(rgraph, surface,
-        pal, x0, y0, zoom, frame_i,
+        pal, prend, x0, y0, zoom, frame_i,
         rendered_pos, rendered_rot, rendered_flip,
-        prend, mapper,
+        mapper,
         body->label_mappings_len, body->label_mappings);
 }
 
