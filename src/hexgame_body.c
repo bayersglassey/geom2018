@@ -588,8 +588,9 @@ int body_relocate(body_t *body, const char *map_filename,
  * BODY STATE *
  **************/
 
-static int _execute_onload_procs(body_t *body, const char *stateset_filename){
-    /* To be called by body_set_stateset */
+int body_execute_onload_procs(body_t *body){
+    /* To be called after body's stateset is set, or body's vars are loaded
+    from a save file, etc */
     int err;
 
     hexgame_state_context_t context = {
@@ -612,7 +613,7 @@ static int _execute_onload_procs(body_t *body, const char *stateset_filename){
                     fprintf(stderr, "...in proc \"%s\"\n", proc->name);
                     fprintf(stderr,
                         "...while attempting to set stateset to: %s\n",
-                        stateset_filename);
+                        body->stateset.filename);
                 }
                 return err;
             }
@@ -620,6 +621,7 @@ static int _execute_onload_procs(body_t *body, const char *stateset_filename){
     }
     return 0;
 }
+
 int body_set_stateset(body_t *body, const char *stateset_filename,
     const char *state_name
 ){
@@ -669,7 +671,7 @@ int body_set_stateset(body_t *body, const char *stateset_filename,
     if(err)return err;
 
     /* Execute any "onload" procs */
-    err = _execute_onload_procs(body, stateset_filename);
+    err = body_execute_onload_procs(body);
     if(err)return err;
 
     if(state_name == NULL){

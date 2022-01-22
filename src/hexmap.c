@@ -435,6 +435,8 @@ static int hexmap_load_hexmap_recording(
         interestingly enough. */
         err = vars_copy(&body->vars, &recording->vars);
         if(err)return err;
+        err = body_execute_onload_procs(body);
+        if(err)return err;
     }else if(recording->type == HEXMAP_RECORDING_TYPE_ACTOR){
         /* We create a body with NULL stateset, state.
         Is that even allowed?..
@@ -456,6 +458,9 @@ static int hexmap_load_hexmap_recording(
 
         err = vars_copy(&body->vars, &recording->bodyvars);
         if(err)return err;
+        err = body_execute_onload_procs(body);
+        if(err)return err;
+
         err = vars_copy(&actor->vars, &recording->vars);
         if(err)return err;
     }else{

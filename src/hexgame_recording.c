@@ -177,6 +177,8 @@ static int recording_parse(recording_t *rec,
         OPEN
         err = vars_parse(&body->vars, lexer);
         if(err)return err;
+        err = body_execute_onload_procs(body);
+        if(err)return err;
         CLOSE
     }
 
