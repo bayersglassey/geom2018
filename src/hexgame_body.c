@@ -282,9 +282,8 @@ int body_respawn(body_t *body, vec_t pos, rot_t rot, bool turn,
     hexmap_t *map
 ){
     /* Respawns body at given map and location.
-    Only moves body, does NOT change stateset or state.
-    Caller is free to use body_set_stateset/body_set_state to achieve
-    that. */
+    Only moves body, does NOT change stateset.
+    Caller is free to use body_set_stateset to achieve that. */
 
     int err;
 
@@ -664,15 +663,15 @@ int body_set_stateset(body_t *body, const char *stateset_filename,
         err = stateset_load(&body->stateset, stateset_filename,
             NULL, map->prend, map->space);
         if(err)return err;
+
+        /* Copy stateset's vars onto body */
+        err = vars_copy(&body->vars, &body->stateset.vars);
+        if(err)return err;
+
+        /* Execute any "onload" procs */
+        err = body_execute_onload_procs(body);
+        if(err)return err;
     }
-
-    /* Copy stateset's vars onto body */
-    err = vars_copy(&body->vars, &body->stateset.vars);
-    if(err)return err;
-
-    /* Execute any "onload" procs */
-    err = body_execute_onload_procs(body);
-    if(err)return err;
 
     if(state_name == NULL){
         /* If state_name not provided, use stateset's default state */

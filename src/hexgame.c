@@ -541,11 +541,6 @@ int hexgame_reset_player(hexgame_t *game, player_t *player,
     err = player_reload_from_location(player, location);
     if(err)return err;
 
-    const char *stateset_filename = location->stateset_filename;
-    const char *state_name = location->state_name;
-    err = body_set_stateset(body, stateset_filename, state_name);
-    if(err)return err;
-
     body_reset_cameras(body);
     body_flash_cameras(body, 255, 255, 255, 30);
     return 0;
