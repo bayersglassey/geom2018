@@ -79,10 +79,14 @@ typedef struct stateset_proc {
     /* A "procedure" which can be "called" using STATE_EFFECT_TYPE_CALL */
     const char *name;
     ARRAY_DECL(struct state_effect*, effects)
+
+    bool onload;
+        /* This proc should be called when body's stateset is set */
 } stateset_proc_t;
 
 void stateset_proc_cleanup(stateset_proc_t *handler);
-void stateset_proc_init(stateset_proc_t *handler, const char *msg);
+void stateset_proc_init(stateset_proc_t *handler, const char *name,
+    bool onload);
 
 
 /********

@@ -588,6 +588,38 @@ int body_relocate(body_t *body, const char *map_filename,
  * BODY STATE *
  **************/
 
+static int _execute_onload_procs(body_t *body, const char *stateset_filename){
+    /* To be called by body_set_stateset */
+    int err;
+
+    hexgame_state_context_t context = {
+        .game = body->game,
+        .body = body,
+    };
+    state_effect_goto_t *gotto = NULL;
+    for(int i = 0; i < body->stateset.procs_len; i++){
+        stateset_proc_t *proc = &body->stateset.procs[i];
+        if(!proc->onload)continue;
+        for(int j = 0; j < proc->effects_len; j++){
+            state_effect_t *effect = proc->effects[j];
+            err = state_effect_apply(effect, &context, &gotto, NULL);
+            if(gotto){
+                fprintf(stderr, "Can't use \"goto\" in \"onload\" procs\n");
+                err = 2;
+            }
+            if(err){
+                if(err == 2){
+                    fprintf(stderr, "...in proc \"%s\"\n", proc->name);
+                    fprintf(stderr,
+                        "...while attempting to set stateset to: %s\n",
+                        stateset_filename);
+                }
+                return err;
+            }
+        }
+    }
+    return 0;
+}
 int body_set_stateset(body_t *body, const char *stateset_filename,
     const char *state_name
 ){
@@ -634,6 +666,10 @@ int body_set_stateset(body_t *body, const char *stateset_filename,
 
     /* Copy stateset's vars onto body */
     err = vars_copy(&body->vars, &body->stateset.vars);
+    if(err)return err;
+
+    /* Execute any "onload" procs */
+    err = _execute_onload_procs(body, stateset_filename);
     if(err)return err;
 
     if(state_name == NULL){
@@ -979,18 +1015,12 @@ int body_collide_against_body(body_t *body, body_t *body_other){
 
     /* Body "handles" the collmsg by applying handler's effects to itself */
     {
-        bool continues = false;
-            /* Unused. The "continue" effect only makes sense when handling
-            rules: it means "continue checking for matching rules after this
-            one".
-            But here, we are only applying a series of effects. */
-
         hexgame_state_context_t context = {
             .game = body->game,
             .body = body,
             .your_body = body_other,
         };
-        err = collmsg_handler_apply(handler, &context, &continues);
+        err = collmsg_handler_apply(handler, &context, NULL);
         if(err)return err;
     }
 

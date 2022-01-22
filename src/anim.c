@@ -123,6 +123,12 @@ static int _parse_stateset_proc(stateset_t *stateset, fus_lexer_t *lexer,
 ){
     INIT
 
+    bool onload = false;
+    if(GOT("onload")){
+        NEXT
+        onload = true;
+    }
+
     const char *name;
     GET_STR_CACHED(name, &prend->name_store)
 
@@ -133,7 +139,7 @@ static int _parse_stateset_proc(stateset_t *stateset, fus_lexer_t *lexer,
         return 2;
     }
 
-    stateset_proc_init(proc, name);
+    stateset_proc_init(proc, name, onload);
 
     OPEN
     while(true){
@@ -171,9 +177,12 @@ void stateset_proc_cleanup(stateset_proc_t *proc){
     ARRAY_FREE_PTR(state_effect_t*, proc->effects, state_effect_cleanup)
 }
 
-void stateset_proc_init(stateset_proc_t *proc, const char *name){
+void stateset_proc_init(stateset_proc_t *proc, const char *name,
+    bool onload
+){
     proc->name = name;
     ARRAY_INIT(proc->effects)
+    proc->onload = onload;
 }
 
 

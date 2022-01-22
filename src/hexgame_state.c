@@ -346,9 +346,8 @@ static int _apply_sub_effects(state_effect_t *effect,
         state_effect_t *sub_effect = sub_effects[i];
 
         state_effect_goto_t *gotto = NULL;
-        bool continues = false; /* No effect if used */
         err = state_effect_apply(sub_effect, context, &gotto,
-            &continues);
+            NULL);
         if(err){
             if(err == 2){
                 fprintf(stderr, "...in \"%s\" statement\n",
@@ -625,6 +624,11 @@ int state_effect_apply(state_effect_t *effect,
         break;
     }
     case STATE_EFFECT_TYPE_CONTINUE: {
+        if(!continues_ptr){
+            RULE_PERROR()
+            fprintf(stderr, "Can't use \"continue\" here\n");
+            return 2;
+        }
         *continues_ptr = true;
         break;
     }
