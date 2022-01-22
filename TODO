@@ -681,3 +681,12 @@ Jan 19, 2022:
         err = hexgame_get_or_load_stateset(game, filename, &stateset);
         if(err)return err;
 
+
+Jan 21, 2022:
+-------------
+
+(From https://forums.tigsource.com/index.php?topic=54415.msg1447310#msg1447310)
+Read this paper ("Graph Drawing by Force-directed Placement"):
+
+    https://reingold.co/force-directed.pdf
+
