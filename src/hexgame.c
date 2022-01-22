@@ -348,7 +348,7 @@ int camera_render(camera_t *camera,
             err = body_render(body,
                 surface,
                 pal, x0, y0, zoom,
-                map, camera_renderpos, mapper);
+                camera_renderpos, mapper);
             if(err)return err;
         }
     }

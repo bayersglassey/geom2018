@@ -243,7 +243,7 @@ int body_collide_against_body(body_t *body, body_t *body_other);
 int body_render(body_t *body,
     SDL_Surface *surface,
     SDL_Palette *pal, int x0, int y0, int zoom,
-    hexmap_t *map, vec_t camera_renderpos, prismelmapper_t *mapper);
+    vec_t camera_renderpos, prismelmapper_t *mapper);
 
 void body_keydown(body_t *body, int key_i);
 void body_keyup(body_t *body, int key_i);

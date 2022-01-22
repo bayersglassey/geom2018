@@ -1034,43 +1034,18 @@ int body_collide_against_body(body_t *body, body_t *body_other){
  * BODY RENDER *
  ***************/
 
-int body_render(body_t *body,
-    SDL_Surface *surface,
-    SDL_Palette *pal, int x0, int y0, int zoom,
-    hexmap_t *map, vec_t camera_renderpos, prismelmapper_t *mapper
+static int _render_rgraph_and_labels(
+    rendergraph_t *rgraph, SDL_Surface *surface,
+    SDL_Palette *pal, int x0, int y0, int zoom, int frame_i,
+    vec_t rendered_pos, rot_t rendered_rot, flip_t rendered_flip,
+    prismelrenderer_t *prend, prismelmapper_t *mapper,
+    int label_mappings_len, body_label_mapping_t **label_mappings
 ){
-    /* RENDER THAT BODY */
     int err;
 
-    if(body->state == NULL)return 0;
-
-    rendergraph_t *rgraph = body->state->rgraph;
-    if(rgraph == NULL)return 0;
-
-    prismelrenderer_t *prend = map->prend;
-    vecspace_t *map_space = map->space; /* &hexspace */
     vecspace_t *rgraph_space = rgraph->space; /* &vec4 */
 
-    if(body->palmapper){
-        err = palettemapper_apply_to_rendergraph(body->palmapper,
-            prend, rgraph, NULL, map_space, &rgraph);
-        if(err)return err;
-    }
-
-    int frame_i = body->frame_i;
-
-    vec_t rendered_pos;
-    rot_t rendered_rot;
-    flip_t rendered_flip;
-    vec4_coords_from_hexspace(
-        body->loc.pos,
-        hexgame_location_get_rot(&body->loc),
-        body->loc.turn,
-        rendered_pos, &rendered_rot, &rendered_flip);
-    vec_sub(rgraph_space->dims, rendered_pos, camera_renderpos);
-    vec_mul(rgraph_space, rendered_pos, map->unit);
-
-    /* Render body's rgraph */
+    /* Render rgraph */
     err = rendergraph_render(rgraph, surface,
         pal, prend,
         x0, y0, zoom,
@@ -1078,9 +1053,9 @@ int body_render(body_t *body,
         frame_i, mapper);
     if(err)return err;
 
-    if(body->label_mappings_len){
+    if(label_mappings_len){
 
-        /* Make sure body->labels is populated */
+        /* Make sure rgraph->labels is populated */
         err = rendergraph_calculate_labels(rgraph);
         if(err)return err;
 
@@ -1095,8 +1070,8 @@ int body_render(body_t *body,
         rendergraph_frame_t *frame = &rgraph->frames[animated_frame_i];
 
         /* Render all mapped labels */
-        for(int i = 0; i < body->label_mappings_len; i++){
-            body_label_mapping_t *mapping = body->label_mappings[i];
+        for(int i = 0; i < label_mappings_len; i++){
+            body_label_mapping_t *mapping = label_mappings[i];
             rendergraph_t *label_rgraph = mapping->rgraph;
             for(int j = 0; j < frame->labels_len; j++){
                 rendergraph_label_t *label = frame->labels[j];
@@ -1124,5 +1099,49 @@ int body_render(body_t *body,
     }
 
     return 0;
+}
+
+int body_render(body_t *body,
+    SDL_Surface *surface,
+    SDL_Palette *pal, int x0, int y0, int zoom,
+    vec_t camera_renderpos, prismelmapper_t *mapper
+){
+    /* RENDER THAT BODY */
+    int err;
+
+    if(body->state == NULL)return 0;
+
+    rendergraph_t *rgraph = body->state->rgraph;
+    if(rgraph == NULL)return 0;
+
+    hexmap_t *map = body->map;
+    prismelrenderer_t *prend = map->prend;
+    vecspace_t *map_space = map->space; /* &hexspace */
+    vecspace_t *rgraph_space = rgraph->space; /* &vec4 */
+
+    if(body->palmapper){
+        err = palettemapper_apply_to_rendergraph(body->palmapper,
+            prend, rgraph, NULL, map_space, &rgraph);
+        if(err)return err;
+    }
+
+    int frame_i = body->frame_i;
+
+    vec_t rendered_pos;
+    rot_t rendered_rot;
+    flip_t rendered_flip;
+    vec4_coords_from_hexspace(
+        body->loc.pos,
+        hexgame_location_get_rot(&body->loc),
+        body->loc.turn,
+        rendered_pos, &rendered_rot, &rendered_flip);
+    vec_sub(rgraph_space->dims, rendered_pos, camera_renderpos);
+    vec_mul(rgraph_space, rendered_pos, map->unit);
+
+    return _render_rgraph_and_labels(rgraph, surface,
+        pal, x0, y0, zoom, frame_i,
+        rendered_pos, rendered_rot, rendered_flip,
+        prend, mapper,
+        body->label_mappings_len, body->label_mappings);
 }
 
