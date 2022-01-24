@@ -73,7 +73,7 @@ struct state_effect_goto;
 
 /****************
 * STATESET_PROC *
-*****************/
+****************/
 
 typedef struct stateset_proc {
     /* A "procedure" which can be "called" using STATE_EFFECT_TYPE_CALL */
@@ -89,24 +89,60 @@ void stateset_proc_init(stateset_proc_t *handler, const char *name,
     bool onload);
 
 
+/****************
+* STATE_CONTEXT *
+****************/
+
+typedef struct state_context_collmap_entry {
+    /* Key/value pair */
+    const char *name;
+    struct hexcollmap *collmap;
+} state_context_collmap_entry_t;
+
+void state_context_collmap_entry_cleanup(state_context_collmap_entry_t *entry);
+
+struct stateset;
+typedef struct state_context {
+    /* Stuff which can be used by states within a stateset */
+    ARRAY_DECL(char*, collmsgs)
+    ARRAY_DECL(struct collmsg_handler, collmsg_handlers)
+    ARRAY_DECL(struct stateset_proc, procs)
+    ARRAY_DECL(state_context_collmap_entry_t*, collmaps)
+
+    /* Weakrefs: */
+    struct stateset *stateset;
+    struct state_context *parent;
+} state_context_t;
+
+void state_context_cleanup(state_context_t *context);
+void state_context_init(state_context_t *context, struct stateset *stateset,
+    state_context_t *parent);
+
+hexcollmap_t *state_context_get_collmap(state_context_t *context,
+    const char *name);
+stateset_proc_t *state_context_get_proc(state_context_t *context,
+    const char *name);
+
+
 /********
 * STATE *
 ********/
 
 typedef struct state {
-    struct stateset *stateset;
     const char *name;
-    rendergraph_t *rgraph;
     hexcollmap_t *own_hitbox;
         /* For if we own the hitbox, as opposed to
-        just pointing to one from stateset->collmaps. */
-    hexcollmap_t *hitbox;
-        /* If own_hitbox != NULL, then hitbox == own_hitbox */
+        just pointing to one from context->collmaps. */
     bool safe;
     bool flying;
-    ARRAY_DECL(char*, collmsgs)
-    ARRAY_DECL(struct collmsg_handler, collmsg_handlers)
     ARRAY_DECL(struct state_rule*, rules)
+
+    /* Weakrefs: */
+    struct stateset *stateset;
+    rendergraph_t *rgraph;
+    state_context_t *context;
+    hexcollmap_t *hitbox;
+        /* If own_hitbox != NULL, then hitbox == own_hitbox */
 } state_t;
 
 
@@ -114,19 +150,10 @@ typedef struct state {
 * STATESET *
 ***********/
 
-typedef struct stateset_collmap_entry {
-    /* Key/value pair in the array stateset->collmaps. */
-    const char *name;
-    struct hexcollmap *collmap;
-} stateset_collmap_entry_t;
-
 typedef struct stateset {
     const char *filename;
-    ARRAY_DECL(char*, collmsgs)
-    ARRAY_DECL(struct collmsg_handler, collmsg_handlers)
-    ARRAY_DECL(struct stateset_proc, procs)
     ARRAY_DECL(struct state*, states)
-    ARRAY_DECL(stateset_collmap_entry_t*, collmaps)
+    ARRAY_DECL(state_context_t*, contexts)
     vars_t vars;
     bool debug_collision;
     const char *default_state_name; /* stateset->states[i]->name */
@@ -190,7 +217,7 @@ typedef struct state_cond {
                 a stateset filename instead) */
             hexcollmap_t *own_collmap;
                 /* own_collmap is for if we own the collmap, as opposed to
-                just pointing to one from stateset->collmaps. */
+                just pointing to one from context->collmaps. */
             hexcollmap_t *collmap;
                 /* Cannot be NULL. If own_collmap != NULL, then
                 collmap == own_collmap */
@@ -288,6 +315,7 @@ typedef struct state_effect_goto {
 } state_effect_goto_t;
 
 typedef struct state_effect_call {
+    state_context_t *state_context;
     const char *name;
 } state_effect_call_t;
 
@@ -354,22 +382,18 @@ typedef struct state_effect_ite {
 * PROTOTYPES *
 *************/
 
-void stateset_collmap_entry_cleanup(stateset_collmap_entry_t *entry);
-
 void stateset_cleanup(stateset_t *stateset);
 int stateset_init(stateset_t *stateset, const char *filename);
 void stateset_dump(stateset_t *stateset, FILE *file, int depth);
-hexcollmap_t *stateset_get_collmap(stateset_t *stateset, const char *name);
-stateset_proc_t *stateset_get_proc(stateset_t *stateset, const char *name);
 int stateset_load(stateset_t *stateset, const char *filename, vars_t *vars,
     prismelrenderer_t *prend, vecspace_t *space);
 int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
     prismelrenderer_t *prend, vecspace_t *space);
 state_t *stateset_get_state(stateset_t *stateset, const char *name);
 
-
 void state_cleanup(state_t *state);
-int state_init(state_t *state, stateset_t *stateset, const char *name);
+int state_init(state_t *state, stateset_t *stateset, const char *name,
+    state_context_t *parent_context);
 void state_dump(state_t *state, FILE *file, int depth);
 
 void state_rule_cleanup(state_rule_t *rule);

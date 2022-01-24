@@ -597,24 +597,27 @@ int body_execute_onload_procs(body_t *body){
         .body = body,
     };
     state_effect_goto_t *gotto = NULL;
-    for(int i = 0; i < body->stateset.procs_len; i++){
-        stateset_proc_t *proc = &body->stateset.procs[i];
-        if(!proc->onload)continue;
-        for(int j = 0; j < proc->effects_len; j++){
-            state_effect_t *effect = proc->effects[j];
-            err = state_effect_apply(effect, &context, &gotto, NULL);
-            if(gotto){
-                fprintf(stderr, "Can't use \"goto\" in \"onload\" procs\n");
-                err = 2;
-            }
-            if(err){
-                if(err == 2){
-                    fprintf(stderr, "...in proc \"%s\"\n", proc->name);
-                    fprintf(stderr,
-                        "...while attempting to set stateset to: %s\n",
-                        body->stateset.filename);
+    for(int i = 0; i < body->stateset.contexts_len; i++){
+        state_context_t *state_context = body->stateset.contexts[i];
+        for(int j = 0; j < state_context->procs_len; j++){
+            stateset_proc_t *proc = &state_context->procs[j];
+            if(!proc->onload)continue;
+            for(int k = 0; k < proc->effects_len; k++){
+                state_effect_t *effect = proc->effects[k];
+                err = state_effect_apply(effect, &context, &gotto, NULL);
+                if(gotto){
+                    fprintf(stderr, "Can't use \"goto\" in \"onload\" procs\n");
+                    err = 2;
                 }
-                return err;
+                if(err){
+                    if(err == 2){
+                        fprintf(stderr, "...in proc \"%s\"\n", proc->name);
+                        fprintf(stderr,
+                            "...while attempting to set stateset to: %s\n",
+                            body->stateset.filename);
+                    }
+                    return err;
+                }
             }
         }
     }
@@ -915,14 +918,15 @@ int body_step(body_t *body, hexgame_t *game){
 bool body_sends_collmsg(body_t *body, const char *msg){
     /* Returns whether body is sending given msg */
     state_t *state = body->state;
-    for(int i = 0; i < state->collmsgs_len; i++){
-        const char *state_msg = state->collmsgs[i];
-        if(!strcmp(state_msg, msg))return true;
-    }
-    stateset_t *stateset = &body->stateset;
-    for(int i = 0; i < stateset->collmsgs_len; i++){
-        const char *stateset_msg = stateset->collmsgs[i];
-        if(!strcmp(stateset_msg, msg))return true;
+    for(
+        state_context_t *context = state->context;
+        context;
+        context = context->parent
+    ){
+        for(int i = 0; i < context->collmsgs_len; i++){
+            const char *state_msg = context->collmsgs[i];
+            if(!strcmp(state_msg, msg))return true;
+        }
     }
     return false;
 }
@@ -931,23 +935,19 @@ collmsg_handler_t *body_get_collmsg_handler(body_t *body, const char *msg){
     /* Returns the handler body uses to handle given msg (or NULL if not
     found) */
     state_t *state = body->state;
-    for(int j = 0; j < state->collmsg_handlers_len; j++){
-        collmsg_handler_t *handler = &state->collmsg_handlers[j];
-        if(body->stateset.debug_collision){
-            fprintf(stderr, "    -> state handler: %s\n", handler->msg);
-        }
-        if(!strcmp(msg, handler->msg)){
-            return handler;
-        }
-    }
-    stateset_t *stateset = &body->stateset;
-    for(int j = 0; j < stateset->collmsg_handlers_len; j++){
-        collmsg_handler_t *handler = &stateset->collmsg_handlers[j];
-        if(body->stateset.debug_collision){
-            fprintf(stderr, "    -> stateset handler: %s\n", handler->msg);
-        }
-        if(!strcmp(msg, handler->msg)){
-            return handler;
+    for(
+        state_context_t *context = state->context;
+        context;
+        context = context->parent
+    ){
+        for(int i = 0; i < context->collmsg_handlers_len; i++){
+            collmsg_handler_t *handler = &context->collmsg_handlers[i];
+            if(body->stateset.debug_collision){
+                fprintf(stderr, "    -> state handler: %s\n", handler->msg);
+            }
+            if(!strcmp(msg, handler->msg)){
+                return handler;
+            }
         }
     }
     return NULL;
@@ -958,22 +958,19 @@ collmsg_handler_t *_body_handle_other_bodies_collmsgs(body_t *body, body_t *body
     to handle them, and returns the first handler found */
     collmsg_handler_t *handler = NULL;
     state_t *state = body_other->state;
-    for(int i = 0; i < state->collmsgs_len; i++){
-        const char *msg = state->collmsgs[i];
-        if(body->stateset.debug_collision){
-            fprintf(stderr, "  -> state collmsg: %s\n", msg);
+    for(
+        state_context_t *context = state->context;
+        context;
+        context = context->parent
+    ){
+        for(int i = 0; i < context->collmsgs_len; i++){
+            const char *msg = context->collmsgs[i];
+            if(body->stateset.debug_collision){
+                fprintf(stderr, "  -> state collmsg: %s\n", msg);
+            }
+            handler = body_get_collmsg_handler(body, msg);
+            if(handler)return handler;
         }
-        handler = body_get_collmsg_handler(body, msg);
-        if(handler)return handler;
-    }
-    stateset_t *stateset = &body_other->stateset;
-    for(int i = 0; i < stateset->collmsgs_len; i++){
-        const char *msg = stateset->collmsgs[i];
-        if(body->stateset.debug_collision){
-            fprintf(stderr, "  -> stateset collmsg: %s\n", msg);
-        }
-        handler = body_get_collmsg_handler(body, msg);
-        if(handler)return handler;
     }
     return NULL;
 }

@@ -37,7 +37,7 @@ static int _parse_trf(fus_lexer_t *lexer, vecspace_t *space, rot_t *rot_ptr){
 }
 
 
-static int _parse_collmap(stateset_t *stateset, fus_lexer_t *lexer,
+static int _parse_collmap(state_context_t *context, fus_lexer_t *lexer,
     prismelrenderer_t *prend, vecspace_t *space,
     hexcollmap_t **own_collmap_ptr, hexcollmap_t **collmap_ptr
 ){
@@ -47,14 +47,16 @@ static int _parse_collmap(stateset_t *stateset, fus_lexer_t *lexer,
     hexcollmap_t *own_collmap = NULL;
     hexcollmap_t *collmap;
 
+    stateset_t *stateset = context->stateset;
+
     if(GOT("collmap")){
         NEXT
         OPEN
         const char *name;
         GET_STR_CACHED(name, &prend->name_store)
 
-        hexcollmap_t *found_collmap = stateset_get_collmap(
-            stateset, name);
+        hexcollmap_t *found_collmap = state_context_get_collmap(
+            context, name);
         if(!found_collmap){
             fus_lexer_err_info(lexer);
             fprintf(stderr, "Couldn't find collmap: %s\n", name);
@@ -94,10 +96,10 @@ static int _parse_collmap(stateset_t *stateset, fus_lexer_t *lexer,
 }
 
 
-static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
+static int _parse_effect(state_context_t *context, fus_lexer_t *lexer,
     prismelrenderer_t *prend, vecspace_t *space,
     state_effect_t *effect);
-static int _parse_collmsg_handler(stateset_t *stateset, fus_lexer_t *lexer,
+static int _parse_collmsg_handler(state_context_t *context, fus_lexer_t *lexer,
     collmsg_handler_t *handler, prismelrenderer_t *prend, vecspace_t *space
 ){
     INIT
@@ -111,17 +113,19 @@ static int _parse_collmsg_handler(stateset_t *stateset, fus_lexer_t *lexer,
     while(true){
         if(GOT(")"))break;
         ARRAY_PUSH_NEW(state_effect_t*, handler->effects, effect)
-        err = _parse_effect(stateset, lexer, prend, space, effect);
+        err = _parse_effect(context, lexer, prend, space, effect);
         if(err)return err;
     }
     NEXT
 
     return 0;
 }
-static int _parse_stateset_proc(stateset_t *stateset, fus_lexer_t *lexer,
+static int _parse_stateset_proc(state_context_t *context, fus_lexer_t *lexer,
     stateset_proc_t *proc, prismelrenderer_t *prend, vecspace_t *space
 ){
     INIT
+
+    stateset_t *stateset = context->stateset;
 
     bool onload = false;
     if(GOT("onload")){
@@ -132,7 +136,7 @@ static int _parse_stateset_proc(stateset_t *stateset, fus_lexer_t *lexer,
     const char *name;
     GET_STR_CACHED(name, &prend->name_store)
 
-    stateset_proc_t *found_proc = stateset_get_proc(stateset, name);
+    stateset_proc_t *found_proc = state_context_get_proc(context, name);
     if(found_proc){
         fprintf(stderr, "Can't redefine proc \"%s\" in stateset \"%s\"\n",
             name, stateset->filename);
@@ -145,7 +149,7 @@ static int _parse_stateset_proc(stateset_t *stateset, fus_lexer_t *lexer,
     while(true){
         if(GOT(")"))break;
         ARRAY_PUSH_NEW(state_effect_t*, proc->effects, effect)
-        err = _parse_effect(stateset, lexer, prend, space, effect);
+        err = _parse_effect(context, lexer, prend, space, effect);
         if(err)return err;
     }
     NEXT
@@ -186,34 +190,78 @@ void stateset_proc_init(stateset_proc_t *proc, const char *name,
 }
 
 
-/************
- * STATESET *
- ************/
+/****************
+* STATE_CONTEXT *
+****************/
 
-void stateset_collmap_entry_cleanup(stateset_collmap_entry_t *entry){
+void state_context_collmap_entry_cleanup(state_context_collmap_entry_t *entry){
     hexcollmap_cleanup(entry->collmap);
     free(entry->collmap);
 }
 
-void stateset_cleanup(stateset_t *stateset){
-    ARRAY_FREE_PTR(char*, stateset->collmsgs, (void))
-    ARRAY_FREE(collmsg_handler_t, stateset->collmsg_handlers,
+void state_context_cleanup(state_context_t *context){
+    ARRAY_FREE_PTR(char*, context->collmsgs, (void))
+    ARRAY_FREE(collmsg_handler_t, context->collmsg_handlers,
         collmsg_handler_cleanup)
-    ARRAY_FREE(stateset_proc_t, stateset->procs,
+    ARRAY_FREE(stateset_proc_t, context->procs,
         stateset_proc_cleanup)
+    ARRAY_FREE_PTR(state_context_collmap_entry_t*, context->collmaps,
+        state_context_collmap_entry_cleanup)
+}
+
+void state_context_init(state_context_t *context, stateset_t *stateset,
+    state_context_t *parent
+){
+    ARRAY_INIT(context->collmsgs)
+    ARRAY_INIT(context->collmsg_handlers)
+    ARRAY_INIT(context->procs)
+    ARRAY_INIT(context->collmaps)
+    context->stateset = stateset;
+    context->parent = parent;
+}
+
+hexcollmap_t *state_context_get_collmap(state_context_t *context,
+    const char *name
+){
+    while(context){
+        for(int i = 0; i < context->collmaps_len; i++){
+            state_context_collmap_entry_t *entry = context->collmaps[i];
+            if(!strcmp(entry->name, name))return entry->collmap;
+        }
+        context = context->parent;
+    }
+    return NULL;
+}
+
+stateset_proc_t *state_context_get_proc(state_context_t *context,
+    const char *name
+){
+    while(context){
+        for(int i = 0; i < context->procs_len; i++){
+            stateset_proc_t *proc = &context->procs[i];
+            if(!strcmp(proc->name, name))return proc;
+        }
+        context = context->parent;
+    }
+    return NULL;
+}
+
+
+/************
+ * STATESET *
+ ************/
+
+void stateset_cleanup(stateset_t *stateset){
     ARRAY_FREE_PTR(state_t*, stateset->states, state_cleanup)
-    ARRAY_FREE_PTR(stateset_collmap_entry_t*, stateset->collmaps,
-        stateset_collmap_entry_cleanup)
+    ARRAY_FREE_PTR(state_context_t*, stateset->contexts,
+        state_context_cleanup)
     vars_cleanup(&stateset->vars);
 }
 
 int stateset_init(stateset_t *stateset, const char *filename){
     stateset->filename = filename;
-    ARRAY_INIT(stateset->collmsgs)
-    ARRAY_INIT(stateset->collmsg_handlers)
-    ARRAY_INIT(stateset->procs)
     ARRAY_INIT(stateset->states)
-    ARRAY_INIT(stateset->collmaps)
+    ARRAY_INIT(stateset->contexts)
     vars_init_with_props(&stateset->vars, hexgame_vars_prop_names);
     stateset->debug_collision = false;
     return 0;
@@ -226,22 +274,6 @@ void stateset_dump(stateset_t *stateset, FILE *file, int depth){
         state_t *state = stateset->states[i];
         state_dump(state, file, depth+1);
     }
-}
-
-hexcollmap_t *stateset_get_collmap(stateset_t *stateset, const char *name){
-    for(int i = 0; i < stateset->collmaps_len; i++){
-        stateset_collmap_entry_t *entry = stateset->collmaps[i];
-        if(!strcmp(entry->name, name))return entry->collmap;
-    }
-    return NULL;
-}
-
-stateset_proc_t *stateset_get_proc(stateset_t *stateset, const char *name){
-    for(int i = 0; i < stateset->procs_len; i++){
-        stateset_proc_t *proc = &stateset->procs[i];
-        if(!strcmp(proc->name, name))return proc;
-    }
-    return NULL;
 }
 
 int stateset_load(stateset_t *stateset, const char *filename, vars_t *vars,
@@ -268,7 +300,7 @@ int stateset_load(stateset_t *stateset, const char *filename, vars_t *vars,
     return 0;
 }
 
-static int _parse_cond(stateset_t *stateset, fus_lexer_t *lexer,
+static int _parse_cond(state_context_t *context, fus_lexer_t *lexer,
     prismelrenderer_t *prend, vecspace_t *space,
     state_cond_t *cond
 ){
@@ -349,7 +381,7 @@ static int _parse_cond(stateset_t *stateset, fus_lexer_t *lexer,
 
         hexcollmap_t *own_collmap;
         hexcollmap_t *collmap;
-        err = _parse_collmap(stateset, lexer, prend, space,
+        err = _parse_collmap(context, lexer, prend, space,
             &own_collmap, &collmap);
         if(err)return err;
 
@@ -387,7 +419,7 @@ static int _parse_cond(stateset_t *stateset, fus_lexer_t *lexer,
         OPEN
         while(!GOT(")")){
             ARRAY_PUSH_NEW(state_cond_t*, cond->u.subconds.conds, subcond)
-            err = _parse_cond(stateset, lexer, prend, space, subcond);
+            err = _parse_cond(context, lexer, prend, space, subcond);
             if(err)return err;
         }
         NEXT
@@ -409,7 +441,7 @@ static int _parse_cond(stateset_t *stateset, fus_lexer_t *lexer,
     return 0;
 }
 
-static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
+static int _parse_effect(state_context_t *context, fus_lexer_t *lexer,
     prismelrenderer_t *prend, vecspace_t *space,
     state_effect_t *effect
 ){
@@ -507,6 +539,7 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         GET_STR_CACHED(name, &prend->name_store)
 
         effect->type = STATE_EFFECT_TYPE_CALL;
+        effect->u.call.state_context = context;
         effect->u.call.name = name;
 
         CLOSE
@@ -546,7 +579,7 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
             OPEN
             while(!GOT(")")){
                 ARRAY_PUSH_NEW(state_effect_t*, spawn.effects, effect)
-                err = _parse_effect(stateset, lexer, prend, space, effect);
+                err = _parse_effect(context, lexer, prend, space, effect);
                 if(err)return err;
             }
             NEXT
@@ -663,7 +696,7 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         OPEN
         while(!GOT(")")){
             ARRAY_PUSH_NEW(state_cond_t*, ite->conds, cond)
-            err = _parse_cond(stateset, lexer, prend, space, cond);
+            err = _parse_cond(context, lexer, prend, space, cond);
             if(err)return err;
         }
         NEXT
@@ -672,7 +705,7 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         OPEN
         while(!GOT(")")){
             ARRAY_PUSH_NEW(state_effect_t*, ite->then_effects, effect)
-            err = _parse_effect(stateset, lexer, prend, space, effect);
+            err = _parse_effect(context, lexer, prend, space, effect);
             if(err)return err;
         }
         NEXT
@@ -682,7 +715,7 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
             OPEN
             while(!GOT(")")){
                 ARRAY_PUSH_NEW(state_effect_t*, ite->else_effects, effect)
-                err = _parse_effect(stateset, lexer, prend, space, effect);
+                err = _parse_effect(context, lexer, prend, space, effect);
                 if(err)return err;
             }
             NEXT
@@ -704,7 +737,7 @@ static int _parse_effect(stateset_t *stateset, fus_lexer_t *lexer,
         while(!GOT(")")){
             ARRAY_PUSH_NEW(state_effect_t*, effect->u.as.sub_effects,
                 sub_effect)
-            err = _parse_effect(stateset, lexer, prend, space, sub_effect);
+            err = _parse_effect(context, lexer, prend, space, sub_effect);
             if(err)return err;
         }
         NEXT
@@ -731,6 +764,7 @@ static int _state_parse_rule(state_t *state, fus_lexer_t *lexer,
     INIT
 
     stateset_t *stateset = state->stateset;
+    state_context_t *context = state->context;
 
     ARRAY_PUSH_NEW(state_rule_t*, state->rules, rule)
     err = state_rule_init(rule, state);
@@ -741,7 +775,7 @@ static int _state_parse_rule(state_t *state, fus_lexer_t *lexer,
     while(1){
         if(GOT(")"))break;
         ARRAY_PUSH_NEW(state_cond_t*, rule->conds, cond)
-        err = _parse_cond(stateset, lexer, prend, space, cond);
+        err = _parse_cond(context, lexer, prend, space, cond);
         if(err)return err;
     }
     NEXT
@@ -751,7 +785,7 @@ static int _state_parse_rule(state_t *state, fus_lexer_t *lexer,
     while(1){
         if(GOT(")"))break;
         ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
-        err = _parse_effect(stateset, lexer, prend, space, effect);
+        err = _parse_effect(context, lexer, prend, space, effect);
         if(err)return err;
     }
     NEXT
@@ -765,6 +799,7 @@ static int _state_parse(state_t *state, fus_lexer_t *lexer,
     int err;
 
     stateset_t *stateset = state->stateset;
+    state_context_t *context = state->context;
 
     /* Parse state properties */
     while(1){
@@ -798,7 +833,7 @@ static int _state_parse(state_t *state, fus_lexer_t *lexer,
             while(!GOT(")")){
                 char *msg;
                 GET_STR(msg)
-                ARRAY_PUSH(char*, state->collmsgs, msg)
+                ARRAY_PUSH(char*, state->context->collmsgs, msg)
             }
             NEXT
             continue;
@@ -809,7 +844,7 @@ static int _state_parse(state_t *state, fus_lexer_t *lexer,
 
             hexcollmap_t *own_collmap;
             hexcollmap_t *collmap;
-            err = _parse_collmap(stateset, lexer, prend, space,
+            err = _parse_collmap(context, lexer, prend, space,
                 &own_collmap, &collmap);
             if(err)return err;
 
@@ -822,10 +857,10 @@ static int _state_parse(state_t *state, fus_lexer_t *lexer,
         if(GOT("on")){
             NEXT
             collmsg_handler_t handler;
-            err = _parse_collmsg_handler(stateset, lexer, &handler,
+            err = _parse_collmsg_handler(context, lexer, &handler,
                 prend, space);
             if(err)return err;
-            ARRAY_PUSH(collmsg_handler_t, state->collmsg_handlers, handler)
+            ARRAY_PUSH(collmsg_handler_t, state->context->collmsg_handlers, handler)
             continue;
         }
         break;
@@ -882,7 +917,7 @@ static int _state_parse(state_t *state, fus_lexer_t *lexer,
 }
 
 static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
-    prismelrenderer_t *prend, vecspace_t *space
+    prismelrenderer_t *prend, vecspace_t *space, state_context_t *context
 ){
     /* NOTE: This function may be called recursively! (If an "import"
     token is encountered.) */
@@ -901,7 +936,7 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             while(!GOT(")")){
                 char *msg;
                 GET_STR(msg)
-                ARRAY_PUSH(char*, stateset->collmsgs, msg)
+                ARRAY_PUSH(char*, context->collmsgs, msg)
             }
             NEXT
             continue;
@@ -909,19 +944,19 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
         if(GOT("on")){
             NEXT
             collmsg_handler_t handler;
-            err = _parse_collmsg_handler(stateset, lexer, &handler,
+            err = _parse_collmsg_handler(context, lexer, &handler,
                 prend, space);
             if(err)return err;
-            ARRAY_PUSH(collmsg_handler_t, stateset->collmsg_handlers, handler)
+            ARRAY_PUSH(collmsg_handler_t, context->collmsg_handlers, handler)
             continue;
         }
         if(GOT("proc")){
             NEXT
             stateset_proc_t proc;
-            err = _parse_stateset_proc(stateset, lexer, &proc,
+            err = _parse_stateset_proc(context, lexer, &proc,
                 prend, space);
             if(err)return err;
-            ARRAY_PUSH(stateset_proc_t, stateset->procs, proc)
+            ARRAY_PUSH(stateset_proc_t, context->procs, proc)
             continue;
         }
         if(GOT("vars")){
@@ -945,8 +980,8 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                 const char *name;
                 GET_STR_CACHED(name, &prend->name_store)
 
-                hexcollmap_t *found_collmap = stateset_get_collmap(
-                    stateset, name);
+                hexcollmap_t *found_collmap = state_context_get_collmap(
+                    context, name);
                 if(!found_collmap){
                     fus_lexer_err_info(lexer);
                     fprintf(stderr, "Couldn't find collmap: %s\n", name);
@@ -974,7 +1009,7 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             }
             CLOSE
 
-            ARRAY_PUSH_NEW(stateset_collmap_entry_t*, stateset->collmaps,
+            ARRAY_PUSH_NEW(state_context_collmap_entry_t*, context->collmaps,
                 entry)
             entry->collmap = collmap;
             entry->name = name;
@@ -998,7 +1033,11 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                 lexer->vars);
             if(err)return err;
 
-            err = _stateset_parse(stateset, &sublexer, prend, space);
+            ARRAY_PUSH_NEW(state_context_t*, stateset->contexts, sub_context)
+            state_context_init(sub_context, stateset, context);
+
+            err = _stateset_parse(stateset, &sublexer, prend, space,
+                sub_context);
             if(err){
                 fus_lexer_err_info(lexer);
                 fprintf(stderr, "...while importing here.\n");
@@ -1028,8 +1067,11 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             GET_STR_CACHED(name, &prend->name_store)
             OPEN
 
+            ARRAY_PUSH_NEW(state_context_t*, stateset->contexts, sub_context)
+            state_context_init(sub_context, stateset, context);
+
             ARRAY_PUSH_NEW(state_t*, stateset->states, state)
-            err = state_init(state, stateset, name);
+            err = state_init(state, stateset, name, sub_context);
             if(err)return err;
 
             err = _state_parse(state, lexer, prend, space);
@@ -1046,7 +1088,10 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
 ){
     INIT
 
-    err = _stateset_parse(stateset, lexer, prend, space);
+    ARRAY_PUSH_NEW(state_context_t*, stateset->contexts, context)
+    state_context_init(context, stateset, NULL);
+
+    err = _stateset_parse(stateset, lexer, prend, space, context);
     if(err)return err;
 
     stateset->default_state_name = stateset->states[0]->name;
@@ -1073,13 +1118,12 @@ void state_cleanup(state_t *state){
         hexcollmap_cleanup(state->own_hitbox);
         free(state->own_hitbox);
     }
-    ARRAY_FREE_PTR(char*, state->collmsgs, (void))
-    ARRAY_FREE(collmsg_handler_t, state->collmsg_handlers,
-        collmsg_handler_cleanup)
     ARRAY_FREE_PTR(state_rule_t*, state->rules, state_rule_cleanup)
 }
 
-int state_init(state_t *state, stateset_t *stateset, const char *name){
+int state_init(state_t *state, stateset_t *stateset, const char *name,
+    state_context_t *context
+){
     state->stateset = stateset;
     state->name = name;
     state->rgraph = NULL;
@@ -1087,9 +1131,8 @@ int state_init(state_t *state, stateset_t *stateset, const char *name){
     state->hitbox = NULL;
     state->safe = true;
     state->flying = false;
-    ARRAY_INIT(state->collmsgs)
-    ARRAY_INIT(state->collmsg_handlers)
     ARRAY_INIT(state->rules)
+    state->context = context;
     return 0;
 }
 

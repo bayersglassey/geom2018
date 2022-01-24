@@ -26,13 +26,13 @@ static void print_usage(FILE *file){
 
 
 static int dump_effect(stateset_t *stateset, state_effect_t *effect,
-    void *parent, FILE *file
+    state_context_t *context, void *parent, FILE *file
 ) {
     int err;
     switch(effect->type){
         case STATE_EFFECT_TYPE_CALL: {
             state_effect_call_t *call = &effect->u.call;
-            stateset_proc_t *proc = stateset_get_proc(stateset, call->name);
+            stateset_proc_t *proc = state_context_get_proc(context, call->name);
             if(!proc){
                 fprintf(stderr, "Couldn't find proc \"%s\"\n", call->name);
                 return 2;
@@ -44,7 +44,7 @@ static int dump_effect(stateset_t *stateset, state_effect_t *effect,
             state_effect_spawn_t *spawn = &effect->u.spawn;
             for(int i = 0; i < spawn->effects_len; i++){
                 state_effect_t *effect = spawn->effects[i];
-                err = dump_effect(stateset, effect, parent, file);
+                err = dump_effect(stateset, effect, context, parent, file);
                 if(err)return err;
             }
             break;
@@ -63,11 +63,13 @@ static int dump_effect(stateset_t *stateset, state_effect_t *effect,
             state_effect_ite_t *ite = effect->u.ite;
             for(int i = 0; i < ite->then_effects_len; i++){
                 state_effect_t *sub_effect = ite->then_effects[i];
-                err = dump_effect(stateset, sub_effect, parent, file);
+                err = dump_effect(stateset, sub_effect, context, parent,
+                    file);
             }
             for(int i = 0; i < ite->else_effects_len; i++){
                 state_effect_t *sub_effect = ite->else_effects[i];
-                err = dump_effect(stateset, sub_effect, parent, file);
+                err = dump_effect(stateset, sub_effect, context, parent,
+                    file);
             }
             break;
         }
@@ -77,7 +79,7 @@ static int dump_effect(stateset_t *stateset, state_effect_t *effect,
 }
 
 static int dump_handler(stateset_t *stateset, collmsg_handler_t *handler,
-    FILE *file
+    state_context_t *context, FILE *file
 ){
     int err;
 
@@ -85,14 +87,14 @@ static int dump_handler(stateset_t *stateset, collmsg_handler_t *handler,
 
     for(int i = 0; i < handler->effects_len; i++){
         state_effect_t *effect = handler->effects[i];
-        err = dump_effect(stateset, effect, handler, file);
+        err = dump_effect(stateset, effect, context, handler, file);
         if(err)return err;
     }
     return 0;
 }
 
 static int dump_proc(stateset_t *stateset, stateset_proc_t *proc,
-    FILE *file
+    state_context_t *context, FILE *file
 ){
     int err;
 
@@ -100,7 +102,7 @@ static int dump_proc(stateset_t *stateset, stateset_proc_t *proc,
 
     for(int i = 0; i < proc->effects_len; i++){
         state_effect_t *effect = proc->effects[i];
-        err = dump_effect(stateset, effect, proc, file);
+        err = dump_effect(stateset, effect, context, proc, file);
         if(err)return err;
     }
     return 0;
@@ -109,22 +111,47 @@ static int dump_proc(stateset_t *stateset, stateset_proc_t *proc,
 static int dump_state(stateset_t *stateset, state_t *state, FILE *file){
     int err;
 
+    state_context_t *context = state->context;
+
     fprintf(file, "    \"%p\" [label=\"State: %s\"];\n", state, state->name);
 
-    for(int i = 0; i < state->collmsg_handlers_len; i++){
-        collmsg_handler_t *handler = &state->collmsg_handlers[i];
-        fprintf(file, "    \"%p\" -> \"%p\";\n", state, handler);
-        err = dump_handler(stateset, handler, file);
-        if(err)return err;
+    for(
+        state_context_t *context = state->context;
+        context; context = context->parent
+    ){
+        for(int i = 0; i < context->collmsg_handlers_len; i++){
+            collmsg_handler_t *handler = &context->collmsg_handlers[i];
+            fprintf(file, "    \"%p\" -> \"%p\";\n", state, handler);
+        }
     }
 
     for(int i = 0; i < state->rules_len; i++){
         state_rule_t *rule = state->rules[i];
         for(int j = 0; j < rule->effects_len; j++){
             state_effect_t *effect = rule->effects[j];
-            err = dump_effect(stateset, effect, state, file);
+            err = dump_effect(stateset, effect, context, state, file);
             if(err)return err;
         }
+    }
+
+    return 0;
+}
+
+static int dump_context(stateset_t *stateset, state_context_t *context,
+    FILE *file
+){
+    int err;
+
+    for(int i = 0; i < context->collmsg_handlers_len; i++){
+        collmsg_handler_t *handler = &context->collmsg_handlers[i];
+        err = dump_handler(stateset, handler, context, file);
+        if(err)return err;
+    }
+
+    for(int i = 0; i < context->procs_len; i++){
+        stateset_proc_t *proc = &context->procs[i];
+        err = dump_proc(stateset, proc, context, file);
+        if(err)return err;
     }
 
     return 0;
@@ -137,16 +164,9 @@ static int dump_stateset(stateset_t *stateset, FILE *file){
     fprintf(file, "    label = \"Stateset: %s\";\n", stateset->filename);
     fprintf(file, "    fontsize = 24;\n");
 
-    for(int i = 0; i < stateset->collmsg_handlers_len; i++){
-        collmsg_handler_t *handler = &stateset->collmsg_handlers[i];
-        err = dump_handler(stateset, handler, file);
-        if(err)return err;
-    }
-
-    for(int i = 0; i < stateset->procs_len; i++){
-        stateset_proc_t *proc = &stateset->procs[i];
-        err = dump_proc(stateset, proc, file);
-        if(err)return err;
+    for(int i = 0; i < stateset->contexts_len; i++){
+        state_context_t *context = stateset->contexts[i];
+        dump_context(stateset, context, file);
     }
 
     for(int i = 0; i < stateset->states_len; i++){

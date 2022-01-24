@@ -502,8 +502,9 @@ int state_effect_apply(state_effect_t *effect,
         break;
     }
     case STATE_EFFECT_TYPE_CALL: {
+        state_context_t *state_context = effect->u.call.state_context;
         const char *name = effect->u.call.name;
-        stateset_proc_t *proc = stateset_get_proc(&body->stateset, name);
+        stateset_proc_t *proc = state_context_get_proc(state_context, name);
         if(!proc){
             RULE_PERROR()
             fprintf(stderr,
