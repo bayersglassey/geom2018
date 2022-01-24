@@ -51,7 +51,7 @@ int test_app_list_recording_render(test_app_list_t *list){
     recording_t *rec = &body->recording;
     recording_node_t *node = rec->nodes_len > 0? &rec->nodes[rec->node_i]: NULL;
 
-    _console_write_field(console, "Stateset", body->stateset.filename);
+    _console_write_field(console, "Stateset", body->stateset->filename);
     _console_write_field(console, "State", body->state->name);
     _console_write_section(console, "Recording");
     _console_write_recording(console, rec, true);

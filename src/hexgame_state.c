@@ -218,7 +218,7 @@ int state_cond_match(state_cond_t *cond,
                     if(!visible)continue;
 
                     if(collmsg && !(
-                        !strcmp(body_other->stateset.filename, collmsg) ||
+                        !strcmp(body_other->stateset->filename, collmsg) ||
                         body_sends_collmsg(body_other, collmsg)
                     ))continue;
 
@@ -509,7 +509,7 @@ int state_effect_apply(state_effect_t *effect,
             RULE_PERROR()
             fprintf(stderr,
                 "Couldn't find proc \"%s\" for stateset \"%s\"\n",
-                name, body->stateset.filename);
+                name, body->stateset->filename);
             return 2;
         }
         for(int i = 0; i < proc->effects_len; i++){

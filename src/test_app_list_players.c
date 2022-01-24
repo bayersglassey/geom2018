@@ -49,7 +49,7 @@ int test_app_list_players_render(test_app_list_t *list){
     player_t *player = data->item;
     if(player != NULL){
         body_t *body = player->body;
-        _console_write_field(console, "Body stateset", body? body->stateset.filename: NULL);
+        _console_write_field(console, "Body stateset", body? body->stateset->filename: NULL);
         _console_write_field(console, "Body state", body? body->state->name: NULL);
         _console_write_field_int(console, "Savepoint cooldown", player->savepoint_cooldown);
         _console_write_options(console, data->options,

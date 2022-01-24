@@ -17,7 +17,6 @@
 
 
 void actor_cleanup(actor_t *actor){
-    stateset_cleanup(&actor->stateset);
     vars_cleanup(&actor->vars);
 }
 
@@ -33,10 +32,10 @@ int actor_init(actor_t *actor, hexmap_t *map, body_t *body,
     /* NOTE: body may be NULL */
     actor->body = body;
 
+    actor->game = map->game;
+
     err = actor_init_stateset(actor, stateset_filename, state_name, map);
     if(err)return err;
-
-    actor->game = map->game;
 
     return 0;
 }
@@ -47,12 +46,12 @@ int actor_init_stateset(actor_t *actor, const char *stateset_filename,
 ){
     int err;
 
-    err = stateset_load(&actor->stateset, stateset_filename,
-        NULL, map->prend, map->space);
+    err = hexgame_get_or_load_stateset(actor->game, stateset_filename,
+        &actor->stateset);
     if(err)return err;
 
     if(state_name == NULL){
-        state_name = actor->stateset.default_state_name;
+        state_name = actor->stateset->default_state_name;
     }
 
     err = actor_set_state(actor, state_name);
@@ -65,11 +64,11 @@ int actor_set_state(actor_t *actor, const char *state_name){
     if(state_name == NULL){
         actor->state = NULL;
     }else{
-        actor->state = stateset_get_state(&actor->stateset, state_name);
+        actor->state = stateset_get_state(actor->stateset, state_name);
         if(actor->state == NULL){
             fprintf(stderr, "Couldn't init actor stateset: "
                 "couldn't find state %s in stateset %s\n",
-                state_name, actor->stateset.filename);
+                state_name, actor->stateset->filename);
             return 2;}
     }
     return 0;

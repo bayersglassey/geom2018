@@ -108,7 +108,6 @@ static void body_label_mapping_cleanup(body_label_mapping_t *mapping){
 void body_cleanup(body_t *body){
     valexpr_cleanup(&body->visible_expr);
     vars_cleanup(&body->vars);
-    stateset_cleanup(&body->stateset);
     recording_cleanup(&body->recording);
     ARRAY_FREE_PTR(body_label_mapping_t*, body->label_mappings,
         body_label_mapping_cleanup)
@@ -175,8 +174,7 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
     body->safe = false;
     body->remove = false;
 
-    memset(&body->stateset, 0, sizeof(body->stateset));
-
+    body->stateset = NULL;
     if(stateset_filename != NULL){
         err = body_set_stateset(body, stateset_filename, state_name);
         if(err)return err;
@@ -231,7 +229,7 @@ void body_dump(body_t *body, int depth){
     vars_write(&body->map->vars, stderr, TAB_SPACES * (depth + 1));
     print_tabs(stderr, depth);
     fprintf(stderr, "stateset: %s\n",
-        body->stateset.filename);
+        body->stateset->filename);
     print_tabs(stderr, depth);
     fprintf(stderr, "state: %s\n",
         body->state->name);
@@ -296,7 +294,7 @@ int body_respawn(body_t *body, vec_t pos, rot_t rot, bool turn,
     body->loc.turn = turn;
 
     /* Set body state */
-    err = body_set_state(body, body->stateset.default_state_name, true);
+    err = body_set_state(body, body->stateset->default_state_name, true);
     if(err)return err;
 
     /* Set body map */
@@ -564,7 +562,7 @@ int body_relocate(body_t *body, const char *map_filename,
     int flash_b = 255;
 
     if(stateset_filename != NULL){
-        if(strcmp(body->stateset.filename, stateset_filename)){
+        if(strcmp(body->stateset->filename, stateset_filename)){
             /* Switch anim (stateset) */
             err = body_set_stateset(body, stateset_filename, state_name);
             if(err)return err;
@@ -597,8 +595,8 @@ int body_execute_onload_procs(body_t *body){
         .body = body,
     };
     state_effect_goto_t *gotto = NULL;
-    for(int i = 0; i < body->stateset.contexts_len; i++){
-        state_context_t *state_context = body->stateset.contexts[i];
+    for(int i = 0; i < body->stateset->contexts_len; i++){
+        state_context_t *state_context = body->stateset->contexts[i];
         for(int j = 0; j < state_context->procs_len; j++){
             stateset_proc_t *proc = &state_context->procs[j];
             if(!proc->onload)continue;
@@ -614,7 +612,7 @@ int body_execute_onload_procs(body_t *body){
                         fprintf(stderr, "...in proc \"%s\"\n", proc->name);
                         fprintf(stderr,
                             "...while attempting to set stateset to: %s\n",
-                            body->stateset.filename);
+                            body->stateset->filename);
                     }
                     return err;
                 }
@@ -633,42 +631,32 @@ int body_set_stateset(body_t *body, const char *stateset_filename,
 
     int err;
 
-    if(stateset_filename == NULL)stateset_filename = body->stateset.filename;
+    if(stateset_filename == NULL && body->stateset != NULL){
+        stateset_filename = body->stateset->filename;
+    }
     if(stateset_filename == NULL){
         fprintf(stderr, "body_set_stateset: stateset_filename is NULL\n");
         return 2;
     }
 
     /* Is new stateset different from old one?..
-    Note we check for body->stateset.filename == NULL, the weird case
-    where body doesn't have a stateset set up yet (and therefore
-    body->stateset.filename == NULL). */
-    bool stateset_is_different =
-        body->stateset.filename != stateset_filename && (
-            body->stateset.filename == NULL ||
-            strcmp(body->stateset.filename, stateset_filename)
-        );
+    Note we check for body->stateset == NULL, the weird case
+    where body doesn't have a stateset set up yet. */
+    bool stateset_is_different = body->stateset == NULL || (
+        body->stateset->filename != stateset_filename &&
+        strcmp(body->stateset->filename, stateset_filename)
+    );
 
     /* If new stateset is different from old one, make the change */
     if(stateset_is_different){
 
-        /* Don't attempt to cleanup stateset if it's not initialized
-        (that weird possibility we want to remove) */
-        if(body->stateset.filename != NULL){
-            stateset_cleanup(&body->stateset);
-        }
-
-        /* Make sure freed pointers are zeroed, etc */
-        memset(&body->stateset, 0, sizeof(body->stateset));
-
-        hexmap_t *map = body->map;
-
-        err = stateset_load(&body->stateset, stateset_filename,
-            NULL, map->prend, map->space);
+        /* Get or load stateset */
+        err = hexgame_get_or_load_stateset(body->game, stateset_filename,
+            &body->stateset);
         if(err)return err;
 
         /* Copy stateset's vars onto body */
-        err = vars_copy(&body->vars, &body->stateset.vars);
+        err = vars_copy(&body->vars, &body->stateset->vars);
         if(err)return err;
 
         /* Execute any "onload" procs */
@@ -678,7 +666,7 @@ int body_set_stateset(body_t *body, const char *stateset_filename,
 
     if(state_name == NULL){
         /* If state_name not provided, use stateset's default state */
-        state_name = body->stateset.default_state_name;
+        state_name = body->stateset->default_state_name;
     }
 
     return body_set_state(body, state_name, true);
@@ -692,11 +680,11 @@ int body_set_state(body_t *body, const char *state_name,
         return 2;
     }
 
-    body->state = stateset_get_state(&body->stateset, state_name);
+    body->state = stateset_get_state(body->stateset, state_name);
     if(body->state == NULL){
         fprintf(stderr, "Couldn't init body stateset: "
             "couldn't find state %s in stateset %s\n",
-            state_name, body->stateset.filename);
+            state_name, body->stateset->filename);
         return 2;
     }
 
@@ -942,7 +930,7 @@ collmsg_handler_t *body_get_collmsg_handler(body_t *body, const char *msg){
     ){
         for(int i = 0; i < context->collmsg_handlers_len; i++){
             collmsg_handler_t *handler = &context->collmsg_handlers[i];
-            if(body->stateset.debug_collision){
+            if(body->stateset->debug_collision){
                 fprintf(stderr, "    -> state handler: %s\n", handler->msg);
             }
             if(!strcmp(msg, handler->msg)){
@@ -965,7 +953,7 @@ collmsg_handler_t *_body_handle_other_bodies_collmsgs(body_t *body, body_t *body
     ){
         for(int i = 0; i < context->collmsgs_len; i++){
             const char *msg = context->collmsgs[i];
-            if(body->stateset.debug_collision){
+            if(body->stateset->debug_collision){
                 fprintf(stderr, "  -> state collmsg: %s\n", msg);
             }
             handler = body_get_collmsg_handler(body, msg);
@@ -979,10 +967,10 @@ int body_collide_against_body(body_t *body, body_t *body_other){
     /* Do whatever happens when two bodies collide */
     int err;
 
-    if(body->stateset.debug_collision){
+    if(body->stateset->debug_collision){
         fprintf(stderr, "Colliding bodies: %s (%s) against %s (%s)\n",
-            body->stateset.filename, body->state->name,
-            body_other->stateset.filename, body_other->state->name);
+            body->stateset->filename, body->state->name,
+            body_other->stateset->filename, body_other->state->name);
     }
 
     if(body->recording.action == 1 && !body->recording.reacts){
@@ -991,7 +979,7 @@ int body_collide_against_body(body_t *body, body_t *body_other){
         MAYBE TODO: These bodies should die too, but then their
         recording should restart after a brief pause?
         Maybe we can reuse body->cooldown for the pause. */
-        if(body->stateset.debug_collision){
+        if(body->stateset->debug_collision){
             fprintf(stderr, "  -> recording is playing, early exit\n");
         }
         return 0;
@@ -1002,7 +990,7 @@ int body_collide_against_body(body_t *body, body_t *body_other){
         body, body_other);
     if(!handler)return 0;
 
-    if(body->stateset.debug_collision){
+    if(body->stateset->debug_collision){
         fprintf(stderr, "  -> *** handling with:\n");
         for(int i = 0; i < handler->effects_len; i++){
             state_effect_t *effect = handler->effects[i];

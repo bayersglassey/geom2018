@@ -366,6 +366,7 @@ void hexgame_cleanup(hexgame_t *game){
     vars_cleanup(&game->vars);
     ARRAY_FREE_PTR(char*, game->worldmaps, (void))
     ARRAY_FREE_PTR(hexmap_t*, game->maps, hexmap_cleanup)
+    ARRAY_FREE_PTR(stateset_t*, game->statesets, stateset_cleanup)
     ARRAY_FREE_PTR(camera_t*, game->cameras, camera_cleanup)
     ARRAY_FREE_PTR(player_t*, game->players, player_cleanup)
     ARRAY_FREE_PTR(actor_t*, game->actors, actor_cleanup)
@@ -432,6 +433,7 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
 
     ARRAY_INIT(game->worldmaps)
     ARRAY_INIT(game->maps)
+    ARRAY_INIT(game->statesets)
     ARRAY_INIT(game->cameras)
     ARRAY_INIT(game->players)
     ARRAY_INIT(game->actors)
@@ -495,6 +497,33 @@ int hexgame_get_or_load_map(hexgame_t *game, const char *map_filename,
     }
 
     return hexgame_load_map(game, map_filename, map_ptr);
+}
+
+int hexgame_get_or_load_stateset(hexgame_t *game, const char *filename,
+    stateset_t **stateset_ptr
+){
+    int err;
+
+    stateset_t *stateset = NULL;
+
+    for(int i = 0; i < game->statesets_len; i++){
+        stateset_t *_stateset = game->statesets[i];
+        if(!strcmp(_stateset->filename, filename)){
+            stateset = _stateset;
+            break;
+        }
+    }
+
+    if(!stateset){
+        ARRAY_PUSH_NEW(stateset_t*, game->statesets, new_stateset)
+        err = stateset_load(new_stateset, filename,
+            game->prend, game->space);
+        if(err)return err;
+        stateset = new_stateset;
+    }
+
+    *stateset_ptr = stateset;
+    return 0;
 }
 
 int hexgame_get_map_index(hexgame_t *game, hexmap_t *map){

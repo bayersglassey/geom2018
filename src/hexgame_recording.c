@@ -177,8 +177,13 @@ static int recording_parse(recording_t *rec,
         OPEN
         err = vars_parse(&body->vars, lexer);
         if(err)return err;
-        err = body_execute_onload_procs(body);
-        if(err)return err;
+        /*
+        We don't do this here because body->stateset is NULL!..
+        It will be set later on, whenever someone calls body_play_recording.
+        TODO: FIX THIS GROSS HACK >__>
+         err = body_execute_onload_procs(body);
+         if(err)return err;
+        */
         CLOSE
     }
 
@@ -407,7 +412,7 @@ int body_start_recording(body_t *body, const char *filename){
     body->recording.file = f;
 
     fprintf(f, "anim: ");
-    fus_write_str(f, body->stateset.filename);
+    fus_write_str(f, body->stateset->filename);
     fprintf(f, "\n");
 
     fprintf(f, "state: ");

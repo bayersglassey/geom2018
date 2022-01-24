@@ -68,7 +68,7 @@ int test_app_list_actors_step(test_app_list_t *list){
     if(data->mode == TEST_APP_LIST_ACTORS_MODE_STATEPICKER){
         test_app_list_data_set_options_stateset(data,
             test_app_list_actors_options_statepicker, list->index_y,
-            actor? &actor->stateset: NULL, actor? actor->state: NULL);
+            actor? actor->stateset: NULL, actor? actor->state: NULL);
     }else{
         test_app_list_data_set_options(data,
             test_app_list_actors_options, list->index_y);
@@ -83,14 +83,14 @@ int test_app_list_actors_render(test_app_list_t *list){
     actor_t *actor = data->item;
     if(actor != NULL){
         body_t *body = actor->body;
-        _console_write_field(console, "Stateset", actor->stateset.filename);
+        _console_write_field(console, "Stateset", actor->stateset->filename);
         _console_write_field(console, "State", actor->state->name);
-        _console_write_field(console, "Body stateset", body? body->stateset.filename: NULL);
+        _console_write_field(console, "Body stateset", body? body->stateset->filename: NULL);
         _console_write_field(console, "Body state", body? body->state->name: NULL);
         if(data->mode == TEST_APP_LIST_ACTORS_MODE_STATEPICKER){
             _console_write_options_stateset(console, data->options,
                 data->options_index, data->options_length,
-                &actor->stateset, actor->state);
+                actor->stateset, actor->state);
         }else{
             _console_write_options(console, data->options,
                 data->options_index, data->options_length);
@@ -113,10 +113,10 @@ int test_app_list_actors_select_item(test_app_list_t *list){
                     TEST_APP_LIST_ACTORS_MODE_DEFAULT);
             } break;
             default: {
-                if(actor->stateset.states_len == 0)return 0;
-                int options_length = data->options_length - actor->stateset.states_len;
+                if(actor->stateset->states_len == 0)return 0;
+                int options_length = data->options_length - actor->stateset->states_len;
                 int state_index = data->options_index - options_length;
-                state_t *state = actor->stateset.states[state_index];
+                state_t *state = actor->stateset->states[state_index];
                 err = actor_set_state(actor, state->name);
                 if(err)return err;
                 if(body != NULL)body->recording.action = 0;

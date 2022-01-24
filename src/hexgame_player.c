@@ -96,14 +96,14 @@ static int player_set_respawn(player_t *player){
     body_t *body = player->body;
     return _player_set_location(player, &player->respawn_location,
         body->loc.pos, body->loc.rot, body->loc.turn, body->map->filename,
-        body->stateset.filename, body->state->name);
+        body->stateset->filename, body->state->name);
 }
 
 static int player_set_safe_location(player_t *player){
     body_t *body = player->body;
     return _player_set_location(player, &player->safe_location,
         body->loc.pos, body->loc.rot, body->loc.turn, body->map->filename,
-        body->stateset.filename, body->state->name);
+        body->stateset->filename, body->state->name);
 }
 
 int player_spawn_body(player_t *player){

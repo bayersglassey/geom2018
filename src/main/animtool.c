@@ -261,7 +261,7 @@ int main(int n_args, char **args){
         stateset_t stateset;
         stateset_init(&stateset, stateset_filename);
 
-        err = stateset_load(&stateset, stateset_filename, NULL,
+        err = stateset_load(&stateset, stateset_filename,
             &prend, &hexspace);
         if(err)return err;
 

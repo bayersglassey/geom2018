@@ -250,7 +250,7 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
                 if(player->keymap < 0)continue;
                 if(event->key.keysym.mod & KMOD_CTRL){
                     if(!player->body)continue;
-                    stateset_dump(&player->body->stateset, stderr, 0);
+                    stateset_dump(player->body->stateset, stderr, 0);
                 }else{
                     player_dump(player, 0);
                 }

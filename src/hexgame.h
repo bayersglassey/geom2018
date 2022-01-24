@@ -150,31 +150,6 @@ typedef struct body {
         (e.g. bodies loaded by hexmap which simply play a recording
         on repeat, or body created when you press F10). */
 
-    stateset_t stateset;
-        /* Bodies can be in a strange state where their stateset is
-        not initialized yet.
-        This happens when the stateset_filename passed to body_init is
-        NULL.
-        This happens in the following cases (as of this writing):
-
-            * An actor is loaded by a hexmap (hexmap_load_hexmap_recording)
-            ...in this case, a body is created for the actor with
-            uninitialized stateset, because we expect the actor to execute
-            the "play" effect and initialize body's stateset. (?)
-
-            * A recording is loaded by a hexmap (hexmap_load_recording)
-            ...in this case, we need a body because the recording object
-            lives on it.
-            Once recording is loaded, we call body_play_recording which
-            initializes body's stateset.
-
-        I believe we can detect this situation with either of the following:
-            * body->stateset->filename = NULL
-            * body->state == NULL (?)
-
-        ...I would rather not have to support bodies with uninitialized
-        statesets. Can we fix it somehow?.. */
-
     int frame_i;
     int cooldown;
     bool no_key_reset; /* don't reset keyinfo when cooldown reaches zero */
@@ -192,6 +167,30 @@ typedef struct body {
     hexmap_t *map;
     hexmap_submap_t *cur_submap;
     palettemapper_t *palmapper;
+
+    stateset_t *stateset;
+        /* Bodies can be in a strange state where their stateset is NULL.
+        This happens when the stateset_filename passed to body_init is NULL.
+        This happens in the following cases (as of this writing):
+
+            * An actor is loaded by a hexmap (hexmap_load_hexmap_recording)
+            ...in this case, a body is created for the actor with
+            uninitialized stateset, because we expect the actor to execute
+            the "play" effect and initialize body's stateset. (?)
+
+            * A recording is loaded by a hexmap (hexmap_load_recording)
+            ...in this case, we need a body because the recording object
+            lives on it.
+            Once recording is loaded, we call body_play_recording which
+            initializes body's stateset.
+
+        I believe we can detect this situation with either of the following:
+            * body->stateset == NULL
+            * body->state == NULL (?)
+
+        ...I would rather not have to support bodies with NULL statesets.
+        Can we fix it somehow?.. */
+
     state_t *state;
 } body_t;
 
@@ -301,7 +300,6 @@ int player_use_savepoint(player_t *player);
 
 typedef struct actor {
     trf_t trf;
-    stateset_t stateset;
     int wait;
 
     vars_t vars;
@@ -310,6 +308,7 @@ typedef struct actor {
     struct hexgame *game;
     body_t *body;
     state_t *state;
+    stateset_t *stateset;
 } actor_t;
 
 void actor_cleanup(actor_t *actor);
@@ -404,6 +403,7 @@ typedef struct hexgame {
 
     ARRAY_DECL(char*, worldmaps)
     ARRAY_DECL(hexmap_t*, maps)
+    ARRAY_DECL(stateset_t*, statesets)
     ARRAY_DECL(camera_t*, cameras)
     ARRAY_DECL(player_t*, players)
     ARRAY_DECL(actor_t*, actors)
@@ -434,6 +434,8 @@ int hexgame_load_map(hexgame_t *game, const char *map_filename,
     hexmap_t **map_ptr);
 int hexgame_get_or_load_map(hexgame_t *game, const char *map_filename,
     hexmap_t **map_ptr);
+int hexgame_get_or_load_stateset(hexgame_t *game, const char *filename,
+    stateset_t **stateset_ptr);
 int hexgame_get_map_index(hexgame_t *game, hexmap_t *map);
 int hexgame_reset_player(hexgame_t *game, player_t *player,
     int reset_level, hexmap_t *reset_map);

@@ -458,8 +458,14 @@ static int hexmap_load_hexmap_recording(
 
         err = vars_copy(&body->vars, &recording->bodyvars);
         if(err)return err;
-        err = body_execute_onload_procs(body);
-        if(err)return err;
+        /*
+        We don't actually do this here, because body->stateset is NULL!..
+        We basically expect the actor's initial state to "play" a recording
+        which will give the body its stateset.
+        TODO: FIX THIS GODAWFUL HACK T__T
+         err = body_execute_onload_procs(body);
+         if(err)return err;
+        */
 
         err = vars_copy(&actor->vars, &recording->vars);
         if(err)return err;

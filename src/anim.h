@@ -385,7 +385,7 @@ typedef struct state_effect_ite {
 void stateset_cleanup(stateset_t *stateset);
 int stateset_init(stateset_t *stateset, const char *filename);
 void stateset_dump(stateset_t *stateset, FILE *file, int depth);
-int stateset_load(stateset_t *stateset, const char *filename, vars_t *vars,
+int stateset_load(stateset_t *stateset, const char *filename,
     prismelrenderer_t *prend, vecspace_t *space);
 int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
     prismelrenderer_t *prend, vecspace_t *space);
