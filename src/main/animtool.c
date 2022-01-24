@@ -11,6 +11,19 @@
 const char *DEFAULT_PREND_FILENAME = "data/test.fus";
 
 
+
+typedef struct opts{
+    bool output_handlers;
+    bool output_procs;
+    FILE *file;
+} opts_t;
+static void opts_init(opts_t *opts){
+    opts->output_handlers = true;
+    opts->output_procs = true;
+    opts->file = stdout;
+}
+
+
 static void print_usage(FILE *file){
     fprintf(stderr,
         "Usage: animtool [OPTION ...] [--] FILENAME"
@@ -20,31 +33,33 @@ static void print_usage(FILE *file){
         "\n"
         "Options:\n"
         "   -h --help            Print this message and exit\n"
+        "   -H --no_handlers     Don't output collmsg handlers\n"
+        "   -P --no_procs        Don't output procs\n"
         "      --prend FILENAME  Prismelrenderer (default: %s)\n"
     , DEFAULT_PREND_FILENAME);
 }
 
 
 static int dump_effect(stateset_t *stateset, state_effect_t *effect,
-    state_context_t *context, void *parent, FILE *file
+    state_context_t *context, void *parent, opts_t *opts
 ) {
     int err;
     switch(effect->type){
-        case STATE_EFFECT_TYPE_CALL: {
+        case STATE_EFFECT_TYPE_CALL: if(opts->output_procs){
             state_effect_call_t *call = &effect->u.call;
             stateset_proc_t *proc = state_context_get_proc(context, call->name);
             if(!proc){
                 fprintf(stderr, "Couldn't find proc \"%s\"\n", call->name);
                 return 2;
             }
-            fprintf(file, "    \"%p\" -> \"%p\";\n", parent, proc);
+            fprintf(opts->file, "    \"%p\" -> \"%p\";\n", parent, proc);
             break;
         }
         case STATE_EFFECT_TYPE_SPAWN: {
             state_effect_spawn_t *spawn = &effect->u.spawn;
             for(int i = 0; i < spawn->effects_len; i++){
                 state_effect_t *effect = spawn->effects[i];
-                err = dump_effect(stateset, effect, context, parent, file);
+                err = dump_effect(stateset, effect, context, parent, opts);
                 if(err)return err;
             }
             break;
@@ -56,7 +71,7 @@ static int dump_effect(stateset_t *stateset, state_effect_t *effect,
                 fprintf(stderr, "Couldn't find state \"%s\"\n", gotto->name);
                 return 2;
             }
-            fprintf(file, "    \"%p\" -> \"%p\";\n", parent, state);
+            fprintf(opts->file, "    \"%p\" -> \"%p\";\n", parent, state);
             break;
         }
         case STATE_EFFECT_TYPE_IF: {
@@ -64,12 +79,12 @@ static int dump_effect(stateset_t *stateset, state_effect_t *effect,
             for(int i = 0; i < ite->then_effects_len; i++){
                 state_effect_t *sub_effect = ite->then_effects[i];
                 err = dump_effect(stateset, sub_effect, context, parent,
-                    file);
+                    opts);
             }
             for(int i = 0; i < ite->else_effects_len; i++){
                 state_effect_t *sub_effect = ite->else_effects[i];
                 err = dump_effect(stateset, sub_effect, context, parent,
-                    file);
+                    opts);
             }
             break;
         }
@@ -79,49 +94,51 @@ static int dump_effect(stateset_t *stateset, state_effect_t *effect,
 }
 
 static int dump_handler(stateset_t *stateset, collmsg_handler_t *handler,
-    state_context_t *context, FILE *file
+    state_context_t *context, opts_t *opts
 ){
     int err;
 
-    fprintf(file, "    \"%p\" [label=\"Handler: %s\"];\n", handler, handler->msg);
+    fprintf(opts->file, "    \"%p\" [label=\"Handler: %s\"];\n", handler, handler->msg);
 
     for(int i = 0; i < handler->effects_len; i++){
         state_effect_t *effect = handler->effects[i];
-        err = dump_effect(stateset, effect, context, handler, file);
+        err = dump_effect(stateset, effect, context, handler, opts);
         if(err)return err;
     }
     return 0;
 }
 
 static int dump_proc(stateset_t *stateset, stateset_proc_t *proc,
-    state_context_t *context, FILE *file
+    state_context_t *context, opts_t *opts
 ){
     int err;
 
-    fprintf(file, "    \"%p\" [label=\"Proc: %s\"];\n", proc, proc->name);
+    fprintf(opts->file, "    \"%p\" [label=\"Proc: %s\"];\n", proc, proc->name);
 
     for(int i = 0; i < proc->effects_len; i++){
         state_effect_t *effect = proc->effects[i];
-        err = dump_effect(stateset, effect, context, proc, file);
+        err = dump_effect(stateset, effect, context, proc, opts);
         if(err)return err;
     }
     return 0;
 }
 
-static int dump_state(stateset_t *stateset, state_t *state, FILE *file){
+static int dump_state(stateset_t *stateset, state_t *state, opts_t *opts){
     int err;
 
     state_context_t *context = state->context;
 
-    fprintf(file, "    \"%p\" [label=\"State: %s\"];\n", state, state->name);
+    fprintf(opts->file, "    \"%p\" [label=\"State: %s\"];\n", state, state->name);
 
-    for(
-        state_context_t *context = state->context;
-        context; context = context->parent
-    ){
-        for(int i = 0; i < context->collmsg_handlers_len; i++){
-            collmsg_handler_t *handler = &context->collmsg_handlers[i];
-            fprintf(file, "    \"%p\" -> \"%p\";\n", state, handler);
+    if(opts->output_handlers){
+        for(
+            state_context_t *context = state->context;
+            context; context = context->parent
+        ){
+            for(int i = 0; i < context->collmsg_handlers_len; i++){
+                collmsg_handler_t *handler = &context->collmsg_handlers[i];
+                fprintf(opts->file, "    \"%p\" -> \"%p\";\n", state, handler);
+            }
         }
     }
 
@@ -129,7 +146,7 @@ static int dump_state(stateset_t *stateset, state_t *state, FILE *file){
         state_rule_t *rule = state->rules[i];
         for(int j = 0; j < rule->effects_len; j++){
             state_effect_t *effect = rule->effects[j];
-            err = dump_effect(stateset, effect, context, state, file);
+            err = dump_effect(stateset, effect, context, state, opts);
             if(err)return err;
         }
     }
@@ -138,44 +155,48 @@ static int dump_state(stateset_t *stateset, state_t *state, FILE *file){
 }
 
 static int dump_context(stateset_t *stateset, state_context_t *context,
-    FILE *file
+    opts_t *opts
 ){
     int err;
 
-    for(int i = 0; i < context->collmsg_handlers_len; i++){
-        collmsg_handler_t *handler = &context->collmsg_handlers[i];
-        err = dump_handler(stateset, handler, context, file);
-        if(err)return err;
+    if(opts->output_handlers){
+        for(int i = 0; i < context->collmsg_handlers_len; i++){
+            collmsg_handler_t *handler = &context->collmsg_handlers[i];
+            err = dump_handler(stateset, handler, context, opts);
+            if(err)return err;
+        }
     }
 
-    for(int i = 0; i < context->procs_len; i++){
-        stateset_proc_t *proc = &context->procs[i];
-        err = dump_proc(stateset, proc, context, file);
-        if(err)return err;
+    if(opts->output_procs){
+        for(int i = 0; i < context->procs_len; i++){
+            stateset_proc_t *proc = &context->procs[i];
+            err = dump_proc(stateset, proc, context, opts);
+            if(err)return err;
+        }
     }
 
     return 0;
 }
 
-static int dump_stateset(stateset_t *stateset, FILE *file){
+static int dump_stateset(stateset_t *stateset, opts_t *opts){
     int err;
 
-    fprintf(file, "digraph {\n");
-    fprintf(file, "    label = \"Stateset: %s\";\n", stateset->filename);
-    fprintf(file, "    fontsize = 24;\n");
+    fprintf(opts->file, "digraph {\n");
+    fprintf(opts->file, "    label = \"Stateset: %s\";\n", stateset->filename);
+    fprintf(opts->file, "    fontsize = 24;\n");
 
     for(int i = 0; i < stateset->contexts_len; i++){
         state_context_t *context = stateset->contexts[i];
-        dump_context(stateset, context, file);
+        dump_context(stateset, context, opts);
     }
 
     for(int i = 0; i < stateset->states_len; i++){
         state_t *state = stateset->states[i];
-        err = dump_state(stateset, state, file);
+        err = dump_state(stateset, state, opts);
         if(err)return err;
     }
 
-    fprintf(file, "}\n");
+    fprintf(opts->file, "}\n");
 
     return 0;
 }
@@ -184,12 +205,19 @@ static int dump_stateset(stateset_t *stateset, FILE *file){
 int main(int n_args, char **args){
     const char *prend_filename = DEFAULT_PREND_FILENAME;
 
+    opts_t opts;
+    opts_init(&opts);
+
     int arg_i = 1;
     for(; arg_i < n_args; arg_i++){
         char *arg = args[arg_i];
         if(!strcmp(arg, "-h") || !strcmp(arg, "--help")){
             print_usage(stdout);
             return 0;
+        }else if(!strcmp(arg, "-H") || !strcmp(arg, "--no_handlers")){
+            opts.output_handlers = false;
+        }else if(!strcmp(arg, "-P") || !strcmp(arg, "--no_procs")){
+            opts.output_procs = false;
         }else if(!strcmp(arg, "--prend")){
             if(n_args - arg_i < 2){
                 fprintf(stderr, "Missing value for option: %s\n", arg);
@@ -238,7 +266,7 @@ int main(int n_args, char **args){
         if(err)return err;
 
         /* What we came here for... */
-        err = dump_stateset(&stateset, stdout);
+        err = dump_stateset(&stateset, &opts);
         if(err)return err;
 
         stateset_cleanup(&stateset);

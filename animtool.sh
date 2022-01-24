@@ -3,8 +3,9 @@
 set -eu
 
 usage() {
-    echo "Usage: $0 [--ext EXT] [--open] ANIM" >&2
+    echo "Usage: $0 [--ext EXT] [--open] ANIM [OPTION ...]" >&2
     echo "...where the file anim/ANIM.fus is expected to exist." >&2
+    echo "The OPTIONs are those of bin/animtool, run it with --help to see them." >&2
 }
 
 ext=pdf
@@ -20,7 +21,7 @@ do
     esac
 done
 
-test "$#" -eq 1 || {
+test "$#" -ge 1 || {
     usage
     exit 1
 }
