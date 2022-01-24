@@ -1018,6 +1018,12 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
         if(GOT("import")){
             NEXT
 
+            bool scoped = false;
+            if(GOT("scoped")){
+                NEXT
+                scoped = true;
+            }
+
             /* We use _fus_lexer_get_str to avoid calling fus_lexer_next until after
             the call to fus_lexer_init_with_vars is done, to make sure we don't modify
             lexer->vars first */
@@ -1033,11 +1039,15 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                 lexer->vars);
             if(err)return err;
 
-            ARRAY_PUSH_NEW(state_context_t*, stateset->contexts, sub_context)
-            state_context_init(sub_context, stateset, context);
+            state_context_t *import_context = context;
+            if(scoped){
+                ARRAY_PUSH_NEW(state_context_t*, stateset->contexts, sub_context)
+                state_context_init(sub_context, stateset, context);
+                import_context = sub_context;
+            }
 
             err = _stateset_parse(stateset, &sublexer, prend, space,
-                sub_context);
+                import_context);
             if(err){
                 fus_lexer_err_info(lexer);
                 fprintf(stderr, "...while importing here.\n");
