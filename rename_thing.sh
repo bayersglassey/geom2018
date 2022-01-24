@@ -19,7 +19,7 @@ if ack -l "$from" "$@" >/dev/null
 then
     echo "Modifying the following files:" >&2
     ack -l "$from" "$@" >&2
-    sed -i "s@$from@$to@g" $(ack -l "$from" "$@") || true
+    sed -E -i "s@$from@$to@g" $(ack -l "$from" "$@") || true
 else
     echo "No files need to be modified" >&2
 fi
@@ -28,7 +28,7 @@ found=
 for f in $(find "$@" -name "*$from*")
 do
     found=1
-    f2="$(echo "$f" | sed "s@$from@$to@g")"
+    f2="$(echo "$f" | sed -E "s@$from@$to@g")"
     echo "Moving: $f -> $f2"
     mv "$f" "$f2"
 done
