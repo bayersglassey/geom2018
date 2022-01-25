@@ -561,7 +561,16 @@ static int _hexmap_parse(hexmap_t *map, fus_lexer_t *lexer,
         NEXT
     }
 
-    /* parse vars */
+    /* parse globalvars */
+    if(GOT("globalvars")){
+        NEXT
+        OPEN
+        err = vars_parse(&map->game->vars, lexer);
+        if(err)return err;
+        CLOSE
+    }
+
+    /* parse mapvars */
     if(GOT("vars")){
         NEXT
         OPEN
