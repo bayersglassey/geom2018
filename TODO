@@ -573,7 +573,6 @@ Nov 3, 2021:
 Dec 13, 2021:
 -------------
 
-* procs should be able to live on states as well as stateset...
 * coinlike things should know how to remove themselves when their key becomes F (or antikey becomes T)?..
     * Need this for when mapvar("eyeplayer_vines_ran_away_4") becomes T, then mini_eye should disappear
 
@@ -585,6 +584,7 @@ Concerning turning into non-spider things, e.g. rollers...
 That's not gonna interact well with e.g. myvars("carrying"), eh?
 So we either need to call a certain proc when transforming, or... uh... do something else.
 => Maybe... switch bodies?
+=> UPDATE: there are now "onstatesetchange" procs. Maaaaybe that could be a solution.
 
 
 Dec 21, 2021:
@@ -599,15 +599,6 @@ Dec 21, 2021:
 
 * data/maps/tutorial3/start.fus: eyes should give you a hint, like
     "jump right through the middle!" or something
-
-
-Jan 1, 2022:
-------------
-
-myvar("is_rollerspider"), myvar("is_flierspider"), myvar("is_birdspider"): presumably don't work
-with anim/*spider.fus other than the ones they're intended for use with, because the others will be
-missing the imports of anim/_roller.fus, anim/_flier_core.fus, anim/_bird.fus, etc.
-So: can we use labels to introduce visual changes, instead of requiring separate statesets?..
 
 
 Jan 7, 2022:
@@ -673,15 +664,6 @@ Jan 17, 2022:
     and you can crouch under them or walk over them.
 
 
-Jan 19, 2022:
--------------
-
-* Currently statesets are loaded from file all the time, with no caching... so, add a cache, e.g.:
-
-        err = hexgame_get_or_load_stateset(game, filename, &stateset);
-        if(err)return err;
-
-
 Jan 21, 2022:
 -------------
 
@@ -689,16 +671,3 @@ Jan 21, 2022:
 Read this paper ("Graph Drawing by Force-directed Placement"):
 
     https://reingold.co/force-directed.pdf
-
-
-Jan 22, 2022:
--------------
-
-In anim/_bird.fus there is:
-
-    on "spikeyspit":
-        goto: $PREFIX ANIM_NS "turn"
-        delay: $GET_INT TURN_DELAY
-
-...which, when you have "is_spikeyplayer": T, and shoot a spikey spit, causes it
-to hit you, and you turn around and become a bird. O_o
