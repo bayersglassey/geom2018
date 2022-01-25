@@ -119,6 +119,22 @@ $IF !EYESPIDER: on "carryable":
             goto immediate: "_collected"
 
 
+proc onmapchange "mapchange":
+
+    # Decrement a mapvar tracking how many of this thing are
+    # being carried
+    # (NOTE: this logic should match that for when spit "dies")
+    if: exists myvar("carrying_respawn_counter")
+    then: dec mapvar(myvar("carrying_respawn_counter"))
+
+    # Unset "carrying" and related vars
+    call: "_unset_carrying"
+
+proc "_unset_carrying":
+    # Unsets "carrying" and related vars
+    set myvar("carrying"): null
+    set myvar("label:carrying"): null
+
 proc "_spawn_spit":
     # "me" is spider, "you" is spider's newly-spawned spit
 
@@ -132,33 +148,27 @@ proc "_spawn_spit":
             set myvar("carrying_respawn_counter"): yourvar("carrying_respawn_counter")
             set myvar("label:carrying"): yourvar("label:carrying")
 
-        # Unset spider's "carrying"
-        set myvar("carrying"): null
-        set myvar("label:carrying"): null
+        # Unset "carrying" and related vars
+        call: "_unset_carrying"
 
 proc "spit":
-    spawn: myvar("spit_anim") "fly" (0 0) 0 f do:
-        call: "_spawn_spit"
+    spawn: myvar("spit_anim") "fly" (0 0) 0 f do: call: "_spawn_spit"
     goto delay: "spit"
 
 proc "looking_up_spit":
-    spawn: myvar("spit_anim") "fly" (1 0) 1 f do:
-        call: "_spawn_spit"
+    spawn: myvar("spit_anim") "fly" (1 0) 1 f do: call: "_spawn_spit"
     goto delay: "looking_up_spit"
 
 proc "crawl_spit":
-    spawn: myvar("spit_anim") "crouch_fly" (0 0) 0 f do:
-        call: "_spawn_spit"
+    spawn: myvar("spit_anim") "crouch_fly" (0 0) 0 f do: call: "_spawn_spit"
     goto delay: "crawl_spit"
 
 proc "crawl_looking_up_spit":
-    spawn: myvar("spit_anim") "crouch_fly" (1 0) 1 f do:
-        call: "_spawn_spit"
+    spawn: myvar("spit_anim") "crouch_fly" (1 0) 1 f do: call: "_spawn_spit"
     goto delay: "crawl_looking_up_spit"
 
 proc "swim_spit":
-    spawn: myvar("spit_anim") "fly" (0 0) 0 f do:
-        call: "_spawn_spit"
+    spawn: myvar("spit_anim") "fly" (0 0) 0 f do: call: "_spawn_spit"
     goto delay: "swim_spit"
 
 
