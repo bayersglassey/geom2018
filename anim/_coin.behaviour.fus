@@ -10,7 +10,7 @@ proc "while_collected":
     # Respawn based on a mapvar
     if: exists myvar("respawn_counter")
     then:
-        if: expr: <= globalvar(myvar("respawn_counter")) 0
+        if: expr: <= mapvar(myvar("respawn_counter")) 0
         then: goto immediate: "init"
 
     # Respawn based on a timer

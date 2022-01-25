@@ -36,7 +36,7 @@ proc "on_death":
         # Decrement a mapvar tracking how many of this thing are
         # being carried
         if: exists myvar("carrying_respawn_counter")
-        then: dec globalvar(myvar("carrying_respawn_counter"))
+        then: dec mapvar(myvar("carrying_respawn_counter"))
 
         # We're no longer carrying anything
         set myvar("carrying"): null

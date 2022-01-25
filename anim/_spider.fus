@@ -112,7 +112,7 @@ $IF !EYESPIDER: on "carryable":
         # Increment a var tracking how many of this thing are
         # being carried
         if: exists myvar("carrying_respawn_counter")
-        then: inc globalvar(myvar("carrying_respawn_counter"))
+        then: inc mapvar(myvar("carrying_respawn_counter"))
 
         # When a thing is carried, it is "collected"
         as you:
