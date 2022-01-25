@@ -502,31 +502,37 @@ int body_refresh_vars(body_t *body){
     int err;
     vars_t *vars = &body->vars;
 
-    var_t *var_turn = _get_nosave_var(vars, ".turn");
-    if(var_turn == NULL)return 1;
-    val_set_bool(&var_turn->value, body->loc.turn);
-    /*
-    ...we don't bother calling the following, because we know these
-    aren't "label vars" (in the sense of HEXGAME_VARS_PROP_LABEL), so
-    body->vars.callback (i.e. body_vars_callback) doesn't care about them.
-     err = vars_callback(vars, var_turn);
-     if(err)return err;
-    */
-
-    var_t *var_state = _get_nosave_var(vars, ".state");
-    if(var_state == NULL)return 1;
-    if(body->state != NULL){
-        val_set_const_str(&var_state->value, body->state->name);
-    }else{
-        val_set_null(&var_state->value);
+    {
+        var_t *var = _get_nosave_var(vars, ".turn");
+        if(var == NULL)return 1;
+        val_set_bool(&var->value, body->loc.turn);
     }
-    /*
-    ...we don't bother calling the following, because we know these
-    aren't "label vars" (in the sense of HEXGAME_VARS_PROP_LABEL), so
-    body->vars.callback (i.e. body_vars_callback) doesn't care about them.
-     err = vars_callback(vars, var_state);
-     if(err)return err;
-    */
+
+    {
+        var_t *var = _get_nosave_var(vars, ".anim");
+        if(var == NULL)return 1;
+        if(body->stateset != NULL){
+            val_set_const_str(&var->value, body->stateset->filename);
+        }else{
+            val_set_null(&var->value);
+        }
+    }
+
+    {
+        var_t *var = _get_nosave_var(vars, ".state");
+        if(var == NULL)return 1;
+        if(body->state != NULL){
+            val_set_const_str(&var->value, body->state->name);
+        }else{
+            val_set_null(&var->value);
+        }
+    }
+
+    {
+        var_t *var = _get_nosave_var(vars, ".map");
+        if(var == NULL)return 1;
+        val_set_const_str(&var->value, body->map->filename);
+    }
 
     return 0;
 }
