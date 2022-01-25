@@ -3,7 +3,7 @@
 set -euo pipefail
 
 test "$#" -ge 2 || {
-    echo "Usage: rename_thing.sh RENAME_FROM RENAME_TO" >&2
+    echo "Usage: rename_thing.sh RENAME_FROM RENAME_TO [FILE_OR_DIR ...]" >&2
     exit 1
 }
 
