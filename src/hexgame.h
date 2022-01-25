@@ -225,7 +225,7 @@ int body_relocate(body_t *body, const char *map_filename,
     hexgame_location_t *loc, const char *stateset_filename,
     const char *state_name);
 
-int body_execute_onload_procs(body_t *body);
+int body_execute_procs(body_t *body, int type /* enum stateset_proc_type */);
 int body_set_stateset(body_t *body, const char *stateset_filename,
     const char *state_name);
 int body_set_state(body_t *body, const char *state_name,

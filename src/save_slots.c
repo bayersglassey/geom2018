@@ -222,7 +222,8 @@ int hexgame_load(hexgame_t *game, const char *filename,
 
             err = vars_copy(&player->body->vars, &body_vars);
             if(err)return err;
-            err = body_execute_onload_procs(player->body);
+            err = body_execute_procs(player->body,
+                STATESET_PROC_TYPE_ONSTATESETCHANGE);
             if(err)return err;
         }
 

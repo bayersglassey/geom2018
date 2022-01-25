@@ -127,10 +127,19 @@ static int _parse_stateset_proc(state_context_t *context, fus_lexer_t *lexer,
 
     stateset_t *stateset = context->stateset;
 
-    bool onload = false;
-    if(GOT("onload")){
-        NEXT
-        onload = true;
+    int type = STATESET_PROC_TYPE_NORMAL;
+    while(true){
+        if(GOT("onstatesetchange")){
+            NEXT
+            type = STATESET_PROC_TYPE_ONSTATESETCHANGE;
+            continue;
+        }
+        if(GOT("onmapchange")){
+            NEXT
+            type = STATESET_PROC_TYPE_ONMAPCHANGE;
+            continue;
+        }
+        break;
     }
 
     const char *name;
@@ -143,7 +152,7 @@ static int _parse_stateset_proc(state_context_t *context, fus_lexer_t *lexer,
         return 2;
     }
 
-    stateset_proc_init(proc, name, onload);
+    stateset_proc_init(proc, type, name);
 
     OPEN
     while(true){
@@ -181,12 +190,10 @@ void stateset_proc_cleanup(stateset_proc_t *proc){
     ARRAY_FREE_PTR(state_effect_t*, proc->effects, state_effect_cleanup)
 }
 
-void stateset_proc_init(stateset_proc_t *proc, const char *name,
-    bool onload
-){
+void stateset_proc_init(stateset_proc_t *proc, int type, const char *name){
+    proc->type = type;
     proc->name = name;
     ARRAY_INIT(proc->effects)
-    proc->onload = onload;
 }
 
 

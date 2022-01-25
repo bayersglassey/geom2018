@@ -75,18 +75,31 @@ struct state_effect_goto;
 * STATESET_PROC *
 ****************/
 
+enum stateset_proc_type {
+    STATESET_PROC_TYPE_NORMAL,
+    STATESET_PROC_TYPE_ONSTATESETCHANGE,
+    STATESET_PROC_TYPE_ONMAPCHANGE,
+    STATESET_PROC_TYPES
+};
+
+static const char *stateset_proc_type_msg(int type){
+    switch(type){
+        case STATESET_PROC_TYPE_NORMAL: return "normal";
+        case STATESET_PROC_TYPE_ONSTATESETCHANGE: return "onstatesetchange";
+        case STATESET_PROC_TYPE_ONMAPCHANGE: return "onmapchange";
+        default: return "unknown";
+    }
+}
+
 typedef struct stateset_proc {
     /* A "procedure" which can be "called" using STATE_EFFECT_TYPE_CALL */
+    int type; /* enum stateset_proc_type */
     const char *name;
     ARRAY_DECL(struct state_effect*, effects)
-
-    bool onload;
-        /* This proc should be called when body's stateset is set */
 } stateset_proc_t;
 
 void stateset_proc_cleanup(stateset_proc_t *handler);
-void stateset_proc_init(stateset_proc_t *handler, const char *name,
-    bool onload);
+void stateset_proc_init(stateset_proc_t *handler, int type, const char *name);
 
 
 /****************

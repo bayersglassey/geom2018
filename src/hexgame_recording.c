@@ -181,7 +181,7 @@ static int recording_parse(recording_t *rec,
         We don't do this here because body->stateset is NULL!..
         It will be set later on, whenever someone calls body_play_recording.
         TODO: FIX THIS GROSS HACK >__>
-         err = body_execute_onload_procs(body);
+         err = body_execute_procs(body, STATESET_PROC_TYPE_ONSTATESETCHANGE);
          if(err)return err;
         */
         CLOSE

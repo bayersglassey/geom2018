@@ -471,6 +471,10 @@ int body_move_to_map(body_t *body, hexmap_t *map){
     /* Don't do nuthin rash if you don't gotta */
     if(body->map == map)return 0;
 
+    /* Run any procs which need to e.g. clean up mapvars in the old map */
+    err = body_execute_procs(body, STATESET_PROC_TYPE_ONMAPCHANGE);
+    if(err)return err;
+
     /* Do the thing we all came here for */
     body->map = map;
 
@@ -591,9 +595,8 @@ int body_relocate(body_t *body, const char *map_filename,
  * BODY STATE *
  **************/
 
-int body_execute_onload_procs(body_t *body){
-    /* To be called after body's stateset is set, or body's vars are loaded
-    from a save file, etc */
+int body_execute_procs(body_t *body, int type /* enum stateset_proc_type */){
+    /* Execute all procs of the given type */
     int err;
 
     hexgame_state_context_t context = {
@@ -605,20 +608,20 @@ int body_execute_onload_procs(body_t *body){
         state_context_t *state_context = body->stateset->contexts[i];
         for(int j = 0; j < state_context->procs_len; j++){
             stateset_proc_t *proc = &state_context->procs[j];
-            if(!proc->onload)continue;
+            if(proc->type != type)continue;
             for(int k = 0; k < proc->effects_len; k++){
                 state_effect_t *effect = proc->effects[k];
                 err = state_effect_apply(effect, &context, &gotto, NULL);
-                if(gotto){
-                    fprintf(stderr, "Can't use \"goto\" in \"onload\" procs\n");
+                if(!err && gotto){
+                    fprintf(stderr, "Can't use \"goto\" in \"%s\" procs\n",
+                        stateset_proc_type_msg(type));
                     err = 2;
                 }
                 if(err){
                     if(err == 2){
-                        fprintf(stderr, "...in proc \"%s\"\n", proc->name);
-                        fprintf(stderr,
-                            "...while attempting to set stateset to: %s\n",
-                            body->stateset->filename);
+                        fprintf(stderr, "...in proc: \"%s\"\n", proc->name);
+                        fprintf(stderr, "...of body:\n");
+                        body_dump(body, 1);
                     }
                     return err;
                 }
@@ -665,8 +668,8 @@ int body_set_stateset(body_t *body, const char *stateset_filename,
         err = vars_copy(&body->vars, &body->stateset->vars);
         if(err)return err;
 
-        /* Execute any "onload" procs */
-        err = body_execute_onload_procs(body);
+        /* Execute any "onstatesetchange" procs */
+        err = body_execute_procs(body, STATESET_PROC_TYPE_ONSTATESETCHANGE);
         if(err)return err;
     }
 
