@@ -28,16 +28,22 @@ parts:
     "T": "data/maps/demo/tiles/hex_vec4/fisheye_big2tri.fus"
     "A": recording "data/recs/eye.fus"
         vars:
-            "key_anim": "anim/spider.fus"
+            # NOTE: used to use "key_anim" here to specify that we only
+            # open for specific types of spider.
+            # However, these days "types" of spider are just "is_*spider"
+            # vars, which we can't check for with "coll: bodies" yet...
             "opened_key": "fisheye_eye_a_open"
     "B": recording "data/recs/eye.fus"
         vars:
-            "key_anim": "anim/rollerspider.fus" # TODO: check for "is_spikeyplayer" instead
+            # NOTE: used to use "key_anim" here to specify that we only
+            # open for specific types of spider.
+            # However, these days "types" of spider are just "is_*spider"
+            # vars, which we can't check for with "coll: bodies" yet...
             "opened_key": "fisheye_eye_b_open"
     "d": recording "data/recs/door.fus"
         vars:
-            "anim": "anim/rollerspider.fus" # TODO: check for "is_rollerplayer" instead
             "location": "fisheye_location_a"
+            "set_bool": "is_rollerspider"
     "l": location "fisheye_location_a"
 collmap:
     ;;
