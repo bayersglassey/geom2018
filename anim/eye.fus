@@ -13,6 +13,11 @@ vars:
     # The collmsg (or stateset filename) of bodies we will look at
     "key_anim": "touch"
 
+    # Vars for temporarily storing the results of "coll: bodies ..."
+    nosave "coll_looking": F
+    nosave "coll_looking_l": F
+    nosave "coll_looking_d": F
+
 proc "accept_carryable":
     # me: an eye
     # you: spit which is carrying a mini_eye
@@ -108,22 +113,34 @@ state "open":
             coll: bodies(myvar("key_anim")) any yes collmap("opening")
     then: goto delay: "closing"
 
+    if() then:
+        set myvar("coll_looking"): F
+        set myvar("coll_looking_l"): F
+        set myvar("coll_looking_d"): F
+        if: coll: bodies(myvar("key_anim")) any yes collmap("looking")
+        then: set myvar("coll_looking"): T
+        if: coll: bodies(myvar("key_anim")) any yes collmap("looking_l")
+        then: set myvar("coll_looking_l"): T
+        if: coll: bodies(myvar("key_anim")) any yes collmap("looking_d")
+        then: set myvar("coll_looking_d"): T
+        continue
+
     if:
-        coll: bodies(myvar("key_anim")) any yes collmap("looking")
-        not: coll: bodies(myvar("key_anim")) any yes collmap("looking_l")
-        not: coll: bodies(myvar("key_anim")) any yes collmap("looking_d")
+        expr: myvar("coll_looking")
+        not: expr: myvar("coll_looking_l")
+        not: expr: myvar("coll_looking_d")
     then: goto delay: "looking"
 
     if:
-        not: coll: bodies(myvar("key_anim")) any yes collmap("looking")
-        coll: bodies(myvar("key_anim")) any yes collmap("looking_l")
-        not: coll: bodies(myvar("key_anim")) any yes collmap("looking_d")
+        not: expr: myvar("coll_looking")
+        expr: myvar("coll_looking_l")
+        not: expr: myvar("coll_looking_d")
     then: goto delay: "looking_l"
 
     if:
-        not: coll: bodies(myvar("key_anim")) any yes collmap("looking")
-        not: coll: bodies(myvar("key_anim")) any yes collmap("looking_l")
-        coll: bodies(myvar("key_anim")) any yes collmap("looking_d")
+        not: expr: myvar("coll_looking")
+        not: expr: myvar("coll_looking_l")
+        expr: myvar("coll_looking_d")
     then: goto delay: "looking_d"
 
 state "closing":
