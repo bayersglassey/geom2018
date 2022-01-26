@@ -128,7 +128,13 @@ static int _parse_stateset_proc(state_context_t *context, fus_lexer_t *lexer,
     stateset_t *stateset = context->stateset;
 
     int type = STATESET_PROC_TYPE_NORMAL;
+    bool toplevel = false;
     while(true){
+        if(GOT("toplevel")){
+            NEXT
+            toplevel = true;
+            continue;
+        }
         if(GOT("onstatesetchange")){
             NEXT
             type = STATESET_PROC_TYPE_ONSTATESETCHANGE;
@@ -142,6 +148,12 @@ static int _parse_stateset_proc(state_context_t *context, fus_lexer_t *lexer,
         break;
     }
 
+    if(toplevel){
+        /* Just puts this proc in the root context for this stateset, which
+        is particularly useful for bodies making calls to each others procs */
+        context = stateset->root_context;
+    }
+
     const char *name;
     GET_STR_CACHED(name, &prend->name_store)
 
@@ -152,7 +164,7 @@ static int _parse_stateset_proc(state_context_t *context, fus_lexer_t *lexer,
         return 2;
     }
 
-    stateset_proc_init(proc, type, name);
+    stateset_proc_init(proc, stateset, type, name);
 
     OPEN
     while(true){
@@ -190,7 +202,10 @@ void stateset_proc_cleanup(stateset_proc_t *proc){
     ARRAY_FREE_PTR(state_effect_t*, proc->effects, state_effect_cleanup)
 }
 
-void stateset_proc_init(stateset_proc_t *proc, int type, const char *name){
+void stateset_proc_init(stateset_proc_t *proc, stateset_t *stateset,
+    int type, const char *name
+){
+    proc->stateset = stateset;
     proc->type = type;
     proc->name = name;
     ARRAY_INIT(proc->effects)
@@ -271,6 +286,12 @@ int stateset_init(stateset_t *stateset, const char *filename){
     ARRAY_INIT(stateset->contexts)
     vars_init_with_props(&stateset->vars, hexgame_vars_prop_names);
     stateset->debug_collision = false;
+
+    /* Create root context */
+    ARRAY_PUSH_NEW(state_context_t*, stateset->contexts, context)
+    state_context_init(context, stateset, NULL);
+    stateset->root_context = context;
+
     return 0;
 }
 
@@ -1105,10 +1126,8 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
 ){
     INIT
 
-    ARRAY_PUSH_NEW(state_context_t*, stateset->contexts, context)
-    state_context_init(context, stateset, NULL);
-
-    err = _stateset_parse(stateset, lexer, prend, space, context);
+    err = _stateset_parse(stateset, lexer, prend, space,
+        stateset->root_context);
     if(err)return err;
 
     stateset->default_state_name = stateset->states[0]->name;

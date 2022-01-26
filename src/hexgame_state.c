@@ -502,14 +502,15 @@ int state_effect_apply(state_effect_t *effect,
         break;
     }
     case STATE_EFFECT_TYPE_CALL: {
-        state_context_t *state_context = effect->u.call.state_context;
+        CHECK_BODY
+        state_context_t *state_context = body->state->context;
         const char *name = effect->u.call.name;
         stateset_proc_t *proc = state_context_get_proc(state_context, name);
         if(!proc){
             RULE_PERROR()
             fprintf(stderr,
                 "Couldn't find proc \"%s\" for stateset \"%s\"\n",
-                name, body->stateset->filename);
+                name, state_context->stateset->filename);
             return 2;
         }
         for(int i = 0; i < proc->effects_len; i++){

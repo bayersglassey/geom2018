@@ -54,6 +54,9 @@ enum effect_as {
 };
 
 
+struct stateset;
+
+
 /******************
 * COLLMSG_HANDLER *
 ******************/
@@ -96,10 +99,14 @@ typedef struct stateset_proc {
     int type; /* enum stateset_proc_type */
     const char *name;
     ARRAY_DECL(struct state_effect*, effects)
+
+    /* Weakrefs: */
+    struct stateset *stateset;
 } stateset_proc_t;
 
 void stateset_proc_cleanup(stateset_proc_t *handler);
-void stateset_proc_init(stateset_proc_t *handler, int type, const char *name);
+void stateset_proc_init(stateset_proc_t *proc, struct stateset *stateset,
+    int type, const char *name);
 
 
 /****************
@@ -114,7 +121,6 @@ typedef struct state_context_collmap_entry {
 
 void state_context_collmap_entry_cleanup(state_context_collmap_entry_t *entry);
 
-struct stateset;
 typedef struct state_context {
     /* Stuff which can be used by states within a stateset */
     ARRAY_DECL(char*, collmsgs)
@@ -170,6 +176,9 @@ typedef struct stateset {
     vars_t vars;
     bool debug_collision;
     const char *default_state_name; /* stateset->states[i]->name */
+
+    /* Weakrefs: */
+    state_context_t *root_context;
 } stateset_t;
 
 

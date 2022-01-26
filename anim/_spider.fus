@@ -59,7 +59,7 @@ vars:
 
     nosave "spit_anim": null
 
-proc onstatesetchange "update_vars":
+proc toplevel onstatesetchange "update_vars":
     # Sets various vars which depend on the "is_*spider" vars.
 
     # Defaults:
