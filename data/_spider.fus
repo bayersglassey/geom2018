@@ -201,17 +201,10 @@ shapes:
             : "label:fleg"  ( 2  1  1  1)  7 t
 
     $PREFIX NS "jump":
-        animation: cycle 3
+        animation: cycle 2
         shapes:
-            # The following is very "smooth", but somehow ends up looking
-            # strange compared to the version below which pauses on the
-            # first frame. *shrug*
-            #: $PREFIX NS "_jump" (-2 0 0  0) 0 f  0 (0 1)
-            #: $PREFIX NS "_jump" (-1 0 0  0) 0 f  0 (1 1)
-            #: $PREFIX NS "_jump" ( 0 0 0  0) 0 f  0 (2 1)
-
-            : $PREFIX NS "_jump" (-1 0 0  0) 0 f  0 (0 2)
-            : $PREFIX NS "_jump" ( 0 0 0  0) 0 f  0 (2 1)
+            : $PREFIX NS "_jump" (-2 0 0  0) 0 f  0 (0 1)
+            : $PREFIX NS "_jump" ( 0 0 0  0) 0 f  0 (1 1)
 
     $PREFIX NS "swim_jump":
         animation: cycle 5
@@ -373,9 +366,3 @@ shapes:
         animation: cycle $PREFIX NS "jump"
         shapes:
             : $PREFIX NS "jump" (0 0 0 0) 0 f
-
-        # ALTERNATE, SUPER FAST JUMP:
-        #animation: cycle 2
-        #shapes:
-        #    : $PREFIX NS "_jump" (-1 0 0  0) 0 f  0 (0 1)
-        #    : $PREFIX NS "_jump" ( 0 0 0  0) 0 f  0 (1 1)
