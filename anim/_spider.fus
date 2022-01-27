@@ -194,6 +194,11 @@ state "look_up":
     hitbox: collmap("stand")
     if() then: goto: "looking_up"
 
+state "unlook_up":
+    rgraph: $PREFIX NS "unlook_up"
+    hitbox: collmap("stand")
+    if() then: goto: "stand"
+
 state "looking_up":
     rgraph: $PREFIX NS "looking_up"
     hitbox: collmap("stand")
@@ -217,11 +222,10 @@ state "looking_up":
         rot: 1
         goto immediate: "start_jump"
 
-    if: key: wasdown f
-    then: goto immediate: "stand"
-
-    if: key: wasdown b
-    then: goto immediate: "stand"
+    if: any:
+        key: wasdown f
+        key: wasdown b
+    then: goto delay: "unlook_up"
 
     if:
         key: wasdown d
@@ -229,7 +233,7 @@ state "looking_up":
         goto delay: "crawling_looking_up"
 
     if: key: not isdown x
-    then: goto: "stand"
+    then: goto delay: "unlook_up"
 
 state "spit":
     rgraph: $PREFIX NS "spit"

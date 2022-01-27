@@ -29,12 +29,7 @@ then:
 # Flip over an edge
 if:
     expr: myvar("is_flipspider")
-    any:
-        #key: wasdown u
-        key: wentdown d
-        #all:
-        #    key: wasdown f
-        #    key: wentdown b
+    key: wentdown u
     coll: all yes
         ;;  (+)- +
     coll: all no
@@ -42,6 +37,28 @@ if:
         ;;     *
         ;;     .
 then:
-    move: 1 0
+    #move: 1 0
+    #rot: 3
+    turn
     rot: 3
     goto delay: "crawl_flip"
+
+# Flip over an edge
+# NOTE: this thing is experimental, and therefore turned off by default...
+# Feels fairly good, but a bit odd, and can happen by accident a
+# bit too easily
+$SKIP:
+    if:
+        expr: myvar("is_flipspider")
+        key: wasdown f
+        key: wentdown b
+        coll: all yes
+            ;;  (+)- +
+        coll: all no
+            ;;  (.)  .
+            ;;     *
+            ;;     .
+    then:
+        turn
+        rot: 3
+        goto delay: "crawl_flip"

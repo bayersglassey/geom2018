@@ -14,6 +14,11 @@ proc "crawl_crush":
 state "crawling":
     rgraph: $PREFIX NS "crawling"
     hitbox: collmap("stand")
+
+    # Actions (spitting, etc)
+    $SET_STR CRAWL_SPIT "crawl_spit"
+    import "anim/_spider_crawl.state.fus"
+
     if() then: goto: "crawl"
 
 state "uncrawling":
@@ -24,6 +29,11 @@ state "uncrawling":
 state "crawling_looking_up":
     rgraph: $PREFIX NS "crawling_looking_up"
     hitbox: collmap("stand")
+
+    # Actions (spitting, etc)
+    $SET_STR CRAWL_SPIT "crawl_looking_up_spit"
+    import "anim/_spider_crawl.state.fus"
+
     if() then: goto: "crawl_looking_up"
 
 state "uncrawling_looking_up":
@@ -42,8 +52,7 @@ state "crawl_looking_up":
 
     # Uncrawl
     if:
-        #key: not isdown d
-        key: wasdown u
+        key: not isdown d
         coll: all no
             ;;  *\*/*
             ;;  - + -
@@ -52,14 +61,11 @@ state "crawl_looking_up":
     then:
         goto delay: "uncrawling_looking_up"
 
-    if: key: wasdown f
-    then: goto immediate: "crawl"
-
-    if: key: wasdown b
-    then: goto immediate: "crawl"
-
-    if: key: not isdown x
-    then: goto: "crawl"
+    if: any:
+        key: wasdown f
+        key: wasdown b
+        key: not isdown x
+    then: goto delay: "crawl_unlook_up"
 
 state "crawl_spit":
     rgraph: $PREFIX NS "crawl_spit"
@@ -85,8 +91,7 @@ state "crawl":
 
     # Uncrawl
     if:
-        #key: not isdown d
-        key: wasdown u
+        key: not isdown d
         coll: all no
             ;;  *\*/*
             ;;  - + -
@@ -154,6 +159,17 @@ state "crawl_look_up":
     import "anim/_spider_crawl.state.fus"
 
     if() then: goto: "crawl_looking_up"
+
+state "crawl_unlook_up":
+    rgraph: $PREFIX NS "crawl_unlook_up"
+    hitbox: collmap("crawl")
+    on "crush": call: "crawl_crush"
+
+    # Actions (spitting, etc)
+    $SET_STR CRAWL_SPIT "crawl_looking_up_spit"
+    import "anim/_spider_crawl.state.fus"
+
+    if() then: goto: "crawl"
 
 state "crawl_step_down":
     rgraph: $PREFIX NS "crawl_step"
