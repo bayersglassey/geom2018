@@ -25,3 +25,23 @@ if:
 then:
     goto: "bird_crawl"
     delay: 1
+
+# Flip over an edge
+if:
+    expr: myvar("is_flipspider")
+    any:
+        #key: wasdown u
+        key: wentdown d
+        #all:
+        #    key: wasdown f
+        #    key: wentdown b
+    coll: all yes
+        ;;  (+)- +
+    coll: all no
+        ;;  (.)  .
+        ;;     *
+        ;;     .
+then:
+    move: 1 0
+    rot: 3
+    goto delay: "crawl_flip"

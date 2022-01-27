@@ -42,7 +42,8 @@ state "crawl_looking_up":
 
     # Uncrawl
     if:
-        key: not isdown d
+        #key: not isdown d
+        key: wasdown u
         coll: all no
             ;;  *\*/*
             ;;  - + -
@@ -84,7 +85,8 @@ state "crawl":
 
     # Uncrawl
     if:
-        key: not isdown d
+        #key: not isdown d
+        key: wasdown u
         coll: all no
             ;;  *\*/*
             ;;  - + -
@@ -204,5 +206,15 @@ state "crawl_shielding":
     on "crush": # Do nothing
 
     # Don't buffer actions (spitting, etc) out of shield?..
+
+    if() then: goto: "crawl"
+
+state "crawl_flip":
+    rgraph: $PREFIX NS "crawl_flip"
+    hitbox: collmap("crawl")
+
+    # Actions (spitting, etc)
+    $SET_STR CRAWL_SPIT "crawl_spit"
+    import "anim/_spider_crawl.state.fus"
 
     if() then: goto: "crawl"

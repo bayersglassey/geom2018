@@ -226,6 +226,15 @@ shapes:
             : "label:bleg"  (-1  1  1  1)  0 f
             : "label:fleg"  ( 2  1  1  1)  6 t
 
+    $PREFIX NS "crawl_flip":
+        animation: cycle 3
+        labels:
+            : "label:crawl_head" (-1  1  2 -2)  3 f (0 1)
+            : "label:crawl_head" (-1  1  2 -1)  2 f (1 1)
+            : "label:crawl_head" ( 0  1  2  0)  1 f (2 1)
+            #: "label:bleg"  (-1  1  1  1)  0 f
+            #: "label:fleg"  ( 2  1  1  1)  6 t
+
     $PREFIX NS "crawl_look_up":
         labels:
             : "label:crawl_head" ( 1  1  2  0)  1 f

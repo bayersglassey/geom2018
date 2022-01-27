@@ -34,6 +34,7 @@ vars:
     "is_spikeyspider": F
     "is_flierspider": F
     "is_birdspider": F
+    "is_flipspider": F
 
     # Labels which *don't* depend on "is_*spider" vars
     # (These labels are moved around to animate the spider)
