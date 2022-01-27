@@ -1,46 +1,27 @@
 
-# Crawl up
-if:
-    key: wasdown f
-    coll: all no
-        ;;     \*
-        ;; ( )
-    coll: all yes
-        ;;        +
-        ;;       /
-        ;; ( )  +
-then:
-    move: 1 0
-    rot: 1
-    goto: "crawl_step"
-    delay: 2
+# Expected vars:
+# CRAWL_SPIT (str) e.g. "crawl_spit", "crawl_looking_up_spit"
 
-# Crawl forwards
+# Spit
 if:
-    key: wasdown f
-    coll: all yes
-        ;; ( )  + - +
-    coll: all no
-        ;;     \*/*
-        ;; (.)  .
+    key: wentdown y
 then:
-    move: 1 0
-    goto: "crawl_step"
-    delay: 2
+    call: $GET_STR CRAWL_SPIT
 
-# Crawl down
+# Turn into bird
 if:
-    key: wasdown f
-    coll: all yes
-        ;; ( )  +
-        ;;       \
-        ;;        +
+    expr: myvar("is_birdspider")
+    key: wentdown x
     coll: all no
-        ;;     \*/*
-        ;; (.)  . -
-        ;;        *
+        ;;   .   .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;   . - .
+        ;;   *\*/*
+        ;; . - + - .
+        ;;   */*\*
+        ;;  (.)  .
 then:
-    move: 1 0
-    rot: -1
-    goto: "crawl_step_down"
-    delay: 2
+    goto: "bird_crawl"
+    delay: 1

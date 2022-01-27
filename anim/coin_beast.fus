@@ -35,11 +35,11 @@ state "stand":
         ;;  (.)  .
 
     # Crawling, turning
-    import "anim/_spider_stand.state.fus"
+    import "anim/_walker_stand.state.fus"
 
     # Stepping and jumping
-    import "anim/_spider_jump.state.fus"
-    import "anim/_spider_step.state.fus"
+    import "anim/_walker_jump.state.fus"
+    import "anim/_walker_step.state.fus"
 
 state "turn":
     rgraph: "coin_beast_turn"
@@ -51,8 +51,8 @@ state "turn":
         ;;  (.)  .
 
     # Crawling, turning, jumping
-    import "anim/_spider_stand.state.fus"
-    import "anim/_spider_jump.state.fus"
+    import "anim/_walker_stand.state.fus"
+    import "anim/_walker_jump.state.fus"
 
     if() then: goto: "stand"
 
@@ -66,8 +66,8 @@ state "step":
         ;;  (.)  .
 
     # Crawling, turning, jumping
-    import "anim/_spider_stand.state.fus"
-    import "anim/_spider_jump.state.fus"
+    import "anim/_walker_stand.state.fus"
+    import "anim/_walker_jump.state.fus"
 
     if() then: goto: "stand"
 
@@ -81,8 +81,8 @@ state "step_up":
         ;;  (.)  .
 
     # Crawling, turning, jumping
-    import "anim/_spider_stand.state.fus"
-    import "anim/_spider_jump.state.fus"
+    import "anim/_walker_stand.state.fus"
+    import "anim/_walker_jump.state.fus"
 
     if() then: goto: "stand"
 
@@ -96,8 +96,8 @@ state "step_down":
         ;;   .  (.)  .
 
     # Crawling, turning, jumping
-    import "anim/_spider_stand.state.fus"
-    import "anim/_spider_jump.state.fus"
+    import "anim/_walker_stand.state.fus"
+    import "anim/_walker_jump.state.fus"
 
     if() then: goto: "stand"
 
@@ -135,7 +135,7 @@ state "crawl":
         goto delay: "uncrawling"
 
     # Crawling
-    import "anim/_spider_crawl.state.fus"
+    import "anim/_walker_crawl.state.fus"
 
     # Turn
     if:
@@ -187,7 +187,7 @@ state "jump":
         ;;  (.)  .
 
     # Landing, jumping, crashing
-    import "anim/_spider_jumping.state.fus"
+    import "anim/_walker_jumping.state.fus"
 
 state "collected":
     rgraph: "dead_once"

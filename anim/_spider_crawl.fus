@@ -36,11 +36,11 @@ state "crawl_looking_up":
     hitbox: collmap("crawl")
     on "crush": call: "crawl_crush"
 
-    if:
-        key: wentdown y
-    then:
-        call: "crawl_looking_up_spit"
+    # Actions (spitting, etc)
+    $SET_STR CRAWL_SPIT "crawl_looking_up_spit"
+    import "anim/_spider_crawl.state.fus"
 
+    # Uncrawl
     if:
         key: not isdown d
         coll: all no
@@ -78,29 +78,9 @@ state "crawl":
 
     on "crush": call: "crawl_crush"
 
-    # Spit
-    if:
-        key: wentdown y
-    then:
-        call: "crawl_spit"
-
-    # Turn into bird
-    if:
-        expr: myvar("is_birdspider")
-        key: wentdown x
-        coll: all no
-            ;;   .   .
-            ;;   *\*/*
-            ;; . - + - .
-            ;;   */*\*
-            ;;   . - .
-            ;;   *\*/*
-            ;; . - + - .
-            ;;   */*\*
-            ;;  (.)  .
-    then:
-        goto: "bird_crawl"
-        delay: 1
+    # Actions (spitting, etc)
+    $SET_STR CRAWL_SPIT "crawl_spit"
+    import "anim/_spider_crawl.state.fus"
 
     # Uncrawl
     if:
@@ -113,8 +93,8 @@ state "crawl":
     then:
         goto delay: "uncrawling"
 
-    # Crawling
-    import "anim/_spider_crawl.state.fus"
+    # Crawling (stepping)
+    import "anim/_walker_crawl.state.fus"
 
     # Roll over a gap
     if:
@@ -166,6 +146,11 @@ state "crawl_look_up":
     rgraph: $PREFIX NS "crawl_look_up"
     hitbox: collmap("crawl")
     on "crush": call: "crawl_crush"
+
+    # Actions (spitting, etc)
+    $SET_STR CRAWL_SPIT "crawl_looking_up_spit"
+    import "anim/_spider_crawl.state.fus"
+
     if() then: goto: "crawl_looking_up"
 
 state "crawl_step_down":
@@ -176,10 +161,9 @@ state "crawl_step_down":
         ;;  . -(.)  .
     on "crush": call: "crawl_crush"
 
-    if:
-        key: wentdown y
-    then:
-        call: "crawl_spit"
+    # Actions (spitting, etc)
+    $SET_STR CRAWL_SPIT "crawl_spit"
+    import "anim/_spider_crawl.state.fus"
 
     if() then: goto: "crawl"
 
@@ -193,10 +177,9 @@ state "crawl_step":
         ;;     (.)  .
     on "crush": call: "crawl_crush"
 
-    if:
-        key: wentdown y
-    then:
-        call: "crawl_spit"
+    # Actions (spitting, etc)
+    $SET_STR CRAWL_SPIT "crawl_spit"
+    import "anim/_spider_crawl.state.fus"
 
     if() then: goto: "crawl"
 
@@ -208,11 +191,18 @@ state "crawl_turn":
     hitbox: collmap("crawl")
     on "crush": call: "crawl_crush"
 
+    # Actions (spitting, etc)
+    $SET_STR CRAWL_SPIT "crawl_spit"
+    import "anim/_spider_crawl.state.fus"
+
     if() then: goto immediate: "crawl_step"
 
 state "crawl_shielding":
+    # This happens when we are crushed while crawling & spikey
     rgraph: $PREFIX NS "crawl_shielding"
     hitbox: collmap("crawl")
     on "crush": # Do nothing
-    if:
-    then: goto: "crawl"
+
+    # Don't buffer actions (spitting, etc) out of shield?..
+
+    if() then: goto: "crawl"

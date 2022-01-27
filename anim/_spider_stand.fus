@@ -18,11 +18,11 @@ state $GET_STR STATE_STAND:
     hitbox: collmap("stand")
 
     # Crawling, turning
-    import "anim/_spider_stand.state.fus"
+    import "anim/_walker_stand.state.fus"
 
     # Stepping and jumping
-    import "anim/_spider_jump.state.fus"
-    import "anim/_spider_step.state.fus"
+    import "anim/_walker_jump.state.fus"
+    import "anim/_walker_step.state.fus"
 
     $IF RUNNING:
         # If we didn't do anything else, then just go to the non-running
@@ -64,7 +64,7 @@ state $GET_STR STATE_JUMP:
     hitbox: collmap("stand")
 
     # Landing, jumping, crashing
-    import "anim/_spider_jumping.state.fus"
+    import "anim/_walker_jumping.state.fus"
 
 state $GET_STR STATE_STEP_DOWN:
     rgraph: $PREFIX NS $GET_STR STATE_STEP
@@ -76,8 +76,8 @@ state $GET_STR STATE_STEP_DOWN:
         ;;   .  (.)  .
 
     # Crawling, turning, jumping
-    import "anim/_spider_stand.state.fus"
-    import "anim/_spider_jump.state.fus"
+    import "anim/_walker_stand.state.fus"
+    import "anim/_walker_jump.state.fus"
 
     if() then: goto: $GET_STR STATE_STAND
 
@@ -86,7 +86,7 @@ state $GET_STR STATE_STEP:
     hitbox: collmap("stand")
 
     # Crawling, turning, jumping
-    import "anim/_spider_stand.state.fus"
-    import "anim/_spider_jump.state.fus"
+    import "anim/_walker_stand.state.fus"
+    import "anim/_walker_jump.state.fus"
 
     if() then: goto: $GET_STR STATE_STAND

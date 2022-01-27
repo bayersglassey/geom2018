@@ -1,0 +1,46 @@
+
+# Crawl up
+if:
+    key: wasdown f
+    coll: all no
+        ;;     \*
+        ;; ( )
+    coll: all yes
+        ;;        +
+        ;;       /
+        ;; ( )  +
+then:
+    move: 1 0
+    rot: 1
+    goto: "crawl_step"
+    delay: 2
+
+# Crawl forwards
+if:
+    key: wasdown f
+    coll: all yes
+        ;; ( )  + - +
+    coll: all no
+        ;;     \*/*
+        ;; (.)  .
+then:
+    move: 1 0
+    goto: "crawl_step"
+    delay: 2
+
+# Crawl down
+if:
+    key: wasdown f
+    coll: all yes
+        ;; ( )  +
+        ;;       \
+        ;;        +
+    coll: all no
+        ;;     \*/*
+        ;; (.)  . -
+        ;;        *
+then:
+    move: 1 0
+    rot: -1
+    goto: "crawl_step_down"
+    delay: 2

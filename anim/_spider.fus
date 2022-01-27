@@ -7,7 +7,7 @@
 # should go below it
 
 
-# So we know we're not just a "spiderlike" thing, e.g. coin_beast
+# So we know we're not just a "spider-like" thing, e.g. coin_beast
 $SET_BOOL SPIDER
 
 
