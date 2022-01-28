@@ -113,7 +113,6 @@ state "crawl":
     then:
         goto: "roller_stand"
         move: 1 0
-        turn
         rot: 1
         delay: $GET_INT ROLLER_STAND_DELAY
 
@@ -126,10 +125,9 @@ state "crawl":
             ;;     \
             ;; (.)  +
     then:
-        goto: "crawl_step"
+        goto delay: "crawl_step"
         move: 1 0
         rot: 2
-        delay: 2
 
     # Turn
     if:

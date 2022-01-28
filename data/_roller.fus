@@ -79,9 +79,9 @@ shapes:
         $IF SPIDER:
             labels:
                 : "label:carrying" eval((2 2 1 0) + (1 0 0 0)) 1 f
-            prismels:
+
                 # Player's "nose"
-                : "tri" (2 2 1 0) 2 f eval: 1 + 8 + 2
+                : "label:nose" (2 2 1 -1)  0 f
 
     $PREFIX NS "roller_grab":
         shapes:
