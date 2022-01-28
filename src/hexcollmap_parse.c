@@ -68,6 +68,7 @@ static char get_elem_type(char c){
         case 'S':
         case 'D':
         case 'w':
+        case 'o':
             return '*';
         case ' ':
         case '(':
@@ -82,7 +83,7 @@ static char get_elem_type(char c){
     }
 }
 static bool elem_is_visible(char c){
-    return strchr("+!-/\\*SDw", c);
+    return strchr("+!-/\\*SDwo", c);
 }
 static bool represents_vert(char c){return get_elem_type(c) == '+';}
 static bool represents_edge(char c){return strchr("-/\\", get_elem_type(c)) != NULL;}
@@ -515,12 +516,14 @@ static int _hexcollmap_parse_lines_tiles(hexcollmap_t *collmap,
                 bool is_savepoint = c == 'S';
                 bool is_door = c == 'D';
                 bool is_water = c == 'w';
+                bool is_bgface = c == 'o';
                 bool is_hard_transparent = c == 'x';
 
                 char tile_c =
                     is_savepoint? 'S':
                     is_door? 'D':
                     is_water? 'w':
+                    is_bgface? 'o':
                     is_hard_transparent? 'x':
                     represents_vert(c)? default_vert_c:
                     represents_edge(c)? default_edge_c:

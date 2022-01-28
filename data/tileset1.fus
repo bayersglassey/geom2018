@@ -13,5 +13,6 @@ faces:
     "S": "map_savepoint"
     "D": "map_door"
     "w": frame_offset(1) "map_water"
+    "o": "map_bgface"
     "E": frame_offset(1) "map_face_energy_on"
     "e": "map_face_energy_off"

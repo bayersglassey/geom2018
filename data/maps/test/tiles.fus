@@ -248,6 +248,18 @@ shapes:
             : "_map_water" ( 1 1 1 0) 0 f 10 (20 2)
             : "_map_water" ( 1 1 1 0) 0 f 11 (22 2)
 
+    "map_bgface_third":
+        prismels:
+            : "tri" ( 0 0 0 0)  0 f eval: 1 + 8
+            : "tri" ( 0 0 0 0)  2 f eval: 1 + 8
+            : "tri" (-1 0 1 0)  0 f eval: 1 + 8
+
+    "map_bgface":
+        shapes:
+            : "map_bgface_third" (1 1 1 0)  0 f
+            : "map_bgface_third" (1 1 1 0)  4 f
+            : "map_bgface_third" (1 1 1 0)  8 f
+
 mappers:
     "test_map":
         solid
