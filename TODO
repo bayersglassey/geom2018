@@ -671,3 +671,14 @@ Jan 21, 2022:
 Read this paper ("Graph Drawing by Force-directed Placement"):
 
     https://reingold.co/force-directed.pdf
+
+
+Jan 27, 2022:
+-------------
+
+* Change "nosave" to "save" (so, don't save variables by default...)
+
+* For "Roll into a corner" in anim/_spider_crawl.fus, need a different anim than "crawl_step"
+    * We need an anim that makes it look like you're rotating in place, not like...
+      teleporting backwards & then stepping forwards. You know?
+
