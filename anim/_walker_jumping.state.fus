@@ -7,10 +7,19 @@
 
 # Land up
 if:
-    coll: all yes
-        ;;        +
-        ;;       /
-        ;; ( )  +
+    any:
+        all:
+            expr: myvar("is_stickyspider")
+            coll: all yes
+                ;;        +
+                ;;
+                ;; ( )  +
+        all:
+            not: expr: myvar("is_stickyspider")
+            coll: all yes
+                ;;        +
+                ;;       /
+                ;; ( )  +
 then:
     move: 1 0
     rot: 1
@@ -37,8 +46,15 @@ if:
         ;;        + -
         ;;       /*\*
         ;; ( )
-    coll: all yes
-        ;; ( )  + - +
+    any:
+        all:
+            expr: myvar("is_stickyspider")
+            coll: all yes
+                ;; ( )  +   +
+        all:
+            not: expr: myvar("is_stickyspider")
+            coll: all yes
+                ;; ( )  + - +
 then:
     move: 1 0
     goto delay: $GET_STR STATE_STEP

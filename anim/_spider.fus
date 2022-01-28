@@ -36,6 +36,7 @@ vars:
     "is_flierspider": F
     "is_birdspider": F
     "is_flipspider": F
+    "is_stickyspider": F
 
     # Labels which *don't* depend on "is_*spider" vars
     # (These labels are moved around to animate the spider)
@@ -230,6 +231,10 @@ state "looking_up":
 
     if:
         key: wasdown d
+        coll: all yes
+            # Can only crawl when there's an edge under you.
+            # This is significant for stickyspider.
+            ;; (.)- .
     then:
         goto delay: "crawling_looking_up"
 
@@ -277,10 +282,19 @@ state "stop_running":
 
     # Step up
     if:
-        coll: all yes
-            ;;        +
-            ;;       /
-            ;; ( )  +
+        any:
+            all:
+                expr: myvar("is_stickyspider")
+                coll: all yes
+                    ;;        +
+                    ;;
+                    ;; ( )  +
+            all:
+                not: expr: myvar("is_stickyspider")
+                coll: all yes
+                    ;;        +
+                    ;;       /
+                    ;; ( )  +
     then:
         move: 1 0
         rot: 1
@@ -288,8 +302,15 @@ state "stop_running":
 
     # Step
     if:
-        coll: all yes
-            ;; ( )  + - +
+        any:
+            all:
+                expr: myvar("is_stickyspider")
+                coll: all yes
+                    ;; ( )  +   +
+            all:
+                not: expr: myvar("is_stickyspider")
+                coll: all yes
+                    ;; ( )  + - +
         coll: all no
             ;;       \*/*
             ;;        + -
@@ -301,10 +322,19 @@ state "stop_running":
 
     # Step down
     if:
-        coll: all yes
-            ;; ( )  +
-            ;;       \
-            ;;        +
+        any:
+            all:
+                expr: myvar("is_stickyspider")
+                coll: all yes
+                    ;; ( )  +
+                    ;;
+                    ;;        +
+            all:
+                not: expr: myvar("is_stickyspider")
+                coll: all yes
+                    ;; ( )  +
+                    ;;       \
+                    ;;        +
         coll: all no
             ;;       \*/*
             ;;        + -

@@ -37,8 +37,6 @@ if:
         ;;     *
         ;;     .
 then:
-    #move: 1 0
-    #rot: 3
     turn
     rot: 3
     goto delay: "crawl_flip"

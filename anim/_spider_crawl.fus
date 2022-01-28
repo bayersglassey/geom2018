@@ -52,7 +52,10 @@ state "crawl_looking_up":
 
     # Uncrawl
     if:
-        key: not isdown d
+        any:
+            key: not isdown d
+            coll: all no
+                ;; (.)- .
         coll: all no
             ;;  *\*/*
             ;;  - + -
@@ -91,7 +94,10 @@ state "crawl":
 
     # Uncrawl
     if:
-        key: not isdown d
+        any:
+            key: not isdown d
+            coll: all no
+                ;; (.)- .
         coll: all no
             ;;  *\*/*
             ;;  - + -
@@ -125,6 +131,10 @@ state "crawl":
             ;;     \
             ;; (.)  +
     then:
+        # TODO: use a different anim, one which shows you
+        # rotating in place, as opposed to this one which
+        # in this case shows you kind of... teleporting
+        # backwards, and then stepping forwards.
         goto delay: "crawl_step"
         move: 1 0
         rot: 2

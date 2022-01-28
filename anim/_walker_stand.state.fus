@@ -25,8 +25,15 @@ $IF RUNNING:
 
 # Can't stand on nothing
 if:
-    coll: any no
-        ;;  (+)- +
+    any:
+        all:
+            expr: myvar("is_stickyspider")
+            coll: any no
+                ;;  (+)  +
+        all:
+            not: expr: myvar("is_stickyspider")
+            coll: any no
+                ;;  (+)- +
 then:
     move: 1 0
     goto immediate: $GET_STR STATE_START_JUMP
@@ -66,6 +73,10 @@ $IF EYESPIDER:
 # Crawl
 if:
     key: wasdown d
+    coll: all yes
+        # Can only crawl when there's an edge under you.
+        # This is significant for stickyspider.
+        ;; (.)- .
 then:
     goto delay: "crawling"
 
@@ -82,5 +93,7 @@ then:
 if:
     expr: myvar("is_aimerspider")
     key: wasdown x
+    key: not wasdown f
+    key: not wasdown b
 then:
     goto: "look_up"

@@ -26,10 +26,19 @@ state "swim_jump":
             key: isdown f
             key: isdown u
             key: isdown d
-        coll: all yes
-            ;;        +
-            ;;       /
-            ;; ( )  +
+        any:
+            all:
+                expr: myvar("is_stickyspider")
+                coll: all yes
+                    ;;        +
+                    ;;
+                    ;; ( )  +
+            all:
+                not: expr: myvar("is_stickyspider")
+                coll: all yes
+                    ;;        +
+                    ;;       /
+                    ;; ( )  +
     then:
         move: 1 0
         rot: 1
@@ -108,10 +117,19 @@ state "swim":
             key: isdown f
             key: isdown u
             key: isdown d
-        coll: all yes
-            ;;        +
-            ;;       /
-            ;; ( )  +
+        any:
+            all:
+                expr: myvar("is_stickyspider")
+                coll: all yes
+                    ;;        +
+                    ;;
+                    ;; ( )  +
+            all:
+                not: expr: myvar("is_stickyspider")
+                coll: all yes
+                    ;;        +
+                    ;;       /
+                    ;; ( )  +
     then:
         move: 1 0
         rot: 1
@@ -184,8 +202,15 @@ state "swim":
         delay: 2
 
     if:
-        coll: all yes
-            ;; (+)- +
+        any:
+            all:
+                expr: myvar("is_stickyspider")
+                coll: all yes
+                    ;; (+)  +
+            all:
+                not: expr: myvar("is_stickyspider")
+                coll: all yes
+                    ;; (+)- +
     then:
         goto: "stand"
         delay: 2
