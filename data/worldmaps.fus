@@ -17,3 +17,4 @@ worldmaps:
     : "data/maps/sprucetown/worldmap.fus"
     : "data/maps/death_place/worldmap.fus"
     : "data/maps/playarea/worldmap.fus"
+    : "data/maps/minidemo/worldmap.fus"

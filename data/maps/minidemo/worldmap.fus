@@ -1,0 +1,14 @@
+$SET_STR WM "data/maps/minidemo/"
+
+name: "minidemo"
+unit: 3 2 0 -1
+spawn: $PREFIX WM "start.fus"
+palette: "data/pal1.fus"
+tileset: "data/tileset1.fus"
+
+submaps:
+    :
+        file: $PREFIX WM "start.fus"
+        pos: (0 0)
+        camera: (2 0)
+        mapper: ("triple")
