@@ -46,14 +46,12 @@ submaps:
                 pos: (2 15)
                 camera: (5 -5)
                 mapper: ("triple")
-                tileset: "data/maps/demo/tilesets/shiny.fus"
                 submaps:
                     "start4":
                         file: "data/maps/demo/start4.fus"
                         pos: (19 6)
                         camera: (5 5)
                         mapper: ("quadruple")
-                        tileset: "data/maps/demo/tilesets/shiny.fus"
                     : import "data/maps/demo/submap_vines.fus"
             "pebbles":
                 file: "data/maps/demo/pebbles.fus"
@@ -92,7 +90,6 @@ submaps:
                         pos: eval: (13 1) + (18 8)
                         camera: (0 5)
                         mapper: ("triple")
-                        tileset: "data/maps/demo/tilesets/shiny.fus"
                         doors:
                             :
                                 map: "data/maps/wilderness/worldmap.fus"
