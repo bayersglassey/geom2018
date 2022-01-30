@@ -14,16 +14,21 @@
 
 
 static char _write_vert(char tile_c, char empty){
-    return tile_c_is_visible(tile_c)? '+': empty;
+    return tile_c_is_visible(tile_c)?
+        (tile_c_is_special(tile_c)? tile_c: '+'):
+        empty;
 }
 
 static char _write_edge(char tile_c, char visible, char empty){
-    return tile_c_is_visible(tile_c)? visible: empty;
+    return tile_c_is_visible(tile_c)?
+        (tile_c_is_special(tile_c)? tile_c: visible):
+        empty;
 }
 
 static char _write_face(char tile_c, char empty){
     return tile_c_is_visible(tile_c)?
-        (tile_c_is_special(tile_c)? tile_c: '*'): empty;
+        (tile_c_is_special(tile_c)? tile_c: '*'):
+        empty;
 }
 
 static bool out_of_bounds_z(hexbox_t *hexbox, int x, int y){

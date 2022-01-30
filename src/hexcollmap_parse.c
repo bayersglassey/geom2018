@@ -59,6 +59,7 @@ static char get_elem_type(char c){
         case '+':
         case '?':
         case '!':
+        case '@':
             return '+';
         case '-':
         case '/':
@@ -75,15 +76,13 @@ static char get_elem_type(char c){
         case ')':
         case '%':
         case 'x':
+        case '=':
             /* Valid, but unknown whether vert, edge, or face, or none */
             return ' ';
         default:
             /* Invalid */
             return '\0';
     }
-}
-static bool elem_is_visible(char c){
-    return strchr("+!-/\\*SDwo", c);
 }
 static bool represents_vert(char c){return get_elem_type(c) == '+';}
 static bool represents_edge(char c){return strchr("-/\\", get_elem_type(c)) != NULL;}
@@ -508,30 +507,20 @@ static int _hexcollmap_parse_lines_tiles(hexcollmap_t *collmap,
 
         for(int x = 0; x < line_len; x++){
             char c = line[x];
-            if(elem_is_visible(c) || c == 'x'){
-                char elem_type = c == 'x'?
+            if(tile_c_is_visible(c) || c == 'x'){
+                char elem_type = c == 'x' || c == '='?
                     get_map_elem_type(x-ox, y-oy):
                     get_elem_type(c);
 
-                bool is_savepoint = c == 'S';
-                bool is_door = c == 'D';
-                bool is_water = c == 'w';
-                bool is_bgface = c == 'o';
-                bool is_hard_transparent = c == 'x';
-
                 char tile_c =
-                    is_savepoint? 'S':
-                    is_door? 'D':
-                    is_water? 'w':
-                    is_bgface? 'o':
-                    is_hard_transparent? 'x':
+                    tile_c_is_special(c)? c:
                     represents_vert(c)? default_vert_c:
                     represents_edge(c)? default_edge_c:
                     represents_face(c)? default_face_c:
                     ' ';
                     /* NOTE: The way we've implemented this, 'S' and 'D'
                     can be overwritten by '%'. Maybe that's weird? Maybe if
-                    is_savepoint or is_door then we should skip the check
+                    c is 'S' or 'D' then we should skip the check
                     for tilebucket_active entirely? */
 
                 int draw_z = 0;
@@ -582,12 +571,15 @@ static int _hexcollmap_parse_lines_tiles(hexcollmap_t *collmap,
                     }else if(elem_type == '*'){
                         elem = &tile->face[is_face1? 1: 0];
                     }
-                    if(elem != NULL){
-                        /* We don't expect elem to be NULL, but it never
-                        hurts to check */
-                        elem->tile_c = tile_c;
-                        elem->z = draw_z;
+                    if(elem == NULL){
+                        _debug_print_line(line, x, y);
+                        fprintf(stderr, "Unrecognized elem_type '%c' "
+                            "for character: '%c'\n",
+                            elem_type, c);
+                        return 2;
                     }
+                    elem->tile_c = tile_c;
+                    elem->z = draw_z;
                 }
             }
 

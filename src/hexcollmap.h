@@ -231,15 +231,17 @@ typedef struct hexcollmap {
 
 
 static bool tile_c_is_visible(char tile_c){
-    return tile_c != ' ' && tile_c != 'x';
+    return strchr(" x.%?()[]", tile_c) == NULL;
 }
 
 static bool tile_c_is_solid(char tile_c){
-    return strchr(" xSDwo", tile_c) == NULL;
+    return strchr(" xSDwo=@", tile_c) == NULL;
 }
 
 static bool tile_c_is_special(char tile_c){
-    return strchr("xSDwo", tile_c) != NULL;
+    /* Whether tile_c represents a vert/edge/face, but is not one of the
+    standard such chars (so, not in "+/-\\*") */
+    return strchr("xSDwo=@", tile_c) != NULL;
 }
 
 static bool hexcollmap_elem_is_visible(hexcollmap_elem_t *elem){
@@ -299,8 +301,6 @@ hexcollmap_tile_t *hexcollmap_get_tile(hexcollmap_t *collmap, trf_t *index);
 hexcollmap_elem_t *hexcollmap_get_vert(hexcollmap_t *collmap, trf_t *index);
 hexcollmap_elem_t *hexcollmap_get_edge(hexcollmap_t *collmap, trf_t *index);
 hexcollmap_elem_t *hexcollmap_get_face(hexcollmap_t *collmap, trf_t *index);
-bool hexcollmap_elem_is_visible(hexcollmap_elem_t *elem);
-bool hexcollmap_elem_is_solid(hexcollmap_elem_t *elem);
 bool hexcollmap_collide(
     hexcollmap_t *collmap1, trf_t *trf1,
     hexcollmap_t *collmap2, trf_t *trf2,

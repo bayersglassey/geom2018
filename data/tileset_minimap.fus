@@ -4,11 +4,13 @@ verts:
     "1": "minimap.vert"
     "2": "minimap.vert"
     "s": "minimap.vert"
+    "@": "empty"
 edges:
     "0": "minimap.edge"
     "1": "minimap.edge"
     "2": "minimap.edge"
     "s": "minimap.edge"
+    "=": "empty"
 faces:
     "0": "minimap.face"
     "1": "minimap.face"
