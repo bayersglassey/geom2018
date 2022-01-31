@@ -1,0 +1,92 @@
+parts:
+    "b": actor "actor/aibig_roller.fus"
+
+    "R": recording "data/recs/door.fus"
+        vars:
+            "set_bool": "is_rollerspider"
+    "P": recording "data/recs/door.fus"
+        vars:
+            "set_bool": "is_spikeyspider"
+    "A": recording "data/recs/door.fus"
+        vars:
+            "set_bool": "is_aimerspider"
+    "F": recording "data/recs/door.fus"
+        vars:
+            "set_bool": "is_flipspider"
+    "S": recording "data/recs/door.fus"
+        vars:
+            "set_bool": "is_stickyspider"
+
+    #$SET_BOOL SHOW_SPIDERS
+    $IF SHOW_SPIDERS:
+        "r": recording "data/recs/spider.fus" "spider_cpu"
+            vars:
+                "is_rollerspider": T
+        "p": recording "data/recs/spider.fus" "spider_cpu"
+            vars:
+                "is_spikeyspider": T
+        "a": recording "data/recs/spider.fus" "spider_cpu"
+            vars:
+                "is_aimerspider": T
+        "f": recording "data/recs/spider.fus" "spider_cpu"
+            vars:
+                "is_flipspider": T
+        "s": recording "data/recs/spider.fus" "spider_cpu"
+            vars:
+                "is_stickyspider": T
+    $IF !SHOW_SPIDERS:
+        "r": shape "empty"
+        "p": shape "empty"
+        "a": shape "empty"
+        "f": shape "empty"
+        "s": shape "empty"
+
+collmap:
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .
+    ;;                                                                  / \
+    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - + - +   .   .   .   .   .   .   .   .
+    ;;                                                                      \ /
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   +   .   .   .   +   .   .   .   .   .
+    ;;                                                              /     \   \               \
+    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   +   +   .   +   .   +   .   .   .   .
+    ;;                                                                    / \         / \     /
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - + - +   + - + - +   .   .   .   .   .
+    ;;                                                                                    \ /
+    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .   .
+    ;;                                                                                      \ /
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .
+    ;;
+    ;;     +   .  (+)- +   .   .   .   .   .   .   .   .   .   .   .   .   + - + - +   .   +   .   .   .   .   .
+    ;;    / \     /     \                                                   \       \     / \
+    ;;   + - +   + - +   +   .   .   .   .   .   .   .   .   .   .   .   .   +   .   +   +   +   .   .   ?   .   .  [R]
+    ;;                \   \                                                   \     /   /     \
+    ;;     .   .   +   +   +   .   .   .   .   .   .   .   .   .   .   .   .   + - +   +   .   +   + - + - +   .
+    ;;                  \   \                                                           \     /   /       /
+    ;;   .   .   .   +   +   +   + - +   .   .   .   .   .   .   .   .   + - +   .   .   + - +   +   .   +   .   .
+    ;;                  /   /   /     \                                 /     \                   \     /
+    ;;     .   .   .   +   +   +   .   +   .   .   .   .   .   .   .   +   .   +   .   .   .   .   ! - +   .   .    [r]
+    ;;                  \ /     \     /                                 \     /
+    ;;   .   .   .   .   +   ?   ! - +   .   .   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   [F][f]
+    ;;                    \
+    ;;     .   .   .   +   + - + - +   .   .   .   + - +   .   .   .   .   .   + - +   .   .   .   .   .   .   .
+    ;;                / \   \       \             /     \                     /     \
+    ;;   .   !   .   + - +   +   .   +   .   .   +   .   +   .   .   .   .   +   .   + - +   .   .   .   .   .   .  [b]
+    ;;      / \     /         \       \           \     /                     \           \
+    ;;     +   + - +   .   .   +   .   + - + - +   ! - +   .   .   .   .   .   + - +   .   + - +   .   .   .   .        [a]
+    ;;    /       /             \               \                                   \           \
+    ;;   ! - + - +   .   .   .   + - +   .   .   +   ?   + - +   .   .   .   .   .   ! - +   .   +   .   .   .   .  [b^1][A]  [s]
+    ;;                                \           \     /     \                           \     /
+    ;;     .   .   .   .   .   +   .   + - + - + - + - +   .   +   .   .   .   .   .   ?   + - +   .   .   .   .       [S]
+    ;;                        / \                   \         /
+    ;;   .   .   .   .   .   + - +   .   .   .   .   + - + - +   .   .   .   .   .   .   .   .   +   .   .   .   .
+    ;;                      /
+    ;;     .   .   .   .   +   ?   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   +   .   .   .     [P]
+    ;;                    / \
+    ;;   .   .   .   .   +   + - +   .   .   .   .   .   .   .   +   +   .   .   .   .   .   .   +   .   .   .   .
+    ;;                    \       \
+    ;;     .   .   .   .   +   .   +   .   .   .   .   .   .   .   .   +   .   .   .   .   + - +   .   .   .   .
+    ;;                      \     /                                                       /     \
+    ;;   .   .   .   .   .   ! - +   .   .   .   .   .   .   .   .   .   +   +   +   +   +   .   +   .   .   .   .   [p]
+    ;;                                                                                    \     /
+    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .   .

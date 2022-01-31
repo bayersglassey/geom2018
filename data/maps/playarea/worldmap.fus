@@ -10,3 +10,14 @@ submaps:
         pos: (0 0)
         camera: (5 0)
         mapper: ("quadruple")
+    :
+        pos: (30 0)
+        camera: (8 -5)
+        mapper: ("triple")
+        submaps:
+            :
+                bg
+                file: "data/maps/playarea/start2_bg.fus"
+                tileset: "data/tileset1_bg.fus"
+            :
+                file: "data/maps/playarea/start2.fus"
