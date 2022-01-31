@@ -682,3 +682,34 @@ Jan 27, 2022:
     * We need an anim that makes it look like you're rotating in place, not like...
       teleporting backwards & then stepping forwards. You know?
 
+* Make a real "turn" anim for spider (instead of just reusing "step")
+
+
+Jan 30, 2022:
+-------------
+
+maps/bridges/start.fus:
+
+    * Coins appearing one at a time as you collect them (somewhat like start of tutorial2),
+      teaching you how to get around by following the "bridges"
+
+    * Leave "bridges" behind you when you successfully jump???
+        * To show player what the bridges are supposed to represent
+
+Backgrounds:
+
+    * Add more bg submaps, so the grid can be seen.
+      See jungle5_bg.fus for inspiration...
+
+Silkspider:
+
+    * You pick up little white balls of silk. Each one adds to your silk timer.
+      While you have silk, when jumping, you leave silk behind.
+      Silk eventually disappears.
+      (Rollers roll on it?.. or some other creature?.. which can fly away when it disappears?..)
+      The silk timer counts down... always?.. or just while jumping (each frame you "use" silk)?..
+
+* Hexmap recording palmappers are broken?..
+    See data/maps/playarea/start2.fus, it specifies "spider_cpu" but the bodies
+    don't seem to be rendering any differently
+
