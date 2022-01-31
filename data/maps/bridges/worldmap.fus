@@ -1,6 +1,6 @@
-$SET_STR WM "data/maps/minidemo/"
+$SET_STR WM "data/maps/bridges/"
 
-name: "minidemo"
+name: "bridges"
 unit: 3 2 0 -1
 spawn: $PREFIX WM "start.fus"
 palette: "data/pal1.fus"
