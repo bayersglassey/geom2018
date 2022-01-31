@@ -52,6 +52,7 @@ vars:
     nosave label "label:_head": null
     nosave label "label:eye": null
     nosave label "label:nose": null
+    nosave label "label:toe": null
     nosave label "label:headbump": null
     nosave label "label:head_spikes": null
     nosave label "label:head_spikes_extended": null
@@ -69,6 +70,7 @@ proc toplevel onstatesetchange "update_vars":
     set myvar("label:_head"): $PREFIX NS "_head"
     set myvar("label:eye"): $PREFIX NS "eye"
     set myvar("label:nose"): $PREFIX NS "nose"
+    set myvar("label:toe"): null
     set myvar("label:headbump"): null
     set myvar("label:head_spikes"): null
     set myvar("label:head_spikes_extended"): null
@@ -88,6 +90,12 @@ proc toplevel onstatesetchange "update_vars":
     then:
         set myvar("label:head_spikes"): $PREFIX NS "head_spikes"
         set myvar("label:head_spikes_extended"): $PREFIX NS "head_spikes_extended"
+    if: expr: myvar("is_flipspider")
+    then:
+        set myvar("label:eye"): $PREFIX NS "eye_flip"
+    if: expr: myvar("is_stickyspider")
+    then:
+        set myvar("label:toe"): $PREFIX NS "toe_sticky"
 
     # Set myvar("spit_anim")
     if: expr: myvar("is_spikeyspider")

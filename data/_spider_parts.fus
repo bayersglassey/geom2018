@@ -38,6 +38,7 @@ shapes:
     ################################
     # "label:bleg"
     # "label:fleg"
+    # "label:toe"
 
     $PREFIX NS "bleg":
         $IF EYESPIDER:
@@ -51,6 +52,8 @@ shapes:
                 : "tri" (  0 -1  0  0) 11 f eval: 1 + 8 + 5
                 : "sq"  (  0 -1 -1  0) 11 f eval: 1 + 8 + 3
                 : "tri" (  0 -1 -1 -1)  1 f eval: 1 + 8 + 3
+            labels:
+                : "label:toe" (0 -1 -1 -1) 0 f
 
     $PREFIX NS "fleg":
         shapes:
@@ -58,6 +61,13 @@ shapes:
             # just "fleg" is usually rotated 180 degrees wherever it's used...
             # However, they're separate in case we ever want to tweak one.
             : $PREFIX NS "bleg" (0 0 0 0) 0 f
+
+    $PREFIX NS "toe_sticky":
+        prismels:
+            : "dia" (0 0 0 0)  3 f eval: 1 + 8 + 7
+            #: "dia" (0 0 0 0)  4 f eval: 1 + 15
+            #: "dia" (0 0 0 0)  5 f eval: 1 + 15
+            #: "sq" (0 0 0 0)  9 f eval: 1 + 15
 
 
     ################################
@@ -130,6 +140,25 @@ shapes:
             : "tri" (0 0 0 0)  6 f eval: 1 + 8 + 4
             : "tri" (0 0 0 0)  8 f eval: 1 + 8 + 4
             : "tri" (0 0 0 0) 10 f eval: 1 + 8 + 4
+
+    $PREFIX NS "_eye_flip":
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval: 1 + 0 + 4
+            : "tri" (0 0 0 0)  2 f eval: 1 + 0 + 4
+            : "tri" (0 0 0 0)  4 f eval: 1 + 0 + 4
+            : "tri" (0 0 0 0)  6 f eval: 1 + 8 + 4
+            : "tri" (0 0 0 0)  8 f eval: 1 + 8 + 4
+            : "tri" (0 0 0 0) 10 f eval: 1 + 8 + 4
+
+    $PREFIX NS "eye_flip":
+        animation: cycle 48
+        shapes:
+            : $PREFIX NS "_eye_flip" (0 0 0 0)  2 f 0 ( 0  1)
+            : $PREFIX NS "_eye_flip" (0 0 0 0)  4 f 0 ( 1  1)
+            : $PREFIX NS "_eye_flip" (0 0 0 0)  6 f 0 ( 2  1)
+            : $PREFIX NS "_eye_flip" (0 0 0 0)  8 f 0 ( 3  1)
+            : $PREFIX NS "_eye_flip" (0 0 0 0) 10 f 0 ( 4  1)
+            : $PREFIX NS "_eye_flip" (0 0 0 0)  0 f 0 ( 5 43)
 
 
     ################################
