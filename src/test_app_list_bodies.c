@@ -77,6 +77,7 @@ int test_app_list_bodies_render(test_app_list_t *list){
     if(body != NULL){
         _console_write_field(console, "Stateset", body->stateset->filename);
         _console_write_field(console, "State", body->state->name);
+        if(body->palmapper)_console_write_field(console, "Palmapper", body->palmapper->name);
         _console_write_keyinfo(console, body, &body->keyinfo);
 
         recording_t *rec = &body->recording;
