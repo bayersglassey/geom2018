@@ -44,12 +44,7 @@ shapes:
 
     "map_bgvert":
         prismels:
-            : "tri" (0 0 0 0)  0 f eval: 1 + 8
-            : "tri" (0 0 0 0)  2 f eval: 1 + 8
-            : "tri" (0 0 0 0)  4 f eval: 1 + 8
-            : "tri" (0 0 0 0)  6 f eval: 1 + 8
-            : "tri" (0 0 0 0)  8 f eval: 1 + 8
-            : "tri" (0 0 0 0) 10 f eval: 1 + 8
+            : "vert" (0 0 0 0)  0 f eval: 1 + 15
 
     ########
     # EDGE #
@@ -89,7 +84,7 @@ shapes:
     "map_bgedge":
         prismels:
             : "sq"  (0 1 0 -1)  0 f eval: 1 + 7
-            : "sq"  (1 1 0 -1)  0 f eval: 1 + 8
+            #: "sq"  (1 1 0 -1)  0 f eval: 1 + 8
             : "sq"  (2 1 0 -1)  0 f eval: 1 + 7
 
     ########
