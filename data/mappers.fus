@@ -25,6 +25,8 @@ mappers:
         solid
         unit: 1 0 0 0
         entries:
+            : "vert" -> "vert"
+            : "edge" -> "edge"
             : "sq" -> "sq"
             : "tri" -> "tri"
             : "dia" -> "dia"
