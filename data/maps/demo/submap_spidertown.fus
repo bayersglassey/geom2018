@@ -28,6 +28,14 @@ submaps:
             :
                 file: "data/maps/test/map2.fus"
                 pos: (1 10)
+            :
+                file: "data/maps/demo/honey1.fus"
+                pos: (-15 20)
+                camera: (6 -13)
+            :
+                file: "data/maps/demo/honey2.fus"
+                pos: (-15 -14)
+                camera: (0 0)
     "spidertown":
         file: "data/maps/test/map2x.fus"
         pos: (15 12)
