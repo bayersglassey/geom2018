@@ -56,6 +56,8 @@ static hexcollmap_t *load_collmap(FILE *file, const char *filename,
 
 
 static void print_help(){
+    fprintf(stderr, "Usage: collmaptool [OPTION ...] [--] FILENAME\n");
+    fprintf(stderr, "If FILENAME is \"-\", stdin is used.\n");
     fprintf(stderr, "Options:\n");
     fprintf(stderr, "    --just_coll      "
         "Only parse/output the collmap's lines, no leading \"collmap:\" etc\n");
@@ -86,8 +88,9 @@ int main(int n_args, char **args){
     rot_t rot = -1;
 
     /* Parse args */
-    for(int i = 1; i < n_args; i++){
-        const char *arg = args[i];
+    int arg_i = 1;
+    for(; arg_i < n_args; arg_i++){
+        const char *arg = args[arg_i];
         if(!strcmp(arg, "--just_coll")){
             just_coll = true;
         }else if(!strcmp(arg, "--dump")){
@@ -101,16 +104,22 @@ int main(int n_args, char **args){
         }else if(!strcmp(arg, "-e") || !strcmp(arg, "--eol_semicolons")){
             eol_semicolons = true;
         }else if(!strcmp(arg, "-r") || !strcmp(arg, "--rot")){
-            i++;
-            if(i >= n_args)goto arg_missing_value;
-            rot = rot_contain(HEXSPACE_ROT_MAX, atoi(args[i]));
+            arg_i++;
+            if(arg_i >= n_args)goto arg_missing_value;
+            rot = rot_contain(HEXSPACE_ROT_MAX, atoi(args[arg_i]));
         }else if(!strcmp(arg, "-h") || !strcmp(arg, "--help")){
             print_help();
             return 0;
-        }else{
+        }else if(!strcmp(arg, "--")){
+            arg_i++;
+            break;
+        }else if(arg[0] == '-' && arg[1] != '\0'){
             fprintf(stderr, "Unrecognized option: %s\n", arg);
             print_help();
             return 1;
+        }else{
+            /* Hopefully the filename... */
+            break;
         }
 
         continue;
@@ -118,6 +127,23 @@ int main(int n_args, char **args){
         fprintf(stderr, "Missing value for option: %s\n", arg);
         print_help();
         return 2;
+    }
+
+    if(arg_i != n_args - 1){
+        fprintf(stderr, "ERROR: Missing filename\n");
+        print_help();
+        return 1;
+    }
+
+    const char *collmap_filename = args[arg_i];
+    FILE *collmap_file = stdin;
+    if(strcmp(collmap_filename, "-")){
+        collmap_file = fopen(collmap_filename, "r");
+        if(!collmap_file){
+            perror("fopen");
+            return 1;
+        }
+        collmap_filename = "<stdin>";
     }
 
     stringstore_t name_store;
@@ -129,7 +155,8 @@ int main(int n_args, char **args){
     int parts_len;
 
     /* Load collmap */
-    hexcollmap_t *collmap = load_collmap(stdin, "<stdin>", just_coll,
+    hexcollmap_t *collmap = load_collmap(collmap_file,
+        collmap_filename, just_coll,
         &parts, &parts_len,
         &name_store, &filename_store);
     if(!collmap)return 2;
