@@ -48,7 +48,7 @@ clean:
 check: $(TESTS)
 	./runtests.sh $(TESTS) tests/*.sh
 
-bin/collmaptool: src/main/collmaptool.o $(OFILES)
+bin/collmaptool: src/main/collmaptool.o $(OFILES) src/mapeditor.o src/rawinput.o
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 

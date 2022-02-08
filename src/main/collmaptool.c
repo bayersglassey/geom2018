@@ -8,6 +8,8 @@
 #include "../stringstore.h"
 #include "../hexspace.h"
 #include "../hexcollmap.h"
+#include "../mapeditor.h"
+
 
 
 static hexcollmap_t *load_collmap(FILE *file, const char *filename,
@@ -73,6 +75,8 @@ static void print_help(){
         "Semicolons written to end of each line marking end of tile data\n");
     fprintf(stderr, " -r --rot ROT        "
         "Rotate collmap by ROT (an integer modulo 6)\n");
+    fprintf(stderr, " -E --editor         "
+        "Start interactive editor\n");
     fprintf(stderr, " -h --help           "
         "Show this message\n");
 }
@@ -82,6 +86,7 @@ int main(int n_args, char **args){
     hexcollmap_write_options_t opts = {0};
     bool dump = false;
     rot_t rot = -1;
+    bool use_editor = false;
 
     /* Parse args */
     int arg_i = 1;
@@ -103,6 +108,8 @@ int main(int n_args, char **args){
             arg_i++;
             if(arg_i >= n_args)goto arg_missing_value;
             rot = rot_contain(HEXSPACE_ROT_MAX, atoi(args[arg_i]));
+        }else if(!strcmp(arg, "-E") || !strcmp(arg, "--editor")){
+            use_editor = true;
         }else if(!strcmp(arg, "-h") || !strcmp(arg, "--help")){
             print_help();
             return 0;
@@ -177,7 +184,11 @@ int main(int n_args, char **args){
     }
 
     /* Write collmap */
-    if(dump){
+    if(use_editor){
+        int err = mapeditor(collmap_filename, &opts, collmap,
+            parts, parts_len);
+        if(err)return err;
+    }else if(dump){
         hexcollmap_dump(collmap, stdout);
     }else{
         hexcollmap_write_with_parts(collmap, stdout, &opts,
