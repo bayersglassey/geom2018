@@ -274,12 +274,18 @@ void hexcollmap_init_clone(hexcollmap_t *collmap,
 int hexcollmap_init_tiles_from_hexbox(hexcollmap_t *collmap);
 int hexcollmap_union_hexbox(hexcollmap_t *collmap, hexbox_t *hexbox);
 void hexcollmap_dump(hexcollmap_t *collmap, FILE *f);
+typedef struct hexcollmap_write_options {
+    bool just_coll;
+    bool extra;
+    bool nodots;
+    bool show_tiles;
+    bool eol_semicolons;
+} hexcollmap_write_options_t;
 void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
-    bool just_coll, bool extra, bool nodots, bool show_tiles,
-    bool eol_semicolons, hexcollmap_part_t **parts, int parts_len);
+    hexcollmap_write_options_t *opts,
+    hexcollmap_part_t **parts, int parts_len);
 void hexcollmap_write(hexcollmap_t *collmap, FILE *f,
-    bool just_coll, bool extra, bool nodots, bool show_tiles,
-    bool eol_semicolons);
+    hexcollmap_write_options_t *opts);
 int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
     vecspace_t *space, const char *filename, bool just_coll,
     hexcollmap_part_t ***parts_ptr, int *parts_len_ptr,

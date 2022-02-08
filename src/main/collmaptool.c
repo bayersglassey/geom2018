@@ -56,8 +56,8 @@ static hexcollmap_t *load_collmap(FILE *file, const char *filename,
 
 
 static void print_help(){
-    fprintf(stderr, "Usage: collmaptool [OPTION ...] [--] FILENAME\n");
-    fprintf(stderr, "If FILENAME is \"-\", stdin is used.\n");
+    fprintf(stderr, "Usage: collmaptool [OPTION ...] [--] [FILENAME]\n");
+    fprintf(stderr, "If FILENAME is missing or \"-\", stdin is used.\n");
     fprintf(stderr, "Options:\n");
     fprintf(stderr, "    --just_coll      "
         "Only parse/output the collmap's lines, no leading \"collmap:\" etc\n");
@@ -79,12 +79,8 @@ static void print_help(){
 
 
 int main(int n_args, char **args){
-    bool just_coll = false;
+    hexcollmap_write_options_t opts = {0};
     bool dump = false;
-    bool extra = false;
-    bool nodots = false;
-    bool show_tiles = false;
-    bool eol_semicolons = false;
     rot_t rot = -1;
 
     /* Parse args */
@@ -92,17 +88,17 @@ int main(int n_args, char **args){
     for(; arg_i < n_args; arg_i++){
         const char *arg = args[arg_i];
         if(!strcmp(arg, "--just_coll")){
-            just_coll = true;
+            opts.just_coll = true;
         }else if(!strcmp(arg, "--dump")){
             dump = true;
         }else if(!strcmp(arg, "-x") || !strcmp(arg, "--extra")){
-            extra = true;
+            opts.extra = true;
         }else if(!strcmp(arg, "-d") || !strcmp(arg, "--nodots")){
-            nodots = true;
+            opts.nodots = true;
         }else if(!strcmp(arg, "-t") || !strcmp(arg, "--show_tiles")){
-            show_tiles = true;
+            opts.show_tiles = true;
         }else if(!strcmp(arg, "-e") || !strcmp(arg, "--eol_semicolons")){
-            eol_semicolons = true;
+            opts.eol_semicolons = true;
         }else if(!strcmp(arg, "-r") || !strcmp(arg, "--rot")){
             arg_i++;
             if(arg_i >= n_args)goto arg_missing_value;
@@ -114,7 +110,7 @@ int main(int n_args, char **args){
             arg_i++;
             break;
         }else if(arg[0] == '-' && arg[1] != '\0'){
-            fprintf(stderr, "Unrecognized option: %s\n", arg);
+            fprintf(stderr, "ERROR: Unrecognized option: %s\n", arg);
             print_help();
             return 1;
         }else{
@@ -124,26 +120,29 @@ int main(int n_args, char **args){
 
         continue;
         arg_missing_value:
-        fprintf(stderr, "Missing value for option: %s\n", arg);
+        fprintf(stderr, "ERROR: Missing value for option: %s\n", arg);
         print_help();
         return 2;
     }
 
-    if(arg_i != n_args - 1){
-        fprintf(stderr, "ERROR: Missing filename\n");
+    const char *collmap_filename = "-";
+    if(arg_i > n_args - 1){
+        fprintf(stderr, "ERROR: extra arguments after filename\n");
         print_help();
-        return 1;
+        return 2;
+    }else if(arg_i == n_args - 1){
+        collmap_filename = args[arg_i];
     }
 
-    const char *collmap_filename = args[arg_i];
     FILE *collmap_file = stdin;
-    if(strcmp(collmap_filename, "-")){
+    if(!strcmp(collmap_filename, "-")){
+        collmap_filename = "<stdin>";
+    }else{
         collmap_file = fopen(collmap_filename, "r");
         if(!collmap_file){
             perror("fopen");
             return 1;
         }
-        collmap_filename = "<stdin>";
     }
 
     stringstore_t name_store;
@@ -156,7 +155,7 @@ int main(int n_args, char **args){
 
     /* Load collmap */
     hexcollmap_t *collmap = load_collmap(collmap_file,
-        collmap_filename, just_coll,
+        collmap_filename, opts.just_coll,
         &parts, &parts_len,
         &name_store, &filename_store);
     if(!collmap)return 2;
@@ -181,8 +180,7 @@ int main(int n_args, char **args){
     if(dump){
         hexcollmap_dump(collmap, stdout);
     }else{
-        hexcollmap_write_with_parts(collmap, stdout,
-            just_coll, extra, nodots, show_tiles, eol_semicolons,
+        hexcollmap_write_with_parts(collmap, stdout, &opts,
             parts, parts_len);
     }
 
