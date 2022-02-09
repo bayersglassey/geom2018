@@ -231,7 +231,7 @@ typedef struct hexcollmap {
 
 
 static bool tile_c_is_visible(char tile_c){
-    return strchr(" x.%?()[]", tile_c) == NULL;
+    return strchr(" x.?", tile_c) == NULL;
 }
 
 static bool tile_c_is_solid(char tile_c){

@@ -507,7 +507,10 @@ static int _hexcollmap_parse_lines_tiles(hexcollmap_t *collmap,
 
         for(int x = 0; x < line_len; x++){
             char c = line[x];
-            if(tile_c_is_visible(c) || c == 'x'){
+            if(
+                !strchr(";[()%", c) &&
+                tile_c_is_visible(c) || c == 'x'
+            ){
                 char elem_type = c == 'x' || c == '='?
                     get_map_elem_type(x-ox, y-oy):
                     get_elem_type(c);
