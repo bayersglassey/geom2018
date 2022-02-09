@@ -280,6 +280,10 @@ typedef struct hexcollmap_write_options {
     bool nodots;
     bool show_tiles;
     bool eol_semicolons;
+
+    /* Weakrefs: */
+    trf_t *marker;
+        /* Optional marker, showing a position on the collmap */
 } hexcollmap_write_options_t;
 void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
     hexcollmap_write_options_t *opts,

@@ -82,10 +82,17 @@ static void _hexcollmap_write(hexcollmap_t *collmap, FILE *f,
                 continue;
             }
             bool is_origin = x == collmap->ox && y == collmap->oy;
+            bool is_marker =
+                opts->marker &&
+                opts->marker->add[0] == x &&
+                -opts->marker->add[1] == y
+                    /* as usual, must flip vec's y coord when indexing into
+                    collmap's tiles */
+            ;
             hexcollmap_tile_t *tile = &collmap->tiles[y * collmap->w + x];
             fprintf(f, "%c%c%c%c",
                 is_origin? '(': opts->show_tiles? '[': ' ',
-                _write_vert(tile->vert[0].tile_c, opts->nodots? (opts->show_tiles? ' ': ' '): '.'),
+                is_marker? 'M': _write_vert(tile->vert[0].tile_c, opts->nodots? (opts->show_tiles? ' ': ' '): '.'),
                 is_origin? ')': opts->show_tiles? ' ': ' ',
                 _write_edge(tile->edge[0].tile_c, '-', opts->show_tiles? ']': ' '));
         }

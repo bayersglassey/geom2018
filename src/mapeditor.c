@@ -21,12 +21,18 @@ int mapeditor(const char *collmap_filename, hexcollmap_write_options_t *opts,
     err = enable_raw_mode();
     if(err)return err;
 
-    int x = 0;
-    int y = 0;
+    trf_t _marker = {
+        .add = {collmap->ox, -collmap->oy},
+    };
+    trf_t *marker=&_marker;
+    opts->marker = marker;
+
     bool quit = false;
     while(!quit){
         printf(ANSI_CLS);
         hexcollmap_write_with_parts(collmap, stdout, opts, parts, parts_len);
+        printf("Origin: (%i %i)\n", collmap->ox, collmap->oy);
+        printf("Marker: (%i %i)\n", marker->add[0], marker->add[1]);
 
         int ch = raw_getch();
         if(ch < 0){
@@ -35,11 +41,32 @@ int mapeditor(const char *collmap_filename, hexcollmap_write_options_t *opts,
         }
 
         switch(ch){
-            case ESC: case 'q': quit = true; break;
-            case ARROW_UP:    y--; break;
-            case ARROW_DOWN:  y++; break;
-            case ARROW_LEFT:  x--; break;
-            case ARROW_RIGHT: x++; break;
+            case 'q': quit = true; break;
+            case 's': {
+                if(!strcmp(collmap_filename, "<stdin>")){
+                    fprintf(stderr, "Can't save to stdin!\n");
+                    return 2;
+                }
+                FILE *file = fopen(collmap_filename, "w");
+                if(!file){
+                    perror("fopen");
+                    return 1;
+                }
+                opts->marker = NULL;
+                hexcollmap_write_with_parts(collmap, file, opts,
+                    parts, parts_len);
+                opts->marker = marker;
+                if(fclose(file)){
+                    perror("fclose");
+                    return 1;
+                }
+                printf("Saved to: %s\n", collmap_filename);
+                break;
+            }
+            case ARROW_UP:    marker->add[1]++; break;
+            case ARROW_DOWN:  marker->add[1]--; break;
+            case ARROW_LEFT:  marker->add[0]--; break;
+            case ARROW_RIGHT: marker->add[0]++; break;
             default: break;
         }
     }
