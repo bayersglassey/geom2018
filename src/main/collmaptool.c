@@ -141,17 +141,6 @@ int main(int n_args, char **args){
         collmap_filename = args[arg_i];
     }
 
-    FILE *collmap_file = stdin;
-    if(!strcmp(collmap_filename, "-")){
-        collmap_filename = "<stdin>";
-    }else{
-        collmap_file = fopen(collmap_filename, "r");
-        if(!collmap_file){
-            perror("fopen");
-            return 1;
-        }
-    }
-
     stringstore_t name_store;
     stringstore_t filename_store;
     stringstore_init(&name_store);
@@ -161,11 +150,32 @@ int main(int n_args, char **args){
     int parts_len;
 
     /* Load collmap */
-    hexcollmap_t *collmap = load_collmap(collmap_file,
-        collmap_filename, opts.just_coll,
-        &parts, &parts_len,
-        &name_store, &filename_store);
-    if(!collmap)return 2;
+    hexcollmap_t *collmap;
+    {
+        FILE *collmap_file = stdin;
+        if(!strcmp(collmap_filename, "-")){
+            collmap_filename = "<stdin>";
+        }else{
+            collmap_file = fopen(collmap_filename, "r");
+            if(!collmap_file){
+                perror("fopen");
+                return 1;
+            }
+        }
+
+        collmap = load_collmap(collmap_file,
+            collmap_filename, opts.just_coll,
+            &parts, &parts_len,
+            &name_store, &filename_store);
+        if(!collmap)return 2;
+
+        if(collmap_file != stdin){
+            if(fclose(collmap_file) == EOF){
+                perror("fclose");
+                return 1;
+            }
+        }
+    }
 
     /* Transform collmap */
     if(rot != -1){
