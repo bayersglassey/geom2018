@@ -115,25 +115,26 @@ int player_spawn_body(player_t *player){
         return 2;
     }
 
+    hexgame_savelocation_t *respawn = &player->respawn_location;
+
     hexmap_t *respawn_map;
     err = hexgame_get_or_load_map(player->game,
-        player->respawn_location.map_filename, &respawn_map);
+        respawn->map_filename, &respawn_map);
     if(err)return err;
 
     /* Set player->body */
     ARRAY_PUSH_NEW(body_t*, respawn_map->bodies, body)
     err = body_init(body, player->game, respawn_map,
-        player->respawn_location.stateset_filename, NULL, NULL);
+        respawn->stateset_filename,
+        respawn->state_name,
+        NULL);
     if(err)return err;
 
     /* Attach body to player */
     player->body = body;
 
     /* Move body to the respawn location */
-    err = body_respawn(body,
-        player->respawn_location.loc.pos, player->respawn_location.loc.rot,
-        player->respawn_location.loc.turn, respawn_map);
-    if(err)return err;
+    body->loc = respawn->loc;
 
     return 0;
 }
