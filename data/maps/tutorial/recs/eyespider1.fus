@@ -27,3 +27,10 @@ state "start":
         goto: "start2"
 
 state "start2":
+    if:
+        coll: bodies("touch") any yes collmap("detect")
+    then:
+        play: "data/maps/tutorial/recs/eyespider1_c.fus"
+        goto: "done"
+
+state "done":

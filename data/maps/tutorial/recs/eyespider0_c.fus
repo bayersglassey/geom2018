@@ -1,13 +1,13 @@
 anim: "anim/eyespider.fus"
-state: "stand"
-pos: ( 100 31)
+state: "eye_closed"
+pos: ( 98 38)
 rot: 0
 turn: yes
 keys:
-    x:
+    x: is was
     y:
     u:
     d:
     l:
     r:
-data: "+r w69 -r w24 +l w1 -l w20 +x w8"
+data: " w9 -x w13 +r w73 -r w3 +l w5 -l w17 +x w37"

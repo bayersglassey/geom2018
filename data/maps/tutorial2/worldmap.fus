@@ -14,13 +14,9 @@ vars:
     "start_solved": F
     nosave "num_coin_g": 5
 
-    nosave "start_eye_a_open": 0
     nosave "start2_eye_a_open": 0
     nosave "start2_eye_b_open": 0
     nosave "start2_eye_c_open": 0
-    nosave "start3_eye_a_open": 0
-    nosave "start3b_eye_a_open": 0
-    nosave "start4_eye_a_open": 0
 
     "start3b_coin_a": F
     "start3b_coin_b": F
@@ -94,10 +90,19 @@ submaps:
                     file: "data/maps/tutorial2/start3b.fus"
                     pos: eval: (13 -9) + (-1 -12)
                     camera: (-5 -6)
-                :
-                    file: "data/maps/tutorial2/start3b_blocker.fus"
-                    visible: not mapvar("start3b_solved")
-                    pos: eval: (13 -9) + (-1 -12) + (-22 -17)
+                    submaps:
+                        :
+                            file: "data/maps/tutorial2/start3b_blocker.fus"
+                            visible: not mapvar("start3b_coin_b")
+                            pos: (5 -7)
+                        :
+                            file: "data/maps/tutorial2/start3b_blocker.fus"
+                            visible: not mapvar("start3b_coin_d")
+                            pos: (6 -2)
+                        :
+                            file: "data/maps/tutorial2/start3b_blocker.fus"
+                            visible: not mapvar("start3b_solved")
+                            pos: (-22 -17)
             "start4": submaps:
                 :
                     bg

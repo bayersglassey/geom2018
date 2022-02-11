@@ -1,0 +1,13 @@
+anim: "anim/eyespider.fus"
+state: "eye_closed"
+pos: ( 145 41)
+rot: 0
+turn: yes
+keys:
+    x: is was
+    y:
+    u:
+    d:
+    l:
+    r:
+data: " w16 -x w15 +r w35 -r w4 +l w3 -l w23 +r w13 -r w17 +u w4 -u w28 +l w2 -l w14 +l w18 -l w23 +l w11 -l w26 +l w23 -l w12 +r w1 -r w24 +u w2 -u w20 +l w68 -l w45 +x w52"

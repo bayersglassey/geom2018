@@ -34,23 +34,14 @@ state "start":
     if:
         coll: bodies("touch") any yes collmap("detect")
     then:
-        set mapvar("eyespider0_speak"): T
         play: "data/maps/tutorial/recs/eyespider0_b.fus"
         goto: "start2"
 
 state "start2":
     if:
-    then:
-        set mapvar("eyespider0_speak"): F
-        play: "data/maps/tutorial/recs/eyespider0_c.fus"
-        goto: "start3"
-
-
-state "start3":
-    if:
         coll: bodies("touch") any yes collmap("detect_partial")
     then:
-        play: "data/maps/tutorial/recs/eyespider0_d.fus"
+        play: "data/maps/tutorial/recs/eyespider0_c.fus"
         goto: "done"
 
 state "done":

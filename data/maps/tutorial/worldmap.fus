@@ -20,7 +20,6 @@ vars:
     nosave "start4_eye_b_open": 0
     nosave "skypipes_eye_a_open": 0
     nosave "skypipes4_eye_a_open": 0
-    nosave "eyespider0_speak": F
 
 submaps:
     :

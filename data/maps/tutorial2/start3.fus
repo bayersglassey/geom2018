@@ -1,28 +1,4 @@
-$SET_STR DANGER: lines:
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;Something dangerous is
-    ;; rolling around down there.
-    ;;
-    ;;
-    ;;
-    ;; Everything will be okay.
-    ;;   Keep going.
-
 spawn: (0 0) -1 y
-text: if mapvar("start3_eye_a_open") then $GET_STR DANGER else null
 parts:
     "h": recording "data/recs/hotspot.fus"
         vars:
@@ -30,7 +6,6 @@ parts:
     "A": recording "data/recs/eye.fus"
         vars:
             "key": "start_solved"
-            "opened_key": "start3_eye_a_open"
 collmap:
     ;;         .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                            /

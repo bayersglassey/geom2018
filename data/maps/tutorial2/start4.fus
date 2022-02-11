@@ -1,29 +1,8 @@
-$SET_STR COIN_BEASTS: lines:
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;; The purple people
-    ;; cannot hurt you.
-    ;;
-    ;;   Please...
-    ;;   collect them...
-    ;;   for me.
-
 spawn: (0 0) 0 y
-text: if mapvar("start4_eye_a_open") then $GET_STR COIN_BEASTS else null
 parts:
     "A": recording "data/recs/eye.fus"
         vars:
             "antikey": "start4_solved"
-            "opened_key": "start4_eye_a_open"
     "c": recording "data/recs/coin.fus"
         vars:
             "appear": T
