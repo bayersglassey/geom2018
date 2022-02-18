@@ -713,3 +713,27 @@ Silkspider:
     See data/maps/playarea/start2.fus, it specifies "spider_cpu" but the bodies
     don't seem to be rendering any differently
 
+
+Feb 8, 2022:
+------------
+
+* Editor should attempt to switch screens or something... currently when it "clears"
+  the screen, really that just adds a bunch of newlines.
+  So after exiting the editor, you can scroll up and see every "frame" it ever rendered.
+
+* Factor out some stuff in hexcollmap.c to properly define the "space" of coordinates
+  into collmap->tiles. This "space" is sometimes referred to as "tile coords"?..
+  E.g. in hexcollmap_collide_elem, a comment says:
+
+        /* And now, because we were fools and defined */
+        /* the tile coords such that their Y is flipped */
+        /* compared to vecspaces, we need to flip that Y */
+        /* before calling trf_apply and then flip it back */
+        /* again: */
+        index.add[1] = -index.add[1];
+
+  ...and in hexcollmap.c there are some trf_t instances which represent coords in
+  vecspace, others coords in... "tile space", as it were.
+  Can we make vecspace_to_tilespace and vice versa?..
+  Should we?..
+  If not, how do we make it all clear?.. currently it's too confusing.
