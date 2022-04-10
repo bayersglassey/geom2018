@@ -32,6 +32,11 @@ submaps:
                 file: "data/maps/demo/honey1.fus"
                 pos: (-15 20)
                 camera: (6 -13)
+                submaps:
+                    :
+                        file: "data/maps/demo/bee_honey.fus"
+                        pos: (-2 0)
+                        camera: (0 0)
             :
                 file: "data/maps/demo/honey2.fus"
                 pos: (-15 -14)
