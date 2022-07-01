@@ -1,0 +1,13 @@
+anim: "anim/spider.fus"
+state: "crawl"
+pos: ( 9 -27)
+rot: 5
+turn: yes
+keys:
+    x:
+    y:
+    u:
+    d:
+    l:
+    r:
+data: " w46 +d w39 +l w9 -l w5 +r w3 -r w91 +r w3 -r w4 +l w1 -l w105 +r w9 -r w116 +l w1 -l w14"

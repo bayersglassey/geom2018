@@ -90,6 +90,8 @@ submaps:
                     file: "data/maps/tutorial2/start3b.fus"
                     pos: eval: (13 -9) + (-1 -12)
                     camera: (-5 -6)
+                    recs:
+                        : "data/maps/tutorial2/recs/spider_start3b.fus" "spider_cpu"
                     submaps:
                         :
                             file: "data/maps/tutorial2/start3b_blocker.fus"
