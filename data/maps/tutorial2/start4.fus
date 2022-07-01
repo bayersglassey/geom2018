@@ -13,8 +13,6 @@ parts:
         bodyvars:
             "appear": T
             "key": "start3b_solved"
-            "collected_key": "start4_solved"
-            "num_key": "start4_num_coin"
 collmap:
     ;;    .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   ?   ?   ?   ?   ?   ?   ?   [c] [c][c][c][c][c][c][c]
     ;;
