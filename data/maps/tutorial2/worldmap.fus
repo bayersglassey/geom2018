@@ -115,6 +115,8 @@ submaps:
                     file: "data/maps/tutorial2/start4.fus"
                     pos: eval: (13 -9) + (-1 -12) + (-29 -19)
                     camera: (-8 6)
+                    recs:
+                        : "data/maps/tutorial2/recs/coin_beast_start4.fus"
                     submaps:
                         :
                             file: "data/maps/tutorial2/start4_door_closed.fus"
