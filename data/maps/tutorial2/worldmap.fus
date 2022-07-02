@@ -30,7 +30,7 @@ vars:
     nosave "start3b_num_coin_e": 4
 
     "start4_solved": F
-    nosave "start4_num_coin": 16
+    nosave "start4_num_coin": 20
 
 submaps:
     :
