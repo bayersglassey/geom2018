@@ -158,7 +158,7 @@ typedef struct state {
 
     /* Weakrefs: */
     struct stateset *stateset;
-    rendergraph_t *rgraph;
+    ARRAY_DECL(rendergraph_t *, rgraphs)
     state_context_t *context;
     hexcollmap_t *hitbox;
         /* If own_hitbox != NULL, then hitbox == own_hitbox */

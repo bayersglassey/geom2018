@@ -837,12 +837,13 @@ static int _state_parse(state_t *state, fus_lexer_t *lexer,
             OPEN
             GET_STR_CACHED(rgraph_name, &prend->name_store)
             CLOSE
-            state->rgraph = prismelrenderer_get_rendergraph(
+            rendergraph_t *rgraph = prismelrenderer_get_rendergraph(
                 prend, rgraph_name);
-            if(state->rgraph == NULL){
+            if(rgraph == NULL){
                 fus_lexer_err_info(lexer);
                 fprintf(stderr, "Couldn't find shape: %s\n", rgraph_name);
                 return 2;}
+            ARRAY_PUSH(rendergraph_t*, state->rgraphs, rgraph)
             continue;
         }
         if(GOT("unsafe")){
@@ -1162,7 +1163,7 @@ int state_init(state_t *state, stateset_t *stateset, const char *name,
 ){
     state->stateset = stateset;
     state->name = name;
-    state->rgraph = NULL;
+    ARRAY_INIT(state->rgraphs)
     state->own_hitbox = NULL;
     state->hitbox = NULL;
     state->safe = true;
@@ -1175,9 +1176,10 @@ int state_init(state_t *state, stateset_t *stateset, const char *name,
 void state_dump(state_t *state, FILE *file, int depth){
     _print_tabs(file, depth);
     fprintf(file, "%s:\n", state->name);
-    if(state->rgraph){
+    for(int i = 0; i < state->rgraphs_len; i++){
+        rendergraph_t *rgraph = state->rgraphs[i];
         _print_tabs(file, depth+1);
-        fprintf(file, "rgraph: %s\n", state->rgraph->name);
+        fprintf(file, "rgraph: %s\n", rgraph->name);
     }
     for(int i = 0; i < state->rules_len; i++){
         state_rule_t *rule = state->rules[i];

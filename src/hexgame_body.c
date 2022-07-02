@@ -1103,39 +1103,43 @@ int body_render(body_t *body,
     /* RENDER THAT BODY */
     int err;
 
-    if(body->state == NULL)return 0;
-
-    rendergraph_t *rgraph = body->state->rgraph;
-    if(rgraph == NULL)return 0;
+    state_t *state = body->state;
+    if(state == NULL)return 0;
 
     hexmap_t *map = body->map;
     prismelrenderer_t *prend = map->prend;
     vecspace_t *map_space = map->space; /* &hexspace */
-    vecspace_t *rgraph_space = rgraph->space; /* &vec4 */
 
-    if(body->palmapper){
-        err = palettemapper_apply_to_rendergraph(body->palmapper,
-            prend, rgraph, NULL, map_space, &rgraph);
+    for(int i = 0; i < state->rgraphs_len; i++){
+        rendergraph_t *rgraph = state->rgraphs[i];
+        vecspace_t *rgraph_space = rgraph->space; /* &vec4 */
+
+        if(body->palmapper){
+            err = palettemapper_apply_to_rendergraph(body->palmapper,
+                prend, rgraph, NULL, map_space, &rgraph);
+            if(err)return err;
+        }
+
+        int frame_i = body->frame_i;
+
+        vec_t rendered_pos;
+        rot_t rendered_rot;
+        flip_t rendered_flip;
+        vec4_coords_from_hexspace(
+            body->loc.pos,
+            hexgame_location_get_rot(&body->loc),
+            body->loc.turn,
+            rendered_pos, &rendered_rot, &rendered_flip);
+        vec_sub(rgraph_space->dims, rendered_pos, camera_renderpos);
+        vec_mul(rgraph_space, rendered_pos, map->unit);
+
+        err = _render_rgraph_and_labels(rgraph, surface,
+            pal, prend, x0, y0, zoom, frame_i,
+            rendered_pos, rendered_rot, rendered_flip,
+            mapper,
+            body->label_mappings_len, body->label_mappings);
         if(err)return err;
     }
-
-    int frame_i = body->frame_i;
-
-    vec_t rendered_pos;
-    rot_t rendered_rot;
-    flip_t rendered_flip;
-    vec4_coords_from_hexspace(
-        body->loc.pos,
-        hexgame_location_get_rot(&body->loc),
-        body->loc.turn,
-        rendered_pos, &rendered_rot, &rendered_flip);
-    vec_sub(rgraph_space->dims, rendered_pos, camera_renderpos);
-    vec_mul(rgraph_space, rendered_pos, map->unit);
-
-    return _render_rgraph_and_labels(rgraph, surface,
-        pal, prend, x0, y0, zoom, frame_i,
-        rendered_pos, rendered_rot, rendered_flip,
-        mapper,
-        body->label_mappings_len, body->label_mappings);
+    return 0;
 }
 
