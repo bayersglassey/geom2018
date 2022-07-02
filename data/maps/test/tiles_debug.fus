@@ -1,0 +1,30 @@
+
+shapes:
+
+    "map_vert_debug":
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 2
+            : "tri" (0 0 0 0)  2 f eval: 1 + 8 + 2
+            : "tri" (0 0 0 0)  4 f eval: 1 + 8 + 2
+            : "tri" (0 0 0 0)  6 f eval: 1 + 8 + 2
+            : "tri" (0 0 0 0)  8 f eval: 1 + 8 + 2
+            : "tri" (0 0 0 0) 10 f eval: 1 + 8 + 2
+
+    "map_edge_debug":
+        prismels:
+            : "tri" (1 0 0  0) 11 f eval: 1 + 8 + 2
+            : "sq"  (1 1 0 -1)  0 f eval: 1 + 8 + 2
+            : "tri" (2 2 0 -1)  5 f eval: 1 + 8 + 2
+
+
+    "map_face_debug_third":
+        prismels:
+            : "tri" ( 0 0 0 0)  0 f eval: 1 + 0 + 2
+            : "tri" ( 0 0 0 0)  2 f eval: 1 + 0 + 2
+            : "sq"  (-1 0 1 0)  0 f eval: 1 + 0 + 2
+
+    "map_face_debug":
+        shapes:
+            : "map_face_debug_third" (1 1 1 0)  0 f
+            : "map_face_debug_third" (1 1 1 0)  4 f
+            : "map_face_debug_third" (1 1 1 0)  8 f

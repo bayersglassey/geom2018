@@ -11,6 +11,18 @@
 #include "hexcollmap.h"
 
 
+/* BIG OL' HACK: If any "tile" rgraphs are animated, we need the
+map's rgraph to be animated also.
+The most correct way to do this is I guess to compute the LCD of
+the tile rgraphs' n_frames, and set the map's rgraph's n_frames
+to that.
+But for now we use a magic number which has "many" divisors.
+That's a lot of bitmaps to cache for the map's rgraph, though...
+if we're going to allow complicated map animations, maybe we
+should disable bitmap caching for it (somehow). */
+#define HEXMAP_SUBMAP_RGRAPH_N_FRAMES 24
+
+
 /********************
  * HEXMAP COLLISION *
  ********************/

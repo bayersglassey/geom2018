@@ -821,6 +821,65 @@ static int _state_parse_rule(state_t *state, fus_lexer_t *lexer,
     return 0;
 }
 
+static int parse_rgraph_reference(fus_lexer_t *lexer,
+    prismelrenderer_t *prend, vecspace_t *space, rendergraph_t **rgraph_ptr
+){
+    int err;
+
+    rendergraph_t *rgraph;
+    if(GOT("collmap")){
+        NEXT
+        hexcollmap_t _collmap, *collmap=&_collmap;
+
+        /* Get tileset */
+        const char *tileset_name;
+        GET_STR_CACHED(tileset_name, &prend->name_store)
+        tileset_t *tileset;
+        err = prismelrenderer_get_or_create_tileset(prend, tileset_name,
+            &tileset);
+        if(err)return err;
+
+        /* Parse collmap */
+        OPEN
+        err = hexcollmap_parse(collmap, lexer, space,
+            "<inline>" /* filename */,
+            true /* just_coll */,
+            &prend->name_store, &prend->filename_store);
+        if(err)return err;
+        CLOSE
+
+        /* TODO: generate a random name or something */
+        const char *rgraph_name = "...collmap...";
+
+        /* Create rgraph */
+        ARRAY_PUSH_NEW(rendergraph_t*, prend->rendergraphs, _rgraph)
+        rgraph = _rgraph;
+        err = rendergraph_init(rgraph, rgraph_name, prend, NULL,
+            rendergraph_animation_type_cycle,
+            HEXMAP_SUBMAP_RGRAPH_N_FRAMES /* HACK */);
+        if(err)return err;
+
+        /* Populate rgraph's children */
+        err = rendergraph_add_rgraphs_from_collmap(
+            rgraph, collmap, tileset,
+            false /* add_collmap_rendergraphs */);
+        if(err)return err;
+
+        hexcollmap_cleanup(collmap);
+    }else{
+        const char *rgraph_name;
+        GET_STR_CACHED(rgraph_name, &prend->name_store)
+        rgraph = prismelrenderer_get_rendergraph(prend, rgraph_name);
+        if(rgraph == NULL){
+            fus_lexer_err_info(lexer);
+            fprintf(stderr, "Couldn't find shape: %s\n", rgraph_name);
+            return 2;}
+    }
+
+    *rgraph_ptr = rgraph;
+    return 0;
+}
+
 static int _state_parse(state_t *state, fus_lexer_t *lexer,
     prismelrenderer_t *prend, vecspace_t *space
 ){
@@ -832,17 +891,12 @@ static int _state_parse(state_t *state, fus_lexer_t *lexer,
     /* Parse state properties */
     while(1){
         if(GOT("rgraph")){
-            const char *rgraph_name;
             NEXT
             OPEN
-            GET_STR_CACHED(rgraph_name, &prend->name_store)
+            rendergraph_t *rgraph;
+            err = parse_rgraph_reference(lexer, prend, space, &rgraph);
+            if(err)return err;
             CLOSE
-            rendergraph_t *rgraph = prismelrenderer_get_rendergraph(
-                prend, rgraph_name);
-            if(rgraph == NULL){
-                fus_lexer_err_info(lexer);
-                fprintf(stderr, "Couldn't find shape: %s\n", rgraph_name);
-                return 2;}
             ARRAY_PUSH(rendergraph_t*, state->rgraphs, rgraph)
             continue;
         }
