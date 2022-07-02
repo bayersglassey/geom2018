@@ -96,19 +96,19 @@ static int _get_rgraph_i_when_faces_solid_edge(int n_faces_solid) {
     return n_faces_solid;
 }
 static int _get_rgraph_i_when_faces_solid_face(int n_faces_solid) {
-    /* Should never be called. hexmap_tileset_entry_t's type should
-    never be HEXMAP_TILESET_ENTRY_TYPE_WHEN_FACES_SOLID for a face. */
+    /* Should never be called. tileset_entry_t's type should
+    never be TILESET_ENTRY_TYPE_WHEN_FACES_SOLID for a face. */
     return 0;
 }
 
-typedef void hexmap_tileset_get_rgraph(hexmap_tileset_t *tileset,
+typedef void tileset_get_rgraph(tileset_t *tileset,
     char tile_c, rot_t rot, int n_faces_solid,
     rendergraph_t **rgraph_ptr, bool *rot_ok_ptr,
     int *frame_offset_ptr);
 typedef hexcollmap_elem_t *hexcollmap_tile_get_part(
     hexcollmap_tile_t *tile, int i);
-#define HEXMAP_TILESET_DEFINE_HELPERS(TYPE) \
-    static void hexmap_tileset_get_rgraph_##TYPE(hexmap_tileset_t *tileset, \
+#define TILESET_DEFINE_HELPERS(TYPE) \
+    static void tileset_get_rgraph_##TYPE(tileset_t *tileset, \
         char tile_c, rot_t rot, int n_faces_solid, \
         rendergraph_t **rgraph_ptr, bool *rot_ok_ptr, \
         int *frame_offset_ptr \
@@ -122,16 +122,16 @@ typedef hexcollmap_elem_t *hexcollmap_tile_get_part(
         rendergraph_t *rgraph = NULL; \
         for(int i = 0; i < tileset->TYPE##_entries_len; i++){ \
             /* This loop searches for the entry with given tile_c. */ \
-            hexmap_tileset_entry_t *entry = tileset->TYPE##_entries[i]; \
+            tileset_entry_t *entry = tileset->TYPE##_entries[i]; \
             if(entry->tile_c != tile_c)continue; \
             rgraph = entry->rgraphs[0]; \
-            if(entry->type == HEXMAP_TILESET_ENTRY_TYPE_ROTS){ \
+            if(entry->type == TILESET_ENTRY_TYPE_ROTS){ \
                 if(rot < entry->n_rgraphs){ \
                     rot_ok = true; \
                     rgraph = entry->rgraphs[rot]; \
                 } \
             }else if( \
-                entry->type == HEXMAP_TILESET_ENTRY_TYPE_WHEN_FACES_SOLID \
+                entry->type == TILESET_ENTRY_TYPE_WHEN_FACES_SOLID \
             ){ \
                 int rgraph_i = _get_rgraph_i_when_faces_solid_##TYPE( \
                     n_faces_solid); \
@@ -149,10 +149,10 @@ typedef hexcollmap_elem_t *hexcollmap_tile_get_part(
     ){ \
         return &tile->TYPE[i]; \
     }
-HEXMAP_TILESET_DEFINE_HELPERS(vert)
-HEXMAP_TILESET_DEFINE_HELPERS(edge)
-HEXMAP_TILESET_DEFINE_HELPERS(face)
-#undef HEXMAP_TILESET_DEFINE_HELPERS
+TILESET_DEFINE_HELPERS(vert)
+TILESET_DEFINE_HELPERS(edge)
+TILESET_DEFINE_HELPERS(face)
+#undef TILESET_DEFINE_HELPERS
 
 
 
@@ -188,9 +188,9 @@ static void hexcollmap_get_vec4(hexcollmap_t *collmap,
 static int rendergraph_add_rgraph_from_tile(
     rendergraph_t *rgraph, hexcollmap_tile_t *tile,
     int rot, const char *part_name,
-    hexmap_tileset_t *tileset, int x,
+    tileset_t *tileset, int x,
     vecspace_t *space, vec_t v,
-    hexmap_tileset_get_rgraph *get_rgraph,
+    tileset_get_rgraph *get_rgraph,
     hexcollmap_tile_get_part *tile_get_part,
     int *n_faces_solid
         /* array of length rot, or NULL if this call is for a face */
@@ -312,15 +312,12 @@ static void _init_n_faces_solid_edge(int *n_faces_solid,
     }
 }
 
-static int rendergraph_add_rgraphs_from_collmap(
+int rendergraph_add_rgraphs_from_collmap(
     rendergraph_t *rgraph, hexcollmap_t *collmap,
-    hexmap_tileset_t *tileset, vec_t unit,
-    bool add_collmap_rendergraphs
+    tileset_t *tileset, bool add_collmap_rendergraphs
 ){
     /* Add to rgraph->rendergraph_children, according to collmap->tiles,
-    using tiles from tileset.
-    unit should be the tileset's unit vector; tileset_t doesn't currently
-    have an explicit unit, it's generally supplied by hexmap_t. */
+    using tiles from tileset. */
     int err;
 
     prismelrenderer_t *prend = rgraph->prend;
@@ -349,7 +346,7 @@ static int rendergraph_add_rgraphs_from_collmap(
         for(int x = 0; x < collmap->w; x++){
             vec_t v;
             hexcollmap_get_vec4(collmap, x, y, v);
-            vec_mul(space, v, unit);
+            vec_mul(space, v, tileset->unit);
 
             hexcollmap_tile_t *tile =
                 &collmap->tiles[y * collmap->w + x];
@@ -363,7 +360,7 @@ static int rendergraph_add_rgraphs_from_collmap(
                 err = rendergraph_add_rgraph_from_tile( \
                     rgraph, tile, ROT, #PART, \
                     tileset, x, space, v, \
-                    hexmap_tileset_get_rgraph_##PART, \
+                    tileset_get_rgraph_##PART, \
                     hexcollmap_tile_get_##PART, \
                     n_faces_solid); \
                 if(err)return err; \
@@ -395,7 +392,7 @@ static int rendergraph_add_rgraphs_from_collmap(
             /* Convert trf from hexspace to vec4 and multiply by unit */
             vec_t v;
             vec4_vec_from_hexspace(v, trf->add);
-            vec_mul(space, v, unit);
+            vec_mul(space, v, tileset->unit);
             rot_t r = vec4_rot_from_hexspace(trf->rot);
 
             int frame_i = 0;
@@ -428,8 +425,7 @@ int hexmap_submap_create_rgraph_map(hexmap_submap_t *submap){
     if(err)return err;
 
     err = rendergraph_add_rgraphs_from_collmap(
-        rgraph, &submap->collmap, submap->tileset,
-        map->unit, true);
+        rgraph, &submap->collmap, submap->tileset, true);
     if(err)return err;
 
     submap->rgraph_map = rgraph;
@@ -463,10 +459,8 @@ int hexmap_submap_create_rgraph_minimap(hexmap_submap_t *submap){
         n_frames);
     if(err)return err;
 
-    vec_t unit = {1, 0, 0, 0};
     err = rendergraph_add_rgraphs_from_collmap(
-        rgraph, &submap->collmap, &map->game->minimap_tileset,
-        unit, false);
+        rgraph, &submap->collmap, &map->game->minimap_tileset, false);
     if(err)return err;
 
     submap->rgraph_minimap = rgraph;

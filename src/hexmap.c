@@ -23,213 +23,6 @@
 #include "geom_lexer_utils.h"
 
 
-/******************
- * HEXMAP TILESET *
- ******************/
-
-void hexmap_tileset_cleanup(hexmap_tileset_t *tileset){
-    ARRAY_FREE_PTR(hexmap_tileset_entry_t*, tileset->vert_entries, (void))
-    ARRAY_FREE_PTR(hexmap_tileset_entry_t*, tileset->edge_entries, (void))
-    ARRAY_FREE_PTR(hexmap_tileset_entry_t*, tileset->face_entries, (void))
-}
-
-int hexmap_tileset_init(hexmap_tileset_t *tileset, const char *name){
-    tileset->name = name;
-    ARRAY_INIT(tileset->vert_entries)
-    ARRAY_INIT(tileset->edge_entries)
-    ARRAY_INIT(tileset->face_entries)
-    return 0;
-}
-
-static const char VERTS[] = "verts";
-static const char EDGES[] = "edges";
-static const char FACES[] = "faces";
-static const char *WHEN_FACES_SOLID_RGRAPH_KEYS_VERT[] = {
-    "none", "some", "all", NULL};
-static const char *WHEN_FACES_SOLID_RGRAPH_KEYS_EDGE[] = {
-    "neither", "bottom", "top", "both", NULL};
-static int _hexmap_tileset_parse_part(
-    const char *part_name /* one of VERTS, EDGES, or FACES */,
-    hexmap_tileset_entry_t ***entries_ptr,
-    int *entries_len_ptr, int *entries_size_ptr,
-    prismelrenderer_t *prend, fus_lexer_t *lexer
-){
-    /* WELCOME TO THE FUNCTION FROM HELL
-    AREN'T WE GLAD WE ROLLED OUR OWN DATA FORMAT? */
-    INIT
-
-    /* The following hack is an indication that our array.h system
-    of doing things was itself a hack.
-    That is, we will use ARRAY_PUSH_NEW below, passing it the token
-    "entries", and it expects the tokens "entries_len" and "entries_size"
-    to also exist.
-    So we create them here and populate them from pointers, then assign
-    their values back through the pointers at end of function.
-    It's weird, man... but it works! */
-    hexmap_tileset_entry_t **entries = *entries_ptr;
-    int entries_len = *entries_len_ptr;
-    int entries_size = *entries_size_ptr;
-
-    GET(part_name)
-    OPEN
-    while(1){
-        if(GOT(")"))break;
-
-        char tile_c;
-        GET_CHR(tile_c)
-
-        OPEN
-        ARRAY_PUSH_NEW(hexmap_tileset_entry_t*, entries, entry)
-        entry->type = HEXMAP_TILESET_ENTRY_TYPE_ROTS;
-        entry->n_rgraphs = 0;
-        entry->tile_c = tile_c;
-        entry->frame_offset = 0;
-
-        if(GOT("frame_offset")){
-            NEXT
-            OPEN
-            GET_INT(entry->frame_offset)
-            CLOSE
-        }
-
-        const char **rgraph_keys = NULL;
-        if(GOT("when_faces_solid")){
-            NEXT
-            if(part_name == VERTS){
-                rgraph_keys = WHEN_FACES_SOLID_RGRAPH_KEYS_VERT;
-            }else if(part_name == EDGES){
-                rgraph_keys = WHEN_FACES_SOLID_RGRAPH_KEYS_EDGE;
-            }else{
-                fus_lexer_err_info(lexer);
-                fprintf(stderr, "when_faces_solid only makes sense for "
-                    "verts and edges!\n");
-                return 2;
-            }
-
-            entry->type = HEXMAP_TILESET_ENTRY_TYPE_WHEN_FACES_SOLID;
-            OPEN
-        }
-
-        while(1){
-            if(rgraph_keys){
-                if(!GOT_NAME)break;
-                const char *rgraph_key = rgraph_keys[entry->n_rgraphs];
-                if(rgraph_key == NULL){
-                    fus_lexer_err_info(lexer);
-                    fprintf(stderr,
-                        "Too many entries for when_faces_solid.\n");
-                    return 2;
-                }
-                GET(rgraph_key)
-                OPEN
-            }else{
-                if(!GOT_STR)break;
-            }
-            if(entry->n_rgraphs == HEXMAP_TILESET_ENTRY_RGRAPHS) {
-                fus_lexer_err_info(lexer);
-                fprintf(stderr, "Already parsed max rgraphs (%i)!\n",
-                    HEXMAP_TILESET_ENTRY_RGRAPHS);
-                return 2;
-            }
-            const char *rgraph_name;
-            GET_STR_CACHED(rgraph_name, &prend->name_store)
-            rendergraph_t *rgraph =
-                prismelrenderer_get_rendergraph(prend, rgraph_name);
-            if(rgraph == NULL){
-                fus_lexer_err_info(lexer);
-                fprintf(stderr, "Couldn't find shape: %s\n",
-                    rgraph_name);
-                return 2;}
-            entry->rgraphs[entry->n_rgraphs] = rgraph;
-            entry->n_rgraphs++;
-            if(rgraph_keys){
-                CLOSE
-            }
-        }
-
-        if(entry->n_rgraphs == 0){
-            return UNEXPECTED("str");
-        }
-        if(rgraph_keys){
-            const char *rgraph_key = rgraph_keys[entry->n_rgraphs];
-            if(rgraph_key != NULL){
-                fus_lexer_err_info(lexer);
-                fprintf(stderr, "Missing an entry for when_faces_solid. "
-                    "Expected entries:");
-                for(int i = 0; rgraph_keys[i]; i++){
-                    fprintf(stderr, " %s", rgraph_keys[i]);
-                }
-                fputc('\n', stderr);
-                return 2;
-            }
-            CLOSE
-        }
-        CLOSE
-    }
-    NEXT
-
-    *entries_ptr = entries;
-    *entries_len_ptr = entries_len;
-    *entries_size_ptr = entries_size;
-    return 0;
-}
-
-static int hexmap_tileset_parse(hexmap_tileset_t *tileset,
-    prismelrenderer_t *prend, const char *name,
-    fus_lexer_t *lexer
-){
-    int err;
-
-    err = hexmap_tileset_init(tileset, name);
-    if(err)return err;
-
-    err = _hexmap_tileset_parse_part(VERTS,
-        &tileset->vert_entries,
-        &tileset->vert_entries_len,
-        &tileset->vert_entries_size,
-        prend, lexer);
-    if(err)return err;
-    err = _hexmap_tileset_parse_part(EDGES,
-        &tileset->edge_entries,
-        &tileset->edge_entries_len,
-        &tileset->edge_entries_size,
-        prend, lexer);
-    if(err)return err;
-    err = _hexmap_tileset_parse_part(FACES,
-        &tileset->face_entries,
-        &tileset->face_entries_len,
-        &tileset->face_entries_size,
-        prend, lexer);
-    if(err)return err;
-
-    return 0;
-}
-
-int hexmap_tileset_load(hexmap_tileset_t *tileset,
-    prismelrenderer_t *prend, const char *filename, vars_t *vars
-){
-    int err;
-    fus_lexer_t lexer;
-
-    fprintf(stderr, "Loading tileset: %s\n", filename);
-
-    char *text = load_file(filename);
-    if(text == NULL)return 1;
-
-    err = fus_lexer_init_with_vars(&lexer, text, filename, vars);
-    if(err)return err;
-
-    err = hexmap_tileset_parse(tileset, prend, filename,
-        &lexer);
-    if(err)return err;
-
-    fus_lexer_cleanup(&lexer);
-
-    free(text);
-    return 0;
-}
-
-
 /**********
  * HEXMAP *
  **********/
@@ -243,9 +36,6 @@ void hexmap_cleanup(hexmap_t *map){
         hexmap_submap_group_cleanup)
     ARRAY_FREE_PTR(hexmap_recording_t*, map->recordings,
         hexmap_recording_cleanup)
-    ARRAY_FREE_PTR(palette_t*, map->palettes, palette_cleanup)
-    ARRAY_FREE_PTR(hexmap_tileset_t*, map->tilesets,
-        hexmap_tileset_cleanup)
     ARRAY_FREE_PTR(hexmap_location_t*, map->locations,
         hexmap_location_cleanup)
 
@@ -278,8 +68,6 @@ int hexmap_init(hexmap_t *map, hexgame_t *game, const char *filename,
     ARRAY_INIT(map->submaps)
     ARRAY_INIT(map->submap_groups)
     ARRAY_INIT(map->recordings)
-    ARRAY_INIT(map->palettes)
-    ARRAY_INIT(map->tilesets)
     ARRAY_INIT(map->locations)
     return 0;
 }
@@ -702,7 +490,7 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, const char *filename,
         GET("palette")
         OPEN
         GET_STR_CACHED(palette_filename, &prend->filename_store)
-        err = hexmap_get_or_create_palette(map, palette_filename,
+        err = prismelrenderer_get_or_create_palette(prend, palette_filename,
             &map->default_palette);
         if(err)return err;
         context.palette = map->default_palette;
@@ -715,7 +503,7 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, const char *filename,
         GET("tileset")
         OPEN
         GET_STR_CACHED(tileset_filename, &prend->filename_store)
-        err = hexmap_get_or_create_tileset(map, tileset_filename,
+        err = prismelrenderer_get_or_create_tileset(prend, tileset_filename,
             &map->default_tileset);
         if(err)return err;
         context.tileset = map->default_tileset;
@@ -975,7 +763,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
         OPEN
         const char *palette_filename;
         GET_STR_CACHED(palette_filename, &prend->filename_store)
-        err = hexmap_get_or_create_palette(map, palette_filename,
+        err = prismelrenderer_get_or_create_palette(prend, palette_filename,
             &context->palette);
         if(err)return err;
         CLOSE
@@ -986,7 +774,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
         OPEN
         const char *tileset_filename;
         GET_STR_CACHED(tileset_filename, &prend->filename_store)
-        err = hexmap_get_or_create_tileset(map, tileset_filename,
+        err = prismelrenderer_get_or_create_tileset(prend, tileset_filename,
             &context->tileset);
         if(err)return err;
         CLOSE
@@ -1118,58 +906,6 @@ int hexmap_get_submap_index(hexmap_t *map, hexmap_submap_t *submap){
         if(map->submaps[i] == submap)return i;
     }
     return -1;
-}
-
-static palette_t *hexmap_get_palette(hexmap_t *map, const char *name){
-    for(int i = 0; i < map->palettes_len; i++){
-        palette_t *palette = map->palettes[i];
-        if(palette->name == name || !strcmp(palette->name, name)){
-            return palette;
-        }
-    }
-    return NULL;
-}
-
-int hexmap_get_or_create_palette(hexmap_t *map, const char *name,
-    palette_t **palette_ptr
-){
-    int err;
-    palette_t *palette = hexmap_get_palette(map, name);
-    if(palette == NULL){
-        ARRAY_PUSH_NEW(palette_t*, map->palettes, _palette);
-        palette = _palette;
-
-        err = palette_load(palette, name, NULL);
-        if(err)return err;
-    }
-    *palette_ptr = palette;
-    return 0;
-}
-
-static hexmap_tileset_t *hexmap_get_tileset(hexmap_t *map, const char *name){
-    for(int i = 0; i < map->tilesets_len; i++){
-        hexmap_tileset_t *tileset = map->tilesets[i];
-        if(tileset->name == name || !strcmp(tileset->name, name)){
-            return tileset;
-        }
-    }
-    return NULL;
-}
-
-int hexmap_get_or_create_tileset(hexmap_t *map, const char *name,
-    hexmap_tileset_t **tileset_ptr
-){
-    int err;
-    hexmap_tileset_t *tileset = hexmap_get_tileset(map, name);
-    if(tileset == NULL){
-        ARRAY_PUSH_NEW(hexmap_tileset_t*, map->tilesets, _tileset);
-        tileset = _tileset;
-
-        err = hexmap_tileset_load(tileset, map->prend, name, NULL);
-        if(err)return err;
-    }
-    *tileset_ptr = tileset;
-    return 0;
 }
 
 int hexmap_load_recording(hexmap_t *map, const char *filename,

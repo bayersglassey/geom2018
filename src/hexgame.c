@@ -362,7 +362,7 @@ int camera_render(camera_t *camera,
  ***********/
 
 void hexgame_cleanup(hexgame_t *game){
-    hexmap_tileset_cleanup(&game->minimap_tileset);
+    tileset_cleanup(&game->minimap_tileset);
     vars_cleanup(&game->vars);
     ARRAY_FREE_PTR(char*, game->worldmaps, (void))
     ARRAY_FREE_PTR(hexmap_t*, game->maps, hexmap_cleanup)
@@ -438,7 +438,7 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     ARRAY_INIT(game->players)
     ARRAY_INIT(game->actors)
 
-    err = hexmap_tileset_load(&game->minimap_tileset, minimap_prend,
+    err = tileset_load(&game->minimap_tileset, minimap_prend,
         minimap_tileset_filename, NULL);
     if(err)return err;
 

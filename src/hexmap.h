@@ -11,49 +11,6 @@
 #include "hexcollmap.h"
 
 
-
-/******************
- * HEXMAP TILESET *
- ******************/
-
-#define HEXMAP_TILESET_ENTRY_RGRAPHS 4
-
-enum hexmap_tileset_entry_type {
-    HEXMAP_TILESET_ENTRY_TYPE_ROTS,
-    HEXMAP_TILESET_ENTRY_TYPE_WHEN_FACES_SOLID,
-    HEXMAP_TILESET_ENTRY_TYPES
-};
-
-typedef struct hexmap_tileset_entry {
-    int type; /* enum hexmap_tileset_entry_type */
-    char tile_c;
-        /* see hexcollmap_elem->tile_c */
-    int n_rgraphs;
-        /* Between 1 and HEXMAP_TILESET_ENTRY_RGRAPHS */
-    int frame_offset;
-        /* How tiles' positions should affect the frame offset of
-        their animation.
-        For now, should basically be treated as a bool (0/1). */
-
-    /* Weakrefs */
-    rendergraph_t *rgraphs[HEXMAP_TILESET_ENTRY_RGRAPHS];
-} hexmap_tileset_entry_t;
-
-typedef struct hexmap_tileset {
-    const char *name;
-
-    /* Weakrefs */
-    ARRAY_DECL(hexmap_tileset_entry_t*, vert_entries)
-    ARRAY_DECL(hexmap_tileset_entry_t*, edge_entries)
-    ARRAY_DECL(hexmap_tileset_entry_t*, face_entries)
-} hexmap_tileset_t;
-
-void hexmap_tileset_cleanup(hexmap_tileset_t *tileset);
-int hexmap_tileset_init(hexmap_tileset_t *tileset, const char *name);
-int hexmap_tileset_load(hexmap_tileset_t *tileset,
-    prismelrenderer_t *prend, const char *filename, vars_t *vars);
-
-
 /********************
  * HEXMAP COLLISION *
  ********************/
@@ -113,7 +70,7 @@ typedef struct hexmap_submap {
     rendergraph_t *rgraph_minimap;
     prismelmapper_t *mapper;
     palette_t *palette;
-    hexmap_tileset_t *tileset;
+    tileset_t *tileset;
 } hexmap_submap_t;
 
 typedef struct hexmap_submap_parser_context {
@@ -133,7 +90,7 @@ typedef struct hexmap_submap_parser_context {
     struct hexmap_submap_parser_context *parent;
     prismelmapper_t *mapper;
     palette_t *palette;
-    hexmap_tileset_t *tileset;
+    tileset_t *tileset;
 } hexmap_submap_parser_context_t;
 
 const char *submap_camera_type_msg(int camera_type);
@@ -151,8 +108,6 @@ typedef struct hexmap {
     ARRAY_DECL(hexmap_submap_t*, submaps)
     ARRAY_DECL(hexmap_submap_group_t*, submap_groups)
     ARRAY_DECL(hexmap_recording_t*, recordings)
-    ARRAY_DECL(palette_t*, palettes)
-    ARRAY_DECL(hexmap_tileset_t*, tilesets)
     ARRAY_DECL(hexmap_location_t*, locations)
 
     /* Weakrefs */
@@ -160,7 +115,7 @@ typedef struct hexmap {
     vecspace_t *space; /* Always hexspace! */
     prismelrenderer_t *prend;
     palette_t *default_palette;
-    hexmap_tileset_t *default_tileset;
+    tileset_t *default_tileset;
     prismelmapper_t *default_mapper;
 } hexmap_t;
 
@@ -181,10 +136,6 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
     hexmap_submap_parser_context_t *parent_context,
     hexmap_submap_group_t *group);
 int hexmap_get_submap_index(hexmap_t *map, hexmap_submap_t *submap);
-int hexmap_get_or_create_palette(hexmap_t *map, const char *name,
-    palette_t **palette_ptr);
-int hexmap_get_or_create_tileset(hexmap_t *map, const char *name,
-    hexmap_tileset_t **tileset_ptr);
 int hexmap_load_recording(hexmap_t *map, const char *filename,
     palettemapper_t *palmapper, bool loop, int offset, trf_t *trf,
     struct body **body_ptr);
@@ -208,6 +159,9 @@ void hexmap_submap_visit(hexmap_submap_t *submap);
 bool hexmap_submap_is_visited(hexmap_submap_t *submap);
 int hexmap_submap_is_visible(hexmap_submap_t *submap, bool *visible_ptr);
 int hexmap_submap_is_solid(hexmap_submap_t *submap, bool *solid_ptr);
+int rendergraph_add_rgraphs_from_collmap(
+    rendergraph_t *rgraph, hexcollmap_t *collmap,
+    tileset_t *tileset, bool add_collmap_rendergraphs);
 int hexmap_submap_create_rgraph_map(hexmap_submap_t *submap);
 int hexmap_submap_create_rgraph_minimap(hexmap_submap_t *submap);
 hexmap_door_t *hexmap_submap_get_door(hexmap_submap_t *submap,

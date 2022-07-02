@@ -16,6 +16,8 @@
 
 
 struct geomfont;
+struct palette;
+struct tileset;
 
 
 /***********
@@ -94,7 +96,6 @@ void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box,
     int bitmap_i);
 
 
-
 /*******************
  * PRISMELRENDERER *
  *******************/
@@ -105,6 +106,8 @@ typedef struct prismelrenderer {
     ARRAY_DECL(struct geomfont*, geomfonts)
     ARRAY_DECL(struct prismel*, prismels)
     ARRAY_DECL(struct rendergraph*, rendergraphs)
+    ARRAY_DECL(struct palette*, palettes)
+    ARRAY_DECL(struct tileset*, tilesets)
     ARRAY_DECL(struct prismelmapper*, mappers)
     ARRAY_DECL(struct palettemapper*, palmappers)
 
@@ -132,12 +135,18 @@ DICT_DECL(font, font, fonts, filename)
 DICT_DECL(geomfont, geomfont, geomfonts, name)
 DICT_DECL(prismel, prismel, prismels, name)
 DICT_DECL(rendergraph, rendergraph, rendergraphs, name)
+DICT_DECL(palette, palette, palettes, name)
+DICT_DECL(tileset, tileset, tilesets, name)
 DICT_DECL(prismelmapper, mapper, mappers, name)
 DICT_DECL(palettemapper, palmapper, palmappers, name)
 #undef DICT_DECL
 int prismelrenderer_get_or_create_font(
     prismelrenderer_t *prend, const char *filename,
     font_t **font_ptr);
+int prismelrenderer_get_or_create_palette(prismelrenderer_t *prend,
+    const char *name, struct palette **palette_ptr);
+int prismelrenderer_get_or_create_tileset(prismelrenderer_t *prend,
+    const char *name, struct tileset **tileset_ptr);
 struct palettemapper;
 int prismelrenderer_get_or_create_solid_palettemapper(
     prismelrenderer_t *prend, int color,
@@ -154,6 +163,51 @@ int prismelrenderer_get_rgraph_i(prismelrenderer_t *prend,
 rendergraph_t *prismelrenderer_get_rgraph(prismelrenderer_t *prend,
     const char *name);
 
+
+/***********
+ * TILESET *
+ **********/
+
+#define TILESET_ENTRY_RGRAPHS 4
+
+enum tileset_entry_type {
+    TILESET_ENTRY_TYPE_ROTS,
+    TILESET_ENTRY_TYPE_WHEN_FACES_SOLID,
+    TILESET_ENTRY_TYPES
+};
+
+typedef struct tileset_entry {
+    int type; /* enum tileset_entry_type */
+    char tile_c;
+        /* see hexcollmap_elem->tile_c */
+    int n_rgraphs;
+        /* Between 1 and TILESET_ENTRY_RGRAPHS */
+    int frame_offset;
+        /* How tiles' positions should affect the frame offset of
+        their animation.
+        For now, should basically be treated as a bool (0/1). */
+
+    /* Weakrefs */
+    rendergraph_t *rgraphs[TILESET_ENTRY_RGRAPHS];
+} tileset_entry_t;
+
+typedef struct tileset {
+    const char *name;
+
+    vecspace_t *space;
+    vec_t unit;
+
+    /* Weakrefs */
+    ARRAY_DECL(tileset_entry_t*, vert_entries)
+    ARRAY_DECL(tileset_entry_t*, edge_entries)
+    ARRAY_DECL(tileset_entry_t*, face_entries)
+} tileset_t;
+
+void tileset_cleanup(tileset_t *tileset);
+int tileset_init(tileset_t *tileset, const char *name,
+    vecspace_t *space, vec_t unit);
+int tileset_load(tileset_t *tileset,
+    prismelrenderer_t *prend, const char *filename, vars_t *vars);
 
 
 /*****************

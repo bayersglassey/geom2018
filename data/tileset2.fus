@@ -3,6 +3,8 @@
 # Maybe there's a better way to do that... e.g. can submap specify
 # default_vert, default_edge, etc?
 
+unit: 3 2 0 -1
+
 verts:
     "0": "map_vert1"
     "1": "map_vert1"

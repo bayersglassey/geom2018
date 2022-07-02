@@ -8,6 +8,7 @@
 #include "prismelrenderer.h"
 #include "rendergraph.h"
 #include "lexer.h"
+#include "lexer_macros.h"
 #include "bounds.h"
 #include "util.h"
 #include "array.h"
@@ -141,6 +142,229 @@ int get_bitmap_i(vecspace_t *space, rot_t rot, flip_t flip,
 
     int bitmap_i = (frame_i * 2 + (flip? 1: 0)) * space->rot_max + rot;
     return bitmap_i;
+}
+
+
+/***********
+ * TILESET *
+ ***********/
+
+void tileset_cleanup(tileset_t *tileset){
+    ARRAY_FREE_PTR(tileset_entry_t*, tileset->vert_entries, (void))
+    ARRAY_FREE_PTR(tileset_entry_t*, tileset->edge_entries, (void))
+    ARRAY_FREE_PTR(tileset_entry_t*, tileset->face_entries, (void))
+}
+
+int tileset_init(tileset_t *tileset, const char *name,
+    vecspace_t *space, vec_t unit
+){
+    tileset->name = name;
+    ARRAY_INIT(tileset->vert_entries)
+    ARRAY_INIT(tileset->edge_entries)
+    ARRAY_INIT(tileset->face_entries)
+
+    vec_cpy(space->dims, tileset->unit, unit);
+    tileset->space = space;
+
+    return 0;
+}
+
+static const char TILESET_VERTS[] = "verts";
+static const char TILESET_EDGES[] = "edges";
+static const char TILESET_FACES[] = "faces";
+static const char *WHEN_FACES_SOLID_RGRAPH_KEYS_VERT[] = {
+    "none", "some", "all", NULL};
+static const char *WHEN_FACES_SOLID_RGRAPH_KEYS_EDGE[] = {
+    "neither", "bottom", "top", "both", NULL};
+static int _tileset_parse_part(
+    const char *part_name /* one of TILESET_VERTS, TILESET_EDGES, or TILESET_FACES */,
+    tileset_entry_t ***entries_ptr,
+    int *entries_len_ptr, int *entries_size_ptr,
+    prismelrenderer_t *prend, fus_lexer_t *lexer
+){
+    /* WELCOME TO THE FUNCTION FROM HELL
+    AREN'T WE GLAD WE ROLLED OUR OWN DATA FORMAT? */
+    INIT
+
+    /* The following hack is an indication that our array.h system
+    of doing things was itself a hack.
+    That is, we will use ARRAY_PUSH_NEW below, passing it the token
+    "entries", and it expects the tokens "entries_len" and "entries_size"
+    to also exist.
+    So we create them here and populate them from pointers, then assign
+    their values back through the pointers at end of function.
+    It's weird, man... but it works! */
+    tileset_entry_t **entries = *entries_ptr;
+    int entries_len = *entries_len_ptr;
+    int entries_size = *entries_size_ptr;
+
+    GET(part_name)
+    OPEN
+    while(1){
+        if(GOT(")"))break;
+
+        char tile_c;
+        GET_CHR(tile_c)
+
+        OPEN
+        ARRAY_PUSH_NEW(tileset_entry_t*, entries, entry)
+        entry->type = TILESET_ENTRY_TYPE_ROTS;
+        entry->n_rgraphs = 0;
+        entry->tile_c = tile_c;
+        entry->frame_offset = 0;
+
+        if(GOT("frame_offset")){
+            NEXT
+            OPEN
+            GET_INT(entry->frame_offset)
+            CLOSE
+        }
+
+        const char **rgraph_keys = NULL;
+        if(GOT("when_faces_solid")){
+            NEXT
+            if(part_name == TILESET_VERTS){
+                rgraph_keys = WHEN_FACES_SOLID_RGRAPH_KEYS_VERT;
+            }else if(part_name == TILESET_EDGES){
+                rgraph_keys = WHEN_FACES_SOLID_RGRAPH_KEYS_EDGE;
+            }else{
+                fus_lexer_err_info(lexer);
+                fprintf(stderr, "when_faces_solid only makes sense for "
+                    "verts and edges!\n");
+                return 2;
+            }
+
+            entry->type = TILESET_ENTRY_TYPE_WHEN_FACES_SOLID;
+            OPEN
+        }
+
+        while(1){
+            if(rgraph_keys){
+                if(!GOT_NAME)break;
+                const char *rgraph_key = rgraph_keys[entry->n_rgraphs];
+                if(rgraph_key == NULL){
+                    fus_lexer_err_info(lexer);
+                    fprintf(stderr,
+                        "Too many entries for when_faces_solid.\n");
+                    return 2;
+                }
+                GET(rgraph_key)
+                OPEN
+            }else{
+                if(!GOT_STR)break;
+            }
+            if(entry->n_rgraphs == TILESET_ENTRY_RGRAPHS) {
+                fus_lexer_err_info(lexer);
+                fprintf(stderr, "Already parsed max rgraphs (%i)!\n",
+                    TILESET_ENTRY_RGRAPHS);
+                return 2;
+            }
+            const char *rgraph_name;
+            GET_STR_CACHED(rgraph_name, &prend->name_store)
+            rendergraph_t *rgraph =
+                prismelrenderer_get_rendergraph(prend, rgraph_name);
+            if(rgraph == NULL){
+                fus_lexer_err_info(lexer);
+                fprintf(stderr, "Couldn't find shape: %s\n",
+                    rgraph_name);
+                return 2;}
+            entry->rgraphs[entry->n_rgraphs] = rgraph;
+            entry->n_rgraphs++;
+            if(rgraph_keys){
+                CLOSE
+            }
+        }
+
+        if(entry->n_rgraphs == 0){
+            return UNEXPECTED("str");
+        }
+        if(rgraph_keys){
+            const char *rgraph_key = rgraph_keys[entry->n_rgraphs];
+            if(rgraph_key != NULL){
+                fus_lexer_err_info(lexer);
+                fprintf(stderr, "Missing an entry for when_faces_solid. "
+                    "Expected entries:");
+                for(int i = 0; rgraph_keys[i]; i++){
+                    fprintf(stderr, " %s", rgraph_keys[i]);
+                }
+                fputc('\n', stderr);
+                return 2;
+            }
+            CLOSE
+        }
+        CLOSE
+    }
+    NEXT
+    *entries_ptr = entries;
+    *entries_len_ptr = entries_len;
+    *entries_size_ptr = entries_size;
+    return 0;
+}
+
+static int tileset_parse(tileset_t *tileset,
+    prismelrenderer_t *prend, const char *name,
+    fus_lexer_t *lexer
+){
+    int err;
+
+    vecspace_t *space = prend->space;
+
+    /* parse unit */
+    vec_t unit;
+    GET("unit")
+    OPEN
+    for(int i = 0; i < space->dims; i++){
+        GET_INT(unit[i])
+    }
+    CLOSE
+
+    err = tileset_init(tileset, name, space, unit);
+    if(err)return err;
+
+    err = _tileset_parse_part(TILESET_VERTS,
+        &tileset->vert_entries,
+        &tileset->vert_entries_len,
+        &tileset->vert_entries_size,
+        prend, lexer);
+    if(err)return err;
+    err = _tileset_parse_part(TILESET_EDGES,
+        &tileset->edge_entries,
+        &tileset->edge_entries_len,
+        &tileset->edge_entries_size,
+        prend, lexer);
+    if(err)return err;
+    err = _tileset_parse_part(TILESET_FACES,
+        &tileset->face_entries,
+        &tileset->face_entries_len,
+        &tileset->face_entries_size,
+        prend, lexer);
+    if(err)return err;
+
+    return 0;
+}
+
+int tileset_load(tileset_t *tileset,
+    prismelrenderer_t *prend, const char *filename, vars_t *vars
+){
+    int err;
+    fus_lexer_t lexer;
+
+    fprintf(stderr, "Loading tileset: %s\n", filename);
+
+    char *text = load_file(filename);
+    if(text == NULL)return 1;
+
+    err = fus_lexer_init_with_vars(&lexer, text, filename, vars);
+    if(err)return err;
+
+    err = tileset_parse(tileset, prend, filename,
+        &lexer);
+    if(err)return err;
+
+    fus_lexer_cleanup(&lexer);
+
+    free(text);
+    return 0;
 }
 
 
@@ -469,6 +693,8 @@ int prismelrenderer_init(prismelrenderer_t *prend, vecspace_t *space){
     ARRAY_INIT(prend->geomfonts)
     ARRAY_INIT(prend->prismels)
     ARRAY_INIT(prend->rendergraphs)
+    ARRAY_INIT(prend->palettes)
+    ARRAY_INIT(prend->tilesets)
     ARRAY_INIT(prend->mappers)
     ARRAY_INIT(prend->palmappers)
     return 0;
@@ -483,6 +709,8 @@ void prismelrenderer_cleanup(prismelrenderer_t *prend){
     ARRAY_FREE_PTR(prismel_t*, prend->prismels, prismel_cleanup)
     ARRAY_FREE_PTR(rendergraph_t*, prend->rendergraphs,
         rendergraph_cleanup)
+    ARRAY_FREE_PTR(palette_t*, prend->palettes, palette_cleanup)
+    ARRAY_FREE_PTR(tileset_t*, prend->tilesets, tileset_cleanup)
     ARRAY_FREE_PTR(prismelmapper_t*, prend->mappers,
         prismelmapper_cleanup)
     ARRAY_FREE_PTR(palettemapper_t*, prend->palmappers,
@@ -520,6 +748,18 @@ void prismelrenderer_dump(prismelrenderer_t *prend, FILE *f,
     for(int i = 0; i < prend->rendergraphs_len; i++){
         rendergraph_t *rgraph = prend->rendergraphs[i];
         rendergraph_dump(rgraph, f, 4, dump_bitmaps);
+    }
+
+    fprintf(f, "  palettes:\n");
+    for(int i = 0; i < prend->palettes_len; i++){
+        palette_t *palette = prend->palettes[i];
+        fprintf(f, "    palette: %s\n", palette->name);
+    }
+
+    fprintf(f, "  tilesets:\n");
+    for(int i = 0; i < prend->tilesets_len; i++){
+        tileset_t *tileset = prend->tilesets[i];
+        fprintf(f, "    tileset: %s\n", tileset->name);
     }
 
     fprintf(f, "  prismelmappers:\n");
@@ -627,6 +867,8 @@ DICT_IMPLEMENT(font, font, fonts, filename)
 DICT_IMPLEMENT(geomfont, geomfont, geomfonts, name)
 DICT_IMPLEMENT(prismel, prismel, prismels, name)
 DICT_IMPLEMENT(rendergraph, rendergraph, rendergraphs, name)
+DICT_IMPLEMENT(palette, palette, palettes, name)
+DICT_IMPLEMENT(tileset, tileset, tilesets, name)
 DICT_IMPLEMENT(prismelmapper, mapper, mappers, name)
 DICT_IMPLEMENT(palettemapper, palmapper, palmappers, name)
 #undef DICT_IMPLEMENT
@@ -645,6 +887,38 @@ int prismelrenderer_get_or_create_font(
         if(err)return err;
     }
     *font_ptr = font;
+    return 0;
+}
+
+int prismelrenderer_get_or_create_palette(prismelrenderer_t *prend, const char *name,
+    palette_t **palette_ptr
+){
+    int err;
+    palette_t *palette = prismelrenderer_get_palette(prend, name);
+    if(palette == NULL){
+        ARRAY_PUSH_NEW(palette_t*, prend->palettes, _palette);
+        palette = _palette;
+
+        err = palette_load(palette, name, NULL);
+        if(err)return err;
+    }
+    *palette_ptr = palette;
+    return 0;
+}
+
+int prismelrenderer_get_or_create_tileset(prismelrenderer_t *prend, const char *name,
+    tileset_t **tileset_ptr
+){
+    int err;
+    tileset_t *tileset = prismelrenderer_get_tileset(prend, name);
+    if(tileset == NULL){
+        ARRAY_PUSH_NEW(tileset_t*, prend->tilesets, _tileset);
+        tileset = _tileset;
+
+        err = tileset_load(tileset, prend, name, NULL);
+        if(err)return err;
+    }
+    *tileset_ptr = tileset;
     return 0;
 }
 

@@ -397,7 +397,7 @@ typedef struct hexgame {
         It's a bool in that it controls whether minimap is shown; but
         it's also an int in that when nonzeo, it represents the zoom
         of the minimap. */
-    hexmap_tileset_t minimap_tileset;
+    tileset_t minimap_tileset;
 
     vars_t vars;
 
