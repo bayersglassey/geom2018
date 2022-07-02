@@ -124,7 +124,6 @@ extern const char rendergraph_animation_type_once[];
 extern const char rendergraph_animation_type_cycle[];
 extern const char rendergraph_animation_type_oscillate[];
 extern const char *rendergraph_animation_types[];
-extern const char *rendergraph_animation_type_default;
 extern const int rendergraph_n_frames_default;
 
 

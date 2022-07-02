@@ -32,8 +32,6 @@ const char *rendergraph_animation_types[] = {
     rendergraph_animation_type_oscillate,
     NULL
 };
-const char *rendergraph_animation_type_default =
-    rendergraph_animation_type_cycle;
 const int rendergraph_n_frames_default = 1;
 
 static void rendergraph_child_cleanup(rendergraph_child_t *child){

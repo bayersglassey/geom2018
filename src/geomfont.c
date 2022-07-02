@@ -95,7 +95,7 @@ int geomfont_init_chars_from_sq_prismel(geomfont_t *geomfont,
 
         ARRAY_PUSH_NEW(rendergraph_t*, prend->rendergraphs, rgraph)
         err = rendergraph_init(rgraph, rgraph_name, prend, NULL,
-            rendergraph_animation_type_default,
+            rendergraph_animation_type_cycle,
             n_frames);
         if(err)return err;
 
