@@ -288,6 +288,7 @@ submaps:
                 pos: (-30 0)
                 rot: 4
                 mapper: ("triple")
+                tileset: "data/tileset1.fus"
     "start5":
         file: "data/maps/tutorial3/start.fus"
         text:
