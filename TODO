@@ -587,25 +587,8 @@ So we either need to call a certain proc when transforming, or... uh... do somet
 => UPDATE: there are now "onstatesetchange" procs. Maaaaybe that could be a solution.
 
 
-Dec 21, 2021:
--------------
-
-* your spit can go through e.g. rollers moving towards it (the two bodies pass
-    through each other). so we need spit's hitbox to extend behind it.
-    but I think we used to have that and removed it, because it meant you
-    could hit things through walls... *WHEN THE SPIT BOUNCED!*
-    so we probably need to add a "bounce" state which lasts for 1 frame
-    and whose hitbox doesn't extend behind
-
-* data/maps/tutorial3/start.fus: eyes should give you a hint, like
-    "jump right through the middle!" or something
-
-
 Jan 7, 2022:
 ------------
-
-* show_minimap should live on test_app, not hexgame
-  (i.e. app->hexgame.show_minimap should be changed to app->show_minimap)
 
 * Remove hexmap_door_t (and the magic 'D' tile)
     How many 'D' tile doors are there to replace?
@@ -617,60 +600,6 @@ Jan 7, 2022:
     To find more:
 
         $ nano $(ack -l '[ /\\]D[ /\\]' data/maps/ | head -n 1)
-
-
-Jan 16, 2022:
--------------
-
-* geomfont: add a geomfont using sq & tri prismels combined.
-  Somehow this should be defined using hexpictures.
-
-
-Jan 17, 2022:
--------------
-
-* add a spider type / ability: swing around edges?.. so like:
-
-  From here:          To here:
-
-    .   +                 +
-       /         =>      /
-     (+)               (+)  .
-
-
-* add a spider type / ability: walk on "spikes"?.. so like:
-
-    You can walk around this
-    "spiky hexagon" while *not* crawling:
-
-            +   +
-             \ /
-          + - + - +
-             / \
-            +   +
-
-    ...so actually, maybe it doesn't
-    have anything to do with "spikes",
-    rather "vertices with no edges between them":
-
-            +   +
-
-          +   .   +
-
-            +   +
-
-    ...yeah, that's cool.
-    Then we can have "walkways" made of vertices,
-    and you can crouch under them or walk over them.
-
-
-Jan 21, 2022:
--------------
-
-(From https://forums.tigsource.com/index.php?topic=54415.msg1447310#msg1447310)
-Read this paper ("Graph Drawing by Force-directed Placement"):
-
-    https://reingold.co/force-directed.pdf
 
 
 Jan 27, 2022:
@@ -737,3 +666,60 @@ Feb 8, 2022:
   Can we make vecspace_to_tilespace and vice versa?..
   Should we?..
   If not, how do we make it all clear?.. currently it's too confusing.
+
+
+Jul 1, 2022:
+------------
+
+Need a better way to debug recordings, hitboxes.
+
+* Need a way to start playing a recording, step through frame by frame, then
+  take control at some point and start overwriting the rest of the recording.
+    * set player->body to recording's body
+* Currently, recordings have 1 keyframe (followed by playback data).
+    * Could we allow multiple keyframes?
+      And then it would be very easy to have a tool for cutting & splicing
+      recordings together?..
+* For creating "actors" with multiple recordings: want to make 1 long recording,
+  then automatically split it into multiple recordings and put conditionals
+  between them...
+
+
+========================================
+
+Regarding this:
+
+* F9/F10: need a way to set the filename used by these
+    * commandline option
+    * console command
+
+Currently, we have these 2 functions (methods of test_app) for getting
+recording filenames:
+    * test_app_get_next_recording_filename (used when recording with F9)
+    * test_app_get_last_recording_filename (used when replying with F10)
+
+We could add two new fields to test_app:
+    * next_recording_filename
+    * last_recording_filename
+
+...usually they are NULL, and so the current "recs/xxx.fus" template thing
+is used.
+But we could say, *if* they are non-NULL, then use them instead.
+And also, once you've recorded to next_recording_filename, it's set to NULL,
+so you don't accidentally overwrite it afterwards.
+
+
+Jul 2, 2022:
+------------
+
+tutorial2's start3b needs to be easier.
+* Could turn people into spikeyspider
+    * But then we need to teach them how that works first
+* Could have a "weak" hexroller, which just stuns you or something?..
+
+
+Jul 3, 2022:
+------------
+
+* "@", "=", "o": these don't affect rendergraph's bounds????
+    ...so they can end up wrapping around the rgraph...
