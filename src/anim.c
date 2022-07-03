@@ -892,12 +892,25 @@ static int _state_parse(state_t *state, fus_lexer_t *lexer,
     while(1){
         if(GOT("rgraph")){
             NEXT
+            if(state->rgraph){
+                fus_lexer_err_info(lexer);
+                fprintf(stderr, "Can't redefine rgraph.\n");
+                return 2;
+            }
+            OPEN
+            err = parse_rgraph_reference(lexer, prend, space, &state->rgraph);
+            if(err)return err;
+            CLOSE
+            continue;
+        }
+        if(GOT("extra_rgraph")){
+            NEXT
             OPEN
             rendergraph_t *rgraph;
             err = parse_rgraph_reference(lexer, prend, space, &rgraph);
             if(err)return err;
             CLOSE
-            ARRAY_PUSH(rendergraph_t*, state->rgraphs, rgraph)
+            ARRAY_PUSH(rendergraph_t*, state->extra_rgraphs, rgraph)
             continue;
         }
         if(GOT("unsafe")){
@@ -1209,6 +1222,7 @@ void state_cleanup(state_t *state){
         hexcollmap_cleanup(state->own_hitbox);
         free(state->own_hitbox);
     }
+    ARRAY_FREE(rendergraph_t*, state->extra_rgraphs, (void))
     ARRAY_FREE_PTR(state_rule_t*, state->rules, state_rule_cleanup)
 }
 
@@ -1217,7 +1231,8 @@ int state_init(state_t *state, stateset_t *stateset, const char *name,
 ){
     state->stateset = stateset;
     state->name = name;
-    ARRAY_INIT(state->rgraphs)
+    state->rgraph = NULL;
+    ARRAY_INIT(state->extra_rgraphs)
     state->own_hitbox = NULL;
     state->hitbox = NULL;
     state->safe = true;
@@ -1230,10 +1245,14 @@ int state_init(state_t *state, stateset_t *stateset, const char *name,
 void state_dump(state_t *state, FILE *file, int depth){
     _print_tabs(file, depth);
     fprintf(file, "%s:\n", state->name);
-    for(int i = 0; i < state->rgraphs_len; i++){
-        rendergraph_t *rgraph = state->rgraphs[i];
+    if(state->rgraph){
         _print_tabs(file, depth+1);
-        fprintf(file, "rgraph: %s\n", rgraph->name);
+        fprintf(file, "rgraph: %s\n", state->rgraph->name);
+    }
+    for(int i = 0; i < state->extra_rgraphs_len; i++){
+        rendergraph_t *rgraph = state->extra_rgraphs[i];
+        _print_tabs(file, depth+1);
+        fprintf(file, "extra_rgraph: %s\n", rgraph->name);
     }
     for(int i = 0; i < state->rules_len; i++){
         state_rule_t *rule = state->rules[i];
