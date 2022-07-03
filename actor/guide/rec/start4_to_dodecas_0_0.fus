@@ -1,6 +1,6 @@
 anim: "anim/spider.fus"
 state: "stand"
-pos: ( 5 5)
+pos: ( 22 1)
 rot: 0
 turn: yes
 keys:
@@ -10,4 +10,4 @@ keys:
     d:
     l:
     r:
-data: " w8 +r w191 -r w12 +l w2 -l w4"
+data: " w9 +l w42 -l w5 +d w7 +r w6 -d w1 -r w7 +r w22 -r w8 +l w2 -l w14"
