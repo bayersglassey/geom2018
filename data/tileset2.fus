@@ -8,10 +8,12 @@ unit: 3 2 0 -1
 verts:
     "0": "map_vert1"
     "1": "map_vert1"
+    "@": "map_bgvert"
 edges:
     "0": "map_edge1"
     "1": "map_edge1"
     "2": "map_edge2"
+    "=": "map_bgedge"
 faces:
     "0": "map_face1"
     "1": "map_face1"
@@ -19,3 +21,4 @@ faces:
     "S": "map_savepoint"
     "D": "map_door"
     "w": frame_offset(1) "map_water"
+    "o": "map_bgface"

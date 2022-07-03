@@ -7,6 +7,8 @@ vars:
     "switch1": F
     "switch2": F
     "switch3": F
+    "start5_switch_a": F
+    "start5_switch_b": F
     "final_switch": F
 
     nosave "start_eye_a_open": 0
@@ -14,27 +16,6 @@ vars:
     nosave "start_eye_c_open": 0
     nosave "start_eye_d_open": 0
     nosave "start_eye_e_open": 0
-
-$SET_STR HIT_THE_SWITCH: lines: at(46 25)
-    ;;Hit the switch
-    ;; with your spit.
-
-$SET_STR JUMP_FROM_HERE: lines: at(20 34)
-    ;;JUMP FROM HERE!!!
-
-$SET_STR START3_SWITCHED_HINT: lines: at(21 15)
-    ;;        Hit it
-    ;;                from
-    ;;                       here
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;(Remember:
-    ;;  your spit
-    ;;   bounces)
 
 submaps:
     "floaty_start":
@@ -83,7 +64,7 @@ submaps:
                 rot: 3
                 mapper: ("triple")
     "start2":
-        file: "data/maps/tutorial3/start.fus"
+        file: "data/maps/tutorial3/start2.fus"
         pos: eval: (0 0) + (11 -14)
         rot: 1
         camera: (11 3)
@@ -106,7 +87,7 @@ submaps:
                 visible: not mapvar("switch1")
                 inherit_rot
     "start3":
-        file: "data/maps/tutorial3/start.fus"
+        file: "data/maps/tutorial3/start3.fus"
         pos: eval: (0 0) + (11 -14) + (7 -16)
         rot: 2
         camera: (6 9)
@@ -131,10 +112,6 @@ submaps:
                 submaps:
                     :
                         file: "data/maps/tutorial3/start3_switched_b.fus"
-                        text:
-                            if mapvar("start_eye_e_open") then
-                                if mapvar("switch2") then $GET_STR START3_SWITCHED_HINT else null
-                            else null
                         inherit_visible
                         pos: (11 2)
             :
@@ -155,7 +132,7 @@ submaps:
                     then T else F
                 pos: (-1 4)
     "start4":
-        file: "data/maps/tutorial3/start.fus"
+        file: "data/maps/tutorial3/start4.fus"
         pos: eval: (0 0) + (11 -14) + (7 -16) + (0 -12)
         rot: 3
         camera: (-5 3)
@@ -175,15 +152,7 @@ submaps:
                 mapper: ("triple")
                 tileset: "data/tileset1.fus"
     "start5":
-        file: "data/maps/tutorial3/start.fus"
-        text:
-            if any:
-                mapvar("start_eye_a_open")
-                mapvar("start_eye_b_open")
-                mapvar("start_eye_c_open")
-            then if mapvar("switch1") then null else $GET_STR HIT_THE_SWITCH
-            else null
-        text: if mapvar("start_eye_d_open") then if mapvar("switch1") then null else $GET_STR JUMP_FROM_HERE else null
+        file: "data/maps/tutorial3/start5.fus"
         pos: eval: (0 0) + (11 -14) + (7 -16) + (0 -12) + (-10 -8)
         rot: 4
         camera: (-5 0)
@@ -194,14 +163,22 @@ submaps:
             : relative (11 -2) 0 n "data/recs/death_roller_l.fus"
         submaps:
             :
+                file: "data/maps/tutorial3/start5_stick1.fus"
+                visible: mapvar("start5_switch_a")
+                pos: (-15 -10)
+                rot: 3
+            :
+                file: "data/maps/tutorial3/start5_stick2.fus"
+                visible: mapvar("start5_switch_b")
+                pos: (-12 -1)
+                rot: 4
+            :
                 file: "data/maps/tutorial3/start_save_alt.fus"
                 inherit_rot
             :
-                file: "data/maps/tutorial3/start5.fus"
-                inherit_text
+                file: "data/maps/tutorial3/end.fus"
                 pos: (2 -7)
             :
-                file: "data/maps/tutorial3/start5_switched.fus"
-                inherit_text
+                file: "data/maps/tutorial3/end_switched.fus"
                 visible: mapvar("switch1")
                 pos: (-9 -11)

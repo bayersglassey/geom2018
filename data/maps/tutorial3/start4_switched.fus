@@ -1,13 +1,8 @@
-parts:
-    "s": recording "data/recs/switch.fus"
-        visible: mapvar("switch1")
-        vars:
-            "key": "switch2"
 collmap:
     ;;
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;;     .   .   .   .   .   .   !   .   .   .   .   .   .     [s^4]
+    ;;     .   .   .   .   .   .   +   .   .   .   .   .   .
     ;;                            /
     ;;   .   .   .   .   .   .   +   .   .   .   .   .   .
     ;;                            \
