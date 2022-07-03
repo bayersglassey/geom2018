@@ -351,6 +351,32 @@ int camera_render(camera_t *camera,
                 camera_renderpos, mapper);
             if(err)return err;
         }
+
+        /* Render all actors who have a body on this map */
+        for(int i = 0; i < game->actors_len; i++){
+            actor_t *actor = game->actors[i];
+
+            state_t *state = actor->state;
+            if(!state)continue;
+
+            body_t *body = actor->body;
+            if(!body || body->map != map)continue;
+
+            if(state->rgraph){
+                err = body_render_rgraph(body, state->rgraph,
+                    surface, pal, x0, y0, zoom, camera_renderpos, mapper,
+                    false /* render_labels */);
+                if(err)return err;
+            }
+
+            for(int j = 0; j < state->extra_rgraphs_len; j++){
+                rendergraph_t *rgraph = state->extra_rgraphs[j];
+                err = body_render_rgraph(body, rgraph,
+                    surface, pal, x0, y0, zoom, camera_renderpos, mapper,
+                    false /* render_labels */);
+                if(err)return err;
+            }
+        }
     }
 
     return 0;

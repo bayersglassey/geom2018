@@ -243,6 +243,11 @@ int body_render(body_t *body,
     SDL_Surface *surface,
     SDL_Palette *pal, int x0, int y0, int zoom,
     vec_t camera_renderpos, prismelmapper_t *mapper);
+int body_render_rgraph(body_t *body, rendergraph_t *rgraph,
+    SDL_Surface *surface,
+    SDL_Palette *pal, int x0, int y0, int zoom,
+    vec_t camera_renderpos, prismelmapper_t *mapper,
+    bool render_labels);
 
 void body_keydown(body_t *body, int key_i);
 void body_keyup(body_t *body, int key_i);

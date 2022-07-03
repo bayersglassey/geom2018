@@ -1106,74 +1106,71 @@ int body_render(body_t *body,
     state_t *state = body->state;
     if(state == NULL)return 0;
 
-    hexmap_t *map = body->map;
-    prismelrenderer_t *prend = map->prend;
-    vecspace_t *map_space = map->space; /* &hexspace */
-
-    hexgame_location_t *loc = &body->loc;
-    palettemapper_t *palmapper = body->palmapper;
-    int frame_i = body->frame_i;
-
     if(state->rgraph){
-        rendergraph_t *rgraph = state->rgraph;
-        vecspace_t *rgraph_space = rgraph->space; /* &vec4 */
-
-        if(palmapper){
-            err = palettemapper_apply_to_rendergraph(palmapper,
-                prend, rgraph, NULL, map_space, &rgraph);
-            if(err)return err;
-        }
-
-        vec_t rendered_pos;
-        rot_t rendered_rot;
-        flip_t rendered_flip;
-        vec4_coords_from_hexspace(
-            loc->pos,
-            hexgame_location_get_rot(loc),
-            loc->turn,
-            rendered_pos, &rendered_rot, &rendered_flip);
-        vec_sub(rgraph_space->dims, rendered_pos, camera_renderpos);
-        vec_mul(rgraph_space, rendered_pos, map->unit);
-
-        /* Render rgraph and labels (recursively) */
-        err = _render_rgraph_and_labels(rgraph, surface,
-            pal, prend, x0, y0, zoom, frame_i,
-            rendered_pos, rendered_rot, rendered_flip,
-            mapper,
-            body->label_mappings_len, body->label_mappings);
+        err = body_render_rgraph(body, state->rgraph,
+            surface, pal, x0, y0, zoom, camera_renderpos, mapper,
+            true /* render_labels */);
         if(err)return err;
     }
 
     for(int i = 0; i < state->extra_rgraphs_len; i++){
         rendergraph_t *rgraph = state->extra_rgraphs[i];
-        vecspace_t *rgraph_space = rgraph->space; /* &vec4 */
-
-        if(palmapper){
-            err = palettemapper_apply_to_rendergraph(palmapper,
-                prend, rgraph, NULL, map_space, &rgraph);
-            if(err)return err;
-        }
-
-        vec_t rendered_pos;
-        rot_t rendered_rot;
-        flip_t rendered_flip;
-        vec4_coords_from_hexspace(
-            loc->pos,
-            hexgame_location_get_rot(loc),
-            loc->turn,
-            rendered_pos, &rendered_rot, &rendered_flip);
-        vec_sub(rgraph_space->dims, rendered_pos, camera_renderpos);
-        vec_mul(rgraph_space, rendered_pos, map->unit);
-
-        /* Render rgraph */
-        err = rendergraph_render(rgraph, surface,
-            pal, prend,
-            x0, y0, zoom,
-            rendered_pos, rendered_rot, rendered_flip,
-            frame_i, mapper);
+        err = body_render_rgraph(body, rgraph,
+            surface, pal, x0, y0, zoom, camera_renderpos, mapper,
+            false /* render_labels */);
         if(err)return err;
     }
 
     return 0;
 }
 
+int body_render_rgraph(body_t *body, rendergraph_t *rgraph,
+    SDL_Surface *surface,
+    SDL_Palette *pal, int x0, int y0, int zoom,
+    vec_t camera_renderpos, prismelmapper_t *mapper,
+    bool render_labels
+){
+    int err;
+
+    hexmap_t *map = body->map;
+    prismelrenderer_t *prend = map->prend;
+    vecspace_t *map_space = map->space; /* &hexspace */
+    vecspace_t *rgraph_space = rgraph->space; /* &vec4 */
+
+    hexgame_location_t *loc = &body->loc;
+    palettemapper_t *palmapper = body->palmapper;
+    int frame_i = body->frame_i;
+
+    if(palmapper){
+        err = palettemapper_apply_to_rendergraph(palmapper,
+            prend, rgraph, NULL, map_space, &rgraph);
+        if(err)return err;
+    }
+
+    vec_t rendered_pos;
+    rot_t rendered_rot;
+    flip_t rendered_flip;
+    vec4_coords_from_hexspace(
+        loc->pos,
+        hexgame_location_get_rot(loc),
+        loc->turn,
+        rendered_pos, &rendered_rot, &rendered_flip);
+    vec_sub(rgraph_space->dims, rendered_pos, camera_renderpos);
+    vec_mul(rgraph_space, rendered_pos, map->unit);
+
+    if(render_labels){
+        /* Render rgraph and labels (recursively) */
+        return _render_rgraph_and_labels(rgraph, surface,
+            pal, prend, x0, y0, zoom, frame_i,
+            rendered_pos, rendered_rot, rendered_flip,
+            mapper,
+            body->label_mappings_len, body->label_mappings);
+    }else{
+        /* Render just the rgraph */
+        return rendergraph_render(rgraph, surface,
+            pal, prend,
+            x0, y0, zoom,
+            rendered_pos, rendered_rot, rendered_flip,
+            frame_i, mapper);
+    }
+}
