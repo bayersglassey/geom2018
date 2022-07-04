@@ -119,7 +119,7 @@ int test_app_list_actors_select_item(test_app_list_t *list){
                 state_t *state = actor->stateset->states[state_index];
                 err = actor_set_state(actor, state->name);
                 if(err)return err;
-                if(body != NULL)body->recording.action = 0;
+                if(body != NULL)body->recording.action = RECORDING_ACTION_NONE;
             } break;
         }
     }else{

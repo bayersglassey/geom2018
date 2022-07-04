@@ -164,7 +164,8 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
 
     ARRAY_INIT(body->label_mappings)
 
-    body->recording.action = 0; /* No recording loaded */
+    /* No recording loaded */
+    body->recording.action = RECORDING_ACTION_NONE;
 
     body->state = NULL;
     body->frame_i = 0;
@@ -714,7 +715,7 @@ void body_keydown(body_t *body, int key_i){
     body->keyinfo.wasdown[key_i] = true;
     body->keyinfo.wentdown[key_i] = true;
 
-    if(body->recording.action == 2){
+    if(body->recording.action == RECORDING_ACTION_RECORD){
         body_record_keydown(body, key_i);
     }
 }
@@ -723,7 +724,7 @@ void body_keyup(body_t *body, int key_i){
     if(key_i < 0 || key_i >= KEYINFO_KEYS)return;
     body->keyinfo.isdown[key_i] = false;
 
-    if(body->recording.action == 2){
+    if(body->recording.action == RECORDING_ACTION_RECORD){
         body_record_keyup(body, key_i);
     }
 }
@@ -982,7 +983,7 @@ int body_collide_against_body(body_t *body, body_t *body_other){
             body_other->stateset->filename, body_other->state->name);
     }
 
-    if(body->recording.action == 1 && !body->recording.reacts){
+    if(body->recording.action == RECORDING_ACTION_PLAY && !body->recording.reacts){
         /* Bodies playing a recording don't react to collisions.
         In particular, they cannot be "killed" by other bodies.
         MAYBE TODO: These bodies should die too, but then their

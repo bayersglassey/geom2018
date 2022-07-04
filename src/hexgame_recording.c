@@ -20,9 +20,9 @@
 
 const char *recording_action_msg(int action){
     switch(action){
-        case 0: return "None";
-        case 1: return "Playing";
-        case 2: return "Recording";
+        case RECORDING_ACTION_NONE: return "None";
+        case RECORDING_ACTION_PLAY: return "Playing";
+        case RECORDING_ACTION_RECORD: return "Recording";
         default: return "Unknown";
     }
 }
@@ -168,7 +168,8 @@ static int recording_parse(recording_t *rec,
         So, we turn off rec->loop, which causes recording_step_play to
         immediately stop the recording.
         ...that seems to work ok, but do we not want to just stop
-        body_play_recording from setting body->recording.action to 1?.. */
+        body_play_recording from setting body->recording.action to
+        RECORDING_ACTION_PLAY?.. */
         rec->loop = false;
     }
 
@@ -290,13 +291,13 @@ int recording_step(recording_t *recording){
     int rec_action = recording->action;
 
     /* No recording loaded: early exit */
-    if(rec_action == 0)return 0;
+    if(rec_action == RECORDING_ACTION_NONE)return 0;
 
-    if(rec_action == 1){
+    if(rec_action == RECORDING_ACTION_PLAY){
         /* play */
         int err = recording_step_play(recording);
         if(err)return err;
-    }else if(rec_action == 2){
+    }else if(rec_action == RECORDING_ACTION_RECORD){
         /* record */
         recording->wait++;
     }
@@ -322,11 +323,11 @@ int recording_step(recording_t *recording){
 int recording_step_reverse(recording_t *recording){
     int rec_action = recording->action;
 
-    if(rec_action == 1){
+    if(rec_action == RECORDING_ACTION_PLAY){
         /* play */
         int err = recording_step_play_reverse(recording);
         if(err)return err;
-    }else if(rec_action == 2){
+    }else if(rec_action == RECORDING_ACTION_RECORD){
         /* record */
         if(recording->wait > 0){
             recording->wait--;
@@ -363,7 +364,7 @@ int body_play_recording(body_t *body){
     err = body_set_stateset(body, rec->stateset_name, rec->state_name);
     if(err)return err;
 
-    body->recording.action = 1; /* play */
+    body->recording.action = RECORDING_ACTION_PLAY;
     return body_restart_recording(body, false, true);
 }
 
@@ -407,7 +408,7 @@ int body_start_recording(body_t *body, const char *filename){
         return 2;}
 
     recording_reset(&body->recording);
-    body->recording.action = 2; /* record */
+    body->recording.action = RECORDING_ACTION_RECORD;
     body->recording.filename = filename;
     body->recording.file = f;
 

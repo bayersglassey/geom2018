@@ -69,6 +69,13 @@ enum recording_node_type {
     RECORDING_NODE_TYPES
 };
 
+enum recording_action {
+    RECORDING_ACTION_NONE,
+    RECORDING_ACTION_PLAY,
+    RECORDING_ACTION_RECORD,
+    RECORDING_ACTIONS
+};
+
 typedef struct recording_node {
     int type; /* enum recording_node_type */
     union {
@@ -78,8 +85,7 @@ typedef struct recording_node {
 } recording_node_t;
 
 typedef struct recording {
-    int action;
-        /* 0: none, 1: play, 2: record */
+    int action; /* enum recording_action */
     bool reacts;
     bool loop;
     bool resets_position; /* default: true, if false, looping doesn't reset body's position */

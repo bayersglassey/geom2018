@@ -176,7 +176,7 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
                 if(!body){
                     fprintf(stderr,
                         "Can't record without a body!\n");
-                }else if(body->recording.action != 2){
+                }else if(body->recording.action != RECORDING_ACTION_RECORD){
                     const char *_recording_filename =
                         test_app_get_save_recording_filename(app);
 
@@ -228,7 +228,7 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
                             "Can't play back recording without a body!\n");
                     }else{
                         /* If we're recording, save the recording so it can be loaded. */
-                        if(body->recording.action == 2){
+                        if(body->recording.action == RECORDING_ACTION_RECORD){
                             err = body_stop_recording(body);
                             if(err)return err;
                         }
