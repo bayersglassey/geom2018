@@ -160,13 +160,7 @@ static int _test_app_restart(test_app_t *app,
     }
 
     /* Find player0 */
-    player_t *player0 = NULL;
-    for(int i = 0; i < game->players_len; i++){
-        player_t *player = game->players[i];
-        if(player->keymap != 0)continue;
-        player0 = player;
-        break;
-    }
+    player_t *player0 = hexgame_get_player_by_keymap(game, 0);
 
     {
         /* Create camera */
@@ -196,8 +190,8 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     const char *submap_filename, bool developer_mode,
     bool minimap_alt, bool cache_bitmaps, bool animate_palettes,
     int n_players, int save_slot,
-    const char *last_recording_filename,
-    const char *next_recording_filename
+    const char *load_recording_filename,
+    const char *save_recording_filename
 ){
     int err;
 
@@ -215,8 +209,8 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->stateset_filename = stateset_filename;
 
     strcpy(app->_recording_filename, RECORDING_FILENAME_TEMPLATE);
-    app->last_recording_filename = last_recording_filename;
-    app->next_recording_filename = next_recording_filename;
+    app->load_recording_filename = load_recording_filename;
+    app->save_recording_filename = save_recording_filename;
 
     SDL_Palette *sdl_palette = SDL_AllocPalette(256);
     app->sdl_palette = sdl_palette;
@@ -601,13 +595,13 @@ static const char *_test_app_get_last_or_next_recording_filename(
     return recording_filename;
 }
 
-const char *test_app_get_last_recording_filename(test_app_t *app){
-    if(app->last_recording_filename)return app->last_recording_filename;
+const char *test_app_get_load_recording_filename(test_app_t *app){
+    if(app->load_recording_filename)return app->load_recording_filename;
     return _test_app_get_last_or_next_recording_filename(app, false);
 }
 
-const char *test_app_get_next_recording_filename(test_app_t *app){
-    if(app->next_recording_filename)return app->next_recording_filename;
+const char *test_app_get_save_recording_filename(test_app_t *app){
+    if(app->save_recording_filename)return app->save_recording_filename;
     return _test_app_get_last_or_next_recording_filename(app, true);
 }
 

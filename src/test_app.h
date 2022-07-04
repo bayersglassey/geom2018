@@ -88,8 +88,8 @@ typedef struct test_app {
     int save_slot;
 
     char _recording_filename[200]; /* HACKY :'( */
-    const char *last_recording_filename;
-    const char *next_recording_filename;
+    const char *load_recording_filename;
+    const char *save_recording_filename;
 } test_app_t;
 
 
@@ -102,12 +102,12 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     const char *submap_filename, bool developer_mode,
     bool minimap_alt, bool cache_bitmaps, bool animate_palettes,
     int n_players, int save_slot,
-    const char *last_recording_filename,
-    const char *next_recording_filename);
+    const char *load_recording_filename,
+    const char *save_recording_filename);
 int test_app_mainloop(test_app_t *app);
 int test_app_mainloop_step(test_app_t *app);
-const char *test_app_get_last_recording_filename(test_app_t *app);
-const char *test_app_get_next_recording_filename(test_app_t *app);
+const char *test_app_get_load_recording_filename(test_app_t *app);
+const char *test_app_get_save_recording_filename(test_app_t *app);
 void test_app_blitter_render_init(test_app_t *app,
     geomfont_blitter_t *blitter,
     int x0, int y0);

@@ -444,6 +444,7 @@ int hexgame_get_or_load_stateset(hexgame_t *game, const char *filename,
 int hexgame_get_map_index(hexgame_t *game, hexmap_t *map);
 int hexgame_reset_player(hexgame_t *game, player_t *player,
     int reset_level, hexmap_t *reset_map);
+player_t *hexgame_get_player_by_keymap(hexgame_t *game, int keymap);
 int hexgame_reset_player_by_keymap(hexgame_t *game, int keymap,
     int reset_level, hexmap_t *reset_map);
 int hexgame_reset_players(hexgame_t *game, int reset_level,

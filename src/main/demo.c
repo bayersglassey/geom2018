@@ -139,9 +139,9 @@ void print_help(FILE *file){
         "        --dont_animate_palettes\n"
         "                         Don't animate the colour palettes; improves the quality of\n"
         "                         gameplay recordings saved as GIFs\n"
-        "   -lrf      FILE        Set \"last recording filename\"\n"
+        "   -lrf      FILE        Set \"load recording filename\"\n"
         "                         (where to load recording from, used by F10)\n"
-        "   -nrf      FILE        Set \"next recording filename\"\n"
+        "   -srf      FILE        Set \"save recording filename\"\n"
         "                         (where to save recording to, used by F9)\n"
         , DEFAULT_PREND_FILENAME, DEFAULT_STATESET_FILENAME, ENV_DEVEL,
         DEFAULT_DELAY_GOAL, DEFAULT_PLAYERS
@@ -169,8 +169,8 @@ bool developer_mode = false;
 int n_players = DEFAULT_PLAYERS;
 int delay_goal = DEFAULT_DELAY_GOAL;
 int save_slot = -1;
-const char *last_recording_filename = NULL;
-const char *next_recording_filename = NULL;
+const char *load_recording_filename = NULL;
+const char *save_recording_filename = NULL;
 SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL;
 
@@ -182,7 +182,7 @@ static test_app_t *get_test_app(){
         hexmap_filename, submap_filename, developer_mode,
         minimap_alt, cache_bitmaps, animate_palettes,
         n_players, save_slot,
-        last_recording_filename, next_recording_filename);
+        load_recording_filename, save_recording_filename);
     if(err){
         free(app);
         return NULL;
@@ -306,14 +306,14 @@ int main(int n_args, char *args[]){
                 fprintf(stderr, "Missing filename after %s\n", arg);
                 goto parse_failure;
             }
-            last_recording_filename = args[arg_i];
-        }else if(!strcmp(arg, "-nrf")){
+            load_recording_filename = args[arg_i];
+        }else if(!strcmp(arg, "-srf")){
             arg_i++;
             if(arg_i >= n_args){
                 fprintf(stderr, "Missing filename after %s\n", arg);
                 goto parse_failure;
             }
-            next_recording_filename = args[arg_i];
+            save_recording_filename = args[arg_i];
         }else{
             fprintf(stderr, "Unrecognized option: %s\n", arg);
             goto parse_failure;

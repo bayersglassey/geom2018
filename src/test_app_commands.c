@@ -297,19 +297,19 @@ static int _test_app_command_visit_all(test_app_t *app, fus_lexer_t *lexer, bool
     return 0;
 }
 
-static int _test_app_command_next_recording_filename(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
+static int _test_app_command_save_recording_filename(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
     int err;
     const char *filename;
     GET_STR_CACHED(filename, &app->prend.filename_store)
-    app->next_recording_filename = filename;
+    app->save_recording_filename = filename;
     return 0;
 }
 
-static int _test_app_command_last_recording_filename(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
+static int _test_app_command_load_recording_filename(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
     int err;
     const char *filename;
     GET_STR_CACHED(filename, &app->prend.filename_store)
-    app->last_recording_filename = filename;
+    app->load_recording_filename = filename;
     return 0;
 }
 
@@ -338,8 +338,8 @@ test_app_command_t _test_app_commands[] = {
     COMMAND(get_shape, NULL, "SHAPE"),
     COMMAND(mode, "m", "(game | g | editor | e)"),
     COMMAND(visit_all, "va", NULL),
-    COMMAND(next_recording_filename, "nrf", NULL),
-    COMMAND(last_recording_filename, "lrf", NULL),
+    COMMAND(save_recording_filename, "srf", NULL),
+    COMMAND(load_recording_filename, "lrf", NULL),
     NULLCOMMAND
 };
 

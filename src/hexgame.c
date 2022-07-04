@@ -601,7 +601,7 @@ int hexgame_reset_player(hexgame_t *game, player_t *player,
     return 0;
 }
 
-static player_t *hexgame_get_player_by_keymap(hexgame_t *game, int keymap){
+player_t *hexgame_get_player_by_keymap(hexgame_t *game, int keymap){
     for(int i = 0; i < game->players_len; i++){
         player_t *player = game->players[i];
         if(player->keymap == keymap)return player;
