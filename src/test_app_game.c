@@ -181,9 +181,20 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
                 }else if(body->recording.action != 2){
                     const char *_recording_filename =
                         test_app_get_next_recording_filename(app);
+
+                    /* In case this is where we got the filename, we now set
+                    it to NULL so next time we start recording, we won't
+                    overwrite this one */
+                    app->next_recording_filename = NULL;
+
                     const char *recording_filename = stringstore_get(
                         &app->prend.filename_store, _recording_filename);
                     if(!recording_filename)return 1;
+
+                    /* So that the next time we play a recording with F10,
+                    we play the one we're recording now */
+                    app->last_recording_filename = recording_filename;
+
                     fprintf(stderr, "Recording to file: %s "
                         " (When finished, press F9 to save!)\n",
                         recording_filename);

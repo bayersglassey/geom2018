@@ -191,35 +191,6 @@ lexer_err:
     return 0;
 }
 
-static int _test_app_command_play_recording(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    INIT
-
-    const char *recording_filename = NULL;
-    GET_STR_CACHED(recording_filename, &app->prend.filename_store)
-
-    hexgame_t *game = &app->hexgame;
-    for(int i = 0; i < game->players_len; i++){
-        player_t *player = game->players[i];
-        if(player->keymap != 0)continue;
-
-        body_t *body = player->body;
-        if(!body){
-            fprintf(stderr,
-                "Can't play back recording without a body!\n");
-            break;
-        }
-
-        err = hexmap_load_recording(body->map,
-            recording_filename, NULL, true, 0, NULL, NULL);
-        if(err)return err;
-    }
-
-    return 0;
-lexer_err:
-    *lexer_err_ptr = true;
-    return 0;
-}
-
 static int _test_app_command_save(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
     int err;
     char *filename = NULL;
@@ -241,94 +212,6 @@ static int _test_app_command_save(test_app_t *app, fus_lexer_t *lexer, bool *lex
 
 lexer_err:
     free(filename);
-    *lexer_err_ptr = true;
-    return 0;
-}
-
-static int _test_app_command_dump(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    int err;
-    int dump_bitmaps = 1;
-    int dump_what = 0; /* rgraph, prend */
-    FILE *file = NULL;
-    while(1){
-        if(fus_lexer_done(lexer))break;
-        else if(fus_lexer_got(lexer, "rgraph"))dump_what = 0;
-        else if(fus_lexer_got(lexer, "prend"))dump_what = 1;
-        else if(fus_lexer_got(lexer, "nobitmaps"))dump_bitmaps = 0;
-        else if(fus_lexer_got(lexer, "surfaces")){
-            /* WARNING: doing this with "prend" after "renderall" causes
-            my laptop to hang... */
-            dump_bitmaps = 2;
-        }else if(fus_lexer_got(lexer, "file")){
-            err = fus_lexer_next(lexer);
-            if(err)goto lexer_err;
-            char *filename;
-            err = fus_lexer_get_str(lexer, &filename);
-            if(err)goto lexer_err;
-            file = fopen(filename, "w");
-            free(filename);
-            if(!file){
-                perror("fopen");
-                return 1;
-            }
-        }else goto lexer_err;
-        err = fus_lexer_next(lexer);
-        if(err)goto lexer_err;
-    }
-    if(dump_what == 0){
-        rendergraph_t *rgraph =
-            app->prend.rendergraphs[app->editor.cur_rgraph_i];
-        rendergraph_dump(rgraph, file? file: stdout, 0, dump_bitmaps);
-    }else if(dump_what == 1){
-        prismelrenderer_dump(&app->prend, file? file: stdout, dump_bitmaps);
-    }
-    if(file != NULL){
-        if(fclose(file)){
-            perror("fclose");
-            return 1;
-        }
-    }
-    return 0;
-lexer_err:
-    *lexer_err_ptr = true;
-    return 0;
-}
-
-static int _test_app_command_dump_stringstores(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    int err;
-    bool dump_map = true;
-    bool dump_minimap = false;
-    if(!fus_lexer_done(lexer)){
-        if(fus_lexer_got(lexer, "map")){
-            err = fus_lexer_next(lexer);
-            if(err)goto lexer_err;
-            dump_map = true;
-            dump_minimap = false;
-        }else if(fus_lexer_got(lexer, "minimap")){
-            err = fus_lexer_next(lexer);
-            if(err)goto lexer_err;
-            dump_map = false;
-            dump_minimap = true;
-        }else if(fus_lexer_got(lexer, "both")){
-            err = fus_lexer_next(lexer);
-            if(err)goto lexer_err;
-            dump_map = true;
-            dump_minimap = true;
-        }else{
-            err = fus_lexer_unexpected(lexer, "map minimap both");
-            goto lexer_err;
-        }
-    }
-    if(dump_map){
-        fprintf(stderr, "=== MAP:\n");
-        prismelrenderer_dump_stringstores(&app->prend, stderr);
-    }
-    if(dump_minimap){
-        fprintf(stderr, "=== MINI MAP:\n");
-        prismelrenderer_dump_stringstores(&app->minimap_prend, stderr);
-    }
-    return 0;
-lexer_err:
     *lexer_err_ptr = true;
     return 0;
 }
@@ -365,14 +248,6 @@ static int _test_app_command_map(test_app_t *app, fus_lexer_t *lexer, bool *lexe
     return 0;
 lexer_err:
     *lexer_err_ptr = true;
-    return 0;
-}
-
-static int _test_app_command_renderall(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    int err;
-    err = prismelrenderer_render_all_bitmaps(
-        &app->prend, app->sdl_palette);
-    if(err)return err;
     return 0;
 }
 
@@ -422,6 +297,22 @@ static int _test_app_command_visit_all(test_app_t *app, fus_lexer_t *lexer, bool
     return 0;
 }
 
+static int _test_app_command_next_recording_filename(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
+    int err;
+    const char *filename;
+    GET_STR_CACHED(filename, &app->prend.filename_store)
+    app->next_recording_filename = filename;
+    return 0;
+}
+
+static int _test_app_command_last_recording_filename(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
+    int err;
+    const char *filename;
+    GET_STR_CACHED(filename, &app->prend.filename_store)
+    app->last_recording_filename = filename;
+    return 0;
+}
+
 
 #define COMMAND(NAME, ALT_NAME, PARAMS) (test_app_command_t){ \
     .name = #NAME, \
@@ -442,15 +333,13 @@ test_app_command_t _test_app_commands[] = {
     COMMAND(list_actors, "la", NULL),
     COMMAND(edit_player, "ep", "[PLAYER_INDEX] [STATESET]"),
     COMMAND(save_player, "sp", "[PLAYER_INDEX]"),
-    COMMAND(play_recording, "pc", "[FILENAME]"),
     COMMAND(save, NULL, "[FILENAME]"),
-    COMMAND(dump, NULL, "[(rgraph | prend | nobitmaps | surfaces | file FILENAME) ...]"),
-    COMMAND(dump_stringstores, "dss", "[map | minimap | both]"),
     COMMAND(map, NULL, "MAPPER RGRAPH [RESULTING_RGRAPH]"),
-    COMMAND(renderall, NULL, NULL),
     COMMAND(get_shape, NULL, "SHAPE"),
     COMMAND(mode, "m", "(game | g | editor | e)"),
     COMMAND(visit_all, "va", NULL),
+    COMMAND(next_recording_filename, "nrf", NULL),
+    COMMAND(last_recording_filename, "lrf", NULL),
     NULLCOMMAND
 };
 

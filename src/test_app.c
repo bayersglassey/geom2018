@@ -195,7 +195,9 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     const char *stateset_filename, const char *hexmap_filename,
     const char *submap_filename, bool developer_mode,
     bool minimap_alt, bool cache_bitmaps, bool animate_palettes,
-    int n_players, int save_slot
+    int n_players, int save_slot,
+    const char *last_recording_filename,
+    const char *next_recording_filename
 ){
     int err;
 
@@ -213,6 +215,8 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->stateset_filename = stateset_filename;
 
     strcpy(app->_recording_filename, RECORDING_FILENAME_TEMPLATE);
+    app->last_recording_filename = last_recording_filename;
+    app->next_recording_filename = next_recording_filename;
 
     SDL_Palette *sdl_palette = SDL_AllocPalette(256);
     app->sdl_palette = sdl_palette;
@@ -578,7 +582,7 @@ static const char *test_app_get_recording_filename(
     return recording_filename;
 }
 
-static const char *test_app_get_last_or_next_recording_filename(
+static const char *_test_app_get_last_or_next_recording_filename(
     test_app_t *app, bool next
 ){
     /* This function is... horrific */
@@ -598,11 +602,13 @@ static const char *test_app_get_last_or_next_recording_filename(
 }
 
 const char *test_app_get_last_recording_filename(test_app_t *app){
-    return test_app_get_last_or_next_recording_filename(app, false);
+    if(app->last_recording_filename)return app->last_recording_filename;
+    return _test_app_get_last_or_next_recording_filename(app, false);
 }
 
 const char *test_app_get_next_recording_filename(test_app_t *app){
-    return test_app_get_last_or_next_recording_filename(app, true);
+    if(app->next_recording_filename)return app->next_recording_filename;
+    return _test_app_get_last_or_next_recording_filename(app, true);
 }
 
 
