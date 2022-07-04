@@ -11,6 +11,10 @@ parts:
         vars:
             "map": "data/maps/tutorial/worldmap.fus"
 
+    "F": recording "data/recs/door.fus"
+        vars:
+            "map": "data/maps/demo/worldmap.fus"
+
     "H": recording "data/recs/hotspot3.fus"
         vars:
             "counter": "heyyy"
@@ -22,7 +26,7 @@ collmap:
     ;;
     ;;           .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;;         .   .   .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .      [T]
+    ;;         .   .   .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .      [T]  [F]
     ;;
     ;;           .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   + - + - + - + - + - +   .
     ;;                                                                                                  /                     \
