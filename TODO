@@ -695,18 +695,92 @@ Regarding this:
 
 Currently, we have these 2 functions (methods of test_app) for getting
 recording filenames:
-    * test_app_get_next_recording_filename (used when recording with F9)
-    * test_app_get_last_recording_filename (used when replying with F10)
+    * test_app_get_save_recording_filename (used when recording with F9)
+    * test_app_get_load_recording_filename (used when replying with F10)
 
 We could add two new fields to test_app:
-    * next_recording_filename
-    * last_recording_filename
+    * save_recording_filename
+    * load_recording_filename
 
 ...usually they are NULL, and so the current "recs/xxx.fus" template thing
 is used.
 But we could say, *if* they are non-NULL, then use them instead.
-And also, once you've recorded to next_recording_filename, it's set to NULL,
+And also, once you've recorded to save_recording_filename, it's set to NULL,
 so you don't accidentally overwrite it afterwards.
+
+^ OKAY! We did that.
+Now the issue is that when you F9, it stops your F10.
+And I think really, the issue here is that body->recording has an "action"
+(i.e. a state) which can be PLAY or RECORD, when really we want separate
+body->playing_recording and body->recording_recording. As it were.
+
+    typedef struct recording {
+        int action; /* enum recording_action */
+        bool reacts;
+        bool loop;
+        bool resets_position; /* default: true, if false, looping doesn't reset body's position */
+        const char *stateset_name;
+        const char *state_name;
+
+        hexgame_location_t loc0;
+
+        keyinfo_t keyinfo;
+
+        ARRAY_DECL(struct recording_node, nodes)
+
+        int frame_i;
+        int node_i;
+        int wait;
+        const char *filename;
+        FILE *file;
+        int offset;
+
+        /* Weakrefs: */
+        struct body *body;
+    } recording_t;
+
+^ Most of that isn't actually used when we start a new recording (which happens
+in body_start_recording).
+We call recording_reset, and then manually write some stuff to a file:
+
+    anim: body->stateset->filename
+    state: body->state->name
+    pos: body->loc.pos
+    rot: body->loc.rot
+    turn: body->loc.turn
+    keys: body->keyinfo.{is,was,went}down[i in KEYINFO_KEYS]
+    data: ...
+
+...so I don't think we really even need to use body->recording when we're
+recording... where all is it used?
+
+In body_key{down,up}, we do:
+
+    if(body->recording.action == RECORDING_ACTION_RECORD){
+        body_record_keydown(body, key_i);
+    }
+
+Of course F9, F10 check whether body->recording.action == RECORDING_ACTION_RECORD
+to decide what to do.
+
+recording_step does this:
+
+    }else if(rec_action == RECORDING_ACTION_RECORD){
+        /* record */
+        recording->wait++;
+    }
+
+...so recording->wait is used when recording...
+
+body_start_recording does this:
+
+    recording_reset(&body->recording);
+    body->recording.action = RECORDING_ACTION_RECORD;
+    body->recording.filename = filename;
+    body->recording.file = f;
+
+...so that's basically it, eh? We need to store the file we write to,
+maybe the filename, and the "wait" counter.
 
 
 Jul 2, 2022:
@@ -723,3 +797,5 @@ Jul 3, 2022:
 
 * "@", "=", "o": these don't affect rendergraph's bounds????
     ...so they can end up wrapping around the rgraph...
+
+    ===> IMPORTANT! BUG! FIXME!
