@@ -1,0 +1,13 @@
+name: "touma"
+unit: 3 2 0 -1
+spawn: "data/maps/touma/start.fus"
+
+palette: "data/pal1.fus"
+tileset: "data/tileset1.fus"
+
+submaps:
+    :
+        file: "data/maps/touma/start.fus"
+        pos: (0 0)
+        camera: (0 0)
+        mapper: ("triple")
