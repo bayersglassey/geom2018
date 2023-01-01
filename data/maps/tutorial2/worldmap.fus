@@ -110,7 +110,7 @@ submaps:
                 submaps:
                     :
                         bg
-                        file: "data/maps/tutorial2/start3b_bg.fus"
+                        file: "data/maps/tutorial2/start3.2b_bg.fus"
                         pos: eval: (13 -9) + (-1 -12)
                         tileset: "data/tileset1_bg.fus"
                     :
@@ -122,8 +122,7 @@ submaps:
                         pos: eval: (13 -9) + (-1 -12)
                         camera: (-3 -8)
                         recs:
-                            : "data/maps/tutorial2/recs/spider_start3b.fus" "spider_cpu"
-                            : "data/maps/tutorial2/recs/spider_start3b.lower.fus" "spider_cpu"
+                            : "data/maps/tutorial2/recs/coin_beast_waiter.fus"
             "start4":
                 pos: (-13 -32)
                 submaps:

@@ -1,0 +1,13 @@
+anim: "anim/coin_beast.fus"
+state: "stand"
+pos: ( -28 -72)
+rot: 0
+turn: yes
+keys:
+    x:
+    y:
+    u:
+    d:
+    l:
+    r:
+data: " w14 +r w22 -r w17 +r w6 -r w47 +l w4 -l w10 +l w18 -l w52 +r w23 -r w9 +d w74 -d w27 +l w28 -l w47"
