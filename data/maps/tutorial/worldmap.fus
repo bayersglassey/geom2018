@@ -71,10 +71,15 @@ submaps:
         mapper: ("triple")
         submaps:
             "skypipes":
-                file: "data/maps/tutorial/skypipes.fus"
                 pos: eval: (19 0) + (19 -1) + (24 17)
                 camera: (8 0)
                 submaps:
+                    :
+                        bg
+                        file: "data/maps/tutorial/skypipes_bg.fus"
+                        tileset: "data/tileset1_bg.fus"
+                    :
+                        file: "data/maps/tutorial/skypipes.fus"
                     :
                         file: "data/maps/tutorial/skyblocker.fus"
                         pos: eval: (25 2) + (-2 -1)
