@@ -22,6 +22,7 @@ vars:
     "start3b_coin_b": F
     "start3b_coin_c": F
     "start3b_coin_d": F
+    "start3b_coin_e": F
     "start3b_solved": F
     nosave "start3b_num_coin_a": 3
     nosave "start3b_num_coin_b": 3
@@ -76,59 +77,79 @@ submaps:
                             file: "data/maps/tutorial2/start2_blocker.fus"
                             visible: not mapvar("coin_e")
                             pos: (0 5)
-            "start3": submaps:
-                :
-                    bg
-                    file: "data/maps/tutorial2/start3b_bg.fus"
-                    pos: eval: (13 -9) + (-1 -12)
-                    tileset: "data/tileset1_bg.fus"
-                :
-                    file: "data/maps/tutorial2/start3.fus"
-                    pos: eval: (13 -9)
-                    camera: (-4 -8)
-                :
-                    file: "data/maps/tutorial2/start3b.fus"
-                    pos: eval: (13 -9) + (-1 -12)
-                    camera: (-5 -6)
-                    recs:
-                        : "data/maps/tutorial2/recs/spider_start3b.fus" "spider_cpu"
-                    submaps:
-                        :
-                            file: "data/maps/tutorial2/start3b_blocker.fus"
-                            visible: not mapvar("start3b_coin_b")
-                            pos: (5 -7)
-                        :
-                            file: "data/maps/tutorial2/start3b_blocker.fus"
-                            visible: not mapvar("start3b_coin_d")
-                            pos: (6 -2)
-                        :
-                            file: "data/maps/tutorial2/start3b_blocker.fus"
-                            visible: not mapvar("start3b_solved")
-                            pos: (-22 -17)
-            "start4": submaps:
-                :
-                    bg
-                    file: "data/maps/tutorial2/start4_bg.fus"
-                    pos: eval: (13 -9) + (-1 -12) + (-29 -19)
-                    tileset: "data/tileset1_bg.fus"
-                :
-                    file: "data/maps/tutorial2/start4.fus"
-                    pos: eval: (13 -9) + (-1 -12) + (-29 -19)
-                    camera: (-8 6)
-                    recs:
-                        : "data/maps/tutorial2/recs/coin_beast_start4.fus"
-                    submaps:
-                        :
-                            file: "data/maps/tutorial2/start4_door_closed.fus"
-                            visible: not mapvar("start4_solved")
-                            pos: (-11 -4)
-                        :
-                            file: "data/maps/tutorial2/start4_door_open.fus"
-                            visible: mapvar("start4_solved")
-                            pos: (-11 -4)
-                            doors:
-                                :
-                                    map: "data/maps/tutorial3/worldmap.fus"
-                                    pos: (-7 0)
-                                    rot: 0
-                                    turn: n
+            "start3.1":
+                submaps:
+                    :
+                        bg
+                        file: "data/maps/tutorial2/start3b_bg.fus"
+                        pos: eval: (13 -9) + (-1 -12)
+                        tileset: "data/tileset1_bg.fus"
+                    :
+                        file: "data/maps/tutorial2/start3.fus"
+                        pos: eval: (13 -9)
+                        camera: (-4 -8)
+                    :
+                        file: "data/maps/tutorial2/start3b.fus"
+                        pos: eval: (13 -9) + (-1 -12)
+                        camera: (-5 -8)
+                        submaps:
+                            :
+                                file: "data/maps/tutorial2/start3b_blocker.fus"
+                                visible: not mapvar("start3b_coin_b")
+                                pos: (5 -7)
+                            :
+                                file: "data/maps/tutorial2/start3b_blocker.fus"
+                                visible: not mapvar("start3b_coin_d")
+                                pos: (6 -2)
+                            :
+                                file: "data/maps/tutorial2/start3b_blocker.fus"
+                                visible: not mapvar("start3b_coin_e")
+                                pos: (-15 -19)
+            "start3.2":
+                pos: (-13 -32)
+                submaps:
+                    :
+                        bg
+                        file: "data/maps/tutorial2/start3b_bg.fus"
+                        pos: eval: (13 -9) + (-1 -12)
+                        tileset: "data/tileset1_bg.fus"
+                    :
+                        file: "data/maps/tutorial2/start3.2.fus"
+                        pos: eval: (13 -9)
+                        camera: (2 -8)
+                    :
+                        file: "data/maps/tutorial2/start3.2b.fus"
+                        pos: eval: (13 -9) + (-1 -12)
+                        camera: (-3 -8)
+                        recs:
+                            : "data/maps/tutorial2/recs/spider_start3b.fus" "spider_cpu"
+                            : "data/maps/tutorial2/recs/spider_start3b.lower.fus" "spider_cpu"
+            "start4":
+                pos: (-13 -32)
+                submaps:
+                    :
+                        bg
+                        file: "data/maps/tutorial2/start4_bg.fus"
+                        pos: eval: (13 -9) + (-1 -12) + (-29 -19)
+                        tileset: "data/tileset1_bg.fus"
+                    :
+                        file: "data/maps/tutorial2/start4.fus"
+                        pos: eval: (13 -9) + (-1 -12) + (-29 -19)
+                        camera: (-8 6)
+                        recs:
+                            : "data/maps/tutorial2/recs/coin_beast_start4.fus"
+                        submaps:
+                            :
+                                file: "data/maps/tutorial2/start4_door_closed.fus"
+                                visible: not mapvar("start4_solved")
+                                pos: (-11 -4)
+                            :
+                                file: "data/maps/tutorial2/start4_door_open.fus"
+                                visible: mapvar("start4_solved")
+                                pos: (-11 -4)
+                                doors:
+                                    :
+                                        map: "data/maps/tutorial3/worldmap.fus"
+                                        pos: (-7 0)
+                                        rot: 0
+                                        turn: n

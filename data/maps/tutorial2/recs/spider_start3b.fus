@@ -1,6 +1,6 @@
 anim: "anim/spider.fus"
 state: "crawl"
-pos: ( 9 -27)
+pos: eval: ( 9 -27) - (13 32)
 rot: 5
 turn: yes
 keys:
