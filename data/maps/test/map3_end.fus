@@ -11,7 +11,7 @@ parts:
     "D": recording "data/recs/door.fus"
         vars:
             "location": "puzzle"
-            "set_bool": "is_aimerspider"
+            "set_yourbool": "is_aimerspider"
 
 collmap:
     ;;                                 .                           .

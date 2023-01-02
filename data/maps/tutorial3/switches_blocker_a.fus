@@ -1,0 +1,9 @@
+default_vert: "0"
+default_edge: "0"
+default_face: "0"
+collmap:
+    ;;    .   .
+    ;;    *\*/*
+    ;;  . - + - .
+    ;;    */*\*/*
+    ;;   (.)  .

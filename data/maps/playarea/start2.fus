@@ -3,19 +3,19 @@ parts:
 
     "R": recording "data/recs/door.fus"
         vars:
-            "set_bool": "is_rollerspider"
+            "set_yourbool": "is_rollerspider"
     "P": recording "data/recs/door.fus"
         vars:
-            "set_bool": "is_spikeyspider"
+            "set_yourbool": "is_spikeyspider"
     "A": recording "data/recs/door.fus"
         vars:
-            "set_bool": "is_aimerspider"
+            "set_yourbool": "is_aimerspider"
     "F": recording "data/recs/door.fus"
         vars:
-            "set_bool": "is_flipspider"
+            "set_yourbool": "is_flipspider"
     "S": recording "data/recs/door.fus"
         vars:
-            "set_bool": "is_stickyspider"
+            "set_yourbool": "is_stickyspider"
 
     #$SET_BOOL SHOW_SPIDERS
     $IF SHOW_SPIDERS:

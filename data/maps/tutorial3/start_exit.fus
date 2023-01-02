@@ -1,8 +1,12 @@
+parts:
+    "D": recording "data/recs/door.fus"
+        vars:
+            "map": "data/maps/demo/worldmap.fus"
 collmap:
     ;;
     ;;   .   .   .   .   .   .   .   .
     ;;
-    ;; @ = @ = + - +   .   + - + = @ = @ = @
-    ;;   o          \  D  /
+    ;; @ = @ = + - +   ?   + - + = @ = @ = @     [D]
+    ;;   o          \     /
     ;;   .   .   .  (+)- +   .   .   .
     ;;

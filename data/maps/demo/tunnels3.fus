@@ -2,7 +2,7 @@ parts:
     "D": recording "data/recs/door.fus"
         vars:
             "location": "tunnels3"
-            "set_bool": "is_rollerspider"
+            "set_yourbool": "is_rollerspider"
     "l": location "tunnels3"
 
 collmap:

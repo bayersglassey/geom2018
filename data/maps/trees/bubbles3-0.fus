@@ -4,11 +4,11 @@ parts:
     "A": recording "data/recs/door.fus"
         vars:
             "location": "bubbles_transform_a"
-            "set_bool": "is_rollerspider"
+            "set_yourbool": "is_rollerspider"
     "B": recording "data/recs/door.fus"
         vars:
             "location": "bubbles_transform_b"
-            "set_bool": "is_spikeyspider"
+            "set_yourbool": "is_spikeyspider"
     "a": location "bubbles_transform_a"
     "b": location "bubbles_transform_b"
 

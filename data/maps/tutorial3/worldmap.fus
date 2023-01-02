@@ -1,9 +1,11 @@
 name: "tutorial3"
 unit: 3 2 0 -1
-spawn: "data/maps/tutorial3/floaty_start.fus"
+spawn: "data/maps/tutorial3/switches.fus"
 palette: "data/pal1.fus"
 tileset: "data/tileset1.fus"
 vars:
+    "switches_a": F
+    "switches_b": F
     "switch1": F
     "switch2": F
     "switch3": F
@@ -18,6 +20,33 @@ vars:
     nosave "start_eye_e_open": 0
 
 submaps:
+    "switches":
+        file: "data/maps/tutorial3/switches.fus"
+        pos: (-40 0)
+        camera: (-8 -5)
+        mapper: ("triple")
+        recs:
+            : "data/maps/tutorial3/recs/switches_spider000.fus"
+        submaps:
+            :
+                file: "data/maps/tutorial3/switches_blocker_a.fus"
+                visible: not mapvar("switches_a")
+                pos: (-8 -9)
+                rot: 1
+            :
+                file: "data/maps/tutorial3/switches_blocker_b.fus"
+                visible: not mapvar("switches_b")
+                pos: (-5 -6)
+                rot: 1
+            :
+                file: "data/maps/tutorial3/switches_blocker_a.fus"
+                visible: mapvar("switches_a")
+                pos: (-18 -9)
+            :
+                file: "data/maps/tutorial3/switches_blocker_b.fus"
+                visible: mapvar("switches_b")
+                pos: (-16 -1)
+                rot: 5
     "floaty_start":
         file: "data/maps/tutorial3/floaty_start.fus"
         pos: eval: (-7 0)
@@ -48,12 +77,6 @@ submaps:
                 file: "data/maps/tutorial3/start_exit.fus"
                 pos: (3 -5)
                 tileset: "data/tileset2.fus"
-                doors:
-                    :
-                        map: "data/maps/demo/worldmap.fus"
-                        pos: (-19 -5)
-                        rot: 0
-                        turn: n
                 submaps:
                     :
                         file: "data/maps/tutorial3/start_exit_blocker.fus"
@@ -73,8 +96,8 @@ submaps:
         recs:
             : relative (-1 -4) 0 n "data/recs/roller_r.fus"
             : relative ( 8 -9) 0 n "data/recs/roller_l.fus"
-            : relative (11 -2) 0 n "data/recs/death_roller_r.fus"
-                visible: mapvar("switch3")
+            #: relative (11 -2) 0 n "data/recs/death_roller_r.fus"
+            #    visible: mapvar("switch3")
             : relative ( 0  0) 0 n "data/recs/death_roller_l.fus"
                 visible: mapvar("switch3")
             : relative ( 4  4) 0 n "data/recs/death_roller_r.fus"
@@ -93,6 +116,8 @@ submaps:
         camera: (6 9)
         mapper: ("triple")
         tileset: "data/tileset1.fus"
+        recs:
+            : "data/maps/tutorial3/recs/start3_spider000.fus"
         submaps:
             :
                 file: "data/maps/tutorial3/start_save.fus"
@@ -178,7 +203,9 @@ submaps:
             :
                 file: "data/maps/tutorial3/end.fus"
                 pos: (2 -7)
+                camera: (3 14)
+                mapper: ("double")
             :
-                file: "data/maps/tutorial3/end_switched.fus"
+                file: "data/maps/tutorial3/start5_alt.fus"
                 visible: mapvar("switch1")
-                pos: (-9 -11)
+                pos: (-9 -9)

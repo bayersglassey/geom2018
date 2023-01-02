@@ -43,7 +43,7 @@ parts:
     "d": recording "data/recs/door.fus"
         vars:
             "location": "fisheye_location_a"
-            "set_bool": "is_rollerspider"
+            "set_yourbool": "is_rollerspider"
     "l": location "fisheye_location_a"
 collmap:
     ;;

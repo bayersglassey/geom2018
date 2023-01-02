@@ -37,7 +37,11 @@ vars:
     "map": null
     "anim": null
     "state": null
-    "set_bool": null
+    "set_yourbool": null
+    "set_mapvar.name": null
+    "set_mapvar.value": null
+    "set_globalvar.name": null
+    "set_globalvar.value": null
 
 
 state "init":
@@ -79,11 +83,24 @@ state "open":
             yourvar("state")
 
         # Set a boolean variable and call the "update_vars" proc
-        # (NOTE: this is a bit of a hack... or not?..)
-        if: exists myvar("set_bool")
+        # of the body which touched us.
+        # NOTE: this is a bit of a hack... the "spider" body has an
+        # "update_vars" proc, which it uses to set up its labels based
+        # on certain vars, e.g. "is_rollerspider".
+        # The idea is that some doors can set such vars of the spider,
+        # then run the "update_vars" proc so that its labels are
+        # recalculated.
+        # TL;DR this is how a door can turn you into e.g. a rollerspider.
+        if: exists myvar("set_yourbool")
         then: as you:
-            set myvar(yourvar("set_bool")): T
+            set myvar(yourvar("set_yourbool")): T
             call: "update_vars"
+
+        if: exists myvar("set_mapvar.name")
+        then: set mapvar(myvar("set_mapvar.name")): myvar("set_mapvar.value")
+
+        if: exists myvar("set_globalvar.name")
+        then: set globalvar(myvar("set_globalvar.name")): myvar("set_globalvar.value")
 
         goto: "closed"
 

@@ -137,18 +137,3 @@ submaps:
                         camera: (-8 6)
                         recs:
                             : "data/maps/tutorial2/recs/coin_beast_start4.fus"
-                        submaps:
-                            :
-                                file: "data/maps/tutorial2/start4_door_closed.fus"
-                                visible: not mapvar("start4_solved")
-                                pos: (-11 -4)
-                            :
-                                file: "data/maps/tutorial2/start4_door_open.fus"
-                                visible: mapvar("start4_solved")
-                                pos: (-11 -4)
-                                doors:
-                                    :
-                                        map: "data/maps/tutorial3/worldmap.fus"
-                                        pos: (-7 0)
-                                        rot: 0
-                                        turn: n
