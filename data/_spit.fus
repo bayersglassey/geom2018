@@ -8,19 +8,24 @@ shapes:
         labels:
             : "label:carrying" (0 0 0 0) 0 f
         prismels:
-            : "tri" (0 0 0 0)  0 f eval(1 + 0 + 7)
-            : "tri" (0 0 0 0)  2 f eval(1 + 0 + 7)
-            : "tri" (0 0 0 0)  4 f eval(1 + 8 + 7)
-            : "tri" (0 0 0 0)  6 f eval(1 + 8 + 7)
-            : "tri" (0 0 0 0)  8 f eval(1 + 0 + 7)
-            : "tri" (0 0 0 0) 10 f eval(1 + 8 + 7)
-            $IF SPIKEY:
-                : "tri" ( 1 0  0 0)  2 f eval(1 + 0 + 7)
-                : "tri" ( 0 0  1 0)  4 f eval(1 + 0 + 7)
-                : "tri" (-1 0  1 0)  6 f eval(1 + 0 + 7)
-                : "tri" (-1 0  0 0)  8 f eval(1 + 0 + 7)
-                : "tri" ( 0 0 -1 0) 10 f eval(1 + 0 + 7)
-                : "tri" ( 1 0 -1 0)  0 f eval(1 + 0 + 7)
+            $IF EYE:
+                : "sq"  ( 0 2 0 -1)  0 f eval(1 + 7 + 8)
+                : "sq"  (-1 2 0 -1)  0 f eval(1 + 7 + 0)
+                : "sq"  (-2 2 0 -1)  0 f eval(1 + 1 + 0)
+            $IF !EYE:
+                : "tri" (0 0 0 0)  0 f eval(1 + 0 + 7)
+                : "tri" (0 0 0 0)  2 f eval(1 + 0 + 7)
+                : "tri" (0 0 0 0)  4 f eval(1 + 8 + 7)
+                : "tri" (0 0 0 0)  6 f eval(1 + 8 + 7)
+                : "tri" (0 0 0 0)  8 f eval(1 + 0 + 7)
+                : "tri" (0 0 0 0) 10 f eval(1 + 8 + 7)
+                $IF SPIKEY:
+                    : "tri" ( 1 0  0 0)  2 f eval(1 + 0 + 7)
+                    : "tri" ( 0 0  1 0)  4 f eval(1 + 0 + 7)
+                    : "tri" (-1 0  1 0)  6 f eval(1 + 0 + 7)
+                    : "tri" (-1 0  0 0)  8 f eval(1 + 0 + 7)
+                    : "tri" ( 0 0 -1 0) 10 f eval(1 + 0 + 7)
+                    : "tri" ( 1 0 -1 0)  0 f eval(1 + 0 + 7)
 
     $PREFIX NS "spit_fly":
         shapes:

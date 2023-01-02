@@ -1,4 +1,5 @@
 
 $SET_STR RGRAPH_NS "spikey_"
 $SET_BOOL SPIKEY
+$UNSET_BOOL EYE
 import "anim/_spit.fus"

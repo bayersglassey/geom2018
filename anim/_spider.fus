@@ -98,9 +98,12 @@ proc toplevel onstatesetchange "update_vars":
         set myvar("label:toe"): $PREFIX NS "toe_sticky"
 
     # Set myvar("spit_anim")
-    if: expr: myvar("is_spikeyspider")
-    then: set myvar("spit_anim"): "anim/spikeyspit.fus"
-    else: set myvar("spit_anim"): "anim/spit.fus"
+    $IF EYESPIDER:
+        set myvar("spit_anim"): "anim/eyespit.fus"
+    $IF !EYESPIDER:
+        if: expr: myvar("is_spikeyspider")
+        then: set myvar("spit_anim"): "anim/spikeyspit.fus"
+        else: set myvar("spit_anim"): "anim/spit.fus"
 
 
 collmsgs:

@@ -64,8 +64,15 @@ shapes:
 
 $SET_STR NS ""
 $UNSET_BOOL SPIKEY
+$UNSET_BOOL EYE
 import "data/_spit.fus"
 
 $SET_STR NS "spikey_"
 $SET_BOOL SPIKEY
+$UNSET_BOOL EYE
+import "data/_spit.fus"
+
+$SET_STR NS "eye_"
+$UNSET_BOOL SPIKEY
+$SET_BOOL EYE
 import "data/_spit.fus"
