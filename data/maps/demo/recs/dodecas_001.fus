@@ -1,11 +1,13 @@
 anim: "anim/spider.fus"
-state: "stand"
-pos: ( 14 -13)
+state: "crawl"
+pos: ( 27 -5)
 rot: 0
 turn: no
 keys:
+    x:
+    y:
     u:
-    d:
+    d: is was
     l:
     r:
-data: " w3+d w2+r w19-d w1-r w6+r w6-r w11+d w4+l w10-l w10-d w25+r w12-r w4+r w6-r w2+d w3+l w62-d w4-l w4+r w12-r w22+r w1-r w3+u w3-u w29+d w11+r w7-r w5-d w5+r w21-r w2+d w3+r w58-r w13-d w17+u w2-u w28+r w46-r w1+l w16-l w28+l w26-l w4+r w2-r w38+r w12-r w4+l w3-l w13+u w2-u w25+l w5-l w7+d w6+r w4-r w13+r w5-r w5-d w3+r w20+d w27-d w11-r w10+r w5-r w3+d w3+r w5-r w11-d w1+d w1-d w4+r w60-r w13+r w4-r w9+d w6+r w15-d w3-r w11+r w4-r w8+d w5+l w29-d w8-l w16+d w17-d w3+l w7-l w17+u w3-u w5+l w49-l w22+l w17-l w2+r w3+u w1-r w2-u w10+r w77-r w3+d w4+r w5-r w14-d w8+r w20-r w4+d w7+r w29-r w9-d w7+r w8-r w9+d w3+l w7-l w7-d w1+l w45-l w5+d w20+l w7-l w10-d w10+l w4-l w3+d w3+r w34-r w1-d w3+l w32-l w9+l w12-l w7+d w6+l w16-l w9-d w3+l w38-l w2+d w4+l w6-l w25+l w3-l w1-d w2+l w20-l w6+d w37+r w4-r w16+r w3-r w6-d w9+r w4-r w26+d w7+r w16-r w3-d w8+r w14-r w16+d w1+r w12-r w7-d w6+r w12-r w2+d w3+r w5-r w16+l w8-l w14+l w3-l w8-d w23+r w4-r w4+r w6-r w13+d w3+r w9-r w4-d w9+l w12-l w3+d w4+l w5-l w30+l w9-d w2-l w29+l w19-l w8+l w5-l w4+d w6+l w10-l w15-d w2+l w6-l w13+d w4+r w9-r w9+r w3-r w3-d w11+l w18-l w11"
+data: " w54 -d w51 +l w2 -l w7 +d w22 +l w12 -l w15 -d w13 +r w2 -r w56 +l w25 -l w7 +r w2 -r w10 +d w84 -d w15 +r w9 -r w2 +l w4 -l +d w88 -d w29 +d w3 -d w13 +r w28 -r w5 +d w2 +l w24 -l w22 +l w3 -l w2 -d w2 +l w27 -l w7 +d w12 +l w7 -l w7 -d w5 +l w2 -l w19 +l w4 -l w3 +d w5 +r w7 -r w5 -d w8 +r w29 -r w6 +d w10 +r w17 -d w29 +d w51 -d w9 -r w2 +l w3 -l w8 +d w20 +r w6 -r w26 -d w3 +r w12 -r w17 +d w4 +r w4 -r w18 -d w4 +r w8 -r w3 +d w2 +l w6 -l w3 -d w8 +l w10 -l w7 +d w10 +l w5 -l w3 -d w12 +l w4 -l w4 +d w17 +r w8 -d w35 -r w2 +d w13 +r w19 -d w1 -r w6 +l w23 -l w1 +d w15 +l w16 -l w11 -d w13 +l w4 -l w5 +d w3 +r w6 -d w1 -r w15 +r w4 -r w5 +d w8 +l w33 -l w14 -d w23 +l w7 -l w6 +d w19 +r w17 -r w1 -d w24 +r w4 -r w4 +d w24 +l w33 -l w1 -d w16 +r w15 -r w30 +r w17 -r w2 +d w21 +r w16 -d w8 -r w28 +r w6 -r w4 +d w14 +r w9 -r w1 -d w4 +l w20 -l w5 +d w5 +r w11 -r w38 +l w2 -l w66 +r w8 -r w46 -d w11 +l w5 -l w14 +r w16 -r w5 +d w6 +l w8 -l w48 +r w17 -r w74 +l w2 -l w54 +l w2 -l w6 -d w10 +r w26 -r w22 +r w5 -r w6 +d w21 +l w2 -l w52 -d w34 +l w49 -l w5 +d w11 +l w8 -l w1 -d w7 +r w24 -r w8 +d w13 +l w10 -l w12 +l w2 -l w8 -d w8 +l w54 -l w5 +d w14 -d w2 +l w9 -l w5 +d w9 +l w38 -d w17 -l w3 +d w3 +l w7 -d w23 -l w3 +l w8 -l w22 +l w2 -l w3 +d w7 +l w3 -l w3 -d w1 +l w21 +d w1 -l w6 +l w16 -l w2 -d w6 +r w14 -r w2 +d w5 +r w4 -r w5 -d w16 +r w7 -r w4 +d w6 +r w3 -r w5 -d w5 +l w11 -l w10 +d w4 +r w9 -r w3 -d w6 +l w25 -l w6 +d w1 +r w7 -r w3 -d w11 +l w29 +d w31 -d w34 +d w16 -d w38 -l w20 +d w3 +l w4 -l w2 -d w7 +l w3 -l w6 +d w4 +l w4 -l w1 -d w4 +l w8 -l w7 +d w2 +l w9 -l w19 -d w5 +r w12 -r w8 +d w5 +r w4 -r w2 -d w15 +l w12 +d w18 -l w16 +r w3 -r w18"

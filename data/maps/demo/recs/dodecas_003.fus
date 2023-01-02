@@ -1,0 +1,13 @@
+anim: "anim/spider.fus"
+state: "crawl"
+pos: ( 25 -8)
+rot: 0
+turn: yes
+keys:
+    x:
+    y:
+    u:
+    d: is was
+    l:
+    r:
+data: " w27 +l w16 -l w1 -d w3 +l w24 -l w2 +d w8 +l w9 -d w8 -l w5 +d w7 +l w3 -l w3 -d w4 +l w12 -l w1 +d w9 +l w13 -d w18 -l w1 +d w10 +r w47 -d w7 -r w1 +d w6 +r w3 -r w5 -d w4 +r w18 -r w1 +d w2 +l w11 -d w8 -l w14 +l w3 -l w3 +d w4 +l w4 -l w2 -d w4 +l w7 -l w7 +d w4 +r w15 -d w25 +d w26 -r w1 -d w2 +l w9 +d w31 -l w1 -d w12 +l w19 -l w19 +r w35 -r w13 +d w12 +l w5 -d w20 -l w23 +r w5 -r w16 +r w6 -r w2 +l w2 +u w1 -l w2 -u w17 +d w11 +l w44 -l w1 -d w5 +r w13 -r w2 +d w3 +r w4 -r w5 -d w1 +d w21 -d w4 +r w20 -r +d w29 +r w10 -d w23 -r w10 +d w3 +l w20 -d w7 -l w2 +d w3 +r w10 -d w1 -r w6 +l w26 -l w2 +d w2 +r w9 -d -r w4 +l w34 +d w21 -l -d w3 +r w14 +d w20 -d w1 -r w11 +r w7 -r w14 +d w2 +r w6 -d w1 -r w10 +r w6 -r w4 +d w17 +l w9 -l w1 -d w4 +l w10 -l +d w3 -d w3 +d w10 +l w11 -l w1 -d w5 +r w10 -r w31"

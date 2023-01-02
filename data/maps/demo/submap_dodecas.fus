@@ -4,13 +4,14 @@ mapper: ("double")
 recs:
     : "data/maps/demo/recs/dodecas_000.fus" "spider_cpu"
     : "data/maps/demo/recs/dodecas_001.fus" "spider_cpu"
+    : "data/maps/demo/recs/dodecas_002.fus" "spider_cpu"
+    : "data/maps/demo/recs/dodecas_003.fus" "spider_cpu"
+    : "data/maps/demo/recs/dodecas_000.fus" "spider_cpu" 1000
+    : "data/maps/demo/recs/dodecas_001.fus" "spider_cpu" 1000
+    : "data/maps/demo/recs/dodecas_002.fus" "spider_cpu" 1000
+    : "data/maps/demo/recs/dodecas_003.fus" "spider_cpu" 1000
     : "data/maps/demo/recs/dodecas_hexroller_000.fus"
     : "data/maps/demo/recs/dodecas_hexroller_001.fus" "spider_cpu"
-
-actors:
-    : (21 -15) 5 y "actor/aispider.fus" "spider_cpu"
-        vars:
-            "is_rollerspider": T
 
 vars:
     "eyespider_dodecas_ran_away_1": F
@@ -39,7 +40,6 @@ submaps:
         file: "data/maps/demo/dodecas_1_0.fus"
         pos: (0 -28)
         camera: (0 -4)
-        tileset: "data/maps/sprucetown/tilesets/earth.fus"
     "dodecas":
         file: "data/maps/demo/dodecas_1_-1.fus"
         pos: (-22 -30)
