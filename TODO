@@ -799,3 +799,36 @@ Jul 3, 2022:
     ...so they can end up wrapping around the rgraph...
 
     ===> IMPORTANT! BUG! FIXME!
+
+
+Oct 9, 2022:
+------------
+
+When you record (with F9) it doesn't add your body's vars to the recording.
+
+When you touch a death roller who's stuck in one place, and you're a spikey spider,
+you get stuck there in your shielding animation forever!
+
+
+Jan 1, 2023:
+------------
+
+Don't bring up minimap if Alt is held down.
+
+There should be an eye which comes out as some kind of eye-worm. O_o
+
+There should be eyes which grab death rollers and hold them for you.
+
+The rendergraphs generated from submaps should have a "nocache" bool set,
+causing their bitmaps to never be cached?..
+=> MAYBE NOT! I tried adding rgraph->cache_bitmaps, which is true by default,
+but false for submaps' rgraphs.
+And it actually seemed to cause my laptop to make little quiet clickly noises,
+like it had to think a bit harder in order to render everything...
+=> TODO: FIGURE OUT HOW TO PROFILE ANYTHING
+
+
+All cached bitmaps should be forgotten whenever the map changes!
+...detecting when the map changes would have to be done, like, with a
+game->cur_map or something... errr camera->cur_map?.. hmmm anyway.
+
