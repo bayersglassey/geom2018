@@ -146,6 +146,7 @@ int minieditor_process_event(minieditor_t *editor, SDL_Event *event){
                 }else if(event->key.keysym.mod & KMOD_SHIFT){
                     rendergraph_t *rgraph = minieditor_get_rgraph(editor);
                     if(rgraph){
+                        int n_spaces = 2;
                         int dump_bitmaps = 1;
                         /* dump_bitmaps: if 1, dumps bitmaps.
                         If 2, also dumps their surfaces. */
@@ -153,7 +154,7 @@ int minieditor_process_event(minieditor_t *editor, SDL_Event *event){
                         err = rendergraph_calculate_labels(rgraph);
                         if(err)return err;
 
-                        rendergraph_dump(rgraph, stderr, dump_bitmaps, 2);
+                        rendergraph_dump(rgraph, stderr, n_spaces, dump_bitmaps);
                     }else{
                         fprintf(stderr, "(No rendergraph)\n");
                     }

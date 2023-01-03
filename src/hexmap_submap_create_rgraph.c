@@ -411,6 +411,13 @@ int hexmap_submap_create_rgraph_map(hexmap_submap_t *submap){
         n_frames);
     if(err)return err;
 
+    /* This seemed like a good idea, but my laptop makes noises
+    when I uncomment this, like maybe it has to think a bit harder
+    to render everything.
+    So I think it's better to leave it commented out...
+    rgraph->cache_bitmaps = false;
+    */
+
     err = rendergraph_add_rgraphs_from_collmap(
         rgraph, &submap->collmap, submap->tileset, true);
     if(err)return err;
@@ -445,6 +452,13 @@ int hexmap_submap_create_rgraph_minimap(hexmap_submap_t *submap){
         rendergraph_animation_type_cycle,
         n_frames);
     if(err)return err;
+
+    /* This seemed like a good idea, but my laptop makes noises
+    when I uncomment this, like maybe it has to think a bit harder
+    to render everything.
+    So I think it's better to leave it commented out...
+    rgraph->cache_bitmaps = false;
+    */
 
     err = rendergraph_add_rgraphs_from_collmap(
         rgraph, &submap->collmap, &map->game->minimap_tileset, false);

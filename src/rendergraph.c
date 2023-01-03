@@ -63,7 +63,7 @@ void rendergraph_cleanup(rendergraph_t *rendergraph){
 
 static int _rendergraph_init(rendergraph_t *rendergraph, const char *name,
     prismelrenderer_t *prend, palettemapper_t *palmapper,
-    const char *animation_type, int n_frames
+    const char *animation_type, int n_frames, bool cache_bitmaps
 ){
     /* initialize everything except children and frames */
 
@@ -73,6 +73,7 @@ static int _rendergraph_init(rendergraph_t *rendergraph, const char *name,
 
     rendergraph->name = name;
     rendergraph->n_frames = n_frames;
+    rendergraph->cache_bitmaps = cache_bitmaps;
 
     int n_bitmaps = get_n_bitmaps(space, n_frames);
     rendergraph_bitmap_t *bitmaps = calloc(n_bitmaps, sizeof(*bitmaps));
@@ -96,8 +97,9 @@ int rendergraph_init(rendergraph_t *rendergraph, const char *name,
 ){
     int err;
 
+    bool cache_bitmaps = true;
     err = _rendergraph_init(rendergraph, name, prend, palmapper,
-        animation_type, n_frames);
+        animation_type, n_frames, cache_bitmaps);
     if(err)return err;
 
     rendergraph_frame_t *frames = calloc(n_frames, sizeof(*frames));
@@ -120,7 +122,8 @@ int rendergraph_copy(rendergraph_t *rendergraph, const char *name,
 
     err = _rendergraph_init(rendergraph, name,
         copy_of->prend, copy_of->palmapper,
-        copy_of->animation_type, copy_of->n_frames);
+        copy_of->animation_type, copy_of->n_frames,
+        copy_of->cache_bitmaps);
     if(err)return err;
 
     rendergraph->frames = copy_of->frames;
@@ -216,6 +219,7 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces,
 
     fprintf(f, "%s  animation_type: %s\n", spaces,
         rendergraph->animation_type);
+    fprintf(f, "%s  cache_bitmaps: %c\n", spaces, rendergraph->cache_bitmaps? 'y': 'n');
     fprintf(f, "%s  n_frames: %i\n", spaces, rendergraph->n_frames);
     fprintf(f, "%s  n_bitmaps: %i\n", spaces, rendergraph->n_bitmaps);
     if(dump_bitmaps > 0){
@@ -512,7 +516,7 @@ int rendergraph_calculate_bitmap_bounds(rendergraph_t *rendergraph,
     return 0;
 }
 
-int rendergraph_render_bitmap(rendergraph_t *rendergraph,
+static int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i,
     SDL_Palette *pal
 ){
@@ -591,7 +595,7 @@ int rendergraph_render_to_surface(rendergraph_t *rendergraph,
                     bitmap2->pbox.h
                 };
 
-                if(!rendergraph->prend->cache_bitmaps){
+                if(!rendergraph->cache_bitmaps || !rendergraph->prend->cache_bitmaps){
                     /* Recurse and continue */
                     err = rendergraph_render_to_surface(rendergraph2, surface,
                         &dst_rect2,
@@ -693,7 +697,8 @@ int rendergraph_render(rendergraph_t *rgraph,
 ){
     int err;
 
-    bool cache_bitmaps = surface == NULL? true: prend->cache_bitmaps;
+    bool cache_bitmaps = surface == NULL? true:
+        (rgraph->cache_bitmaps && prend->cache_bitmaps);
 
     int animated_frame_i = get_animated_frame_i(
         rgraph->animation_type, rgraph->n_frames, frame_i);

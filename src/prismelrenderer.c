@@ -1264,6 +1264,7 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
         mapped_rgraph->palmapper,
         mapped_rgraph->animation_type, mapped_rgraph->n_frames);
     if(err)return err;
+    resulting_rgraph->cache_bitmaps = mapped_rgraph->cache_bitmaps;
 
     /* Apply mapper to mapped_rgraph's children */
     for(int i = 0; i < mapped_rgraph->children_len; i++){

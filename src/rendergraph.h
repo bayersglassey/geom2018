@@ -95,6 +95,8 @@ typedef struct rendergraph {
     const char *name;
     ARRAY_DECL(struct rendergraph_child*, children)
 
+    bool cache_bitmaps;
+
     int n_frames;
     struct rendergraph_frame *frames;
     bool labels_calculated;
@@ -151,9 +153,6 @@ int rendergraph_calculate_bitmap_bounds(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i);
 int rendergraph_render_to_surface(rendergraph_t *rendergraph,
     SDL_Surface *surface, SDL_Rect *dst_rect,
-    rot_t rot, flip_t flip, int frame_i,
-    SDL_Palette *pal);
-int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i,
     SDL_Palette *pal);
 int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
