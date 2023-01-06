@@ -111,6 +111,17 @@ typedef struct prismelrenderer {
     ARRAY_DECL(struct prismelmapper*, mappers)
     ARRAY_DECL(struct palettemapper*, palmappers)
 
+    bool loaded;
+        /* Whether we have already been fully loaded once, in the sense
+        of prismelrenderer_load.
+        If this is true, we can call prismelrenderer_load again, in order
+        to "reload" the prismelrenderer -- so that we can easily test
+        changes we've made to any of the files describing the rendergraphs
+        etc.
+        The behaviour of prismelrenderer_load is slightly different when
+        prend->loaded is true, e.g. it allows "redefinition" of shapes
+        (i.e. rendergraphs). */
+
     stringstore_t filename_store;
     stringstore_t name_store;
 

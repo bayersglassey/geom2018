@@ -515,6 +515,7 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, const char *filename,
         const char *mapper_filename;
         NEXT
         OPEN
+        map->default_mapper = NULL;
         err = fus_lexer_get_mapper(lexer, map->prend, NULL,
             &map->default_mapper);
         if(err)return err;
@@ -753,6 +754,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
     if(GOT("mapper")){
         NEXT
         OPEN
+        context->mapper = NULL;
         err = fus_lexer_get_mapper(lexer, map->prend, NULL, &context->mapper);
         if(err)return err;
         CLOSE

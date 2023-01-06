@@ -689,6 +689,8 @@ int prismelrenderer_init(prismelrenderer_t *prend, vecspace_t *space){
     stringstore_init(&prend->filename_store);
     stringstore_init(&prend->name_store);
 
+    prend->loaded = false;
+
     ARRAY_INIT(prend->fonts)
     ARRAY_INIT(prend->geomfonts)
     ARRAY_INIT(prend->prismels)
@@ -819,6 +821,13 @@ void prismelrenderer_dump_stats(prismelrenderer_t *prend, FILE *f){
     }
 
     fprintf(f, "Prismelrenderer stats:\n");
+    fprintf(f, "  fonts: %i\n", prend->fonts_len);
+    fprintf(f, "  geomfonts: %i\n", prend->geomfonts_len);
+    fprintf(f, "  prismels: %i\n", prend->prismels_len);
+    fprintf(f, "  palettes: %i\n", prend->palettes_len);
+    fprintf(f, "  mappers: %i\n", prend->mappers_len);
+    fprintf(f, "  palmappers: %i\n", prend->palmappers_len);
+    fprintf(f, "  rgraphs: %i\n", prend->rendergraphs_len);
     fprintf(f, "  bitmaps: %i\n", n_bitmaps);
     fprintf(f, "  surfaces: %i\n", n_surfaces);
     fprintf(f, "    size (total | avg):\n");
@@ -961,6 +970,8 @@ int prismelrenderer_load(prismelrenderer_t *prend, const char *filename,
 
     err = prismelrenderer_parse(prend, &lexer);
     if(err)return err;
+
+    prend->loaded = true;
 
     fus_lexer_cleanup(&lexer);
 

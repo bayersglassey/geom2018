@@ -200,6 +200,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->delay_goal = delay_goal;
     app->took = 0;
     app->developer_mode = developer_mode;
+    app->minimap_alt = minimap_alt;
     app->n_players = n_players;
     app->animate_palettes = animate_palettes;
 
@@ -227,21 +228,18 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     prismelrenderer_t *prend = &app->prend;
     err = prismelrenderer_init(prend, &vec4);
     if(err)return err;
-    err = prismelrenderer_load(prend, app->prend_filename, NULL);
-    if(err)return err;
-    if(prend->rendergraphs_len < 1){
-        fprintf(stderr, "No rendergraphs in %s\n", app->prend_filename);
-        return 2;}
     prend->cache_bitmaps = cache_bitmaps;
 
     prismelrenderer_t *minimap_prend = &app->minimap_prend;
     err = prismelrenderer_init(minimap_prend,
         minimap_alt? &vec4_alt: &vec4);
     if(err)return err;
-    err = prismelrenderer_load(minimap_prend,
-        minimap_alt? "data/minimap_alt.fus": "data/minimap.fus",
-        NULL);
+
+    err = test_app_reload_prismelrenderers(app);
     if(err)return err;
+    if(prend->rendergraphs_len < 1){
+        fprintf(stderr, "No rendergraphs in %s\n", app->prend_filename);
+        return 2;}
 
     err = font_load(&app->font, "data/font.fus", NULL);
     if(err)return err;
@@ -293,6 +291,20 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 
     return _test_app_restart(app, prend, minimap_prend,
         hexmap_filename, submap_filename);
+}
+
+int test_app_reload_prismelrenderers(test_app_t *app){
+    int err;
+
+    err = prismelrenderer_load(&app->prend, app->prend_filename, NULL);
+    if(err)return err;
+
+    err = prismelrenderer_load(&app->minimap_prend,
+        app->minimap_alt? "data/minimap_alt.fus": "data/minimap.fus",
+        NULL);
+    if(err)return err;
+
+    return 0;
 }
 
 int test_app_mainloop(test_app_t *app){
