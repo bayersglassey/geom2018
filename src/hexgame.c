@@ -369,6 +369,8 @@ int camera_render(camera_t *camera,
                 if(err)return err;
             }
 
+            /* Render any extra rgraphs for this *actor*.
+            (If *body* has extra rgraphs, it will render them itself. */
             for(int j = 0; j < state->extra_rgraphs_len; j++){
                 rendergraph_t *rgraph = state->extra_rgraphs[j];
                 err = body_render_rgraph(body, rgraph,
