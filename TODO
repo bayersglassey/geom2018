@@ -641,6 +641,9 @@ Silkspider:
 * Hexmap recording palmappers are broken?..
     See data/maps/playarea/start2.fus, it specifies "spider_cpu" but the bodies
     don't seem to be rendering any differently
+    AH HAAAAAAA PROBABLY BECAUSE NOW OUR SPIDER RGRAPHS ARE EMPTY, AND IT'S
+    ALL LABELS!..
+    ...so labels need to inherit palmappers or something.
 
 
 Feb 8, 2022:
