@@ -7,22 +7,6 @@
 # actions.
 
 
-
-
-# Stop running if we're not holding forward, or if we try to
-# do almost anything other than jump
-# (don't stop running if we try to e.g. spit, because it won't
-# have the desired effect... the stop_running state will play,
-# but then you won't spit, because "went_down x" or whatever is
-# not true)
-$IF RUNNING:
-    if: any:
-        key: wasdown b
-        key: wasdown d
-        key: not isdown f
-    then:
-        goto immediate: "stop_running"
-
 # Can't stand on nothing
 if:
     any:

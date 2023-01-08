@@ -1,15 +1,10 @@
 
 # Expected variables:
-# RUNNING (bool)
 # STATE_STAND (str)
 # STATE_STEP (str)
 # STATE_STEP_UP (str)
 # STATE_STEP_DOWN (str)
 # STATE_START_JUMP (str)
-# STATE_RUN_STEP (str)
-# STATE_RUN_STEP_UP (str)
-# STATE_RUN_STEP_DOWN (str)
-# STATE_RUN_START_JUMP (str)
 # STATE_JUMP (str)
 
 
@@ -23,11 +18,6 @@ state $GET_STR STATE_STAND:
     # Stepping and jumping
     import "anim/_walker_jump.state.fus"
     import "anim/_walker_step.state.fus"
-
-    $IF RUNNING:
-        # If we didn't do anything else, then just go to the non-running
-        # "stand" state.
-        if() then: goto: "stand"
 
 state $GET_STR STATE_START_JUMP:
 

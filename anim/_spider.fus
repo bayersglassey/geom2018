@@ -11,9 +11,6 @@
 $SET_BOOL SPIDER
 
 
-$SET_BOOL DISABLE_RUNNING # !!! DISABLED FOR NOW
-
-
 # Should match the delays in anim/_roller.fus
 $SET_INT ROLLER_STAND_DELAY 1
 
@@ -22,10 +19,6 @@ $SET_STR STATE_STEP step
 $SET_STR STATE_STEP_UP step
 $SET_STR STATE_STEP_DOWN step_down
 $SET_STR STATE_START_JUMP start_jump
-$SET_STR STATE_RUN_STEP run_step
-$SET_STR STATE_RUN_STEP_UP run_step
-$SET_STR STATE_RUN_STEP_DOWN run_step_down
-$SET_STR STATE_RUN_START_JUMP run_start_jump
 $SET_STR STATE_JUMP jump
 
 
@@ -198,7 +191,6 @@ collmap "crawl":
     ;;  (.)  .
 
 
-$UNSET_BOOL RUNNING
 import "anim/_spider_stand.fus"
 
 
@@ -276,90 +268,9 @@ state "turn":
             ;; ( )
     then:
         move: 1 0
-        if:
-            $IF DISABLE_RUNNING: false
-            key: wasdown f
-        then: goto immediate: $GET_STR STATE_RUN_START_JUMP
-        else: goto immediate: $GET_STR STATE_START_JUMP
+        goto immediate: $GET_STR STATE_START_JUMP
 
     if() then: goto immediate: "step"
-
-state "stop_running":
-    # (Expected to be "goto immediate"'d to)
-    #
-    # We were running, but now we should stop somehow.
-    # Try to take a (regular, non-running) step forwards, to give a sense
-    # of inertia.
-
-    # Step up
-    if:
-        any:
-            all:
-                expr: myvar("is_stickyspider")
-                coll: all yes
-                    ;;        +
-                    ;;
-                    ;; ( )  +
-            all:
-                not: expr: myvar("is_stickyspider")
-                coll: all yes
-                    ;;        +
-                    ;;       /
-                    ;; ( )  +
-    then:
-        move: 1 0
-        rot: 1
-        goto delay: "step"
-
-    # Step
-    if:
-        any:
-            all:
-                expr: myvar("is_stickyspider")
-                coll: all yes
-                    ;; ( )  +   +
-            all:
-                not: expr: myvar("is_stickyspider")
-                coll: all yes
-                    ;; ( )  + - +
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*
-            ;; ( )
-    then:
-        move: 1 0
-        goto delay: "step"
-
-    # Step down
-    if:
-        any:
-            all:
-                expr: myvar("is_stickyspider")
-                coll: all yes
-                    ;; ( )  +
-                    ;;
-                    ;;        +
-            all:
-                not: expr: myvar("is_stickyspider")
-                coll: all yes
-                    ;; ( )  +
-                    ;;       \
-                    ;;        +
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*/*
-            ;; ( )    - + -
-            ;;        */*\*
-    then:
-        move: 1 0
-        rot: -1
-        goto delay: "step_down"
-
-    # If we can't take a step forward, then just go to the non-running
-    # "stand" state.
-    if() then: goto: "stand"
 
 state "sleep":
     rgraph: $PREFIX NS "sleep"
@@ -399,4 +310,3 @@ state "dead":
 
 import "anim/_spider_crawl.fus"
 import "anim/_spider_swim.fus"
-import "anim/_spider_run.fus"
