@@ -160,7 +160,7 @@ static const char *_face_type_msg(int type){
 }
 
 static int _get_color(char c){
-    if(c == '.')return 0;
+    if(c == '.' || c == ' ')return 0;
     if(c >= '0' && c <= '9')return c - '0' + 1;
     if(c >= 'A' && c <= 'Z')return c - 'A' + 10 + 1;
     if(c >= 'a' && c <= 'z')return c - 'a' + 10 + 1;
@@ -464,17 +464,14 @@ static int _hexpicture_parse_faces(
             }
 
             if(type != HEXPICTURE_FACE_TYPE_NONE){
-                hexpicture_face_t *face = &vert->faces[rot];
-                face->rot = rot;
-                face->type = type;
-
                 const int (*coords)[2] = face_coords[type - 1];
                     /* type - 1: sq=0, tri=1, dia=2 */
                 int x = vert->x + coords[rot][0];
                 int y = vert->y + coords[rot][1];
 
-                const char *c = _get_char(lines, lines_len, x, y);
-                int color = !c? 0: _get_color(*c);
+                const char *c_ptr = _get_char(lines, lines_len, x, y);
+                char c = c_ptr? *c_ptr: ' ';
+                int color = _get_color(c);
                 if(color == -1){
                     fprintf(stderr,
                         "While parsing face at vert %ti (%i, %i): "
@@ -483,11 +480,14 @@ static int _hexpicture_parse_faces(
                         _face_type_msg(type), rot);
                     fprintf(stderr,
                         "Couldn't find face colour, unrecognized char [%c] "
-                        "at position (%i, %i)\n", *c, x, y);
+                        "at position (%i, %i)\n", c, x, y);
                     return 2;
                 }
-                face->color = color;
 
+                hexpicture_face_t *face = &vert->faces[rot];
+                face->rot = rot;
+                face->type = type;
+                face->color = color;
                 faces_len++;
             }
         }
