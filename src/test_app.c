@@ -307,6 +307,19 @@ int test_app_reload_prismelrenderers(test_app_t *app){
     return 0;
 }
 
+int test_app_reload_map(test_app_t *app){
+    int err;
+
+    camera_t *camera = app->camera;
+    hexmap_t *map = camera? camera->map: NULL;
+    if(map){
+        err = hexmap_reload(map);
+        if(err)return err;
+    }
+
+    return 0;
+}
+
 int test_app_mainloop(test_app_t *app){
     /* Mainloop when running "imperatively" as opposed to using callbacks.
     If callbacks are used (e.g. Emscripten), you should figure out some other

@@ -116,6 +116,15 @@ typedef struct hexmap {
     hexgame_location_t spawn;
     vec_t unit;
 
+    bool loaded;
+        /* Whether we have already been fully loaded once, in the sense
+        of _hexmap_load.
+        If this is true, we can call _hexmap_load again, in order
+        to "reload" the map -- so that we can easily test
+        changes we've made to any of the files describing it, etc.
+        The behaviour of _hexmap_load is slightly different when
+        map->loaded is true, e.g. it allows "redefinition" of submaps. */
+
     ARRAY_DECL(struct body*, bodies)
     ARRAY_DECL(hexmap_submap_t*, submaps)
     ARRAY_DECL(hexmap_submap_group_t*, submap_groups)
@@ -133,17 +142,15 @@ typedef struct hexmap {
 
 
 void hexmap_cleanup(hexmap_t *map);
-int hexmap_init(hexmap_t *map, struct hexgame *game, const char *filename,
-    vec_t unit);
+int hexmap_init(hexmap_t *map, struct hexgame *game, const char *filename);
+int hexmap_reload(hexmap_t *map);
 hexgame_location_t *hexmap_get_location(hexmap_t *map, const char *name);
 hexmap_submap_group_t *hexmap_get_submap_group(hexmap_t *map,
     const char *name);
 int hexmap_get_or_add_submap_group(hexmap_t *map, const char *name,
     hexmap_submap_group_t **group_ptr);
-int hexmap_load(hexmap_t *map, struct hexgame *game, const char *filename,
-    vars_t *vars);
-int hexmap_parse(hexmap_t *map, struct hexgame *game, const char *filename,
-    fus_lexer_t *lexer);
+int hexmap_load(hexmap_t *map, vars_t *vars);
+int hexmap_parse(hexmap_t *map, fus_lexer_t *lexer);
 int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
     hexmap_submap_parser_context_t *parent_context,
     hexmap_submap_group_t *group);

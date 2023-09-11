@@ -23,6 +23,9 @@
 #include "geom_lexer_utils.h"
 
 
+static int _hexmap_load(hexmap_t *map, vars_t *vars);
+
+
 /**********
  * HEXMAP *
  **********/
@@ -42,21 +45,20 @@ void hexmap_cleanup(hexmap_t *map){
     vars_cleanup(&map->vars);
 }
 
-int hexmap_init(hexmap_t *map, hexgame_t *game, const char *filename,
-    vec_t unit
-){
+int hexmap_init(hexmap_t *map, hexgame_t *game, const char *filename){
     int err;
 
     prismelrenderer_t *prend = game->prend;
     vecspace_t *space = &hexspace;
 
+    map->loaded = false;
     map->filename = filename;
     map->game = game;
     map->space = space;
     hexgame_location_zero(&map->spawn);
 
     map->prend = prend;
-    vec_cpy(prend->space->dims, map->unit, unit);
+    vec_zero(map->unit);
 
     vars_init_with_props(&map->vars, hexgame_vars_prop_names);
 
@@ -69,6 +71,15 @@ int hexmap_init(hexmap_t *map, hexgame_t *game, const char *filename,
     ARRAY_INIT(map->submap_groups)
     ARRAY_INIT(map->recordings)
     ARRAY_INIT(map->locations)
+    return 0;
+}
+
+int hexmap_reload(hexmap_t *map){
+    int err;
+
+    err = _hexmap_load(map, NULL);
+    if(err)return err;
+
     return 0;
 }
 
@@ -186,12 +197,13 @@ static int hexmap_parse_recording(fus_lexer_t *lexer, prismelrenderer_t *prend,
 }
 
 static int hexmap_load_hexmap_recording(
-    hexmap_t *map, hexmap_submap_t *submap, hexgame_t *game,
+    hexmap_t *map, hexmap_submap_t *submap,
     hexmap_recording_t *recording
 ){
     /* NOTE: submap may be NULL! */
     int err;
     vecspace_t *space = map->space;
+    hexgame_t *game = map->game;
 
     /* Get palmapper */
     palettemapper_t *palmapper = NULL;
@@ -266,41 +278,50 @@ static int hexmap_load_hexmap_recording(
     return 0;
 }
 
-int hexmap_load(hexmap_t *map, hexgame_t *game, const char *filename,
-    vars_t *vars
-){
+static int _hexmap_load(hexmap_t *map, vars_t *vars){
     int err;
     fus_lexer_t lexer;
 
-    fprintf(stderr, "Loading map: %s\n", filename);
+    fprintf(stderr, "Loading map: %s\n", map->filename);
 
-    char *text = load_file(filename);
+    char *text = load_file(map->filename);
     if(text == NULL)return 1;
 
-    err = fus_lexer_init_with_vars(&lexer, text, filename, vars);
+    err = fus_lexer_init_with_vars(&lexer, text, map->filename, vars);
     if(err)return err;
 
-    err = hexmap_parse(map, game, filename, &lexer);
+    err = hexmap_parse(map, &lexer);
+    if(err)return err;
+
+    fus_lexer_cleanup(&lexer);
+
+    free(text);
+    return 0;
+}
+
+int hexmap_load(hexmap_t *map, vars_t *vars){
+    int err;
+
+    err = _hexmap_load(map, vars);
     if(err)return err;
 
     /* Load recordings & actors */
     for(int i = 0; i < map->recordings_len; i++){
         hexmap_recording_t *recording = map->recordings[i];
-        err = hexmap_load_hexmap_recording(map, NULL, game, recording);
+        err = hexmap_load_hexmap_recording(map, NULL, recording);
         if(err)return err;
     }
     for(int j = 0; j < map->submaps_len; j++){
         hexmap_submap_t *submap = map->submaps[j];
         for(int i = 0; i < submap->collmap.recordings_len; i++){
             hexmap_recording_t *recording = submap->collmap.recordings[i];
-            err = hexmap_load_hexmap_recording(map, submap, game, recording);
+            err = hexmap_load_hexmap_recording(map, submap, recording);
             if(err)return err;
         }
     }
 
-    fus_lexer_cleanup(&lexer);
+    map->loaded = true;
 
-    free(text);
     return 0;
 }
 
@@ -315,56 +336,74 @@ static int _hexmap_parse(hexmap_t *map, fus_lexer_t *lexer,
     if(GOT("actors")){
         NEXT
         OPEN
-        while(1){
-            if(GOT(")"))break;
+        if(map->loaded){
+            /* If we're reloading the map, skip parsing this */
+            PARSE_SILENT
+            NEXT
+        }else{
+            while(1){
+                if(GOT(")"))break;
 
-            const char *filename;
-            const char *palmapper_name = NULL;
-            int frame_offset = 0;
-            trf_t trf;
-            vars_t vars;
-            vars_init_with_props(&vars, hexgame_vars_prop_names);
-            vars_t bodyvars;
-            vars_init_with_props(&bodyvars, hexgame_vars_prop_names);
-            bool relative; /* unused here -- only used when parsing submaps */
-            valexpr_t visible_expr;
-            bool visible_not;
-            err = hexmap_parse_recording(lexer, prend,
-                &filename, &palmapper_name, &frame_offset, &trf,
-                &vars, &bodyvars, &relative, &visible_expr, &visible_not);
-            if(err)return err;
+                const char *filename;
+                const char *palmapper_name = NULL;
+                int frame_offset = 0;
+                trf_t trf;
+                vars_t vars;
+                vars_init_with_props(&vars, hexgame_vars_prop_names);
+                vars_t bodyvars;
+                vars_init_with_props(&bodyvars, hexgame_vars_prop_names);
+                bool relative; /* unused here -- only used when parsing submaps */
+                valexpr_t visible_expr;
+                bool visible_not;
+                err = hexmap_parse_recording(lexer, prend,
+                    &filename, &palmapper_name, &frame_offset, &trf,
+                    &vars, &bodyvars, &relative, &visible_expr, &visible_not);
+                if(err)return err;
 
-            ARRAY_PUSH_NEW(hexmap_recording_t*, map->recordings,
-                recording)
-            hexmap_recording_init(recording,
-                HEXMAP_RECORDING_TYPE_ACTOR,
-                filename, palmapper_name, frame_offset);
+                ARRAY_PUSH_NEW(hexmap_recording_t*, map->recordings,
+                    recording)
+                hexmap_recording_init(recording,
+                    HEXMAP_RECORDING_TYPE_ACTOR,
+                    filename, palmapper_name, frame_offset);
 
-            recording->trf = trf;
-            recording->vars = vars;
-            recording->bodyvars = bodyvars;
-            recording->visible_expr = visible_expr;
-            recording->visible_not = visible_not;
+                recording->trf = trf;
+                recording->vars = vars;
+                recording->bodyvars = bodyvars;
+                recording->visible_expr = visible_expr;
+                recording->visible_not = visible_not;
+            }
+            NEXT
         }
-        NEXT
     }
 
     /* parse globalvars */
     if(GOT("globalvars")){
         NEXT
         OPEN
-        err = vars_parse(&map->game->vars, lexer);
-        if(err)return err;
-        CLOSE
+        if(map->loaded){
+            /* If we're reloading the map, skip parsing this */
+            PARSE_SILENT
+            NEXT
+        }else{
+            err = vars_parse(&map->game->vars, lexer);
+            if(err)return err;
+            CLOSE
+        }
     }
 
     /* parse mapvars */
     if(GOT("vars")){
         NEXT
         OPEN
-        err = vars_parse(&map->vars, lexer);
-        if(err)return err;
-        CLOSE
+        if(map->loaded){
+            /* If we're reloading the map, skip parsing this */
+            PARSE_SILENT
+            NEXT
+        }else{
+            err = vars_parse(&map->vars, lexer);
+            if(err)return err;
+            CLOSE
+        }
     }
 
     /* parse submaps */
@@ -437,12 +476,10 @@ static int _hexmap_parse(hexmap_t *map, fus_lexer_t *lexer,
     return 0;
 }
 
-int hexmap_parse(hexmap_t *map, hexgame_t *game, const char *filename,
-    fus_lexer_t *lexer
-){
+int hexmap_parse(hexmap_t *map, fus_lexer_t *lexer){
     INIT
 
-    prismelrenderer_t *prend = game->prend;
+    prismelrenderer_t *prend = map->game->prend;
 
     GET("name")
     OPEN
@@ -454,13 +491,9 @@ int hexmap_parse(hexmap_t *map, hexgame_t *game, const char *filename,
     GET("unit")
     OPEN
     for(int i = 0; i < prend->space->dims; i++){
-        GET_INT(unit[i])
+        GET_INT(map->unit[i])
     }
     CLOSE
-
-    /* init the map */
-    err = hexmap_init(map, game, filename, unit);
-    if(err)return err;
 
     /* parse spawn point */
     const char *spawn_filename = NULL;
@@ -785,6 +818,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
     if(submap_filename != NULL){
         fprintf(stderr, "Loading submap: %s\n", submap_filename);
 
+        /* TODO: if map->loaded, try to get existing submap & modify it... */
         ARRAY_PUSH_NEW(hexmap_submap_t*, map->submaps, submap)
 
         /* WARNING: submap's init does *NOT* init its collmap, so need

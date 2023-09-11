@@ -106,6 +106,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     const char *load_recording_filename,
     const char *save_recording_filename);
 int test_app_reload_prismelrenderers(test_app_t *app);
+int test_app_reload_map(test_app_t *app);
 int test_app_mainloop(test_app_t *app);
 int test_app_mainloop_step(test_app_t *app);
 const char *test_app_get_load_recording_filename(test_app_t *app);

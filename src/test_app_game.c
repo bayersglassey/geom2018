@@ -144,6 +144,8 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
         if(event->key.keysym.sym == SDLK_F4 && app->developer_mode){
             err = test_app_reload_prismelrenderers(app);
             if(err)return err;
+            err = test_app_reload_map(app);
+            if(err)return err;
         }else if(event->key.keysym.sym == SDLK_F5 && app->developer_mode){
             app->hexgame_running = !app->hexgame_running;
         }else if(event->key.keysym.sym == SDLK_PAGEUP && app->developer_mode){

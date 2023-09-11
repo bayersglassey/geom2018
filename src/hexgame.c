@@ -505,7 +505,9 @@ int hexgame_load_map(hexgame_t *game, const char *map_filename,
     }
 
     ARRAY_PUSH_NEW(hexmap_t*, game->maps, map)
-    err = hexmap_load(map, game, map_filename, NULL);
+    err = hexmap_init(map, game, map_filename);
+    if(err)return err;
+    err = hexmap_load(map, NULL);
     if(err)return err;
     *map_ptr = map;
     return 0;

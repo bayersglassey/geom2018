@@ -176,6 +176,38 @@ static int _run_tests(){
         "");
     if(err)return err;
 
+    /* SKIP macros */
+    err = run_test(
+        "$SKIP()",
+        "");
+    if(err)return err;
+    err = run_test(
+        "$SKIP(1 2 3)",
+        "");
+    if(err)return err;
+    err = run_test(
+        "10 $SKIP() 20",
+        "10 20");
+    if(err)return err;
+    err = run_test(
+        "10 $SKIP(1 2 3) 20",
+        "10 20");
+    if(err)return err;
+    err = run_test(
+        "10 $SKIP((1) (2) (3)) 20",
+        "10 20");
+    if(err)return err;
+    err = run_test(
+        "vars: $SKIP:\n"
+        "    : \"hello\"\n"
+        "    : \"world\"\n"
+        "numbers: $SKIP:\n"
+        "    : 1\n"
+        "    : 2\n"
+        ,
+        "vars() numbers()");
+    if(err)return err;
+
     return 0;
 }
 
