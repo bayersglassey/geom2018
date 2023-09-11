@@ -30,8 +30,12 @@ vars:
     nosave "start3b_num_coin_d": 2
     nosave "start3b_num_coin_e": 4
 
-    "start4_solved": F
-    nosave "start4_num_coin": 20
+    nosave "start4a_num_coin": 4
+    nosave "start4b_num_coin": 4
+    nosave "start4c_num_coin": 4
+    "start4a_solved": F
+    "start4b_solved": F
+    "start4c_solved": F
 
 submaps:
     :
@@ -78,6 +82,8 @@ submaps:
                             visible: not mapvar("coin_e")
                             pos: (0 5)
             "start3.1":
+                recs:
+                    : "data/maps/tutorial2/recs/start3_crawler.fus"
                 submaps:
                     :
                         bg
@@ -107,6 +113,8 @@ submaps:
                                 pos: (-15 -19)
             "start3.2":
                 pos: (-13 -32)
+                recs:
+                    : "data/maps/tutorial2/recs/start3.2b_crawler.fus"
                 submaps:
                     :
                         bg
@@ -123,17 +131,93 @@ submaps:
                         camera: (-3 -8)
                         recs:
                             : "data/maps/tutorial2/recs/coin_beast_waiter.fus"
+            "start3.2_blockers":
+                pos: eval: (-13 -32) + (-10 -50)
+                submaps:
+                    :
+                        file: "data/maps/tutorial2/start2_blocker.fus"
+                        pos: (0 0)
+                    :
+                        file: "data/maps/tutorial2/start2_blocker.fus"
+                        pos: (5 0)
             "start4":
-                pos: (-13 -32)
+                pos: eval: (-13 -32) + (13 -9) + (-1 -12) + (-29 -19)
+                camera: (-8 6)
                 submaps:
                     :
                         bg
                         file: "data/maps/tutorial2/start4_bg.fus"
-                        pos: eval: (13 -9) + (-1 -12) + (-29 -19)
                         tileset: "data/tileset1_bg.fus"
                     :
                         file: "data/maps/tutorial2/start4.fus"
-                        pos: eval: (13 -9) + (-1 -12) + (-29 -19)
-                        camera: (-8 6)
-                        recs:
-                            : "data/maps/tutorial2/recs/coin_beast_start4.fus"
+                        actors:
+                            : (0 0) 0 n "data/maps/tutorial2/actors/coin_beast_start4.fus"
+                    :
+                        file: "data/maps/tutorial2/start4_blocker.fus"
+                        visible: not mapvar("start4a_solved")
+                        pos: (-3 -2)
+                        rot: 3
+                    :
+                        file: "data/maps/tutorial2/start4_blocker_line5.fus"
+                        visible: not mapvar("start4b_solved")
+                        pos: (-13 2)
+                        rot: 1
+                    :
+                        file: "data/maps/tutorial2/start4_blocker.fus"
+                        visible: not mapvar("start4b_solved")
+                        pos: (-17 5)
+                        rot: 1
+                    :
+                        file: "data/maps/tutorial2/start4_blocker2.fus"
+                        visible: not mapvar("start4c_solved")
+                        pos: (-10 -2)
+            "start4_blockers":
+                pos: eval: (-13 -32) + (13 -9) + (-1 -12) + (-29 -19) + (10 -15)
+                submaps:
+                    :
+                        file: "data/maps/tutorial2/start2_blocker.fus"
+                        pos: (-40 0)
+                    :
+                        file: "data/maps/tutorial2/start2_blocker.fus"
+                        pos: (-35 0)
+                    :
+                        file: "data/maps/tutorial2/start2_blocker.fus"
+                        pos: (-30 0)
+                    :
+                        file: "data/maps/tutorial2/start2_blocker.fus"
+                        pos: (-25 0)
+                    :
+                        file: "data/maps/tutorial2/start2_blocker.fus"
+                        pos: (-20 0)
+                    :
+                        file: "data/maps/tutorial2/start2_blocker.fus"
+                        pos: (-15 0)
+            "start4.2":
+                pos: eval: (-13 -32) + (13 -9) + (-1 -12) + (-29 -19) + (-20 -45)
+                camera: follow
+                mapper: ("double")
+                submaps:
+                    :
+                        bg
+                        file: "data/maps/tutorial2/start4_bg.fus"
+                        rot: 0
+                        tileset: "data/tileset1_bg.fus"
+                    :
+                        bg
+                        file: "data/maps/tutorial2/start4_bg.fus"
+                        rot: 2
+                        tileset: "data/tileset1_bg.fus"
+                    :
+                        bg
+                        file: "data/maps/tutorial2/start4_bg.fus"
+                        rot: 4
+                        tileset: "data/tileset1_bg.fus"
+                    :
+                        file: "data/maps/tutorial2/start4.2.fus"
+                        rot: 0
+                    :
+                        file: "data/maps/tutorial2/start4.2.fus"
+                        rot: 2
+                    :
+                        file: "data/maps/tutorial2/start4.2.fus"
+                        rot: 4

@@ -1,0 +1,4 @@
+state "start":
+    if: expr: mapvar("start4b_solved")
+    then:
+        play: "data/maps/tutorial2/recs/coin_beast_start4.fus"
