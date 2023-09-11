@@ -13,6 +13,7 @@ faces:
     "0": "map_face0"
     "1": "map_face1"
     "2": "map_face2"
+    "3": "map_face3"
     "S": "map_savepoint"
     "D": "map_door"
     "w": frame_offset(1) "map_water"
