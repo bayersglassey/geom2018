@@ -1,0 +1,32 @@
+
+$SET_INT MOVE_DELAY 2
+
+state "stand":
+    rgraph: $PREFIX ANIM_NS "stand"
+
+    if: key: isdown f
+    then:
+        move: 1 0
+        goto: "stand"
+        delay: $GET_INT MOVE_DELAY
+
+    if: key: isdown b
+    then:
+        move: 1 0
+        turn
+        goto: "stand"
+        delay: $GET_INT MOVE_DELAY
+
+    if: key: isdown u
+    then:
+        move: 1 0
+        rot: 1
+        goto: "stand"
+        delay: $GET_INT MOVE_DELAY
+
+    if: key: isdown d
+    then:
+        rot: -1
+        move: -1 0
+        goto: "stand"
+        delay: $GET_INT MOVE_DELAY

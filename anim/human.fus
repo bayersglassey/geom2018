@@ -1,0 +1,3 @@
+
+$SET_STR ANIM_NS human_
+import "anim/_human.fus"
