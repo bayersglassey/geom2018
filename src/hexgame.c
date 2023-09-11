@@ -40,6 +40,7 @@ int camera_init(camera_t *camera, hexgame_t *game, hexmap_t *map,
 
     memset(camera->colors, 0, sizeof(camera->colors));
     camera->colors_fade = 0;
+    camera->max_colors_fade = 250; /* Slow fade-in */
 
     camera_set(camera, (vec_t){0}, 0);
     return 0;
@@ -60,6 +61,11 @@ void camera_set_body(camera_t *camera, body_t *body){
     camera->mapper = NULL;
 }
 
+void camera_start_fade(camera_t *camera, int max_colors_fade){
+    camera->colors_fade = 0;
+    camera->max_colors_fade = max_colors_fade;
+}
+
 void camera_colors_flash(camera_t *camera, Uint8 r, Uint8 g, Uint8 b,
     int percent
 ){
@@ -67,7 +73,7 @@ void camera_colors_flash(camera_t *camera, Uint8 r, Uint8 g, Uint8 b,
         SDL_Color *c = &camera->colors[i];
         interpolate_color(c, r, g, b, percent, 100);
     }
-    camera->colors_fade = 0;
+    camera_start_fade(camera, 10);
 }
 
 void camera_colors_flash_white(camera_t *camera, int percent){
@@ -77,9 +83,9 @@ void camera_colors_flash_white(camera_t *camera, int percent){
 static int camera_colors_step(camera_t *camera, palette_t *palette){
     int err;
     err = palette_update_colors(palette, camera->colors,
-        camera->colors_fade, HEXGAME_MAX_COLORS_FADE);
+        camera->colors_fade, camera->max_colors_fade);
     if(err)return err;
-    if(camera->colors_fade < HEXGAME_MAX_COLORS_FADE)camera->colors_fade++;
+    if(camera->colors_fade < camera->max_colors_fade)camera->colors_fade++;
     return 0;
 }
 
@@ -108,7 +114,7 @@ int camera_step(camera_t *camera){
 
             if(game->animate_palettes && !camera->should_reset){
                 /* Smoothly transition between old & new palettes */
-                camera->colors_fade = 0;
+                camera_start_fade(camera, 10);
             }
         }
     }

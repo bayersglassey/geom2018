@@ -356,7 +356,7 @@ typedef struct camera {
 
     SDL_Color colors[256];
     int colors_fade;
-    #define HEXGAME_MAX_COLORS_FADE 10
+    int max_colors_fade;
 
     vec_t pos;
         /* target pos within hexmap, to which we are scrolling */
@@ -383,6 +383,7 @@ int camera_init(camera_t *camera, struct hexgame *game, struct hexmap *map,
     body_t *body);
 void camera_set(camera_t *camera, vec_t pos, rot_t rot);
 void camera_set_body(camera_t *camera, body_t *body);
+void camera_start_fade(camera_t *camera, int max_colors_fade);
 void camera_colors_flash(camera_t *camera, Uint8 r, Uint8 g, Uint8 b,
     int percent);
 void camera_colors_flash_white(camera_t *camera, int percent);
