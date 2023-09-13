@@ -1,6 +1,6 @@
 name: "tutorial3"
 unit: 3 2 0 -1
-spawn: "data/maps/tutorial3/switches.fus"
+spawn: "data/maps/tutorial3/switches2.fus"
 palette: "data/pal1.fus"
 tileset: "data/tileset1.fus"
 vars:
@@ -21,29 +21,29 @@ vars:
 
 submaps:
     "switches":
-        file: "data/maps/tutorial3/switches.fus"
+        file: "data/maps/tutorial3/switches2.fus"
         pos: (-40 0)
         camera: (-8 -5)
         mapper: ("triple")
         recs:
-            : "data/maps/tutorial3/recs/switches_spider000.fus"
+            : "data/maps/tutorial3/recs/switches2_spider000.fus"
         submaps:
             :
-                file: "data/maps/tutorial3/switches_blocker_a.fus"
+                file: "data/maps/tutorial3/switches2_blocker_a.fus"
                 visible: not mapvar("switches_a")
                 pos: (-8 -9)
                 rot: 1
             :
-                file: "data/maps/tutorial3/switches_blocker_b.fus"
+                file: "data/maps/tutorial3/switches2_blocker_b.fus"
                 visible: not mapvar("switches_b")
                 pos: (-5 -6)
                 rot: 1
             :
-                file: "data/maps/tutorial3/switches_blocker_a.fus"
+                file: "data/maps/tutorial3/switches2_blocker_a.fus"
                 visible: mapvar("switches_a")
                 pos: (-18 -9)
             :
-                file: "data/maps/tutorial3/switches_blocker_b.fus"
+                file: "data/maps/tutorial3/switches2_blocker_b.fus"
                 visible: mapvar("switches_b")
                 pos: (-16 -1)
                 rot: 5
