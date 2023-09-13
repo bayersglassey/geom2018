@@ -6,7 +6,6 @@ parts:
     "D": recording "data/recs/door.fus"
         vars:
             "map": "data/maps/tutorial3/worldmap.fus"
-            "location": "floaty_start"
 collmap:
     ;;
     ;;    .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .

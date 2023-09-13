@@ -1,12 +1,12 @@
 spawn: (2 2) 2 n
 parts:
-    "l": location "switches"
+    "l": location "switches2"
     "a": recording "data/recs/switch.fus"
         vars:
-            "key": "switches_a"
+            "key": "switches2_a"
     "b": recording "data/recs/switch.fus"
         vars:
-            "key": "switches_b"
+            "key": "switches2_b"
     "D": recording "data/recs/door.fus"
         vars:
             "location": "floaty_start"
