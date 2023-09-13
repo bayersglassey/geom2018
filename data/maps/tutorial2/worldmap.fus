@@ -136,10 +136,19 @@ submaps:
                 submaps:
                     :
                         file: "data/maps/tutorial2/start2_blocker.fus"
+                        pos: (-5 0)
+                    :
+                        file: "data/maps/tutorial2/start2_blocker.fus"
                         pos: (0 0)
                     :
                         file: "data/maps/tutorial2/start2_blocker.fus"
                         pos: (5 0)
+                    :
+                        file: "data/maps/tutorial2/start2_blocker.fus"
+                        pos: (10 0)
+                    :
+                        file: "data/maps/tutorial2/start2_blocker.fus"
+                        pos: (15 0)
             "start4":
                 pos: eval: (-13 -32) + (13 -9) + (-1 -12) + (-29 -19)
                 camera: (-8 6)
