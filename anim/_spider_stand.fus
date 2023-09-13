@@ -46,3 +46,13 @@ state "step_up":
     import "anim/_walker_jump.state.fus"
 
     if() then: goto: "stand"
+
+state "step_backwards":
+    rgraph: $PREFIX NS "step_backwards"
+    hitbox: collmap("stand")
+
+    # Crawling, turning, jumping
+    import "anim/_walker_stand.state.fus"
+    import "anim/_walker_jump.state.fus"
+
+    if() then: goto: "stand"

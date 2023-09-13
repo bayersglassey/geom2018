@@ -33,5 +33,112 @@ state "jump":
     rgraph: $PREFIX NS "jump"
     hitbox: collmap("stand")
 
+    # Flip around so you're jumping backwards
+    if:
+        key: wasdown b
+        key: not wasdown f
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        move: 1 0
+        goto immediate: "start_jump_backwards"
+
     # Landing, jumping, crashing
     import "anim/_walker_jumping.state.fus"
+
+state "start_jump_backwards":
+
+    if:
+        coll: water any yes collmap("stand")
+    then:
+        turn
+        goto delay: "swim_jump"
+
+    if() then:
+        goto delay: "jump_backwards"
+
+state "jump_backwards":
+    # NOTE: the only `goto: "jump_backwards"` is in "start_jump_backwards",
+    # which checks whether we're in water, and does `goto: jump_backwards`
+    # or `goto: "swim_jump"` accordingly.
+    # Therefore, if we're in "jump_backwards", then we can safely assume we're not in
+    # water without checking.
+
+    unsafe
+    rgraph: $PREFIX NS "jump_backwards"
+    hitbox: collmap("stand")
+
+    # Flip around so you're jumping forwards again
+    if:
+        key: wasdown f
+        key: not wasdown b
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        move: 1 0
+        goto immediate: "start_jump"
+
+    # Land
+    if:
+        any:
+            key: not isdown b
+            coll: any yes
+                ;;       \*/*
+                ;;        + -
+                ;;       /*\*
+                ;; ( )
+        any:
+            all:
+                expr: myvar("is_stickyspider")
+                coll: all yes
+                    ;; (+)  +
+            all:
+                not: expr: myvar("is_stickyspider")
+                coll: all yes
+                    ;; (+)- +
+    then:
+        move: 1 0
+        turn
+        goto delay: "step"
+
+    # Swing around a vertex
+    if:
+        coll: all yes
+            ;; (+)
+        coll: all no
+            ;;       /*
+            ;; ( )- + -
+            ;;    */*\*
+    then:
+        rot: -1
+        goto delay: "swing_backwards"
+
+    # Continue jump
+    if:
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        move: 1 0
+        goto immediate: "start_jump_backwards"
+
+    # Crash
+    if() then:
+        goto delay: "mostly_dead"
+
+state "swing_backwards":
+    unsafe
+    rgraph: $PREFIX NS "swing_backwards"
+    hitbox: collmap("stand")
+
+    if:
+    then:
+        goto immediate: "start_jump_backwards"
