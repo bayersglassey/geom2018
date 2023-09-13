@@ -1,0 +1,37 @@
+
+state "start_jump":
+
+    if:
+        expr: myvar("is_flierspider")
+        key: wasdown x
+        coll: all no
+            ;;       \*/*
+            ;;        + -
+            ;;       /*\*
+            ;; ( )
+    then:
+        goto: "flier_fly"
+        move: 2 1
+        delay: 2
+
+    if:
+        coll: water any yes collmap("stand")
+    then:
+        goto delay: "swim_jump"
+
+    if() then:
+        goto delay: "jump"
+
+state "jump":
+    # NOTE: the only `goto: "jump"` is in "start_jump", which checks whether
+    # we're in water, and does `goto: jump` or `goto: "swim_jump"`
+    # accordingly.
+    # Therefore, if we're in "jump", then we can safely assume we're not in
+    # water without checking.
+
+    unsafe
+    rgraph: $PREFIX NS "jump"
+    hitbox: collmap("stand")
+
+    # Landing, jumping, crashing
+    import "anim/_walker_jumping.state.fus"

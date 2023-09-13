@@ -1,15 +1,6 @@
 
-# Expected variables:
-# STATE_STAND (str)
-# STATE_STEP (str)
-# STATE_STEP_UP (str)
-# STATE_STEP_DOWN (str)
-# STATE_START_JUMP (str)
-# STATE_JUMP (str)
-
-
-state $GET_STR STATE_STAND:
-    rgraph: $PREFIX NS $GET_STR STATE_STAND
+state "stand":
+    rgraph: $PREFIX NS "stand"
     hitbox: collmap("stand")
 
     # Crawling, turning
@@ -19,45 +10,8 @@ state $GET_STR STATE_STAND:
     import "anim/_walker_jump.state.fus"
     import "anim/_walker_step.state.fus"
 
-state $GET_STR STATE_START_JUMP:
-
-    if:
-        expr: myvar("is_flierspider")
-        key: wasdown x
-        coll: all no
-            ;;       \*/*
-            ;;        + -
-            ;;       /*\*
-            ;; ( )
-    then:
-        goto: "flier_fly"
-        move: 2 1
-        delay: 2
-
-    if:
-        coll: water any yes collmap("stand")
-    then:
-        goto delay: "swim_jump"
-
-    if() then:
-        goto delay: $GET_STR STATE_JUMP
-
-state $GET_STR STATE_JUMP:
-    # NOTE: the only "goto: "jump"" is in "start_jump", which checks whether
-    # we're in water, and does "goto: jump" or "goto: "swim_jump""
-    # accordingly.
-    # Therefore, if we're in "jump", then we can safely assume we're not in
-    # water without checking.
-
-    unsafe
-    rgraph: $PREFIX NS $GET_STR STATE_JUMP
-    hitbox: collmap("stand")
-
-    # Landing, jumping, crashing
-    import "anim/_walker_jumping.state.fus"
-
-state $GET_STR STATE_STEP_DOWN:
-    rgraph: $PREFIX NS $GET_STR STATE_STEP
+state "step_down":
+    rgraph: $PREFIX NS "step"
     hitbox:
         ;;   .   .   .
         ;;   *\*/*\*/*
@@ -69,14 +23,26 @@ state $GET_STR STATE_STEP_DOWN:
     import "anim/_walker_stand.state.fus"
     import "anim/_walker_jump.state.fus"
 
-    if() then: goto: $GET_STR STATE_STAND
+    if() then: goto: "stand"
 
-state $GET_STR STATE_STEP:
-    rgraph: $PREFIX NS $GET_STR STATE_STEP
+state "step":
+    rgraph: $PREFIX NS "step"
     hitbox: collmap("stand")
 
     # Crawling, turning, jumping
     import "anim/_walker_stand.state.fus"
     import "anim/_walker_jump.state.fus"
 
-    if() then: goto: $GET_STR STATE_STAND
+    if() then: goto: "stand"
+
+state "step_up":
+    # NOTE: for spider, states "step" and "step_up" are identical.
+
+    rgraph: $PREFIX NS "step"
+    hitbox: collmap("stand")
+
+    # Crawling, turning, jumping
+    import "anim/_walker_stand.state.fus"
+    import "anim/_walker_jump.state.fus"
+
+    if() then: goto: "stand"

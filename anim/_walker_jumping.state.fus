@@ -1,10 +1,4 @@
 
-# Expected variables:
-# STATE_STEP (str)
-# STATE_STEP_UP (str)
-# STATE_START_JUMP (str)
-
-
 # Land up
 if:
     any:
@@ -23,7 +17,7 @@ if:
 then:
     move: 1 0
     rot: 1
-    goto delay: $GET_STR STATE_STEP_UP
+    goto delay: "step_up"
 
 # Forced jump up
 if:
@@ -36,7 +30,7 @@ if:
 then:
     move: 1 0
     rot: 1
-    goto immediate: $GET_STR STATE_START_JUMP
+    goto immediate: "start_jump"
 
 # Land
 if:
@@ -57,7 +51,7 @@ if:
                 ;; ( )  + - +
 then:
     move: 1 0
-    goto delay: $GET_STR STATE_STEP
+    goto delay: "step"
 
 # Continue jump
 if:
@@ -68,7 +62,7 @@ if:
         ;; ( )
 then:
     move: 1 0
-    goto immediate: $GET_STR STATE_START_JUMP
+    goto immediate: "start_jump"
 
 # Crash
 if() then:

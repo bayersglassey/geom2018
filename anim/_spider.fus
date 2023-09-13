@@ -14,13 +14,6 @@ $SET_BOOL SPIDER
 # Should match the delays in anim/_roller.fus
 $SET_INT ROLLER_STAND_DELAY 1
 
-$SET_STR STATE_STAND stand
-$SET_STR STATE_STEP step
-$SET_STR STATE_STEP_UP step
-$SET_STR STATE_STEP_DOWN step_down
-$SET_STR STATE_START_JUMP start_jump
-$SET_STR STATE_JUMP jump
-
 
 vars:
     "is_rollerspider": F
@@ -192,6 +185,7 @@ collmap "crawl":
 
 
 import "anim/_spider_stand.fus"
+import "anim/_spider_jump.fus"
 
 
 state "look_up":
@@ -268,7 +262,7 @@ state "turn":
             ;; ( )
     then:
         move: 1 0
-        goto immediate: $GET_STR STATE_START_JUMP
+        goto immediate: "start_jump"
 
     if() then: goto immediate: "step"
 

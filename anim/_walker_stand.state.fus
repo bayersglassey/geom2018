@@ -20,7 +20,7 @@ if:
                 ;;  (+)- +
 then:
     move: 1 0
-    goto immediate: $GET_STR STATE_START_JUMP
+    goto immediate: "start_jump"
 
 # Spit
 $IF SPIDER:

@@ -1,11 +1,4 @@
 
-# Expected variables:
-# STATE_STEP (str)
-# STATE_STEP_UP (str)
-# STATE_STEP_DOWN (str)
-# STATE_START_JUMP (str)
-
-
 # Step up
 if:
     key: wasdown f
@@ -25,7 +18,7 @@ if:
 then:
     move: 1 0
     rot: 1
-    goto delay: $GET_STR STATE_STEP_UP
+    goto delay: "step_up"
 
 # Step
 if:
@@ -46,7 +39,7 @@ if:
         ;; ( )
 then:
     move: 1 0
-    goto delay: $GET_STR STATE_STEP
+    goto delay: "step"
 
 # Step down
 if:
@@ -73,7 +66,7 @@ if:
 then:
     move: 1 0
     rot: -1
-    goto delay: $GET_STR STATE_STEP_DOWN
+    goto delay: "step_down"
 
 # Forced jump up
 if:
@@ -85,7 +78,7 @@ if:
 then:
     move: 1 0
     rot: 1
-    goto immediate: $GET_STR STATE_START_JUMP
+    goto immediate: "start_jump"
 
 # Forced jump
 if:
@@ -97,4 +90,4 @@ if:
         ;; ( )
 then:
     move: 1 0
-    goto immediate: $GET_STR STATE_START_JUMP
+    goto immediate: "start_jump"
