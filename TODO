@@ -816,8 +816,6 @@ you get stuck there in your shielding animation forever!
 Jan 1, 2023:
 ------------
 
-Don't bring up minimap if Alt is held down.
-
 There should be an eye which comes out as some kind of eye-worm. O_o
 
 There should be eyes which grab death rollers and hold them for you.
@@ -835,3 +833,30 @@ All cached bitmaps should be forgotten whenever the map changes!
 ...detecting when the map changes would have to be done, like, with a
 game->cur_map or something... errr camera->cur_map?.. hmmm anyway.
 
+
+Sep 10, 2023:
+-------------
+
+Owls & mice.
+Owls are huge; mice are same width as spider (in the sense of tunnel width...
+but they may be longer than spider).
+
+
+OH DEAR!
+Apparently a spider can jump from the left here, and land with just his
+front foot on the vertex indicated with "^"!
+
+    ->     *
+         + - +
+         ^
+
+
+Sep 13, 2023:
+-------------
+
+It's now possible (with "visible") to stand on some ground, jump off it,
+then have the gound disappear; so that if you hit something ("maybe_dead"),
+and then press "u" to go back onto the ground, you will appear in midair
+and repeatedly jump to your doom.
+Maybe that's okay?.. because you can still press "1".
+Or we could try to detect it, and have "u" do the same thing as "1".
