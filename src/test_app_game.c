@@ -100,6 +100,14 @@ int test_app_render_game(test_app_t *app){
         if(err)return err;
     }
 
+    hexmap_submap_t *submap = app->camera->cur_submap;
+
+    if(submap && app->have_audio){
+        SDL_LockAudioDevice(app->audio_id);
+        hexgame_audio_data_set_callback(&game->audio_data, submap->song);
+        SDL_UnlockAudioDevice(app->audio_id);
+    }
+
     if(app->show_menu){
         test_app_menu_render(&app->menu);
     }else if(game->show_minimap){
@@ -112,21 +120,18 @@ int test_app_render_game(test_app_t *app){
         err = _show_dead_msgs(app, &showed_dead_msg);
         if(err)return err;
 
-        if(!showed_dead_msg){
+        if(!showed_dead_msg && submap){
             /* Show submap texts */
-            hexmap_submap_t *submap = app->camera->cur_submap;
-            if(submap){
-                for(int i = 0; i < submap->text_exprs_len; i++){
-                    valexpr_t *text_expr = submap->text_exprs[i];
-                    err = _print_text_expr(app, submap, text_expr);
-                    if(err)return err;
-                }
-                hexcollmap_t *collmap = &submap->collmap;
-                for(int i = 0; i < collmap->text_exprs_len; i++){
-                    valexpr_t *text_expr = collmap->text_exprs[i];
-                    err = _print_text_expr(app, submap, text_expr);
-                    if(err)return err;
-                }
+            for(int i = 0; i < submap->text_exprs_len; i++){
+                valexpr_t *text_expr = submap->text_exprs[i];
+                err = _print_text_expr(app, submap, text_expr);
+                if(err)return err;
+            }
+            hexcollmap_t *collmap = &submap->collmap;
+            for(int i = 0; i < collmap->text_exprs_len; i++){
+                valexpr_t *text_expr = collmap->text_exprs[i];
+                err = _print_text_expr(app, submap, text_expr);
+                if(err)return err;
             }
         }
     }

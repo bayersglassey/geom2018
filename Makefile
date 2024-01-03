@@ -7,7 +7,7 @@ LIBS += $(shell sdl2-config --libs) -lm
 
 PROGS = \
  bin/lexertool bin/collmaptool bin/hexpicturetest bin/sdltest bin/directorytest \
- bin/prendtool bin/demo bin/minieditor bin/geomtool bin/animtool
+ bin/prendtool bin/demo bin/minieditor bin/geomtool bin/animtool bin/audiotool
 
 TESTS = \
  bin/lexertest bin/frozenstringtest bin/geomtest bin/stringstoretest bin/varstest
@@ -28,7 +28,7 @@ SDL_OFILES = \
  src/sdlfont.o src/geomfont.o src/minieditor.o \
  src/hexmap.o src/hexmap_submap_create_rgraph.o \
  src/hexgame.o src/hexgame_body.o src/hexgame_player.o src/hexgame_recording.o \
- src/hexgame_state.o src/hexgame_actor.o \
+ src/hexgame_state.o src/hexgame_actor.o src/hexgame_audio.o \
  src/hexgame_savelocation.o src/save_slots.o
 
 TEST_APP_OFILES = \
@@ -105,5 +105,9 @@ bin/geomtool: src/main/geomtool.o $(OFILES)
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 bin/animtool: src/main/animtool.o $(OFILES) $(SDL_OFILES)
+	mkdir -p bin
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
+
+bin/audiotool: src/main/audiotool.o $(OFILES) $(SDL_OFILES)
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)

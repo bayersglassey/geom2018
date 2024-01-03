@@ -9,6 +9,7 @@
 #include "hexgame_savelocation.h"
 #include "prismelrenderer.h"
 #include "hexcollmap.h"
+#include "hexgame_audio.h"
 
 
 /* BIG OL' HACK: If any "tile" rgraphs are animated, we need the
@@ -57,6 +58,8 @@ typedef struct hexmap_door {
 
 typedef struct hexmap_submap_group {
     const char *name;
+        /* Name is never NULL; there is one group per map with the name "",
+        which is the "root" group (to which submaps belong by default) */
 
     bool visited;
         /* Controls whether this group's submaps show up on minimap */
@@ -74,6 +77,9 @@ typedef struct hexmap_submap {
     bool visible_not; /* Whether to invert the result of visible_expr */
     hexcollmap_t collmap;
     ARRAY_DECL(hexmap_door_t*, doors)
+
+    hexgame_audio_callback_t *song;
+    vars_t song_vars;
 
     /* Weakrefs */
     hexmap_submap_group_t *group;
@@ -94,6 +100,9 @@ typedef struct hexmap_submap_parser_context {
 
     valexpr_t visible_expr;
     bool visible_not;
+
+    hexgame_audio_callback_t *song;
+    vars_t song_vars;
 
     ARRAY_DECL(struct valexpr*, text_exprs)
 

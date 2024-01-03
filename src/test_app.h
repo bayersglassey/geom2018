@@ -88,6 +88,9 @@ typedef struct test_app {
     bool show_menu;
     int save_slot;
 
+    bool have_audio;
+    SDL_AudioDeviceID audio_id;
+
     char _recording_filename[200]; /* HACKY :'( */
     const char *load_recording_filename;
     const char *save_recording_filename;
@@ -104,7 +107,8 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     bool minimap_alt, bool cache_bitmaps, bool animate_palettes,
     int n_players, int save_slot,
     const char *load_recording_filename,
-    const char *save_recording_filename);
+    const char *save_recording_filename,
+    bool have_audio);
 int test_app_reload_prismelrenderers(test_app_t *app);
 int test_app_reload_map(test_app_t *app);
 int test_app_mainloop(test_app_t *app);

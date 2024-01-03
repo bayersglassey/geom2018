@@ -860,3 +860,55 @@ and then press "u" to go back onto the ground, you will appear in midair
 and repeatedly jump to your doom.
 Maybe that's okay?.. because you can still press "1".
 Or we could try to detect it, and have "u" do the same thing as "1".
+
+
+Jan 2, 2024:
+------------
+
+MUSIC!!!!!!!!!!!!!
+
+Bytebeats. Hell yeah.
+
+The way audio works is:
+* When initializing SDL, we hand SDL_OpenAudioDevice "desired" and "actual" SDL_AudioSpec structs.
+    * Our desired one will be 1 channel, 8000 Hz, AUDIO_U8, etc.
+    * The desired spec includes a callback function and some "user data" for it.
+      Our user data should be some stuff which depends on current camera?
+      The song (the bytebeat program) is set by... the map? But we pass it the submap, and
+      submaps can turn on or off different parts of the map's music. Somehow.
+      (I guess the submap .fus files can have "audio vars"?.. which are set per submap, and
+      inherited like text etc?..)
+      Anyway the userdata includes a snapshot of current map's vars, the submap "audio vars",
+      and anything else which might be useful.
+      (Can we include, like, distance from dangerous things?.. how would we detect what's
+      dangerous or not?.. anything with a hitbox?.. naahhhh...)
+      (Can we have a noise for jumping?.. maybe anims can have "audio vars"?.. but jumping
+      is more of an event -- can we have "audio events"?.. what would those look like, a
+      queue?.. or maybe just booleans, when each boolean is set by the anim, at the end of
+      the hexgame's step function it notifies audio callback somehow, then resets the boolean
+      to false...)
+      The audio callback runs in a different thread, or something; so the userdata shouldn't
+      include live pointers to game data. It should have copies/snapshots of stuff.
+      And we should use a SDL_LockAudioDevice/SDL_UnlockAudioDevice pair while updating
+      the userdata (which can happen each frame).
+
+How many different sample rates do we need to support?
+Looking at the dropdown on https://dollchan.net/bytebeat, there are preset entries for:
+* 8000
+* 11025
+* 16000
+* 22050
+* 32000
+* 44100
+* 48000
+
+Soooo... we could try and do fancy math for all that...
+Or we could try to use SDL_AudioStream to do conversion for us?..
+See: https://wiki.libsdl.org/SDL2/Tutorials-AudioStream
+
+Or we could just 100% standardize on 8000 Hz for now. Wheee!
+
+
+=== TODO: vars_get_or_add is using strdup to copy the key.
+So, vars own their keys?!?! Preposterous!
+Give them a stringstore for goodness' sake.

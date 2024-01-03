@@ -398,6 +398,7 @@ int camera_render(camera_t *camera,
 void hexgame_cleanup(hexgame_t *game){
     tileset_cleanup(&game->minimap_tileset);
     vars_cleanup(&game->vars);
+    hexgame_audio_data_cleanup(&game->audio_data);
     ARRAY_FREE_PTR(char*, game->worldmaps, (void))
     ARRAY_FREE_PTR(hexmap_t*, game->maps, hexmap_cleanup)
     ARRAY_FREE_PTR(stateset_t*, game->statesets, stateset_cleanup)
@@ -445,7 +446,8 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     prismelrenderer_t *minimap_prend,
     const char *minimap_tileset_filename,
     const char *map_filename, hexmap_t **map_ptr,
-    hexgame_save_callback_t *save_callback, void *save_callback_data
+    hexgame_save_callback_t *save_callback, void *save_callback_data,
+    bool have_audio
 ){
     int err;
 
@@ -460,6 +462,9 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
 
     game->save_callback = save_callback;
     game->save_callback_data = save_callback_data;
+
+    game->have_audio = have_audio;
+    hexgame_audio_data_init(&game->audio_data);
 
     game->animate_palettes = true;
 

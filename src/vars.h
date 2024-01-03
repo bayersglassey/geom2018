@@ -84,8 +84,10 @@ typedef struct vars {
         var->props bit array.
         (So, for each var, each prop can be either active or not.) */
 
+    /* Callback (called whenever any var in vars is modified): */
     vars_callback_t *callback;
     void *callback_data;
+
 } vars_t;
 
 

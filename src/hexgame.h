@@ -13,6 +13,7 @@
 #include "vec4.h"
 #include "array.h"
 #include "hexgame_location.h"
+#include "hexgame_audio.h"
 
 
 #define MAX_FRAME_I 554400
@@ -425,6 +426,9 @@ typedef struct hexgame {
 
     bool animate_palettes;
 
+    bool have_audio;
+    hexgame_audio_data_t audio_data;
+
     /* Weakrefs: */
     prismelrenderer_t *prend;
     prismelrenderer_t *minimap_prend;
@@ -441,7 +445,8 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
     prismelrenderer_t *minimap_prend,
     const char *minimap_tileset_filename,
     const char *map_filename, hexmap_t **map_ptr,
-    hexgame_save_callback_t *save_callback, void *save_callback_data);
+    hexgame_save_callback_t *save_callback, void *save_callback_data,
+    bool have_audio);
 int hexgame_load_map(hexgame_t *game, const char *map_filename,
     hexmap_t **map_ptr);
 int hexgame_get_or_load_map(hexgame_t *game, const char *map_filename,

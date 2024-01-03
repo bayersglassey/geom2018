@@ -131,18 +131,21 @@ void print_help(FILE *file){
         "                         (You can also use env var %s)\n"
         "   -d   --delay     N    Delay goal (in milliseconds) (default: %i)\n"
         "   -p   --players   N    Number of players (default: %i)\n"
-        "   -l   --load_game SLOT Load saved game immediately on startup\n"
-        "   -n   --new_game  SLOT Start a new game (delete save slot and start)\n"
-        "        --minimap_alt    Use alternate minimap\n"
-        "        --dont_cache_bitmaps\n"
+        "   -l   --load-game SLOT Load saved game immediately on startup\n"
+        "   -n   --new-game  SLOT Start a new game (delete save slot and start)\n"
+        "        --minimap-alt    Use alternate minimap\n"
+        "        --dont-cache-bitmaps\n"
         "                         ...low-level hokey-pokery, should probably get rid of this option\n"
-        "        --dont_animate_palettes\n"
+        "        --dont-animate-palettes\n"
         "                         Don't animate the colour palettes; improves the quality of\n"
         "                         gameplay recordings saved as GIFs\n"
-        "   -lrf      FILE        Set \"load recording filename\"\n"
+        "   -lrf --load-recording-filename FILE\n"
+        "                         Set \"load recording filename\"\n"
         "                         (where to load recording from, used by F10)\n"
-        "   -srf      FILE        Set \"save recording filename\"\n"
+        "   -srf --save-recording-filename FILE\n"
+        "                         Set \"save recording filename\"\n"
         "                         (where to save recording to, used by F9)\n"
+        "        --no-audio       Disable audio\n"
         , DEFAULT_PREND_FILENAME, DEFAULT_STATESET_FILENAME, ENV_DEVEL,
         DEFAULT_DELAY_GOAL, DEFAULT_PLAYERS
     );
@@ -171,6 +174,7 @@ int delay_goal = DEFAULT_DELAY_GOAL;
 int save_slot = -1;
 const char *load_recording_filename = NULL;
 const char *save_recording_filename = NULL;
+bool have_audio = true;
 SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL;
 
@@ -182,7 +186,8 @@ static test_app_t *get_test_app(){
         hexmap_filename, submap_filename, developer_mode,
         minimap_alt, cache_bitmaps, animate_palettes,
         n_players, save_slot,
-        load_recording_filename, save_recording_filename);
+        load_recording_filename, save_recording_filename,
+        have_audio);
     if(err){
         free(app);
         return NULL;
@@ -266,8 +271,8 @@ int main(int n_args, char *args[]){
                 goto parse_failure;
             }
         }else if(
-            !strcmp(arg, "-l") || !strcmp(arg, "--load_game") ||
-            !strcmp(arg, "-n") || !strcmp(arg, "--new_game")
+            !strcmp(arg, "-l") || !strcmp(arg, "--load-game") ||
+            !strcmp(arg, "-n") || !strcmp(arg, "--new-game")
         ){
             bool load_game =
                 (arg[1] == '-' && arg[2] == 'l') || arg[1] == 'l';
@@ -294,26 +299,28 @@ int main(int n_args, char *args[]){
                         save_slot);
                 }
             }
-        }else if(!strcmp(arg, "--minimap_alt")){
+        }else if(!strcmp(arg, "--minimap-alt")){
             minimap_alt = !minimap_alt;
-        }else if(!strcmp(arg, "--dont_cache_bitmaps")){
+        }else if(!strcmp(arg, "--dont-cache-bitmaps")){
             cache_bitmaps = false;
-        }else if(!strcmp(arg, "--dont_animate_palettes")){
+        }else if(!strcmp(arg, "--dont-animate-palettes")){
             animate_palettes = false;
-        }else if(!strcmp(arg, "-lrf")){
+        }else if(!strcmp(arg, "-lrf") || !strcmp(arg, "--load-recording-filename")){
             arg_i++;
             if(arg_i >= n_args){
                 fprintf(stderr, "Missing filename after %s\n", arg);
                 goto parse_failure;
             }
             load_recording_filename = args[arg_i];
-        }else if(!strcmp(arg, "-srf")){
+        }else if(!strcmp(arg, "-srf") || !strcmp(arg, "--save-recording-filename")){
             arg_i++;
             if(arg_i >= n_args){
                 fprintf(stderr, "Missing filename after %s\n", arg);
                 goto parse_failure;
             }
             save_recording_filename = args[arg_i];
+        }else if(!strcmp(arg, "--no-audio")){
+            have_audio = false;
         }else{
             fprintf(stderr, "Unrecognized option: %s\n", arg);
             goto parse_failure;
@@ -330,6 +337,12 @@ int main(int n_args, char *args[]){
         err = 1;
         fprintf(stderr, "SDL_Init error: %s\n", SDL_GetError());
     }else{
+        if(have_audio && SDL_InitSubSystem(SDL_INIT_AUDIO) < 0){
+            fprintf(stderr, "SDL_InitSubSystem error: %s\n", SDL_GetError());
+            fprintf(stderr, "...disabling audio!\n");
+            have_audio = false;
+        }
+
         window = SDL_CreateWindow("Spider Game",
             SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
             SCW, SCH, window_flags);
@@ -364,7 +377,21 @@ int main(int n_args, char *args[]){
                     err = 1;
                     fprintf(stderr, "Couldn't init test app\n");
                 }else{
-                    err = test_app_mainloop(app);
+                    if(have_audio){
+                        /* Open an audio device */
+                        SDL_AudioSpec want_spec, spec;
+                        err = hexgame_audio_sdl_open_device(
+                            &app->hexgame.audio_data,
+                            &want_spec, &spec, &app->audio_id
+                        );
+                        if(!err){
+                            /* Start playing sound */
+                            SDL_PauseAudioDevice(app->audio_id, 0);
+                        }
+                    }
+                    if(!err){
+                        err = test_app_mainloop(app);
+                    }
                     fprintf(stderr, "Cleaning up...\n");
                     test_app_cleanup(app);
                     free(app);

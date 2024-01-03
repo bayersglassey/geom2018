@@ -545,7 +545,6 @@ int hexmap_parse(hexmap_t *map, fus_lexer_t *lexer){
 
     /* default mapper */
     if(GOT("mapper")){
-        const char *mapper_filename;
         NEXT
         OPEN
         map->default_mapper = NULL;
@@ -553,6 +552,22 @@ int hexmap_parse(hexmap_t *map, fus_lexer_t *lexer){
             &map->default_mapper);
         if(err)return err;
         context.mapper = map->default_mapper;
+        CLOSE
+    }
+
+    /* default song */
+    if(GOT("song")){
+        const char *song_name;
+        NEXT
+        OPEN
+        GET_STR_CACHED(song_name, &prend->name_store)
+        hexgame_audio_callback_t *song = hexgame_songs_get(song_name);
+        if(!song){
+            fprintf(stderr, "Couldn't find song: %s\n",
+                song_name);
+            return 2;
+        }
+        context.song = song;
         CLOSE
     }
 
@@ -790,6 +805,21 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
         context->mapper = NULL;
         err = fus_lexer_get_mapper(lexer, map->prend, NULL, &context->mapper);
         if(err)return err;
+        CLOSE
+    }
+
+    if(GOT("song")){
+        const char *song_name;
+        NEXT
+        OPEN
+        GET_STR_CACHED(song_name, &prend->name_store)
+        hexgame_audio_callback_t *song = hexgame_songs_get(song_name);
+        if(!song){
+            fprintf(stderr, "Couldn't find song: %s\n",
+                song_name);
+            return 2;
+        }
+        context->song = song;
         CLOSE
     }
 
@@ -1272,6 +1302,7 @@ void hexmap_submap_cleanup(hexmap_submap_t *submap){
     ARRAY_FREE_PTR(valexpr_t*, submap->text_exprs, valexpr_cleanup)
     valexpr_cleanup(&submap->visible_expr);
     hexcollmap_cleanup(&submap->collmap);
+    vars_cleanup(&submap->song_vars);
     ARRAY_FREE_PTR(hexmap_door_t*, submap->doors, hexmap_door_cleanup)
 }
 
@@ -1298,6 +1329,16 @@ int hexmap_submap_init_from_parser_context(hexmap_t *map,
     err = valexpr_copy(&submap->visible_expr, &context->visible_expr);
     if(err)return err;
     submap->visible_not = context->visible_not;
+
+    submap->song = context->song;
+    vars_init(&submap->song_vars);
+    for(hexmap_submap_parser_context_t *cur_context = context;
+        cur_context;
+        cur_context=cur_context->parent
+    ){
+        err = vars_copy(&submap->song_vars, &cur_context->song_vars);
+        if(err)return err;
+    }
 
     ARRAY_INIT(submap->text_exprs)
     for(int i = 0; i < context->text_exprs_len; i++){
@@ -1406,6 +1447,9 @@ void hexmap_submap_parser_context_init(hexmap_submap_parser_context_t *context,
 
     context->camera_type = parent? parent->camera_type: CAMERA_TYPE_STATIC;
 
+    context->song = parent? parent->song: NULL;
+    vars_init(&context->song_vars);
+
     /* Visibility is *NOT* inherited by default.
     Opt in with the "inherit_visible" syntax. */
     valexpr_set_literal_bool(&context->visible_expr, true);
@@ -1422,5 +1466,6 @@ void hexmap_submap_parser_context_init(hexmap_submap_parser_context_t *context,
 
 void hexmap_submap_parser_context_cleanup(hexmap_submap_parser_context_t *context){
     valexpr_cleanup(&context->visible_expr);
+    vars_cleanup(&context->song_vars);
     ARRAY_FREE_PTR(valexpr_t*, context->text_exprs, valexpr_cleanup)
 }

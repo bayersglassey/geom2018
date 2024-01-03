@@ -3,6 +3,8 @@ unit: 3 2 0 -1
 spawn: "data/maps/tutorial/entrance.fus"
 palette: "data/pal1.fus"
 tileset: "data/tileset1.fus"
+song: "symphony"
+
 vars:
     "made_it_underneath": F
     "going_upwards": F
@@ -31,6 +33,7 @@ submaps:
                 pos: eval: (-4 9)
                 camera: (5 3)
                 mapper: ("quadruple")
+                song: "entrance"
             "start":
                 file: "data/maps/tutorial/start.fus"
                 pos: eval: (0 0)

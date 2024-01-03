@@ -84,7 +84,8 @@ static int _test_app_restart(test_app_t *app,
         minimap_prend,
         "data/tileset_minimap.fus",
         hexmap_filename, &map,
-        &_save_callback, app);
+        &_save_callback, app,
+        app->have_audio);
     if(err)return err;
     game->animate_palettes = app->animate_palettes;
 
@@ -191,7 +192,8 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     bool minimap_alt, bool cache_bitmaps, bool animate_palettes,
     int n_players, int save_slot,
     const char *load_recording_filename,
-    const char *save_recording_filename
+    const char *save_recording_filename,
+    bool have_audio
 ){
     int err;
 
@@ -288,6 +290,9 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         submap_filename = NULL;
         app->show_menu = true;
     }
+
+    app->have_audio = have_audio;
+    app->audio_id = 0;
 
     return _test_app_restart(app, prend, minimap_prend,
         hexmap_filename, submap_filename);
