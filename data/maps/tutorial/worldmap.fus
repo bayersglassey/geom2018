@@ -33,20 +33,25 @@ submaps:
                 pos: eval: (-4 9)
                 camera: (5 3)
                 mapper: ("quadruple")
-                song: "entrance"
             "start":
                 file: "data/maps/tutorial/start.fus"
                 pos: eval: (0 0)
                 camera: (8 0)
                 mapper: ("quadruple")
+                song_vars:
+                    "x": 1
             "start2":
                 file: "data/maps/tutorial/start2.fus"
                 pos: eval: (19 0)
                 camera: (9 0)
+                song_vars:
+                    "x": 2
             "start3":
                 file: "data/maps/tutorial/start3.fus"
                 pos: eval: (19 0) + (19 -1)
                 camera: (9 0)
+                song_vars:
+                    "x": 3
             "loop":
                 file: "data/maps/tutorial/loop.fus"
                 pos: eval: (19 0) + (19 -1) + (19 -6)

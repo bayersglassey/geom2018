@@ -4,6 +4,7 @@ spawn: "data/maps/title/playground.fus"
 palette: "data/pal1.fus"
 tileset: "data/tileset1.fus"
 mapper: ("triple")
+song: "title"
 
 submaps:
     :

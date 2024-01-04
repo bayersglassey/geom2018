@@ -465,6 +465,7 @@ int hexgame_process_event(hexgame_t *game, SDL_Event *event);
 int hexgame_unpauseable_step(hexgame_t *game);
 int hexgame_step(hexgame_t *game);
 int hexgame_step_cameras(hexgame_t *game);
+int hexgame_update_audio_data(hexgame_t *game, camera_t *camera);
 
 
 #endif

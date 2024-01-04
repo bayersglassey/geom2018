@@ -393,6 +393,7 @@ int main(int n_args, char *args[]){
                         err = test_app_mainloop(app);
                     }
                     fprintf(stderr, "Cleaning up...\n");
+                    SDL_CloseAudioDevice(app->audio_id);
                     test_app_cleanup(app);
                     free(app);
                 }

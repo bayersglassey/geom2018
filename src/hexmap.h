@@ -134,6 +134,9 @@ typedef struct hexmap {
         The behaviour of _hexmap_load is slightly different when
         map->loaded is true, e.g. it allows "redefinition" of submaps. */
 
+    hexgame_audio_callback_t *song;
+    vars_t song_vars;
+
     ARRAY_DECL(struct body*, bodies)
     ARRAY_DECL(hexmap_submap_t*, submaps)
     ARRAY_DECL(hexmap_submap_group_t*, submap_groups)

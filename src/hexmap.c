@@ -42,6 +42,7 @@ void hexmap_cleanup(hexmap_t *map){
     ARRAY_FREE_PTR(hexmap_location_t*, map->locations,
         hexmap_location_cleanup)
 
+    vars_cleanup(&map->song_vars);
     vars_cleanup(&map->vars);
 }
 
@@ -61,6 +62,9 @@ int hexmap_init(hexmap_t *map, hexgame_t *game, const char *filename){
     vec_zero(map->unit);
 
     vars_init_with_props(&map->vars, hexgame_vars_prop_names);
+
+    map->song = NULL;
+    vars_init(&map->song_vars);
 
     map->default_palette = NULL;
     map->default_tileset = NULL;
@@ -567,7 +571,18 @@ int hexmap_parse(hexmap_t *map, fus_lexer_t *lexer){
                 song_name);
             return 2;
         }
-        context.song = song;
+        map->song = context.song = song;
+        CLOSE
+    }
+
+    /* default song vars */
+    if(GOT("song_vars")){
+        NEXT
+        OPEN
+        err = vars_parse(&map->song_vars, lexer);
+        if(err)return err;
+        err = vars_copy(&context.song_vars, &map->song_vars);
+        if(err)return err;
         CLOSE
     }
 
@@ -820,6 +835,14 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
             return 2;
         }
         context->song = song;
+        CLOSE
+    }
+
+    if(GOT("song_vars")){
+        NEXT
+        OPEN
+        err = vars_parse(&context->song_vars, lexer);
+        if(err)return err;
         CLOSE
     }
 

@@ -361,6 +361,18 @@ int vars_set_const_str(vars_t *vars, const char *key, const char *s){
     return vars_callback(vars, var);
 }
 
+int vars_set_all_null(vars_t *vars){
+    /* Sets all vars to null */
+    int err;
+    for(int i = 0; i < vars->vars_len; i++){
+        var_t *var = vars->vars[i];
+        val_set_null(&var->value);
+        err = vars_callback(vars, var);
+        if(err)return err;
+    }
+    return 0;
+}
+
 int vars_copy(vars_t *vars1, vars_t *vars2){
     /* Copies variables from vars2 to vars1 */
     int err;

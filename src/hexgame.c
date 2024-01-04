@@ -711,3 +711,32 @@ int hexgame_step_cameras(hexgame_t *game){
 
     return 0;
 }
+
+int hexgame_update_audio_data(hexgame_t *game, camera_t *camera){
+    int err;
+    hexgame_audio_data_t *data = &game->audio_data;
+
+    vars_t *song_vars = &data->vars;
+    err = vars_set_all_null(song_vars);
+    if(err)return err;
+
+    err = vars_copy(song_vars, &game->vars);
+    if(err)return err;
+
+    hexmap_t *map = camera? camera->map: NULL;
+    hexmap_submap_t *submap = camera? camera->cur_submap: NULL;
+
+    if(map){
+        err = vars_copy(song_vars, &map->vars);
+        if(err)return err;
+    }
+
+    if(submap){
+        hexgame_audio_data_set_callback(data, submap->song);
+        err = vars_copy(song_vars, &submap->song_vars);
+        if(err)return err;
+    }else{
+        hexgame_audio_data_set_callback(data, map->song);
+    }
+    return 0;
+}

@@ -102,9 +102,10 @@ int test_app_render_game(test_app_t *app){
 
     hexmap_submap_t *submap = app->camera->cur_submap;
 
-    if(submap && app->have_audio){
+    if(app->have_audio){
         SDL_LockAudioDevice(app->audio_id);
-        hexgame_audio_data_set_callback(&game->audio_data, submap->song);
+        err = hexgame_update_audio_data(game, app->camera);
+        if(err)return err;
         SDL_UnlockAudioDevice(app->audio_id);
     }
 

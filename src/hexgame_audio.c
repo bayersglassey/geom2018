@@ -19,16 +19,20 @@ void hexgame_audio_data_init(hexgame_audio_data_t *data){
 
 
 void hexgame_audio_data_set_callback(hexgame_audio_data_t *data, hexgame_audio_callback_t *callback){
+    if(data->_callback != callback)data->_t = 0;
     data->_callback = callback;
-    /* NOTE: don't reset data->_t, otherwise when moving between maps which
-    use the same "song", there will be a hiccup?.. */
 }
 
 
 static void _audio_callback(void *userdata, Uint8 *stream, int len){
     /* For use as the callback of a SDL_AudioSpec */
     hexgame_audio_data_t *data = userdata;
-    if(data->_callback)data->_callback(data, stream, len);
+    if(data->_callback){
+        data->_callback(data, stream, len);
+    }else{
+        /* Silence! */
+        memset(stream, 0, len);
+    }
 }
 
 
@@ -62,18 +66,19 @@ int hexgame_audio_sdl_open_device(
 
 
 #define SONG(_BODY) { \
-    int a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z; \
-    t = data->_t; \
+    int _t = data->_t; \
     for(int _i = 0; _i < len; _i+=2){ \
         /* Generate data for each channel. */ \
         /* The variable "c" represents the current channel (0 or 1). */ \
-        for(c = 0; c < 2; c++){ \
+        for(int _c = 0; _c < 2; _c++){ \
+            int t = _t; \
+            int c = _c; \
             Uint8 value = (_BODY); \
             buf[_i + c] = value; \
         } \
-        t++; \
+        _t++; \
     } \
-    data->_t = t; \
+    data->_t = _t; \
 }
 
 
@@ -81,8 +86,9 @@ void hexgame_song_symphony(struct hexgame_audio_data *data, Uint8 *buf, int len)
     /* Based on "remix of miiro's 1-line symphony ":
     https://dollchan.net/bytebeat/#v3b64q1ZKzk9JVbJSstQqUSuxszOpMYUwzGuMIQxDA6VaAA
     */
+    int x = vars_get_int(&data->vars, "x");
     SONG(
-        (9-c*2)*t&t>>4|(5+c)*t&t>>7|(2+c)*t&t>>10
+        (9-c*2)*t&t>>4*(x+1)|(5+c)*t&t>>7|(2+c)*t&t>>10*(x+1)
     )
 }
 
@@ -97,20 +103,20 @@ void hexgame_song_house(struct hexgame_audio_data *data, Uint8 *buf, int len){
 }
 
 
-void hexgame_song_entrance(struct hexgame_audio_data *data, Uint8 *buf, int len){
-    /* Based on "Diesel engine" etc:
-    https://dollchan.net/bytebeat/#v3b64q1ZKzk9JVbJS0iixszPV1IJQNUDSSKkWAA
+void hexgame_song_title(struct hexgame_audio_data *data, Uint8 *buf, int len){
+    /* Based on "simple repeating bass":
+    https://dollchan.net/bytebeat/#v3b64q1ZKzk9JVbJS0jDSKlEzMjXV1NLQLbGzM1czNDLXtLOzUKoFAA
     */
-    SONG(
-        (t>>6+c)*((t+c)>>5)|t>>5-c*2
-    )
+    SONG((
+        t/(2<<c)&(2*t&255)*(-t>>7+c&255)>>8+c*2
+    ))
 }
 
 
 hexgame_song_entry_t hexgame_songs[] = {
     {"symphony", &hexgame_song_symphony},
     {"house", &hexgame_song_house},
-    {"entrance", &hexgame_song_entrance},
+    {"title", &hexgame_song_title},
     {NULL}
 };
 

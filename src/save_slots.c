@@ -43,6 +43,10 @@ bool get_save_slot_file_exists(int i){
 int delete_save_slot(int i){
     const char *filename = get_save_slot_filename(i);
     fprintf(stderr, "Removing save file: %s\n", filename);
+    if(getenv("NOSAVE")){
+        fprintf(stderr, "SAVING DISABLED\n");
+        return 0;
+    }
     if(remove(filename)){
         perror("remove");
         return 1;
@@ -59,6 +63,11 @@ static void _write_vars(vars_t *vars, FILE *file, int depth){
 }
 int hexgame_save(hexgame_t *game, const char *filename){
     int err;
+
+    if(getenv("NOSAVE")){
+        fprintf(stderr, "SAVING DISABLED\n");
+        return 0;
+    }
 
     FILE *file = fopen(filename, "w");
     if(file == NULL){
