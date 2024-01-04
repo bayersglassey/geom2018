@@ -28,7 +28,6 @@
 #/main.html.map
 #/main.html.mem
 #/main.data
-#/main.wasm
 
 # core dumps
 vgcore.*
