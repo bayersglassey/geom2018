@@ -19,9 +19,6 @@
 # nano stuff
 *.swp
 
-# various tool output (e.g. bin/animtool)
-/output/*
-
 # EMCC files (should be removed by _compile_demo)
 #/main.js
 #/main.html

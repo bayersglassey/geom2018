@@ -1,9 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-mkdir -p output
-cfile=output/music.c
-binfile=output/music
+cfile=~/.music.c
+binfile=~/.music
 
 echo "
 #include \"stdio.h\"
@@ -32,4 +31,4 @@ int main(){
     return 0;
 }" >"$cfile" &&
 gcc "$cfile" -o "$binfile" &&
-./"$binfile" | aplay -c "${CHANNELS:-2}" -f "${FORMAT:-U8}" -r "${RATE:-8000}"
+"$binfile" | aplay -t raw -c "${CHANNELS:-2}" -f "${FORMAT:-U8}" -r "${RATE:-8000}"
