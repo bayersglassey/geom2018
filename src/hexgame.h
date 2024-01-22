@@ -135,13 +135,6 @@ int recording_step(recording_t *rec);
     } \
 }
 
-typedef struct body_label_mapping {
-    /* Weakrefs: */
-    const char *label_name;
-    rendergraph_t *rgraph;
-    int frame_i;
-} body_label_mapping_t;
-
 typedef struct body {
     hexgame_location_t loc;
     keyinfo_t keyinfo;
@@ -149,7 +142,7 @@ typedef struct body {
     bool visible_not;
     vars_t vars;
 
-    ARRAY_DECL(body_label_mapping_t*, label_mappings)
+    ARRAY_DECL(label_mapping_t*, label_mappings)
 
     recording_t recording;
         /* This can be used by player (while they create/edit

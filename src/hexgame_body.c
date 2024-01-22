@@ -101,7 +101,7 @@ int fus_lexer_get_keyinfo(fus_lexer_t *lexer,
  * BODY INIT/CLEANUP *
  *********************/
 
-static void body_label_mapping_cleanup(body_label_mapping_t *mapping){
+static void label_mapping_cleanup(label_mapping_t *mapping){
     /* Nothing to do... */
 }
 
@@ -109,8 +109,8 @@ void body_cleanup(body_t *body){
     valexpr_cleanup(&body->visible_expr);
     vars_cleanup(&body->vars);
     recording_cleanup(&body->recording);
-    ARRAY_FREE_PTR(body_label_mapping_t*, body->label_mappings,
-        body_label_mapping_cleanup)
+    ARRAY_FREE_PTR(label_mapping_t*, body->label_mappings,
+        label_mapping_cleanup)
 }
 
 static vars_callback_t body_vars_callback;
@@ -241,7 +241,7 @@ void body_dump(body_t *body, int depth){
     print_tabs(stderr, depth);
     fprintf(stderr, "label mappings:\n");
     for(int i = 0; i < body->label_mappings_len; i++){
-        body_label_mapping_t *mapping = body->label_mappings[i];
+        label_mapping_t *mapping = body->label_mappings[i];
         print_tabs(stderr, depth);
         fprintf(stderr, "    %s -> %s (frame=%i)\n", mapping->label_name,
             mapping->rgraph->name, mapping->frame_i);
@@ -349,11 +349,11 @@ int body_add_body(body_t *body, body_t **new_body_ptr,
  * BODY MISC *
  *************/
 
-static body_label_mapping_t *_body_get_label_mapping(body_t *body,
+static label_mapping_t *_body_get_label_mapping(body_t *body,
     const char *label_name
 ){
     for(int i = 0; i < body->label_mappings_len; i++){
-        body_label_mapping_t *mapping = body->label_mappings[i];
+        label_mapping_t *mapping = body->label_mappings[i];
         if(
             mapping->label_name == label_name ||
             !strcmp(mapping->label_name, label_name)
@@ -363,18 +363,18 @@ static body_label_mapping_t *_body_get_label_mapping(body_t *body,
 }
 
 static int body_get_label_mapping(body_t *body, const char *label_name,
-    body_label_mapping_t **mapping_ptr
+    label_mapping_t **mapping_ptr
 ){
     int err;
 
-    body_label_mapping_t *found_mapping = _body_get_label_mapping(body,
+    label_mapping_t *found_mapping = _body_get_label_mapping(body,
         label_name);
     if(found_mapping){
         *mapping_ptr = found_mapping;
         return 0;
     }
 
-    ARRAY_PUSH_NEW(body_label_mapping_t*, body->label_mappings, mapping)
+    ARRAY_PUSH_NEW(label_mapping_t*, body->label_mappings, mapping)
     mapping->label_name = label_name;
     mapping->rgraph = NULL;
     *mapping_ptr = mapping;
@@ -383,11 +383,11 @@ static int body_get_label_mapping(body_t *body, const char *label_name,
 
 int body_unset_label_mapping(body_t *body, const char *label_name){
     int err;
-    body_label_mapping_t *found_mapping = _body_get_label_mapping(body,
+    label_mapping_t *found_mapping = _body_get_label_mapping(body,
         label_name);
     if(found_mapping){
         ARRAY_REMOVE_PTR(body->label_mappings, found_mapping,
-            body_label_mapping_cleanup)
+            label_mapping_cleanup)
     }
     return 0;
 }
@@ -397,7 +397,7 @@ int body_set_label_mapping(body_t *body, const char *label_name,
 ){
     int err;
 
-    body_label_mapping_t *mapping;
+    label_mapping_t *mapping;
     err = body_get_label_mapping(body, label_name, &mapping);
     if(err)return err;
 
@@ -878,7 +878,7 @@ int body_step(body_t *body, hexgame_t *game){
     /* Increment frame */
     body->frame_i = _increment_frame_i(body->frame_i);
     for(int i = 0; i < body->label_mappings_len; i++){
-        body_label_mapping_t *mapping = body->label_mappings[i];
+        label_mapping_t *mapping = body->label_mappings[i];
         mapping->frame_i = _increment_frame_i(mapping->frame_i);
     }
 
@@ -1028,74 +1028,6 @@ int body_collide_against_body(body_t *body, body_t *body_other){
  * BODY RENDER *
  ***************/
 
-static int _render_rgraph_and_labels(
-    rendergraph_t *rgraph, SDL_Surface *surface,
-    SDL_Palette *pal, prismelrenderer_t *prend,
-    int x0, int y0, int zoom, int frame_i,
-    vec_t rendered_pos, rot_t rendered_rot, flip_t rendered_flip,
-    prismelmapper_t *mapper,
-    int label_mappings_len, body_label_mapping_t **label_mappings
-){
-    int err;
-
-    vecspace_t *rgraph_space = rgraph->space; /* &vec4 */
-
-    /* Render rgraph */
-    err = rendergraph_render(rgraph, surface,
-        pal, prend,
-        x0, y0, zoom,
-        rendered_pos, rendered_rot, rendered_flip,
-        frame_i, mapper);
-    if(err)return err;
-
-    if(label_mappings_len){
-
-        /* Make sure rgraph->labels is populated */
-        err = rendergraph_calculate_labels(rgraph);
-        if(err)return err;
-
-        trf_t rendered_trf = {
-            .rot = rendered_rot,
-            .flip = rendered_flip,
-        };
-        vec_cpy(rgraph_space->dims, rendered_trf.add, rendered_pos);
-
-        int animated_frame_i = get_animated_frame_i(
-            rgraph->animation_type, rgraph->n_frames, frame_i);
-        rendergraph_frame_t *frame = &rgraph->frames[animated_frame_i];
-
-        /* Render all mapped labels */
-        for(int i = 0; i < label_mappings_len; i++){
-            body_label_mapping_t *mapping = label_mappings[i];
-            rendergraph_t *label_rgraph = mapping->rgraph;
-            for(int j = 0; j < frame->labels_len; j++){
-                rendergraph_label_t *label = frame->labels[j];
-                if(!(
-                    label->name == mapping->label_name ||
-                    !strcmp(label->name, mapping->label_name)
-                ))continue;
-
-                trf_t label_trf = label->trf;
-                trf_apply(rgraph_space, &label_trf, &rendered_trf);
-
-                int label_frame_i = get_animated_frame_i(
-                    label_rgraph->animation_type,
-                    label_rgraph->n_frames, mapping->frame_i);
-
-                /* Recurse: render label's rgraph, and its labels */
-                err = _render_rgraph_and_labels(label_rgraph, surface,
-                    pal, prend, x0, y0, zoom, label_frame_i,
-                    label_trf.add, label_trf.rot, label_trf.flip,
-                    mapper,
-                    label_mappings_len, label_mappings);
-                if(err)return err;
-            }
-        }
-    }
-
-    return 0;
-}
-
 int body_render(body_t *body,
     SDL_Surface *surface,
     SDL_Palette *pal, int x0, int y0, int zoom,
@@ -1161,10 +1093,11 @@ int body_render_rgraph(body_t *body, rendergraph_t *rgraph,
 
     if(render_labels){
         /* Render rgraph and labels (recursively) */
-        return _render_rgraph_and_labels(rgraph, surface,
-            pal, prend, x0, y0, zoom, frame_i,
+        return rendergraph_render_with_labels(rgraph, surface,
+            pal, prend,
+            x0, y0, zoom,
             rendered_pos, rendered_rot, rendered_flip,
-            mapper,
+            frame_i, mapper,
             body->label_mappings_len, body->label_mappings);
     }else{
         /* Render just the rgraph */

@@ -84,6 +84,13 @@ typedef struct rendergraph_label {
     trf_t trf;
 } rendergraph_label_t;
 
+typedef struct label_mapping {
+    /* Weakrefs: */
+    const char *label_name;
+    struct rendergraph *rgraph;
+    int frame_i;
+} label_mapping_t;
+
 typedef struct rendergraph_frame {
     /* Represents information about individual frames of a rendergraph */
 
@@ -160,12 +167,19 @@ int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
     rot_t rot, flip_t flip, int frame_i,
     SDL_Palette *pal);
 struct prismelmapper;
-int rendergraph_render(rendergraph_t *rgraph,
-    SDL_Surface *surface,
+int rendergraph_render(
+    rendergraph_t *rgraph, SDL_Surface *surface,
     SDL_Palette *pal, struct prismelrenderer *prend,
     int x0, int y0, int zoom,
     vec_t pos, rot_t rot, flip_t flip, int frame_i,
     struct prismelmapper *mapper);
+int rendergraph_render_with_labels(
+    rendergraph_t *rgraph, SDL_Surface *surface,
+    SDL_Palette *pal, struct prismelrenderer *prend,
+    int x0, int y0, int zoom,
+    vec_t pos, rot_t rot, flip_t flip, int frame_i,
+    struct prismelmapper *mapper,
+    int label_mappings_len, label_mapping_t **label_mappings);
 int rendergraph_render_all_bitmaps(rendergraph_t *rgraph, SDL_Palette *pal);
 
 

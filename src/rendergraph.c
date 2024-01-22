@@ -688,8 +688,8 @@ int rendergraph_get_or_render_bitmap(rendergraph_t *rendergraph,
     return 0;
 }
 
-int rendergraph_render(rendergraph_t *rgraph,
-    SDL_Surface *surface,
+int rendergraph_render(
+    rendergraph_t *rgraph, SDL_Surface *surface,
     SDL_Palette *pal, prismelrenderer_t *prend,
     int x0, int y0, int zoom,
     vec_t pos, rot_t rot, flip_t flip, int frame_i,
@@ -772,6 +772,74 @@ int rendergraph_render(rendergraph_t *rgraph,
         err = rendergraph_render_to_surface(rgraph, surface, &dst_rect,
             rot, flip, animated_frame_i, pal);
         if(err)return err;
+    }
+
+    return 0;
+}
+
+int rendergraph_render_with_labels(
+    rendergraph_t *rgraph, SDL_Surface *surface,
+    SDL_Palette *pal, prismelrenderer_t *prend,
+    int x0, int y0, int zoom,
+    vec_t pos, rot_t rot, flip_t flip, int frame_i,
+    prismelmapper_t *mapper,
+    int label_mappings_len, label_mapping_t **label_mappings
+){
+    int err;
+
+    vecspace_t *rgraph_space = rgraph->space; /* &vec4 */
+
+    /* Render rgraph */
+    err = rendergraph_render(rgraph, surface,
+        pal, prend,
+        x0, y0, zoom,
+        pos, rot, flip,
+        frame_i, mapper);
+    if(err)return err;
+
+    if(label_mappings_len){
+
+        /* Make sure rgraph->labels is populated */
+        err = rendergraph_calculate_labels(rgraph);
+        if(err)return err;
+
+        trf_t trf = {
+            .rot = rot,
+            .flip = flip,
+        };
+        vec_cpy(rgraph_space->dims, trf.add, pos);
+
+        int animated_frame_i = get_animated_frame_i(
+            rgraph->animation_type, rgraph->n_frames, frame_i);
+        rendergraph_frame_t *frame = &rgraph->frames[animated_frame_i];
+
+        /* Render all mapped labels */
+        for(int i = 0; i < label_mappings_len; i++){
+            label_mapping_t *mapping = label_mappings[i];
+            rendergraph_t *label_rgraph = mapping->rgraph;
+            for(int j = 0; j < frame->labels_len; j++){
+                rendergraph_label_t *label = frame->labels[j];
+                if(!(
+                    label->name == mapping->label_name ||
+                    !strcmp(label->name, mapping->label_name)
+                ))continue;
+
+                trf_t label_trf = label->trf;
+                trf_apply(rgraph_space, &label_trf, &trf);
+
+                int label_frame_i = get_animated_frame_i(
+                    label_rgraph->animation_type,
+                    label_rgraph->n_frames, mapping->frame_i);
+
+                /* Recurse: render label's rgraph, and its labels */
+                err = rendergraph_render_with_labels(label_rgraph, surface,
+                    pal, prend, x0, y0, zoom,
+                    label_trf.add, label_trf.rot, label_trf.flip,
+                    label_frame_i, mapper,
+                    label_mappings_len, label_mappings);
+                if(err)return err;
+            }
+        }
     }
 
     return 0;
