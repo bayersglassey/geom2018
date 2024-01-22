@@ -104,19 +104,40 @@ void hexgame_song_house(struct hexgame_audio_data *data, Uint8 *buf, int len){
 
 
 void hexgame_song_title(struct hexgame_audio_data *data, Uint8 *buf, int len){
-    /* Based on "simple repeating bass":
-    https://dollchan.net/bytebeat/#v3b64q1ZKzk9JVbJS0jDSKlEzMjXV1NLQLbGzM1czNDLXtLOzUKoFAA
+    /* Based on "t>>t%":
+    https://dollchan.net/bytebeat/#v3b64q1ZKzk9JVbJS0tAosbMrUdUoUTWyN7cytNSsgfLVDM2MLUzsjc2sjI00NdXMTE2NTTX1gepMDCzNNJVqAQ
     */
     SONG((
-        t/(2<<c)&(2*t&255)*(-t>>7+c&255)>>8+c*2
+        (
+            (
+                t>>t%(t%2?7:19-c*3)
+                |t>>t%(t&16384?36/(c+1):32)
+            )&65535
+        )/(t%4096?t%4096:1)
     ))
 }
 
 
+void hexgame_song_intertime_dubstep(struct hexgame_audio_data *data, Uint8 *buf, int len){
+    /* Based on "Inter Time Dubstep":
+    https://dollchan.net/bytebeat/#v3b64q1ZKzk9JVbJS0iixswNhQ2M1Y0NNNUMjC01tDY0SNZCQkaYWhNI2TjXV1yhRNTQztjDRVNJRKk7MLchJDUosARphYmJoYFALAA
+    ...although that was using 44100 Hz.
+    Do we want to... reopen audio device with different sample rate?..
+    */
+    int s;
+    SONG((
+        s = t * 10,
+        s/(2<<c)&(2*s&255)*(-s>>7+c&255)>>8+c*2
+    ))
+}
+
+
+#define ENTRY(NAME) {#NAME, &hexgame_song_##NAME}
 hexgame_song_entry_t hexgame_songs[] = {
-    {"symphony", &hexgame_song_symphony},
-    {"house", &hexgame_song_house},
-    {"title", &hexgame_song_title},
+    ENTRY(symphony),
+    ENTRY(house),
+    ENTRY(title),
+    ENTRY(intertime_dubstep),
     {NULL}
 };
 
