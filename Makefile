@@ -1,5 +1,8 @@
 
-CFLAGS += -O2 -g -rdynamic -std=c99 \
+# Used to be able to print stacktraces (with GNU backtrace) if I included
+# these in CFLAGS: -g -rdynamic
+# ...but it doesn't seem to work anymore.
+CFLAGS += -O2 -std=c99 \
  $(shell sdl2-config --cflags) \
  -Wall -Werror -Wno-unused -Wno-missing-braces -Wno-tautological-compare -Wno-parentheses
 
