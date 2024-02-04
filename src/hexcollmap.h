@@ -14,6 +14,16 @@
 
 
 
+/************************
+ * HELPERS & ALGORITHMS *
+ ***********************/
+
+void hexcollmap_normalize_vert(trf_t *index);
+void hexcollmap_normalize_edge(trf_t *index);
+void hexcollmap_normalize_face(trf_t *index);
+void hexcollmap_face_rot(int *x_ptr, int *y_ptr, int *face_i_ptr,
+    rot_t rot);
+
 
 /********************
  * HEXMAP RECORDING *
@@ -302,9 +312,6 @@ int hexcollmap_clone(hexcollmap_t *collmap,
 int hexcollmap_load(hexcollmap_t *collmap, vecspace_t *space,
     const char *filename, vars_t *vars,
     stringstore_t *name_store, stringstore_t *filename_store);
-void hexcollmap_normalize_vert(trf_t *index);
-void hexcollmap_normalize_edge(trf_t *index);
-void hexcollmap_normalize_face(trf_t *index);
 hexcollmap_tile_t *hexcollmap_get_tile_xy(hexcollmap_t *collmap,
     int x, int y);
 hexcollmap_tile_t *hexcollmap_get_tile(hexcollmap_t *collmap, trf_t *index);

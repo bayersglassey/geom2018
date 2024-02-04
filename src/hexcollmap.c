@@ -15,6 +15,113 @@
 #include "hexgame_vars_props.h"
 
 
+/************************
+ * HELPERS & ALGORITHMS *
+ ***********************/
+
+void hexcollmap_normalize_vert(trf_t *index){
+    /* Normalizes the given trf_t so that it can be used to get a vertex,
+    according to the following logic:
+
+        int x = index->add[0];
+        int y = index->add[1];
+        int i = index->rot;
+        ...index->flip is unused, we "normalize" it to false...
+        hexcollmap_tile_t *tile = &collmap->tiles[y * collmap->w + x];
+        return tile->vert[i];
+
+    PROBABLY TODO: get rid of these "normalization" functions and just
+    add get_vert/edge/face functions which do this.
+    */
+    index->rot = 0;
+    index->flip = false;
+}
+
+void hexcollmap_normalize_edge(trf_t *index){
+    /* See hexcollmap_normalize_vert */
+    index->flip = false;
+    if(index->rot == 3){
+        index->rot = 0; index->add[0]--;
+    }else if(index->rot == 4){
+        index->rot = 1; index->add[0]--; index->add[1]++;
+    }else if(index->rot == 5){
+        index->rot = 2; index->add[1]++;
+    }
+}
+
+void hexcollmap_normalize_face(trf_t *index){
+    /* See hexcollmap_normalize_vert */
+    if(index->flip){
+        index->flip = false;
+        index->rot = rot_contain(6, index->rot - 1);
+    }
+    if(index->rot == 2){
+        index->rot = 0; index->add[0]--;
+    }else if(index->rot == 3){
+        index->rot = 1; index->add[0]--; index->add[1]++;
+    }else if(index->rot == 4){
+        index->rot = 0; index->add[0]--; index->add[1]++;
+    }else if(index->rot == 5){
+        index->rot = 1; index->add[1]++;
+    }
+}
+
+void hexcollmap_face_rot(int *x_ptr, int *y_ptr, int *face_i_ptr,
+    rot_t rot
+){
+    /* Rotates the given hexcollmap tile coordinates and face index.
+    E.g. given this (with '+' indicating x and y, and '*' indicating
+    that face_i = 0):
+
+         .   .
+             *
+       .  (+)  .  +X axis
+
+         .   .
+
+              +Y axis
+
+    ...rotating by 3 gives:
+
+         .   .
+
+       .  (.)  .
+         *
+         +   .
+
+    ...i.e. adds (-1, 1) to (x, y), and switches face_i from 0 to 1.
+
+    NOTE: this function was originally in hexcollmap_parse.c, used by
+    hexcollmap_clone. However, that function now simply calls out to
+    hexcollmap_draw, which sets up a trf_t index and ultimately does
+    hexcollmap_normalize_##PART(&index).
+    Somehow, doing that sidesteps the need for this function's lookup table.
+    Is that better somehow?.. do we want to remove this function and document
+    & use hexcollmap_draw's technique?.. */
+
+    int x = *x_ptr;
+    int y = *y_ptr;
+    rot_t rot_from = *face_i_ptr;
+    rot_t rot_to = rot_contain(HEXSPACE_ROT_MAX, rot_from + rot);
+
+    static const int lookup[6][3] = {
+        /* NOTE: lookup[rot] = {dx, dy, face_i} */
+        { 0,  0, 0},
+        { 0,  0, 1},
+        {-1,  0, 0},
+        {-1,  1, 1},
+        {-1,  1, 0},
+        { 0,  1, 1}
+    };
+
+    const int *lookup_from = lookup[rot_from];
+    const int *lookup_to = lookup[rot_to];
+    *x_ptr = x - lookup_from[0] + lookup_to[0];
+    *y_ptr = y - lookup_from[1] + lookup_to[1];
+    *face_i_ptr = lookup_to[2];
+}
+
+
 /********************
  * HEXMAP RECORDING *
  ********************/
@@ -294,38 +401,6 @@ int hexcollmap_load(hexcollmap_t *collmap, vecspace_t *space,
     return 0;
 }
 
-void hexcollmap_normalize_vert(trf_t *index){
-    index->rot = 0;
-    index->flip = false;
-}
-
-void hexcollmap_normalize_edge(trf_t *index){
-    index->flip = false;
-    if(index->rot == 3){
-        index->rot = 0; index->add[0]--;
-    }else if(index->rot == 4){
-        index->rot = 1; index->add[0]--; index->add[1]++;
-    }else if(index->rot == 5){
-        index->rot = 2; index->add[1]++;
-    }
-}
-
-void hexcollmap_normalize_face(trf_t *index){
-    if(index->flip){
-        index->flip = false;
-        index->rot = rot_contain(6, index->rot - 1);
-    }
-    if(index->rot == 2){
-        index->rot = 0; index->add[0]--;
-    }else if(index->rot == 3){
-        index->rot = 1; index->add[0]--; index->add[1]++;
-    }else if(index->rot == 4){
-        index->rot = 0; index->add[0]--; index->add[1]++;
-    }else if(index->rot == 5){
-        index->rot = 1; index->add[1]++;
-    }
-}
-
 hexcollmap_tile_t *hexcollmap_get_tile_xy(hexcollmap_t *collmap,
     int x, int y
 ){
@@ -422,6 +497,10 @@ bool hexcollmap_collide(
             int collide;
             int x = x2 - ox2;
             int y = y2 - oy2;
+
+            /* TODO: REMOVE THE FOLLOWING FUNCTION CALLS, WHICH TAKE FUNCTION
+            POINTERS, WITH A MACRO WHICH DOES E.G. hexcollmap_normalize_##PART
+            INSTEAD OF CALLING FUNCTION POINTERS, SEE hexcollmap_draw */
             collide = hexcollmap_collide_elem(collmap1, all,
                 space, x, y, &trf,
                 tile2->vert, 1,

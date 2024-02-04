@@ -101,10 +101,6 @@ int fus_lexer_get_keyinfo(fus_lexer_t *lexer,
  * BODY INIT/CLEANUP *
  *********************/
 
-static void label_mapping_cleanup(label_mapping_t *mapping){
-    /* Nothing to do... */
-}
-
 void body_cleanup(body_t *body){
     valexpr_cleanup(&body->visible_expr);
     vars_cleanup(&body->vars);
