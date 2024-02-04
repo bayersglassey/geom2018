@@ -133,7 +133,7 @@ int main(int n_args, char **args){
     }
 
     const char *collmap_filename = "-";
-    if(arg_i > n_args - 1){
+    if(arg_i < n_args - 1){
         fprintf(stderr, "ERROR: extra arguments after filename\n");
         print_help();
         return 2;
@@ -154,6 +154,10 @@ int main(int n_args, char **args){
     {
         FILE *collmap_file = stdin;
         if(!strcmp(collmap_filename, "-")){
+            if(use_editor){
+                fprintf(stderr, "Interactive editor requires a filename.\n");
+                return 1;
+            }
             collmap_filename = "<stdin>";
         }else{
             collmap_file = fopen(collmap_filename, "r");
