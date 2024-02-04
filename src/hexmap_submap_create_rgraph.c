@@ -8,6 +8,43 @@
 #include "prismelrenderer.h"
 
 
+static void hexcollmap_face_rot(int *x_ptr, int *y_ptr, int *face_i_ptr,
+    rot_t rot
+){
+    /* Rotates the given hexcollmap tile coordinates and face index.
+    E.g. given this (with '+' indicating x and y, and '*' indicating
+    that face_i = 0):
+
+         .   .
+             *
+       .  (+)  .  +X axis
+
+         .   .
+
+              +Y axis
+
+    ...rotating by 3 gives:
+
+         .   .
+
+       .  (.)  .
+         *
+         +   .
+
+    ...i.e. adds (-1, 1) to (x, y), and switches face_i from 0 to 1.
+    */
+
+    trf_t index = {
+        .add = {*x_ptr, *y_ptr},
+        .rot = rot_contain(HEXSPACE_ROT_MAX, *face_i_ptr + rot)
+    };
+    hexcollmap_normalize_face(&index);
+    *x_ptr = index.add[0];
+    *y_ptr = index.add[1];
+    *face_i_ptr = index.rot;
+}
+
+
 static int _get_rgraph_i_when_faces_solid_vert(int n_faces_solid) {
     if(n_faces_solid == 0)return 0;
     if(n_faces_solid == 6)return 2;

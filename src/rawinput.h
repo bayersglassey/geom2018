@@ -49,7 +49,7 @@ enum KEY_ACTION {
     CTRL_Q = 17,        /* Ctrl-q */
     CTRL_S = 19,        /* Ctrl-s */
     CTRL_U = 21,        /* Ctrl-u */
-    ESC = 27,           /* Escape */
+    ESC = 27,           /* Escape, F1, F2, etc... */
     BACKSPACE =  127,   /* Backspace */
     /* The following are just soft codes, not really reported by the
     terminal directly. */

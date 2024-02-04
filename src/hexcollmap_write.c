@@ -12,7 +12,6 @@
 #include "hexspace.h"
 
 
-
 static char _write_vert(char tile_c, char empty){
     return tile_c_is_visible(tile_c)?
         (tile_c_is_special(tile_c)? tile_c: '+'):
@@ -41,6 +40,22 @@ static bool out_of_bounds_z(hexbox_t *hexbox, int x, int y){
 static void _hexcollmap_write(hexcollmap_t *collmap, FILE *f,
     const char *tabs, hexcollmap_write_options_t *opts
 ){
+    trf_t marker_vert_index = {0};
+    trf_t marker_edge_index = {0};
+    trf_t marker_face_index = {0};
+    if(opts->marker){
+        marker_vert_index = *opts->marker;
+        marker_edge_index = *opts->marker;
+        marker_face_index = *opts->marker;
+
+        marker_vert_index.add[1] = -marker_vert_index.add[1];
+        marker_edge_index.add[1] = -marker_edge_index.add[1];
+        marker_face_index.add[1] = -marker_face_index.add[1];
+
+        hexcollmap_normalize_vert(&marker_vert_index);
+        hexcollmap_normalize_edge(&marker_edge_index);
+        hexcollmap_normalize_face(&marker_face_index);
+    }
     for(int y = 0; y < collmap->h; y++){
         // \ /
         //  . -
@@ -61,10 +76,14 @@ static void _hexcollmap_write(hexcollmap_t *collmap, FILE *f,
             }
             hexcollmap_tile_t *tile = &collmap->tiles[y * collmap->w + x];
             fprintf(f, "%c%c%c%c",
-                _write_edge(tile->edge[2].tile_c, '\\', opts->show_tiles? '[': ' '),
-                _write_face(tile->face[1].tile_c, opts->show_tiles? ' ': ' '),
-                _write_edge(tile->edge[1].tile_c, '/', opts->show_tiles? ' ': ' '),
-                _write_face(tile->face[0].tile_c, opts->show_tiles? ']': ' '));
+                opts->marker && x == marker_edge_index.add[0] && y == marker_edge_index.add[1] && marker_edge_index.rot == 2? 'm':
+                    _write_edge(tile->edge[2].tile_c, '\\', opts->show_tiles? '[': ' '),
+                opts->marker && x == marker_face_index.add[0] && y == marker_face_index.add[1] && marker_face_index.rot == 1? '#':
+                    _write_face(tile->face[1].tile_c, opts->show_tiles? ' ': ' '),
+                opts->marker && x == marker_edge_index.add[0] && y == marker_edge_index.add[1] && marker_edge_index.rot == 1? 'm':
+                    _write_edge(tile->edge[1].tile_c, '/', opts->show_tiles? ' ': ' '),
+                opts->marker && x == marker_face_index.add[0] && y == marker_face_index.add[1] && marker_face_index.rot == 0? '#':
+                    _write_face(tile->face[0].tile_c, opts->show_tiles? ']': ' '));
         }
         if(opts->eol_semicolons)fputc(';', f);
         fputc('\n', f);
@@ -82,19 +101,14 @@ static void _hexcollmap_write(hexcollmap_t *collmap, FILE *f,
                 continue;
             }
             bool is_origin = x == collmap->ox && y == collmap->oy;
-            bool is_marker =
-                opts->marker &&
-                opts->marker->add[0] == x &&
-                -opts->marker->add[1] == y
-                    /* as usual, must flip vec's y coord when indexing into
-                    collmap's tiles */
-            ;
             hexcollmap_tile_t *tile = &collmap->tiles[y * collmap->w + x];
             fprintf(f, "%c%c%c%c",
                 is_origin? '(': opts->show_tiles? '[': ' ',
-                is_marker? 'M': _write_vert(tile->vert[0].tile_c, opts->nodots? (opts->show_tiles? ' ': ' '): '.'),
+                opts->marker && x == marker_vert_index.add[0] && y == marker_vert_index.add[1]? 'M':
+                    _write_vert(tile->vert[0].tile_c, opts->nodots? (opts->show_tiles? ' ': ' '): '.'),
                 is_origin? ')': opts->show_tiles? ' ': ' ',
-                _write_edge(tile->edge[0].tile_c, '-', opts->show_tiles? ']': ' '));
+                opts->marker && x == marker_edge_index.add[0] && y == marker_edge_index.add[1] && marker_edge_index.rot == 0? 'm':
+                    _write_edge(tile->edge[0].tile_c, '-', opts->show_tiles? ']': ' '));
         }
         if(opts->eol_semicolons)fputc(';', f);
         fputc('\n', f);
@@ -148,6 +162,19 @@ void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
     const char *tabs = "";
     if(!opts->just_coll){
         tabs = "    ";
+
+        if(
+            collmap->spawn.pos[0] ||
+            collmap->spawn.pos[1] ||
+            collmap->spawn.rot ||
+            collmap->spawn.turn
+        ){
+            fprintf(f, "spawn: (%i %i) %i %c\n",
+                collmap->spawn.pos[0],
+                collmap->spawn.pos[1],
+                collmap->spawn.rot,
+                collmap->spawn.turn? 'y': 'n');
+        }
 
         if(parts){
             fprintf(f, "parts:\n");

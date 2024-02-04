@@ -21,8 +21,6 @@
 void hexcollmap_normalize_vert(trf_t *index);
 void hexcollmap_normalize_edge(trf_t *index);
 void hexcollmap_normalize_face(trf_t *index);
-void hexcollmap_face_rot(int *x_ptr, int *y_ptr, int *face_i_ptr,
-    rot_t rot);
 
 
 /********************
@@ -209,7 +207,9 @@ typedef struct hexcollmap {
           \       \
            + - + - +
 
-    The array of tiles is actually stored with (0, 0) in the top-left, though.
+    The array of tiles is actually stored with (0, 0) in the top-left, though!..
+    So we often use coordinates in a "hexcollmap index" space, which is like
+    regular hexspace, but with the y coordinate inverted.
 
     The hexbox's dimensions are like this:
 
@@ -226,8 +226,8 @@ typedef struct hexcollmap {
     hexbox_t hexbox;
     int w;
     int h;
-    int ox;
-    int oy;
+    int ox; /* origin's x */
+    int oy; /* origin's y, in hexcollmap index space */
     hexcollmap_tile_t *tiles; /* array of length w * h */
     ARRAY_DECL(hexmap_recording_t*, recordings)
     ARRAY_DECL(hexmap_rendergraph_t*, rendergraphs)
