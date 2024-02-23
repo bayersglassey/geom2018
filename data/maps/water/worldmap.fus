@@ -32,11 +32,14 @@ submaps:
             : "data/maps/water/recs/roller_chain_000.fus" empty 700
             : "data/maps/water/recs/roller_chain_000.fus" empty 800
             : "data/maps/water/recs/roller_chain_000.fus" empty 900
-            : "data/maps/water/recs/death_flier_chain_000.fus" empty 0
-            : "data/maps/water/recs/death_flier_chain_000.fus" empty 20
-            : "data/maps/water/recs/death_flier_chain_000.fus" empty 25
-            : "data/maps/water/recs/death_flier_chain_000.fus" empty 35
-            : "data/maps/water/recs/death_flier_chain_000.fus" empty 50
+
+            # Uncomment once fliers stop being invisible (probably due to labels)!
+            #: "data/maps/water/recs/death_flier_chain_000.fus" empty 0
+            #: "data/maps/water/recs/death_flier_chain_000.fus" empty 20
+            #: "data/maps/water/recs/death_flier_chain_000.fus" empty 25
+            #: "data/maps/water/recs/death_flier_chain_000.fus" empty 35
+            #: "data/maps/water/recs/death_flier_chain_000.fus" empty 50
+
         submaps:
             :
                 file: "data/maps/water/start.fus"

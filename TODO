@@ -638,13 +638,6 @@ Silkspider:
       (Rollers roll on it?.. or some other creature?.. which can fly away when it disappears?..)
       The silk timer counts down... always?.. or just while jumping (each frame you "use" silk)?..
 
-* Hexmap recording palmappers are broken?..
-    See data/maps/playarea/start2.fus, it specifies "spider_cpu" but the bodies
-    don't seem to be rendering any differently
-    AH HAAAAAAA PROBABLY BECAUSE NOW OUR SPIDER RGRAPHS ARE EMPTY, AND IT'S
-    ALL LABELS!..
-    ...so labels need to inherit palmappers or something.
-
 
 Feb 8, 2022:
 ------------
@@ -912,3 +905,61 @@ Or we could just 100% standardize on 8000 Hz for now. Wheee!
 === TODO: vars_get_or_add is using strdup to copy the key.
 So, vars own their keys?!?! Preposterous!
 Give them a stringstore for goodness' sake.
+
+
+Jan 21, 2024:
+-------------
+
+* Hexmap recording palmappers are broken?..
+    See data/maps/playarea/start2.fus, it specifies "spider_cpu" but the bodies
+    don't seem to be rendering any differently
+    AH HAAAAAAA PROBABLY BECAUSE NOW OUR SPIDER RGRAPHS ARE EMPTY, AND IT'S
+    ALL LABELS!..
+    ...so labels need to inherit palmappers or something.
+    The flier is also invisible now, because it uses "spider_head"
+
+* The grey death fliers in data/maps/water/room_sm_bubble1.fus are invisible!..
+  Presumably for the same reason that different colour palettes for spiders aren't working?..
+  See above. I commented these guys out for now, turn them back on once they're visible!
+
+* Minieditor needs to show you available labels for each rgraph...
+  Ah, there's `-n NAME --dump` which shows labels!
+  So now, you should be able to specify them when opening it...
+
+* Rendergraphs should have default label mappings.
+  If a label is unmapped when we try to render it, we should error
+  hard.
+
+
+Feb 3, 2024:
+------------
+
+TOWARDS A HEXCOLLMAP EDITOR:
+
+Compare these:
+
+    $ cat data/maps/demo/start2.fus
+    $ bin/collmaptool -d data/maps/demo/start2.fus
+
+...the latter is missing the vars here:
+
+    parts:
+        "h": recording "data/recs/hotspot.fus"
+            vars:
+                "key": "guide_passed_start"
+
+...so make sure those are supported correctly.
+Also add support for '!' and '?'.
+
+So anyway, once we're able to read & write the text format for hexcollmap,
+then we can make a visual editor for it.
+Or do we want to implement a binary format?.. hmmmmmm naaaaaahh.
+Because then we'll have to make sure it's backwards compatible and all kinds
+of stuff, it's going to become a time suck.
+And harder to debug.
+Easier to just maintain a single human-readable text format.
+
+Anyway, we've already started adding an editor! Use `-E` with collmaptool:
+
+    $ bin/collmaptool -E data/maps/demo/start.fus
+

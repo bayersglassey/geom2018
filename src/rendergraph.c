@@ -15,8 +15,9 @@
 #include "write.h"
 
 
-
-
+void label_mapping_cleanup(label_mapping_t *mapping){
+    /* Nothing to do... */
+}
 
 
 /***************
@@ -777,13 +778,14 @@ int rendergraph_render(
     return 0;
 }
 
-int rendergraph_render_with_labels(
+static int _rendergraph_render_with_labels(
     rendergraph_t *rgraph, SDL_Surface *surface,
     SDL_Palette *pal, prismelrenderer_t *prend,
     int x0, int y0, int zoom,
     vec_t pos, rot_t rot, flip_t flip, int frame_i,
     prismelmapper_t *mapper,
-    int label_mappings_len, label_mapping_t **label_mappings
+    int label_mappings_len, label_mapping_t **label_mappings,
+    int depth
 ){
     int err;
 
@@ -814,15 +816,19 @@ int rendergraph_render_with_labels(
         rendergraph_frame_t *frame = &rgraph->frames[animated_frame_i];
 
         /* Render all mapped labels */
+        int missing_labels = 0;
         for(int i = 0; i < label_mappings_len; i++){
             label_mapping_t *mapping = label_mappings[i];
             rendergraph_t *label_rgraph = mapping->rgraph;
+            int found = 0;
             for(int j = 0; j < frame->labels_len; j++){
                 rendergraph_label_t *label = frame->labels[j];
                 if(!(
                     label->name == mapping->label_name ||
                     !strcmp(label->name, mapping->label_name)
                 ))continue;
+
+                found++;
 
                 trf_t label_trf = label->trf;
                 trf_apply(rgraph_space, &label_trf, &trf);
@@ -832,17 +838,60 @@ int rendergraph_render_with_labels(
                     label_rgraph->n_frames, mapping->frame_i);
 
                 /* Recurse: render label's rgraph, and its labels */
-                err = rendergraph_render_with_labels(label_rgraph, surface,
+                err = _rendergraph_render_with_labels(label_rgraph, surface,
                     pal, prend, x0, y0, zoom,
                     label_trf.add, label_trf.rot, label_trf.flip,
                     label_frame_i, mapper,
-                    label_mappings_len, label_mappings);
-                if(err)return err;
+                    label_mappings_len, label_mappings,
+                    depth + 1);
+                if(err){
+                    for(int i = 0; i < depth; i++)fputs("  ", stderr);
+                    fprintf(stderr, "While rendering %s, recursive call to render %s failed\n",
+                        rgraph->name,
+                        label_rgraph->name);
+                    return err;
+                }
             }
+            if(!found){
+                /*
+                for(int i = 0; i < depth; i++)fputs("  ", stderr);
+                fprintf(stderr, "Missing label: %s\n", mapping->label_name);
+                */
+                missing_labels++;
+            }
+        }
+        if(missing_labels){
+            /*
+            for(int i = 0; i < depth; i++)fputs("  ", stderr);
+            fprintf(stderr, "Rgraph %s (frame %i): missing %i required labels!\n",
+                rgraph->name,
+                animated_frame_i,
+                missing_labels);
+            */
+            //return 2;
         }
     }
 
     return 0;
+}
+
+int rendergraph_render_with_labels(
+    rendergraph_t *rgraph, SDL_Surface *surface,
+    SDL_Palette *pal, prismelrenderer_t *prend,
+    int x0, int y0, int zoom,
+    vec_t pos, rot_t rot, flip_t flip, int frame_i,
+    prismelmapper_t *mapper,
+    int label_mappings_len, label_mapping_t **label_mappings
+){
+    return _rendergraph_render_with_labels(
+        rgraph, surface,
+        pal, prend,
+        x0, y0, zoom,
+        pos, rot, flip, frame_i,
+        mapper,
+        label_mappings_len, label_mappings,
+        0 /* depth */
+    );
 }
 
 int rendergraph_render_all_bitmaps(rendergraph_t *rgraph, SDL_Palette *pal){

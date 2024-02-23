@@ -8,6 +8,17 @@ tileset: "data/tileset1.fus"
 submaps:
     :
         file: "data/maps/touma/start.fus"
-        pos: (0 0)
+        pos: (0 -5)
         camera: (0 0)
+        mapper: ("double")
+        palette: "data/maps/demo/pals/start.fus"
+    :
+        file: "data/maps/touma/start2.fus"
+        pos: (30 0)
+        camera: (8 -8)
+        mapper: ("triple")
+    :
+        file: "data/maps/touma/swimming_pool.fus"
+        pos: (60 0)
+        camera: (8 -8)
         mapper: ("triple")

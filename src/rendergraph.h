@@ -139,6 +139,9 @@ extern const int rendergraph_n_frames_default;
 struct prismelrenderer;
 struct rendergraph_bitmap;
 
+void label_mapping_cleanup(label_mapping_t *mapping);
+
+
 void rendergraph_cleanup(rendergraph_t *rendergraph);
 int rendergraph_init(rendergraph_t *rendergraph, const char *name,
     struct prismelrenderer *prend, struct palettemapper *palmapper,
