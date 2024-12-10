@@ -907,30 +907,6 @@ So, vars own their keys?!?! Preposterous!
 Give them a stringstore for goodness' sake.
 
 
-Jan 21, 2024:
--------------
-
-* Hexmap recording palmappers are broken?..
-    See data/maps/playarea/start2.fus, it specifies "spider_cpu" but the bodies
-    don't seem to be rendering any differently
-    AH HAAAAAAA PROBABLY BECAUSE NOW OUR SPIDER RGRAPHS ARE EMPTY, AND IT'S
-    ALL LABELS!..
-    ...so labels need to inherit palmappers or something.
-    The flier is also invisible now, because it uses "spider_head"
-
-* The grey death fliers in data/maps/water/room_sm_bubble1.fus are invisible!..
-  Presumably for the same reason that different colour palettes for spiders aren't working?..
-  See above. I commented these guys out for now, turn them back on once they're visible!
-
-* Minieditor needs to show you available labels for each rgraph...
-  Ah, there's `-n NAME --dump` which shows labels!
-  So now, you should be able to specify them when opening it...
-
-* Rendergraphs should have default label mappings.
-  If a label is unmapped when we try to render it, we should error
-  hard.
-
-
 Feb 3, 2024:
 ------------
 
@@ -966,13 +942,6 @@ Anyway, we've already started adding an editor! Use `-E` with collmaptool:
 
 Mar 30, 2024:
 -------------
-
-Rendergraphs should specify default values for their labels.
-For instance, data/_spider.fus has a bajillion references to
-"label:head", "label:bleg", "label:fleg", etc.
-We should be able to declare once at the top of the file what
-their default values are.
-
 
 Currently, the way spider's label values are determined is pretty insane.
 In anim/_spider.fus, there is a proc "update_vars" which is marked
