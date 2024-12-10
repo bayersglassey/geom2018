@@ -210,8 +210,9 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces,
                 trf_fprintf(f, rendergraph->space->dims, &child->trf);
                 fprintf(f, " frame(% 3i % 3i)",
                     child->frame_start, child->frame_len);
+                rendergraph_t *default_rgraph = child->u.label.default_rgraph;
                 fprintf(f, " (default: %s %i)\n",
-                    child->u.label.default_rgraph_name? child->u.label.default_rgraph_name: "<NULL>",
+                    default_rgraph? default_rgraph->name: "<NULL>",
                     child->u.label.default_frame_i);
                 break;
             }
@@ -245,8 +246,9 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces,
                 rendergraph_label_t *label = frame->labels[j];
                 fprintf(f, "%s      %8s ", spaces, label->name);
                 trf_fprintf(f, rendergraph->space->dims, &label->trf);
+                rendergraph_t *default_rgraph = label->default_rgraph;
                 fprintf(f, " (default: %s %i)",
-                    label->default_rgraph_name? label->default_rgraph_name: "<NULL>",
+                    default_rgraph? default_rgraph->name: "<NULL>",
                     label->default_frame_i);
                 fputc('\n', f);
             }
@@ -378,9 +380,11 @@ static int rendergraph_child_details(
 }
 
 static int _rendergraph_render_labels(rendergraph_frame_t *frame,
-    rendergraph_t *rgraph, trf_t *trf, int frame_i
+    rendergraph_t *parent_rgraph, rendergraph_t *rgraph,
+    trf_t *trf, int frame_i
 ){
-    /* Recursively populates frame->labels, adding one for every descendant
+    /* This function is part of rendergraph_calculate_labels.
+    Recursively populates frame->labels, adding one for every descendant
     rgraph of frame's rgraph. (The rgraph parameter is one such rgraph.) */
     int err;
 
@@ -399,18 +403,26 @@ static int _rendergraph_render_labels(rendergraph_frame_t *frame,
         switch(child->type){
             case RENDERGRAPH_CHILD_TYPE_RGRAPH: {
                 rendergraph_t *child_rgraph = child->u.rgraph.rendergraph;
-                err = _rendergraph_render_labels(frame, child_rgraph,
+                err = _rendergraph_render_labels(frame,
+                    parent_rgraph, child_rgraph,
                     &trf2, frame_i2);
                 if(err)return err;
                 break;
             }
             case RENDERGRAPH_CHILD_TYPE_LABEL: {
+                rendergraph_t *default_rgraph = child->u.label.default_rgraph;
+                if(default_rgraph && parent_rgraph->palmapper){
+                    err = palettemapper_apply_to_rendergraph(parent_rgraph->palmapper,
+                        parent_rgraph->prend, default_rgraph, NULL, parent_rgraph->space,
+                        &default_rgraph);
+                    if(err)return err;
+                }
+
                 ARRAY_PUSH_NEW(rendergraph_label_t*, frame->labels,
                     label)
                 label->name = child->u.label.name;
                 label->trf = trf2;
-                label->default_rgraph_name = child->u.label.default_rgraph_name;
-                label->default_rgraph = NULL;
+                label->default_rgraph = default_rgraph;
                 label->default_frame_i = child->u.label.default_frame_i;
                 break;
             }
@@ -436,7 +448,7 @@ int rendergraph_calculate_labels(rendergraph_t *rgraph){
     trf_t trf = {0};
     for(int frame_i = 0; frame_i < rgraph->n_frames; frame_i++){
         rendergraph_frame_t *frame = &rgraph->frames[frame_i];
-        err = _rendergraph_render_labels(frame, rgraph, &trf, frame_i);
+        err = _rendergraph_render_labels(frame, rgraph, rgraph, &trf, frame_i);
         if(err)return err;
     }
 
@@ -798,7 +810,12 @@ static int _rendergraph_render_with_labels(
 ){
     int err;
 
+    bool debug = false;
+
     vecspace_t *rgraph_space = rgraph->space; /* &vec4 */
+
+    if(debug)fprintf(stderr, "Rendering: %s\n", rgraph->name);
+    if(debug && mapper)fprintf(stderr, " ...with mapper: %s\n", mapper->name);
 
     /* Render rgraph */
     err = rendergraph_render(rgraph, surface,
@@ -826,8 +843,11 @@ static int _rendergraph_render_with_labels(
     for(int i = 0; i < frame->labels_len; i++){
         rendergraph_label_t *label = frame->labels[i];
 
+        if(debug)fprintf(stderr, " ...rendering label %i: %s\n", i, label->name);
+
         #define _RENDER_LABEL_RGRAPH(_RGRAPH, _FRAME_I) { \
             rendergraph_t *label_rgraph = (_RGRAPH); \
+            if(debug)fprintf(stderr, "  ...using rgraph: %s\n", label_rgraph->name); \
             trf_t label_trf = label->trf; \
             trf_apply(rgraph_space, &label_trf, &trf); \
             int label_frame_i = get_animated_frame_i( \
@@ -861,7 +881,16 @@ static int _rendergraph_render_with_labels(
 
             found++;
 
-            _RENDER_LABEL_RGRAPH(mapping->rgraph, mapping->frame_i)
+            rendergraph_t *mapping_rgraph = mapping->rgraph;
+
+            if(rgraph->palmapper){
+                err = palettemapper_apply_to_rendergraph(rgraph->palmapper,
+                    prend, mapping_rgraph, NULL, rgraph_space,
+                    &mapping_rgraph);
+                if(err)return err;
+            }
+
+            _RENDER_LABEL_RGRAPH(mapping_rgraph, mapping->frame_i)
         }
 
         /* If we found (and therefore rendered) any rgraphs for this label, continue
@@ -869,25 +898,8 @@ static int _rendergraph_render_with_labels(
         if(found)continue;
 
         /* If we didn't find any rgraphs for this label, use its default rgraph */
-        if(label->default_rgraph_name){
-
-            /* Get the default rgraph */
-            rendergraph_t *default_rgraph = label->default_rgraph;
-            if(!default_rgraph){
-                /* The rgraph wasn't cached, we only have its name, so look up the rgraph
-                by name and cache it */
-                default_rgraph = prismelrenderer_get_rgraph(
-                    prend, label->default_rgraph_name);
-                if(!default_rgraph){
-                    fprintf(stderr, "While rendering %s, label %s, failed to find default rgraph %s\n",
-                        rgraph->name, label->name, label->default_rgraph_name);
-                    return 2;
-                }
-                label->default_rgraph = default_rgraph;
-            }
-
-            /* Render the default rgraph */
-            _RENDER_LABEL_RGRAPH(default_rgraph, label->default_frame_i)
+        if(label->default_rgraph){
+            _RENDER_LABEL_RGRAPH(label->default_rgraph, label->default_frame_i)
         }
     }
 

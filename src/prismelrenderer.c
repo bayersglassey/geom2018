@@ -1394,23 +1394,21 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
             }
             case RENDERGRAPH_CHILD_TYPE_LABEL: {
                 /* Add a child to resulting_rgraph */
+
+                rendergraph_t *default_rgraph = child->u.label.default_rgraph;
+                if(default_rgraph){
+                    err = prismelmapper_apply_to_rendergraph(mapper, prend,
+                        default_rgraph, NULL, space, table, &default_rgraph);
+                    if(err)return err;
+                }
+
                 rendergraph_child_t *new_child;
                 err = rendergraph_push_child(resulting_rgraph,
                     RENDERGRAPH_CHILD_TYPE_LABEL,
                     &new_child);
                 if(err)return err;
                 new_child->u.label.name = child->u.label.name;
-                new_child->u.label.default_rgraph_name = child->u.label.default_rgraph_name;
-                    /* TODO: figure out a way to apply the mapper to this label's
-                    default rgraph...
-                    Currently, child->u.label only has a default_rgraph_name, not a default_rgraph.
-                    This is so that we can handle forward references easily.
-                    But maybe we need to *also* support default_rgraph.
-                    The idea there being, by the time you're applying prismelmappers,
-                    probably all the rgraphs you were using as labels' default rgraphs
-                    are already defined, so we don't need to use names for forward
-                    references anymore, we can actually look things up and get rgraphs
-                    and apply mappers to them. Yeah?.. */
+                new_child->u.label.default_rgraph = default_rgraph;
                 new_child->u.label.default_frame_i = child->u.label.default_frame_i;
                 new_child->trf = child->trf;
                 vec_mul(mapper->space, new_child->trf.add,

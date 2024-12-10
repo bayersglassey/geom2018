@@ -521,13 +521,24 @@ static int parse_shape_labels(prismelrenderer_t *prend, fus_lexer_t *lexer,
             return 2;
         }
 
+        rendergraph_t *default_rgraph = NULL;
+        if(label_localdata->default_rgraph_name){
+            default_rgraph = prismelrenderer_get_rendergraph(rgraph->prend,
+                label_localdata->default_rgraph_name);
+            if(!default_rgraph){
+                fprintf(stderr, "Couldn't find default rendergraph: %s\n",
+                    label_localdata->default_rgraph_name);
+                return 2;
+            }
+        }
+
         rendergraph_child_t *child;
         err = rendergraph_push_child(rgraph,
             RENDERGRAPH_CHILD_TYPE_LABEL,
             &child);
         if(err)return err;
         child->u.label.name = name;
-        child->u.label.default_rgraph_name = label_localdata->default_rgraph_name;
+        child->u.label.default_rgraph = default_rgraph;
         child->u.label.default_frame_i = label_localdata->default_frame_i;
         child->trf.rot = rot;
         child->trf.flip = flip;

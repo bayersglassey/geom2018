@@ -109,7 +109,7 @@ typedef struct rendergraph_child {
             struct palettemapper *palmapper;
         } rgraph;
         struct {
-            /* A child label node... which is really like a dynamic child rgraph node,
+            /* A child label node... which is kind of like a dynamic child rgraph node,
             in the sense that a label is a named reference to an rgraph!..
             NOTE: these are not rendered directly, they are only ever used to populate
             rendergraph->frames[i].labels, which are what we can render.
@@ -118,9 +118,8 @@ typedef struct rendergraph_child {
             const char *name;
 
             /* Weakrefs */
-            const char *default_rgraph_name;
-            struct default_rgraph *rgraph; /* cached from lookup of default_rgraph_name */
-            int default_frame_i;
+            struct rendergraph *default_rgraph;
+            int default_frame_i; /* frame offset when rendering default_rgraph */
         } label;
     } u;
 } rendergraph_child_t;
@@ -144,8 +143,7 @@ typedef struct rendergraph_label {
     trf_t trf;
 
     /* Weakrefs: */
-    const char *default_rgraph_name;
-    struct rendergraph *default_rgraph; /* cached lookup of default_rgraph_name */
+    struct rendergraph *default_rgraph;
     int default_frame_i; /* frame offset when rendering default_rgraph */
 } rendergraph_label_t;
 

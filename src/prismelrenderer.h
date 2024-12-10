@@ -110,24 +110,12 @@ typedef struct prismelrenderer_localdata_label {
 
 typedef struct prismelrenderer_localdata {
     /* While parsing a prismelrenderer, files can be "imported".
-    Most parsing data is shared between a file and any files it imports; however,
-    each file has a prismelrenderer_localdata which contains all data which is *not*
-    shared with imported files.
-
-    So for instance, data/_spider.fus currently does something like this,
-    where it starts with top-level label declarations (which live in the file's
-    "localdata"), then imports another file (which does *not* inherit the
-    label declarations):
-
-        label "label:head": default $PREFIX NS "head"
-        label "label:crawl_head": default $PREFIX NS "crawl_head"
-        label "label:sleep_head": default $PREFIX NS "sleep_head"
-        label "label:fleg": default $PREFIX NS "fleg"
-        label "label:bleg": default $PREFIX NS "bleg"
-
-        import "data/_spider_parts.fus"
-
-    */
+    The localdata is everything which is "scoped" to an import.
+    In other words, it's everything shared with current file and its imports,
+    but *not* with the file which imported current file.
+    The localdata "scopes" form a chain, and any "lookups" (see e.g.
+    prismelrenderer_localdata_init) are done in each link of the chain,
+    back up to the root. */
 
     ARRAY_DECL(prismelrenderer_localdata_label_t*, labels)
 
