@@ -1400,6 +1400,18 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
                     &new_child);
                 if(err)return err;
                 new_child->u.label.name = child->u.label.name;
+                new_child->u.label.default_rgraph_name = child->u.label.default_rgraph_name;
+                    /* TODO: figure out a way to apply the mapper to this label's
+                    default rgraph...
+                    Currently, child->u.label only has a default_rgraph_name, not a default_rgraph.
+                    This is so that we can handle forward references easily.
+                    But maybe we need to *also* support default_rgraph.
+                    The idea there being, by the time you're applying prismelmappers,
+                    probably all the rgraphs you were using as labels' default rgraphs
+                    are already defined, so we don't need to use names for forward
+                    references anymore, we can actually look things up and get rgraphs
+                    and apply mappers to them. Yeah?.. */
+                new_child->u.label.default_frame_i = child->u.label.default_frame_i;
                 new_child->trf = child->trf;
                 vec_mul(mapper->space, new_child->trf.add,
                     mapper->unit);
@@ -1621,9 +1633,17 @@ int palettemapper_apply_to_rendergraph(palettemapper_t *mapper,
     err = rendergraph_copy(resulting_rgraph, name, mapped_rgraph);
     if(err)return err;
 
-    /* Set resulting_rgraph's palmapper to mapper
-    (this was the whole point) */
-    resulting_rgraph->palmapper = mapper;
+    /* If we're applying a palmapper to an rgraph which already has one, we
+    need to apply our palmapper to the existing one */
+    palettemapper_t *resulting_palmapper = mapper;
+    if(mapped_rgraph->palmapper){
+        err = palettemapper_apply_to_palettemapper(mapper, prend,
+            mapped_rgraph->palmapper, NULL, &resulting_palmapper);
+        if(err)return err;
+    }
+
+    /* Set resulting_rgraph's palmapper (this was the whole point) */
+    resulting_rgraph->palmapper = resulting_palmapper;
 
     /* Cache this resulting_rgraph on the mapper in case it
     ever gets applied to the same mapped_rgraph again */
