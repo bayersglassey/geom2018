@@ -301,12 +301,12 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 int test_app_reload_prismelrenderers(test_app_t *app){
     int err;
 
-    err = prismelrenderer_load(&app->prend, app->prend_filename, NULL);
+    err = prismelrenderer_load(&app->prend, app->prend_filename, NULL, NULL);
     if(err)return err;
 
     err = prismelrenderer_load(&app->minimap_prend,
         app->minimap_alt? "data/minimap_alt.fus": "data/minimap.fus",
-        NULL);
+        NULL, NULL);
     if(err)return err;
 
     return 0;

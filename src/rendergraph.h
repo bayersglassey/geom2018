@@ -12,6 +12,37 @@
 #include "array.h"
 
 
+struct rendergraph;
+
+
+/*****************
+ * LABEL MAPPING *
+ *****************/
+
+typedef struct label_mapping {
+    /* Maps label names to rendergraphs. Used for body->label_mappings.
+    Is passed to rendergraph_render_with_labels, for rendering.
+    Is set by body_vars_callback, i.e. when .fus files in anim/ set vars of body
+    which were declared with the "label" property.
+    So like:
+
+        vars:
+            nosave label "label:eye": null
+
+    ...and then:
+
+        set myvar("label:eye"): $PREFIX NS "eye"
+
+    ...make sense? Wheee! */
+
+    /* Weakrefs: */
+    const char *label_name;
+    struct rendergraph *rgraph;
+    int frame_i;
+        /* Incremented by body_step */
+} label_mapping_t;
+
+
 /***************
  * RENDERGRAPH *
  ***************/
@@ -42,6 +73,15 @@ static const char *rendergraph_child_type_plural(int type){
 }
 
 typedef struct rendergraph_child {
+    /* Information about a child rendergraph.
+    The whole point of a "render graph" is to be a tree (graph) of stuff to
+    render!.. so this is basically an outgoing edge, pointing to some other
+    node.
+    Except actually, the graph isn't just built out of rendergraph nodes; it
+    also has prismels and labels, which are always leaves.
+    So, rendergraph_child->type says whether this edge is pointing to another
+    rgraph node, or a prismel or a label. */
+
     trf_t trf;
     int frame_start;
     int frame_len;
@@ -49,12 +89,16 @@ typedef struct rendergraph_child {
     int type; /* enum rendergraph_child_type */
     union {
         struct {
+            /* A child prismel node, so a leaf of the rgraph tree. */
+
             Uint8 color;
 
             /* Weakrefs */
             struct prismel *prismel;
         } prismel;
         struct {
+            /* A child rgraph node, so a branch of the rgraph tree. */
+
             int frame_i;
             bool frame_i_additive;
             bool frame_i_reversed;
@@ -65,37 +109,53 @@ typedef struct rendergraph_child {
             struct palettemapper *palmapper;
         } rgraph;
         struct {
+            /* A child label node... which is really like a dynamic child rgraph node,
+            in the sense that a label is a named reference to an rgraph!..
+            NOTE: these are not rendered directly, they are only ever used to populate
+            rendergraph->frames[i].labels, which are what we can render.
+            See: rendergraph_calculate_labels, rendergraph_render_with_labels */
+
             const char *name;
+
+            /* Weakrefs */
+            const char *default_rgraph_name;
+            struct default_rgraph *rgraph; /* cached from lookup of default_rgraph_name */
+            int default_frame_i;
         } label;
     } u;
 } rendergraph_child_t;
 
 typedef struct rendergraph_bitmap {
+    /* A bitmap, representing a rendergraph rendered with some frame_i/rot/flip
+    combination.
+    See: rendergraph->bitmaps */
     bool pbox_calculated;
     position_box_t pbox;
     SDL_Surface *surface;
 } rendergraph_bitmap_t;
 
 typedef struct rendergraph_label {
-    /* Represents one of rendergraph's descendants (rendergraph_child_t)
-    which have type RENDERGRAPH_CHILD_TYPE_LABEL */
+    /* Represents one of the labels on a single frame of a rendergraph.
+    See: rendergraph_frame->labels */
 
-    const char *name; /* Points to a child->u.label.name */
+    const char *name;
+        /* Points to a child->u.label.name, for some child in
+        rendergraph->children */
     trf_t trf;
-} rendergraph_label_t;
 
-typedef struct label_mapping {
     /* Weakrefs: */
-    const char *label_name;
-    struct rendergraph *rgraph;
-    int frame_i;
-} label_mapping_t;
+    const char *default_rgraph_name;
+    struct rendergraph *default_rgraph; /* cached lookup of default_rgraph_name */
+    int default_frame_i; /* frame offset when rendering default_rgraph */
+} rendergraph_label_t;
 
 typedef struct rendergraph_frame {
     /* Represents information about individual frames of a rendergraph */
 
     ARRAY_DECL(struct rendergraph_label*, labels)
-        /* Labels visible on this frame */
+        /* Labels visible on this frame
+        NOTE: only populated if our parent rendergraph's
+        labels_calculated == true */
 } rendergraph_frame_t;
 
 typedef struct rendergraph {
@@ -111,6 +171,13 @@ typedef struct rendergraph {
 
     int n_bitmaps;
     struct rendergraph_bitmap *bitmaps;
+        /* Pre-rendered bitmaps for this rendergraph under various frame/flip/rot
+        combinations.
+        The formula for the indices is something like:
+
+            (frame_i * 2 + (flip? 1: 0)) * space->rot_max + rot
+
+        See: rendergraph_get_bitmap_i, get_bitmap_i */
     boundbox_t boundbox;
 
     /* Weakrefs: */
@@ -138,6 +205,9 @@ extern const int rendergraph_n_frames_default;
 
 struct prismelrenderer;
 struct rendergraph_bitmap;
+
+void label_mapping_cleanup(label_mapping_t *mapping);
+
 
 void rendergraph_cleanup(rendergraph_t *rendergraph);
 int rendergraph_init(rendergraph_t *rendergraph, const char *name,

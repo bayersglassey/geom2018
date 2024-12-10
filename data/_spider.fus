@@ -4,6 +4,25 @@
 # EYESPIDER (bool)
 
 
+# Higher-level labels, used within _spider.fus to animate the spider
+label "label:head": default $PREFIX NS "head"
+label "label:crawl_head": default $PREFIX NS "crawl_head"
+label "label:sleep_head": default $PREFIX NS "sleep_head"
+label "label:fleg": default $PREFIX NS "fleg"
+label "label:bleg": default $PREFIX NS "bleg"
+
+# Lower-level labels, i.e. "spider parts", defined in _spider_parts.fus,
+# used by rgraphs which "implement" higher-level labels
+label "label:_head": default $PREFIX NS "_head"
+label "label:eye": default $PREFIX NS "eye"
+label "label:nose": default $PREFIX NS "nose"
+label "label:toe": default null
+label "label:headbump": default null
+label "label:head_spikes": default null
+label "label:head_spikes_extended": default null
+label "label:carrying": default null
+
+
 import "data/_spider_parts.fus"
 
 

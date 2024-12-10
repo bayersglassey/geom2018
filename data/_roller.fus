@@ -2,6 +2,11 @@
 # Expected vars:
 # NS (str), e.g. "spider_", ""
 
+
+label "label:carrying": default null
+label "label:nose": default null
+
+
 shapes:
 
     $PREFIX NS "_roller_body_hollow_third":

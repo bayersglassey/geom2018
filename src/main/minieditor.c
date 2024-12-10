@@ -23,6 +23,11 @@
 #define DEFAULT_DELAY_GOAL 30
 
 
+typedef struct label_mapping_def {
+    const char *label_name;
+    const char *rgraph_name;
+} label_mapping_def_t;
+
 typedef struct options {
     bool quiet;
     Uint32 window_flags;
@@ -46,9 +51,16 @@ typedef struct options {
     bool screenshot;
     bool dump;
     int dump_bitmaps;
+    bool list;
+
+    ARRAY_DECL(label_mapping_def_t*, label_mappings)
 } options_t;
 
-void options_init(options_t *opts){
+static void options_cleanup(options_t *opts){
+    ARRAY_FREE_PTR(label_mapping_def_t*, opts->label_mappings, (void))
+}
+
+static void options_init(options_t *opts){
     opts->window_flags = SDL_WINDOW_SHOWN;
     opts->prend_filename = DEFAULT_PREND_FILENAME;
     opts->palette_filename = DEFAULT_PALETTE_FILENAME;
@@ -61,6 +73,7 @@ void options_init(options_t *opts){
     opts->delay_goal = DEFAULT_DELAY_GOAL;
     opts->scw = DEFAULT_SCW;
     opts->sch = DEFAULT_SCH;
+    ARRAY_INIT(opts->label_mappings)
 }
 
 
@@ -78,6 +91,7 @@ static void print_help(FILE *file){
         "  -z  ZOOM         Set zoom (1 - %i)\n"
         "  -r  ROT          Set rotation\n"
         "  -t  FLIP         Set flip\n"
+        "  -l  LABEL RGRAPH Set label (to rgraph name)\n"
         "  --delay TICKS    Set delay goal (default: %i)\n"
         "  -s SCW SCH       Set screen width and height (default: %i %i)\n"
         "  -p X0 Y0         Set screen position\n"
@@ -93,6 +107,7 @@ static void print_help(FILE *file){
         "  --screenshot     Save screenshot and exit (see -if)\n"
         "  --dump           Dump rgraph's details to stdout and exit\n"
         "                   (see -n, --dump_bitmaps)\n"
+        "  --list           Lists prismelrenderer's rgraphs\n"
     , MINIEDITOR_MAX_ZOOM, DEFAULT_DELAY_GOAL, DEFAULT_SCW, DEFAULT_SCH);
 }
 
@@ -157,6 +172,20 @@ static int parse_options(options_t *opts,
                 fprintf(stderr, "Missing value after %s\n", arg);
                 return 2;}
             opts->flip = atoi(args[arg_i]);
+        }else if(!strcmp(arg, "-l")){
+            arg_i += 2;
+            if(arg_i >= n_args + 1){
+                fprintf(stderr, "Missing 2 values after %s\n", arg);
+                return 2;}
+            if(arg_i >= n_args){
+                fprintf(stderr, "Missing 1 value after %s\n", arg);
+                return 2;}
+            const char *label_name = args[arg_i - 1];
+            const char *rgraph_name = args[arg_i];
+
+            ARRAY_PUSH_NEW(label_mapping_def_t*, opts->label_mappings, mapping)
+            mapping->label_name = label_name;
+            mapping->rgraph_name = rgraph_name;
         }else if(!strcmp(arg, "--delay")){
             arg_i++;
             if(arg_i >= n_args){
@@ -210,6 +239,8 @@ static int parse_options(options_t *opts,
             opts->screenshot = true;
         }else if(!strcmp(arg, "--dump")){
             opts->dump = true;
+        }else if(!strcmp(arg, "--list")){
+            opts->list = true;
         }else if(!strcmp(arg, "--dont_cache_bitmaps")){
             opts->cache_bitmaps = false;
         }else{
@@ -277,7 +308,7 @@ static int _reload_editor(minieditor_t *editor, options_t *opts){
     err = prismelrenderer_init(editor->prend, &vec4);
     if(err)return err;
 
-    err = prismelrenderer_load(editor->prend, opts->prend_filename, NULL);
+    err = prismelrenderer_load(editor->prend, opts->prend_filename, NULL, NULL);
     if(err)return err;
     if(editor->prend->rendergraphs_len < 1){
         fprintf(stderr, "No rendergraphs in %s\n", opts->prend_filename);
@@ -382,7 +413,7 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
     err = prismelrenderer_init(prend, &vec4);
     if(err)return err;
 
-    err = prismelrenderer_load(prend, opts->prend_filename, NULL);
+    err = prismelrenderer_load(prend, opts->prend_filename, NULL, NULL);
     if(err)return err;
     if(prend->rendergraphs_len < 1){
         fprintf(stderr, "No rendergraphs in %s\n", opts->prend_filename);
@@ -393,7 +424,7 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
     err = prismelrenderer_init(font_prend, &vec4);
     if(err)return err;
 
-    err = prismelrenderer_load(font_prend, opts->fonts_filename, NULL);
+    err = prismelrenderer_load(font_prend, opts->fonts_filename, NULL, NULL);
     if(err)return err;
 
     const char *geomfont_name = "geomfont1";
@@ -428,6 +459,19 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
         editor->cur_rgraph_i = rgraph_i;
     }
 
+    for(int i = 0; i < opts->label_mappings_len; i++){
+        label_mapping_def_t *def = opts->label_mappings[i];
+        ARRAY_PUSH_NEW(label_mapping_t*, editor->label_mappings, mapping)
+        mapping->label_name = def->label_name;
+        mapping->rgraph = prismelrenderer_get_rgraph(
+            prend, def->rgraph_name);
+        if(!mapping->rgraph){
+            fprintf(stderr, "Couldn't find rgraph: %s\n",
+                def->rgraph_name);
+            return 2;
+        }
+    }
+
     if(renderer){
         /* We're running in a window -- interactive GUI mode, go! */
         err = _mainloop(editor, opts, palette, renderer);
@@ -460,6 +504,11 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
             int n_spaces = 0;
             int dump_bitmaps = 0;
             rendergraph_dump(rgraph, stdout, n_spaces, dump_bitmaps);
+        }else if(opts->list){
+            for(int i = 0; i < prend->rendergraphs_len; i++){
+                rendergraph_t *rgraph = prend->rendergraphs[i];
+                printf("%s\n", rgraph->name);
+            }
         }else{
             /* This should never happen... */
             fprintf(stderr,
@@ -470,6 +519,7 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
     minieditor_cleanup(editor);
     prismelrenderer_cleanup(font_prend);
     prismelrenderer_cleanup(prend);
+    palette_cleanup(palette);
     font_cleanup(font);
     SDL_FreeSurface(surface);
     SDL_FreePalette(sdl_palette);
@@ -544,6 +594,9 @@ int main(int n_args, char **args){
         if(quit)return 0;
     }
 
-    if(opts.screenshot || opts.dump)return main_nogui(&opts);
-    else return main_gui(&opts);
+    if(opts.screenshot || opts.dump || opts.list)e = main_nogui(&opts);
+    else e = main_gui(&opts);
+
+    options_cleanup(&opts);
+    return e;
 }

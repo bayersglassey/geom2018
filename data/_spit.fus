@@ -2,6 +2,10 @@
 # Expected variables:
 # NS (str): e.g. "spikey_", ""
 
+
+label "label:carrying": default null
+
+
 shapes:
 
     $PREFIX NS "_spit":

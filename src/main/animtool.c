@@ -252,7 +252,7 @@ int main(int n_args, char **args){
         err = prismelrenderer_init(&prend, &vec4);
         if(err)return err;
 
-        err = prismelrenderer_load(&prend, prend_filename, NULL);
+        err = prismelrenderer_load(&prend, prend_filename, NULL, NULL);
         if(err)return err;
 
         fprintf(stderr, "Loading stateset from file: %s\n",

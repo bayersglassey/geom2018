@@ -678,6 +678,36 @@ void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box,
 
 
 
+/*****************************
+ * PRISMELRENDERER LOCALDATA *
+ *****************************/
+
+void prismelrenderer_localdata_cleanup(prismelrenderer_localdata_t *localdata){
+    ARRAY_FREE_PTR(prismelrenderer_localdata_label_t*, localdata->labels, (void))
+}
+
+void prismelrenderer_localdata_init(prismelrenderer_localdata_t *localdata,
+    prismelrenderer_localdata_t *parent
+){
+    ARRAY_INIT(localdata->labels)
+    localdata->parent = parent;
+}
+
+prismelrenderer_localdata_label_t *prismelrenderer_localdata_get_label(
+    prismelrenderer_localdata_t *localdata, const char *name, bool recurse
+){
+    while(localdata){
+        for(int i = 0; i < localdata->labels_len; i++){
+            prismelrenderer_localdata_label_t *label = localdata->labels[i];
+            if(!strcmp(label->name, name))return label;
+        }
+        if(recurse)localdata = localdata->parent;
+        else localdata = NULL;
+    }
+    return NULL;
+}
+
+
 /*******************
  * PRISMELRENDERER *
  *******************/
@@ -699,6 +729,7 @@ int prismelrenderer_init(prismelrenderer_t *prend, vecspace_t *space){
     ARRAY_INIT(prend->tilesets)
     ARRAY_INIT(prend->mappers)
     ARRAY_INIT(prend->palmappers)
+    ARRAY_INIT(prend->localdatas)
     return 0;
 }
 
@@ -717,6 +748,8 @@ void prismelrenderer_cleanup(prismelrenderer_t *prend){
         prismelmapper_cleanup)
     ARRAY_FREE_PTR(palettemapper_t*, prend->palmappers,
         palettemapper_cleanup)
+    ARRAY_FREE_PTR(prismelrenderer_localdata_t*, prend->localdatas,
+        prismelrenderer_localdata_cleanup)
 }
 
 void prismelrenderer_dump(prismelrenderer_t *prend, FILE *f,
@@ -957,7 +990,7 @@ int prismelrenderer_get_or_create_solid_palettemapper(
 
 
 int prismelrenderer_load(prismelrenderer_t *prend, const char *filename,
-    vars_t *vars
+    vars_t *vars, prismelrenderer_localdata_t *parent_localdata
 ){
     int err;
     fus_lexer_t lexer;
@@ -968,7 +1001,7 @@ int prismelrenderer_load(prismelrenderer_t *prend, const char *filename,
     err = fus_lexer_init_with_vars(&lexer, text, filename, vars);
     if(err)return err;
 
-    err = prismelrenderer_parse(prend, &lexer);
+    err = prismelrenderer_parse(prend, &lexer, parent_localdata);
     if(err)return err;
 
     prend->loaded = true;

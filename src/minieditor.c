@@ -10,7 +10,8 @@
 
 
 void minieditor_cleanup(minieditor_t *editor){
-    /* Nuthin */
+    ARRAY_FREE_PTR(label_mapping_t*, editor->label_mappings,
+        label_mapping_cleanup);
 }
 
 void minieditor_init(minieditor_t *editor,
@@ -26,6 +27,8 @@ void minieditor_init(minieditor_t *editor,
     editor->font = font;
     editor->geomfont = geomfont;
     editor->prend = prend;
+
+    ARRAY_INIT(editor->label_mappings)
 
     editor->cur_rgraph_i = 0;
     editor->frame_i = 0;
@@ -122,9 +125,10 @@ int minieditor_render(minieditor_t *editor, int *line_y_ptr){
         /* Render rgraph */
         int x0 = editor->scw / 2 + editor->x0;
         int y0 = editor->sch / 2 + editor->y0;
-        err = rendergraph_render(rgraph, editor->surface,
+        err = rendergraph_render_with_labels(rgraph, editor->surface,
             editor->sdl_palette, editor->prend, x0, y0, editor->zoom,
-            (vec_t){0}, editor->rot, editor->flip, editor->frame_i, NULL);
+            (vec_t){0}, editor->rot, editor->flip, editor->frame_i, NULL,
+            editor->label_mappings_len, editor->label_mappings);
         if(err)return err;
     }
 

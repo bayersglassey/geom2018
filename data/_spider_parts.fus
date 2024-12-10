@@ -3,6 +3,9 @@
 # NS (str), e.g. "spider_"
 # EYESPIDER (bool)
 
+# This file defines the shapes used by higher-level labels, like
+# "label:head", which are used in data/_spider.fus.
+
 
 shapes:
 

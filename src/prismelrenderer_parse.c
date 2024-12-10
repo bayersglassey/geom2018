@@ -477,7 +477,7 @@ static int parse_shape_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer,
 }
 
 static int parse_shape_labels(prismelrenderer_t *prend, fus_lexer_t *lexer,
-    rendergraph_t *rgraph
+    rendergraph_t *rgraph, prismelrenderer_localdata_t *localdata
 ){
     /*
         Example data:
@@ -513,12 +513,22 @@ static int parse_shape_labels(prismelrenderer_t *prend, fus_lexer_t *lexer,
         }
         CLOSE
 
+        prismelrenderer_localdata_label_t *label_localdata =
+            prismelrenderer_localdata_get_label(localdata, name, true);
+        if(!label_localdata){
+            fus_lexer_err_info(lexer);
+            fprintf(stderr, "Label not defined: \"%s\"\n", name);
+            return 2;
+        }
+
         rendergraph_child_t *child;
         err = rendergraph_push_child(rgraph,
             RENDERGRAPH_CHILD_TYPE_LABEL,
             &child);
         if(err)return err;
         child->u.label.name = name;
+        child->u.label.default_rgraph_name = label_localdata->default_rgraph_name;
+        child->u.label.default_frame_i = label_localdata->default_frame_i;
         child->trf.rot = rot;
         child->trf.flip = flip;
         child->frame_start = frame_start;
@@ -590,7 +600,8 @@ static int parse_shape_hexpicture(prismelrenderer_t *prend, fus_lexer_t *lexer,
 
 
 int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
-    prismelrenderer_t *prend, const char *name, rendergraph_t **rgraph_ptr
+    prismelrenderer_t *prend, const char *name, rendergraph_t **rgraph_ptr,
+    prismelrenderer_localdata_t *localdata
 ){
     INIT
     rendergraph_t *rgraph = NULL;
@@ -617,7 +628,7 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
 
         rendergraph_t *mapped_rgraph = NULL;
         err = fus_lexer_get_rendergraph(lexer, prend, NULL,
-            &mapped_rgraph);
+            &mapped_rgraph, localdata);
         if(err)return err;
 
         err = prismelmapper_apply_to_rendergraph(mapper, prend, mapped_rgraph,
@@ -688,7 +699,7 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
             if(err)return err;
         }else if(GOT("labels")){
             NEXT
-            err = parse_shape_labels(prend, lexer, rgraph);
+            err = parse_shape_labels(prend, lexer, rgraph, localdata);
             if(err)return err;
         }else if(GOT("hexpicture")){
             NEXT
@@ -740,7 +751,9 @@ ok:
     return 0;
 }
 
-static int parse_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer){
+static int parse_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
+    prismelrenderer_localdata_t *localdata
+){
     INIT
     while(1){
         const char *name;
@@ -753,7 +766,7 @@ static int parse_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer){
             return 2;
         }
 
-        err = fus_lexer_get_rendergraph(lexer, prend, name, &rgraph);
+        err = fus_lexer_get_rendergraph(lexer, prend, name, &rgraph, localdata);
         if(err)return err;
     }
     NEXT
@@ -997,11 +1010,45 @@ static int parse_geomfonts(prismelrenderer_t *prend, fus_lexer_t *lexer){
  * PRISMELRENDERER *
  *******************/
 
-int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer){
+int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer,
+    prismelrenderer_localdata_t *parent_localdata
+){
+
+    /* This function parses a single file (errrr, lexer) worth of data.
+    If it encounters an "import" it may call itself recursively (via
+    prismelrenderer_load).
+    However, some data is not shared between these recursive calls, i.e.
+    between files: that data is the "localdata". */
+    ARRAY_PUSH_NEW(prismelrenderer_localdata_t*, prend->localdatas, localdata)
+    prismelrenderer_localdata_init(localdata, parent_localdata);
+
     INIT
     while(1){
         if(DONE){
             break;
+        }else if(GOT("label")){
+            NEXT
+            const char *name;
+            GET_STR_CACHED(name, &prend->name_store)
+            if(prismelrenderer_localdata_get_label(localdata, name, false)){
+                fus_lexer_err_info(lexer);
+                fprintf(stderr, "Redefinition of label \"%s\"\n", name);
+                return 2;
+            }
+            ARRAY_PUSH_NEW(prismelrenderer_localdata_label_t*, localdata->labels, label)
+            label->name = name;
+            OPEN
+            GET("default")
+            if(GOT("null")){
+                NEXT
+                label->default_rgraph_name = NULL;
+            }else{
+                GET_STR_CACHED(label->default_rgraph_name, &prend->name_store)
+                if(!GOT(")")){
+                    GET_INT(label->default_frame_i)
+                }
+            }
+            CLOSE
         }else if(GOT("palmappers")){
             NEXT
             OPEN
@@ -1015,7 +1062,7 @@ int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer){
         }else if(GOT("shapes")){
             NEXT
             OPEN
-            err = parse_shapes(prend, lexer);
+            err = parse_shapes(prend, lexer, localdata);
             if(err)return err;
         }else if(GOT("mappers")){
             NEXT
@@ -1037,7 +1084,7 @@ int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer){
             err = _fus_lexer_get_str(lexer, &filename);
             if(err)return err;
 
-            err = prismelrenderer_load(prend, filename, lexer->vars);
+            err = prismelrenderer_load(prend, filename, lexer->vars, localdata);
             if(err){
                 fus_lexer_err_info(lexer);
                 fprintf(stderr, "...while importing here.\n");

@@ -96,6 +96,53 @@ void prismel_get_boundary_box(prismel_t *prismel, boundary_box_t *box,
     int bitmap_i);
 
 
+/*****************************
+ * PRISMELRENDERER LOCALDATA *
+ *****************************/
+
+typedef struct prismelrenderer_localdata_label {
+    const char *name;
+
+    /* Fields of rendergraph_label_t */
+    const char *default_rgraph_name;
+    int default_frame_i;
+} prismelrenderer_localdata_label_t;
+
+typedef struct prismelrenderer_localdata {
+    /* While parsing a prismelrenderer, files can be "imported".
+    Most parsing data is shared between a file and any files it imports; however,
+    each file has a prismelrenderer_localdata which contains all data which is *not*
+    shared with imported files.
+
+    So for instance, data/_spider.fus currently does something like this,
+    where it starts with top-level label declarations (which live in the file's
+    "localdata"), then imports another file (which does *not* inherit the
+    label declarations):
+
+        label "label:head": default $PREFIX NS "head"
+        label "label:crawl_head": default $PREFIX NS "crawl_head"
+        label "label:sleep_head": default $PREFIX NS "sleep_head"
+        label "label:fleg": default $PREFIX NS "fleg"
+        label "label:bleg": default $PREFIX NS "bleg"
+
+        import "data/_spider_parts.fus"
+
+    */
+
+    ARRAY_DECL(prismelrenderer_localdata_label_t*, labels)
+
+    /* Weakrefs */
+    struct prismelrenderer_localdata *parent;
+} prismelrenderer_localdata_t;
+
+
+void prismelrenderer_localdata_cleanup(prismelrenderer_localdata_t *localdata);
+void prismelrenderer_localdata_init(prismelrenderer_localdata_t *localdata,
+    prismelrenderer_localdata_t *parent);
+prismelrenderer_localdata_label_t *prismelrenderer_localdata_get_label(
+    prismelrenderer_localdata_t *localdata, const char *name, bool recurse);
+
+
 /*******************
  * PRISMELRENDERER *
  *******************/
@@ -110,6 +157,7 @@ typedef struct prismelrenderer {
     ARRAY_DECL(struct tileset*, tilesets)
     ARRAY_DECL(struct prismelmapper*, mappers)
     ARRAY_DECL(struct palettemapper*, palmappers)
+    ARRAY_DECL(prismelrenderer_localdata_t*, localdatas)
 
     bool loaded;
         /* Whether we have already been fully loaded once, in the sense
@@ -162,9 +210,10 @@ struct palettemapper;
 int prismelrenderer_get_or_create_solid_palettemapper(
     prismelrenderer_t *prend, int color,
     struct palettemapper **palmapper_ptr);
-int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer);
+int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer,
+    prismelrenderer_localdata_t *parent_localdata);
 int prismelrenderer_load(prismelrenderer_t *prend, const char *filename,
-    vars_t *vars);
+    vars_t *vars, prismelrenderer_localdata_t *parent_localdata);
 int prismelrenderer_save(prismelrenderer_t *prend, const char *filename);
 int prismelrenderer_write(prismelrenderer_t *prend, FILE *f);
 int prismelrenderer_render_all_bitmaps(prismelrenderer_t *prend,
@@ -334,7 +383,8 @@ int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
 int fus_lexer_get_prismel(fus_lexer_t *lexer,
     prismelrenderer_t *prend, const char *name, prismel_t **prismel_ptr);
 int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
-    prismelrenderer_t *prend, const char *name, rendergraph_t **rgraph_ptr);
+    prismelrenderer_t *prend, const char *name, rendergraph_t **rgraph_ptr,
+    prismelrenderer_localdata_t *localdata);
 int fus_lexer_get_mapper(fus_lexer_t *lexer,
     prismelrenderer_t *prend, const char *name, prismelmapper_t **mapper_ptr);
 

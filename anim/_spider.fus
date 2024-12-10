@@ -24,15 +24,19 @@ vars:
     "is_flipspider": F
     "is_stickyspider": F
 
-    # Labels which *don't* depend on "is_*spider" vars
+    # Vars controlling labels which *don't* depend on "is_*spider" vars
     # (These labels are moved around to animate the spider)
+    # NOTE: these labels are given default values in data/_spider.fus,
+    # so we probably don't actually need to set them here.
+    # PROBABLY TODO: remove them from here; I don't think we would
+    # ever need to modify their values.
     nosave label "label:head": $PREFIX NS "head"
     nosave label "label:crawl_head": $PREFIX NS "crawl_head"
     nosave label "label:sleep_head": $PREFIX NS "sleep_head"
     nosave label "label:fleg": $PREFIX NS "fleg"
     nosave label "label:bleg": $PREFIX NS "bleg"
 
-    # Labels which *do* depend on "is_*spider" vars
+    # Vars controlling labels which *do* depend on "is_*spider" vars
     # (These labels are set by proc "update_vars", and are used
     # to customize the spider's appearance)
     nosave label "label:_head": null
@@ -52,7 +56,7 @@ vars:
 proc toplevel onstatesetchange "update_vars":
     # Sets various vars which depend on the "is_*spider" vars.
 
-    # Defaults:
+    # Default label values:
     set myvar("label:_head"): $PREFIX NS "_head"
     set myvar("label:eye"): $PREFIX NS "eye"
     set myvar("label:nose"): $PREFIX NS "nose"
@@ -61,7 +65,8 @@ proc toplevel onstatesetchange "update_vars":
     set myvar("label:head_spikes"): null
     set myvar("label:head_spikes_extended"): null
 
-    # Overriding the defaults depending on what kind(s) of spider we are:
+    # Overriding the default label values depending on what
+    # kind(s) of spider we are:
     if: expr: myvar("is_rollerspider")
     then:
         set myvar("label:_head"): $PREFIX NS "_head_roller"
@@ -83,7 +88,8 @@ proc toplevel onstatesetchange "update_vars":
     then:
         set myvar("label:toe"): $PREFIX NS "toe_sticky"
 
-    # Set myvar("spit_anim")
+    # Set myvar("spit_anim"), i.e. which stateset to use when spawning
+    # our "spit"
     $IF EYESPIDER:
         set myvar("spit_anim"): "anim/eyespit.fus"
     $IF !EYESPIDER:

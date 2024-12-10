@@ -19,6 +19,8 @@ typedef struct minieditor {
     SDL_Surface *surface;
     SDL_Palette *sdl_palette;
 
+    ARRAY_DECL(label_mapping_t*, label_mappings)
+
     const char *prend_filename;
 
     font_t *font;
