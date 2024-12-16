@@ -955,9 +955,6 @@ data/maps/tutorial2, start4.2:
 Make it easier, like maybe have parts of the map open up as player gets to
 more places.
 
-data/maps/tutorial3/switches.fus:
-Add a save point at the start!
-
 Make sure tutorial teaches player how to load from save point with "1" etc
 early on! Like, have a place where you need to save, open a switch, then be
 stuck and reload from save point.
@@ -968,26 +965,12 @@ Errr but no, that doesn't teach you to press "1" yourself, you can just
 press "up" when you're exploded...
 
 
-data/maps/tutorial3/start3_switched_a.fus:
-Make the switch reversable, so player can hit it again and see what its effect
-was. Maaaybe also add electricity so player can see what it's attached to?..
-
-Need to teach player early on that electricity doesn't hurt you, it just shows
-what switches are connected to...
-Maybe right after data/maps/tutorial3/switches2.fus?..
-
-
 HOW TO MAKE A GAME WHICH CAN BE COMPLETED!
 * Fix all the broken recordings!
 * Move some of the later tutorial parts into the main "nonlinear" world, and
     vice versa.
-    * data/maps/tutorial3/
-        * switches.fus, switches2.fus: should come after tutorial1
-        * add a switches3.fus which teaches that electricity doesn't hurt
-            you, it just shows you what switches are connected to
-        * the rest of tutorial3 should not be part of the tutorial, it should
-            be part of open-ended stuff
     * tutorial2: should be part of open-ended world
+    * tutorial3: should be part of open-ended world
 * Make "pickup slots".
     You start with 1.
     Parts of the tutorial teach you how to use some pickups.
