@@ -1,15 +1,9 @@
 name: "tutorial3"
 unit: 3 2 0 -1
-spawn: "data/maps/tutorial3/switches.fus"
+spawn: "data/maps/tutorial3/floaty_start.fus"
 palette: "data/pal1.fus"
 tileset: "data/tileset1.fus"
 vars:
-    "switches_a": F
-    "switches_b": F
-
-    "switches2_a": F
-    "switches2_b": F
-
     "switch1": F
     "switch2": F
     "switch3": F
@@ -24,56 +18,6 @@ vars:
     nosave "start_eye_e_open": 0
 
 submaps:
-    "switches":
-        file: "data/maps/tutorial3/switches.fus"
-        pos: (-100 0)
-        camera: (12 5)
-        mapper: ("triple")
-        submaps:
-            :
-                file: "data/maps/tutorial3/switches_blocker.fus"
-                visible: not mapvar("switches_a")
-                pos: (6 6)
-            :
-                file: "data/maps/tutorial3/switches_blocker_thick_r.fus"
-                visible: mapvar("switches_a")
-                pos: (12 6)
-            :
-                file: "data/maps/tutorial3/switches_blocker_thick_l.fus"
-                visible: mapvar("switches_b")
-                pos: (17 7)
-            :
-                file: "data/maps/tutorial3/switches_blocker_short.fus"
-                visible: mapvar("switches_b")
-                pos: (8 9)
-                rot: 3
-    "switches2":
-        file: "data/maps/tutorial3/switches2.fus"
-        pos: (-110 7)
-        camera: (-8 -5)
-        mapper: ("triple")
-        recs:
-            : "data/maps/tutorial3/recs/switches2_spider000.fus"
-        submaps:
-            :
-                file: "data/maps/tutorial3/switches2_blocker_a.fus"
-                visible: not mapvar("switches2_a")
-                pos: (-8 -9)
-                rot: 1
-            :
-                file: "data/maps/tutorial3/switches2_blocker_b.fus"
-                visible: not mapvar("switches2_b")
-                pos: (-5 -6)
-                rot: 1
-            :
-                file: "data/maps/tutorial3/switches2_blocker_a.fus"
-                visible: mapvar("switches2_a")
-                pos: (-18 -9)
-            :
-                file: "data/maps/tutorial3/switches2_blocker_b.fus"
-                visible: mapvar("switches2_b")
-                pos: (-16 -1)
-                rot: 5
     "floaty_start":
         file: "data/maps/tutorial3/floaty_start.fus"
         pos: eval: (-7 0)

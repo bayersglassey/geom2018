@@ -2,6 +2,7 @@ vars:
     # Global variables
 worldmaps:
     : "data/maps/tutorial/worldmap.fus"
+    : "data/maps/tutorial_switches/worldmap.fus"
     : "data/maps/tutorial2/worldmap.fus"
     : "data/maps/tutorial3/worldmap.fus"
     : "data/maps/title/worldmap.fus"

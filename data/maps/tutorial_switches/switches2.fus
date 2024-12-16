@@ -9,7 +9,7 @@ parts:
             "key": "switches2_b"
     "D": recording "data/recs/door.fus"
         vars:
-            "location": "floaty_start"
+            "map": "data/maps/demo/worldmap.fus"
 collmap:
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;

@@ -4,7 +4,7 @@ parts:
             "opened_key": "skypipes4_eye_a_open"
     "D": recording "data/recs/door.fus"
         vars:
-            "map": "data/maps/tutorial2/worldmap.fus"
+            "map": "data/maps/tutorial_switches/worldmap.fus"
 collmap:
     ;;
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
