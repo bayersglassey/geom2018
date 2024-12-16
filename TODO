@@ -779,15 +779,6 @@ body_start_recording does this:
 maybe the filename, and the "wait" counter.
 
 
-Jul 2, 2022:
-------------
-
-tutorial2's start3b needs to be easier.
-* Could turn people into spikeyspider
-    * But then we need to teach them how that works first
-* Could have a "weak" hexroller, which just stuns you or something?..
-
-
 Jul 3, 2022:
 ------------
 
@@ -955,3 +946,55 @@ into data/_spider.fus?.. i.e. into the prismelrenderer and its shapes?..
 Errrrmmmmm but I guess that would mess up our whole "cache bitmaps on
 shapes" approach.
 Omfg. Never mind. O_o
+
+
+Dec 15, 2024:
+-------------
+
+data/maps/tutorial2, start4.2:
+Make it easier, like maybe have parts of the map open up as player gets to
+more places.
+
+data/maps/tutorial3/switches.fus:
+Add a save point at the start!
+
+Make sure tutorial teaches player how to load from save point with "1" etc
+early on! Like, have a place where you need to save, open a switch, then be
+stuck and reload from save point.
+...maybe by adding a creature which blows you and it up?
+And then there's a room with 3 of them and a savepoint at the start, and
+so you need to go in 3 times and get blown up, before continuing?..
+Errr but no, that doesn't teach you to press "1" yourself, you can just
+press "up" when you're exploded...
+
+
+data/maps/tutorial3/start3_switched_a.fus:
+Make the switch reversable, so player can hit it again and see what its effect
+was. Maaaybe also add electricity so player can see what it's attached to?..
+
+Need to teach player early on that electricity doesn't hurt you, it just shows
+what switches are connected to...
+Maybe right after data/maps/tutorial3/switches2.fus?..
+
+
+HOW TO MAKE A GAME WHICH CAN BE COMPLETED!
+* Fix all the broken recordings!
+* Move some of the later tutorial parts into the main "nonlinear" world, and
+    vice versa.
+    * data/maps/tutorial3/
+        * switches.fus, switches2.fus: should come after tutorial1
+        * add a switches3.fus which teaches that electricity doesn't hurt
+            you, it just shows you what switches are connected to
+        * the rest of tutorial3 should not be part of the tutorial, it should
+            be part of open-ended stuff
+    * tutorial2: should be part of open-ended world
+* Make "pickup slots".
+    You start with 1.
+    Parts of the tutorial teach you how to use some pickups.
+    After going through certain long parts of the open-ended world, you can
+    get extra pickup slots.
+* Don't worry about adding too many new places, rather make it so existing
+    places change as you achieve stuff.
+* And the ultimate goal is... what?.. something like rejoining spider city?..
+    So you complete tasks for spiders in various areas who are... making
+    spider outposts?.. and then they help you get to the city?..
