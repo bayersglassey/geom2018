@@ -35,11 +35,11 @@ submaps:
                 visible: not mapvar("switches_a")
                 pos: (6 6)
             :
-                file: "data/maps/tutorial3/switches_blocker.fus"
+                file: "data/maps/tutorial3/switches_blocker_thick_r.fus"
                 visible: mapvar("switches_a")
                 pos: (12 6)
             :
-                file: "data/maps/tutorial3/switches_blocker.fus"
+                file: "data/maps/tutorial3/switches_blocker_thick_l.fus"
                 visible: mapvar("switches_b")
                 pos: (17 7)
             :
@@ -49,7 +49,7 @@ submaps:
                 rot: 3
     "switches2":
         file: "data/maps/tutorial3/switches2.fus"
-        pos: (-40 0)
+        pos: (-110 7)
         camera: (-8 -5)
         mapper: ("triple")
         recs:

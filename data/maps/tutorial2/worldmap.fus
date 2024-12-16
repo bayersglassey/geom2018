@@ -113,8 +113,6 @@ submaps:
                                 pos: (-15 -19)
             "start3.2":
                 pos: (-13 -32)
-                recs:
-                    : "data/maps/tutorial2/recs/start3.2b_crawler.fus"
                 submaps:
                     :
                         bg

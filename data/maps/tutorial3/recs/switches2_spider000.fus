@@ -1,6 +1,6 @@
 anim: "anim/eyespider.fus"
 state: "stand"
-pos: ( -45 3)
+pos: ( -115 10)
 rot: 4
 turn: yes
 keys:
