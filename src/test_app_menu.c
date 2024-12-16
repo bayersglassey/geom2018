@@ -18,7 +18,7 @@ bool _test_app_menu_pauses_game[TEST_APP_MENU_SCREENS] = {
     false, false, false, true};
 const char *_title_options[] = {"Start game", "Delete saved game", "Quit game", NULL};
 const char *_save_slot_options[] = {"Slot 1", "Slot 2", "Slot 3", "Back to title screen", NULL};
-const char *_paused_options[] = {"Continue", "Exit to title screen", "Quit game", NULL};
+const char *_paused_options[] = {"Continue", "Restart from save point", "Exit to title screen", "Quit game", NULL};
 const char **test_app_menu_options[TEST_APP_MENU_SCREENS] = {
     _title_options, _save_slot_options, _save_slot_options, _paused_options};
 
@@ -154,12 +154,18 @@ int test_app_menu_select(test_app_menu_t *menu){
                 case 0: /* CONTINUE */
                     app->show_menu = false;
                     break;
-                case 1: /* EXIT TO TITLE */
+                case 1: /* RESTART FROM SAVE POINT */
+                    err = hexgame_reset_player_by_keymap(&app->hexgame, 0,
+                        RESET_SOFT, NULL);
+                    if(err)return err;
+                    app->show_menu = false;
+                    break;
+                case 2: /* EXIT TO TITLE */
                     test_app_menu_set_screen(menu,
                         TEST_APP_MENU_SCREEN_TITLE);
                     app->state = TEST_APP_STATE_TITLE_SCREEN;
                     break;
-                case 2: /* QUIT */
+                case 3: /* QUIT */
                     app->state = TEST_APP_STATE_QUIT;
                     app->show_menu = false;
                     break;
