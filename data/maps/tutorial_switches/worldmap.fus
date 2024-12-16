@@ -10,12 +10,17 @@ vars:
     "switches2_a": F
     "switches2_b": F
 
+    "switches3_a": F
+    "switches3_b": F
+
 submaps:
     "switches":
         file: "data/maps/tutorial_switches/switches.fus"
         pos: (-100 0)
         camera: (12 5)
         mapper: ("triple")
+        recs:
+            : "data/maps/tutorial_switches/recs/switches2_eyespider000.fus"
         submaps:
             :
                 file: "data/maps/tutorial_switches/switches_blocker.fus"
@@ -39,8 +44,6 @@ submaps:
         pos: (-110 7)
         camera: (-8 -5)
         mapper: ("triple")
-        recs:
-            : "data/maps/tutorial_switches/recs/switches2_spider000.fus"
         submaps:
             :
                 file: "data/maps/tutorial_switches/switches2_blocker_a.fus"
@@ -61,3 +64,27 @@ submaps:
                 visible: mapvar("switches2_b")
                 pos: (-16 -1)
                 rot: 5
+    "switches3":
+        file: "data/maps/tutorial_switches/switches3.fus"
+        pos: (-143 -2)
+        camera: (-4 -4)
+        mapper: ("triple")
+        submaps:
+            :
+                bg
+                file: "data/maps/tutorial_switches/switches3_energy_a_on.fus"
+                visible: not mapvar("switches3_a")
+            :
+                bg
+                file: "data/maps/tutorial_switches/switches3_energy_a_off.fus"
+                visible: mapvar("switches3_a")
+            :
+                file: "data/maps/tutorial_switches/switches3_blocker_a.fus"
+                visible: not mapvar("switches3_a")
+            :
+                file: "data/maps/tutorial_switches/switches3_blocker_b.fus"
+                visible: if mapvar("switches3_a")
+                    # We don't have boolean expressions, so we build a XOR out
+                    # of if...then...else things..,
+                    then if mapvar("switches3_b") then F else T
+                    else if mapvar("switches3_b") then T else F

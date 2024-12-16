@@ -1,0 +1,13 @@
+anim: "anim/eyespider.fus"
+state: "stand"
+pos: ( -90 13)
+rot: 0
+turn: no
+keys:
+    x:
+    y:
+    u:
+    d:
+    l:
+    r:
+data: " w73 +r w52 -r w19 +l w2 -l w27 +y w2 -y w7 +y w4 -y w14 +d w7 +y w3 -y w15 -d w58 +l w50 -l w6 +r w3 -r w24 +y w4 -y w11 +d w14 +y w4 -y w32 -d w49 +r w25 -r w11 +l w2 -l w14 +y w3 -y w30 +r w2 -r w19 +y w3 -y w72 +l w32 -l w12 +r w2 -r w8"
