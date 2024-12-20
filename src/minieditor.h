@@ -19,6 +19,9 @@ typedef struct minieditor {
     SDL_Surface *surface;
     SDL_Palette *sdl_palette;
 
+    prismelmapper_t *mapper;
+    palettemapper_t *palmapper;
+
     ARRAY_DECL(label_mapping_t*, label_mappings)
 
     const char *prend_filename;
@@ -52,6 +55,8 @@ typedef struct minieditor {
 void minieditor_cleanup(minieditor_t *editor);
 void minieditor_init(minieditor_t *editor,
     SDL_Surface *surface, SDL_Palette *sdl_palette,
+    prismelmapper_t *mapper,
+    palettemapper_t *palmapper,
     const char *prend_filename,
     font_t *font, geomfont_t *geomfont,
     prismelrenderer_t *prend,

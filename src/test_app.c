@@ -261,6 +261,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 
     minieditor_init(&app->editor,
         app->surface, app->sdl_palette,
+        NULL, NULL, /* no mapper or palmapper */
         app->prend_filename,
         &app->font, app->geomfont, &app->prend,
         app->delay_goal, app->scw, app->sch);

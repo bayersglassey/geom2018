@@ -22,6 +22,13 @@
 /* How many milliseconds we want each frame to last */
 #define DEFAULT_DELAY_GOAL 30
 
+#define ACTION_DEFAULT          0
+#define ACTION_SCREENSHOT       1
+#define ACTION_DUMP             2
+#define ACTION_LIST             3
+#define ACTION_LIST_MAPPERS     4
+#define ACTION_LIST_PALMAPPERS  5
+
 
 typedef struct label_mapping_def {
     const char *label_name;
@@ -35,6 +42,8 @@ typedef struct options {
     const char *rgraph_name;
     const char *image_filename;
     const char *palette_filename;
+    const char *mapper_name;
+    const char *palmapper_name;
     const char *font_filename;
     const char *fonts_filename;
     int zoom;
@@ -48,11 +57,8 @@ typedef struct options {
     int sch;
     int x0;
     int y0;
-    bool screenshot;
-    bool dump;
     int dump_bitmaps;
-    bool list;
-
+    int action; /* See ACTION_* */
     ARRAY_DECL(label_mapping_def_t*, label_mappings)
 } options_t;
 
@@ -64,6 +70,8 @@ static void options_init(options_t *opts){
     opts->window_flags = SDL_WINDOW_SHOWN;
     opts->prend_filename = DEFAULT_PREND_FILENAME;
     opts->palette_filename = DEFAULT_PALETTE_FILENAME;
+    opts->mapper_name = NULL;
+    opts->palmapper_name = NULL;
     opts->font_filename = DEFAULT_FONT_FILENAME;
     opts->fonts_filename = DEFAULT_FONTS_FILENAME;
     opts->image_filename = DEFAULT_IMAGE_FILENAME;
@@ -98,16 +106,21 @@ static void print_help(FILE *file){
         "  --pal   FILENAME Load palette (default: " DEFAULT_PALETTE_FILENAME ")\n"
         "  --font  FILENAME Load font (default: " DEFAULT_FONT_FILENAME ")\n"
         "  --fonts FILENAME Load fonts (default: " DEFAULT_FONTS_FILENAME ")\n"
+        "  --mapper    NAME Applies the given prismel mapper\n"
+        "  --palmapper NAME Applies the given palette mapper\n"
         "  --nocontrols     Don't show controls initially\n"
         "  --dump_bitmaps   Whether to dump rendergraph's bitmaps (see --dump)\n"
         "                     0: don't dump bitmaps\n"
         "                     1: dump bitmaps\n"
         "                     2: also dump their surfaces\n"
         "Commands which cause the program to run without a GUI window:\n"
-        "  --screenshot     Save screenshot and exit (see -if)\n"
-        "  --dump           Dump rgraph's details to stdout and exit\n"
+        "  screenshot       Save screenshot and exit (see -if)\n"
+        "  dump             Dump rgraph's details to stdout and exit\n"
         "                   (see -n, --dump_bitmaps)\n"
-        "  --list           Lists prismelrenderer's rgraphs\n"
+        "  list             Lists prismelrenderer's rgraphs and exit\n"
+        "  list_mappers     Lists prismelrenderer's prismelmappers and exit\n"
+        "  list_palmappers  Lists prismelrenderer's palettemappers and exit\n"
+        "                   (NOTE: palmapper is applied after mapper)\n"
     , MINIEDITOR_MAX_ZOOM, DEFAULT_DELAY_GOAL, DEFAULT_SCW, DEFAULT_SCH);
 }
 
@@ -212,6 +225,18 @@ static int parse_options(options_t *opts,
                 fprintf(stderr, "Missing filename after %s\n", arg);
                 return 2;}
             opts->palette_filename = args[arg_i];
+        }else if(!strcmp(arg, "--mapper")){
+            arg_i++;
+            if(arg_i >= n_args){
+                fprintf(stderr, "Missing name after %s\n", arg);
+                return 2;}
+            opts->mapper_name = args[arg_i];
+        }else if(!strcmp(arg, "--palmapper")){
+            arg_i++;
+            if(arg_i >= n_args){
+                fprintf(stderr, "Missing name after %s\n", arg);
+                return 2;}
+            opts->palmapper_name = args[arg_i];
         }else if(!strcmp(arg, "--font")){
             arg_i++;
             if(arg_i >= n_args){
@@ -235,12 +260,16 @@ static int parse_options(options_t *opts,
             if(i < 0)i = 0;
             if(i > 2)i = 2;
             opts->dump_bitmaps = i;
-        }else if(!strcmp(arg, "--screenshot")){
-            opts->screenshot = true;
-        }else if(!strcmp(arg, "--dump")){
-            opts->dump = true;
-        }else if(!strcmp(arg, "--list")){
-            opts->list = true;
+        }else if(!strcmp(arg, "screenshot")){
+            opts->action = ACTION_SCREENSHOT;
+        }else if(!strcmp(arg, "dump")){
+            opts->action = ACTION_DUMP;
+        }else if(!strcmp(arg, "list")){
+            opts->action = ACTION_LIST;
+        }else if(!strcmp(arg, "list_mappers")){
+            opts->action = ACTION_LIST_MAPPERS;
+        }else if(!strcmp(arg, "list_palmappers")){
+            opts->action = ACTION_LIST_PALMAPPERS;
         }else if(!strcmp(arg, "--dont_cache_bitmaps")){
             opts->cache_bitmaps = false;
         }else{
@@ -420,6 +449,22 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
         return 2;}
     prend->cache_bitmaps = opts->cache_bitmaps;
 
+    prismelmapper_t *mapper = NULL;
+    if(opts->mapper_name){
+        mapper = prismelrenderer_get_mapper(prend, opts->mapper_name);
+        if(!mapper){
+            fprintf(stderr, "Couldn't find mapper: %s\n", opts->mapper_name);
+            return 2;}
+    }
+
+    palettemapper_t *palmapper = NULL;
+    if(opts->palmapper_name){
+        palmapper = prismelrenderer_get_palmapper(prend, opts->palmapper_name);
+        if(!palmapper){
+            fprintf(stderr, "Couldn't find palmapper: %s\n", opts->palmapper_name);
+            return 2;}
+    }
+
     prismelrenderer_t _font_prend, *font_prend = &_font_prend;
     err = prismelrenderer_init(font_prend, &vec4);
     if(err)return err;
@@ -437,7 +482,9 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
 
     minieditor_t _editor, *editor=&_editor;
     minieditor_init(editor,
-        surface, sdl_palette, opts->prend_filename,
+        surface, sdl_palette,
+        mapper, palmapper,
+        opts->prend_filename,
         font, geomfont, prend,
         opts->delay_goal, opts->scw, opts->sch);
     editor->frame_i = opts->frame_i;
@@ -478,10 +525,10 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
         if(err)return err;
 
         fprintf(stderr, "Cleaning up...\n");
-    }else{
+    }else switch(opts->action){
         /* We're running at the bare commandline, no GUI. */
 
-        if(opts->screenshot){
+        case ACTION_SCREENSHOT: {
             err = palette_update_sdl_palette(palette, editor->sdl_palette);
             if(err)return err;
 
@@ -491,7 +538,8 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
 
             err = _save_image(editor, opts);
             if(err)return err;
-        }else if(opts->dump){
+        } break;
+        case ACTION_DUMP: {
             rendergraph_t *rgraph = minieditor_get_rgraph(editor);
             if(!rgraph){
                 fprintf(stderr, "Rgraph not found!\n");
@@ -504,16 +552,30 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
             int n_spaces = 0;
             int dump_bitmaps = 0;
             rendergraph_dump(rgraph, stdout, n_spaces, dump_bitmaps);
-        }else if(opts->list){
+        } break;
+        case ACTION_LIST: {
             for(int i = 0; i < prend->rendergraphs_len; i++){
                 rendergraph_t *rgraph = prend->rendergraphs[i];
                 printf("%s\n", rgraph->name);
             }
-        }else{
+        } break;
+        case ACTION_LIST_MAPPERS: {
+            for(int i = 0; i < prend->mappers_len; i++){
+                prismelmapper_t *mapper = prend->mappers[i];
+                printf("%s\n", mapper->name);
+            }
+        } break;
+        case ACTION_LIST_PALMAPPERS: {
+            for(int i = 0; i < prend->palmappers_len; i++){
+                palettemapper_t *palmapper = prend->palmappers[i];
+                printf("%s\n", palmapper->name);
+            }
+        } break;
+        default: {
             /* This should never happen... */
             fprintf(stderr,
                 "Running without a GUI, but no command given...\n");
-        }
+        } break;
     }
 
     minieditor_cleanup(editor);
@@ -594,8 +656,8 @@ int main(int n_args, char **args){
         if(quit)return 0;
     }
 
-    if(opts.screenshot || opts.dump || opts.list)e = main_nogui(&opts);
-    else e = main_gui(&opts);
+    if(opts.action == ACTION_DEFAULT)e = main_gui(&opts);
+    else e = main_nogui(&opts);
 
     options_cleanup(&opts);
     return e;

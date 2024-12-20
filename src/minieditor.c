@@ -16,6 +16,8 @@ void minieditor_cleanup(minieditor_t *editor){
 
 void minieditor_init(minieditor_t *editor,
     SDL_Surface *surface, SDL_Palette *sdl_palette,
+    prismelmapper_t *mapper,
+    palettemapper_t *palmapper,
     const char *prend_filename,
     font_t *font, geomfont_t *geomfont,
     prismelrenderer_t *prend,
@@ -23,6 +25,8 @@ void minieditor_init(minieditor_t *editor,
 ){
     editor->surface = surface;
     editor->sdl_palette = sdl_palette;
+    editor->mapper = mapper;
+    editor->palmapper = palmapper;
     editor->prend_filename = prend_filename;
     editor->font = font;
     editor->geomfont = geomfont;
@@ -51,8 +55,20 @@ void minieditor_init(minieditor_t *editor,
 }
 
 rendergraph_t *minieditor_get_rgraph(minieditor_t *editor){
+    int err;
     if(editor->prend->rendergraphs_len == 0)return NULL;
-    return editor->prend->rendergraphs[editor->cur_rgraph_i];
+    rendergraph_t *rgraph = editor->prend->rendergraphs[editor->cur_rgraph_i];
+    if(editor->mapper){
+        err = prismelmapper_apply_to_rendergraph(editor->mapper,
+            editor->prend, rgraph, NULL, editor->prend->space, NULL, &rgraph);
+        if(err)return NULL;
+    }
+    if(editor->palmapper){
+        err = palettemapper_apply_to_rendergraph(editor->palmapper,
+            editor->prend, rgraph, NULL, editor->prend->space, &rgraph);
+        if(err)return NULL;
+    }
+    return rgraph;
 }
 
 static int _minieditor_print_controls(minieditor_t *editor, FILE *file,
