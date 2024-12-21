@@ -966,7 +966,9 @@ press "up" when you're exploded...
 
 
 HOW TO MAKE A GAME WHICH CAN BE COMPLETED!
+* Tutorial should be optional
 * Fix all the broken recordings!
+* Fix the aispiders! (So they don't explode themselves, etc)
 * Move some of the later tutorial parts into the main "nonlinear" world, and
     vice versa.
     * tutorial2: should be part of open-ended world
@@ -981,3 +983,27 @@ HOW TO MAKE A GAME WHICH CAN BE COMPLETED!
 * And the ultimate goal is... what?.. something like rejoining spider city?..
     So you complete tasks for spiders in various areas who are... making
     spider outposts?.. and then they help you get to the city?..
+
+When a recording's body dies, by default we should probably restart the
+recording...
+Same thing for actors, somehow. Like when AI spiders explode.
+
+
+switches3.fus: add an eyespider to show the electricity is safe
+
+
+I think the recent changes we made to palmappers have a bug.
+When you look at the CPU spider at start of demo, for instance, the front
+and back legs have subtly different colours...
+It looks to me like the same palmapper is applied twice to one of the legs?..
+See it with:
+    bin/minieditor -n spider_stand --palmapper spider_cpu
+The commits:
+* 2f625f79569be2a66545d88150a5aa31c45af573
+* a505a6224ea25aa61a58dff91c82f056b01d71b7
+
+
+MULTIPLAYER:
+* only player 1 should be able to save
+    other players can jump to player 1's last "safe location"
+
