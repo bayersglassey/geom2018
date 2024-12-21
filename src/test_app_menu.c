@@ -11,16 +11,25 @@
 
 
 const char *test_app_menu_titles[TEST_APP_MENU_SCREENS] = {
-    "Spider Game", "Start Game", "Delete saved game", "Paused"};
+    "Spider Game",
+    "Start Game",
+    "Start New Game",
+    "Delete saved game",
+    "Paused"};
 int test_app_menu_parents[TEST_APP_MENU_SCREENS] = {
-    -1, TEST_APP_MENU_SCREEN_TITLE, TEST_APP_MENU_SCREEN_TITLE, -1};
+    -1,
+    TEST_APP_MENU_SCREEN_TITLE,
+    TEST_APP_MENU_SCREEN_START_GAME,
+    TEST_APP_MENU_SCREEN_TITLE,
+    -1};
 bool _test_app_menu_pauses_game[TEST_APP_MENU_SCREENS] = {
-    false, false, false, true};
+    false, false, false, false, true};
 const char *_title_options[] = {"Start game", "Delete saved game", "Quit game", NULL};
 const char *_save_slot_options[] = {"Slot 1", "Slot 2", "Slot 3", "Back to title screen", NULL};
+const char *_new_game_options[] = {"Start from tutorial", "Skip tutorial", "Back", NULL};
 const char *_paused_options[] = {"Continue", "Restart from save point", "Exit to title screen", "Quit game", NULL};
 const char **test_app_menu_options[TEST_APP_MENU_SCREENS] = {
-    _title_options, _save_slot_options, _save_slot_options, _paused_options};
+    _title_options, _save_slot_options, _new_game_options, _save_slot_options, _paused_options};
 
 
 /* Caches the result of get_save_slot_file_exists(i) for
@@ -132,9 +141,23 @@ int test_app_menu_select(test_app_menu_t *menu){
         case TEST_APP_MENU_SCREEN_START_GAME:
             if(menu->option_i == _get_n_options(menu) - 1){
                 test_app_menu_back(menu);
-            }else{
+            }else if(save_slot_file_exists[menu->option_i]){
                 app->state = TEST_APP_STATE_START_GAME;
                 app->save_slot = menu->option_i;
+                app->show_menu = false;
+            }else{
+                app->save_slot = menu->option_i;
+                test_app_menu_set_screen(menu,
+                    TEST_APP_MENU_SCREEN_NEW_GAME);
+            }
+            break;
+        case TEST_APP_MENU_SCREEN_NEW_GAME:
+            if(menu->option_i == _get_n_options(menu) - 1){
+                test_app_menu_back(menu);
+            }else{
+                app->state = menu->option_i == 1?
+                    TEST_APP_STATE_START_GAME_SKIP_TUTORIAL:
+                    TEST_APP_STATE_START_GAME;
                 app->show_menu = false;
             }
             break;

@@ -28,6 +28,7 @@ const char *RECORDING_FILENAME_TEMPLATE = "recs/000.fus";
 /* These are declared as extern in test_app.h */
 const char *TEST_MAP_HEXMAP_FILENAME_TITLE = "data/maps/title/worldmap_menu.fus";
 const char *TEST_MAP_HEXMAP_FILENAME_NEW_GAME = "data/maps/tutorial/worldmap.fus";
+const char *TEST_MAP_HEXMAP_FILENAME_NEW_GAME_SKIP_TUTORIAL = "data/maps/demo/worldmap.fus";
 
 
 /***********
@@ -75,7 +76,9 @@ static int _test_app_restart(test_app_t *app,
         force_new_game = true;
     }else{
         /* Default map */
-        hexmap_filename = TEST_MAP_HEXMAP_FILENAME_NEW_GAME;
+        hexmap_filename = app->state == TEST_APP_STATE_START_GAME_SKIP_TUTORIAL?
+            TEST_MAP_HEXMAP_FILENAME_NEW_GAME_SKIP_TUTORIAL:
+            TEST_MAP_HEXMAP_FILENAME_NEW_GAME;
     }
 
     hexmap_t *map;
@@ -92,7 +95,10 @@ static int _test_app_restart(test_app_t *app,
     int new_state = TEST_APP_STATE_RUNNING;
 
     if(
-        app->state == TEST_APP_STATE_START_GAME &&
+        (
+            app->state == TEST_APP_STATE_START_GAME ||
+            app->state == TEST_APP_STATE_START_GAME_SKIP_TUTORIAL
+        ) &&
         !force_new_game &&
         get_save_slot_file_exists(app->save_slot)
     ){
