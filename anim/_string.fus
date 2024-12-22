@@ -1,0 +1,33 @@
+
+# Expected variables:
+# RGRAPH_NS (str): e.g. ""
+
+$SET_INT MAX_AGE 100
+
+
+state "string_appear":
+    if:
+    then: goto delay: "_string_appear"
+
+state "_string_appear":
+    rgraph: $PREFIX RGRAPH_NS "string_appear"
+
+    if:
+    then: goto: "string_stay"
+
+state "string_stay":
+    rgraph: $PREFIX RGRAPH_NS "string_stay"
+
+    if:
+    then:
+        inc myvar("age")
+        continue
+
+    if: expr: > myvar("age") $GET_INT MAX_AGE
+    then: goto delay: "string_disappear"
+
+state "string_disappear":
+    rgraph: $PREFIX RGRAPH_NS "string_disappear"
+
+    if:
+    then: remove

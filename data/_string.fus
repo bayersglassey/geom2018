@@ -1,0 +1,41 @@
+
+# Expected variables:
+# NS (str): e.g. ""
+
+
+shapes:
+
+    $PREFIX NS "string":
+        prismels:
+            : "tri" ( 0  1  1  0)  1 f eval(1 + 8 + 7)
+            : "tri" ( 0  1  1  0)  3 f eval(1 + 0 + 7)
+
+    $PREFIX NS "string_fade1":
+        prismels:
+            : "tri" ( 0  1  1  0)  1 f eval(1 + 0 + 7)
+            : "tri" ( 0  1  1  0)  3 f eval(1 + 0 + 8)
+
+    $PREFIX NS "string_fade2":
+        prismels:
+            : "tri" ( 0  1  1  0)  1 f eval(1 + 0 + 8)
+            #: "tri" ( 0  1  1  0)  3 f eval(1 + 0 + 8)
+
+    $PREFIX NS "string_appear":
+        animation: once 4
+        shapes:
+            : "string_fade2"  (-3 1 0 -1)  0 f 0 (0 1)
+            : "string_fade2"  (-2 1 0 -1)  0 f 0 (1 1)
+            : "string_fade1"  (-1 1 0 -1)  0 f 0 (2 1)
+            : "string_fade1"  ( 0 1 0 -1)  0 f 0 (3 1)
+
+    $PREFIX NS "string_stay":
+        shapes:
+            : "string"  ( 1 1 0 -1)  0 f
+
+    $PREFIX NS "string_disappear":
+        animation: once 4
+        shapes:
+            : "string_fade1"  ( 2 1 0 -1)  0 f 0 (0 1)
+            : "string_fade1"  ( 3 1 0 -1)  0 f 0 (1 1)
+            : "string_fade2"  ( 4 1 0 -1)  0 f 0 (2 1)
+            : "string_fade2"  ( 5 1 0 -1)  0 f 0 (3 1)

@@ -33,5 +33,10 @@ state "jump":
     rgraph: $PREFIX NS "jump"
     hitbox: collmap("stand")
 
+    if:
+    then:
+        spawn: "anim/string.fus" "string_appear" (0 0) 0 f
+        continue
+
     # Landing, jumping, crashing
     import "anim/_walker_jumping.state.fus"

@@ -66,6 +66,7 @@ $SET_STR NS ""
 $UNSET_BOOL SPIKEY
 $UNSET_BOOL EYE
 import "data/_spit.fus"
+import "data/_string.fus"
 
 $SET_STR NS "spikey_"
 $SET_BOOL SPIKEY
