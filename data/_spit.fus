@@ -32,11 +32,14 @@ shapes:
                     : "tri" ( 1 0 -1 0)  0 f eval(1 + 0 + 7)
 
     $PREFIX NS "spit_fly":
+        animation: once 2
         shapes:
             # NOTE: The center of a hexagon is at (0 1 3 1)
+            : $PREFIX NS "_spit" (-2  1 3 1)  0 f  0 (0 1)
             : $PREFIX NS "_spit" ( 0  1 3 1)  0 f  0 (1 1)
 
     $PREFIX NS "spit_crouch_fly":
+        animation: once 2
         shapes:
             # NOTE: The center of a face is at (1 1 1 0).
             # But if you want that to line up with spider's nose,
@@ -44,4 +47,5 @@ shapes:
             # But then crouching spit and crouching coins don't
             # line up!..
             # So we should probably fix spider's nose when crouching.
+            : $PREFIX NS "_spit" (-1  1 1 0)  0 f  0 (0 1)
             : $PREFIX NS "_spit" ( 1  1 1 0)  0 f  0 (1 1)

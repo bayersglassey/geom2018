@@ -86,9 +86,11 @@ state "fly":
     then:
         move: 2 1
         rot: 1
+        goto delay: "fly"
 
     if() then:
         move: 1 0
+        goto delay: "fly"
 
 state "crouch_fly":
     rgraph: $PREFIX RGRAPH_NS "spit_crouch_fly"
@@ -128,9 +130,11 @@ state "crouch_fly":
     then:
         move: 1 0
         rot: 1
+        goto delay: "crouch_fly"
 
     if() then:
         move: 1 0
+        goto delay: "crouch_fly"
 
 state "dead":
     rgraph: "dead_once"
