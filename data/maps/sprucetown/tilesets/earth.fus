@@ -7,6 +7,7 @@ verts:
         all:  "earth_vert0_dirt"
     "1": "map_vert0"
     "2": "map_vert1"
+    "@": "map_bgvert"
 edges:
     "0": when_faces_solid:
         neither: "earth_edge0_grass_both"
@@ -15,10 +16,15 @@ edges:
         both:    "earth_edge0_dirt"
     "1": "map_edge0"
     "2": "map_edge1"
+    "=": "map_bgedge"
 faces:
     "0": "earth_face0" "earth_face0_r1"
     "1": "map_face0"
     "2": "map_face1"
+    "3": "map_face3"
     "S": "map_savepoint"
     "D": "map_door"
     "w": frame_offset(1) "map_water"
+    "o": "map_bgface"
+    "E": frame_offset(1) "map_face_energy_on"
+    "e": "map_face_energy_off"
