@@ -25,6 +25,7 @@ state "init":
 
 state "switch_off":
     rgraph: $PREFIX RGRAPH_PREFIX "off"
+    collmsgs: "switch"
     hitbox: collmap("hitbox")
     on "spit":
         set mapvar(myvar("key")): T
@@ -33,12 +34,14 @@ state "switch_off":
 
 state "switching_on":
     rgraph: $PREFIX RGRAPH_PREFIX "on"
+    collmsgs: "switch"
     hitbox: collmap("hitbox")
     if:
     then: goto: "switch_on"
 
 state "switch_on":
     rgraph: $PREFIX RGRAPH_PREFIX "on"
+    collmsgs: "switch"
     hitbox: collmap("hitbox")
     $IF !ONEWAY: on "spit":
         set mapvar(myvar("key")): F
@@ -47,6 +50,7 @@ state "switch_on":
 
 state "switching_off":
     rgraph: $PREFIX RGRAPH_PREFIX "off"
+    collmsgs: "switch"
     hitbox: collmap("hitbox")
     if:
     then: goto: "switch_off"

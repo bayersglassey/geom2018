@@ -58,6 +58,9 @@ state "fly":
     on "solid":
         call: "on_collide"
         goto: "dead"
+    on "switch":
+        call: "on_collide"
+        goto: "dead"
 
     if:
     then:
@@ -104,6 +107,9 @@ state "crouch_fly":
         call: "on_collide"
         goto: "crouch_dead"
     on "solid":
+        call: "on_collide"
+        goto: "crouch_dead"
+    on "switch":
         call: "on_collide"
         goto: "crouch_dead"
 
