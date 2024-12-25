@@ -377,9 +377,10 @@ int body_restart_recording(body_t *body, bool ignore_offset, bool reset_position
     rec->wait = 0;
 
     keyinfo_copy(&body->keyinfo, &rec->keyinfo);
-    body_set_state(body, rec->state_name, true);
 
     if(reset_position){
+        body_set_state(body, rec->state_name, true);
+
         vec_cpy(MAX_VEC_DIMS, body->loc.pos, rec->loc0.pos);
         body->loc.rot = rec->loc0.rot;
         body->loc.turn = rec->loc0.turn;

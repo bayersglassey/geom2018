@@ -1,0 +1,14 @@
+resets_position: no
+anim: "anim/eyespider.fus"
+state: "stand"
+pos: ( -138 -2)
+rot: 3
+turn: no
+keys:
+    x:
+    y:
+    u:
+    d:
+    l:
+    r:
+data: " w49 +r w45 -r w23 +l w2 -l w52 +l w44 -l w14 +r w2 -r w8"

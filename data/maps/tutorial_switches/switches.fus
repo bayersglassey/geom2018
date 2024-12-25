@@ -1,4 +1,4 @@
-$SET_STR INSTRUCTIONS: lines: at(18 3)
+$SET_STR INSTRUCTIONS: lines: at(8 3)
     ;;Press space to spit!
 
 text: $GET_STR INSTRUCTIONS
@@ -9,12 +9,15 @@ parts:
     "t": recording "data/recs/switch.fus"
         vars:
             "key": "switches_b"
+    "u": recording "data/recs/switch.fus"
+        vars:
+            "key": "switches_c"
 
 collmap:
     ;;
     ;; .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .   .   +   .   .   .   +   .   .   .   .   .
     ;;                                                /     \                 / \             / \
-    ;;   .   .   .   .   .   + - + - +   .   + - + - +   .   +   .   .   + - + - +   .   .   +   + - + - +   .   .
+    ;;   .   .   .   .   .   + - + - +   .   ! - + - +   .   +   .   .   + - + - +   .   .   +   + - + - +   .   .        [u]
     ;;                                \     /                 \         /         \         /           /
     ;; .   .   .   .   .   .   .   .   + - +   .   .   .   .   + - + - +   .   .   + - + - + - +   .   +   .   .   .
     ;;                                                                                          \       \

@@ -6,6 +6,7 @@ tileset: "data/tileset1.fus"
 vars:
     "switches_a": F
     "switches_b": F
+    "switches_c": F
 
     "switches2_a": F
     "switches2_b": F
@@ -21,6 +22,7 @@ submaps:
         mapper: ("triple")
         recs:
             : "data/maps/tutorial_switches/recs/switches2_eyespider000.fus"
+            : "data/maps/tutorial_switches/recs/switches3_eyespider000.fus"
         submaps:
             :
                 file: "data/maps/tutorial_switches/switches_blocker.fus"
@@ -38,6 +40,11 @@ submaps:
                 file: "data/maps/tutorial_switches/switches_blocker_short.fus"
                 visible: mapvar("switches_b")
                 pos: (8 9)
+                rot: 3
+            :
+                file: "data/maps/tutorial_switches/switches_blocker.fus"
+                visible: not mapvar("switches_c")
+                pos: (18 14)
                 rot: 3
     "switches2":
         file: "data/maps/tutorial_switches/switches2.fus"
