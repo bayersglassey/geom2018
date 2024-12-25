@@ -109,10 +109,13 @@ static void print_help(FILE *file){
         "  --mapper    NAME Applies the given prismel mapper\n"
         "  --palmapper NAME Applies the given palette mapper\n"
         "  --nocontrols     Don't show controls initially\n"
-        "  --dump_bitmaps   Whether to dump rendergraph's bitmaps (see --dump)\n"
+        "  --dump-bitmaps   Whether to dump rendergraph's bitmaps (see --dump)\n"
         "                     0: don't dump bitmaps\n"
         "                     1: dump bitmaps\n"
         "                     2: also dump their surfaces\n"
+        "  --dont-cache-bitmaps\n"
+        "                   Don't cache bitmaps, i.e. re-render rendergraphs\n"
+        "                   from scratch every frame\n"
         "Commands which cause the program to run without a GUI window:\n"
         "  screenshot       Save screenshot and exit (see -if)\n"
         "  dump             Dump rgraph's details to stdout and exit\n"
@@ -251,7 +254,7 @@ static int parse_options(options_t *opts,
             opts->fonts_filename = args[arg_i];
         }else if(!strcmp(arg, "--nocontrols")){
             opts->show_editor_controls = false;
-        }else if(!strcmp(arg, "--dump_bitmaps")){
+        }else if(!strcmp(arg, "--dump-bitmaps")){
             arg_i++;
             if(arg_i >= n_args){
                 fprintf(stderr, "Missing integer (0 <= i <= 2) after %s\n", arg);
@@ -270,7 +273,7 @@ static int parse_options(options_t *opts,
             opts->action = ACTION_LIST_MAPPERS;
         }else if(!strcmp(arg, "list_palmappers")){
             opts->action = ACTION_LIST_PALMAPPERS;
-        }else if(!strcmp(arg, "--dont_cache_bitmaps")){
+        }else if(!strcmp(arg, "--dont-cache-bitmaps")){
             opts->cache_bitmaps = false;
         }else{
             fprintf(stderr, "Unrecognized option: %s\n", arg);

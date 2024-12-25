@@ -61,7 +61,7 @@ static void print_help(){
     fprintf(stderr, "Usage: collmaptool [OPTION ...] [--] [FILENAME]\n");
     fprintf(stderr, "If FILENAME is missing or \"-\", stdin is used.\n");
     fprintf(stderr, "Options:\n");
-    fprintf(stderr, "    --just_coll      "
+    fprintf(stderr, "    --just-coll      "
         "Only parse/output the collmap's lines, no leading \"collmap:\" etc\n");
     fprintf(stderr, "    --dump           "
         "Raw dump instead of pretty write\n");
@@ -69,9 +69,9 @@ static void print_help(){
         "Output extra info as fus comments (e.g. recordings, rendergraphs)\n");
     fprintf(stderr, " -d --nodots         "
         "Invisible verts are displayed as ' ' not '.'\n");
-    fprintf(stderr, " -t --show_tiles     "
+    fprintf(stderr, " -t --show-tiles     "
         "Tiles are shown\n");
-    fprintf(stderr, " -e --eol_semicolons "
+    fprintf(stderr, " -e --eol-semicolons "
         "Semicolons written to end of each line marking end of tile data\n");
     fprintf(stderr, " -r --rot ROT        "
         "Rotate collmap by ROT (an integer modulo 6)\n");
@@ -92,7 +92,7 @@ int main(int n_args, char **args){
     int arg_i = 1;
     for(; arg_i < n_args; arg_i++){
         const char *arg = args[arg_i];
-        if(!strcmp(arg, "--just_coll")){
+        if(!strcmp(arg, "--just-coll")){
             opts.just_coll = true;
         }else if(!strcmp(arg, "--dump")){
             dump = true;
@@ -100,9 +100,9 @@ int main(int n_args, char **args){
             opts.extra = true;
         }else if(!strcmp(arg, "-d") || !strcmp(arg, "--nodots")){
             opts.nodots = true;
-        }else if(!strcmp(arg, "-t") || !strcmp(arg, "--show_tiles")){
+        }else if(!strcmp(arg, "-t") || !strcmp(arg, "--show-tiles")){
             opts.show_tiles = true;
-        }else if(!strcmp(arg, "-e") || !strcmp(arg, "--eol_semicolons")){
+        }else if(!strcmp(arg, "-e") || !strcmp(arg, "--eol-semicolons")){
             opts.eol_semicolons = true;
         }else if(!strcmp(arg, "-r") || !strcmp(arg, "--rot")){
             arg_i++;

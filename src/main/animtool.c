@@ -33,8 +33,8 @@ static void print_usage(FILE *file){
         "\n"
         "Options:\n"
         "   -h --help            Print this message and exit\n"
-        "   -H --no_handlers     Don't output collmsg handlers\n"
-        "   -P --no_procs        Don't output procs\n"
+        "   -H --no-handlers     Don't output collmsg handlers\n"
+        "   -P --no-procs        Don't output procs\n"
         "      --prend FILENAME  Prismelrenderer (default: %s)\n"
     , DEFAULT_PREND_FILENAME);
 }
@@ -214,9 +214,9 @@ int main(int n_args, char **args){
         if(!strcmp(arg, "-h") || !strcmp(arg, "--help")){
             print_usage(stdout);
             return 0;
-        }else if(!strcmp(arg, "-H") || !strcmp(arg, "--no_handlers")){
+        }else if(!strcmp(arg, "-H") || !strcmp(arg, "--no-handlers")){
             opts.output_handlers = false;
-        }else if(!strcmp(arg, "-P") || !strcmp(arg, "--no_procs")){
+        }else if(!strcmp(arg, "-P") || !strcmp(arg, "--no-procs")){
             opts.output_procs = false;
         }else if(!strcmp(arg, "--prend")){
             if(n_args - arg_i < 2){
