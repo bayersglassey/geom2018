@@ -1047,12 +1047,12 @@ Dec 22, 2024:
 -------------
 
 NEXT STEPS:
-[ ] In tutorial, teach how save points work.
+[X] In tutorial, teach how save points work.
     After the first save point (i.e. start3.fus), put 2 blockers:
     one which explodes you and it on contact, and another which
     disappears and teleports you into a tiny cage on contact
     (so you need to press "1" to escape).
-[ ] In data/maps/tutorial_switches/switches.fus
+[X] In data/maps/tutorial_switches/switches.fus
     The eyespider up top should have a little switch, which he can
     hit with his spit, removing a blocker so he can walk back and
     forth between two areas.
@@ -1075,3 +1075,6 @@ NEXT STEPS:
     and out of holes, etc.
     This teaches you how to deal with birds, which allows you to later on
     save the hermit spider. Or something.
+[ ] When a body with a recording dies, e.g. a spider explodes, restart
+    the recording (with resets_position forced to be true).
+    Same for actors, except we restart the actor.
