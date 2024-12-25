@@ -646,23 +646,21 @@ int rendergraph_render_to_surface(rendergraph_t *rendergraph,
                     child->u.rgraph.palmapper_n_applications;
                 Uint8 *table = NULL;
                 Uint8 _table[256];
-                if(rendergraph->palmapper){
-                    for(int i = 0; i < 256; i++){
-                        _table[i] = rendergraph->palmapper->table[i];
-                    }
-                    table = _table;
-                }
                 if(palmapper && n_applications){
+                    for(int i = 0; i < 256; i++)_table[i] = palmapper->table[i];
+                    table = _table;
+                    for(int i = 1; i < n_applications; i++){
+                        palettemapper_apply_to_table(palmapper, table);
+                    }
+                }
+                if(rendergraph->palmapper){
                     if(table){
-                        for(int i = 0; i < n_applications; i++){
-                            palettemapper_apply_to_table(palmapper, table);
-                        }
+                        palettemapper_apply_to_table(rendergraph->palmapper, table);
                     }else{
-                        for(int i = 0; i < 256; i++)_table[i] = palmapper->table[i];
-                        table = _table;
-                        for(int i = 1; i < n_applications; i++){
-                            palettemapper_apply_to_table(palmapper, table);
+                        for(int i = 0; i < 256; i++){
+                            _table[i] = rendergraph->palmapper->table[i];
                         }
+                        table = _table;
                     }
                 }
                 RET_IF_SDL_NZ(SDL_PaletteMappedBlit(surface2, NULL,
