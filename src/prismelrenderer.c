@@ -1288,8 +1288,13 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
     resulting_rgraph = prismelmapper_get_application(
         mapper, mapped_rgraph);
     if(resulting_rgraph != NULL){
-        *rgraph_ptr = resulting_rgraph;
-        return 0;
+        if(name && strcmp(name, resulting_rgraph->name)){
+            /* We're using a different name this time, so create a
+            fresh mapper under the new name */
+        }else{
+            *rgraph_ptr = resulting_rgraph;
+            return 0;
+        }
     }
 
     /* If no name specified, generate one like "<curvy dodeca_sixth>" */
@@ -1587,10 +1592,6 @@ void palettemapper_cleanup(palettemapper_t *palmapper){
         (void))
 }
 
-Uint8 palettemapper_apply_to_color(palettemapper_t *palmapper, Uint8 c){
-    return palmapper->table[c];
-}
-
 void palettemapper_apply_to_table(palettemapper_t *palmapper, Uint8 *table){
     for(int i = 0; i < 256; i++){
         table[i] = palettemapper_apply_to_color(palmapper, table[i]);
@@ -1612,8 +1613,13 @@ int palettemapper_apply_to_rendergraph(palettemapper_t *mapper,
     resulting_rgraph = palettemapper_get_application(
         mapper, mapped_rgraph);
     if(resulting_rgraph != NULL){
-        *rgraph_ptr = resulting_rgraph;
-        return 0;
+        if(name && strcmp(name, resulting_rgraph->name)){
+            /* We're using a different name this time, so create a
+            fresh mapper under the new name */
+        }else{
+            *rgraph_ptr = resulting_rgraph;
+            return 0;
+        }
     }
 
     /* If no name specified, generate one like "<pm:red dodeca_sixth>" */

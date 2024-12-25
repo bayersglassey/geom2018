@@ -342,7 +342,9 @@ typedef struct palettemapper_pmapplication {
 
 int palettemapper_init(palettemapper_t *palmapper, const char *name, int color);
 void palettemapper_cleanup(palettemapper_t *palmapper);
-Uint8 palettemapper_apply_to_color(palettemapper_t *palmapper, Uint8 c);
+static Uint8 palettemapper_apply_to_color(palettemapper_t *palmapper, Uint8 c){
+    return palmapper->table[c];
+}
 void palettemapper_apply_to_table(palettemapper_t *palmapper, Uint8 *table);
 int palettemapper_apply_to_rendergraph(palettemapper_t *mapper,
     prismelrenderer_t *prend,
@@ -366,7 +368,7 @@ palettemapper_t *palettemapper_get_pmapplication(palettemapper_t *mapper,
  * FUS_LEXER *
  *************/
 
-int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
+int fus_lexer_get_palmapper(fus_lexer_t *lexer,
     prismelrenderer_t *prend, const char *name, palettemapper_t **palmapper_ptr);
 int fus_lexer_get_prismel(fus_lexer_t *lexer,
     prismelrenderer_t *prend, const char *name, prismel_t **prismel_ptr);

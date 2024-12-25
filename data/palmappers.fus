@@ -52,8 +52,8 @@ palmappers:
         15: 16
         16:  1
 
-    "cycle2": map ("cycle1") ("cycle1")
-    "cycle3": map ("cycle1") ("cycle2")
+    "cycle2": palmap ("cycle1") ("cycle1")
+    "cycle3": palmap ("cycle1") ("cycle2")
 
     "blk":
         :

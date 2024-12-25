@@ -33,14 +33,14 @@ static int parse_palmappers(prismelrenderer_t *prend, fus_lexer_t *lexer){
             return 2;
         }
 
-        err = fus_lexer_get_palettemapper(lexer, prend, name, &palmapper);
+        err = fus_lexer_get_palmapper(lexer, prend, name, &palmapper);
         if(err)return err;
     }
     NEXT
     return 0;
 }
 
-int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
+int fus_lexer_get_palmapper(fus_lexer_t *lexer,
     prismelrenderer_t *prend, const char *name, palettemapper_t **palmapper_ptr
 ){
     INIT
@@ -58,16 +58,16 @@ int fus_lexer_get_palettemapper(fus_lexer_t *lexer,
         goto ok;
     }
 
-    if(GOT("map")){
+    if(GOT("palmap")){
         NEXT
 
         palettemapper_t *palmapper1 = NULL;
-        err = fus_lexer_get_palettemapper(lexer, prend, NULL,
+        err = fus_lexer_get_palmapper(lexer, prend, NULL,
             &palmapper1);
         if(err)return err;
 
         palettemapper_t *palmapper2 = NULL;
-        err = fus_lexer_get_palettemapper(lexer, prend, NULL,
+        err = fus_lexer_get_palmapper(lexer, prend, NULL,
             &palmapper2);
         if(err)return err;
 
@@ -644,6 +644,26 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
 
         err = prismelmapper_apply_to_rendergraph(mapper, prend, mapped_rgraph,
             name, prend->space, NULL, &rgraph);
+        if(err)return err;
+
+        goto ok;
+    }
+
+    if(GOT("palmap")){
+        NEXT
+
+        palettemapper_t *palmapper = NULL;
+        err = fus_lexer_get_palmapper(lexer, prend, NULL,
+            &palmapper);
+        if(err)return err;
+
+        rendergraph_t *mapped_rgraph = NULL;
+        err = fus_lexer_get_rendergraph(lexer, prend, NULL,
+            &mapped_rgraph, localdata);
+        if(err)return err;
+
+        err = palettemapper_apply_to_rendergraph(palmapper, prend, mapped_rgraph,
+            name, prend->space, &rgraph);
         if(err)return err;
 
         goto ok;

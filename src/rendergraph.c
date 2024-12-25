@@ -176,6 +176,10 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces,
     }
     fprintf(f, "%s  space: %p\n", spaces, rendergraph->space);
 
+    if(rendergraph->palmapper != NULL){
+        fprintf(f, "  palmapper: %s\n", rendergraph->palmapper->name);
+    }
+
     fprintf(f, "%s  children:\n", spaces);
     for(int i = 0; i < rendergraph->children_len; i++){
         rendergraph_child_t *child = rendergraph->children[i];
@@ -617,7 +621,10 @@ int rendergraph_render_to_surface(rendergraph_t *rendergraph,
                     bitmap2->pbox.h
                 };
 
-                if(!rendergraph->cache_bitmaps || !rendergraph->prend->cache_bitmaps){
+                bool cache_bitmaps =
+                    rendergraph->cache_bitmaps &&
+                    rendergraph->prend->cache_bitmaps;
+                if(!cache_bitmaps){
                     /* Recurse and continue */
                     err = rendergraph_render_to_surface(rendergraph2, surface,
                         &dst_rect2,
@@ -635,6 +642,8 @@ int rendergraph_render_to_surface(rendergraph_t *rendergraph,
                 /* Blit sub-bitmap's surface onto ours */
                 SDL_Surface *surface2 = bitmap2->surface;
                 palettemapper_t *palmapper = child->u.rgraph.palmapper;
+                int n_applications =
+                    child->u.rgraph.palmapper_n_applications;
                 Uint8 *table = NULL;
                 Uint8 _table[256];
                 if(rendergraph->palmapper){
@@ -643,15 +652,17 @@ int rendergraph_render_to_surface(rendergraph_t *rendergraph,
                     }
                     table = _table;
                 }
-                if(palmapper){
-                    int n_applications =
-                        child->u.rgraph.palmapper_n_applications;
-                    if(!table){
-                        for(int i = 0; i < 256; i++)_table[i] = i;
+                if(palmapper && n_applications){
+                    if(table){
+                        for(int i = 0; i < n_applications; i++){
+                            palettemapper_apply_to_table(palmapper, table);
+                        }
+                    }else{
+                        for(int i = 0; i < 256; i++)_table[i] = palmapper->table[i];
                         table = _table;
-                    }
-                    for(int i = 0; i < n_applications; i++){
-                        palettemapper_apply_to_table(palmapper, table);
+                        for(int i = 1; i < n_applications; i++){
+                            palettemapper_apply_to_table(palmapper, table);
+                        }
                     }
                 }
                 RET_IF_SDL_NZ(SDL_PaletteMappedBlit(surface2, NULL,
@@ -879,10 +890,12 @@ static int _rendergraph_render_with_labels(
                 !strcmp(label->name, mapping->label_name)
             ))continue;
 
+            /* We have found, in the array of label_mapping_t we were passed,
+            an rgraph for this label! */
             found++;
-
             rendergraph_t *mapping_rgraph = mapping->rgraph;
 
+            /* Apply rgraph's palmapper, if any, to the rgraph we found. */
             if(rgraph->palmapper){
                 err = palettemapper_apply_to_rendergraph(rgraph->palmapper,
                     prend, mapping_rgraph, NULL, rgraph_space,
@@ -899,6 +912,9 @@ static int _rendergraph_render_with_labels(
 
         /* If we didn't find any rgraphs for this label, use its default rgraph */
         if(label->default_rgraph){
+            /* NOTE: rgraph->palmapper (if any) should already have been applied
+            to label->default_rgraph for all labels of all frames of rgraph, so
+            no need to apply it here. */
             _RENDER_LABEL_RGRAPH(label->default_rgraph, label->default_frame_i)
         }
     }
