@@ -6,12 +6,14 @@ verts:
     "2": "minimap.vert"
     "s": "minimap.vert"
     "@": "empty"
+    "t": "minimap.vert.tunnel"
 edges:
     "0": "minimap.edge"
     "1": "minimap.edge"
     "2": "minimap.edge"
     "s": "minimap.edge"
     "=": "empty"
+    "t": "minimap.edge.tunnel"
 faces:
     "0": "minimap.face"
     "1": "minimap.face"
@@ -19,6 +21,7 @@ faces:
     "3": "minimap.face"
     "e": "minimap.face"
     "o": "empty"
+    "t": "minimap.face.tunnel"
     "E": "minimap.face"
     "S": "minimap.save"
     "D": "minimap.door"

@@ -4,11 +4,13 @@ verts:
     "0": "map_vert0"
     "1": "map_vert1"
     "@": "map_bgvert"
+    "t": "map_vert_tunnel"
 edges:
     "0": "map_edge0"
     "1": "map_edge1"
     "2": "map_edge2"
     "=": "map_bgedge"
+    "t": "map_edge_tunnel"
 faces:
     "0": "map_face0"
     "1": "map_face1"
@@ -18,5 +20,6 @@ faces:
     "D": "map_door"
     "w": frame_offset(1) "map_water"
     "o": "map_bgface"
+    "t": "map_face_tunnel"
     "E": frame_offset(1) "map_face_energy_on"
     "e": "map_face_energy_off"

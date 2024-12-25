@@ -88,6 +88,18 @@ shapes:
         prismels:
             : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 1
 
+    "minimap.vert.tunnel":
+        $IF ALT: prismels:
+            : "vert" (0 0 0 0)  0 f eval: 1 + 0 + 1
+
+    "minimap.edge.tunnel":
+        $IF ALT: prismels:
+            : "edge" (0 0 0 0)  0 f eval: 1 + 0 + 1
+
+    "minimap.face.tunnel":
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval: 1 + 0 + 1
+
     "minimap.save":
         prismels:
             : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 2

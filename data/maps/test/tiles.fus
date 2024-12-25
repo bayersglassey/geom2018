@@ -23,7 +23,6 @@ shapes:
             : "tri" (0 0 0 0)  8 f eval: 1 + 8 + 5
             : "tri" (0 0 0 0) 10 f eval: 1 + 8 + 6
 
-
     "map_vert0_dark":
         prismels:
             : "tri" (0 0 0 0)  0 f eval: 1 + 0 + 4
@@ -32,6 +31,8 @@ shapes:
             : "tri" (0 0 0 0)  6 f eval: 1 + 0 + 4
             : "tri" (0 0 0 0)  8 f eval: 1 + 0 + 4
             : "tri" (0 0 0 0) 10 f eval: 1 + 0 + 4
+
+    "map_vert_tunnel": palmap ("tunnel") ("map_vert0")
 
     "map_vert0_bg":
         prismels:
@@ -74,6 +75,8 @@ shapes:
             : "tri" (1 0 0  0) 11 f eval: 1 + 0 + 6
             : "sq"  (1 1 0 -1)  0 f eval: 1 + 0 + 1
             : "tri" (2 2 0 -1)  5 f eval: 1 + 0 + 6
+
+    "map_edge_tunnel": palmap ("tunnel") ("map_edge0")
 
     "map_edge0_bg":
         prismels:
@@ -174,6 +177,8 @@ shapes:
             : "map_face0_dark_third" (1 1 1 0)  0 f
             : "map_face0_dark_third" (1 1 1 0)  4 f
             : "map_face0_dark_third" (1 1 1 0)  8 f
+
+    "map_face_tunnel": palmap ("tunnel") ("map_face0")
 
     "map_face_energy_off_third":
         prismels:
