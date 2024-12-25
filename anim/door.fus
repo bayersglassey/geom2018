@@ -33,6 +33,7 @@ collmap "cooldown":
 
 
 vars:
+    "oneway": F
     "location": null
     "map": null
     "anim": null
@@ -60,6 +61,7 @@ state "closed":
     hitbox: collmap("hitbox")
 
     if:
+        not: expr: myvar("oneway")
         any:
             not: exists myvar("key")
             expr: mapvar(myvar("key"))

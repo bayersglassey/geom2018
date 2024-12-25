@@ -1,0 +1,20 @@
+
+shapes:
+
+    "_spikeball":
+        prismels:
+            : "tri" ( 0  0  0  0)  0 f eval: 3 + 0 + 1
+            : "tri" ( 0  0  0  0)  2 f eval: 3 + 0 + 1
+            : "tri" ( 0  0  0  0)  4 f eval: 3 + 8 + 1
+            : "tri" ( 0  0  0  0)  6 f eval: 3 + 8 + 1
+            : "tri" ( 0  0  0  0)  8 f eval: 7 + 8 + 1
+            : "tri" ( 0  0  0  0) 10 f eval: 3 + 8 + 1
+
+            : "dia" ( 0  0  0  0)  0 f eval: 5 + 0 + 1
+            : "dia" ( 0  0  0  0)  2 f eval: 5 + 0 + 1
+            : "dia" ( 0  0  0  0)  4 f eval: 5 + 8 + 1
+            : "dia" ( 0  0  0  0)  6 f eval: 5 + 8 + 1
+            : "dia" ( 0  0  0  0)  8 f eval: 7 + 8 + 1
+            : "dia" ( 0  0  0  0) 10 f eval: 5 + 8 + 1
+
+    "spikeball": map ("double") ("_spikeball")

@@ -1,0 +1,12 @@
+
+state "stand":
+    collmsgs: "crush"
+    on "touch":
+        remove
+    rgraph: "spikeball"
+    hitbox:
+        ;;   .   .
+        ;;   *\*/*
+        ;; . -(+)- .
+        ;;   */*\*
+        ;;   .   .

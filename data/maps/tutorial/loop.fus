@@ -2,6 +2,10 @@ parts:
     "a": recording "data/recs/eye.fus"
         vars:
             "opened_key": "loop_eye_a_open"
+    "w": recording "data/recs/door.fus"
+        vars:
+            "oneway": T
+            "location": "cage"
 collmap:
     ;;
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
@@ -30,7 +34,7 @@ collmap:
     ;;                                                       * * * * * *                 * * *
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                                                             * * * * * *
-    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;     .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .              [w]
     ;;                                                                   * * *
     ;;   .   .  (+)- + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                    \

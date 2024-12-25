@@ -1,0 +1,25 @@
+$SET_STR SAVEPOINT_C: lines: at(4 36)
+    ;;  If you ever
+    ;;    get stuck,    press "1"
+    ;;                   to return
+    ;;                   to where
+    ;;                   you saved.
+    ;;
+    ;;                   (Try it
+    ;;                     now!)
+
+text: if mapvar("made_it_underneath") then null else $GET_STR SAVEPOINT_C
+parts:
+    "l": location "cage"
+collmap:
+    ;;
+    ;;     + - +
+    ;;    /     \
+    ;;   +       +
+    ;;  /         \
+    ;; +           +
+    ;;  \         /
+    ;;   +       +
+    ;;    \     /
+    ;;    (!)- +            [l]
+    ;;
