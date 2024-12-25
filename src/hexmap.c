@@ -1060,7 +1060,10 @@ static int hexmap_collide_elem(hexmap_t *map, int all_type,
         normalize_elem(&index);
 
         bool collide = false;
-        for(int i = 0; i < map->submaps_len; i++){
+        /* NOTE: we iterate over submaps in reverse order, so that tunnels,
+        i.e. elements where tile_c == 't', will work correctly, given the
+        order in which submaps are rendered over one another. */
+        for(int i = map->submaps_len - 1; i >= 0; i--){
             hexmap_submap_t *submap = map->submaps[i];
 
             bool solid;
@@ -1084,6 +1087,13 @@ static int hexmap_collide_elem(hexmap_t *map, int all_type,
                 if(elem->tile_c == 'S')collision_elem = &collision->savepoint;
                 else if(elem->tile_c == 'D')collision_elem = &collision->door;
                 else if(elem->tile_c == 'w')collision_elem = &collision->water;
+                else if(elem->tile_c == 't'){
+                    /* We found a "tunnel" -- some non-colliding stuff which
+                    overrides anything solid which might be (in a submap)
+                    underneath it!..
+                    So, we break out of iterating over submaps. */
+                    break;
+                }
 
                 if(collision_elem){
                     collision_elem->submap = submap;

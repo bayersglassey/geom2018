@@ -775,7 +775,9 @@ int body_update_cur_submap(body_t *body){
 
     /* Check if body's pos is touching a vert of any submap */
     bool out_of_bounds = true;
-    for(int i = 0; i < map->submaps_len; i++){
+    /* NOTE: we iterate over submaps in reverse order, to match the order
+    used by hexmap_collide_elem */
+    for(int i = map->submaps_len - 1; i >= 0; i--){
         hexmap_submap_t *submap = map->submaps[i];
         bool solid;
         err = hexmap_submap_is_solid(submap, &solid);

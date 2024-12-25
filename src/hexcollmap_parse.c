@@ -76,6 +76,7 @@ static char get_elem_type(char c){
         case ')':
         case '%':
         case 'x':
+        case 't':
         case '=':
             /* Valid, but unknown whether vert, edge, or face, or none */
             return ' ';
@@ -511,7 +512,7 @@ static int _hexcollmap_parse_lines_tiles(hexcollmap_t *collmap,
                 !strchr(";[()%", c) &&
                 tile_c_is_visible(c) || c == 'x'
             ){
-                char elem_type = c == 'x' || c == '='?
+                char elem_type = c == 'x' || c == '=' || c == 't'?
                     get_map_elem_type(x-ox, y-oy):
                     get_elem_type(c);
 
