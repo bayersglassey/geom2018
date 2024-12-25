@@ -183,6 +183,8 @@ Inverted rooms filled with water but with suspended wall-less air bubbles?..
 An enemy who swims faster than you, but you walk faster.
 So you need to "land" to escape, and "landing" often involves tricky sequences
 of jumping, doing some kind of turn while swimming, then landing again.
+Also with this enemy, if there are "air bubbles", then it needs to go around
+them, whereas you can jump through them!
 
 
 Mar 29, 2020:
@@ -484,6 +486,9 @@ Oct 2, 2021:
 
 * Add some kind of water animal which chases spiders.
     * It's slow enough that you can get away, and/or shooting it makes it pause for a second.
+    * BUT ALSO, see earlier in this TODO file, where we propose a water "enemy" who is
+      *faster* than spider at swimming, but slower at walking. So you need to land & run away.
+      And/or use "air bubbles" through which you can jump, but enemy must swim.
 
 * Right side of data/maps/demo/jungle5.fus: flierplayer can get trapped in a circle
   if he flies+lands in from the top-right of the circle O_o
@@ -617,26 +622,10 @@ Jan 27, 2022:
 Jan 30, 2022:
 -------------
 
-maps/bridges/start.fus:
-
-    * Coins appearing one at a time as you collect them (somewhat like start of tutorial2),
-      teaching you how to get around by following the "bridges"
-
-    * Leave "bridges" behind you when you successfully jump???
-        * To show player what the bridges are supposed to represent
-
 Backgrounds:
 
     * Add more bg submaps, so the grid can be seen.
       See jungle5_bg.fus for inspiration...
-
-Silkspider:
-
-    * You pick up little white balls of silk. Each one adds to your silk timer.
-      While you have silk, when jumping, you leave silk behind.
-      Silk eventually disappears.
-      (Rollers roll on it?.. or some other creature?.. which can fly away when it disappears?..)
-      The silk timer counts down... always?.. or just while jumping (each frame you "use" silk)?..
 
 
 Feb 8, 2022:
@@ -966,21 +955,19 @@ press "up" when you're exploded...
 
 
 HOW TO MAKE A GAME WHICH CAN BE COMPLETED!
-* Tutorial should be optional
-* Fix all the broken recordings!
-* Fix the aispiders! (So they don't explode themselves, etc)
-* Move some of the later tutorial parts into the main "nonlinear" world, and
-    vice versa.
-    * tutorial2: should be part of open-ended world
-    * tutorial3: should be part of open-ended world
-* Make "pickup slots".
+[X] Tutorial should be optional
+[ ] Fix all the broken recordings!
+[ ] Fix the aispiders! (So they don't explode themselves, etc)
+[ ] tutorial2: should be part of open-ended world
+[ ] tutorial3: should be part of open-ended world
+[ ] Make "pickup slots".
     You start with 1.
     Parts of the tutorial teach you how to use some pickups.
     After going through certain long parts of the open-ended world, you can
     get extra pickup slots.
-* Don't worry about adding too many new places, rather make it so existing
+[ ] Don't worry about adding too many new places, rather make it so existing
     places change as you achieve stuff.
-* And the ultimate goal is... what?.. something like rejoining spider city?..
+[ ] And the ultimate goal is... what?.. something like rejoining spider city?..
     So you complete tasks for spiders in various areas who are... making
     spider outposts?.. and then they help you get to the city?..
 
@@ -993,17 +980,98 @@ switches3.fus: add an eyespider to show the electricity is safe
 
 
 I think the recent changes we made to palmappers have a bug.
+The commits:
+* 2f625f79569be2a66545d88150a5aa31c45af573
+* a505a6224ea25aa61a58dff91c82f056b01d71b7
 When you look at the CPU spider at start of demo, for instance, the front
 and back legs have subtly different colours...
 It looks to me like the same palmapper is applied twice to one of the legs?..
 See it with:
     bin/minieditor -n spider_stand --palmapper spider_cpu
-The commits:
-* 2f625f79569be2a66545d88150a5aa31c45af573
-* a505a6224ea25aa61a58dff91c82f056b01d71b7
+...NO! The issue is that labels-within-labels don't have palmappers applied?.. See:
+    bin/minieditor -z 4 -n spider_head --palmapper cycle3
+...no, but not even this works:
+    bin/minieditor -z 4 -n map_vert0 --palmapper blu
+...AHHHHHHHH BUT THIS WORKS! It renders a tiny blue dot.
+    bin/minieditor -n map_vert0 --palmapper blu
+...so, it seems like applying a prismelmapper to a rendergraph discards
+any palettemappers living on it.
+...omg, but also, adding `--dont-cache-bitmaps` has a similar, but different issue:
+    # Is rendered correctly (as light blue)
+    bin/minieditor -n map_vert0 --palmapper blu --dont-cache-bitmaps
+    # Is rendered incorrectly (as dark blue)
+    bin/minieditor -n map_vert0 --palmapper blu --dont-cache-bitmaps -z 4
+It seems like the issue is probably related to the difference in rgraph children.
+    # Rendered correctly
+    $ bin/minieditor -n map_vert0 --palmapper blu dump
+    rendergraph: 0x55b9b692ef40
+      name: <pm:blu map_vert0>
+      space: 0x55b9b59db140
+      palmapper: blu
+      children:
+        prismel:     tri ( 0  0  0  0)  0 f  13 [  0  -1]
+        ...etc...
+
+    # Rendered incorrectly
+    $ bin/minieditor -n map_vert0 --palmapper blu --mapper double dump
+    rendergraph: 0x55b3291456d0
+      name: <pm:blu <double map_vert0>>
+      space: 0x55b3279e4140
+      palmapper: blu
+      children:
+        rgraph : double_tri ( 0  0  0  0)  0 f <solid 13>   0+  [  0  -1]
+        ...etc...
+...so, maybe something to do with <solid 13>, eh?..
 
 
 MULTIPLAYER:
 * only player 1 should be able to save
     other players can jump to player 1's last "safe location"
 
+
+Dec 21, 2024:
+-------------
+
+Remember those cool "curved" tiles?..
+Anyway, don't forget to use those somewhere!
+It's the "earth" tileset, see data/maps/sprucetown/
+
+
+data/maps/demo/jungle5.fus:
+When you jump up to escape the bird walking back and forth, the
+camera doesn't scroll to show you unless you go all the way up to the
+ceiling! Fiiiix
+
+
+Dec 22, 2024:
+-------------
+
+NEXT STEPS:
+[ ] In tutorial, teach how save points work.
+    After the first save point (i.e. start3.fus), put 2 blockers:
+    one which explodes you and it on contact, and another which
+    disappears and teleports you into a tiny cage on contact
+    (so you need to press "1" to escape).
+[ ] In data/maps/tutorial_switches/switches.fus
+    The eyespider up top should have a little switch, which he can
+    hit with his spit, removing a blocker so he can walk back and
+    forth between two areas.
+[ ] In dodecas area, start making... "time progression".
+    Like... when you do something, the area changes drastically.
+    In particular, wilderness is transformed into populated stuff.
+    So spiders start building things.
+    [ ] Wilderness: randomized, like current maps/wilderness, but with
+        TUNNELS etc chopped out over top, as it is slowly civilized.
+        Current dodecas area is like a partially-civilized wilderness;
+        we should add highly curated "time progression" to it, but
+        also add a less-curated "dodecas wilderness" which only has
+        the progress of tunnels added to it over time.
+[ ] Make a swimming creature, faster than player. In the water worldmap,
+    it chases you; you have to run on the ground to escape, and use air
+    bubbles.
+    Also, add some areas where everything is water, with air bubbles; but
+    when you hit switches, air and water are reversed.
+[ ] Make an area, near jungle, full of birds. They chase you, you pop in
+    and out of holes, etc.
+    This teaches you how to deal with birds, which allows you to later on
+    save the hermit spider. Or something.
