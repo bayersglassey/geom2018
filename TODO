@@ -815,15 +815,6 @@ Owls are huge; mice are same width as spider (in the sense of tunnel width...
 but they may be longer than spider).
 
 
-OH DEAR!
-Apparently a spider can jump from the left here, and land with just his
-front foot on the vertex indicated with "^"!
-
-    ->     *
-         + - +
-         ^
-
-
 Sep 13, 2023:
 -------------
 
@@ -920,109 +911,12 @@ Anyway, we've already started adding an editor! Use `-E` with collmaptool:
     $ bin/collmaptool -E data/maps/demo/start.fus
 
 
-Mar 30, 2024:
--------------
-
-Currently, the way spider's label values are determined is pretty insane.
-In anim/_spider.fus, there is a proc "update_vars" which is marked
-`onstatesetchange` and is also called by doors when you touch them.
-This proc twiddles some vars which were marked `label`, which on the C
-side of things (via body->vars->callback) causes them to be matched up
-to body's labels.
-It's a goddamn mess, is what it is.
-What if we could move the logic in "update_vars" from anim/_spider.fus
-into data/_spider.fus?.. i.e. into the prismelrenderer and its shapes?..
-Errrrmmmmm but I guess that would mess up our whole "cache bitmaps on
-shapes" approach.
-Omfg. Never mind. O_o
-
-
 Dec 15, 2024:
 -------------
 
 data/maps/tutorial2, start4.2:
 Make it easier, like maybe have parts of the map open up as player gets to
 more places.
-
-Make sure tutorial teaches player how to load from save point with "1" etc
-early on! Like, have a place where you need to save, open a switch, then be
-stuck and reload from save point.
-...maybe by adding a creature which blows you and it up?
-And then there's a room with 3 of them and a savepoint at the start, and
-so you need to go in 3 times and get blown up, before continuing?..
-Errr but no, that doesn't teach you to press "1" yourself, you can just
-press "up" when you're exploded...
-
-
-HOW TO MAKE A GAME WHICH CAN BE COMPLETED!
-[X] Tutorial should be optional
-[ ] Fix all the broken recordings!
-[ ] Fix the aispiders! (So they don't explode themselves, etc)
-[ ] tutorial2: should be part of open-ended world
-[ ] tutorial3: should be part of open-ended world
-[ ] Make "pickup slots".
-    You start with 1.
-    Parts of the tutorial teach you how to use some pickups.
-    After going through certain long parts of the open-ended world, you can
-    get extra pickup slots.
-[ ] Don't worry about adding too many new places, rather make it so existing
-    places change as you achieve stuff.
-[ ] And the ultimate goal is... what?.. something like rejoining spider city?..
-    So you complete tasks for spiders in various areas who are... making
-    spider outposts?.. and then they help you get to the city?..
-
-When a recording's body dies, by default we should probably restart the
-recording...
-Same thing for actors, somehow. Like when AI spiders explode.
-
-
-switches3.fus: add an eyespider to show the electricity is safe
-
-
-I think the recent changes we made to palmappers have a bug.
-The commits:
-* 2f625f79569be2a66545d88150a5aa31c45af573
-* a505a6224ea25aa61a58dff91c82f056b01d71b7
-When you look at the CPU spider at start of demo, for instance, the front
-and back legs have subtly different colours...
-It looks to me like the same palmapper is applied twice to one of the legs?..
-See it with:
-    bin/minieditor -n spider_stand --palmapper spider_cpu
-...NO! The issue is that labels-within-labels don't have palmappers applied?.. See:
-    bin/minieditor -z 4 -n spider_head --palmapper cycle3
-...no, but not even this works:
-    bin/minieditor -z 4 -n map_vert0 --palmapper blu
-...AHHHHHHHH BUT THIS WORKS! It renders a tiny blue dot.
-    bin/minieditor -n map_vert0 --palmapper blu
-...so, it seems like applying a prismelmapper to a rendergraph discards
-any palettemappers living on it.
-...omg, but also, adding `--dont-cache-bitmaps` has a similar, but different issue:
-    # Is rendered correctly (as light blue)
-    bin/minieditor -n map_vert0 --palmapper blu --dont-cache-bitmaps
-    # Is rendered incorrectly (as dark blue)
-    bin/minieditor -n map_vert0 --palmapper blu --dont-cache-bitmaps -z 4
-It seems like the issue is probably related to the difference in rgraph children.
-    # Rendered correctly
-    $ bin/minieditor -n map_vert0 --palmapper blu dump
-    rendergraph: 0x55b9b692ef40
-      name: <pm:blu map_vert0>
-      space: 0x55b9b59db140
-      palmapper: blu
-      children:
-        prismel:     tri ( 0  0  0  0)  0 f  13 [  0  -1]
-        ...etc...
-
-    # Rendered incorrectly
-    $ bin/minieditor -n map_vert0 --palmapper blu --mapper double dump
-    rendergraph: 0x55b3291456d0
-      name: <pm:blu <double map_vert0>>
-      space: 0x55b3279e4140
-      palmapper: blu
-      children:
-        rgraph : double_tri ( 0  0  0  0)  0 f <solid 13>   0+  [  0  -1]
-        ...etc...
-...so, maybe something to do with <solid 13>, eh?..
-
 
 MULTIPLAYER:
 * only player 1 should be able to save
@@ -1047,15 +941,6 @@ Dec 22, 2024:
 -------------
 
 NEXT STEPS:
-[X] In tutorial, teach how save points work.
-    After the first save point (i.e. start3.fus), put 2 blockers:
-    one which explodes you and it on contact, and another which
-    disappears and teleports you into a tiny cage on contact
-    (so you need to press "1" to escape).
-[X] In data/maps/tutorial_switches/switches.fus
-    The eyespider up top should have a little switch, which he can
-    hit with his spit, removing a blocker so he can walk back and
-    forth between two areas.
 [ ] In dodecas area, start making... "time progression".
     Like... when you do something, the area changes drastically.
     In particular, wilderness is transformed into populated stuff.
@@ -1078,3 +963,17 @@ NEXT STEPS:
 [ ] When a body with a recording dies, e.g. a spider explodes, restart
     the recording (with resets_position forced to be true).
     Same for actors, except we restart the actor.
+[ ] Fix all the broken recordings!
+[ ] Fix the aispiders! (So they don't explode themselves, etc)
+[ ] tutorial2: should be part of open-ended world
+[ ] tutorial3: should be part of open-ended world
+[ ] Make "pickup slots".
+    You start with 1.
+    Parts of the tutorial teach you how to use some pickups.
+    After going through certain long parts of the open-ended world, you can
+    get extra pickup slots.
+[ ] Don't worry about adding too many new places, rather make it so existing
+    places change as you achieve stuff.
+[ ] And the ultimate goal is... what?.. something like rejoining spider city?..
+    So you complete tasks for spiders in various areas who are... making
+    spider outposts?.. and then they help you get to the city?..
