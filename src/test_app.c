@@ -199,7 +199,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     int n_players, int save_slot,
     const char *load_recording_filename,
     const char *save_recording_filename,
-    bool have_audio
+    bool have_audio, bool load_save_slot
 ){
     int err;
 
@@ -275,7 +275,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     test_app_menu_init(&app->menu, app);
 
     app->state = TEST_APP_STATE_RUNNING;
-    app->save_slot = 0;
+    app->save_slot = save_slot;
 
     app->hexgame_running = true;
     app->show_console = false;
@@ -283,10 +283,9 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->mode = TEST_APP_MODE_GAME;
     app->camera_mapper = NULL;
 
-    if(save_slot >= 0){
+    if(load_save_slot){
         /* Load game immediately, for debugging purposes */
         app->state = TEST_APP_STATE_START_GAME;
-        app->save_slot = save_slot;
         app->show_menu = false;
     }else if(hexmap_filename){
         /* Load game immediately, for debugging purposes */

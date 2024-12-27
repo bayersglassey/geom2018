@@ -131,6 +131,7 @@ void print_help(FILE *file){
         "                         (You can also use env var %s)\n"
         "   -d   --delay     N    Delay goal (in milliseconds) (default: %i)\n"
         "   -p   --players   N    Number of players (default: %i)\n"
+        "   -s   --save-slot SLOT Use indicated save slot\n"
         "   -l   --load-game SLOT Load saved game immediately on startup\n"
         "   -n   --new-game  SLOT Start a new game (delete save slot and start)\n"
         "        --minimap-alt    Use alternate minimap\n"
@@ -175,6 +176,7 @@ int save_slot = -1;
 const char *load_recording_filename = NULL;
 const char *save_recording_filename = NULL;
 bool have_audio = true;
+bool load_save_slot = false;
 SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL;
 
@@ -187,7 +189,7 @@ static test_app_t *get_test_app(){
         minimap_alt, cache_bitmaps, animate_palettes,
         n_players, save_slot,
         load_recording_filename, save_recording_filename,
-        have_audio);
+        have_audio, load_save_slot);
     if(err){
         free(app);
         return NULL;
@@ -271,11 +273,11 @@ int main(int n_args, char *args[]){
                 goto parse_failure;
             }
         }else if(
+            !strcmp(arg, "-s") || !strcmp(arg, "--save-slot") ||
             !strcmp(arg, "-l") || !strcmp(arg, "--load-game") ||
             !strcmp(arg, "-n") || !strcmp(arg, "--new-game")
         ){
-            bool load_game =
-                (arg[1] == '-' && arg[2] == 'l') || arg[1] == 'l';
+            char action = arg[1] == '-'? arg[2]: arg[1]; /* 's' or 'l' or 'n' */
             arg_i++;
             if(arg_i >= n_args){
                 fprintf(stderr, "Missing int after %s\n", arg);
@@ -289,7 +291,7 @@ int main(int n_args, char *args[]){
                     SAVE_SLOTS, save_slot);
                 goto parse_failure;
             }
-            if(!load_game){
+            if(action == 'n'){
                 int err2 = delete_save_slot(save_slot);
                 if(err2){
                     /* Presumably there was just nothing saved in that slot,
@@ -298,6 +300,8 @@ int main(int n_args, char *args[]){
                     fprintf(stderr, "WARNING: couldn't delete save slot %i\n",
                         save_slot);
                 }
+            }else if(action == 'l'){
+                load_save_slot = true;
             }
         }else if(!strcmp(arg, "--minimap-alt")){
             minimap_alt = !minimap_alt;

@@ -109,7 +109,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     int n_players, int save_slot,
     const char *load_recording_filename,
     const char *save_recording_filename,
-    bool have_audio);
+    bool have_audio, bool load_save_slot);
 int test_app_reload_prismelrenderers(test_app_t *app);
 int test_app_reload_map(test_app_t *app);
 int test_app_mainloop(test_app_t *app);
