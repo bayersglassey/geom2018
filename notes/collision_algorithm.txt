@@ -1,0 +1,77 @@
+
+
+Dec 22, 2024:
+-------------
+
+
+What's the algorithm for collisions?
+And can we add a kind of "anti-solid" thing to hexmaps -- perhaps just
+reusing the existing 'x' thing -- which short-circuits the collision algorithm,
+so that we can "dig tunnels through things" simply by placing tunnel hexcollmaps
+over other hexcollmaps in a given hexmap?
+
+    hexmap.h:
+        int hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
+            trf_t *trf, bool all, bool *collide_ptr);
+        int hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
+            trf_t *trf,
+            hexmap_collision_t *collision);
+
+    hexcollmap.h:
+        bool hexcollmap_collide(
+            hexcollmap_t *collmap1, trf_t *trf1,
+            hexcollmap_t *collmap2, trf_t *trf2,
+            vecspace_t *space, bool all);
+
+Implementations:
+
+    hexmap.c:
+
+        int hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
+            trf_t *trf, bool all, bool *collide_ptr
+        ){
+            hexmap_collision_t collision;
+            return _hexmap_collide(map, collmap2, trf, all, &collision, collide_ptr);
+        }
+
+        int hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
+            trf_t *trf, hexmap_collision_t *collision
+        ){
+            int all_type = 2;
+            bool collide; /* unused */
+            return _hexmap_collide(map, collmap2, trf, all_type, collision, &collide);
+        }
+
+...and the basic algorithm of _hexmap_collide is:
+
+    int w2 = collmap2->w;
+    int h2 = collmap2->h;
+    for(int y2 = 0; y2 < h2; y2++){
+        for(int x2 = 0; x2 < w2; x2++){
+            hexcollmap_tile_t *tile2 = &collmap2->tiles[y2 * w2 + x2];
+            // hexmap_collide_elem for vert, for edge, for face
+        }
+    }
+
+...and hexmap_collide_elem is basically:
+
+    for(int r2 = 0; r2 < rot; r2++){
+        if(!hexcollmap_elem_is_solid(&elems2[r2]))continue;
+        for(int i = 0; i < map->submaps_len; i++){
+            hexmap_submap_t *submap = map->submaps[i];
+            if(!hexmap_submap_is_solid(submap))continue;
+            hexcollmap_t *collmap1 = &submap->collmap;
+            hexcollmap_elem_t *elem = get_elem(collmap1, &subindex);
+            // Special stuff for elem->tile_c, 'S', 'D', 'w' for save/door/water
+            if(hexcollmap_elem_is_solid(elem)){
+                collide = true; break;}
+        }
+    }
+
+...hmmmm.
+So basically: for every element (vert/edge/face) in the hexmap, we iterate over
+map->submaps, get the corresponding element of submap->collmap, and do our check.
+And currently, when iterating over submaps, we break if we find something solid.
+But we would also like to break if we find something "tunnelly".
+So basically, when currently checking elem->tile_c for 'S', 'D', 'w', we can just
+also check for 'x'?..
