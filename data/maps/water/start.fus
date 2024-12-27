@@ -5,6 +5,7 @@ parts:
     "L": "data/maps/wilderness/start_line3.fus"
     "m": "data/maps/wilderness/start_line4.fus"
     "M": "data/maps/wilderness/start_line5.fus"
+    "E": location "water_entrance"
 
 collmap:
     ;;
@@ -20,7 +21,7 @@ collmap:
     ;;                           * *    \w w w w w w w w w w\
     ;;   .   .   .   .   .   .   .   .   +   .   .   .   .   . - .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                         * *   D   w w w w w w w w w w w w w\
-    ;; .   .   .   .   .   .   . - + - + - + - + - + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   . - + - + - ! - + - + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .      [E]
     ;;                                        /w w w w w\w w w w w w\
     ;;   .   .   .   .   .   .   .   .   .   +   . - .   + - + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                                      /w w/w w w w w w w w w\w w\

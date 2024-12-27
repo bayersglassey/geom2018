@@ -7,6 +7,10 @@ parts:
     "C": recording "data/recs/coin_crouch.fus"
     "r": actor "actor/airoller.fus"
     "w": actor "actor/aiwater_roller_sneaky.fus"
+    "D": recording "data/recs/door.fus"
+        vars:
+            "map": "data/maps/water/worldmap.fus"
+            "location": "water_entrance"
 
 collmap:
     ;;
@@ -36,8 +40,8 @@ collmap:
     ;;          \           \   \     /       /     \                             /     \     /     \     /
     ;;   .   .   +   .   .   +   + - +   + - +   ?   +   .   .   ! - +   .   + - +   ?   + - +   .   .   +   .   .    [O][w][O]
     ;;          /           /           /     \     /           /     \     /     \     /     \           \
-    ;; .   .   +   .   +   +   .   + - +   ?   + - +   .   + - !   !   + - +   ?   + - +   .   .   .   .   +   .   .  [O][C][C][O]
-    ;;          \  D  /     \     /     \     /           /       /*\       \     /     \               \
+    ;; .   .   +   ?   +   +   .   + - +   ?   + - +   .   + - !   !   + - +   ?   + - +   .   .   .   .   +   .   [D][O][C][C][O]
+    ;;          \     /     \     /     \     /           /       /*\       \     /     \               \
     ;;   .   .   + - +   .   + - +   ?   + - +   .   + - +   ?   +   +   ?   + - +   .   .   .   .   +   +   .   .    [O] [c][c]
     ;;                      /     \     /           /     \     /* * *\     /     \               \
     ;; .   .   .   .   .   +   ?   + - +   .   + - +   .   +   +   .   +   +   .   + - +   .   +   +   .   .   .   .  [O]
