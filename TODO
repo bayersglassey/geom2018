@@ -780,8 +780,6 @@ Jul 3, 2022:
 Oct 9, 2022:
 ------------
 
-When you record (with F9) it doesn't add your body's vars to the recording.
-
 When you touch a death roller who's stuck in one place, and you're a spikey spider,
 you get stuck there in your shielding animation forever!
 
@@ -923,20 +921,6 @@ MULTIPLAYER:
     other players can jump to player 1's last "safe location"
 
 
-Dec 21, 2024:
--------------
-
-Remember those cool "curved" tiles?..
-Anyway, don't forget to use those somewhere!
-It's the "earth" tileset, see data/maps/sprucetown/
-
-
-data/maps/demo/jungle5.fus:
-When you jump up to escape the bird walking back and forth, the
-camera doesn't scroll to show you unless you go all the way up to the
-ceiling! Fiiiix
-
-
 Dec 22, 2024:
 -------------
 
@@ -956,6 +940,10 @@ NEXT STEPS:
     bubbles.
     Also, add some areas where everything is water, with air bubbles; but
     when you hit switches, air and water are reversed.
+[ ] Fix data/maps/demo/jungle5.fus:
+    When you jump up to escape the bird walking back and forth, the
+    camera doesn't scroll to show you unless you go all the way up to the
+    ceiling! Fiiiix
 [ ] Make an area, near jungle, full of birds. They chase you, you pop in
     and out of holes, etc.
     This teaches you how to deal with birds, which allows you to later on
