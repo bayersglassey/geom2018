@@ -1,6 +1,6 @@
 name: "trees"
 unit: 3 2 0 -1
-spawn: (-1 0)
+spawn: "data/maps/trees/start.fus"
 palette: "data/maps/trees/pals/trees.fus"
 tileset: "data/maps/trees/tilesets/trees.fus"
 

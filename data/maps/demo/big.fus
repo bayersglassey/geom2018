@@ -3,6 +3,7 @@ parts:
     "s": recording "data/recs/switch.fus"
         vars:
             "key": "big_switch"
+    "l": location "triangles_exit"
 collmap:
     ;;
     ;;     .       .       .       .       .       .       .       .       +       .       .       .       .
@@ -49,7 +50,7 @@ collmap:
     ;;
     ;;                   +       +
     ;;                    \  D  /
-    ;; .       .       .   + - +       .       .       +       !       .       .       .       .       .       .  [R]
+    ;; .       .       .   + - !       .       .       +       !       .       .       .       .       .       .    [l^3]    [R]
     ;;                                                /       /*\
     ;;                                               +       + - +
     ;;                                              /             \

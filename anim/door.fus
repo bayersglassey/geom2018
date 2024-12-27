@@ -39,6 +39,8 @@ vars:
     "anim": null
     "state": null
     "set_yourbool": null
+    "set_mapbool": null
+    "set_globalbool": null
     "set_mapvar.name": null
     "set_mapvar.value": null
     "set_globalvar.name": null
@@ -100,9 +102,13 @@ state "open":
 
         if: exists myvar("set_mapvar.name")
         then: set mapvar(myvar("set_mapvar.name")): myvar("set_mapvar.value")
+        if: exists myvar("set_mapbool")
+        then: set mapvar(myvar("set_mapbool")): T
 
         if: exists myvar("set_globalvar.name")
         then: set globalvar(myvar("set_globalvar.name")): myvar("set_globalvar.value")
+        if: exists myvar("set_globalbool")
+        then: set globalvar(myvar("set_globalbool")): T
 
         goto: "closed"
 

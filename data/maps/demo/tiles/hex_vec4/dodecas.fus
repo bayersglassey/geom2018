@@ -10,7 +10,7 @@ parts:
     "D": "data/maps/demo/tiles/hex_vec4/dia_r.fus"
     "c": "data/maps/demo/tiles/hex_vec4/dodeca.fus"
     "C": "data/maps/demo/tiles/hex_vec4/dodeca_r.fus"
-    "k": "data/maps/demo/tiles/hex_vec4/dodeca_hollow.fus"
+    "k": "data/maps/demo/tiles/hex_vec4/dodeca_hollow_filled.fus"
 
 collmap:
     ;;

@@ -1,7 +1,6 @@
 name: "wastes"
 unit: 3 2 0 -1
-#spawn: "data/maps/wastes/start.fus"
-spawn: (-2 1)
+spawn: "data/maps/wastes/start.fus"
 palette: "data/pal1.fus"
 tileset: "data/tileset1.fus"
 

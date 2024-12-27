@@ -1,13 +1,14 @@
 name: "triangles"
 unit: 3 2 0 -1
-spawn: (0 0)
-palette: "data/maps/demo/pals/tunnels.fus"
-tileset: "data/tileset1.fus"
+spawn: "data/maps/triangles/start.fus"
+palette: "data/maps/trees/pals/trees.fus"
+tileset: "data/maps/sprucetown/tilesets/earth.fus"
 vars:
     "start_blocker2": F
     "start2_blocker": F
     "start3_blocker": F
     "start4_blocker": F
+    "got_flip": F
 
 submaps:
     :
@@ -55,6 +56,16 @@ submaps:
                         file: "data/maps/triangles/start2_bg.fus"
             :
                 bg
+                file: "data/maps/triangles/start3_bg_e.fus"
+                visible: mapvar("start3_blocker")
+                pos: eval: (14 12) + (22 15) + (11 14)
+            :
+                bg
+                file: "data/maps/triangles/start3_bg_E.fus"
+                visible: not mapvar("start3_blocker")
+                pos: eval: (14 12) + (22 15) + (11 14)
+            :
+                bg
                 file: "data/maps/triangles/start3_bg.fus"
                 pos: eval: (14 12) + (22 15)
             :
@@ -78,12 +89,6 @@ submaps:
                 pos: (0 0)
                 camera: (0 0)
                 mapper: ("triple")
-                doors:
-                    :
-                        map: "data/maps/demo/worldmap.fus"
-                        pos: (38 -80)
-                        rot: 1
-                        turn: n
                 recs:
                     : "data/maps/triangles/recs/bigroller000.fus"
                     #: "data/maps/triangles/recs/bigroller000.fus" "cya"
@@ -94,20 +99,41 @@ submaps:
                 visible: not mapvar("start_blocker2")
                 pos: (0 9)
                 mapper: ("triple")
-            :
-                file: "data/maps/triangles/start2.fus"
-                pos: eval: (14 12)
-                camera: (16 5)
-                mapper: ("triple")
+            "start2":
+                pos: (14 12)
+                submaps:
+                    :
+                        file: "data/maps/triangles/start2.fus"
+                        pos: (19 12)
+                        camera: (3 0)
+                        mapper: ("triple")
+                    :
+                        file: "data/maps/triangles/start2b.fus"
+                        pos: (16 0)
+                        camera: (-5 0)
+                        mapper: ("triple")
             :
                 file: "data/maps/triangles/start2_blocker.fus"
                 visible: not mapvar("start2_blocker")
                 pos: eval: (14 12) + (10 10)
-            :
-                file: "data/maps/triangles/start3.fus"
+            "start3":
                 pos: eval: (14 12) + (22 15)
-                camera: (8 8)
+                camera: (11 8)
                 mapper: ("triple")
+                submaps:
+                    :
+                        file: "data/maps/triangles/start3.fus"
+                    :
+                        file: "data/maps/triangles/start3_blocker.fus"
+                        visible: not mapvar("start3_blocker")
+                        pos: (17 7)
+            :
+                file: "data/maps/triangles/cage.fus"
+                pos: eval: (14 12) + (22 15) + (13 -10)
+                camera: (4 6)
+                mapper: ("quadruple")
+                recs:
+                    : "data/maps/triangles/recs/caged_eyespider.fus"
             :
                 file: "data/maps/triangles/start4.fus"
                 pos: eval: (14 12) + (22 15) + (-4 3)
