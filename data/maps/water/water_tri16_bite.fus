@@ -1,7 +1,10 @@
 parts:
     "T": "data/maps/water/water_tri8.fus"
     "a": "data/maps/water/air_bubble_sm.fus"
-    "D": "data/maps/demo/door.fus"
+    "D": recording "data/recs/door.fus"
+        vars:
+            "map": "data/maps/demo/worldmap.fus"
+            "location": "water_exit"
 
 collmap:
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
@@ -26,9 +29,9 @@ collmap:
     ;;
     ;;   .   .   .   .   .   ?   .   .   ?   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   . [T][a|1][T^3]
     ;;
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .      [D]
     ;;
-    ;;   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .    [D|2]
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;

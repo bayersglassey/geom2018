@@ -40,12 +40,6 @@ submaps:
         submaps:
             :
                 file: "data/maps/water/start.fus"
-                doors:
-                    :
-                        map: "data/maps/demo/worldmap.fus"
-                        pos: (-77 5)
-                        rot: 3
-                        turn: y
             :
                 file: "data/maps/water/bubble_sm.fus"
                 pos: (16 -7)
@@ -96,12 +90,6 @@ submaps:
                         pos: (24 7)
                         camera: (0 0)
                         mapper: ("quadruple")
-                        doors:
-                            :
-                                map: "data/maps/demo/worldmap.fus"
-                                pos: (-51 29)
-                                rot: 0
-                                turn: y
                         submaps:
                             :
                                 file: "data/maps/water/air_bubbles_walled1_tunnel_blocker.fus"
@@ -119,9 +107,3 @@ submaps:
                 file: "data/maps/water/water_tri16_bite.fus"
                 pos: eval: (42 0) + (20 -19) + (25 4)
                 camera: (10 10)
-                doors:
-                    :
-                        map: "data/maps/demo/worldmap.fus"
-                        pos: (-77 5)
-                        rot: 3
-                        turn: y

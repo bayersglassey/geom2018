@@ -1,5 +1,9 @@
 parts:
     "l": location "hermit_exit"
+    "D": recording "data/recs/door.fus"
+        vars:
+            "map": "data/maps/demo/worldmap.fus"
+            "location": "hermit_entrance"
 
 collmap:
     ;;                                                         + - +
@@ -22,8 +26,8 @@ collmap:
     ;;
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .  (!)- +   .   .   .   .   .   .   .   .   .   .   .   .   .       [l]
-    ;;                             D                      /* * *\
+    ;; .   .   .   .   .   .   .   ?   .   .   .   .   .  (!)- +   .   .   .   .   .   .   .   .   .   .   .   .   .    [D]   [l]
+    ;;                                                    /* * *\
     ;;   .   .   .   .   .   + - + - + - +   .   .   + - + - + - +   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                            \* * */
     ;; .   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .

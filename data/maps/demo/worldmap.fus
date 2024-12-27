@@ -91,10 +91,4 @@ submaps:
                         pos: eval: (13 1) + (18 8)
                         camera: (0 5)
                         mapper: ("triple")
-                        doors:
-                            :
-                                map: "data/maps/wilderness/worldmap.fus"
-                                pos: (0 0)
-                                rot: 0
-                                turn: n
     : import "data/maps/demo/submap_spidertown.fus"

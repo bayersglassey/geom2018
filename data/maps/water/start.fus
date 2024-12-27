@@ -6,6 +6,10 @@ parts:
     "m": "data/maps/wilderness/start_line4.fus"
     "M": "data/maps/wilderness/start_line5.fus"
     "E": location "water_entrance"
+    "D": recording "data/recs/door.fus"
+        vars:
+            "map": "data/maps/demo/worldmap.fus"
+            "location": "water_exit"
 
 collmap:
     ;;
@@ -19,8 +23,8 @@ collmap:
     ;;                     *     S            \
     ;; .   .   .   .   . - + - + - + - +   .   . - . - . - .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                           * *    \w w w w w w w w w w\
-    ;;   .   .   .   .   .   .   .   .   +   .   .   .   .   . - .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
-    ;;                         * *   D   w w w w w w w w w w w w w\
+    ;;   .   .   .   .   .   .   .   ?   +   .   .   .   .   . - .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .        [D]
+    ;;                         * *       w w w w w w w w w w w w w\
     ;; .   .   .   .   .   .   . - + - + - ! - + - + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .      [E]
     ;;                                        /w w w w w\w w w w w w\
     ;;   .   .   .   .   .   .   .   .   .   +   . - .   + - + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .

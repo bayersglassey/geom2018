@@ -592,21 +592,6 @@ So we either need to call a certain proc when transforming, or... uh... do somet
 => UPDATE: there are now "onstatesetchange" procs. Maaaaybe that could be a solution.
 
 
-Jan 7, 2022:
-------------
-
-* Remove hexmap_door_t (and the magic 'D' tile)
-    How many 'D' tile doors are there to replace?
-
-        $ ack -l '[ /\\]D[ /\\]' data/maps/ | wc -l
-        10
-
-    ...not too bad. :O
-    To find more:
-
-        $ nano $(ack -l '[ /\\]D[ /\\]' data/maps/ | head -n 1)
-
-
 Jan 27, 2022:
 -------------
 
@@ -965,3 +950,12 @@ NEXT STEPS:
 [ ] And the ultimate goal is... what?.. something like rejoining spider city?..
     So you complete tasks for spiders in various areas who are... making
     spider outposts?.. and then they help you get to the city?..
+
+
+Dec 26, 2022:
+-------------
+
+* Remove hexmap_door_t (and the magic 'D' tile)
+  Find them with this:
+
+    $ ack -l '[ /\\]D[ /\\]' data/maps/
