@@ -161,7 +161,7 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
     ARRAY_INIT(body->label_mappings)
 
     /* No recording loaded */
-    body->recording.action = RECORDING_ACTION_NONE;
+    recording_init(&body->recording);
 
     body->state = NULL;
     body->frame_i = 0;

@@ -96,6 +96,7 @@ typedef struct recording {
     hexgame_location_t loc0;
 
     keyinfo_t keyinfo;
+    vars_t vars;
 
     ARRAY_DECL(struct recording_node, nodes)
 
@@ -114,8 +115,7 @@ const char *recording_action_msg(int action);
 
 void recording_cleanup(recording_t *rec);
 void recording_init(recording_t *rec);
-int recording_load(recording_t *rec, const char *filename,
-    vars_t *vars, struct body *body, bool loop);
+void recording_reset(recording_t *rec);
 int recording_step(recording_t *rec);
 
 

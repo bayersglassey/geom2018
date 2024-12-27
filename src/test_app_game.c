@@ -247,12 +247,14 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
                         }
 
                         if(shift){
+                            /* Play the recording using player's existing body */
                             err = body_load_recording(body, recording_filename,
                                 true);
                             if(err)return err;
                             err = body_play_recording(body);
                             if(err)return err;
                         }else{
+                            /* Create a new body & play the recording with it */
                             /* TODO: Recordings need to state which map they
                             expect! The following is a hack: you must play
                             recordings belonging to your correct map... */

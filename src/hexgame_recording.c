@@ -16,6 +16,7 @@
 #include "write.h"
 #include "var_utils.h"
 #include "geom_lexer_utils.h"
+#include "hexgame_vars_props.h"
 
 
 const char *recording_action_msg(int action){
@@ -48,14 +49,13 @@ void recording_node_init_wait(recording_node_t *node, int wait){
  *************/
 
 void recording_cleanup(recording_t *rec){
-    if(rec->file != NULL)fclose(rec->file);
+    vars_cleanup(&rec->vars);
     ARRAY_FREE(struct recording_node, rec->nodes, (void))
+    if(rec->file != NULL)fclose(rec->file);
 }
 
 void recording_init(recording_t *rec){
-    recording_cleanup(rec);
-
-    rec->action = 0; /* none */
+    rec->action = RECORDING_ACTION_NONE;
     rec->stateset_name = NULL;
     rec->state_name = NULL;
     rec->reacts = false;
@@ -65,6 +65,7 @@ void recording_init(recording_t *rec){
     rec->loc0.turn = false;
 
     keyinfo_reset(&rec->keyinfo);
+    vars_init(&rec->vars);
 
     ARRAY_INIT(rec->nodes)
 
@@ -74,6 +75,11 @@ void recording_init(recording_t *rec){
     rec->filename = NULL;
     rec->file = NULL;
     rec->offset = 0;
+}
+
+void recording_reset(recording_t *rec){
+    recording_cleanup(rec);
+    recording_init(rec);
 }
 
 static int recording_parse_nodes(recording_t *rec, const char *data){
@@ -139,6 +145,14 @@ static int recording_parse(recording_t *rec,
         if(err)return err;
     }
 
+    if(GOT("vars")){
+        NEXT
+        OPEN
+        err = vars_parse(&rec->vars, lexer);
+        if(err)return err;
+        CLOSE
+    }
+
     if(GOT("data")){
         NEXT
         OPEN
@@ -162,25 +176,10 @@ static int recording_parse(recording_t *rec,
         rec->loop = false;
     }
 
-    if(GOT("vars")){
-        NEXT
-        OPEN
-        err = vars_parse(&body->vars, lexer);
-        if(err)return err;
-        /*
-        We don't do this here because body->stateset is NULL!..
-        It will be set later on, whenever someone calls body_play_recording.
-        TODO: FIX THIS GROSS HACK >__>
-         err = body_execute_procs(body, STATESET_PROC_TYPE_ONSTATESETCHANGE);
-         if(err)return err;
-        */
-        CLOSE
-    }
-
     return 0;
 }
 
-int recording_load(recording_t *rec, const char *filename,
+static int recording_load(recording_t *rec, const char *filename,
     vars_t *vars, body_t *body, bool loop
 ){
     int err;
@@ -192,7 +191,7 @@ int recording_load(recording_t *rec, const char *filename,
     err = fus_lexer_init_with_vars(&lexer, text, filename, vars);
     if(err)return err;
 
-    recording_init(rec);
+    recording_reset(rec);
     rec->filename = filename;
     rec->body = body;
     rec->loop = loop;
@@ -229,7 +228,7 @@ static int recording_step_play(recording_t *rec){
                 if(rec->nodes_len <= 0)break;
             }else{
                 /* Stop playback, in fact unload recording entirely */
-                recording_init(rec);
+                recording_reset(rec);
                 break;
             }
         }
@@ -357,6 +356,9 @@ int body_play_recording(body_t *body){
     err = body_set_stateset(body, rec->stateset_name, rec->state_name);
     if(err)return err;
 
+    err = vars_copy(&body->vars, &rec->vars);
+    if(err)return err;
+
     body->recording.action = RECORDING_ACTION_PLAY;
     return body_restart_recording(body, false, true);
 }
@@ -401,7 +403,7 @@ int body_start_recording(body_t *body, const char *filename){
         perror("Couldn't start recording");
         return 2;}
 
-    recording_init(&body->recording);
+    recording_reset(&body->recording);
     body->recording.action = RECORDING_ACTION_RECORD;
     body->recording.filename = filename;
     body->recording.file = f;
@@ -433,6 +435,11 @@ int body_start_recording(body_t *body, const char *filename){
         fprintf(f, "\n");
     }
 
+    /* Don't write the vars which say they shouldn't be saved. */
+    var_props_t nowrite_props_mask = 1 << HEXGAME_VARS_PROP_NOSAVE;
+    fprintf(f, "vars:\n");
+    vars_write_with_mask(&body->vars, f, 4, nowrite_props_mask);
+
     fprintf(f, "data: \"");
 
     return 0;
@@ -449,7 +456,7 @@ int body_stop_recording(body_t *body){
 
     fprintf(f, "\"\n");
 
-    recording_init(&body->recording);
+    recording_reset(&body->recording);
     return 0;
 }
 

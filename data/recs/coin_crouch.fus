@@ -8,6 +8,6 @@ keys:
     d:
     l:
     r:
-nodata
 vars:
     "crouch": T
+nodata

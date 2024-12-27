@@ -12,9 +12,6 @@ static void _print_tabs(FILE *file, int indent){
     for(int i = 0; i < indent; i++)putc(' ', file);
 }
 
-
-
-
 int val_parse(val_t *val, fus_lexer_t *lexer){
     INIT
     if(GOT_INT){
@@ -106,9 +103,6 @@ int val_parse(val_t *val, fus_lexer_t *lexer){
     }
     return 0;
 }
-
-
-
 
 static void _print_props(FILE *file, vars_t *vars, var_t *var){
     var_props_t props = var->props;

@@ -1009,7 +1009,7 @@ int hexmap_load_recording(hexmap_t *map, const char *filename,
     err = body_init(body, game, map, NULL, NULL, palmapper);
     if(err)return err;
 
-    err = recording_load(&body->recording, filename, NULL, body, loop);
+    err = body_load_recording(body, filename, loop);
     if(err)return err;
 
     body->recording.offset += offset;
