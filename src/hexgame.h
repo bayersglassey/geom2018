@@ -113,9 +113,7 @@ typedef struct recording {
 const char *recording_action_msg(int action);
 
 void recording_cleanup(recording_t *rec);
-void recording_reset(recording_t *rec);
-void recording_init(recording_t *rec, const char *filename,
-    struct body *body, bool loop);
+void recording_init(recording_t *rec);
 int recording_load(recording_t *rec, const char *filename,
     vars_t *vars, struct body *body, bool loop);
 int recording_step(recording_t *rec);

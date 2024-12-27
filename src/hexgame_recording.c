@@ -52,7 +52,7 @@ void recording_cleanup(recording_t *rec){
     ARRAY_FREE(struct recording_node, rec->nodes, (void))
 }
 
-void recording_reset(recording_t *rec){
+void recording_init(recording_t *rec){
     recording_cleanup(rec);
 
     rec->action = 0; /* none */
@@ -74,17 +74,6 @@ void recording_reset(recording_t *rec){
     rec->filename = NULL;
     rec->file = NULL;
     rec->offset = 0;
-}
-
-void recording_init(recording_t *rec, const char *filename,
-    body_t *body, bool loop
-){
-    /* This should probably call recording_reset... but it doesn't.
-    Should we fix that, or would it break something?.. */
-    rec->filename = filename;
-    rec->body = body;
-    rec->loop = loop;
-    rec->resets_position = true;
 }
 
 static int recording_parse_nodes(recording_t *rec, const char *data){
@@ -203,7 +192,12 @@ int recording_load(recording_t *rec, const char *filename,
     err = fus_lexer_init_with_vars(&lexer, text, filename, vars);
     if(err)return err;
 
-    recording_init(rec, filename, body, loop);
+    recording_init(rec);
+    rec->filename = filename;
+    rec->body = body;
+    rec->loop = loop;
+    rec->resets_position = true;
+
     err = recording_parse(rec, &lexer, filename);
     if(err)return err;
 
@@ -235,7 +229,7 @@ static int recording_step_play(recording_t *rec){
                 if(rec->nodes_len <= 0)break;
             }else{
                 /* Stop playback, in fact unload recording entirely */
-                recording_reset(rec);
+                recording_init(rec);
                 break;
             }
         }
@@ -351,7 +345,6 @@ int body_load_recording(body_t *body, const char *filename, bool loop){
     int err;
     recording_t *rec = &body->recording;
 
-    recording_reset(rec);
     err = recording_load(rec, filename, NULL, body, loop);
     if(err)return err;
     return 0;
@@ -408,7 +401,7 @@ int body_start_recording(body_t *body, const char *filename){
         perror("Couldn't start recording");
         return 2;}
 
-    recording_reset(&body->recording);
+    recording_init(&body->recording);
     body->recording.action = RECORDING_ACTION_RECORD;
     body->recording.filename = filename;
     body->recording.file = f;
@@ -456,7 +449,7 @@ int body_stop_recording(body_t *body){
 
     fprintf(f, "\"\n");
 
-    recording_reset(&body->recording);
+    recording_init(&body->recording);
     return 0;
 }
 
