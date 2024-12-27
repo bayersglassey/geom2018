@@ -1,0 +1,61 @@
+
+Dec 24, 2024:
+-------------
+
+What is our algorithm for rendering things?..
+
+
+Here are the main structures & functions involved:
+* prismelrenderer_t
+* rendergraph_t
+* rendergraph_child_t
+    * rendergraph->children
+* rendergraph_bitmap_t
+    * rendergraph->bitmaps
+        * array, entries accessed with rendergraph_get_bitmap
+* SDL_Surface
+    * bitmap->surface
+        * lazily populated by rendergraph_get_or_render_bitmap
+            * calls rendergraph_get_bitmap, if bitmap->surface != NULL returns it
+            * if bitmap->surface == NULL, calls rendergraph_render_bitmap
+                * creates bitmap->surface, then calls rendergraph_render_to_surface
+                  (see below)
+* SDL_Palette
+
+
+At the core of everything, there is rendergraph_render_to_surface
+    * Params: rendergraph, surface, dst_rect, rot, flip, frame_i, pal
+    * For each child in rendergraph->children...
+        * If child->type == RENDERGRAPH_CHILD_TYPE_RGRAPH:
+            * NOTE: the logic here is much like that of rendergraph_render
+            * Get rendergraph2, bitmap2 from child->u.rgraph.rendergraph
+            * Calculate `SDL_Rect dst_rect2`
+            * If cache_bitmaps, call rendergraph_get_or_render_bitmap and then SDL_PaletteMappedBlit
+            * If !cache_bitmaps, call rendergraph_render_to_surface
+        * If child->type == RENDERGRAPH_CHILD_TYPE_PRISMEL:
+            * Get child->u.prismel.color, apply rendergraph->palmapper to it if any
+            * Get child->u.prismel.prismel, grab one of its images (based on rot/flip)
+            * Iterate over image->lines, writing line's pixels onto surface
+
+
+There is also: rendergraph_render
+    * Params: rgraph, surface, pal (SDL_Palette), x0, y0, zoom, pos, rot, flip, frame_i, mapper
+    * Maps `int zoom` > 1 to a mapper ("double", "triple", or "quadruple"), combines with passed mapper if any
+    * Calls prismelmapper_apply_to_rendergraph if we have a mapper
+    * Calculate `SDL_Rect dst_rect`
+    * If cache_bitmaps, call rendergraph_get_or_render_bitmap and then SDL_BlitScaled
+        * Should we be calling SDL_PaletteMappedBlit instead?.. when a palmapper is involved?..
+    * If !cache_bitmaps, call rendergraph_render_to_surface
+
+
+There is also: rendergraph_render_with_labels
+    * Params: all those of rendergraph_render, plus an array of label_mapping_t
+    * First call rendergraph_render
+    * Now render the labels...
+        * Calls rendergraph_calculate_labels on rgraph, which lazily recursively
+          populates rgraph->frames[*].labels from rgraph->children
+        * For all labels for the current frame of rgraph...
+            * For all label_mapping_t passed us which match the label's name,
+              call rendergraph_render_with_labels (recursively!) with mapping->rgraph
+            * If no label_mapping_t matching label's name were found, call
+              rendergraph_render_with_labels (recursively!) with frame's default_rgraph
