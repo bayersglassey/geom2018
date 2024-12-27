@@ -5,11 +5,14 @@
 # Expected vars at runtime:
 # * key (str)
 
+vars:
+    "value": T
+
 state "init":
     if: any:
         all:
             exists myvar("key")
-            expr: mapvar(myvar("key"))
+            expr: == mapvar(myvar("key")) myvar("value")
         all:
             exists myvar("counter")
             expr: mapvar(myvar("counter"))
@@ -26,7 +29,7 @@ state "waiting":
 
     on "touch":
         if: exists myvar("key")
-        then: set mapvar(myvar("key")): T
+        then: set mapvar(myvar("key")): myvar("value")
 
         if: exists myvar("counter")
         then: inc mapvar(myvar("counter"))
