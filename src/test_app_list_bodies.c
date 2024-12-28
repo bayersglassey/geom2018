@@ -85,9 +85,11 @@ int test_app_list_bodies_render(test_app_list_t *list){
         if(actor){
             _console_write_field(console, "Actor stateset", actor->stateset->filename);
             _console_write_field(console, "Actor state", actor->state->name);
+            _console_write_field_int(console, "Actor wait", actor->wait);
         }
         _console_write_field(console, "Stateset", body->stateset->filename);
         _console_write_field(console, "State", body->state->name);
+        _console_write_field_int(console, "Cooldown", body->cooldown);
         if(body->palmapper)_console_write_field(console, "Palmapper", body->palmapper->name);
         _console_write_keyinfo(console, body, &body->keyinfo);
 

@@ -85,8 +85,12 @@ int test_app_list_actors_render(test_app_list_t *list){
         body_t *body = actor->body;
         _console_write_field(console, "Stateset", actor->stateset->filename);
         _console_write_field(console, "State", actor->state->name);
-        _console_write_field(console, "Body stateset", body? body->stateset->filename: NULL);
-        _console_write_field(console, "Body state", body? body->state->name: NULL);
+        _console_write_field_int(console, "Wait", actor->wait);
+        if(body){
+            _console_write_field(console, "Body stateset", body->stateset->filename);
+            _console_write_field(console, "Body state", body->state->name);
+            _console_write_field_int(console, "Body cooldown", body->cooldown);
+        }
         if(data->mode == TEST_APP_LIST_ACTORS_MODE_STATEPICKER){
             _console_write_options_stateset(console, data->options,
                 data->options_index, data->options_length,
