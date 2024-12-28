@@ -188,6 +188,7 @@ typedef struct stateset {
 *******/
 
 typedef struct state_rule {
+    const char *name;
     struct state *state;
     ARRAY_DECL(struct state_cond*, conds)
     ARRAY_DECL(struct state_effect*, effects)
@@ -203,6 +204,7 @@ enum state_cond_type {
     STATE_COND_TYPE_TRUE,
     STATE_COND_TYPE_KEY,
     STATE_COND_TYPE_COLL,
+    STATE_COND_TYPE_DEAD,
     STATE_COND_TYPE_CHANCE,
     STATE_COND_TYPE_ANY,
     STATE_COND_TYPE_ALL,
@@ -218,6 +220,7 @@ static const char *state_cond_type_name(int type){
         case STATE_COND_TYPE_TRUE: return "true";
         case STATE_COND_TYPE_KEY: return "key";
         case STATE_COND_TYPE_COLL: return "coll";
+        case STATE_COND_TYPE_DEAD: return "dead";
         case STATE_COND_TYPE_CHANCE: return "chance";
         case STATE_COND_TYPE_ANY: return "any";
         case STATE_COND_TYPE_ALL: return "all";
@@ -264,6 +267,7 @@ typedef struct state_cond {
             ARRAY_DECL(struct state_cond*, conds)
         } subconds;
         valexpr_t valexpr;
+        int dead;
     } u;
 } state_cond_t;
 

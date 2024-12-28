@@ -420,6 +420,20 @@ static int _parse_cond(state_context_t *context, fus_lexer_t *lexer,
         cond->u.coll.collmap = collmap;
         cond->u.coll.flags = flags;
         cond->u.coll.collmsg_expr = collmsg_expr;
+    }else if(GOT("dead")){
+        NEXT
+        OPEN
+        int dead = -1; /* See: body_is_done_for */
+        if(GOT("mostly")){
+            NEXT
+            dead = BODY_MOSTLY_DEAD;
+        }else if(GOT("all")){
+            NEXT
+            dead = BODY_ALL_DEAD;
+        }
+        CLOSE
+        cond->type = STATE_COND_TYPE_DEAD;
+        cond->u.dead = dead;
     }else if(GOT("chance")){
         NEXT
         OPEN

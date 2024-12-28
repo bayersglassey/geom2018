@@ -249,6 +249,13 @@ int state_cond_match(state_cond_t *cond,
         }
         break;
     }
+    case STATE_COND_TYPE_DEAD: {
+        CHECK_BODY
+        matched = cond->u.dead == -1?
+            body_is_done_for(body):
+            body->dead == cond->u.dead;
+        break;
+    }
     case STATE_COND_TYPE_CHANCE: {
         int n = rand() % cond->u.ratio.b;
         matched = n <= cond->u.ratio.a;
