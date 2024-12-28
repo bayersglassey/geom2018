@@ -4,6 +4,18 @@
 state "mainloop":
     # Main AI loop
 
+    if: dead()
+    then:
+        key: up u
+        key: up d
+        key: up l
+        key: up r
+        key: up x
+        key: up y
+        goto: "create_body"
+        delay: 42
+
+
     if() then:
         key: up b
         continue
