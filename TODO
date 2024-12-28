@@ -910,6 +910,11 @@ Dec 22, 2024:
 -------------
 
 NEXT STEPS:
+[ ] Fix all the broken recordings!
+[ ] Fix the aispiders! (So they don't explode themselves, etc)
+[ ] When a body with a recording dies, e.g. a spider explodes, restart
+    the recording (with resets_position forced to be true).
+    Same for actors, except we restart the actor.
 [ ] In dodecas area, start making... "time progression".
     Like... when you do something, the area changes drastically.
     In particular, wilderness is transformed into populated stuff.
@@ -933,11 +938,6 @@ NEXT STEPS:
     and out of holes, etc.
     This teaches you how to deal with birds, which allows you to later on
     save the hermit spider. Or something.
-[ ] When a body with a recording dies, e.g. a spider explodes, restart
-    the recording (with resets_position forced to be true).
-    Same for actors, except we restart the actor.
-[ ] Fix all the broken recordings!
-[ ] Fix the aispiders! (So they don't explode themselves, etc)
 [ ] tutorial2: should be part of open-ended world
 [ ] tutorial3: should be part of open-ended world
 [ ] Make "pickup slots".
@@ -950,12 +950,3 @@ NEXT STEPS:
 [ ] And the ultimate goal is... what?.. something like rejoining spider city?..
     So you complete tasks for spiders in various areas who are... making
     spider outposts?.. and then they help you get to the city?..
-
-
-Dec 26, 2022:
--------------
-
-* Remove hexmap_door_t (and the magic 'D' tile)
-  Find them with this:
-
-    $ ack -l '[ /\\]D[ /\\]' data/maps/
