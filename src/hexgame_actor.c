@@ -119,9 +119,10 @@ int actor_step(actor_t *actor, struct hexgame *game){
     }
 
     body_t *body = actor->body;
-    if(body == NULL || body->recording.action != RECORDING_ACTION_PLAY){
-        /* No body, or recording not playing */
-
+    if(body == NULL || (
+        body->recording.action != RECORDING_ACTION_PLAY &&
+        body->cooldown == 0
+    )){
         /* Handle current state's rules */
         err = actor_handle_rules(actor, NULL);
         if(err)return err;

@@ -4,6 +4,7 @@
 state "mainloop":
     # Main AI loop
 
+    "dead"
     if: dead()
     then:
         key: up u
@@ -16,11 +17,13 @@ state "mainloop":
         delay: 42
 
 
+    "always"
     if() then:
         key: up b
         continue
 
 
+    "wait_for_jump"
     if:
         key: isdown u
         coll: all yes
@@ -29,8 +32,9 @@ state "mainloop":
         # We're still on the ground, wait for our jump to start...
 
 
-    if:
-        coll: any no
+    "jumping"
+    if: not:
+        coll: all yes
             ;; (+)- +
     then:
         # If we're jumping, then do nothing...
@@ -38,6 +42,7 @@ state "mainloop":
 
 
     # Sometimes, jump!
+    "jump"
     if:
         chance: 20%
         any:
@@ -91,6 +96,7 @@ state "mainloop":
 
 
     # Sometimes, crawl!
+    "crawl"
     if:
         chance: 25%
         any:
@@ -129,6 +135,7 @@ state "mainloop":
         goto: "mainloop_crawl"
 
 
+    "turn"
     if:
         # Small chance to spontaneously turn around...
         # Can help get un-stuck from certain situations
@@ -138,10 +145,10 @@ state "mainloop":
     then:
         key: up f
         key: down b
-        delay: 4
 
 
     # Always walk straight ahead if we can
+    "step"
     if: any:
         all:
             coll: all yes
@@ -211,14 +218,15 @@ state "mainloop":
 
 
     # Turn around if we're stuck
+    "turn_because_stuck"
     if() then:
         key: up f
         key: down b
-        delay: 6
 
 
 state "mainloop_crawl":
 
+    "always"
     if() then:
         key: up b
         inc myvar("crawl_time")
@@ -226,6 +234,7 @@ state "mainloop_crawl":
 
 
     # Sometimes, stand!
+    "stand"
     if:
         expr: > myvar("crawl_time") 7 # Don't just stand up right after crouching...
         chance: 25%
@@ -241,6 +250,7 @@ state "mainloop_crawl":
 
 
     # Always walk straight ahead if we can
+    "step"
     if: any:
         all:
             coll: all yes
@@ -270,6 +280,7 @@ state "mainloop_crawl":
 
 
     # Stand up if we're stuck
+    "stand_because_stuck"
     if:
         chance: 70%
         coll: all no
@@ -284,7 +295,7 @@ state "mainloop_crawl":
 
 
     # Turn around if we're stuck
+    "turn_because_stuck"
     if() then:
         key: up f
         key: down b
-        delay: 6
