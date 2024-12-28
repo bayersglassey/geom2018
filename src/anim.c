@@ -808,9 +808,11 @@ static int _state_parse_rule(state_t *state, fus_lexer_t *lexer,
     stateset_t *stateset = state->stateset;
     state_context_t *context = state->context;
 
+    const char *name = NULL;
+    if(GOT_STR)GET_STR_CACHED(name, &prend->name_store)
+
     ARRAY_PUSH_NEW(state_rule_t*, state->rules, rule)
-    err = state_rule_init(rule, state);
-    if(err)return err;
+    state_rule_init(rule, state, name);
 
     GET("if")
     OPEN
@@ -1191,8 +1193,7 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             state_context_init(sub_context, stateset, context);
 
             ARRAY_PUSH_NEW(state_t*, stateset->states, state)
-            err = state_init(state, stateset, name, sub_context);
-            if(err)return err;
+            state_init(state, stateset, name, sub_context);
 
             err = _state_parse(state, lexer, prend, space);
             if(err)return err;
@@ -1240,7 +1241,7 @@ void state_cleanup(state_t *state){
     ARRAY_FREE_PTR(state_rule_t*, state->rules, state_rule_cleanup)
 }
 
-int state_init(state_t *state, stateset_t *stateset, const char *name,
+void state_init(state_t *state, stateset_t *stateset, const char *name,
     state_context_t *context
 ){
     state->stateset = stateset;
@@ -1253,7 +1254,6 @@ int state_init(state_t *state, stateset_t *stateset, const char *name,
     state->flying = false;
     ARRAY_INIT(state->rules)
     state->context = context;
-    return 0;
 }
 
 void state_dump(state_t *state, FILE *file, int depth){
@@ -1386,11 +1386,11 @@ void state_rule_cleanup(state_rule_t *rule){
     ARRAY_FREE_PTR(state_effect_t*, rule->effects, state_effect_cleanup)
 }
 
-int state_rule_init(state_rule_t *rule, state_t *state){
+void state_rule_init(state_rule_t *rule, state_t *state, const char *name){
     rule->state = state;
     ARRAY_INIT(rule->conds)
     ARRAY_INIT(rule->effects)
-    return 0;
+    rule->name = name;
 }
 
 void state_rule_dump(state_rule_t *rule, FILE *file, int depth){

@@ -419,12 +419,12 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
 state_t *stateset_get_state(stateset_t *stateset, const char *name);
 
 void state_cleanup(state_t *state);
-int state_init(state_t *state, stateset_t *stateset, const char *name,
+void state_init(state_t *state, stateset_t *stateset, const char *name,
     state_context_t *parent_context);
 void state_dump(state_t *state, FILE *file, int depth);
 
 void state_rule_cleanup(state_rule_t *rule);
-int state_rule_init(state_rule_t *rule, state_t *state);
+void state_rule_init(state_rule_t *rule, state_t *state, const char *name);
 void state_rule_dump(state_rule_t *rule, FILE *file, int depth);
 
 void state_cond_cleanup(state_cond_t *cond);
