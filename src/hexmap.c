@@ -615,92 +615,6 @@ int hexmap_parse(hexmap_t *map, fus_lexer_t *lexer){
     return 0;
 }
 
-static int hexmap_parse_door(hexmap_t *map, hexmap_submap_t *submap,
-    hexmap_door_t *door, fus_lexer_t *lexer, prismelrenderer_t *prend
-){
-    /* We assume door's memory starts off zero'd, e.g. it was calloc'd
-    by ARRAY_PUSH_NEW */
-    INIT
-
-    vecspace_t *space = map->space;
-
-    if(GOT("map")){
-        NEXT
-        OPEN
-        GET_STR_CACHED(door->location.map_filename,
-            &prend->filename_store)
-        CLOSE
-    }else{
-        /* Non-null door->location.map_filename indicates player should
-        "teleport" to door->location */
-        door->location.map_filename = map->filename;
-    }
-
-    if(GOT("anim")){
-        NEXT
-        OPEN
-        GET_STR_CACHED(door->location.stateset_filename,
-            &prend->filename_store)
-        CLOSE
-    }
-
-    GET("pos")
-    OPEN
-    GET_VEC(space, door->location.loc.pos)
-    CLOSE
-
-    GET("rot")
-    OPEN
-    GET_INT(door->location.loc.rot)
-    CLOSE
-
-    GET("turn")
-    OPEN
-    GET_YN(door->location.loc.turn)
-    CLOSE
-
-    return 0;
-}
-
-static int hexmap_populate_submap_doors(hexmap_t *map,
-    hexmap_submap_t *submap
-){
-    /* Scan submap's collmap for door tiles, and link the corresponding
-    doors to them.
-    (The "corresponding" door is simply the next one found, as we iterate
-    through the tiles from top-left to bottom-right.) */
-    int err;
-
-    int n_doors = 0;
-    hexcollmap_t *collmap = &submap->collmap;
-    int w = collmap->w;
-    int h = collmap->h;
-    for(int y = 0; y < h; y++){
-        for(int x = 0; x < w; x++){
-            hexcollmap_tile_t *tile = &collmap->tiles[y * w + x];
-            for(int i = 0; i < 2; i++){
-                hexcollmap_elem_t *elem = &tile->face[i];
-                if(elem->tile_c != 'D')continue;
-                if(n_doors < submap->doors_len){
-                    hexmap_door_t *door = submap->doors[n_doors];
-                    door->elem = elem;
-                }
-                n_doors++;
-            }
-        }
-    }
-
-    if(n_doors != submap->doors_len){
-        fprintf(stderr,
-            "Map (%s) and collmap (%s) disagree on number of doors: "
-            "%i != %i\n",
-            map->filename, submap->filename,
-            submap->doors_len, n_doors);
-        return 2;
-    }
-    return 0;
-}
-
 int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
     hexmap_submap_parser_context_t *parent_context,
     hexmap_submap_group_t *group
@@ -919,26 +833,6 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
             new_location->loc = location->loc;
             vec_add(space->dims, new_location->loc.pos, submap->pos);
         }
-
-        /* parse doors */
-        if(GOT("doors")){
-            NEXT
-            OPEN
-
-            while(1){
-                if(GOT(")"))break;
-
-                OPEN
-                ARRAY_PUSH_NEW(hexmap_door_t*, submap->doors, door)
-                err = hexmap_parse_door(map, submap, door, lexer, prend);
-                if(err)return err;
-                CLOSE
-            }
-            NEXT
-
-            err = hexmap_populate_submap_doors(map, submap);
-            if(err)return err;
-        }
     }
 
     if(GOT("recs")){
@@ -1085,7 +979,6 @@ static int hexmap_collide_elem(hexmap_t *map, int all_type,
                 hexmap_collision_elem_t *collision_elem = NULL;
 
                 if(elem->tile_c == 'S')collision_elem = &collision->savepoint;
-                else if(elem->tile_c == 'D')collision_elem = &collision->door;
                 else if(elem->tile_c == 'w')collision_elem = &collision->water;
                 else if(elem->tile_c == 't'){
                     /* We found a "tunnel" -- some non-colliding stuff which
@@ -1110,7 +1003,7 @@ static int hexmap_collide_elem(hexmap_t *map, int all_type,
                 return 0;
             }
         }else{
-            /* Just looking for savepoints & doors... */
+            /* Just looking for savepoints, water, etc... */
         }
     }
 
@@ -1126,7 +1019,6 @@ static void hexmap_collision_elem_init(hexmap_collision_elem_t *elem){
 static void hexmap_collision_init(hexmap_collision_t *collision){
     hexmap_collision_elem_init(&collision->savepoint);
     hexmap_collision_elem_init(&collision->water);
-    hexmap_collision_elem_init(&collision->door);
 }
 
 static int _hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
@@ -1188,7 +1080,7 @@ static int _hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
         bool collide;
         if(all_type == 2){
             /* Return value doesn't matter, we were just looking for
-            savepoints & doors */
+            savepoints, water, etc */
             collide = false;
         }else{
             bool all = all_type;
@@ -1316,10 +1208,6 @@ const char *submap_camera_type_msg(int camera_type){
     }
 }
 
-void hexmap_door_cleanup(hexmap_door_t *door){
-    hexgame_savelocation_cleanup(&door->location);
-}
-
 void hexmap_submap_group_cleanup(hexmap_submap_group_t *group){
     /* Nothin */
 }
@@ -1336,7 +1224,6 @@ void hexmap_submap_cleanup(hexmap_submap_t *submap){
     valexpr_cleanup(&submap->visible_expr);
     hexcollmap_cleanup(&submap->collmap);
     vars_cleanup(&submap->song_vars);
-    ARRAY_FREE_PTR(hexmap_door_t*, submap->doors, hexmap_door_cleanup)
 }
 
 int hexmap_submap_init_from_parser_context(hexmap_t *map,
@@ -1388,8 +1275,6 @@ int hexmap_submap_init_from_parser_context(hexmap_t *map,
     submap->mapper = context->mapper;
     submap->palette = context->palette;
     submap->tileset = context->tileset;
-
-    ARRAY_INIT(submap->doors)
 
     return 0;
 }
@@ -1447,17 +1332,6 @@ done:
     *solid_ptr = solid;
     return 0;
 }
-
-hexmap_door_t *hexmap_submap_get_door(hexmap_submap_t *submap,
-    hexcollmap_elem_t *elem
-){
-    for(int i = 0; i < submap->doors_len; i++){
-        hexmap_door_t *door = submap->doors[i];
-        if(door->elem == elem)return door;
-    }
-    return NULL;
-}
-
 
 void hexmap_submap_parser_context_init(hexmap_submap_parser_context_t *context,
     hexmap_submap_parser_context_t *parent

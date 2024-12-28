@@ -67,7 +67,6 @@ static char get_elem_type(char c){
             return c;
         case '*':
         case 'S':
-        case 'D':
         case 'w':
         case 'o':
             return '*';
@@ -522,10 +521,10 @@ static int _hexcollmap_parse_lines_tiles(hexcollmap_t *collmap,
                     represents_edge(c)? default_edge_c:
                     represents_face(c)? default_face_c:
                     ' ';
-                    /* NOTE: The way we've implemented this, 'S' and 'D'
+                    /* NOTE: The way we've implemented this, special tiles like 'S'
                     can be overwritten by '%'. Maybe that's weird? Maybe if
-                    c is 'S' or 'D' then we should skip the check
-                    for tilebucket_active entirely? */
+                    c is 'S' then we should skip the check for tilebucket_active
+                    entirely? */
 
                 int draw_z = 0;
 

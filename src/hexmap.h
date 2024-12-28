@@ -37,24 +37,12 @@ typedef struct hexmap_collision_elem {
 typedef struct hexmap_collision {
     hexmap_collision_elem_t savepoint;
     hexmap_collision_elem_t water;
-    hexmap_collision_elem_t door;
 } hexmap_collision_t;
 
 
 /**********
  * HEXMAP *
  **********/
-
-typedef struct hexmap_door {
-    hexgame_savelocation_t location;
-
-    /* Weakrefs */
-    hexcollmap_elem_t *elem;
-        /* We use this to mark door's position within its submap's
-        collmap, which is kind of silly but works well so long as
-        hexmap_collision_t also stores hexcollmap_elem_t* instead of
-        actual positions. */
-} hexmap_door_t;
 
 typedef struct hexmap_submap_group {
     const char *name;
@@ -76,7 +64,6 @@ typedef struct hexmap_submap {
     valexpr_t visible_expr; /* Whether this submap is visible */
     bool visible_not; /* Whether to invert the result of visible_expr */
     hexcollmap_t collmap;
-    ARRAY_DECL(hexmap_door_t*, doors)
 
     hexgame_audio_callback_t *song;
     vars_t song_vars;
@@ -178,7 +165,6 @@ int hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
 int hexmap_step(hexmap_t *map);
 int hexmap_refresh_vars(hexmap_t *map);
 
-void hexmap_door_cleanup(hexmap_door_t *door);
 void hexmap_submap_group_cleanup(hexmap_submap_group_t *group);
 void hexmap_submap_group_init(hexmap_submap_group_t *group,
     const char *name);
@@ -195,8 +181,6 @@ int rendergraph_add_rgraphs_from_collmap(
     tileset_t *tileset, bool add_collmap_rendergraphs);
 int hexmap_submap_create_rgraph_map(hexmap_submap_t *submap);
 int hexmap_submap_create_rgraph_minimap(hexmap_submap_t *submap);
-hexmap_door_t *hexmap_submap_get_door(hexmap_submap_t *submap,
-    hexcollmap_elem_t *elem);
 
 void hexmap_submap_parser_context_init(hexmap_submap_parser_context_t *context,
     hexmap_submap_parser_context_t *parent);

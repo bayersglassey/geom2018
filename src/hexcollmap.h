@@ -245,13 +245,13 @@ static bool tile_c_is_visible(char tile_c){
 }
 
 static bool tile_c_is_solid(char tile_c){
-    return strchr(" xSDwo=@", tile_c) == NULL;
+    return strchr(" xSwo=@", tile_c) == NULL;
 }
 
 static bool tile_c_is_special(char tile_c){
     /* Whether tile_c represents a vert/edge/face, but is not one of the
     standard such chars (so, not in "+/-\\*") */
-    return strchr("xSDwot=@", tile_c) != NULL;
+    return strchr("xSwot=@", tile_c) != NULL;
 }
 
 static bool hexcollmap_elem_is_visible(hexcollmap_elem_t *elem){

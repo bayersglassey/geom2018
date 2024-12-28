@@ -187,16 +187,6 @@ int player_process_event(player_t *player, SDL_Event *event){
 }
 
 
-static int player_use_door(player_t *player, hexmap_door_t *door){
-    int err;
-    body_t *body = player->body;
-    err = body_relocate(body, door->location.map_filename,
-        &door->location.loc, door->location.stateset_filename,
-        door->location.state_name);
-    if(err)return err;
-    return 0;
-}
-
 int player_use_savepoint(player_t *player){
     int err;
 
@@ -258,7 +248,7 @@ int player_step(player_t *player, hexgame_t *game){
     }
 
     /* Collide body against map, looking for special tiles like
-    savepoints & doors */
+    savepoints & water */
     hexcollmap_t *hitbox = body->state->hitbox;
     if(hitbox != NULL){
         trf_t hitbox_trf;
@@ -269,7 +259,6 @@ int player_step(player_t *player, hexgame_t *game){
         if(err)return err;
 
         hexmap_submap_t *savepoint_submap = collision.savepoint.submap;
-        hexmap_submap_t *door_submap = collision.door.submap;
         hexmap_submap_t *water_submap = collision.water.submap;
 
         bool touching_savepoint =
@@ -293,15 +282,6 @@ int player_step(player_t *player, hexgame_t *game){
         if(use_savepoint){
             err = player_use_savepoint(player);
             if(err)return err;
-        }
-
-        if(door_submap){
-            hexmap_door_t *door = hexmap_submap_get_door(
-                door_submap, collision.door.elem);
-            if(door){
-                err = player_use_door(player, door);
-                if(err)return err;
-            }
         }
     }
 

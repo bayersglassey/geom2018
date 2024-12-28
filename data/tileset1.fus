@@ -17,7 +17,6 @@ faces:
     "2": "map_face2"
     "3": "map_face3"
     "S": "map_savepoint"
-    "D": "map_door"
     "w": frame_offset(1) "map_water"
     "o": "map_bgface"
     "t": "map_face_tunnel"
