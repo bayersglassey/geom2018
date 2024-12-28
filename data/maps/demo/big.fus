@@ -3,6 +3,9 @@ parts:
     "s": recording "data/recs/switch.fus"
         vars:
             "key": "big_switch"
+    "D": recording "data/recs/door.fus"
+        vars:
+            "map": "data/maps/triangles/worldmap.fus"
     "l": location "triangles_exit"
 collmap:
     ;;
@@ -48,8 +51,8 @@ collmap:
     ;;                                            \* * */                         \* * */
     ;;     .       .       .       .       .       + - +   +       .       .       + - +   +       .       .
     ;;
-    ;;                   +       +
-    ;;                    \  D  /
+    ;;                   +   ?   +                                                                                      [D]
+    ;;                    \     /
     ;; .       .       .   + - !       .       .       +       !       .       .       .       .       .       .    [l^3]    [R]
     ;;                                                /       /*\
     ;;                                               +       + - +

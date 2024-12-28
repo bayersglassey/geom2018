@@ -2,6 +2,7 @@ parts:
     "D": recording "data/recs/door.fus"
         vars:
             "map": "data/maps/wilderness/worldmap.fus"
+    "E": location "wilderness_exit"
 default_vert: "1"
 default_edge: "1"
 default_face: "1"
@@ -41,7 +42,7 @@ collmap:
     ;;                                                                                                                                          /
     ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   +   .   .   +   .   +   .   .   .             - + - +   .   + - +
     ;;                                                                                    /       /                          */     \     /
-    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  (+)  .   +   .   .   .               .       + - +
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  (+)  .   +   .   .   .               .       + - !     [E~^3]
     ;;                                                                                  /         \
     ;;                                                         +   +                   +   .       + - + - + - + - + - +   .
     ;;                                                                                  \                               \

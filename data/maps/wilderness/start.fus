@@ -1,4 +1,8 @@
-
+parts:
+    "D": recording "data/recs/door.fus"
+        vars:
+            "map": "data/maps/demo/worldmap.fus"
+            "location": "wilderness_exit"
 collmap:
     # Size of the "house" in the middle: 8 x 8
     ;;
@@ -30,8 +34,8 @@ collmap:
     ;;                                /         \  S                  /
     ;;   .   .   .   .   .   .   .   +   .   .   + - +   .   .   + - +   .   .   .   .   .   .   .   .   .   .
     ;;                              /             \*/             \*/
-    ;; .   .   .   .   .   .   .   +   .   .   .   + - +   .   .   +   .   .   .   .   .   .   .   .   .   .   .
-    ;;                                                  \  D      /
+    ;; .   .   .   .   .   .   .   +   .   .   .   + - +   ?   .   +   .   .   .   .   .   .   .   .   .   .   .        [D]
+    ;;                                                  \         /
     ;;   .   .   .   .   .   .   .   .   .   .   +   .   + - + - +   .   .   .   .   .   .   .   .   .   .   .
     ;;                                          /
     ;; .   .   .   .   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .

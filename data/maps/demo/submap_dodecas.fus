@@ -77,12 +77,6 @@ submaps:
                         pos: (8 3)
                     :
                         file: "data/maps/demo/big.fus"
-                        doors:
-                            :
-                                map: "data/maps/triangles/worldmap.fus"
-                                pos: (0 0)
-                                rot: 0
-                                turn: n
                     :
                         file: "data/maps/demo/big_spikes.fus"
                         visible: not mapvar("big_switch")
