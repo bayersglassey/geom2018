@@ -18,12 +18,12 @@ const char *test_app_list_players_options[] = {
     NULL
 };
 
-int test_app_open_list_players(test_app_t *app){
+int test_app_open_list_players(test_app_t *app, int player_i){
     test_app_list_data_t *new_data = test_app_list_data_create(app);
     if(new_data == NULL)return 1;
 
     return test_app_open_list(app, "Players",
-        0, 0,
+        player_i, 0,
         new_data,
         &test_app_list_players_step,
         &test_app_list_players_render,

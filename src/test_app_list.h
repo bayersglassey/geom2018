@@ -116,12 +116,12 @@ int test_app_list_bodies_step(test_app_list_t *list);
 int test_app_list_bodies_render(test_app_list_t *list);
 int test_app_list_bodies_select_item(test_app_list_t *list);
 
-int test_app_open_list_players(struct test_app *app);
+int test_app_open_list_players(struct test_app *app, int player_i);
 int test_app_list_players_step(test_app_list_t *list);
 int test_app_list_players_render(test_app_list_t *list);
 int test_app_list_players_select_item(test_app_list_t *list);
 
-int test_app_open_list_actors(struct test_app *app);
+int test_app_open_list_actors(struct test_app *app, int actor_i);
 int test_app_list_actors_step(test_app_list_t *list);
 int test_app_list_actors_render(test_app_list_t *list);
 int test_app_list_actors_select_item(test_app_list_t *list);

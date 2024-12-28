@@ -127,11 +127,19 @@ static int _test_app_command_list_bodies(test_app_t *app, fus_lexer_t *lexer, bo
 }
 
 static int _test_app_command_list_players(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    return test_app_open_list_players(app);
+    body_t *body = app->camera->body;
+    player_t *player = body_get_player(body);
+    int player_i = player? player_get_index(player): -1;
+    if(player_i < 0)player_i = 0;
+    return test_app_open_list_players(app, player_i);
 }
 
 static int _test_app_command_list_actors(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
-    return test_app_open_list_actors(app);
+    body_t *body = app->camera->body;
+    actor_t *actor = body_get_actor(body);
+    int actor_i = actor? actor_get_index(actor): -1;
+    if(actor_i < 0)actor_i = 0;
+    return test_app_open_list_actors(app, actor_i);
 }
 
 static int _test_app_command_edit_player(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
@@ -322,8 +330,8 @@ static int _test_app_command_load_recording_filename(test_app_t *app, fus_lexer_
 }
 #define NULLCOMMAND (test_app_command_t){0}
 test_app_command_t _test_app_commands[] = {
-    COMMAND(exit, NULL, NULL),
-    COMMAND(help, NULL, NULL),
+    COMMAND(exit, "x", NULL),
+    COMMAND(help, "h", NULL),
     COMMAND(cls, NULL, NULL),
     COMMAND(list_worldmaps, "lw", NULL),
     COMMAND(list_maps, "lm", NULL),

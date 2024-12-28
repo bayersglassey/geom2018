@@ -100,6 +100,10 @@ int test_app_render_list(test_app_t *app){
     console_t *console = &app->console;
     console_clear(console);
 
+    if(!app->process_console){
+        console_write_msg(console, "(Stopped)\n\n");
+    }
+
     console_write_char(console, '(');
     _render_list_title(console, app->list);
     console_write_char(console, ')');

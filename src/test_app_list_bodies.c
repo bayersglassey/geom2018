@@ -16,6 +16,8 @@
 const char *test_app_list_bodies_options[] = {
     "Set camera target",
     "Set first player",
+    "Open player",
+    "Open actor",
     "Open recording",
     "Open submap",
     "Open stateset (TODO)",
@@ -57,6 +59,10 @@ int test_app_list_bodies_step(test_app_list_t *list){
     test_app_list_data_t *data = list->data;
     hexmap_t *map = data->map? data->map: data->app->hexgame.maps[0];
     data->length = map->bodies_len;
+    /* Now we frig with the currently-selected index into map->bodies...
+    This is pretty weird. Probably instead, we should do something like
+    check whether body->remove is true, which I believe tells us that
+    body *will* be removed at start of next frame?.. or something?.. */
     data->index = _test_app_list_remainder(list->index_x, data->length);
     data->item = data->length > 0? map->bodies[data->index]: NULL;
     if(data->mode == TEST_APP_LIST_BODIES_MODE_RECORDING){
@@ -75,6 +81,11 @@ int test_app_list_bodies_render(test_app_list_t *list){
     _console_write_bar(console, data->index, data->length);
     body_t *body = data->item;
     if(body != NULL){
+        actor_t *actor = body_get_actor(body);
+        if(actor){
+            _console_write_field(console, "Actor stateset", actor->stateset->filename);
+            _console_write_field(console, "Actor state", actor->state->name);
+        }
         _console_write_field(console, "Stateset", body->stateset->filename);
         _console_write_field(console, "State", body->state->name);
         if(body->palmapper)_console_write_field(console, "Palmapper", body->palmapper->name);
@@ -122,10 +133,22 @@ int test_app_list_bodies_select_item(test_app_list_t *list){
                 camera_set_body(data->app->camera, body);
             } break;
             case 2: {
+                player_t *player = body_get_player(body);
+                int player_i = player? player_get_index(player): -1;
+                if(player_i < 0)break;
+                return test_app_open_list_players(data->app, player_i);
+            } break;
+            case 3: {
+                actor_t *actor = body_get_actor(body);
+                int actor_i = actor? actor_get_index(actor): -1;
+                if(actor_i < 0)break;
+                return test_app_open_list_actors(data->app, actor_i);
+            } break;
+            case 4: {
                 test_app_list_data_set_mode(data,
                     TEST_APP_LIST_BODIES_MODE_RECORDING);
             } break;
-            case 3: {
+            case 5: {
                 return test_app_open_list_submaps(data->app,
                     body->cur_submap, body->map);
             }

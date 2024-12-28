@@ -45,12 +45,12 @@ enum {
     TEST_APP_LIST_ACTORS_MODES
 };
 
-int test_app_open_list_actors(test_app_t *app){
+int test_app_open_list_actors(test_app_t *app, int actor_i){
     test_app_list_data_t *new_data = test_app_list_data_create(app);
     if(new_data == NULL)return 1;
 
     return test_app_open_list(app, "Actors",
-        0, 0,
+        actor_i, 0,
         new_data,
         &test_app_list_actors_step,
         &test_app_list_actors_render,

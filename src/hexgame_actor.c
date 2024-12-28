@@ -41,6 +41,15 @@ int actor_init(actor_t *actor, hexmap_t *map, body_t *body,
 }
 
 
+int actor_get_index(actor_t *actor){
+    hexgame_t *game = actor->game;
+    for(int i = 0; i < game->actors_len; i++){
+        actor_t *_actor = game->actors[i];
+        if(actor == _actor)return i;
+    }
+    return -1;
+}
+
 int actor_init_stateset(actor_t *actor, const char *stateset_filename,
     const char *state_name, hexmap_t *map
 ){
