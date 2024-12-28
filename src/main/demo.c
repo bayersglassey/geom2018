@@ -127,6 +127,8 @@ void print_help(FILE *file){
         "   -a   --anim   FILE    Stateset filename (default: %s)\n"
         "   -m   --map    FILE    Map filename (default: NULL)\n"
         "   -sm  --submap FILE    Submap filename (default: NULL)\n"
+        "   -loc --location NAME  Location name (default: NULL)\n"
+        "                         NOTE: this overrides --submap\n"
         "   -D   --devel          Developer mode\n"
         "                         (You can also use env var %s)\n"
         "   -d   --delay     N    Delay goal (in milliseconds) (default: %i)\n"
@@ -168,6 +170,7 @@ const char *stateset_filename = NULL;
 const char *actor_filename = NULL;
 const char *hexmap_filename = NULL;
 const char *submap_filename = NULL;
+const char *location_name = NULL;
 bool minimap_alt = true;
 bool cache_bitmaps = true;
 bool animate_palettes = true;
@@ -188,7 +191,9 @@ static test_app_t *get_test_app(){
     int err = test_app_init(app, SCW, SCH, delay_goal,
         window, renderer, prend_filename,
         stateset_filename, actor_filename,
-        hexmap_filename, submap_filename, developer_mode,
+        hexmap_filename, submap_filename,
+        location_name,
+        developer_mode,
         minimap_alt, cache_bitmaps, animate_palettes,
         n_players, save_slot,
         load_recording_filename, save_recording_filename,
@@ -259,6 +264,14 @@ int main(int n_args, char *args[]){
             }
             arg = args[arg_i];
             submap_filename = arg;
+        }else if(!strcmp(arg, "-loc") || !strcmp(arg, "--location")){
+            arg_i++;
+            if(arg_i >= n_args){
+                fprintf(stderr, "Missing location name after %s\n", arg);
+                goto parse_failure;
+            }
+            arg = args[arg_i];
+            location_name = arg;
         }else if(!strcmp(arg, "-D") || !strcmp(arg, "--devel")){
             developer_mode = true;
         }else if(!strcmp(arg, "-d") || !strcmp(arg, "--delay")){

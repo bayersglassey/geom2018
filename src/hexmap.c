@@ -251,10 +251,8 @@ static int hexmap_load_hexmap_recording(
         if(err)return err;
 
         ARRAY_PUSH_NEW(actor_t*, game->actors, actor)
-        err = actor_init(actor, map, body, recording->filename, NULL);
+        err = actor_init(actor, map, body, recording->filename, NULL, &trf);
         if(err)return err;
-
-        actor->trf = trf;
 
         err = valexpr_copy(&body->visible_expr, &recording->visible_expr);
         if(err)return err;

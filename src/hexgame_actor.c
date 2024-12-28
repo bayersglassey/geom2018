@@ -21,13 +21,16 @@ void actor_cleanup(actor_t *actor){
 }
 
 int actor_init(actor_t *actor, hexmap_t *map, body_t *body,
-    const char *stateset_filename, const char *state_name
+    const char *stateset_filename, const char *state_name,
+    trf_t *trf
 ){
     int err;
 
     memset(actor, 0, sizeof(*actor));
 
     vars_init_with_props(&actor->vars, hexgame_vars_prop_names);
+
+    if(trf)actor->trf = *trf;
 
     /* NOTE: body may be NULL */
     actor->body = body;

@@ -60,7 +60,8 @@ static int _save_callback(hexgame_t *game){
 }
 static int _test_app_restart(test_app_t *app,
     prismelrenderer_t *prend, prismelrenderer_t *minimap_prend,
-    const char *hexmap_filename, const char *submap_filename
+    const char *hexmap_filename, const char *submap_filename,
+    const char *location_name
 ){
     int err;
     hexgame_t *game = &app->hexgame;
@@ -94,6 +95,45 @@ static int _test_app_restart(test_app_t *app,
 
     int new_state = TEST_APP_STATE_RUNNING;
 
+    /* Determine respawn location for players/actors */
+    hexgame_savelocation_t respawn_location;
+    {
+        hexgame_location_t spawn = map->spawn;
+
+        /* Maybe get respawn_pos from a location or submap */
+        if(location_name != NULL){
+            hexgame_location_t *location = hexmap_get_location(map, location_name);
+            if(location == NULL){
+                fprintf(stderr, "Couldn't find location: %s\n",
+                    location_name);
+                return 2;}
+            spawn = *location;
+        }else if(submap_filename != NULL){
+            hexmap_submap_t *spawn_submap = NULL;
+            for(int i = 0; i < map->submaps_len; i++){
+                hexmap_submap_t *submap = map->submaps[i];
+                if(strcmp(submap->filename, submap_filename) == 0){
+                    spawn_submap = submap; break;}
+            }
+            if(spawn_submap == NULL){
+                fprintf(stderr, "Couldn't find submap with filename: %s\n",
+                    submap_filename);
+                return 2;}
+
+            hexgame_location_t *spawn_submap_spawn =
+                &spawn_submap->collmap.spawn;
+
+            spawn = *spawn_submap_spawn;
+            vec_add(map->space->dims, spawn.pos, spawn_submap->pos);
+        }
+
+        hexgame_savelocation_t respawn_location;
+        hexgame_savelocation_set(&respawn_location, map->space,
+            spawn.pos, spawn.rot, spawn.turn, map->filename,
+            NULL, NULL);
+    }
+
+    /* Load game or add player(s) */
     if(
         (
             app->state == TEST_APP_STATE_START_GAME ||
@@ -121,34 +161,6 @@ static int _test_app_restart(test_app_t *app,
         /* Add players */
         for(int i = 0; i < n_players; i++){
             ARRAY_PUSH_NEW(player_t*, game->players, player)
-
-            hexgame_location_t spawn = map->spawn;
-
-            /* Maybe get respawn_pos from a submap */
-            if(submap_filename != NULL){
-                hexmap_submap_t *spawn_submap = NULL;
-                for(int i = 0; i < map->submaps_len; i++){
-                    hexmap_submap_t *submap = map->submaps[i];
-                    if(strcmp(submap->filename, submap_filename) == 0){
-                        spawn_submap = submap; break;}
-                }
-                if(spawn_submap == NULL){
-                    fprintf(stderr, "Couldn't find submap with filename: %s\n",
-                        submap_filename);
-                    return 2;}
-
-                hexgame_location_t *spawn_submap_spawn =
-                    &spawn_submap->collmap.spawn;
-
-                spawn = *spawn_submap_spawn;
-                vec_add(map->space->dims, spawn.pos, spawn_submap->pos);
-            }
-
-            hexgame_savelocation_t respawn_location;
-            hexgame_savelocation_set(&respawn_location, map->space,
-                spawn.pos, spawn.rot, spawn.turn, map->filename,
-                NULL, NULL);
-
             err = player_init(player, game, i, &respawn_location);
             if(err)return err;
         }
@@ -170,19 +182,19 @@ static int _test_app_restart(test_app_t *app,
     player_t *player0 = hexgame_get_player_by_keymap(game, 0);
     body_t *body0 = player0? player0->body: NULL;
 
-    {
-        /* Create camera */
-        ARRAY_PUSH_NEW(camera_t*, game->cameras, camera)
-        err = camera_init(camera, game, map, body0);
-        if(err)return err;
+    /* Create camera */
+    ARRAY_PUSH_NEW(camera_t*, game->cameras, camera)
+    err = camera_init(camera, game, map, body0 /* NOTE: ok if body0 == NULL, e.g. on title screen */);
+    if(err)return err;
+    app->camera = camera;
 
-        app->camera = camera;
-    }
+    /* Maybe add an actor for player0's body, if any */
+    if(app->actor_filename != NULL && body0 != NULL){
+        trf_t trf;
+        hexgame_location_init_trf(&respawn_location.loc, &trf);
 
-    /* Add an actor for player0's body */
-    if(app->actor_filename != NULL){
         ARRAY_PUSH_NEW(actor_t*, game->actors, actor)
-        err = actor_init(actor, map, body0, app->actor_filename, NULL);
+        err = actor_init(actor, map, body0, app->actor_filename, NULL, &trf);
         if(err)return err;
     }
 
@@ -195,14 +207,15 @@ static int test_app_restart(test_app_t *app){
     prismelrenderer_t *prend = game->prend;
     prismelrenderer_t *minimap_prend = game->minimap_prend;
     hexgame_cleanup(game);
-    return _test_app_restart(app, prend, minimap_prend, NULL, NULL);
+    return _test_app_restart(app, prend, minimap_prend, NULL, NULL, NULL);
 }
 
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
     const char *stateset_filename, const char *actor_filename,
-    const char *hexmap_filename,
-    const char *submap_filename, bool developer_mode,
+    const char *hexmap_filename, const char *submap_filename,
+    const char *location_name,
+    bool developer_mode,
     bool minimap_alt, bool cache_bitmaps, bool animate_palettes,
     int n_players, int save_slot,
     const char *load_recording_filename,
@@ -302,7 +315,6 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         app->show_menu = false;
     }else{
         app->state = TEST_APP_STATE_TITLE_SCREEN;
-        submap_filename = NULL;
         app->show_menu = true;
     }
 
@@ -310,7 +322,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->audio_id = 0;
 
     return _test_app_restart(app, prend, minimap_prend,
-        hexmap_filename, submap_filename);
+        hexmap_filename, submap_filename, location_name);
 }
 
 int test_app_reload_prismelrenderers(test_app_t *app){
