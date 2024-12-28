@@ -166,17 +166,24 @@ static int _test_app_restart(test_app_t *app,
         }
     }
 
-    /* Find player0 */
+    /* Find player0 and their body (if any) */
     player_t *player0 = hexgame_get_player_by_keymap(game, 0);
+    body_t *body0 = player0? player0->body: NULL;
 
     {
         /* Create camera */
-        body_t *body = player0? player0->body: NULL;
         ARRAY_PUSH_NEW(camera_t*, game->cameras, camera)
-        err = camera_init(camera, game, map, body);
+        err = camera_init(camera, game, map, body0);
         if(err)return err;
 
         app->camera = camera;
+    }
+
+    /* Add an actor for player0's body */
+    if(app->actor_filename != NULL){
+        ARRAY_PUSH_NEW(actor_t*, game->actors, actor)
+        err = actor_init(actor, map, body0, app->actor_filename, NULL);
+        if(err)return err;
     }
 
     app->state = new_state;
@@ -193,7 +200,8 @@ static int test_app_restart(test_app_t *app){
 
 int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
-    const char *stateset_filename, const char *hexmap_filename,
+    const char *stateset_filename, const char *actor_filename,
+    const char *hexmap_filename,
     const char *submap_filename, bool developer_mode,
     bool minimap_alt, bool cache_bitmaps, bool animate_palettes,
     int n_players, int save_slot,
@@ -216,6 +224,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->renderer = renderer;
     app->prend_filename = prend_filename;
     app->stateset_filename = stateset_filename;
+    app->actor_filename = actor_filename;
 
     strcpy(app->_recording_filename, RECORDING_FILENAME_TEMPLATE);
     app->load_recording_filename = load_recording_filename;

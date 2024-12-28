@@ -147,6 +147,7 @@ void print_help(FILE *file){
         "                         Set \"save recording filename\"\n"
         "                         (where to save recording to, used by F9)\n"
         "        --no-audio       Disable audio\n"
+        "        --actor FILE     Use the given actor, instead of a player\n"
         , DEFAULT_PREND_FILENAME, DEFAULT_STATESET_FILENAME, ENV_DEVEL,
         DEFAULT_DELAY_GOAL, DEFAULT_PLAYERS
     );
@@ -164,6 +165,7 @@ calling emscripten_exit_with_live_runtime */
 Uint32 window_flags = SDL_WINDOW_SHOWN;
 const char *prend_filename = NULL;
 const char *stateset_filename = NULL;
+const char *actor_filename = NULL;
 const char *hexmap_filename = NULL;
 const char *submap_filename = NULL;
 bool minimap_alt = true;
@@ -184,7 +186,8 @@ static test_app_t *get_test_app(){
     test_app_t *app = calloc(1, sizeof(*app));
     if(!app){ perror("calloc"); return NULL; }
     int err = test_app_init(app, SCW, SCH, delay_goal,
-        window, renderer, prend_filename, stateset_filename,
+        window, renderer, prend_filename,
+        stateset_filename, actor_filename,
         hexmap_filename, submap_filename, developer_mode,
         minimap_alt, cache_bitmaps, animate_palettes,
         n_players, save_slot,
@@ -232,6 +235,14 @@ int main(int n_args, char *args[]){
             }
             arg = args[arg_i];
             stateset_filename = arg;
+        }else if(!strcmp(arg, "--actor")){
+            arg_i++;
+            if(arg_i >= n_args){
+                fprintf(stderr, "Missing filename after %s\n", arg);
+                goto parse_failure;
+            }
+            arg = args[arg_i];
+            actor_filename = arg;
         }else if(!strcmp(arg, "-m") || !strcmp(arg, "--map")){
             arg_i++;
             if(arg_i >= n_args){

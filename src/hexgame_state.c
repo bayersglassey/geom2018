@@ -606,11 +606,11 @@ int state_effect_apply(state_effect_t *effect,
         break;
     }
     case STATE_EFFECT_TYPE_PLAY: {
-        CHECK_ACTOR
+        CHECK_BODY
         const char *play_filename = effect->u.play_filename;
         err = body_load_recording(body, play_filename, false);
         if(err)return err;
-        hexgame_location_apply(&body->recording.loc0, &actor->trf);
+        if(actor)hexgame_location_apply(&body->recording.loc0, &actor->trf);
         err = body_play_recording(body);
         if(err)return err;
         break;
