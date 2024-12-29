@@ -809,7 +809,16 @@ static int _state_parse_rule(state_t *state, fus_lexer_t *lexer,
     state_context_t *context = state->context;
 
     const char *name = NULL;
-    if(GOT_STR)GET_STR_CACHED(name, &prend->name_store)
+    if(GOT_STR){
+        GET_STR_CACHED(name, &prend->name_store)
+        for(int i = 0; i < state->rules_len; i++){
+            state_rule_t *rule = state->rules[i];
+            if(rule->name != NULL && !strcmp(rule->name, name)){
+                fprintf(stderr, "State \"%s\": attempted to define duplicate rule: \"%s\"\n",
+                    state->name, name);
+                return 2;}
+        }
+    }
 
     ARRAY_PUSH_NEW(state_rule_t*, state->rules, rule)
     state_rule_init(rule, state, name);
