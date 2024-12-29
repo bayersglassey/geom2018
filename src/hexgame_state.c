@@ -397,6 +397,8 @@ int state_effect_apply(state_effect_t *effect,
     body_t *body = context->body;
     body_t *your_body = context->your_body;
 
+    bool anim_debug = hexgame_state_context_debug(context);
+
     switch(effect->type){
     case STATE_EFFECT_TYPE_NOOP: break;
     case STATE_EFFECT_TYPE_NO_KEY_RESET: {
@@ -509,6 +511,7 @@ int state_effect_apply(state_effect_t *effect,
         break;
     }
     case STATE_EFFECT_TYPE_GOTO: {
+        if(anim_debug)fprintf(stderr, "Goto: \"%s\"\n", effect->u.gotto.name);
         *gotto_ptr = &effect->u.gotto;
         break;
     }
@@ -516,6 +519,7 @@ int state_effect_apply(state_effect_t *effect,
         CHECK_BODY
         state_context_t *state_context = body->state->context;
         const char *name = effect->u.call.name;
+        if(anim_debug)fprintf(stderr, "Call: \"%s\"\n", name);
         stateset_proc_t *proc = state_context_get_proc(state_context, name);
         if(!proc){
             RULE_PERROR()
@@ -654,10 +658,16 @@ int state_effect_apply(state_effect_t *effect,
         CHECK_BODY
         int key_i = body_get_key_i(body, effect->u.key.c);
         bool keydown = effect->u.key.action & 0x1;
+        bool keyup = effect->u.key.action & 0x2;
+        if(anim_debug){
+            fprintf(stderr, "Key: ");
+            if(keydown)fprintf(stderr, "down ");
+            if(keyup)fprintf(stderr, "up ");
+            fprintf(stderr, "%c\n", effect->u.key.c);
+        }
         if(keydown){
             body_keydown(body, key_i);
         }
-        bool keyup = effect->u.key.action & 0x2;
         if(keyup){
             body_keyup(body, key_i);
         }
