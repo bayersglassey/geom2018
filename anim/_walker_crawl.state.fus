@@ -1,5 +1,5 @@
 
-# Crawl up
+"crawl_up"
 if:
     key: wasdown f
     coll: all no
@@ -15,7 +15,7 @@ then:
     goto: "crawl_step"
     delay: 2
 
-# Crawl forwards
+"crawl_forward"
 if:
     key: wasdown f
     coll: all yes
@@ -28,7 +28,7 @@ then:
     goto: "crawl_step"
     delay: 2
 
-# Crawl down
+"crawl_down"
 if:
     key: wasdown f
     coll: all yes

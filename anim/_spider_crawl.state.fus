@@ -2,13 +2,13 @@
 # Expected vars:
 # CRAWL_SPIT (str) e.g. "crawl_spit", "crawl_looking_up_spit"
 
-# Spit
+"spit"
 if:
     key: wentdown y
 then:
     call: $GET_STR CRAWL_SPIT
 
-# Turn into bird
+"become_bird"
 if:
     expr: myvar("is_birdspider")
     key: wentdown x
@@ -26,7 +26,7 @@ then:
     goto: "bird_crawl"
     delay: 1
 
-# Flip over an edge
+"flip"
 if:
     expr: myvar("is_flipspider")
     key: wentdown u
@@ -46,6 +46,7 @@ then:
 # Feels fairly good, but a bit odd, and can happen by accident a
 # bit too easily
 $SKIP:
+    "flip_experimental"
     if:
         expr: myvar("is_flipspider")
         key: wasdown f

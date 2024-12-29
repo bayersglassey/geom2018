@@ -45,6 +45,7 @@ state "turn":
     import "anim/_walker_stand.state.fus"
     import "anim/_walker_jump.state.fus"
 
+    "default"
     if() then: goto: "stand"
 
 state "step":
@@ -60,6 +61,7 @@ state "step":
     import "anim/_walker_stand.state.fus"
     import "anim/_walker_jump.state.fus"
 
+    "default"
     if() then: goto: "stand"
 
 state "step_up":
@@ -75,6 +77,7 @@ state "step_up":
     import "anim/_walker_stand.state.fus"
     import "anim/_walker_jump.state.fus"
 
+    "default"
     if() then: goto: "stand"
 
 state "step_down":
@@ -90,10 +93,12 @@ state "step_down":
     import "anim/_walker_stand.state.fus"
     import "anim/_walker_jump.state.fus"
 
+    "default"
     if() then: goto: "stand"
 
 state "appear_crouch":
     rgraph: "dead_once_crouch_reversed"
+    "default"
     if() then: goto: "crawl"
 
 state "crawling":
@@ -104,6 +109,7 @@ state "crawling":
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
+    "default"
     if() then: goto: "crawl"
 
 state "crawl":
@@ -113,7 +119,7 @@ state "crawl":
         ;;     *
         ;;  (.)  .
 
-    # Uncrawl
+    "uncrawl"
     if:
         key: not isdown d
         coll: all no
@@ -128,7 +134,7 @@ state "crawl":
     # Crawling
     import "anim/_walker_crawl.state.fus"
 
-    # Turn
+    "turn"
     if:
         key: wasdown b
     then:
@@ -142,6 +148,7 @@ state "crawl_step":
         ;;    .   .
         ;;      */*
         ;;     (.)  .
+    "default"
     if() then: goto: "crawl"
 
 state "crawl_step_down":
@@ -150,6 +157,7 @@ state "crawl_step_down":
         ;;    .   .
         ;;    *\*/*
         ;;  . -(.)  .
+    "default"
     if() then: goto: "crawl"
 
 state "uncrawling":
@@ -160,9 +168,11 @@ state "uncrawling":
         ;; . - + - .
         ;;   */*\*
         ;;  (.)  .
+    "default"
     if() then: goto: "stand"
 
 state "start_jump":
+    "default"
     if() then:
         goto: "jump"
         delay: 2
@@ -183,18 +193,22 @@ state "jump":
 state "collected":
     rgraph: "dead_once"
     unsafe
+    "call_collected"
     if() then:
         # Do whatever it is coin-like things do while they've been collected...
         call: "while_collected"
         continue
+    "default"
     if() then: die
 
 state "mostly_dead":
     rgraph: "dead_cycle"
     unsafe
+    "default"
     if() then: die mostly
 
 state "dead":
     rgraph: "dead_cycle"
     unsafe
+    "default"
     if() then: die

@@ -1,5 +1,5 @@
 
-# Step up
+"step_up"
 if:
     key: wasdown f
     any:
@@ -20,7 +20,7 @@ then:
     rot: 1
     goto delay: "step_up"
 
-# Step
+"step_forward"
 if:
     key: wasdown f
     any:
@@ -41,7 +41,7 @@ then:
     move: 1 0
     goto delay: "step"
 
-# Step down
+"step_down"
 if:
     key: wasdown f
     any:
@@ -68,7 +68,7 @@ then:
     rot: -1
     goto delay: "step_down"
 
-# Forced jump up
+"forced_jump_up"
 if:
     key: wasdown f
     coll: any yes
@@ -80,7 +80,7 @@ then:
     rot: 1
     goto immediate: "start_jump"
 
-# Forced jump
+"forced_jump"
 if:
     key: wasdown f
     coll: all no

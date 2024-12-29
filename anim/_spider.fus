@@ -197,22 +197,26 @@ import "anim/_spider_jump.fus"
 state "look_up":
     rgraph: $PREFIX NS "look_up"
     hitbox: collmap("stand")
+    "default"
     if() then: goto: "looking_up"
 
 state "unlook_up":
     rgraph: $PREFIX NS "unlook_up"
     hitbox: collmap("stand")
+    "default"
     if() then: goto: "stand"
 
 state "looking_up":
     rgraph: $PREFIX NS "looking_up"
     hitbox: collmap("stand")
 
+    "spit"
     if:
         key: wentdown y
     then:
         call: "looking_up_spit"
 
+    "jump"
     if:
         key: wasdown u
         coll: all no
@@ -227,11 +231,13 @@ state "looking_up":
         rot: 1
         goto immediate: "start_jump"
 
+    "unlook_for_step"
     if: any:
         key: wasdown f
         key: wasdown b
     then: goto delay: "unlook_up"
 
+    "crawl"
     if:
         key: wasdown d
         coll: all yes
@@ -241,24 +247,27 @@ state "looking_up":
     then:
         goto delay: "crawling_looking_up"
 
+    "unlook"
     if: key: not isdown x
     then: goto delay: "unlook_up"
 
 state "spit":
     rgraph: $PREFIX NS "spit"
     hitbox: collmap("stand")
+    "default"
     if() then: goto: "stand"
 
 state "looking_up_spit":
     rgraph: $PREFIX NS "looking_up_spit"
     hitbox: collmap("stand")
+    "default"
     if() then: goto: "looking_up"
 
 state "turn":
     rgraph: $PREFIX NS "turn"
     hitbox: collmap("stand")
 
-    # Jump
+    "jump"
     if:
         key: wasdown u
         coll: all no
@@ -270,11 +279,13 @@ state "turn":
         move: 1 0
         goto immediate: "start_jump"
 
+    "default"
     if() then: goto immediate: "step"
 
 state "sleep":
     rgraph: $PREFIX NS "sleep"
     hitbox: collmap("crawl")
+    "unsleep"
     if: any:
         key: wasdown u
         key: wasdown d
@@ -286,14 +297,17 @@ $IF EYESPIDER:
     state "eye_closing":
         rgraph: $PREFIX NS "eye_closing"
         hitbox: collmap("stand")
+        "default"
         if() then: goto: "eye_closed"
     state "eye_unclosing":
         rgraph: $PREFIX NS "eye_unclosing"
         hitbox: collmap("stand")
+        "default"
         if() then: goto: "stand"
     state "eye_closed":
         rgraph: $PREFIX NS "eye_closed"
         hitbox: collmap("stand")
+        "unclose_eye"
         if:
             key: not isdown x
         then: goto delay: "eye_unclosing"
@@ -301,11 +315,13 @@ $IF EYESPIDER:
 state "mostly_dead":
     rgraph: "dead_cycle"
     unsafe
+    "default"
     if() then: die mostly
 
 state "dead":
     rgraph: "dead_cycle"
     unsafe
+    "default"
     if() then: die
 
 import "anim/_spider_crawl.fus"

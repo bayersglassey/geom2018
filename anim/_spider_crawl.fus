@@ -19,11 +19,13 @@ state "crawling":
     $SET_STR CRAWL_SPIT "crawl_spit"
     import "anim/_spider_crawl.state.fus"
 
+    "default"
     if() then: goto: "crawl"
 
 state "uncrawling":
     rgraph: $PREFIX NS "uncrawling"
     hitbox: collmap("stand")
+    "default"
     if() then: goto: "stand"
 
 state "crawling_looking_up":
@@ -34,11 +36,13 @@ state "crawling_looking_up":
     $SET_STR CRAWL_SPIT "crawl_looking_up_spit"
     import "anim/_spider_crawl.state.fus"
 
+    "default"
     if() then: goto: "crawl_looking_up"
 
 state "uncrawling_looking_up":
     rgraph: $PREFIX NS "uncrawling_looking_up"
     hitbox: collmap("stand")
+    "default"
     if() then: goto: "looking_up"
 
 state "crawl_looking_up":
@@ -50,7 +54,7 @@ state "crawl_looking_up":
     $SET_STR CRAWL_SPIT "crawl_looking_up_spit"
     import "anim/_spider_crawl.state.fus"
 
-    # Uncrawl
+    "uncrawl"
     if:
         any:
             key: not isdown d
@@ -64,6 +68,7 @@ state "crawl_looking_up":
     then:
         goto delay: "uncrawling_looking_up"
 
+    "unlook"
     if: any:
         key: wasdown f
         key: wasdown b
@@ -74,12 +79,14 @@ state "crawl_spit":
     rgraph: $PREFIX NS "crawl_spit"
     hitbox: collmap("crawl")
     on "crush": call: "crawl_crush"
+    "default"
     if() then: goto: "crawl"
 
 state "crawl_looking_up_spit":
     rgraph: $PREFIX NS "crawl_looking_up_spit"
     hitbox: collmap("crawl")
     on "crush": call: "crawl_crush"
+    "default"
     if() then: goto: "crawl_looking_up"
 
 state "crawl":
@@ -92,7 +99,7 @@ state "crawl":
     $SET_STR CRAWL_SPIT "crawl_spit"
     import "anim/_spider_crawl.state.fus"
 
-    # Uncrawl
+    "uncrawl"
     if:
         any:
             key: not isdown d
@@ -109,7 +116,7 @@ state "crawl":
     # Crawling (stepping)
     import "anim/_walker_crawl.state.fus"
 
-    # Roll over a gap
+    "roll_over_gap"
     if:
         expr: myvar("is_rollerspider")
         key: wasdown f
@@ -122,7 +129,7 @@ state "crawl":
         rot: 1
         delay: $GET_INT ROLLER_STAND_DELAY
 
-    # Roll into a corner
+    "roll_into_corner"
     if:
         expr: myvar("is_rollerspider")
         key: wasdown f
@@ -139,7 +146,7 @@ state "crawl":
         move: 1 0
         rot: 2
 
-    # Turn
+    "turn"
     if:
         key: wasdown b
         key: not isdown f
@@ -149,7 +156,7 @@ state "crawl":
         goto: "crawl_turn"
         delay: 2
 
-    # Look up
+    "look_up"
     if:
         expr: myvar("is_aimerspider")
         key: not isdown f
@@ -166,6 +173,7 @@ state "crawl_look_up":
     $SET_STR CRAWL_SPIT "crawl_looking_up_spit"
     import "anim/_spider_crawl.state.fus"
 
+    "default"
     if() then: goto: "crawl_looking_up"
 
 state "crawl_unlook_up":
@@ -177,6 +185,7 @@ state "crawl_unlook_up":
     $SET_STR CRAWL_SPIT "crawl_looking_up_spit"
     import "anim/_spider_crawl.state.fus"
 
+    "default"
     if() then: goto: "crawl"
 
 state "crawl_step_down":
@@ -191,6 +200,7 @@ state "crawl_step_down":
     $SET_STR CRAWL_SPIT "crawl_spit"
     import "anim/_spider_crawl.state.fus"
 
+    "default"
     if() then: goto: "crawl"
 
 state "crawl_step":
@@ -207,6 +217,7 @@ state "crawl_step":
     $SET_STR CRAWL_SPIT "crawl_spit"
     import "anim/_spider_crawl.state.fus"
 
+    "default"
     if() then: goto: "crawl"
 
 state "crawl_turn":
@@ -221,6 +232,7 @@ state "crawl_turn":
     $SET_STR CRAWL_SPIT "crawl_spit"
     import "anim/_spider_crawl.state.fus"
 
+    "default"
     if() then: goto immediate: "crawl_step"
 
 state "crawl_shielding":
@@ -231,6 +243,7 @@ state "crawl_shielding":
 
     # Don't buffer actions (spitting, etc) out of shield?..
 
+    "default"
     if() then: goto: "crawl"
 
 state "crawl_flip":
@@ -241,4 +254,5 @@ state "crawl_flip":
     $SET_STR CRAWL_SPIT "crawl_spit"
     import "anim/_spider_crawl.state.fus"
 
+    "default"
     if() then: goto: "crawl"

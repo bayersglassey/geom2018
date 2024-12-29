@@ -62,6 +62,7 @@ state $PREFIX ANIM_NS "stand":
     # rollerspider turning back into spider
 
     $IF SPIDER:
+        "unroll"
         if:
             key: not isdown x
             coll: all yes
@@ -69,6 +70,7 @@ state $PREFIX ANIM_NS "stand":
         then:
             goto: "crawl"
 
+        "unroll_backward"
         if:
             key: not isdown x
             coll: all yes
@@ -86,6 +88,7 @@ state $PREFIX ANIM_NS "stand":
 
     $IF !NOGRAB:
         # Grabbing a vertex
+        "grab"
         if:
             key: wasdown u
             coll: any yes
@@ -112,6 +115,7 @@ state $PREFIX ANIM_NS "stand":
 
     $IF !NOGRAB:
         # Attempting to grab, but no vertex (so we just stick out our pseudopod)
+        "grab_fail"
         if:
             key: wasdown u
             coll: all no
@@ -131,6 +135,7 @@ state $PREFIX ANIM_NS "stand":
     ################################################
     # Rolling forward
 
+    "roll_forward"
     if:
         # Roll forward (not holding d)
         key: not isdown d
@@ -148,6 +153,7 @@ state $PREFIX ANIM_NS "stand":
         rot: 2
         delay: 1
 
+    "spin_forward"
     if:
         # Spin around forward (possibly holding d)
         key: not isdown b
@@ -164,6 +170,7 @@ state $PREFIX ANIM_NS "stand":
         rot: -1
         delay: 1
 
+    "roll_forward_down"
     if:
         # Roll forward (possibly holding d)
         key: not isdown b
@@ -184,6 +191,7 @@ state $PREFIX ANIM_NS "stand":
     ################################################
     # Turning around
 
+    "turn"
     if:
         # Turn around
         key: not isdown f
@@ -197,6 +205,7 @@ state $PREFIX ANIM_NS "stand":
 
 state $PREFIX ANIM_NS "turn":
     # When bumped, turn around
+    "default"
     if:
     then:
         confused: toggle
@@ -212,6 +221,7 @@ state $PREFIX ANIM_NS "grab":
         ;;    *\*
         ;; (.)  .
 
+    "ungrab"
     if:
         key: not isdown u
     then:
@@ -219,6 +229,7 @@ state $PREFIX ANIM_NS "grab":
         delay: 1
 
     $IF FLIPPY_GRAB:
+        "flip_grab"
         if:
             key: wasdown f
             key: not isdown b
@@ -236,6 +247,7 @@ state $PREFIX ANIM_NS "grab":
             delay: 1
 
     $IF STICKY_GRAB:
+        "stick_grab"
         if:
             key: wasdown f
             key: not isdown b
@@ -256,6 +268,7 @@ state $PREFIX ANIM_NS "grab":
             delay: 1
 
     $IF FLIPPY_GRAB:
+        "flip_grab_2" # ???
         if:
             key: wasdown f
             key: not isdown b
@@ -291,6 +304,7 @@ state $PREFIX ANIM_NS "grab":
             goto: $PREFIX ANIM_NS "grab_flipped"
             delay: 1
 
+    "forward"
     if:
         key: wasdown f
         key: not isdown b
@@ -329,6 +343,7 @@ state $PREFIX ANIM_NS "grab":
             goto: $PREFIX ANIM_NS "grabbed"
         delay: 1
 
+    "forward_2" # ???
     if:
         key: wasdown f
         key: not isdown b
@@ -346,6 +361,7 @@ state $PREFIX ANIM_NS "grab":
         delay: 1
 
     $IF GRAB_WHEN_TURNING:
+        "grab_when_turning"
         if:
             key: wasdown b
             key: not isdown f
@@ -371,6 +387,7 @@ state $PREFIX ANIM_NS "grab":
                 goto: $PREFIX ANIM_NS "grabbed"
             delay: 1
 
+    "turn"
     if:
         key: wasdown b
         key: not isdown f
@@ -387,6 +404,7 @@ state $PREFIX ANIM_NS "grab_flipped":
         ;;   */*
         ;;  (.)  .
 
+    "ungrab_forward"
     if:
         key: not isdown u
         key: wasdown f
@@ -394,6 +412,7 @@ state $PREFIX ANIM_NS "grab_flipped":
         goto: $PREFIX ANIM_NS "stand"
         delay: 1
 
+    "ungrab_backward"
     if:
         key: not isdown u
         key: wasdown b
@@ -403,6 +422,7 @@ state $PREFIX ANIM_NS "grab_flipped":
         rot: 1
         delay: 1
 
+    "forward_down"
     if:
         key: wasdown d
         key: wasdown f
@@ -418,6 +438,7 @@ state $PREFIX ANIM_NS "grab_flipped":
         rot: -1
         delay: 1
 
+    "forward"
     if:
         key: wasdown f
         key: not isdown b
@@ -434,6 +455,7 @@ state $PREFIX ANIM_NS "grab_flipped":
         goto: $PREFIX ANIM_NS "grab"
         delay: 1
 
+    "forward_2" # ???
     if:
         key: wasdown f
         key: not isdown b
@@ -448,6 +470,7 @@ state $PREFIX ANIM_NS "grab_flipped":
         rot: -1
         delay: 1
 
+    "turn"
     if:
         key: wasdown b
         key: not isdown f
@@ -464,6 +487,7 @@ state $PREFIX ANIM_NS "grabbed":
         ;;    *\*
         ;; (.)  .
 
+    "ungrab"
     if:
         key: not isdown u
     then:

@@ -1,5 +1,5 @@
 
-# Jump up
+"jump_up"
 if:
     expr: myvar("is_aimerspider")
     key: wasdown x
@@ -16,7 +16,7 @@ then:
     rot: 1
     goto immediate: "start_jump"
 
-# Jump
+"jump"
 if:
     key: wasdown u
     coll: all no

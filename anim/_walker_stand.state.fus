@@ -8,6 +8,7 @@
 
 
 # Can't stand on nothing
+"ground_disappeared_jump"
 if:
     any:
         all:
@@ -22,14 +23,14 @@ then:
     move: 1 0
     goto immediate: "start_jump"
 
-# Spit
 $IF SPIDER:
+    "spit"
     if:
         key: wentdown y
     then:
         call: "spit"
 
-# Turn into bird
+"become_bird"
 if:
     expr: myvar("is_birdspider")
     key: wentdown x
@@ -47,14 +48,14 @@ then:
     goto: "bird_crawl"
     delay: 1
 
-# Blink
 $IF EYESPIDER:
+    "close_eye"
     if:
         key: wasdown x
     then:
         goto delay: "eye_closing"
 
-# Crawl
+"crawl"
 if:
     key: wasdown d
     coll: all yes
@@ -64,7 +65,7 @@ if:
 then:
     goto delay: "crawling"
 
-# Turn
+"turn"
 if:
     key: wasdown b
     key: not isdown f
@@ -73,7 +74,7 @@ then:
     turn
     goto delay: "turn"
 
-# Look up
+"look_up"
 if:
     expr: myvar("is_aimerspider")
     key: wasdown x

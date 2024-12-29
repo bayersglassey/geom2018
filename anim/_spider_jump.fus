@@ -1,6 +1,7 @@
 
 state "start_jump":
 
+    "fly"
     if:
         expr: myvar("is_flierspider")
         key: wasdown x
@@ -14,11 +15,13 @@ state "start_jump":
         move: 2 1
         delay: 2
 
+    "swim"
     if:
         coll: water any yes collmap("stand")
     then:
         goto delay: "swim_jump"
 
+    "default"
     if() then:
         goto delay: "jump"
 
@@ -33,6 +36,7 @@ state "jump":
     rgraph: $PREFIX NS "jump"
     hitbox: collmap("stand")
 
+    "spawn_string"
     if:
     then:
         spawn: "anim/string.fus" "string_appear" (0 0) 0 f

@@ -23,6 +23,7 @@ state "step_down":
     import "anim/_walker_stand.state.fus"
     import "anim/_walker_jump.state.fus"
 
+    "default"
     if() then: goto: "stand"
 
 state "step":
@@ -33,6 +34,7 @@ state "step":
     import "anim/_walker_stand.state.fus"
     import "anim/_walker_jump.state.fus"
 
+    "default"
     if() then: goto: "stand"
 
 state "step_up":
@@ -45,4 +47,5 @@ state "step_up":
     import "anim/_walker_stand.state.fus"
     import "anim/_walker_jump.state.fus"
 
+    "default"
     if() then: goto: "stand"

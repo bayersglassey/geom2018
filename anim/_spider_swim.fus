@@ -8,6 +8,7 @@ state "swim_spit":
     rgraph: $PREFIX NS "swim_spit"
     hitbox: collmap("stand")
     unsafe
+    "default"
     if() then: goto: "swim"
 
 state "swim_jump":
@@ -21,6 +22,7 @@ state "swim_jump":
     hitbox: collmap("stand")
     unsafe
 
+    "land_up"
     if:
         any:
             key: isdown f
@@ -44,6 +46,7 @@ state "swim_jump":
         rot: 1
         goto delay: "step"
 
+    "swim_up"
     if:
         any:
             key: isdown f
@@ -65,6 +68,7 @@ state "swim_jump":
         rot: 1
         goto immediate: "start_jump"
 
+    "swim_down"
     if:
         any:
             key: isdown f
@@ -85,6 +89,7 @@ state "swim_jump":
         rot: -1
         goto immediate: "start_jump"
 
+    "swim_forward"
     if:
         any:
             key: isdown f
@@ -99,6 +104,7 @@ state "swim_jump":
         move: 1 0
         goto immediate: "start_jump"
 
+    "default"
     if() then:
         goto immediate: "swim"
 
@@ -107,11 +113,13 @@ state "swim":
     hitbox: collmap("stand")
     unsafe
 
+    "spit"
     if:
         key: wentdown y
     then:
         call: "swim_spit"
 
+    "land_up"
     if:
         any:
             key: isdown f
@@ -135,6 +143,7 @@ state "swim":
         rot: 1
         goto delay: "step"
 
+    "swim_up"
     if:
         any:
             key: isdown f
@@ -158,6 +167,7 @@ state "swim":
         rot: 1
         goto immediate: "start_jump"
 
+    "swim_down"
     if:
         any:
             key: isdown f
@@ -180,6 +190,7 @@ state "swim":
         rot: -1
         goto immediate: "start_jump"
 
+    "swim_forward"
     if:
         any:
             key: isdown f
@@ -194,6 +205,7 @@ state "swim":
         move: 1 0
         goto immediate: "start_jump"
 
+    "turn"
     if:
         key: isdown b
     then:
@@ -201,6 +213,7 @@ state "swim":
         turn
         delay: 2
 
+    "land"
     if:
         any:
             all:

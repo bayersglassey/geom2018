@@ -1,5 +1,5 @@
 
-# Land up
+"land_up"
 if:
     any:
         all:
@@ -19,7 +19,7 @@ then:
     rot: 1
     goto delay: "step_up"
 
-# Forced jump up
+"forced_jump_up"
 if:
     coll: all yes
         ;; ( )  +
@@ -32,7 +32,7 @@ then:
     rot: 1
     goto immediate: "start_jump"
 
-# Land
+"land_forward"
 if:
     key: not isdown u
     coll: all no
@@ -53,7 +53,7 @@ then:
     move: 1 0
     goto delay: "step"
 
-# Continue jump
+"continue_jump"
 if:
     coll: all no
         ;;       \*/*
@@ -64,6 +64,6 @@ then:
     move: 1 0
     goto immediate: "start_jump"
 
-# Crash
+"jump_crash"
 if() then:
     goto delay: "mostly_dead"
