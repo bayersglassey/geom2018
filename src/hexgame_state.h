@@ -16,6 +16,8 @@ typedef struct hexgame_state_context {
     body_t *your_body;
 } hexgame_state_context_t;
 
+bool hexgame_state_context_debug(hexgame_state_context_t *context);
+
 
 int state_handle_rules(state_t *state,
     hexgame_state_context_t *context,

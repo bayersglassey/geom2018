@@ -17,6 +17,13 @@
 #include "write.h"
 
 
+bool hexgame_state_context_debug(hexgame_state_context_t *context){
+    return
+        (context->body && context->body == context->game->anim_debug_body) ||
+        (context->actor && context->actor == context->game->anim_debug_actor);
+}
+
+
 /* TODO: these error handling macros are silly :P */
 
 #define CHECK_BODY \
@@ -319,7 +326,6 @@ static int state_rule_match(state_rule_t *rule,
     bool matched = true;
     for(int i = 0; i < rule->conds_len; i++){
         state_cond_t *cond = rule->conds[i];
-        if(DEBUG_RULES)printf("  if: %s\n", state_cond_type_name(cond->type));
         err = state_cond_match(cond, context, &matched);
         if(err){
             if(err == 2){
@@ -330,8 +336,6 @@ static int state_rule_match(state_rule_t *rule,
         }
         if(!matched)break;
     }
-
-    if(DEBUG_RULES && !matched)printf("    NO MATCH\n");
 
     *matched_ptr = matched;
     return 0;
@@ -758,8 +762,6 @@ int state_effect_apply(state_effect_t *effect,
 
         for(int i = 0; i < effects_len; i++){
             state_effect_t *effect = effects[i];
-            if(DEBUG_RULES)printf("  %s: %s\n", matched? "then": "else",
-                state_effect_type_name(effect->type));
             err = state_effect_apply(effect, context, gotto_ptr,
                 continues_ptr);
             if(err){
@@ -823,7 +825,6 @@ static int state_rule_apply(state_rule_t *rule,
 
     for(int i = 0; i < rule->effects_len; i++){
         state_effect_t *effect = rule->effects[i];
-        if(DEBUG_RULES)printf("  then: %s\n", state_effect_type_name(effect->type));
         err = state_effect_apply(effect, context, gotto_ptr, continues_ptr);
         if(err){
             if(err == 2){
@@ -845,14 +846,17 @@ int state_handle_rules(state_t *state,
     for(int i = 0; i < state->rules_len; i++){
         state_rule_t *rule = state->rules[i];
 
-        if(DEBUG_RULES){printf("body %p, actor %p, rule %i:\n",
-            context->body, context->actor, i);}
-
         bool matched;
         err = state_rule_match(rule, context, &matched);
         if(err)return err;
 
         if(matched){
+            if(hexgame_state_context_debug(context)){
+                fprintf(stderr, "Matched rule: ");
+                if(rule->name != NULL)fprintf(stderr, "\"%s\"", rule->name);
+                else fprintf(stderr, "#%i", i);
+                fprintf(stderr, "\n");
+            }
             bool continues = false;
             err = state_rule_apply(rule, context, gotto_ptr, &continues);
             if(err)return err;

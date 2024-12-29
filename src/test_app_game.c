@@ -182,6 +182,9 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
         }else if(event->key.keysym.sym == SDLK_F7 && app->developer_mode){
             app->camera->follow = !app->camera->follow;
             fprintf(stderr, "Camera follow: %s\n", app->camera->follow? "on": "off");
+        }else if(event->key.keysym.sym == SDLK_F8 && app->developer_mode){
+            game->anim_debug = !game->anim_debug;
+            fprintf(stderr, "Anim debug mode: %s\n", game->anim_debug? "on": "off");
         }else if(event->key.keysym.sym == SDLK_F9 && app->developer_mode){
             /* save recording */
             player_t *player = hexgame_get_player_by_keymap(game, 0);

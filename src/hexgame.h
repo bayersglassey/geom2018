@@ -19,7 +19,6 @@
 #define MAX_FRAME_I 554400
     /* Largest highly composite number smaller than 2^16 */
 
-#define DEBUG_RULES false
 #define DEBUG_RECORDINGS false
 
 /* RESET_TO_SAFETY is to player->safe_location, RESET_SOFT is to
@@ -418,6 +417,10 @@ typedef struct hexgame {
     void *save_callback_data;
 
     bool animate_palettes;
+
+    bool anim_debug;
+    body_t *anim_debug_body;
+    actor_t *anim_debug_actor;
 
     bool have_audio;
     hexgame_audio_data_t audio_data;

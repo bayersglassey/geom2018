@@ -468,6 +468,9 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
 
     game->animate_palettes = true;
 
+    game->anim_debug_body = NULL;
+    game->anim_debug_actor = NULL;
+
     vars_init_with_props(&game->vars, hexgame_vars_prop_names);
 
     ARRAY_INIT(game->worldmaps)
@@ -668,6 +671,21 @@ int hexgame_step(hexgame_t *game){
 
     game->frame_i++;
     if(game->frame_i == MAX_FRAME_I)game->frame_i = 0;
+
+    /* Set up debug stuff */
+    game->anim_debug_body = NULL;
+    game->anim_debug_actor = NULL;
+    if(game->anim_debug){
+        fprintf(stderr, "\n=== Anim debug:\n");
+        game->anim_debug_body = game->cameras[0]->body;
+        if(game->anim_debug_body != NULL){
+            fprintf(stderr, "Body cooldown: %i\n", game->anim_debug_body->cooldown);
+            game->anim_debug_actor = body_get_actor(game->anim_debug_body);
+        }
+        if(game->anim_debug_actor){
+            fprintf(stderr, "Actor wait: %i\n", game->anim_debug_actor->wait);
+        }
+    }
 
     /* Reset all camera->mapper for this step */
     for(int i = 0; i < game->cameras_len; i++){

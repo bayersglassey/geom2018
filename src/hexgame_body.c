@@ -606,6 +606,10 @@ int body_execute_procs(body_t *body, int type /* enum stateset_proc_type */){
         for(int j = 0; j < state_context->procs_len; j++){
             stateset_proc_t *proc = &state_context->procs[j];
             if(proc->type != type)continue;
+            if(hexgame_state_context_debug(&context)){
+                fprintf(stderr, "Executing \"%s\" proc: \"%s\"\n",
+                    stateset_proc_type_msg(type), proc->name);
+            }
             for(int k = 0; k < proc->effects_len; k++){
                 state_effect_t *effect = proc->effects[k];
                 err = state_effect_apply(effect, &context, &gotto, NULL);
@@ -834,12 +838,16 @@ int body_update_cur_submap(body_t *body){
 
 int body_handle_rules(body_t *body, body_t *your_body){
     int err;
+    hexgame_state_context_t context = {
+        .game = body->game,
+        .body = body,
+        .your_body = your_body,
+    };
     handle: {
-        hexgame_state_context_t context = {
-            .game = body->game,
-            .body = body,
-            .your_body = your_body,
-        };
+        if(hexgame_state_context_debug(&context)){
+            fprintf(stderr, "Handling rules for state: \"%s\" -> \"%s\"\n",
+                body->state->stateset->filename, body->state->name);
+        }
         state_effect_goto_t *gotto = NULL;
         err = state_handle_rules(body->state, &context, &gotto);
         if(err)return err;
@@ -1014,6 +1022,10 @@ int body_collide_against_body(body_t *body, body_t *body_other){
             .body = body,
             .your_body = body_other,
         };
+        if(hexgame_state_context_debug(&context)){
+            fprintf(stderr, "Executing handler for collmsg: \"%s\"\n",
+                handler->msg);
+        }
         err = collmsg_handler_apply(handler, &context, NULL);
         if(err)return err;
     }

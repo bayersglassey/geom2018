@@ -88,13 +88,17 @@ int actor_set_state(actor_t *actor, const char *state_name){
 
 int actor_handle_rules(actor_t *actor, body_t *your_body){
     int err;
+    hexgame_state_context_t context = {
+        .game = actor->game,
+        .actor = actor,
+        .body = actor->body,
+        .your_body = your_body,
+    };
     handle: {
-        hexgame_state_context_t context = {
-            .game = actor->game,
-            .actor = actor,
-            .body = actor->body,
-            .your_body = your_body,
-        };
+        if(hexgame_state_context_debug(&context)){
+            fprintf(stderr, "Handling rules for state: \"%s\" -> \"%s\"\n",
+                actor->state->stateset->filename, actor->state->name);
+        }
         state_effect_goto_t *gotto = NULL;
         err = state_handle_rules(actor->state, &context, &gotto);
         if(err)return err;
