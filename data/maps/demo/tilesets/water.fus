@@ -8,6 +8,7 @@ verts:
         all:  "map_vert1"
     "1": "map_vert1"
     "2": "map_vert0"
+    "@": "map_bgvert"
 edges:
     "0": "water_edge"
     "s": when_faces_solid:
@@ -17,6 +18,7 @@ edges:
         both:    "map_edge1"
     "1": "map_edge1"
     "2": "map_edge0"
+    "=": "map_bgedge"
 faces:
     "0": "water_face"
     "1": "map_face1"
