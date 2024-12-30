@@ -12,6 +12,10 @@ shapes:
             : "tri" ( 0  0  0  0)  8 f eval: 15 + 1
             : "tri" ( 0  0  0  0) 10 f eval: 14 + 1
 
+            : "sq"  ( 1  0  0  0)  1 f eval: 7  + 1
+            : "sq"  (-1  0  1  0)  5 f eval: 8  + 1
+            : "sq"  ( 0  0 -1  0)  9 f eval: 7  + 1
+
     $PREFIX PREFIX "top_off":
         animation: cycle 12
         shapes:
@@ -31,11 +35,15 @@ shapes:
     $PREFIX PREFIX "top_on":
         prismels:
             : "tri" ( 0  0  0  0)  0 f eval: 8  + 1
-            : "tri" ( 0  0  0  0)  2 f eval: 8  + 1
-            : "tri" ( 0  0  0  0)  4 f eval: 7  + 1
-            : "tri" ( 0  0  0  0)  6 f eval: 7  + 1
-            : "tri" ( 0  0  0  0)  8 f eval: 15 + 1
+            : "tri" ( 0  0  0  0)  2 f eval: 7  + 1
+            : "tri" ( 0  0  0  0)  4 f eval: 15 + 1
+            : "tri" ( 0  0  0  0)  6 f eval: 15 + 1
+            : "tri" ( 0  0  0  0)  8 f eval: 7  + 1
             : "tri" ( 0  0  0  0) 10 f eval: 7  + 1
+
+            : "sq"  ( 1  0  0  0)  1 f eval: 8  + 1
+            : "sq"  (-1  0  1  0)  5 f eval: 7  + 1
+            : "sq"  ( 0  0 -1  0)  9 f eval: 8  + 1
 
     $PREFIX PREFIX "off":
         animation: cycle 12
