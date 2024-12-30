@@ -54,13 +54,13 @@ state "fly":
 
     on "crush":
         call: "on_collide"
-        goto: "dead"
+        goto delay: "dead"
     on "solid":
         call: "on_collide"
-        goto: "dead"
+        goto delay: "dead"
     on "switch":
         call: "on_collide"
-        goto: "dead"
+        goto delay: "dead"
 
     if:
     then:
@@ -105,13 +105,13 @@ state "crouch_fly":
 
     on "crush":
         call: "on_collide"
-        goto: "crouch_dead"
+        goto delay: "crouch_dead"
     on "solid":
         call: "on_collide"
-        goto: "crouch_dead"
+        goto delay: "crouch_dead"
     on "switch":
         call: "on_collide"
-        goto: "crouch_dead"
+        goto delay: "crouch_dead"
 
     if:
     then:
