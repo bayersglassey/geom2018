@@ -925,11 +925,15 @@ NEXT STEPS:
         we should add highly curated "time progression" to it, but
         also add a less-curated "dodecas wilderness" which only has
         the progress of tunnels added to it over time.
-[ ] Make a swimming creature, faster than player. In the water worldmap,
-    it chases you; you have to run on the ground to escape, and use air
-    bubbles.
-    Also, add some areas where everything is water, with air bubbles; but
-    when you hit switches, air and water are reversed.
+[ ] Expand water area
+    [ ] Make a swimming creature, faster than player. In the water worldmap,
+        it chases you; you have to run on the ground to escape, and use air
+        bubbles.
+        [ ] Have a map where there are water-filled tunnels, with the swimming
+            creature, and you need to keep escaping it by coming up onto "land".
+            Sometimes to hit a switch, sometimes to sneak around the creature, etc.
+    [ ] Add some areas where everything is water, with air bubbles; but
+        when you hit switches, air and water are reversed.
 [ ] Fix data/maps/demo/jungle5.fus:
     When you jump up to escape the bird walking back and forth, the
     camera doesn't scroll to show you unless you go all the way up to the
@@ -955,36 +959,7 @@ NEXT STEPS:
 Dec 27, 2024:
 -------------
 
-[X] Add a way to see which anim rules fired that frame (for body/actor)
-    [X] Add optional names to rules
-    [X] Add test_app->anim_debug_body, when non-NULL, points to a body whose
-        anims (and the anims of its actor, if any) should have debug info printed
-        to stderr every frame
-    [ ] Maybe dump keyinfo?.. once at start of frame, then also log KEY effects?..
-[X] Add an easier way to bring up the console for your body
-    ...never mind, "lb" goes to your body already. Then ctrl+"`" lets you F5 etc.
-[X] When looking at a body, also show the state of its actor, if any
 [ ] When console is up, F5 and PgUp (next frame) should still work (and, like, F8?..)
-[ ] maps/playarea: add some little tests for aispider, and a way to easily jump
-    between them.
-    Example:
+[ ] maps/playarea: add some little tests for aispider
 
         bin/demo --no-audio -m data/maps/playarea/worldmap.fus --actor actor/aispider.fus -loc aispider_gap
-
-
-Ahhhhh I think I know the issue.
-In actor/_aispider.fus we currently have:
-
-    # Turn around if we're stuck
-    "turn_because_stuck"
-    if() then:
-        key: up f
-        key: down b
-        delay: 6
-
-...so, we're doing a manual delay.
-But that delay is more than what it takes for spider to turn around!..
-So, spider is then going backwards without checking whether it'll be jumping to its doom.
-So, it seems like we probably want actor_step to wait for body's delay to be 0 as well as
-actor's?..
-And then we want to remove basically all manual delays from aispider?..
