@@ -679,11 +679,10 @@ int hexgame_step(hexgame_t *game){
         fprintf(stderr, "\n=== Anim debug:\n");
         game->anim_debug_body = game->cameras[0]->body;
         if(game->anim_debug_body != NULL){
-            fprintf(stderr, "Body cooldown: %i\n", game->anim_debug_body->cooldown);
             game->anim_debug_actor = body_get_actor(game->anim_debug_body);
         }
         if(game->anim_debug_actor){
-            fprintf(stderr, "Actor wait: %i\n", game->anim_debug_actor->wait);
+            fprintf(stderr, "--- Actor wait: %i\n", game->anim_debug_actor->wait);
         }
     }
 
@@ -698,6 +697,13 @@ int hexgame_step(hexgame_t *game){
         actor_t *actor = game->actors[i];
         err = actor_step(actor, game);
         if(err)return err;
+    }
+
+    /* Debug stuff */
+    if(game->anim_debug){
+        if(game->anim_debug_body != NULL){
+            fprintf(stderr, "--- Body cooldown: %i\n", game->anim_debug_body->cooldown);
+        }
     }
 
     /* Do 1 gameplay step for each map */
