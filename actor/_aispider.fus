@@ -4,32 +4,23 @@
 state "mainloop":
     # Main AI loop
 
-    "dead"
-    if: dead()
-    then:
+
+    "always"
+    if() then:
         key: up u
         key: up d
         key: up l
         key: up r
         key: up x
         key: up y
-        goto: "create_body"
-        delay: 42
-
-
-    "always"
-    if() then:
-        key: up b
         continue
 
 
-    "wait_for_jump"
-    if:
-        key: isdown u
-        coll: all yes
-            ;; (+)- +
+    "dead"
+    if: dead()
     then:
-        # We're still on the ground, wait for our jump to start...
+        goto: "create_body"
+        delay: 42
 
 
     "jumping"
@@ -38,15 +29,15 @@ state "mainloop":
             ;; (+)- +
     then:
         # If we're jumping, then do nothing...
-        key: up u
 
 
     # Sometimes, jump!
     "jump"
     if:
-        chance: 20%
+        chance: 40%
         any:
             all:
+                # Jump forward small, land forward
                 coll: all yes
                     ;; ( )  .   .   + - +
                 coll: any no
@@ -57,6 +48,7 @@ state "mainloop":
                     ;;       /*\*/*\*/*\*
                     ;; ( )  .   .   .   .
             all:
+                # Jump forward small, land up
                 coll: all yes
                     ;;                +
                     ;;               /
@@ -69,6 +61,7 @@ state "mainloop":
                     ;;       /*\*/*\*
                     ;; ( )  .   .   .
             all:
+                # Jump forward medium, land forward
                 coll: all yes
                     ;; ( )  .   .   .   + - +
                 coll: any no
@@ -79,6 +72,7 @@ state "mainloop":
                     ;;       /*\*/*\*/*\*/*\*
                     ;; ( )  .   .   .   .   .
             all:
+                # Jump forward medium, land up
                 coll: all yes
                     ;;                    +
                     ;;                   /
@@ -91,7 +85,6 @@ state "mainloop":
                     ;;       /*\*/*\*/*\*
                     ;; ( )  .   .   .   .
     then:
-        key: up f
         key: down u
 
 
@@ -129,7 +122,6 @@ state "mainloop":
                     ;; (.)  . -
                     ;;        *
     then:
-        key: up f
         key: down d
         set myvar("crawl_time"): 0
         goto: "mainloop_crawl"
@@ -143,7 +135,6 @@ state "mainloop":
         chance: 1%
         chance: 20%
     then:
-        key: up f
         key: down b
 
 
@@ -151,6 +142,7 @@ state "mainloop":
     "step"
     if: any:
         all:
+            # Step forward
             coll: all yes
                 ;; ( )  + - +
             coll: all no
@@ -159,6 +151,22 @@ state "mainloop":
                 ;;       /*\*
                 ;; ( )
         all:
+            # Step forward over a small gap
+            coll: all yes
+                ;; ( )  .   + - +
+            coll: all no
+                ;;       \*/*\*/*
+                ;;        + - + -
+                ;;       /*\*/*\*
+                ;; ( )  .   .   .
+        all:
+            # Step up
+            coll: all yes
+                ;;        +
+                ;;       /
+                ;; ( )  +
+        all:
+            # Step up over a small gap
             coll: all yes
                 ;;            +
                 ;;           /
@@ -169,25 +177,7 @@ state "mainloop":
                 ;;       /*\*
                 ;; ( )
         all:
-            coll: all yes
-                ;;        +
-                ;;       /
-                ;; ( )  +
-        all:
-            coll: all yes
-                ;;      +
-                ;;       \
-                ;;        +
-                ;;
-                ;; ( )  +
-        all:
-            coll: all yes
-                ;;  + - +
-                ;;
-                ;;        +
-                ;;
-                ;; ( )  +
-        all:
+            # Step up over a small gap
             coll: all yes
                 ;;          +
                 ;;         /
@@ -203,6 +193,23 @@ state "mainloop":
                 ;;
                 ;; ( )  .
         all:
+            # Small backflip
+            coll: all yes
+                ;;      +
+                ;;       \
+                ;;        +
+                ;;
+                ;; ( )  +
+        all:
+            # Medium backflip
+            coll: all yes
+                ;;  + - +
+                ;;
+                ;;        +
+                ;;
+                ;; ( )  +
+        all:
+            # Step down
             coll: all yes
                 ;; ( )  +
                 ;;       \
@@ -220,7 +227,6 @@ state "mainloop":
     # Turn around if we're stuck
     "turn_because_stuck"
     if() then:
-        key: up f
         key: down b
 
 
@@ -228,7 +234,13 @@ state "mainloop_crawl":
 
     "always"
     if() then:
-        key: up b
+        key: up u
+        #key: up d # Don't uncrawl by default!..
+        key: up l
+        key: up r
+        key: up x
+        key: up y
+
         inc myvar("crawl_time")
         continue
 
@@ -244,7 +256,6 @@ state "mainloop_crawl":
             ;;    */*\*
             ;;   ( )
     then:
-        key: up f
         key: up d
         goto: "mainloop"
 
@@ -289,7 +300,6 @@ state "mainloop_crawl":
             ;;    */*\*
             ;;   ( )
     then:
-        key: up f
         key: up d
         goto: "mainloop"
 
@@ -297,5 +307,4 @@ state "mainloop_crawl":
     # Turn around if we're stuck
     "turn_because_stuck"
     if() then:
-        key: up f
         key: down b
