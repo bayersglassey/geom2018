@@ -8,7 +8,7 @@ submaps:
     :
         file: "data/maps/playarea/start.fus"
         pos: (0 0)
-        camera: (5 0)
+        camera: (10 0)
         mapper: ("quadruple")
     :
         pos: (30 0)
