@@ -47,17 +47,18 @@ submaps:
                 song_vars:
                     "x": 2
             "start3":
-                file: "data/maps/tutorial/start3.fus"
                 pos: eval: (19 0) + (19 -1)
                 camera: (9 0)
-                song_vars:
-                    "x": 3
-            "start3_cage":
-                file: "data/maps/tutorial/start3_cage.fus"
-                pos: eval: (19 0) + (19 -1) + (-10 -10)
-                camera: (10 5)
-                song_vars:
-                    "x": 3
+                submaps:
+                    :
+                        file: "data/maps/tutorial/start3.fus"
+                        song_vars:
+                            "x": 3
+                    :
+                        file: "data/maps/tutorial/start3_cage.fus"
+                        pos: (14 -12)
+                        song_vars:
+                            "x": 3
             "loop":
                 file: "data/maps/tutorial/loop.fus"
                 pos: eval: (19 0) + (19 -1) + (19 -6)
