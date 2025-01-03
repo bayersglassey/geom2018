@@ -7,6 +7,10 @@ parts:
         vars:
             "counter": "spider_leaving_vines_for_real"
             "max_cooldown": 15
+    "B": recording "data/recs/hotspot.fus"
+        vars:
+            "need_key": "eyespider_vines_mini_eye_respawn"
+            "key": "spider_left_vines"
 default_vert: "1"
 default_edge: "1"
 default_face: "1"
@@ -20,7 +24,7 @@ collmap:
     ;;                                                                       S
     ;;                                                     + - + - + - + - + - + - + - +
     ;;                                                    /                             \
-    ;;   .   .   ?   .   .   ?   .   .   ?               +       + - + - + - + - +       +     [A][A][A]
+    ;;   .   .   ?   .   .   ?   .   .   ?       ?       +       + - + - + - + - +       +     [A][A][A][B]
     ;;                                                  /       /                 \     /
     ;;                             @ = @ = @ = + - + - +       +       +       +   + - +
     ;;                                        /               /         \       \

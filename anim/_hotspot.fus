@@ -28,16 +28,20 @@ state "waiting":
     hitbox: collmap("hitbox")
 
     on "touch":
-        if: exists myvar("key")
-        then: set mapvar(myvar("key")): myvar("value")
+        if: any:
+            not: exists myvar("need_key")
+            expr: mapvar(myvar("need_key"))
+        then:
+            if: exists myvar("key")
+            then: set mapvar(myvar("key")): myvar("value")
 
-        if: exists myvar("counter")
-        then: inc mapvar(myvar("counter"))
+            if: exists myvar("counter")
+            then: inc mapvar(myvar("counter"))
 
-        if: exists myvar("max_cooldown")
-        then: set myvar("cooldown"): myvar("max_cooldown")
+            if: exists myvar("max_cooldown")
+            then: set myvar("cooldown"): myvar("max_cooldown")
 
-        goto: "touched"
+            goto: "touched"
 
 state "touched":
     rgraph: "hotspot_touched"

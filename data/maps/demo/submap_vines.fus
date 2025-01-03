@@ -28,6 +28,7 @@ vars:
     "spider_passed_vines2": F
     nosave "spider_leaving_vines": 0
     nosave "spider_leaving_vines_for_real": 0
+    nosave "spider_left_vines": F
 
 
 $SET_STR VINES_HIDING: lines: at(25 3)
@@ -58,6 +59,8 @@ $SET_STR VINES_THANKS: lines: at(14 24)
     ;;      If you're
     ;;       heading west,
     ;;        I'll come too
+    ;;
+    ;;            <-
 
 $SET_STR VINES_NOT_OUT_THERE: lines: at(16 26)
     ;;NO WAIT
@@ -139,9 +142,13 @@ submaps:
             then
                 if > mapvar("eyespider_vines_mini_eye_respawn") 0
                 then
-                    if > mapvar("spider_leaving_vines_for_real") 0
+                    if &&
+                        ! mapvar("spider_left_vines")
+                        > mapvar("spider_leaving_vines_for_real") 0
                     then $GET_STR VINES_AAA
-                    else if > mapvar("spider_leaving_vines") 0
+                    else if &&
+                        ! mapvar("spider_left_vines")
+                        > mapvar("spider_leaving_vines") 0
                     then $GET_STR VINES_NOT_OUT_THERE
                     else $GET_STR VINES_THANKS
                 else $GET_STR VINES_TAKE_ME

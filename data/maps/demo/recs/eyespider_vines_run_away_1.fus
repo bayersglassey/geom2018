@@ -2,7 +2,7 @@ anim: "anim/eyespider.fus"
 state: "eye_closed"
 pos: ( 18 28)
 rot: 0
-turn: no
+turn: yes
 keys:
     x: is was
     y:
@@ -10,4 +10,12 @@ keys:
     d:
     l:
     r:
-data: " w9-x w5+l w8-l w2+u w8-u w24+l w10-l w9+l w4-l w3+r w2+u w1-r w3-u w13+r w3-r w3+l w2+u w2-l w1-u w16+l w6-l w2+r w2+u w2-r w1-u w13+r w1+d w36-d w2-r w7+x w25"
+vars:
+    "is_rollerspider": F
+    "is_aimerspider": F
+    "is_spikeyspider": F
+    "is_flierspider": F
+    "is_birdspider": F
+    "is_flipspider": F
+    "is_stickyspider": F
+data: " w13 -x w15 +r w8 -r w3 +l w9 -l w13 +u w3 -u w31 +l w3 -l w10 +l w3 -l w2 +r w2 +u w4 -u -r w6 +r w4 -r w12 +d w11 +l w9 -l w7 -d w10 +l w3 -l w8 +r w6 -r w7 +l w1 -l w12 +l w3 -l w2 +r w1 +u w2 -r w1 -u w7 +r w5 -r w1 +l w1 +u w6 -u w29 -l w2 +r w4 -r w7 +r w33 -r w10 +u w3 -u w7 +d w14 +r w23 -r w11 -d w5 +l w3 -l w15 +r w3 -r w12 +d w10 +r w2 -r w12 -d w16 +x w16"

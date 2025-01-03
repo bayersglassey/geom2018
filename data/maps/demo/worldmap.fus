@@ -18,8 +18,9 @@ vars:
     "eyespider_tunnels_ran_away_1": F
 
 
-$SET_STR START3_SPIDERS: lines: at(17 5)
+$SET_STR START3_SPIDERS: lines: at(13 3)
     ;;S... spiders...
+    ;;  Please, take me back...
 
 
 submaps:

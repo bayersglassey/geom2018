@@ -2,7 +2,7 @@ anim: "anim/eyespider.fus"
 state: "eye_closed"
 pos: ( 18 28)
 rot: 0
-turn: no
+turn: yes
 keys:
     x: is was
     y:
