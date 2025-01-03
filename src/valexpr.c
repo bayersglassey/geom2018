@@ -35,11 +35,15 @@ void valexpr_cleanup(valexpr_t *expr){
             valexpr_cleanup(expr->u.as.sub_expr);
             free(expr->u.as.sub_expr);
             break;
-        case VALEXPR_TYPE_OP:
+        case VALEXPR_TYPE_BINOP:
             valexpr_cleanup(expr->u.op.sub_expr1);
             free(expr->u.op.sub_expr1);
             valexpr_cleanup(expr->u.op.sub_expr2);
             free(expr->u.op.sub_expr2);
+            break;
+        case VALEXPR_TYPE_UNOP:
+            valexpr_cleanup(expr->u.op.sub_expr1);
+            free(expr->u.op.sub_expr1);
             break;
         default: break;
     }
@@ -90,7 +94,7 @@ int valexpr_copy(valexpr_t *expr1, valexpr_t *expr2){
                 expr2->u.as.sub_expr);
             if(err)return err;
             break;
-        case VALEXPR_TYPE_OP:
+        case VALEXPR_TYPE_BINOP:
             expr1->u.op.op = expr2->u.op.op;
 
             expr1->u.op.sub_expr1 = calloc(1, sizeof(valexpr_t));
@@ -105,6 +109,14 @@ int valexpr_copy(valexpr_t *expr1, valexpr_t *expr2){
                 expr2->u.op.sub_expr2);
             if(err)return err;
             break;
+        case VALEXPR_TYPE_UNOP:
+            expr1->u.op.op = expr2->u.op.op;
+
+            expr1->u.op.sub_expr1 = calloc(1, sizeof(valexpr_t));
+            if(!expr1->u.op.sub_expr1)return 1;
+            err = valexpr_copy(expr1->u.op.sub_expr1,
+                expr2->u.op.sub_expr1);
+            if(err)return err;
         default: break;
     }
     return 0;
@@ -136,11 +148,15 @@ void valexpr_fprintf(valexpr_t *expr, FILE *file){
             valexpr_fprintf(expr->u.as.sub_expr, file);
             fputc(')', file);
             break;
-        case VALEXPR_TYPE_OP:
+        case VALEXPR_TYPE_BINOP:
             fprintf(file, "%s ", valexpr_op_msg(expr->u.op.op));
             valexpr_fprintf(expr->u.op.sub_expr1, file);
             fputc(' ', file);
             valexpr_fprintf(expr->u.op.sub_expr2, file);
+            break;
+        case VALEXPR_TYPE_UNOP:
+            fprintf(file, "%s ", valexpr_op_msg(expr->u.op.op));
+            valexpr_fprintf(expr->u.op.sub_expr1, file);
             break;
         default:
             fprintf(file, "<unknown>");
@@ -177,12 +193,15 @@ int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer){
 
     int type = -1;
     int op = -1;
-    if(GOT("==")){ type = VALEXPR_TYPE_OP; op = VALEXPR_OP_EQ; }
-    else if(GOT("!=")){ type = VALEXPR_TYPE_OP; op = VALEXPR_OP_NE; }
-    else if(GOT("<" )){ type = VALEXPR_TYPE_OP; op = VALEXPR_OP_LT; }
-    else if(GOT("<=")){ type = VALEXPR_TYPE_OP; op = VALEXPR_OP_LE; }
-    else if(GOT(">" )){ type = VALEXPR_TYPE_OP; op = VALEXPR_OP_GT; }
-    else if(GOT(">=")){ type = VALEXPR_TYPE_OP; op = VALEXPR_OP_GE; }
+    if(GOT("==")){ type = VALEXPR_TYPE_BINOP; op = VALEXPR_OP_EQ; }
+    else if(GOT("!=")){ type = VALEXPR_TYPE_BINOP; op = VALEXPR_OP_NE; }
+    else if(GOT("<" )){ type = VALEXPR_TYPE_BINOP; op = VALEXPR_OP_LT; }
+    else if(GOT("<=")){ type = VALEXPR_TYPE_BINOP; op = VALEXPR_OP_LE; }
+    else if(GOT(">" )){ type = VALEXPR_TYPE_BINOP; op = VALEXPR_OP_GT; }
+    else if(GOT(">=")){ type = VALEXPR_TYPE_BINOP; op = VALEXPR_OP_GE; }
+    else if(GOT("&&")){ type = VALEXPR_TYPE_BINOP; op = VALEXPR_OP_AND; }
+    else if(GOT("||")){ type = VALEXPR_TYPE_BINOP; op = VALEXPR_OP_OR; }
+    else if(GOT("!")){ type = VALEXPR_TYPE_UNOP; op = VALEXPR_OP_NOT; }
     else type =
         GOT("yourvar")? VALEXPR_TYPE_YOURVAR:
         GOT("mapvar")? VALEXPR_TYPE_MAPVAR:
@@ -192,23 +211,24 @@ int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer){
         GOT("as")? VALEXPR_TYPE_AS:
         VALEXPR_TYPE_LITERAL;
 
-    if(type == VALEXPR_TYPE_OP){
+    if(type == VALEXPR_TYPE_BINOP || type == VALEXPR_TYPE_UNOP){
         NEXT
         expr->type = type;
         expr->u.op.op = op;
 
         valexpr_t *sub_expr1 = calloc(1, sizeof(*sub_expr1));
         if(!sub_expr1)return 1;
-        valexpr_t *sub_expr2 = calloc(1, sizeof(*sub_expr2));
-        if(!sub_expr2)return 1;
-
         err = valexpr_parse(sub_expr1, lexer);
         if(err)return err;
-        err = valexpr_parse(sub_expr2, lexer);
-        if(err)return err;
-
         expr->u.op.sub_expr1 = sub_expr1;
-        expr->u.op.sub_expr2 = sub_expr2;
+
+        if(type == VALEXPR_TYPE_BINOP){
+            valexpr_t *sub_expr2 = calloc(1, sizeof(*sub_expr2));
+            if(!sub_expr2)return 1;
+            err = valexpr_parse(sub_expr2, lexer);
+            if(err)return err;
+            expr->u.op.sub_expr2 = sub_expr2;
+        }
     }else if(
         type == VALEXPR_TYPE_YOURVAR ||
         type == VALEXPR_TYPE_MAPVAR ||
@@ -389,7 +409,8 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
             }
             break;
         }
-        case VALEXPR_TYPE_OP: {
+        case VALEXPR_TYPE_BINOP:
+        case VALEXPR_TYPE_UNOP: {
             valexpr_result_t result1 = {0};
             err = valexpr_get(expr->u.op.sub_expr1, context, &result1);
             if(err)return err;
@@ -401,15 +422,18 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
                 return 2;
             }
 
-            valexpr_result_t result2 = {0};
-            err = valexpr_get(expr->u.op.sub_expr2, context, &result2);
-            if(err)return err;
-            val_t *val2 = result2.val;
-            if(val2 == NULL){
-                fprintf(stderr, "Couldn't get value for RHS: ");
-                valexpr_fprintf(expr->u.op.sub_expr2, stderr);
-                fputc('\n', stderr);
-                return 2;
+            val_t *val2 = NULL;
+            if(expr->type == VALEXPR_TYPE_BINOP){
+                valexpr_result_t result2 = {0};
+                err = valexpr_get(expr->u.op.sub_expr2, context, &result2);
+                if(err)return err;
+                val2 = result2.val;
+                if(val2 == NULL){
+                    fprintf(stderr, "Couldn't get value for RHS: ");
+                    valexpr_fprintf(expr->u.op.sub_expr2, stderr);
+                    fputc('\n', stderr);
+                    return 2;
+                }
             }
 
             bool b = false;
@@ -420,6 +444,9 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
                 case VALEXPR_OP_LE: b = val_le(val1, val2); break;
                 case VALEXPR_OP_GT: b = val_gt(val1, val2); break;
                 case VALEXPR_OP_GE: b = val_ge(val1, val2); break;
+                case VALEXPR_OP_AND: b = val_and(val1, val2); break;
+                case VALEXPR_OP_OR: b = val_or(val1, val2); break;
+                case VALEXPR_OP_NOT: b = val_not(val1); break;
                 default:
                     fprintf(stderr, "Unrecognized op: %i\n", expr->u.op.op);
                     return 2;

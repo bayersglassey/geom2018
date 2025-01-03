@@ -205,6 +205,18 @@ bool val_ge(val_t *val1, val_t *val2){
     }
 }
 
+bool val_and(val_t *val1, val_t *val2){
+    return val_get_bool(val1) && val_get_bool(val2);
+}
+
+bool val_or(val_t *val1, val_t *val2){
+    return val_get_bool(val1) || val_get_bool(val2);
+}
+
+bool val_not(val_t *val){
+    return !val_get_bool(val);
+}
+
 
 
 /********

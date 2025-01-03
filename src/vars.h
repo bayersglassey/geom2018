@@ -117,6 +117,9 @@ bool val_lt(val_t *val1, val_t *val2);
 bool val_le(val_t *val1, val_t *val2);
 bool val_gt(val_t *val1, val_t *val2);
 bool val_ge(val_t *val1, val_t *val2);
+bool val_and(val_t *val1, val_t *val2);
+bool val_or(val_t *val1, val_t *val2);
+bool val_not(val_t *val);
 
 
 void vars_cleanup(vars_t *vars);

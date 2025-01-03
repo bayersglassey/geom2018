@@ -16,7 +16,8 @@ enum valexpr_type {
     VALEXPR_TYPE_MYVAR,
     VALEXPR_TYPE_IF,
     VALEXPR_TYPE_AS,
-    VALEXPR_TYPE_OP,
+    VALEXPR_TYPE_BINOP,
+    VALEXPR_TYPE_UNOP,
     VALEXPR_TYPES
 };
 
@@ -29,7 +30,8 @@ static const char *valexpr_type_msg(int type){
         case VALEXPR_TYPE_MYVAR: return "myvar";
         case VALEXPR_TYPE_IF: return "if";
         case VALEXPR_TYPE_AS: return "as";
-        case VALEXPR_TYPE_OP: return "op";
+        case VALEXPR_TYPE_BINOP: return "binop";
+        case VALEXPR_TYPE_UNOP: return "unop";
         default: return "unknown";
     }
 }
@@ -71,6 +73,9 @@ enum valexpr_op {
     VALEXPR_OP_LE,
     VALEXPR_OP_GT,
     VALEXPR_OP_GE,
+    VALEXPR_OP_AND,
+    VALEXPR_OP_OR,
+    VALEXPR_OP_NOT,
 };
 
 static const char *valexpr_op_msg(int op){
@@ -81,6 +86,9 @@ static const char *valexpr_op_msg(int op){
         case VALEXPR_OP_LE: return "<=";
         case VALEXPR_OP_GT: return ">";
         case VALEXPR_OP_GE: return ">=";
+        case VALEXPR_OP_AND: return "&&";
+        case VALEXPR_OP_OR: return "||";
+        case VALEXPR_OP_NOT: return "!";
         default: return "???";
     }
 }

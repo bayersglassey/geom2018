@@ -337,6 +337,31 @@ int testrunner(int *n_tests_ptr, int *n_fails_ptr){
             if(err)return err;
             ASSERT(valexpr_get_bool(expr, &context));
             valexpr_cleanup(expr);
+
+            err = parse_valexpr(expr, "&& T T");
+            if(err)return err;
+            ASSERT(valexpr_get_bool(expr, &context));
+            valexpr_cleanup(expr);
+
+            err = parse_valexpr(expr, "! && T F");
+            if(err)return err;
+            ASSERT(valexpr_get_bool(expr, &context));
+            valexpr_cleanup(expr);
+
+            err = parse_valexpr(expr, "|| T F");
+            if(err)return err;
+            ASSERT(valexpr_get_bool(expr, &context));
+            valexpr_cleanup(expr);
+
+            err = parse_valexpr(expr, "|| F T");
+            if(err)return err;
+            ASSERT(valexpr_get_bool(expr, &context));
+            valexpr_cleanup(expr);
+
+            err = parse_valexpr(expr, "! || F F");
+            if(err)return err;
+            ASSERT(valexpr_get_bool(expr, &context));
+            valexpr_cleanup(expr);
         }
 
         vars_cleanup(&yourvars);
