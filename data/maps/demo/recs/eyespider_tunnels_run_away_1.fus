@@ -10,4 +10,12 @@ keys:
     d:
     l:
     r:
-data: "-x w11 +d w2 +l w29 -d w1 -l w5 +r w36 -r w6 +u w21 -u w19 +u w4 -u w6 +d w1 +r w29 -d w17 -r w1 +d w2 +l w19 -d w1 -l w16 +x"
+vars:
+    "is_rollerspider": F
+    "is_aimerspider": F
+    "is_spikeyspider": F
+    "is_flierspider": F
+    "is_birdspider": F
+    "is_flipspider": F
+    "is_stickyspider": F
+data: " w3 -x w18 +d w7 +l w29 -l -d w29 +r w24 -r w17 +r w7 -r w14 +l w3 -l w20 +r w2 -r w12 +u w3 -u w25 +u w4 -u w7 +d w9 +r w23 -d w20 -r w3 +d w12 +l w14 -l w2 -d w19 +x w9"
