@@ -911,10 +911,9 @@ Dec 22, 2024:
 
 NEXT STEPS:
 [ ] Fix all the broken recordings!
-[ ] Fix the aispiders! (So they don't explode themselves, etc)
+[X] Fix the aispiders! (So they don't explode themselves, etc)
 [ ] When a body with a recording dies, e.g. a spider explodes, restart
     the recording (with resets_position forced to be true).
-    Same for actors, except we restart the actor.
 [ ] In dodecas area, start making... "time progression".
     Like... when you do something, the area changes drastically.
     In particular, wilderness is transformed into populated stuff.
@@ -934,6 +933,10 @@ NEXT STEPS:
             Sometimes to hit a switch, sometimes to sneak around the creature, etc.
     [ ] Add some areas where everything is water, with air bubbles; but
         when you hit switches, air and water are reversed.
+[ ] Add an area full of various flavours of aispider.
+    Some which know how to hide from birds in tunnels...
+    Some which know how to swim...
+    Some which know how to spit at death rollers to reverse them...
 [ ] Fix data/maps/demo/jungle5.fus:
     When you jump up to escape the bird walking back and forth, the
     camera doesn't scroll to show you unless you go all the way up to the
@@ -954,12 +957,52 @@ NEXT STEPS:
 [ ] And the ultimate goal is... what?.. something like rejoining spider city?..
     So you complete tasks for spiders in various areas who are... making
     spider outposts?.. and then they help you get to the city?..
+[ ] Big triangle rollers leave a trail?.. making their hitbox clear?..
+[ ] Spit should leave a trail?..
+[ ] Aimerspider should be able to aim while swimming.
+[ ] Bring back birdspider. You gain... spit which causes birds (and hexrollers?..
+    and bigrollers?.. and the water creature, once that exists?..) to kneel,
+    and when you touch them in that state, you rise up on them.
+    And you get back off with 'x' key.
+    [ ] Have an area where spiders "herd" birds around, taming them, riding them,
+        corralling them, etc.
+        This occurs in a "time progression" of, say, jungle?..
+[ ] maps/wilderness: for each 5 coins you collect, a tunnel is slowly built
+    across the wilderness??...
+[ ] Add a way to "multiply", i.e. "stretch", entire anims/actors.
+    E.g. multiply all hex coords by 2, replace "-" with "- + -" in all collmaps, etc.
 
 
-Dec 27, 2024:
+Dec 31, 2024:
 -------------
 
-[ ] When console is up, F5 and PgUp (next frame) should still work (and, like, F8?..)
-[ ] maps/playarea: add some little tests for aispider
+Actors are kind of interesting.
+The other day, I had thought that the way you're forced to use "play" to create
+a body was lame, but actually once mapvars get it involved, I think it might be
+necessary. E.g. actor/eyespider_tunnels.fus has:
 
-        bin/demo --no-audio -m data/maps/playarea/worldmap.fus --actor actor/aispider.fus -loc aispider_gap
+    state "create_body":
+        if:
+            expr: mapvar("eyespider_tunnels_ran_away_1")
+        then:
+            play: "data/maps/demo/recs/eyespider_tunnels_wait_2.fus"
+            goto immediate: "start2"
+
+        if:
+        then:
+            play: "data/maps/demo/recs/eyespider_tunnels_wait_1.fus"
+            goto immediate: "start"
+
+...but this is hellish to debug or modify.
+What do we really want, here?..
+
+
+[X] A way to set the filename used by F9/F10
+    [X] A test_app command: "lrf", "srf"
+    [X] A bin/demo option: -lrf, -srf
+
+
+Can coin beasts maybe... stack on top of one another?
+Become two-legged humanoids like that?
+
+
