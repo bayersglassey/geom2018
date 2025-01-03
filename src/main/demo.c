@@ -148,6 +148,8 @@ void print_help(FILE *file){
         "   -srf --save-recording-filename FILE\n"
         "                         Set \"save recording filename\"\n"
         "                         (where to save recording to, used by F9)\n"
+        "   -rf --recording-filename FILE\n"
+        "                         Equivalent to `-srf FILE -lrf FILE`\n"
         "        --no-audio       Disable audio\n"
         "        --actor FILE     Use the given actor, instead of a player\n"
         , DEFAULT_PREND_FILENAME, DEFAULT_STATESET_FILENAME, ENV_DEVEL,
@@ -346,6 +348,14 @@ int main(int n_args, char *args[]){
                 fprintf(stderr, "Missing filename after %s\n", arg);
                 goto parse_failure;
             }
+            save_recording_filename = args[arg_i];
+        }else if(!strcmp(arg, "-rf") || !strcmp(arg, "--recording-filename")){
+            arg_i++;
+            if(arg_i >= n_args){
+                fprintf(stderr, "Missing filename after %s\n", arg);
+                goto parse_failure;
+            }
+            load_recording_filename = args[arg_i];
             save_recording_filename = args[arg_i];
         }else if(!strcmp(arg, "--no-audio")){
             have_audio = false;

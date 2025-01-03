@@ -619,7 +619,7 @@ int test_app_mainloop_step(test_app_t *app){
     return 0;
 }
 
-static const char *test_app_get_recording_filename(
+static const char *_test_app_get_recording_filename_from_template(
     test_app_t *app, int n
 ){
     char *recording_filename = app->_recording_filename;
@@ -640,14 +640,14 @@ static const char *_test_app_get_last_or_next_recording_filename(
     const char *recording_filename;
     int n = 0;
     while(1){
-        recording_filename = test_app_get_recording_filename(app, n);
+        recording_filename = _test_app_get_recording_filename_from_template(app, n);
         FILE *f = fopen(recording_filename, "r");
         if(f == NULL)break;
         n++;
     }
     if(!next){
-    if(n == 0)return NULL;
-        recording_filename = test_app_get_recording_filename(app, n-1);
+        if(n == 0)return NULL;
+        recording_filename = _test_app_get_recording_filename_from_template(app, n-1);
     }
     return recording_filename;
 }
