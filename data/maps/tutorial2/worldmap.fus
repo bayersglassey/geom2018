@@ -83,7 +83,7 @@ submaps:
                             pos: (0 5)
             "start3.1":
                 recs:
-                    : "data/maps/tutorial2/recs/start3_crawler.fus"
+                    : "data/maps/tutorial2/recs/start3_crawler.fus" "spider_cpu"
                 submaps:
                     :
                         bg
