@@ -924,6 +924,10 @@ NEXT STEPS:
         we should add highly curated "time progression" to it, but
         also add a less-curated "dodecas wilderness" which only has
         the progress of tunnels added to it over time.
+    [ ] TIME PROGRESSION: CHANGE IN TILESET!
+        E.g. grass (earth tileset) overgrows a previously civilized area, or vice
+        versa!..
+        Or an underwater area (vines tileset) is drained!
 [ ] Expand water area
     [ ] Make a swimming creature, faster than player. In the water worldmap,
         it chases you; you have to run on the ground to escape, and use air
@@ -971,38 +975,40 @@ NEXT STEPS:
     across the wilderness??...
 [ ] Add a way to "multiply", i.e. "stretch", entire anims/actors.
     E.g. multiply all hex coords by 2, replace "-" with "- + -" in all collmaps, etc.
+[ ] maps/spidertown (i.e. entrance to trees), the aispiders can currently get in
+    the door from maps/demo!!!!
+    That's... odd. Kind of cool tho.
+    Can we make it clearer? Like, you are letting them in? Maybe they ask you
+    to let them in? Hmmmmmm.
+    OMG THEY CAN GET INTO TREES O_o
 
 
 Dec 31, 2024:
 -------------
 
-Actors are kind of interesting.
-The other day, I had thought that the way you're forced to use "play" to create
-a body was lame, but actually once mapvars get it involved, I think it might be
-necessary. E.g. actor/eyespider_tunnels.fus has:
-
-    state "create_body":
-        if:
-            expr: mapvar("eyespider_tunnels_ran_away_1")
-        then:
-            play: "data/maps/demo/recs/eyespider_tunnels_wait_2.fus"
-            goto immediate: "start2"
-
-        if:
-        then:
-            play: "data/maps/demo/recs/eyespider_tunnels_wait_1.fus"
-            goto immediate: "start"
-
-...but this is hellish to debug or modify.
-What do we really want, here?..
-
-
-[X] A way to set the filename used by F9/F10
-    [X] A test_app command: "lrf", "srf"
-    [X] A bin/demo option: -lrf, -srf
-
-
 Can coin beasts maybe... stack on top of one another?
 Become two-legged humanoids like that?
+
+[ ] Bring back flierspider! Press 'x' in midair to fly. There's a counter, after
+    which you go back to jumping, and can't fly again until landing.
+    [ ] Also add rockets?.. which do basically the same thing, except you aren't
+        a "rocketspider", rather when you land on a rocket, you fly on it until a
+        counter runs down?..
+        And rockets... fire continuously out of... cannons?..
+        [ ] And then we add rockets to an area, and getting to the end of that area
+            gets you flierspider.
+
+HERE'S THE PLAN:
+* Finish all egregrious *fixes*, e.g. recordings.
+    * maps/test/worldmap.fus is wacky, count this as a fix...
+* Make sure every area you can reach has a "purpose", e.g. a pick-up.
+* Make sure there's an ending -- any ending.
+    * But it should probably require all the pick-ups.
+      Or like, rescuing a spider from each area (which also have pick-ups,
+      but you don't need to collect them).
+* Make sure there's an explanation -- any explanation.
+    * E.g. in demo/start3.fus, have a message saying "bring the whatevers back here"
+      or whatever.
+* Release as a completeable demo!
 
 
