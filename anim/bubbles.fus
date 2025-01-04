@@ -1,0 +1,6 @@
+
+state "bubbles":
+    rgraph: "bubbles"
+
+    if:
+    then: remove

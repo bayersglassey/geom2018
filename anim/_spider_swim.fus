@@ -4,6 +4,10 @@
 # Expected vars:
 # NS (str), e.g. "spider_"
 
+
+vars:
+    nosave "bubble_toggle": F
+
 state "swim_spit":
     rgraph: $PREFIX NS "swim_spit"
     hitbox: collmap("stand")
@@ -21,6 +25,17 @@ state "swim_jump":
     rgraph: $PREFIX NS "swim_jump"
     hitbox: collmap("stand")
     unsafe
+
+    "spawn_bubbles"
+    if:
+    then:
+        if: expr: myvar("bubble_toggle")
+        then:
+            spawn: "anim/bubbles.fus" "bubbles" (0 0) 0 f
+            set myvar("bubble_toggle"): F
+        else:
+            set myvar("bubble_toggle"): T
+        continue
 
     "land_up"
     if:
@@ -112,6 +127,12 @@ state "swim":
     rgraph: $PREFIX NS "swim"
     hitbox: collmap("stand")
     unsafe
+
+    "always"
+    if:
+    then:
+        set myvar("bubble_toggle"): T
+        continue
 
     "spit"
     if:
