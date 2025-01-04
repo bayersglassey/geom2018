@@ -170,6 +170,7 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
     body->dead = BODY_NOT_DEAD;
     body->safe = false;
     body->remove = false;
+    body->just_spawned = false;
 
     body->stateset = NULL;
     if(stateset_filename != NULL){
@@ -871,7 +872,10 @@ static int _increment_frame_i(int frame_i) {
 int body_step(body_t *body, hexgame_t *game){
     int err;
 
-    if(body->state == NULL){
+    if(body->state == NULL)return 0;
+
+    if(body->just_spawned){
+        body->just_spawned = false;
         return 0;}
 
     hexmap_t *map = body->map;

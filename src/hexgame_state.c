@@ -609,6 +609,7 @@ int state_effect_apply(state_effect_t *effect,
             spawn->loc.pos, spawn->loc.rot, spawn->loc.turn);
         if(err)return err;
 
+        new_body->just_spawned = true; /* don't do "step" stuff this frame */
         new_body->cooldown += _get_rgraph_delay(new_body->state->rgraph);
 
         hexgame_state_context_t sub_context = *context;

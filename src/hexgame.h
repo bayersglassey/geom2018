@@ -154,6 +154,9 @@ typedef struct body {
     bool safe; /* lets player know it should update its safe_location */
     bool remove;
         /* marks body for removal (for use e.g. while iterating over bodies) */
+    bool just_spawned;
+        /* marks body as having been created this frame (so we shouldn't do the
+        usual things in "step") */
 
     bool confused; /* Reverses l/r keys */
 
