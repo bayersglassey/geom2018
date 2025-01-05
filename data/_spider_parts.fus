@@ -237,7 +237,7 @@ shapes:
     $PREFIX NS "crawl_head":
         $IF EYESPIDER:
             shapes:
-                : "_eye_look" (0 0 0 0) 0 f
+                : "_eye_look" (0 0 0 0) 11 f
         $IF !EYESPIDER:
             shapes:
                 : $PREFIX NS "_head_base" (0 0 0 0) 0 f
