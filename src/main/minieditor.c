@@ -25,9 +25,11 @@
 #define ACTION_DEFAULT          0
 #define ACTION_SCREENSHOT       1
 #define ACTION_DUMP             2
-#define ACTION_LIST             3
-#define ACTION_LIST_MAPPERS     4
-#define ACTION_LIST_PALMAPPERS  5
+#define ACTION_DUMP_MAPPER      3
+#define ACTION_DUMP_PALMAPPER   4
+#define ACTION_LIST             5
+#define ACTION_LIST_MAPPERS     6
+#define ACTION_LIST_PALMAPPERS  7
 
 
 typedef struct label_mapping_def {
@@ -108,6 +110,7 @@ static void print_help(FILE *file){
         "  --fonts FILENAME Load fonts (default: " DEFAULT_FONTS_FILENAME ")\n"
         "  --mapper    NAME Applies the given prismel mapper\n"
         "  --palmapper NAME Applies the given palette mapper\n"
+        "                   (NOTE: palmapper is applied after mapper)\n"
         "  --nocontrols     Don't show controls initially\n"
         "  --dump-bitmaps   Whether to dump rendergraph's bitmaps (see --dump)\n"
         "                     0: don't dump bitmaps\n"
@@ -120,10 +123,13 @@ static void print_help(FILE *file){
         "  screenshot       Save screenshot and exit (see -if)\n"
         "  dump             Dump rgraph's details to stdout and exit\n"
         "                   (see -n, --dump_bitmaps)\n"
+        "  dump_mapper      Dump mapper's details to stdout and exit\n"
+        "                   (see --mapper)\n"
+        "  dump_palmapper      Dump palmapper's details to stdout and exit\n"
+        "                   (see --palmapper)\n"
         "  list             Lists prismelrenderer's rgraphs and exit\n"
         "  list_mappers     Lists prismelrenderer's prismelmappers and exit\n"
         "  list_palmappers  Lists prismelrenderer's palettemappers and exit\n"
-        "                   (NOTE: palmapper is applied after mapper)\n"
     , MINIEDITOR_MAX_ZOOM, DEFAULT_DELAY_GOAL, DEFAULT_SCW, DEFAULT_SCH);
 }
 
@@ -267,6 +273,10 @@ static int parse_options(options_t *opts,
             opts->action = ACTION_SCREENSHOT;
         }else if(!strcmp(arg, "dump")){
             opts->action = ACTION_DUMP;
+        }else if(!strcmp(arg, "dump_mapper")){
+            opts->action = ACTION_DUMP_MAPPER;
+        }else if(!strcmp(arg, "dump_palmapper")){
+            opts->action = ACTION_DUMP_PALMAPPER;
         }else if(!strcmp(arg, "list")){
             opts->action = ACTION_LIST;
         }else if(!strcmp(arg, "list_mappers")){
@@ -555,6 +565,22 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
             int n_spaces = 0;
             int dump_bitmaps = 0;
             rendergraph_dump(rgraph, stdout, n_spaces, dump_bitmaps);
+        } break;
+        case ACTION_DUMP_MAPPER: {
+            if(!editor->mapper){
+                fprintf(stderr, "No mapper! Use --mapper to specify one\n");
+                return 2;
+            }
+            int n_spaces = 0;
+            prismelmapper_dump(editor->mapper, stderr, n_spaces);
+        } break;
+        case ACTION_DUMP_PALMAPPER: {
+            if(!editor->palmapper){
+                fprintf(stderr, "No palmapper! Use --palmapper to specify one\n");
+                return 2;
+            }
+            int n_spaces = 0;
+            palettemapper_dump(editor->palmapper, stderr, n_spaces);
         } break;
         case ACTION_LIST: {
             for(int i = 0; i < prend->rendergraphs_len; i++){

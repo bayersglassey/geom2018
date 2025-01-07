@@ -806,16 +806,7 @@ void prismelrenderer_dump(prismelrenderer_t *prend, FILE *f,
     fprintf(f, "  palmappers:\n");
     for(int i = 0; i < prend->palmappers_len; i++){
         palettemapper_t *palmapper = prend->palmappers[i];
-        fprintf(f, "    palmapper: %p\n", palmapper);
-        fprintf(f, "      name: %s\n", palmapper->name);
-        fprintf(f, "      table:\n");
-        for(int i = 0; i < 16; i++){
-            fprintf(f, "        ");
-            for(int j = 0; j < 16; j++){
-                fprintf(f, "%2X ", palmapper->table[i * 16 + j]);
-            }
-            fprintf(f, "\n");
-        }
+        palettemapper_dump(palmapper, f, 4);
     }
 }
 
@@ -1590,6 +1581,22 @@ void palettemapper_cleanup(palettemapper_t *palmapper){
         (void))
     ARRAY_FREE_PTR(palettemapper_pmapplication_t*, palmapper->pmapplications,
         (void))
+}
+
+void palettemapper_dump(palettemapper_t *palmapper, FILE *f, int n_spaces){
+    char spaces[MAX_SPACES];
+    get_spaces(spaces, MAX_SPACES, n_spaces);
+
+    fprintf(f, "%spalmapper: %p\n", spaces, palmapper);
+    fprintf(f, "%s  name: %s\n", spaces, palmapper->name);
+    fprintf(f, "%s  table:\n", spaces);
+    for(int i = 0; i < 16; i++){
+        fprintf(f, "%s    ", spaces);
+        for(int j = 0; j < 16; j++){
+            fprintf(f, "%2X ", palmapper->table[i * 16 + j]);
+        }
+        fprintf(f, "\n");
+    }
 }
 
 void palettemapper_apply_to_table(palettemapper_t *palmapper, Uint8 *table){
