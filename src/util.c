@@ -8,6 +8,12 @@
 
 #include "util.h"
 
+bool get_bool_env(const char *name){
+    /* Is indicated environment variable defined and nonempty? */
+    const char *value = getenv(name);
+    return value && strlen(value);
+}
+
 int int_min(int x, int y){
     return x < y? x: y;
 }

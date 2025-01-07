@@ -58,16 +58,12 @@ rendergraph_t *minieditor_get_rgraph(minieditor_t *editor){
     int err;
     if(editor->prend->rendergraphs_len == 0)return NULL;
     rendergraph_t *rgraph = editor->prend->rendergraphs[editor->cur_rgraph_i];
-    if(editor->mapper){
-        err = prismelmapper_apply_to_rendergraph(editor->mapper,
-            editor->prend, rgraph, NULL, editor->prend->space, NULL, &rgraph);
-        if(err)return NULL;
-    }
-    if(editor->palmapper){
-        err = palettemapper_apply_to_rendergraph(editor->palmapper,
-            editor->prend, rgraph, NULL, editor->prend->space, &rgraph);
-        if(err)return NULL;
-    }
+    err = prismelmapper_apply_to_rendergraph(editor->mapper,
+        editor->prend, rgraph, NULL, editor->prend->space, NULL, &rgraph);
+    if(err)return NULL;
+    err = palettemapper_apply_to_rendergraph(editor->palmapper,
+        editor->prend, rgraph, NULL, editor->prend->space, &rgraph);
+    if(err)return NULL;
     return rgraph;
 }
 

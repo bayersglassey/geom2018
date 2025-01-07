@@ -159,13 +159,13 @@ typedef struct rendergraph_frame {
 typedef struct rendergraph {
     const char *name;
     ARRAY_DECL(struct rendergraph_child*, children)
-        /* NOTE: may not be owned, see copy_of */
+        /* NOTE: may not be owned, see shared_copy_of */
 
     bool cache_bitmaps;
 
     int n_frames;
     struct rendergraph_frame *frames;
-        /* NOTE: may not be owned, see copy_of */
+        /* NOTE: may not be owned, see shared_copy_of */
     bool labels_calculated;
         /* Whether frame->labels has been populated for all frames */
 
@@ -185,7 +185,7 @@ typedef struct rendergraph {
     vecspace_t *space;
     const char *animation_type;
     struct palettemapper *palmapper;
-    struct rendergraph *copy_of;
+    struct rendergraph *shared_copy_of;
         /* If not NULL, this rendergraph is a copy of another one.
         In particular, it does *NOT* own its children or frames, so
         should *NOT* modify or free them.
@@ -213,8 +213,8 @@ void rendergraph_cleanup(rendergraph_t *rendergraph);
 int rendergraph_init(rendergraph_t *rendergraph, const char *name,
     struct prismelrenderer *prend, struct palettemapper *palmapper,
     const char *animation_type, int n_frames);
-int rendergraph_copy(rendergraph_t *rendergraph, const char *name,
-    rendergraph_t *copy_of);
+int rendergraph_copy_for_palmapping(rendergraph_t *rendergraph, const char *name,
+    rendergraph_t *shared_copy_of);
 void rendergraph_bitmap_dump(struct rendergraph_bitmap *bitmap, FILE *f,
     int i, int n_spaces, bool dump_surface);
 void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces,

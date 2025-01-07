@@ -1088,11 +1088,9 @@ int body_render_rgraph(body_t *body, rendergraph_t *rgraph,
     palettemapper_t *palmapper = body->palmapper;
     int frame_i = body->frame_i;
 
-    if(palmapper){
-        err = palettemapper_apply_to_rendergraph(palmapper,
-            prend, rgraph, NULL, map_space, &rgraph);
-        if(err)return err;
-    }
+    err = palettemapper_apply_to_rendergraph(palmapper,
+        prend, rgraph, NULL, map_space, &rgraph);
+    if(err)return err;
 
     vec_t rendered_pos;
     rot_t rendered_rot;

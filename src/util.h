@@ -44,6 +44,7 @@
 
 #define MAX_SPACES 256
 
+bool get_bool_env(const char *name);
 int int_min(int x, int y);
 int int_max(int x, int y);
 int linear_interpolation(int x0, int x1, int t, int t_max);

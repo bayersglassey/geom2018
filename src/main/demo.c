@@ -157,12 +157,6 @@ void print_help(FILE *file){
     );
 }
 
-bool get_bool_env(const char *name){
-    /* Is indicated environment variable defined and nonempty? */
-    const char *value = getenv(name);
-    return value && strcmp(value, "");
-}
-
 
 /* Global variables largely just to make them easier to use after
 calling emscripten_exit_with_live_runtime */

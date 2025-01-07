@@ -344,7 +344,7 @@ int palettemapper_init(palettemapper_t *palmapper, const char *name, int color);
 void palettemapper_cleanup(palettemapper_t *palmapper);
 void palettemapper_dump(palettemapper_t *mapper, FILE *f, int n_spaces);
 static Uint8 palettemapper_apply_to_color(palettemapper_t *palmapper, Uint8 c){
-    return palmapper->table[c];
+    return palmapper == NULL? c: palmapper->table[c];
 }
 void palettemapper_apply_to_table(palettemapper_t *palmapper, Uint8 *table);
 int palettemapper_apply_to_rendergraph(palettemapper_t *mapper,

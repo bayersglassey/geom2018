@@ -13,6 +13,7 @@
 #include "lexer_macros.h"
 #include "var_utils.h"
 #include "hexgame_vars_props.h"
+#include "util.h"
 
 
 const char *save_slot_filenames[SAVE_SLOTS] = {
@@ -43,7 +44,7 @@ bool get_save_slot_file_exists(int i){
 int delete_save_slot(int i){
     const char *filename = get_save_slot_filename(i);
     fprintf(stderr, "Removing save file: %s\n", filename);
-    if(getenv("NOSAVE")){
+    if(get_bool_env("NOSAVE")){
         fprintf(stderr, "SAVING DISABLED\n");
         return 0;
     }
@@ -64,7 +65,7 @@ static void _write_vars(vars_t *vars, FILE *file, int depth){
 int hexgame_save(hexgame_t *game, const char *filename){
     int err;
 
-    if(getenv("NOSAVE")){
+    if(get_bool_env("NOSAVE")){
         fprintf(stderr, "SAVING DISABLED\n");
         return 0;
     }

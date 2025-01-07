@@ -44,7 +44,7 @@ static void rendergraph_frame_cleanup(rendergraph_frame_t *frame){
 }
 
 void rendergraph_cleanup(rendergraph_t *rendergraph){
-    if(!rendergraph->copy_of){
+    if(!rendergraph->shared_copy_of){
         ARRAY_FREE_PTR(rendergraph_child_t*, rendergraph->children,
             rendergraph_child_cleanup)
 
@@ -88,7 +88,7 @@ static int _rendergraph_init(rendergraph_t *rendergraph, const char *name,
     rendergraph->space = space;
     rendergraph->animation_type = animation_type;
     rendergraph->palmapper = palmapper;
-    rendergraph->copy_of = NULL;
+    rendergraph->shared_copy_of = NULL;
     return 0;
 }
 
@@ -116,23 +116,53 @@ int rendergraph_init(rendergraph_t *rendergraph, const char *name,
     return 0;
 }
 
-int rendergraph_copy(rendergraph_t *rendergraph, const char *name,
-    rendergraph_t *copy_of
+int rendergraph_copy_for_palmapping(rendergraph_t *rendergraph, const char *name,
+    rendergraph_t *shared_copy_of
 ){
     int err;
 
-    err = _rendergraph_init(rendergraph, name,
-        copy_of->prend, copy_of->palmapper,
-        copy_of->animation_type, copy_of->n_frames,
-        copy_of->cache_bitmaps);
+    fprintf(stderr, "Copying: %s -> %s\n", shared_copy_of->name, name);
+
+    err = rendergraph_calculate_labels(shared_copy_of);
     if(err)return err;
 
-    rendergraph->frames = copy_of->frames;
-    rendergraph->labels_calculated = copy_of->labels_calculated;
+    /* Check whether the copy can share some data with the original */
+    bool can_share = true;
+    for(int i = 0; i < shared_copy_of->n_frames; i++){
+        rendergraph_frame_t *frame = &shared_copy_of->frames[i];
+        for(int j = 0; j < frame->labels_len; j++){
+            rendergraph_label_t *label = frame->labels[j];
+            if(label->palmapper != NULL){
+                /* Can't share labels which have palmappers, since they get
+                modified by the copy's palmapper, if any */
+                can_share = false;
+                break;
+            }
+        }
+        if(!can_share)break;
+    }
 
-    ARRAY_ASSIGN(rendergraph->children, copy_of->children)
+    if(can_share){
+        err = _rendergraph_init(rendergraph, name,
+            shared_copy_of->prend, shared_copy_of->palmapper,
+            shared_copy_of->animation_type, shared_copy_of->n_frames,
+            shared_copy_of->cache_bitmaps);
+        if(err)return err;
 
-    rendergraph->copy_of = copy_of;
+        rendergraph->frames = shared_copy_of->frames;
+        rendergraph->labels_calculated = shared_copy_of->labels_calculated;
+
+        ARRAY_ASSIGN(rendergraph->children, shared_copy_of->children)
+
+        rendergraph->shared_copy_of = shared_copy_of; /* So we know about shared data */
+    }else{
+        fprintf(stderr, "CAN'T SHARE: %s\n", rendergraph->name);
+        err = rendergraph_init(rendergraph, name,
+            shared_copy_of->prend, shared_copy_of->palmapper,
+            shared_copy_of->animation_type, shared_copy_of->n_frames);
+        if(err)return err;
+    }
+
     return 0;
 }
 
@@ -409,17 +439,11 @@ static int _rendergraph_render_labels(rendergraph_frame_t *frame,
         switch(child->type){
             case RENDERGRAPH_CHILD_TYPE_RGRAPH: {
                 rendergraph_t *child_rgraph = child->u.rgraph.rendergraph;
-                palettemapper_t *child_palmapper = palmapper;
-                if(child->u.rgraph.palmapper != NULL){
-                    if(palmapper != NULL){
-                        err = palettemapper_apply_to_palettemapper(palmapper,
-                            rgraph->prend, child->u.rgraph.palmapper, NULL,
-                            &child_palmapper);
-                        if(err)return err;
-                    }else{
-                        child_palmapper = child->u.rgraph.palmapper;
-                    }
-                }
+                palettemapper_t *child_palmapper = child->u.rgraph.palmapper;
+                err = palettemapper_apply_to_palettemapper(palmapper,
+                    rgraph->prend, child_palmapper, NULL,
+                    &child_palmapper);
+                if(err)return err;
                 err = _rendergraph_render_labels(frame,
                     child_rgraph, &trf2, frame_i2, child_palmapper);
                 if(err)return err;
@@ -453,11 +477,13 @@ int rendergraph_calculate_labels(rendergraph_t *rgraph){
     /* Already populated labels, early exit */
     if(rgraph->labels_calculated)return 0;
 
-    if(rgraph->copy_of){
+    fprintf(stderr, "Calculate labels: %s\n", rgraph->name);
+
+    if(rgraph->shared_copy_of){
         /* We don't own our frames, because we're just a copy!..
         So, make sure the original rgraph we're a copy of has its
         labels calculated... */
-        err = rendergraph_calculate_labels(rgraph->copy_of);
+        err = rendergraph_calculate_labels(rgraph->shared_copy_of);
         if(err)return err;
     }else{
         /* Calculate our labels */
@@ -678,9 +704,7 @@ int rendergraph_render_to_surface(rendergraph_t *rendergraph,
                 SDL_LockSurface(surface);
 
                 Uint8 c = child->u.prismel.color;
-                if(rendergraph->palmapper){
-                    c = palettemapper_apply_to_color(rendergraph->palmapper, c);
-                }
+                c = palettemapper_apply_to_color(rendergraph->palmapper, c);
                 prismel_t *prismel = child->u.prismel.prismel;
                 prismel_image_t *image = &prismel->images[details.bitmap_i2];
                 for(int i = 0; i < image->lines_len; i++){
@@ -745,12 +769,9 @@ int rendergraph_render(
             zoom == 3? prismelrenderer_get_mapper(prend, "triple"):
             zoom == 4? prismelrenderer_get_mapper(prend, "quadruple"):
             NULL;
-        if(mapper == NULL)mapper = zoom_mapper;
-        else if(zoom_mapper != NULL){
-            err = prismelmapper_apply_to_mapper(zoom_mapper, prend, mapper,
-                NULL, rgraph->space, &mapper);
-            if(err)return err;
-        }
+        err = prismelmapper_apply_to_mapper(zoom_mapper, prend, mapper,
+            NULL, rgraph->space, &mapper);
+        if(err)return err;
     }
 
     vec_t mapped_pos;
@@ -823,7 +844,7 @@ static int _rendergraph_render_with_labels(
 ){
     int err;
 
-    bool debug = getenv("DEBUG_RGRAPHS");
+    bool debug = get_bool_env("DEBUG_RGRAPHS");
 
     vecspace_t *rgraph_space = rgraph->space; /* &vec4 */
 
@@ -879,18 +900,16 @@ static int _rendergraph_render_with_labels(
                 label_rgraph->n_frames, \
                 (_FRAME_I)); \
             palettemapper_t *palmapper = label->palmapper; \
-            if(label_rgraph->palmapper){ \
-                err = palettemapper_apply_to_palettemapper(label_rgraph->palmapper, \
-                    prend, palmapper, NULL, &palmapper); \
-                if(err)return err;} \
-            if(palmapper){ \
-            if(debug){ \
+            err = palettemapper_apply_to_palettemapper(label_rgraph->palmapper, \
+                prend, palmapper, NULL, &palmapper); \
+            if(err)return err; \
+            if(debug && palmapper){ \
                 for(int i = 0; i < depth; i++)fputs("  ", stderr); \
                     fprintf(stderr, "  ...using palmapper: %s\n", palmapper->name);} \
-                err = palettemapper_apply_to_rendergraph(palmapper, \
-                    prend, label_rgraph, NULL, rgraph_space, \
-                    &label_rgraph); \
-                if(err)return err;} \
+            err = palettemapper_apply_to_rendergraph(palmapper, \
+                prend, label_rgraph, NULL, rgraph_space, \
+                &label_rgraph); \
+            if(err)return err; \
             /* Recurse: render label's rgraph, and its labels */ \
             err = _rendergraph_render_with_labels(label_rgraph, surface, \
                 pal, prend, x0, y0, zoom, \

@@ -1272,6 +1272,16 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
 ){
     int err;
 
+    /* NULL mappers are the identity */
+    if(mapper == NULL){
+        *rgraph_ptr = mapped_rgraph;
+        return 0;
+    }
+    if(mapped_rgraph == NULL){
+        *rgraph_ptr = NULL;
+        return 0;
+    }
+
     rendergraph_t *resulting_rgraph;
 
     /* Check whether this mapper has already been applied to this
@@ -1392,11 +1402,9 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
                 /* Add a child to resulting_rgraph */
 
                 rendergraph_t *default_rgraph = child->u.label.default_rgraph;
-                if(default_rgraph){
-                    err = prismelmapper_apply_to_rendergraph(mapper, prend,
-                        default_rgraph, NULL, space, table, &default_rgraph);
-                    if(err)return err;
-                }
+                err = prismelmapper_apply_to_rendergraph(mapper, prend,
+                    default_rgraph, NULL, space, table, &default_rgraph);
+                if(err)return err;
 
                 rendergraph_child_t *new_child;
                 err = rendergraph_push_child(resulting_rgraph,
@@ -1445,6 +1453,16 @@ int prismelmapper_apply_to_mapper(prismelmapper_t *mapper,
     Question: do mapper, mapped_mapper, and resulting_mapper all
     need to share the same vecspace?.. */
     int err;
+
+    /* NULL mappers are the identity */
+    if(mapper == NULL){
+        *mapper_ptr = mapped_mapper;
+        return 0;
+    }
+    if(mapped_mapper == NULL){
+        *mapper_ptr = mapper;
+        return 0;
+    }
 
     prismelmapper_t *resulting_mapper;
 
@@ -1600,6 +1618,7 @@ void palettemapper_dump(palettemapper_t *palmapper, FILE *f, int n_spaces){
 }
 
 void palettemapper_apply_to_table(palettemapper_t *palmapper, Uint8 *table){
+    if(palmapper == NULL)return; /* NULL mappers are the identity */
     for(int i = 0; i < 256; i++){
         table[i] = palettemapper_apply_to_color(palmapper, table[i]);
     }
@@ -1612,6 +1631,16 @@ int palettemapper_apply_to_rendergraph(palettemapper_t *mapper,
     rendergraph_t **rgraph_ptr
 ){
     int err;
+
+    /* NULL mappers are the identity */
+    if(mapper == NULL){
+        *rgraph_ptr = mapped_rgraph;
+        return 0;
+    }
+    if(mapped_rgraph == NULL){
+        *rgraph_ptr = NULL;
+        return 0;
+    }
 
     rendergraph_t *resulting_rgraph;
 
@@ -1641,17 +1670,15 @@ int palettemapper_apply_to_rendergraph(palettemapper_t *mapper,
     /* resulting_rgraph starts off as a copy of mapped_rgraph */
     resulting_rgraph = calloc(1, sizeof(rendergraph_t));
     if(resulting_rgraph == NULL)return 1;
-    err = rendergraph_copy(resulting_rgraph, name, mapped_rgraph);
+    err = rendergraph_copy_for_palmapping(resulting_rgraph, name, mapped_rgraph);
     if(err)return err;
 
     /* If we're applying a palmapper to an rgraph which already has one, we
     need to apply our palmapper to the existing one */
     palettemapper_t *resulting_palmapper = mapper;
-    if(mapped_rgraph->palmapper){
-        err = palettemapper_apply_to_palettemapper(mapper, prend,
-            mapped_rgraph->palmapper, NULL, &resulting_palmapper);
-        if(err)return err;
-    }
+    err = palettemapper_apply_to_palettemapper(mapper, prend,
+        mapped_rgraph->palmapper, NULL, &resulting_palmapper);
+    if(err)return err;
 
     /* Set resulting_rgraph's palmapper (this was the whole point) */
     resulting_rgraph->palmapper = resulting_palmapper;
@@ -1678,14 +1705,17 @@ int palettemapper_apply_to_palettemapper(palettemapper_t *palmapper,
 ){
     int err;
 
-    palettemapper_t *resulting_palmapper;
-
-    /* A palmapper of NULL is interpreted as the identity palmapper, so
-    applying another palmapper to it results in that palmapper. */
+    /* NULL mappers are the identity */
+    if(palmapper == NULL){
+        *palmapper_ptr = mapped_palmapper;
+        return 0;
+    }
     if(mapped_palmapper == NULL){
         *palmapper_ptr = palmapper;
         return 0;
     }
+
+    palettemapper_t *resulting_palmapper;
 
     /* Check whether this palmapper has already been applied to this
     mapped_palmapper. If so, return the cached resulting_palmapper. */
