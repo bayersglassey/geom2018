@@ -925,11 +925,11 @@ int fus_lexer_get_int_fancy(fus_lexer_t *lexer, int *i_ptr){
                 if(err)goto err;
                 err = fus_lexer_get(lexer, "(");
                 if(err)goto err;
-                err = fus_lexer_get_int(lexer, &lo);
+                err = fus_lexer_get_int_fancy(lexer, &lo);
                 if(err)goto err;
                 err = fus_lexer_get(lexer, ",");
                 if(err)goto err;
-                err = fus_lexer_get_int(lexer, &hi);
+                err = fus_lexer_get_int_fancy(lexer, &hi);
                 if(err)goto err;
                 err = fus_lexer_get(lexer, ")");
                 if(err)goto err;
@@ -987,7 +987,7 @@ int fus_lexer_get_int_range(fus_lexer_t *lexer, int min_i, int max_len,
         if(err)return err;
         len = max_len;
     }else{
-        err = fus_lexer_get_int(lexer, &i);
+        err = fus_lexer_get_int_fancy(lexer, &i);
         if(err)return err;
         if(i < min_i || i > max_i){
             fus_lexer_err_info(lexer);
@@ -999,7 +999,7 @@ int fus_lexer_get_int_range(fus_lexer_t *lexer, int min_i, int max_len,
         if(fus_lexer_got(lexer, ",")){
             err = fus_lexer_next(lexer);
             if(err)return err;
-            err = fus_lexer_get_int(lexer, &len);
+            err = fus_lexer_get_int_fancy(lexer, &len);
             if(err)return err;
             if(len < 0 || len > max_len){
                 fus_lexer_err_info(lexer);
@@ -1024,7 +1024,7 @@ int fus_lexer_get_attr_int(fus_lexer_t *lexer, const char *attr, int *i,
         if(err)return err;
         err = fus_lexer_get(lexer, "(");
         if(err)return err;
-        err = fus_lexer_get_int(lexer, i);
+        err = fus_lexer_get_int_fancy(lexer, i);
         if(err)return err;
         err = fus_lexer_get(lexer, ")");
         if(err)return err;
