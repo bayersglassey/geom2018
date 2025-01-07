@@ -159,11 +159,13 @@ typedef struct rendergraph_frame {
 typedef struct rendergraph {
     const char *name;
     ARRAY_DECL(struct rendergraph_child*, children)
+        /* NOTE: may not be owned, see copy_of */
 
     bool cache_bitmaps;
 
     int n_frames;
     struct rendergraph_frame *frames;
+        /* NOTE: may not be owned, see copy_of */
     bool labels_calculated;
         /* Whether frame->labels has been populated for all frames */
 

@@ -442,24 +442,32 @@ static int _rendergraph_render_labels(rendergraph_frame_t *frame,
     return 0;
 }
 int rendergraph_calculate_labels(rendergraph_t *rgraph){
-    /* Populates rgraph->labels, adding one for every descendant
-    (rendergraph_child_t) of rgraph for which type is
+    /* Populates rgraph->frames[i].labels, adding one for every
+    descendant (rendergraph_child_t) of rgraph for which type is
     RENDERGRAPH_CHILD_TYPE_LABEL.
     This is only ever done once per rgraph;
     rgraph->labels_calculated is used to mark whether it has been
     done already. */
     int err;
 
-    /* Already populated rgraph->labels, early exit */
+    /* Already populated labels, early exit */
     if(rgraph->labels_calculated)return 0;
 
-    /* Calculate our labels */
-    trf_t trf = {0};
-    for(int frame_i = 0; frame_i < rgraph->n_frames; frame_i++){
-        rendergraph_frame_t *frame = &rgraph->frames[frame_i];
-        err = _rendergraph_render_labels(frame, rgraph, &trf, frame_i,
-            rgraph->palmapper);
+    if(rgraph->copy_of){
+        /* We don't own our frames, because we're just a copy!..
+        So, make sure the original rgraph we're a copy of has its
+        labels calculated... */
+        err = rendergraph_calculate_labels(rgraph->copy_of);
         if(err)return err;
+    }else{
+        /* Calculate our labels */
+        trf_t trf = {0};
+        for(int frame_i = 0; frame_i < rgraph->n_frames; frame_i++){
+            rendergraph_frame_t *frame = &rgraph->frames[frame_i];
+            err = _rendergraph_render_labels(frame, rgraph, &trf, frame_i,
+                rgraph->palmapper);
+            if(err)return err;
+        }
     }
 
     /* Our labels have now been calculated */
@@ -560,11 +568,6 @@ static int rendergraph_render_bitmap(rendergraph_t *rendergraph,
     err = rendergraph_calculate_bitmap_bounds(rendergraph,
         rot, flip, frame_i);
     if(err)return err;
-
-#ifdef GEOM_DEBUG_RENDERING_RGRAPH
-    printf("Rendering rgraph: \"%s\" rot=%i flip=%c frame_i=%i\n",
-        rendergraph->name, rot, flip? 'y': 'n', frame_i);
-#endif
 
     /* Get rid of old bitmap, create new one */
     if(bitmap->surface != NULL){
@@ -820,12 +823,18 @@ static int _rendergraph_render_with_labels(
 ){
     int err;
 
-    bool debug = false;
+    bool debug = getenv("DEBUG_RGRAPHS");
 
     vecspace_t *rgraph_space = rgraph->space; /* &vec4 */
 
-    if(debug)fprintf(stderr, "Rendering: %s\n", rgraph->name);
-    if(debug && mapper)fprintf(stderr, " ...with mapper: %s\n", mapper->name);
+    if(debug){
+        for(int i = 0; i < depth; i++)fputs("  ", stderr);
+        fprintf(stderr, "Rendering: %s\n", rgraph->name);
+        if(mapper){
+            for(int i = 0; i < depth; i++)fputs("  ", stderr);
+            fprintf(stderr, " ...with mapper: %s\n", mapper->name);
+        }
+    }
 
     /* Render rgraph */
     err = rendergraph_render(rgraph, surface,
@@ -835,7 +844,7 @@ static int _rendergraph_render_with_labels(
         frame_i, mapper);
     if(err)return err;
 
-    /* Make sure rgraph->labels is populated */
+    /* Make sure rgraph's labels are populated */
     err = rendergraph_calculate_labels(rgraph);
     if(err)return err;
 
@@ -853,11 +862,16 @@ static int _rendergraph_render_with_labels(
     for(int i = 0; i < frame->labels_len; i++){
         rendergraph_label_t *label = frame->labels[i];
 
-        if(debug)fprintf(stderr, " ...rendering label %i: %s\n", i, label->name);
+        if(debug){
+            for(int i = 0; i < depth; i++)fputs("  ", stderr);
+            fprintf(stderr, " ...rendering label %i: %s\n", i, label->name);
+        }
 
         #define _RENDER_LABEL_RGRAPH(_RGRAPH, _FRAME_I) { \
             rendergraph_t *label_rgraph = (_RGRAPH); \
-            if(debug)fprintf(stderr, "  ...using rgraph: %s\n", label_rgraph->name); \
+            if(debug){ \
+                for(int i = 0; i < depth; i++)fputs("  ", stderr); \
+                fprintf(stderr, "  ...using rgraph: %s\n", label_rgraph->name);} \
             trf_t label_trf = label->trf; \
             trf_apply(rgraph_space, &label_trf, &trf); \
             int label_frame_i = get_animated_frame_i( \
@@ -865,11 +879,14 @@ static int _rendergraph_render_with_labels(
                 label_rgraph->n_frames, \
                 (_FRAME_I)); \
             palettemapper_t *palmapper = label->palmapper; \
-            if(rgraph->palmapper){ \
-                err = palettemapper_apply_to_palettemapper(rgraph->palmapper, \
+            if(label_rgraph->palmapper){ \
+                err = palettemapper_apply_to_palettemapper(label_rgraph->palmapper, \
                     prend, palmapper, NULL, &palmapper); \
                 if(err)return err;} \
             if(palmapper){ \
+            if(debug){ \
+                for(int i = 0; i < depth; i++)fputs("  ", stderr); \
+                    fprintf(stderr, "  ...using palmapper: %s\n", palmapper->name);} \
                 err = palettemapper_apply_to_rendergraph(palmapper, \
                     prend, label_rgraph, NULL, rgraph_space, \
                     &label_rgraph); \
