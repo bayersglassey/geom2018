@@ -102,7 +102,6 @@ typedef struct rendergraph_child {
             int frame_i;
             bool frame_i_additive;
             bool frame_i_reversed;
-            int palmapper_n_applications;
 
             /* Weakrefs */
             struct rendergraph *rendergraph;
@@ -144,6 +143,7 @@ typedef struct rendergraph_label {
 
     /* Weakrefs: */
     struct rendergraph *default_rgraph;
+    struct palettemapper *palmapper;
     int default_frame_i; /* frame offset when rendering default_rgraph */
 } rendergraph_label_t;
 

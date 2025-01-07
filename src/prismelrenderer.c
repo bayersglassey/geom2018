@@ -1673,6 +1673,13 @@ int palettemapper_apply_to_palettemapper(palettemapper_t *palmapper,
 
     palettemapper_t *resulting_palmapper;
 
+    /* A palmapper of NULL is interpreted as the identity palmapper, so
+    applying another palmapper to it results in that palmapper. */
+    if(mapped_palmapper == NULL){
+        *palmapper_ptr = palmapper;
+        return 0;
+    }
+
     /* Check whether this palmapper has already been applied to this
     mapped_palmapper. If so, return the cached resulting_palmapper. */
     resulting_palmapper = palettemapper_get_pmapplication(

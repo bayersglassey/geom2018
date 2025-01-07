@@ -250,6 +250,8 @@ void rendergraph_dump(rendergraph_t *rendergraph, FILE *f, int n_spaces,
                 rendergraph_label_t *label = frame->labels[j];
                 fprintf(f, "%s      %8s ", spaces, label->name);
                 trf_fprintf(f, rendergraph->space->dims, &label->trf);
+                if(label->palmapper != NULL){
+                    fprintf(f, " %s", label->palmapper->name);}
                 rendergraph_t *default_rgraph = label->default_rgraph;
                 fprintf(f, " (default: %s %i)",
                     default_rgraph? default_rgraph->name: "<NULL>",
@@ -275,7 +277,6 @@ int rendergraph_push_child(rendergraph_t *rendergraph,
             child->u.rgraph.frame_i = 0;
             child->u.rgraph.frame_i_additive = true;
             child->u.rgraph.frame_i_reversed = false;
-            child->u.rgraph.palmapper_n_applications = 1;
 
             child->u.rgraph.rendergraph = NULL;
             child->u.rgraph.palmapper = NULL;
@@ -384,8 +385,9 @@ static int rendergraph_child_details(
 }
 
 static int _rendergraph_render_labels(rendergraph_frame_t *frame,
-    rendergraph_t *parent_rgraph, rendergraph_t *rgraph,
-    trf_t *trf, int frame_i
+    rendergraph_t *rgraph,
+    trf_t *trf, int frame_i,
+    palettemapper_t *palmapper
 ){
     /* This function is part of rendergraph_calculate_labels.
     Recursively populates frame->labels, adding one for every descendant
@@ -407,27 +409,30 @@ static int _rendergraph_render_labels(rendergraph_frame_t *frame,
         switch(child->type){
             case RENDERGRAPH_CHILD_TYPE_RGRAPH: {
                 rendergraph_t *child_rgraph = child->u.rgraph.rendergraph;
+                palettemapper_t *child_palmapper = palmapper;
+                if(child->u.rgraph.palmapper != NULL){
+                    if(palmapper != NULL){
+                        err = palettemapper_apply_to_palettemapper(palmapper,
+                            rgraph->prend, child->u.rgraph.palmapper, NULL,
+                            &child_palmapper);
+                        if(err)return err;
+                    }else{
+                        child_palmapper = child->u.rgraph.palmapper;
+                    }
+                }
                 err = _rendergraph_render_labels(frame,
-                    parent_rgraph, child_rgraph,
-                    &trf2, frame_i2);
+                    child_rgraph, &trf2, frame_i2, child_palmapper);
                 if(err)return err;
                 break;
             }
             case RENDERGRAPH_CHILD_TYPE_LABEL: {
-                rendergraph_t *default_rgraph = child->u.label.default_rgraph;
-                if(default_rgraph && parent_rgraph->palmapper){
-                    err = palettemapper_apply_to_rendergraph(parent_rgraph->palmapper,
-                        parent_rgraph->prend, default_rgraph, NULL, parent_rgraph->space,
-                        &default_rgraph);
-                    if(err)return err;
-                }
-
                 ARRAY_PUSH_NEW(rendergraph_label_t*, frame->labels,
                     label)
                 label->name = child->u.label.name;
                 label->trf = trf2;
-                label->default_rgraph = default_rgraph;
+                label->default_rgraph = child->u.label.default_rgraph;
                 label->default_frame_i = child->u.label.default_frame_i;
+                label->palmapper = palmapper;
                 break;
             }
             default: break;
@@ -452,7 +457,8 @@ int rendergraph_calculate_labels(rendergraph_t *rgraph){
     trf_t trf = {0};
     for(int frame_i = 0; frame_i < rgraph->n_frames; frame_i++){
         rendergraph_frame_t *frame = &rgraph->frames[frame_i];
-        err = _rendergraph_render_labels(frame, rgraph, rgraph, &trf, frame_i);
+        err = _rendergraph_render_labels(frame, rgraph, &trf, frame_i,
+            rgraph->palmapper);
         if(err)return err;
     }
 
@@ -642,16 +648,11 @@ int rendergraph_render_to_surface(rendergraph_t *rendergraph,
                 /* Blit sub-bitmap's surface onto ours */
                 SDL_Surface *surface2 = bitmap2->surface;
                 palettemapper_t *palmapper = child->u.rgraph.palmapper;
-                int n_applications =
-                    child->u.rgraph.palmapper_n_applications;
                 Uint8 *table = NULL;
                 Uint8 _table[256];
-                if(palmapper && n_applications){
+                if(palmapper){
                     for(int i = 0; i < 256; i++)_table[i] = palmapper->table[i];
                     table = _table;
-                    for(int i = 1; i < n_applications; i++){
-                        palettemapper_apply_to_table(palmapper, table);
-                    }
                 }
                 if(rendergraph->palmapper){
                     if(table){
@@ -863,6 +864,16 @@ static int _rendergraph_render_with_labels(
                 label_rgraph->animation_type, \
                 label_rgraph->n_frames, \
                 (_FRAME_I)); \
+            palettemapper_t *palmapper = label->palmapper; \
+            if(rgraph->palmapper){ \
+                err = palettemapper_apply_to_palettemapper(rgraph->palmapper, \
+                    prend, palmapper, NULL, &palmapper); \
+                if(err)return err;} \
+            if(palmapper){ \
+                err = palettemapper_apply_to_rendergraph(palmapper, \
+                    prend, label_rgraph, NULL, rgraph_space, \
+                    &label_rgraph); \
+                if(err)return err;} \
             /* Recurse: render label's rgraph, and its labels */ \
             err = _rendergraph_render_with_labels(label_rgraph, surface, \
                 pal, prend, x0, y0, zoom, \
@@ -893,14 +904,6 @@ static int _rendergraph_render_with_labels(
             found++;
             rendergraph_t *mapping_rgraph = mapping->rgraph;
 
-            /* Apply rgraph's palmapper, if any, to the rgraph we found. */
-            if(rgraph->palmapper){
-                err = palettemapper_apply_to_rendergraph(rgraph->palmapper,
-                    prend, mapping_rgraph, NULL, rgraph_space,
-                    &mapping_rgraph);
-                if(err)return err;
-            }
-
             _RENDER_LABEL_RGRAPH(mapping_rgraph, mapping->frame_i)
         }
 
@@ -910,9 +913,6 @@ static int _rendergraph_render_with_labels(
 
         /* If we didn't find any rgraphs for this label, use its default rgraph */
         if(label->default_rgraph){
-            /* NOTE: rgraph->palmapper (if any) should already have been applied
-            to label->default_rgraph for all labels of all frames of rgraph, so
-            no need to apply it here. */
             _RENDER_LABEL_RGRAPH(label->default_rgraph, label->default_frame_i)
         }
     }
