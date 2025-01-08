@@ -327,7 +327,8 @@ int geomfont_blitter_putc(geomfont_blitter_t *blitter, char c){
             blitter->trf.rot,
             blitter->trf.flip,
             frame_i,
-            blitter->u.render.mapper
+            blitter->u.render.mapper,
+            NULL /* palmapper */
         );
         if(err){
             fprintf(stderr, "%s: Error rendering c_rgraph\n", __func__);

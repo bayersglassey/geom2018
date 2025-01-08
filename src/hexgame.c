@@ -230,7 +230,7 @@ static int _render_rgraph(rendergraph_t *rgraph,
         rgraph,
         surface, pal, prend,
         x0, y0, zoom,
-        pos, rot, flip, frame_i, mapper);
+        pos, rot, flip, frame_i, mapper, NULL /* palmapper */);
 }
 
 static int camera_render_map(camera_t *camera,

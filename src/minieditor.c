@@ -139,7 +139,8 @@ int minieditor_render(minieditor_t *editor, int *line_y_ptr){
         int y0 = editor->sch / 2 + editor->y0;
         err = rendergraph_render_with_labels(rgraph, editor->surface,
             editor->sdl_palette, editor->prend, x0, y0, editor->zoom,
-            (vec_t){0}, editor->rot, editor->flip, editor->frame_i, NULL,
+            (vec_t){0}, editor->rot, editor->flip, editor->frame_i,
+            NULL, NULL, /* mapper and palmapper */
             editor->label_mappings_len, editor->label_mappings);
         if(err)return err;
     }

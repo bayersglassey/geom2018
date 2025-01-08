@@ -1088,10 +1088,6 @@ int body_render_rgraph(body_t *body, rendergraph_t *rgraph,
     palettemapper_t *palmapper = body->palmapper;
     int frame_i = body->frame_i;
 
-    err = palettemapper_apply_to_rendergraph(palmapper,
-        prend, rgraph, NULL, map_space, &rgraph);
-    if(err)return err;
-
     vec_t rendered_pos;
     rot_t rendered_rot;
     flip_t rendered_flip;
@@ -1109,7 +1105,7 @@ int body_render_rgraph(body_t *body, rendergraph_t *rgraph,
             pal, prend,
             x0, y0, zoom,
             rendered_pos, rendered_rot, rendered_flip,
-            frame_i, mapper,
+            frame_i, mapper, palmapper,
             body->label_mappings_len, body->label_mappings);
     }else{
         /* Render just the rgraph */
@@ -1117,6 +1113,6 @@ int body_render_rgraph(body_t *body, rendergraph_t *rgraph,
             pal, prend,
             x0, y0, zoom,
             rendered_pos, rendered_rot, rendered_flip,
-            frame_i, mapper);
+            frame_i, mapper, palmapper);
     }
 }

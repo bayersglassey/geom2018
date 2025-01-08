@@ -19,6 +19,12 @@ void label_mapping_cleanup(label_mapping_t *mapping){
     /* Nothing to do... */
 }
 
+static bool debug_rgraphs(){
+    static int debug = -1;
+    if(debug < 0)debug = get_bool_env("DEBUG_RGRAPHS");
+    return debug;
+}
+
 
 /***************
  * RENDERGRAPH *
@@ -121,7 +127,8 @@ int rendergraph_copy_for_palmapping(rendergraph_t *rendergraph, const char *name
 ){
     int err;
 
-    fprintf(stderr, "Copying: %s -> %s\n", shared_copy_of->name, name);
+    bool debug = debug_rgraphs();
+    if(debug)fprintf(stderr, "Copying: %s -> %s\n", shared_copy_of->name, name);
 
     err = rendergraph_calculate_labels(shared_copy_of);
     if(err)return err;
@@ -156,7 +163,6 @@ int rendergraph_copy_for_palmapping(rendergraph_t *rendergraph, const char *name
 
         rendergraph->shared_copy_of = shared_copy_of; /* So we know about shared data */
     }else{
-        fprintf(stderr, "CAN'T SHARE: %s\n", rendergraph->name);
         err = rendergraph_init(rendergraph, name,
             shared_copy_of->prend, shared_copy_of->palmapper,
             shared_copy_of->animation_type, shared_copy_of->n_frames);
@@ -440,6 +446,16 @@ static int _rendergraph_render_labels(rendergraph_frame_t *frame,
             case RENDERGRAPH_CHILD_TYPE_RGRAPH: {
                 rendergraph_t *child_rgraph = child->u.rgraph.rendergraph;
                 palettemapper_t *child_palmapper = child->u.rgraph.palmapper;
+                /* NOTE: it's kind of weird that child->u.rgraph has both a
+                rendergraph and a palmapper.
+                We could have just stored the rendergraph resulting from
+                applying the palmapper!.. presumably we store both to save
+                memory, like we don't need to created a palmapped copy of
+                the rendergraph.
+                Anyway, it means that in this case, where we're trying to
+                extract the labels from all descendents, we need to combine
+                child->u.rgraph's palmapper with its rendergraph's
+                palmapper!.. */
                 err = palettemapper_apply_to_palettemapper(palmapper,
                     rgraph->prend, child_palmapper, NULL,
                     &child_palmapper);
@@ -474,15 +490,18 @@ int rendergraph_calculate_labels(rendergraph_t *rgraph){
     done already. */
     int err;
 
+    bool debug = debug_rgraphs();
+
     /* Already populated labels, early exit */
     if(rgraph->labels_calculated)return 0;
 
-    fprintf(stderr, "Calculate labels: %s\n", rgraph->name);
+    if(debug)fprintf(stderr, "Calculate labels: %s\n", rgraph->name);
 
     if(rgraph->shared_copy_of){
         /* We don't own our frames, because we're just a copy!..
+        And labels live on frames.
         So, make sure the original rgraph we're a copy of has its
-        labels calculated... */
+        labels calculated, since they're ours too... */
         err = rendergraph_calculate_labels(rgraph->shared_copy_of);
         if(err)return err;
     }else{
@@ -752,8 +771,18 @@ int rendergraph_render(
     SDL_Palette *pal, prismelrenderer_t *prend,
     int x0, int y0, int zoom,
     vec_t pos, rot_t rot, flip_t flip, int frame_i,
-    prismelmapper_t *mapper
+    prismelmapper_t *mapper, palettemapper_t *palmapper
 ){
+    /*
+
+        A rendergraph is initially parsed, populating its children.
+        The RGRAPH and PRISMEL children are rendered and cached in
+        rgraph->bitmaps.
+        Those are what are handled by this function.
+        The LABEL children are handled separately, see
+        rendergraph_render_with_labels.
+
+    */
     int err;
 
     bool cache_bitmaps = surface == NULL? true:
@@ -783,6 +812,18 @@ int rendergraph_render(
 
         vec_mul(mapper->space, mapped_pos, mapper->unit);
     }
+
+    /* NOTE: instead of applying the palmapper here, which potentially
+    results in us using a different rgraph, you might think we could just
+    do some palette tricks when blitting -- e.g. use SDL_PaletteMappedBlit
+    instead of SDL_BlitScaled.
+    However, palette tricks when blitting are actually slow!.. so I believe
+    it's better to apply the palmapper, get a new rgraph, and then palmapper's
+    palette effects will affect its cached bitmaps, which we can then blit
+    very quickly. Phew! */
+    err = palettemapper_apply_to_rendergraph(palmapper, prend, rgraph,
+        NULL, rgraph->space, &rgraph);
+    if(err)return err;
 
     err = rendergraph_calculate_bitmap_bounds(rgraph,
         rot, flip, animated_frame_i);
@@ -838,13 +879,13 @@ static int _rendergraph_render_with_labels(
     SDL_Palette *pal, prismelrenderer_t *prend,
     int x0, int y0, int zoom,
     vec_t pos, rot_t rot, flip_t flip, int frame_i,
-    prismelmapper_t *mapper,
+    prismelmapper_t *mapper, palettemapper_t *palmapper,
     int label_mappings_len, label_mapping_t **label_mappings,
     int depth
 ){
     int err;
 
-    bool debug = get_bool_env("DEBUG_RGRAPHS");
+    bool debug = debug_rgraphs();
 
     vecspace_t *rgraph_space = rgraph->space; /* &vec4 */
 
@@ -855,6 +896,10 @@ static int _rendergraph_render_with_labels(
             for(int i = 0; i < depth; i++)fputs("  ", stderr);
             fprintf(stderr, " ...with mapper: %s\n", mapper->name);
         }
+        if(palmapper){
+            for(int i = 0; i < depth; i++)fputs("  ", stderr);
+            fprintf(stderr, " ...with palmapper: %s\n", palmapper->name);
+        }
     }
 
     /* Render rgraph */
@@ -862,7 +907,7 @@ static int _rendergraph_render_with_labels(
         pal, prend,
         x0, y0, zoom,
         pos, rot, flip,
-        frame_i, mapper);
+        frame_i, mapper, palmapper);
     if(err)return err;
 
     /* Make sure rgraph's labels are populated */
@@ -899,22 +944,18 @@ static int _rendergraph_render_with_labels(
                 label_rgraph->animation_type, \
                 label_rgraph->n_frames, \
                 (_FRAME_I)); \
-            palettemapper_t *palmapper = label->palmapper; \
-            err = palettemapper_apply_to_palettemapper(label_rgraph->palmapper, \
-                prend, palmapper, NULL, &palmapper); \
+            palettemapper_t *label_palmapper = label->palmapper; \
+            err = palettemapper_apply_to_palettemapper(palmapper, \
+                prend, label_palmapper, NULL, &label_palmapper); \
             if(err)return err; \
-            if(debug && palmapper){ \
+            if(debug && label_palmapper){ \
                 for(int i = 0; i < depth; i++)fputs("  ", stderr); \
-                    fprintf(stderr, "  ...using palmapper: %s\n", palmapper->name);} \
-            err = palettemapper_apply_to_rendergraph(palmapper, \
-                prend, label_rgraph, NULL, rgraph_space, \
-                &label_rgraph); \
-            if(err)return err; \
+                    fprintf(stderr, "  ...using palmapper: %s\n", label_palmapper->name);} \
             /* Recurse: render label's rgraph, and its labels */ \
             err = _rendergraph_render_with_labels(label_rgraph, surface, \
                 pal, prend, x0, y0, zoom, \
                 label_trf.add, label_trf.rot, label_trf.flip, \
-                label_frame_i, mapper, \
+                label_frame_i, mapper, label_palmapper, \
                 label_mappings_len, label_mappings, \
                 depth + 1); \
             if(err){ \
@@ -961,15 +1002,32 @@ int rendergraph_render_with_labels(
     SDL_Palette *pal, prismelrenderer_t *prend,
     int x0, int y0, int zoom,
     vec_t pos, rot_t rot, flip_t flip, int frame_i,
-    prismelmapper_t *mapper,
+    prismelmapper_t *mapper, palettemapper_t *palmapper,
     int label_mappings_len, label_mapping_t **label_mappings
 ){
+    /*
+
+        A rendergraph is initially parsed, populating its children.
+        The RGRAPH and PRISMEL children are rendered and cached in
+        rgraph->bitmaps.
+        Those are handled by rendergraph_render.
+        The LABEL children are rendered and cached in rgraph->frames[i].labels,
+        known as the rgraph's "rendered labels".
+
+        This function does the following:
+            * Call rendergraph_render for the current rgraph
+            * Use the given label_mappings to map rgraph's rendered labels to
+              rgraphs, recursively calling this function on those rgraphs.
+              Note that each rendered label may have an associated palmapper,
+              which must be applied to the rgraph before the recursive call.
+
+    */
     return _rendergraph_render_with_labels(
         rgraph, surface,
         pal, prend,
         x0, y0, zoom,
         pos, rot, flip, frame_i,
-        mapper,
+        mapper, palmapper,
         label_mappings_len, label_mappings,
         0 /* depth */
     );

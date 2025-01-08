@@ -242,13 +242,13 @@ int rendergraph_render(
     SDL_Palette *pal, struct prismelrenderer *prend,
     int x0, int y0, int zoom,
     vec_t pos, rot_t rot, flip_t flip, int frame_i,
-    struct prismelmapper *mapper);
+    struct prismelmapper *mapper, struct palettemapper *palmapper);
 int rendergraph_render_with_labels(
     rendergraph_t *rgraph, SDL_Surface *surface,
     SDL_Palette *pal, struct prismelrenderer *prend,
     int x0, int y0, int zoom,
     vec_t pos, rot_t rot, flip_t flip, int frame_i,
-    struct prismelmapper *mapper,
+    struct prismelmapper *mapper, struct palettemapper *palmapper,
     int label_mappings_len, label_mapping_t **label_mappings);
 int rendergraph_render_all_bitmaps(rendergraph_t *rgraph, SDL_Palette *pal);
 
