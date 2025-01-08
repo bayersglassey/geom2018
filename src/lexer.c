@@ -1346,6 +1346,17 @@ static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
         err = vars_set_int(lexer->vars, name, val);
         if(err)return err;
         free(name);
+    }else if(fus_lexer_got(lexer, "UNSET")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+
+        char *name;
+        err = _fus_lexer_get_name(lexer, &name);
+        if(err)return err;
+
+        err = vars_set_null(lexer->vars, name);
+        if(err)return err;
+        free(name);
     }else if(fus_lexer_got(lexer, "PRINT")){
         err = fus_lexer_next(lexer);
         if(err)return err;

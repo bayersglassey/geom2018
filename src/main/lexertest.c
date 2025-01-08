@@ -154,12 +154,22 @@ static int _run_tests(){
 
     /* INT macros */
     err = run_test(
+        "1 2 $GET_INT X 3 4",
+        "1 2 0 3 4");
+    if(err)return err;
+    err = run_test(
         "$SET_INT X 10 1 2 $GET_INT X 3 4",
         "1 2 10 3 4");
     if(err)return err;
     err = run_test(
         "1 2 $SET_INT X 10 $GET_INT X 3 4",
         "1 2 10 3 4");
+    if(err)return err;
+
+    /* UNSET macro */
+    err = run_test(
+        "$SET_INT X 2 $UNSET X 1 $GET_INT X 3",
+        "1 0 3");
     if(err)return err;
 
     /* PRINT macros */
