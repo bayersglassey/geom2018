@@ -1028,3 +1028,128 @@ HERE'S THE PLAN:
     Except split off the top-left part of it, that doesn't look good as earth.
 [ ] Instead of glowing blue "doors", when you get an ability, let's somehow show
     the ability you will receieve...
+
+
+[ ] LOOK AT MEMORY USAGE
+    ...it may be causin' fans to blow
+
+
+Jan 6, 2024:
+------------
+
+[ ] Need to actually set label->palmapper for rgraph's labels in calculate_labels
+    ...oh wait, we do!.. Hmmmm.
+[X] The apply_*mapper_to_*mapper functions should accept NULL for either mapper
+
+
+Okay, look at this:
+
+    Calculate labels: ability_door
+     ...frame 0: label: label:head palmapper: 0x5629ec9638a0
+     ...frame 0: label: label:bleg palmapper: 0x5629ec9638a0
+     ...frame 0: label: label:fleg palmapper: 0x5629ec9638a0
+     ...frame 0: label: label:head palmapper: 0x5629ec9638a0
+     ...frame 0: label: label:bleg palmapper: 0x5629ec9638a0
+     ...frame 0: label: label:fleg palmapper: 0x5629ec9638a0
+     ...frame 0: label: label:head palmapper: 0x5629ec9639f0
+     ...frame 0: label: label:bleg palmapper: 0x5629ec9639f0
+     ...frame 0: label: label:fleg palmapper: 0x5629ec9639f0
+     ...frame 0: label: label:head palmapper: 0x5629ec963bd0
+     ...frame 0: label: label:bleg palmapper: 0x5629ec963bd0
+     ...frame 0: label: label:fleg palmapper: 0x5629ec963bd0
+     ...frame 0: label: label:head palmapper: 0x5629ec963d60
+     ...frame 0: label: label:bleg palmapper: 0x5629ec963d60
+     ...frame 0: label: label:fleg palmapper: 0x5629ec963d60
+     ...frame 0: label: label:head palmapper: 0x5629ec963d60
+     ...frame 0: label: label:bleg palmapper: 0x5629ec963d60
+     ...frame 0: label: label:fleg palmapper: 0x5629ec963d60
+    Copying: spider_head -> <pm:spider_ability1 spider_head>
+    Calculate labels: spider_head
+     ...frame 0: label: label:_head palmapper: (nil)
+     ...frame 0: label: label:nose palmapper: (nil)
+     ...frame 0: label: label:headbump palmapper: (nil)
+     ...frame 0: label: label:head_spikes palmapper: (nil)
+     ...frame 0: label: label:eye palmapper: (nil)
+     ...frame 0: label: label:head_spikes palmapper: (nil)
+     ...frame 0: label: label:carrying palmapper: (nil)
+
+The palmapper is correctly set on the labels of ability_door.
+However, it's only at *render time* that we know that e.g. label "label:head"
+maps to rgraph "spider_head".
+So, *at render time*, we need to make use of labels' palmappers somehow.
+
+
+
+Okaaaay, so then let's look at "render time", i.e. _rendergraph_render_with_labels.
+Currently, it does this:
+
+    palettemapper_t *palmapper = label->palmapper; \
+    err = palettemapper_apply_to_palettemapper(label_rgraph->palmapper, \
+        prend, palmapper, NULL, &palmapper); \
+    if(err)return err; \
+    if(debug && palmapper){ \
+        for(int i = 0; i < depth; i++)fputs("  ", stderr); \
+            fprintf(stderr, "  ...using palmapper: %s\n", palmapper->name);} \
+
+...so, it's combining label->palmapper and label_rgraph->palmapper.
+But where is rgraph->palmapper?.. nowhere!..
+And presumably, label_rgraph->palmapper should get involved once we call
+rendergraph_render, right?...
+So okay, that's the key, here -- when calculating labels, we should apply
+rgraph->palmapper to all label->palmapper, no?..
+Or uhhhh....
+
+Note, currently we only use palettes when generating bitmaps. That is:
+* rendergraph_render: SDL_BlitScaled
+* rendergraph_render_to_surface: SDL_PaletteMappedBlit
+...whereas we could reduce memory usage if we used SDL_PaletteMappedBlit with
+rendergraph_render as well.
+Specifically, shared_copy_of currently shares the rgraph->frames data structure
+between rgraphs, but it could (probably) share rgraph->bitmaps too!..
+
+NOTE:
+* SDL_BlitScaled(bitmap->surface, NULL, surface, &dst_rect)
+* SDL_PaletteMappedBlit(surface2, NULL, surface, &dst_rect2, table)
+...and the difference between those things seems to be largely expressed
+in PaletteMappedBlit1to1Key, in src/sdl_util.c:
+
+    Uint8 *palmap = info->table;
+
+    if (palmap) {
+        ...etc...
+          *dst = palmap[*src];
+        ...etc...
+    } else {
+        ...etc...
+          *dst = *src;
+        ...etc...
+    }
+
+Make sense? If we pass a non-NULL table, every pixel requires following
+a pointer.
+That's presumably worth keeping out of "render time", yeah?..
+
+OKAY SO! No sharing of bitmaps between rgraphs.
+We want to cache all palette-mapping when we generate the bitmaps, i.e.
+in rendergraph_render_to_surface.
+So then, we *do* need to apply palmappers at render-time.
+But... currently we have world's shittiest "hash table" implementation
+used by palettemapper_apply_to_rendergraph and friends.
+So what should we do instead?..
+Clearly, we need to cache the palmapped rgraph on each label.
+NO! That's not possible, because labels are mapped to rgraphs at render
+time.
+(By the way, we could probably decrease the shittiness of our
+palmapper-and-rgraph-to-rgraph hash table by storing its entries on the
+LHS rgraph, instead of the palmapper. But I digress.)
+
+OOOOKAAAAAAAAY SO:
+TL;DR, a rendergraph consists of 2 things as far as rendering is concerned:
+* Bitmaps
+    * See: rendergraph_render
+        * ALL PALMAPPING SHOULD ALREADY HAVE BEEN DONE & CACHED IN BITMAPS
+* Labels (to which we map rgraphs at render-time)
+    * See: rendergraph_render_with_labels
+    * Each label has a palmapper, which needs to be applied to its
+      corresponding rgraph (and recursively, to that rgraph's labels'
+      rgraphs, etc) at render-time.
