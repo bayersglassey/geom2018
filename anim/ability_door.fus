@@ -1,0 +1,4 @@
+
+$SET_STR RGRAPH_NS "ability_"
+$SET_BOOL ABILITY
+import "anim/_door.fus"

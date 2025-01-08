@@ -50,6 +50,41 @@ palmappers:
         15:
         16:
 
+    "door_cycle":
+        # A palmapper which mimics the animated colours of the "door" rgraph
+        eval(9 +  3): eval(1 +  3)
+        eval(1 +  3): eval(9 +  1)
+        eval(9 +  1): eval(1 +  1)
+        eval(1 +  1): eval(9 +  3)
+
+    "spider_ability1":
+        # All blue and cyan, for "doors" which give you abilities, like
+        # spikeyspider, rollerspider, etc
+
+          :
+
+         eval(1 +  0): eval(1 +  0)
+         eval(1 +  1): eval(1 +  3)
+         eval(1 +  2): eval(1 +  3)
+         eval(1 +  3): eval(1 +  3)
+         eval(1 +  4): eval(1 +  1) # eye colour
+         eval(1 +  5): eval(1 +  3)
+         eval(1 +  6): eval(1 +  3)
+         eval(1 +  7): eval(1 +  7)
+
+         eval(9 +  0): eval(9 +  0)
+         eval(9 +  1): eval(9 +  3)
+         eval(9 +  2): eval(9 +  3)
+         eval(9 +  3): eval(9 +  3)
+         eval(9 +  4): eval(9 +  1) # eye colour
+         eval(9 +  5): eval(9 +  3)
+         eval(9 +  6): eval(9 +  3)
+         eval(9 +  7): eval(9 +  7)
+
+    "spider_ability2": palmap ("door_cycle") ("spider_ability1")
+    "spider_ability3": palmap ("door_cycle") ("spider_ability2")
+    "spider_ability4": palmap ("door_cycle") ("spider_ability3")
+
     "cycle0":
 
     "cycle1":
