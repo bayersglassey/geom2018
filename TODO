@@ -1012,13 +1012,6 @@ HERE'S THE PLAN:
 * Release as a completeable demo!
 
 
-[X] Bottom of tutorial3, the switch should be one-way!
-    [ ] And that's where you should get... rollerspider?.. no, but something.
-        And then we don't need two exit doors at the top.
-        Rollerspider is too powerful!..
-        Maybe this is one area which is relatively easy, so we just get "progress",
-        not an ability.
-[ ] data/maps/demo/fisheye4.fus: fix the text!
 [ ] trees: remove the rollerspider door here, just have spikeyspider.
     And add a spider which shows you how being spikey works, somehow...
     And force you to escape through a bunch of deathrollers...
@@ -1031,8 +1024,12 @@ HERE'S THE PLAN:
 
 
 
-Jen 7, 2024:
+Jan 8, 2024:
 ------------
 
-[ ] Instead of glowing blue "doors", when you get an ability, let's somehow show
-    the ability you will receieve...
+[ ] What do you get from tutorial3?.. rollerspider?.. no, but something.
+    Rollerspider is too powerful!..
+    Maybe this is one area which is relatively easy, so we just get "progress",
+    not an ability?..
+    Also, currently it's totally unclear that once you go down & come back
+    up, the switch to get rollerspider has been "unlocked".
