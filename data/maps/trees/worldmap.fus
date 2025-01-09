@@ -5,7 +5,7 @@ palette: "data/maps/trees/pals/trees.fus"
 tileset: "data/maps/trees/tilesets/trees.fus"
 
 submaps:
-    :
+    "start":
         pos: (0 0)
         camera: (12 0)
         mapper: ("triple")
@@ -29,22 +29,22 @@ submaps:
                 bg
                 file: "data/maps/trees/start2_bg.fus"
                 tileset: "data/maps/trees/tilesets/trees_dark.fus"
-            :
+            "start2":
                 file: "data/maps/trees/start2.fus"
-            :
+            "start3":
                 file: "data/maps/trees/start3.fus"
                 pos: (5 5)
                 camera: (6 6)
-            :
+            "start4":
                 file: "data/maps/trees/start4.fus"
                 pos: eval: (5 5) + (12 5)
                 camera: (9 6)
-            :
+            "start5":
                 file: "data/maps/trees/start5.fus"
                 pos: eval: (5 5) + (11 14)
                 camera: (6 6)
                 tileset: "data/maps/sprucetown/tilesets/earth.fus"
-            :
+            "start6":
                 file: "data/maps/trees/start6.fus"
                 pos: eval: (5 5) + (11 14) + (10 16)
                 camera: (11 6)
@@ -65,29 +65,32 @@ submaps:
                 camera: (6 6)
                 submaps:
                     :
+                        file: "data/maps/trees/start7_2.fus"
+                        pos: (10 14)
+                    :
                         file: "data/maps/trees/start7_water.fus"
                         pos: (13 5)
                         tileset: "data/maps/sprucetown/tilesets/earth.fus"
             :
                 pos: eval: (5 5) + (12 5) + (22 3) + (23 8)
                 submaps:
-                    :
+                    "bubbles":
                         file: "data/maps/trees/bubbles.fus"
                         pos: (0 0)
                         camera: (10 0)
-                    :
+                    "bubbles2":
                         file: "data/maps/trees/bubbles2.fus"
                         pos: eval: (25 7)
                         camera: (10 0)
-                    :
+                    "bubbles3":
                         file: "data/maps/trees/bubbles3.fus"
                         pos: eval: (25 7) + (19 0)
                         camera: (8 0)
-                    :
+                    "bubbles3-0":
                         file: "data/maps/trees/bubbles3-0.fus"
                         pos: eval: (25 7) + (19 0) + (25 12)
                         camera: (10 -10)
-                    :
+                    "bubbles3-1":
                         file: "data/maps/trees/bubbles3-1.fus"
                         pos: eval: (25 7) + (19 0) + (4 -9)
                         camera: (0 0)
