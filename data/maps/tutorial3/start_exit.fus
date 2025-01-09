@@ -1,7 +1,7 @@
 parts:
-    "D": recording "data/recs/door.fus"
+    "D": recording "data/recs/ability_door.fus"
         vars:
-            "map": "data/maps/demo/worldmap.fus"
+            "set_yourbool": "is_rollerspider"
 collmap:
     ;;
     ;;   .   .   .   .   .   .   .   .

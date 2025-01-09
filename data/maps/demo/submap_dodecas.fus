@@ -16,8 +16,6 @@ recs:
 vars:
     "eyespider_dodecas_ran_away_1": F
 
-    nosave "fisheye_eye_a_open": F
-    nosave "fisheye_eye_b_open": F
     nosave "big_switch": T
 
 submaps:

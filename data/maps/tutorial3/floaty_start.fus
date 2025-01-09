@@ -1,5 +1,9 @@
 parts:
     "l": location "floaty_start"
+    "D": recording "data/recs/door.fus"
+        vars:
+            "map": "data/maps/demo/worldmap.fus"
+            "location": "fisheye_location_a"
 collmap:
     ;;
     ;;                  * * *
@@ -17,7 +21,7 @@ collmap:
     ;;                 /* *   * *\
     ;;                +           +
     ;;                 \  * * *  /* * *
-    ;;                  + -   - +
+    ;;              ?   + -   - +                              [D]
     ;;                    * * *   * * *
     ;;
     ;;                * * *

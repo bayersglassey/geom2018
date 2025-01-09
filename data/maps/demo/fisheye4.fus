@@ -1,49 +1,12 @@
 spawn: (2 -2) 0 n
 
-$SET_STR FISHEYE_BECOME: lines: at(0 25)
-    ;;              Hey.
-    ;;
-    ;;
-    ;;
-    ;;  Go through this door
-    ;;    and you will become
-    ;;      something different.
-    ;;
-    ;;
-    ;;
-
-$SET_STR FISHEYE_CRAWL: lines: at(12 35)
-    ;;Now you can roll
-    ;;  over sharp edges.
-    ;;
-    ;;
-    ;;  Crouch and keep crawling
-    ;;    to see what I mean...
-
-text: if mapvar("fisheye_eye_a_open") then $GET_STR FISHEYE_BECOME else null
-text: if mapvar("fisheye_eye_b_open") then $GET_STR FISHEYE_CRAWL else null
-
 parts:
     "F": "data/maps/demo/tiles/hex_vec4/fisheye_B.fus"
     "T": "data/maps/demo/tiles/hex_vec4/fisheye_big2tri.fus"
     "A": recording "data/recs/eye.fus"
-        vars:
-            # NOTE: used to use "key_anim" here to specify that we only
-            # open for specific types of spider.
-            # However, these days "types" of spider are just "is_*spider"
-            # vars, which we can't check for with "coll: bodies" yet...
-            "opened_key": "fisheye_eye_a_open"
-    "B": recording "data/recs/eye.fus"
-        vars:
-            # NOTE: used to use "key_anim" here to specify that we only
-            # open for specific types of spider.
-            # However, these days "types" of spider are just "is_*spider"
-            # vars, which we can't check for with "coll: bodies" yet...
-            "opened_key": "fisheye_eye_b_open"
     "d": recording "data/recs/door.fus"
         vars:
-            "location": "fisheye_location_a"
-            "set_yourbool": "is_rollerspider"
+            "map": "data/maps/tutorial3/worldmap.fus"
     "l": location "fisheye_location_a"
 collmap:
     ;;
@@ -75,7 +38,7 @@ collmap:
     ;;
     ;;   .   .   .   .   .   ?   .   ?   ?   .   ?   .   .   .   .   .   ?   .   ?   ?   .   .   .   .   .   .[T][] [l] []     [] [] []
     ;;
-    ;; .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .       [B^3]
+    ;; .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .       [A^3]
     ;;
     ;;   .   .   .   .   .   .   .   ?   .   ?   .   .   .   ?   .   .   .   ?   .   ?   .   .   .   .   .   .    [] []   []  [] []
     ;;
