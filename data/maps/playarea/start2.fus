@@ -1,19 +1,19 @@
 parts:
     "b": actor "actor/aibig_roller.fus"
 
-    "R": recording "data/recs/door.fus"
+    "R": recording "data/recs/ability_door.fus"
         vars:
             "set_yourbool": "is_rollerspider"
-    "P": recording "data/recs/door.fus"
+    "P": recording "data/recs/ability_door.fus"
         vars:
             "set_yourbool": "is_spikeyspider"
-    "A": recording "data/recs/door.fus"
+    "A": recording "data/recs/ability_door.fus"
         vars:
             "set_yourbool": "is_aimerspider"
-    "F": recording "data/recs/door.fus"
+    "F": recording "data/recs/ability_door.fus"
         vars:
             "set_yourbool": "is_flipspider"
-    "S": recording "data/recs/door.fus"
+    "S": recording "data/recs/ability_door.fus"
         vars:
             "set_yourbool": "is_stickyspider"
 

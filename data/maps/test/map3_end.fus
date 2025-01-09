@@ -8,7 +8,7 @@ parts:
         vars:
             "map": "data/maps/test/worldmap.fus"
             "location": "test_exit"
-    "D": recording "data/recs/door.fus"
+    "D": recording "data/recs/ability_door.fus"
         vars:
             "location": "puzzle"
             "set_yourbool": "is_aimerspider"

@@ -1,11 +1,11 @@
 spawn: (4 -8) 0 n
 parts:
     "r": recording "data/maps/wilderness/recs/roller000.fus"
-    "A": recording "data/recs/door.fus"
+    "A": recording "data/recs/ability_door.fus"
         vars:
             "location": "bubbles_transform_a"
             "set_yourbool": "is_rollerspider"
-    "B": recording "data/recs/door.fus"
+    "B": recording "data/recs/ability_door.fus"
         vars:
             "location": "bubbles_transform_b"
             "set_yourbool": "is_spikeyspider"

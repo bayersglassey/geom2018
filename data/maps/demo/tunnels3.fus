@@ -1,5 +1,5 @@
 parts:
-    "D": recording "data/recs/door.fus"
+    "D": recording "data/recs/ability_door.fus"
         vars:
             "location": "tunnels3"
             "set_yourbool": "is_rollerspider"
