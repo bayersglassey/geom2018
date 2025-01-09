@@ -93,7 +93,7 @@ submaps:
                         submaps:
                             :
                                 file: "data/maps/water/air_bubbles_walled1_tunnel_blocker.fus"
-                                visible: not mapvar("coins_a")
+                                visible: ! mapvar("coins_a")
                                 pos: (-7 -1)
             :
                 file: "data/maps/water/room_sm_bubble2.fus"

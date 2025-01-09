@@ -152,7 +152,6 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
     body->cur_submap = NULL;
 
     valexpr_set_literal_bool(&body->visible_expr, true);
-    body->visible_not = false;
 
     vars_init_with_props(&body->vars, hexgame_vars_prop_names);
     body->vars.callback = &body_vars_callback;
@@ -269,7 +268,6 @@ int body_is_visible(body_t *body, bool *visible_ptr){
         visible = val_get_bool(result.val);
     }
 
-    if(body->visible_not)visible = !visible;
     *visible_ptr = visible;
     return 0;
 }

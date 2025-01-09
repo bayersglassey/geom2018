@@ -55,7 +55,6 @@ typedef struct hexmap_recording {
     int frame_offset;
 
     valexpr_t visible_expr;
-    bool visible_not;
 
     vars_t vars;
     vars_t bodyvars;
@@ -178,7 +177,6 @@ typedef struct hexcollmap_part {
     int draw_z;
 
     valexpr_t visible_expr;
-    bool visible_not;
 
     vars_t vars;
     vars_t bodyvars;
@@ -272,7 +270,7 @@ static bool hexcollmap_elem_is_special(hexcollmap_elem_t *elem){
 
 void hexcollmap_part_init(hexcollmap_part_t *part, int type,
     char part_c, const char *filename, const char *palmapper_name,
-    int frame_offset, valexpr_t *visible_expr, bool visible_not,
+    int frame_offset, valexpr_t *visible_expr,
     vars_t *vars, vars_t *bodyvars);
 void hexcollmap_part_cleanup(hexcollmap_part_t *part);
 

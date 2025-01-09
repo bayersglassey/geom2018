@@ -87,7 +87,6 @@ void hexmap_recording_init(hexmap_recording_t *recording, int type,
     trf_zero(&recording->trf);
 
     valexpr_set_literal_bool(&recording->visible_expr, true);
-    recording->visible_not = false;
 
     vars_init_with_props(&recording->vars, hexgame_vars_prop_names);
     vars_init_with_props(&recording->bodyvars, hexgame_vars_prop_names);
@@ -106,7 +105,6 @@ int hexmap_recording_clone(hexmap_recording_t *recording1,
 
     err = valexpr_copy(&recording1->visible_expr, &recording2->visible_expr);
     if(err)return err;
-    recording1->visible_not = recording2->visible_not;
 
     err = vars_copy(&recording1->vars, &recording2->vars);
     if(err)return err;
@@ -153,7 +151,7 @@ void hexmap_location_init(hexmap_location_t *location, const char *name){
 
 void hexcollmap_part_init(hexcollmap_part_t *part, int type,
     char part_c, const char *filename, const char *palmapper_name,
-    int frame_offset, valexpr_t *visible_expr, bool visible_not,
+    int frame_offset, valexpr_t *visible_expr,
     vars_t *vars, vars_t *bodyvars
 ){
     part->type = type;
@@ -168,7 +166,6 @@ void hexcollmap_part_init(hexcollmap_part_t *part, int type,
 
     /* NOTE: we take ownership of *visible_expr from caller */
     part->visible_expr = *visible_expr;
-    part->visible_not = visible_not;
 
     /* vars_t must guarantee that it can be freely copied.
     Which it does. (See the comment in definition of vars_t.) */

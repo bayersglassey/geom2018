@@ -71,13 +71,13 @@ submaps:
                     :
                         bg
                         file: "data/maps/demo/big_E.fus"
-                        visible: not mapvar("big_switch")
+                        visible: ! mapvar("big_switch")
                         pos: (8 3)
                     :
                         file: "data/maps/demo/big.fus"
                     :
                         file: "data/maps/demo/big_spikes.fus"
-                        visible: not mapvar("big_switch")
+                        visible: ! mapvar("big_switch")
                         pos: (8 3)
             :
                 file: "data/maps/demo/fisheye.fus"

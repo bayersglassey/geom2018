@@ -136,7 +136,6 @@ typedef struct body {
     hexgame_location_t loc;
     keyinfo_t keyinfo;
     valexpr_t visible_expr;
-    bool visible_not;
     vars_t vars;
 
     ARRAY_DECL(label_mapping_t*, label_mappings)

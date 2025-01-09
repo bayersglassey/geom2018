@@ -31,7 +31,7 @@ submaps:
         submaps:
             :
                 file: "data/maps/tutorial3/start_save.fus"
-                visible: not mapvar("switch1")
+                visible: ! mapvar("switch1")
                 inherit_rot
             :
                 file: "data/maps/tutorial3/start_save_alt.fus"
@@ -43,7 +43,7 @@ submaps:
                 submaps:
                     :
                         file: "data/maps/tutorial3/final_switch_blocker.fus"
-                        visible: not mapvar("switch3")
+                        visible: ! mapvar("switch3")
             :
                 file: "data/maps/tutorial3/start_exit.fus"
                 pos: (3 -5)
@@ -51,7 +51,7 @@ submaps:
                 submaps:
                     :
                         file: "data/maps/tutorial3/start_exit_blocker.fus"
-                        visible: not mapvar("final_switch")
+                        visible: ! mapvar("final_switch")
             "blocker":
                 file: "data/maps/tutorial3/blocker.fus"
                 pos: (-8 -20)
@@ -78,7 +78,7 @@ submaps:
         submaps:
             :
                 file: "data/maps/tutorial3/start_save.fus"
-                visible: not mapvar("switch1")
+                visible: ! mapvar("switch1")
                 inherit_rot
     "start3":
         file: "data/maps/tutorial3/start3.fus"
@@ -92,7 +92,7 @@ submaps:
         submaps:
             :
                 file: "data/maps/tutorial3/start_save.fus"
-                visible: not mapvar("switch1")
+                visible: ! mapvar("switch1")
                 inherit_rot
             :
                 file: "data/maps/tutorial3/start_save_alt.fus"

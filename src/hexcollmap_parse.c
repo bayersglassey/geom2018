@@ -360,7 +360,6 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
 
         err = valexpr_copy(&recording->visible_expr, &part->visible_expr);
         if(err)return err;
-        recording->visible_not = part->visible_not;
 
         err = vars_copy(&recording->vars, &part->vars);
         if(err)return err;
@@ -754,7 +753,6 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
 
     valexpr_t visible_expr;
     valexpr_set_literal_bool(&visible_expr, true);
-    bool visible_not = false;
 
     vars_t vars;
     vars_init_with_props(&vars, hexgame_vars_prop_names);
@@ -799,10 +797,6 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
         if(GOT("visible")){
             NEXT
             OPEN
-            if(GOT("not")){
-                NEXT
-                visible_not = true;
-            }
             err = valexpr_parse(&visible_expr, lexer);
             if(err)return err;
             CLOSE
@@ -828,7 +822,7 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
 
     hexcollmap_part_init(part, type, part_c,
         filename, palmapper_name, frame_offset,
-        &visible_expr, visible_not, &vars, &bodyvars);
+        &visible_expr, &vars, &bodyvars);
     trf_cpy(collmap->space, &part->trf, &trf);
     part->draw_z = draw_z;
     return 0;

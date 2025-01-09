@@ -123,12 +123,11 @@ int hexmap_get_or_add_submap_group(hexmap_t *map, const char *name,
 static int hexmap_parse_recording(fus_lexer_t *lexer, prismelrenderer_t *prend,
     const char **filename_ptr, const char **palmapper_name_ptr, int *frame_offset_ptr,
     trf_t *trf, vars_t *vars, vars_t *bodyvars, bool *relative_ptr,
-    valexpr_t *visible_expr, bool *visible_not_ptr
+    valexpr_t *visible_expr
 ){
     INIT
 
     valexpr_set_literal_bool(visible_expr, true);
-    bool visible_not = false;
 
     OPEN
 
@@ -169,10 +168,6 @@ static int hexmap_parse_recording(fus_lexer_t *lexer, prismelrenderer_t *prend,
     if(GOT("visible")){
         NEXT
         OPEN
-        if(GOT("not")){
-            NEXT
-            visible_not = true;
-        }
         err = valexpr_parse(visible_expr, lexer);
         if(err)return err;
         CLOSE
@@ -195,8 +190,6 @@ static int hexmap_parse_recording(fus_lexer_t *lexer, prismelrenderer_t *prend,
     }
 
     CLOSE
-
-    *visible_not_ptr = visible_not;
     return 0;
 }
 
@@ -233,7 +226,6 @@ static int hexmap_load_hexmap_recording(
 
         err = valexpr_copy(&body->visible_expr, &recording->visible_expr);
         if(err)return err;
-        body->visible_not = recording->visible_not;
 
         /* We uhhhh, don't do anything with recording->bodyvars,
         interestingly enough. */
@@ -256,7 +248,6 @@ static int hexmap_load_hexmap_recording(
 
         err = valexpr_copy(&body->visible_expr, &recording->visible_expr);
         if(err)return err;
-        body->visible_not = recording->visible_not;
 
         err = vars_copy(&body->vars, &recording->bodyvars);
         if(err)return err;
@@ -356,10 +347,9 @@ static int _hexmap_parse(hexmap_t *map, fus_lexer_t *lexer,
                 vars_init_with_props(&bodyvars, hexgame_vars_prop_names);
                 bool relative; /* unused here -- only used when parsing submaps */
                 valexpr_t visible_expr;
-                bool visible_not;
                 err = hexmap_parse_recording(lexer, prend,
                     &filename, &palmapper_name, &frame_offset, &trf,
-                    &vars, &bodyvars, &relative, &visible_expr, &visible_not);
+                    &vars, &bodyvars, &relative, &visible_expr);
                 if(err)return err;
 
                 ARRAY_PUSH_NEW(hexmap_recording_t*, map->recordings,
@@ -372,7 +362,6 @@ static int _hexmap_parse(hexmap_t *map, fus_lexer_t *lexer,
                 recording->vars = vars;
                 recording->bodyvars = bodyvars;
                 recording->visible_expr = visible_expr;
-                recording->visible_not = visible_not;
             }
             NEXT
         }
@@ -673,14 +662,9 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
         err = valexpr_copy(&context->visible_expr,
             &parent_context->visible_expr);
         if(err)return err;
-        context->visible_not = parent_context->visible_not;
     }else if(GOT("visible")){
         NEXT
         OPEN
-        if(GOT("not")){
-            NEXT
-            context->visible_not = true;
-        }
         err = valexpr_parse(&context->visible_expr, lexer);
         if(err)return err;
         CLOSE
@@ -849,10 +833,9 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
             vars_init_with_props(&bodyvars, hexgame_vars_prop_names);
             bool relative;
             valexpr_t visible_expr;
-            bool visible_not;
             err = hexmap_parse_recording(lexer, prend,
                 &filename, &palmapper_name, &frame_offset, &trf,
-                &vars, &bodyvars, &relative, &visible_expr, &visible_not);
+                &vars, &bodyvars, &relative, &visible_expr);
             if(err)return err;
 
             if(relative){
@@ -870,7 +853,6 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
             recording->vars = vars;
             recording->bodyvars = bodyvars;
             recording->visible_expr = visible_expr;
-            recording->visible_not = visible_not;
         }
         NEXT
     }
@@ -1246,7 +1228,6 @@ int hexmap_submap_init_from_parser_context(hexmap_t *map,
 
     err = valexpr_copy(&submap->visible_expr, &context->visible_expr);
     if(err)return err;
-    submap->visible_not = context->visible_not;
 
     submap->song = context->song;
     vars_init(&submap->song_vars);
@@ -1310,7 +1291,6 @@ int hexmap_submap_is_visible(hexmap_submap_t *submap, bool *visible_ptr){
         }
     }
 
-    if(submap->visible_not)visible = !visible;
     *visible_ptr = visible;
     return 0;
 }
@@ -1358,7 +1338,6 @@ void hexmap_submap_parser_context_init(hexmap_submap_parser_context_t *context,
     /* Visibility is *NOT* inherited by default.
     Opt in with the "inherit_visible" syntax. */
     valexpr_set_literal_bool(&context->visible_expr, true);
-    context->visible_not = false;
 
     ARRAY_INIT(context->text_exprs)
 

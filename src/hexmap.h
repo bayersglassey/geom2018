@@ -62,7 +62,6 @@ typedef struct hexmap_submap {
     ARRAY_DECL(valexpr_t*, text_exprs)
         /* Text displayed when camera is on this submap */
     valexpr_t visible_expr; /* Whether this submap is visible */
-    bool visible_not; /* Whether to invert the result of visible_expr */
     hexcollmap_t collmap;
 
     hexgame_audio_callback_t *song;
@@ -86,7 +85,6 @@ typedef struct hexmap_submap_parser_context {
     int camera_type;
 
     valexpr_t visible_expr;
-    bool visible_not;
 
     hexgame_audio_callback_t *song;
     vars_t song_vars;

@@ -23,7 +23,7 @@ submaps:
         mapper: ("triple")
     :
         file: "data/maps/test/map3_end_blocker.fus"
-        visible: not mapvar("map3_end_blocker")
+        visible: ! mapvar("map3_end_blocker")
         pos: (-7 -7)
         camera: (0 0)
         mapper: ("triple")

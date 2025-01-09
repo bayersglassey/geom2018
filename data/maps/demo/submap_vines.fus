@@ -198,7 +198,7 @@ submaps:
                 submaps:
                     :
                         file: "data/maps/demo/vines3_blocker.fus"
-                        visible: not mapvar("vines3_door")
+                        visible: ! mapvar("vines3_door")
                         pos: (-8 13)
             "vines2":
                 file: "data/maps/demo/vines4.fus"
@@ -267,5 +267,5 @@ submaps:
                         file: "data/maps/demo/jungle5.fus"
                     :
                         file: "data/maps/demo/jungle_cage.fus"
-                        visible: not mapvar("jungle_cage")
+                        visible: ! mapvar("jungle_cage")
                         pos: (15 2)

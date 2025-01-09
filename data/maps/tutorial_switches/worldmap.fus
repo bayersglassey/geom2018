@@ -26,7 +26,7 @@ submaps:
         submaps:
             :
                 file: "data/maps/tutorial_switches/switches_blocker.fus"
-                visible: not mapvar("switches_a")
+                visible: ! mapvar("switches_a")
                 pos: (6 6)
             :
                 file: "data/maps/tutorial_switches/switches_blocker_thick_r.fus"
@@ -43,7 +43,7 @@ submaps:
                 rot: 3
             :
                 file: "data/maps/tutorial_switches/switches_blocker.fus"
-                visible: not mapvar("switches_c")
+                visible: ! mapvar("switches_c")
                 pos: (18 14)
                 rot: 3
     "switches2":
@@ -54,12 +54,12 @@ submaps:
         submaps:
             :
                 file: "data/maps/tutorial_switches/switches2_blocker_a.fus"
-                visible: not mapvar("switches2_a")
+                visible: ! mapvar("switches2_a")
                 pos: (-8 -9)
                 rot: 1
             :
                 file: "data/maps/tutorial_switches/switches2_blocker_b.fus"
-                visible: not mapvar("switches2_b")
+                visible: ! mapvar("switches2_b")
                 pos: (-5 -6)
                 rot: 1
             :
@@ -80,14 +80,14 @@ submaps:
             :
                 bg
                 file: "data/maps/tutorial_switches/switches3_energy_a_on.fus"
-                visible: not mapvar("switches3_a")
+                visible: ! mapvar("switches3_a")
             :
                 bg
                 file: "data/maps/tutorial_switches/switches3_energy_a_off.fus"
                 visible: mapvar("switches3_a")
             :
                 file: "data/maps/tutorial_switches/switches3_blocker_a.fus"
-                visible: not mapvar("switches3_a")
+                visible: ! mapvar("switches3_a")
             :
                 file: "data/maps/tutorial_switches/switches3_blocker_b.fus"
                 visible: if mapvar("switches3_a")

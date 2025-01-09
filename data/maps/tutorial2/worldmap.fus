@@ -60,7 +60,7 @@ submaps:
                     submaps:
                         :
                             file: "data/maps/tutorial2/start_blocker.fus"
-                            visible: not mapvar("start_solved")
+                            visible: ! mapvar("start_solved")
                             pos: (13 -7)
                         :
                             file: "data/maps/tutorial2/start_unblocked.fus"
@@ -79,7 +79,7 @@ submaps:
                     submaps:
                         :
                             file: "data/maps/tutorial2/start2_blocker.fus"
-                            visible: not mapvar("coin_e")
+                            visible: ! mapvar("coin_e")
                             pos: (0 5)
             "start3.1":
                 recs:
@@ -101,15 +101,15 @@ submaps:
                         submaps:
                             :
                                 file: "data/maps/tutorial2/start3b_blocker.fus"
-                                visible: not mapvar("start3b_coin_b")
+                                visible: ! mapvar("start3b_coin_b")
                                 pos: (5 -7)
                             :
                                 file: "data/maps/tutorial2/start3b_blocker.fus"
-                                visible: not mapvar("start3b_coin_d")
+                                visible: ! mapvar("start3b_coin_d")
                                 pos: (6 -2)
                             :
                                 file: "data/maps/tutorial2/start3b_blocker.fus"
-                                visible: not mapvar("start3b_coin_e")
+                                visible: ! mapvar("start3b_coin_e")
                                 pos: (-15 -19)
             "start3.2":
                 pos: (-13 -32)
@@ -161,22 +161,22 @@ submaps:
                             : (0 0) 0 n "data/maps/tutorial2/actors/coin_beast_start4.fus"
                     :
                         file: "data/maps/tutorial2/start4_blocker.fus"
-                        visible: not mapvar("start4a_solved")
+                        visible: ! mapvar("start4a_solved")
                         pos: (-3 -2)
                         rot: 3
                     :
                         file: "data/maps/tutorial2/start4_blocker_line5.fus"
-                        visible: not mapvar("start4b_solved")
+                        visible: ! mapvar("start4b_solved")
                         pos: (-13 2)
                         rot: 1
                     :
                         file: "data/maps/tutorial2/start4_blocker.fus"
-                        visible: not mapvar("start4b_solved")
+                        visible: ! mapvar("start4b_solved")
                         pos: (-17 5)
                         rot: 1
                     :
                         file: "data/maps/tutorial2/start4_blocker2.fus"
-                        visible: not mapvar("start4c_solved")
+                        visible: ! mapvar("start4c_solved")
                         pos: (-10 -2)
             "start4_blockers":
                 pos: eval: (-13 -32) + (13 -9) + (-1 -12) + (-29 -19) + (10 -15)

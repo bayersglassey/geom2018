@@ -28,7 +28,7 @@ submaps:
                     :
                         bg
                         file: "data/maps/triangles/start_bg_E2.fus"
-                        visible: not mapvar("start_blocker2")
+                        visible: ! mapvar("start_blocker2")
                     :
                         bg
                         file: "data/maps/triangles/start_bg.fus"
@@ -42,7 +42,7 @@ submaps:
                     :
                         bg
                         file: "data/maps/triangles/start2_bg_E.fus"
-                        visible: not mapvar("start2_blocker")
+                        visible: ! mapvar("start2_blocker")
                     :
                         bg
                         file: "data/maps/triangles/start2_bg_e2.fus"
@@ -50,7 +50,7 @@ submaps:
                     :
                         bg
                         file: "data/maps/triangles/start2_bg_E2.fus"
-                        visible: not mapvar("start4_blocker")
+                        visible: ! mapvar("start4_blocker")
                     :
                         bg
                         file: "data/maps/triangles/start2_bg.fus"
@@ -62,7 +62,7 @@ submaps:
             :
                 bg
                 file: "data/maps/triangles/start3_bg_E.fus"
-                visible: not mapvar("start3_blocker")
+                visible: ! mapvar("start3_blocker")
                 pos: eval: (14 12) + (22 15) + (11 14)
             :
                 bg
@@ -94,7 +94,7 @@ submaps:
                 submaps:
                     :
                         file: "data/maps/triangles/start_blocker2.fus"
-                        visible: not mapvar("start_blocker2")
+                        visible: ! mapvar("start_blocker2")
                         pos: (0 9)
                         mapper: ("triple")
             "start2":
@@ -112,7 +112,7 @@ submaps:
                         mapper: ("triple")
                     :
                         file: "data/maps/triangles/start2_blocker.fus"
-                        visible: not mapvar("start2_blocker")
+                        visible: ! mapvar("start2_blocker")
                         pos: (10 10)
             "start3":
                 pos: eval: (14 12) + (22 15)
@@ -123,7 +123,7 @@ submaps:
                         file: "data/maps/triangles/start3.fus"
                     :
                         file: "data/maps/triangles/start3_blocker.fus"
-                        visible: not mapvar("start3_blocker")
+                        visible: ! mapvar("start3_blocker")
                         pos: (17 7)
             "cage":
                 file: "data/maps/triangles/cage.fus"
@@ -140,4 +140,4 @@ submaps:
                 submaps:
                     :
                         file: "data/maps/triangles/start4_blocker.fus"
-                        visible: not mapvar("start4_blocker")
+                        visible: ! mapvar("start4_blocker")
