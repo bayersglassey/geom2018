@@ -4,6 +4,36 @@
 state "mainloop":
     # Main AI loop
 
+    "always"
+    if() then:
+        key: up u
+        key: up d
+        key: up l
+        key: up r
+        key: up x
+        key: up y
+
+        inc myvar("wait_time")
+        continue
+
+    "wait"
+    if: expr: < myvar("wait_time") 14
+    then:
+
+    "turn"
+    if: chance: 5%
+    then:
+        key: down b
+        set myvar("wait_time"): 20
+
+    "start_running"
+    if: chance: 5%
+    then:
+        set myvar("run_time"): 0
+        goto: "run_around"
+
+
+state "run_around":
 
     "always"
     if() then:
@@ -13,6 +43,8 @@ state "mainloop":
         key: up r
         key: up x
         key: up y
+
+        inc myvar("run_time")
         continue
 
 
@@ -21,6 +53,15 @@ state "mainloop":
     then:
         goto: "create_body"
         delay: 42
+
+
+    "stop_running"
+    if:
+        expr: > myvar("run_time") 10
+        chance: 5%
+    then:
+        set myvar("wait_time"): 0
+        goto: "mainloop"
 
 
     "jumping"
