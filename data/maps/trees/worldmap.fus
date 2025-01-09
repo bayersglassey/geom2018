@@ -59,10 +59,15 @@ submaps:
                 file: "data/maps/trees/start7_bg.fus"
                 pos: eval: (5 5) + (12 5) + (22 3)
                 tileset: "data/maps/trees/tilesets/trees_dark.fus"
-            :
+            "start7":
                 file: "data/maps/trees/start7.fus"
                 pos: eval: (5 5) + (12 5) + (22 3)
                 camera: (6 6)
+                submaps:
+                    :
+                        file: "data/maps/trees/start7_water.fus"
+                        pos: (13 5)
+                        tileset: "data/maps/sprucetown/tilesets/earth.fus"
             :
                 pos: eval: (5 5) + (12 5) + (22 3) + (23 8)
                 submaps:
