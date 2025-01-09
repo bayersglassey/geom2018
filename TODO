@@ -1017,8 +1017,31 @@ HERE'S THE PLAN:
     And force you to escape through a bunch of deathrollers...
     So, remove player's ability to just press "1" and magically appear back at
     a savepoint...
-[ ] trees: data/maps/trees/start7.fus should totally use earth tileset!..
-    Except split off the top-left part of it, that doesn't look good as earth.
+[X] data/maps/trees/start7.fus: the edges and water are both blue...
+    Can we maybe make water a different colour in earth tileset?..
+    Nah, I tried it and it's weird.
+    So, how about an earth tileset with modified tiles?..
+    OR BETTER YET, HAVE ADJECENT WATER TILES AFFECT THE EARTH TILES!
+    Currently, we have:
+        verts:
+            "0": when_faces_solid:
+                none: "earth_vert0_grass"
+                some: "earth_vert0"
+                all:  "earth_vert0_dirt"
+            ...etc...
+        edges:
+            "0": when_faces_solid:
+                neither: "earth_edge0_grass_both"
+                bottom:  "earth_edge0_grass_top"
+                top:     "earth_edge0_grass_bottom"
+                both:    "earth_edge0_dirt"
+            ...etc...
+        faces:
+            "0": "earth_face0" "earth_face0_r1"
+            ...etc...
+    ...so, can we uhhhhh have uhhhh "earth_edge0_water", etc?..
+    And also, let's have face "0" have a when_adjacent_faces_water
+    kind of a thing?..
 [ ] LOOK AT MEMORY USAGE
     ...it may be causin' fans to blow
 
@@ -1033,3 +1056,6 @@ Jan 8, 2024:
     not an ability?..
     Also, currently it's totally unclear that once you go down & come back
     up, the switch to get rollerspider has been "unlocked".
+    But I think we should just remove tutorial3/start_exit.fus and its door
+    entirely.
+    I thiiiiink you should probably be rescuing a spider from tutorial3...
