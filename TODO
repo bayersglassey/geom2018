@@ -1053,6 +1053,12 @@ Jan 8, 2024:
         [X] There is actually already a body->visible_expr, used for bodies which
             come from submap recordings!.. so... we could actually add support
             for a "target" field on recording "parts".
+        [ ] doors should show up on the minimap as cyan!..
+            So, when camera_render_map is rendering bodies on the minimap,
+            it should somehow detect doors...
+            I think a body_t field is prooooobably the most straightforward
+            here?.. or rather, body->anim?.. errrrrrrr I guess it should be
+            on the state. So, body->state->is_door.
     [X] Add "target" submaps, which are rendered on the minimap using a
         palmapper.
         (hexmap_submap_t has two fields, rgraph_map and rgraph_minimap.
@@ -1069,7 +1075,7 @@ Jan 8, 2024:
     I think if there are things on the map which let you use the minimap,
     instead of a dedicated button, that might be really nice.
     So then people aren't jumping in and out of the minimap; they're forced
-    to plot a course and then explode it bodily, as it were.
+    to plot a course and then explore it bodily, as it were.
     But also, the minimap tells people where to go next!
     And if we're going to show text, maybe we can do it while "using the
     minimap" like that.
