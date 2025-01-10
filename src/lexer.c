@@ -1457,10 +1457,12 @@ static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
             if(c == 'T'){
                 /* lexer->token == "GET_STR" */
                 token = strdup_quoted(val);
+                if(!token)return 1;
                 token_type = FUS_LEXER_TOKEN_STR;
             }else{
                 /* lexer->token == "GET_SYM" */
                 token = strdup(val);
+                if(!token)return 1;
                 token_type = FUS_LEXER_TOKEN_SYM;
             }
         }
@@ -1508,6 +1510,26 @@ static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
 
         free(name);
         free(s0);
+    }else if(fus_lexer_got(lexer, "STR")){
+        err = fus_lexer_next(lexer);
+        if(err)return err;
+
+        char *val;
+        if(fus_lexer_got_name(lexer)){
+            err = _fus_lexer_get_name(lexer, &val);
+            if(err)return err;
+        }else{
+            err = _fus_lexer_get_str_fancy(lexer, &val);
+            if(err)return err;
+        }
+
+        char *token = strdup_quoted(val);
+        if(!token)return 1;
+        fus_lexer_set_mem_managed_token(lexer, token);
+        lexer->_token_len = lexer->pos - macro_start_pos;
+        lexer->token_type = FUS_LEXER_TOKEN_STR;
+        *found_token_ptr = true;
+        free(val);
     }else{
         return fus_lexer_unexpected(lexer, NULL);
     }

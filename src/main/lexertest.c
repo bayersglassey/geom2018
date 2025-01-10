@@ -112,8 +112,16 @@ static int _run_tests(){
 
     /* STR macros */
     err = run_test(
-        "$SET_STR X xx 1 2 $GET_STR X 3 4",
-        "1 2 \"xx\" 3 4");
+        "1 $STR \"aaa\" 2",
+        "1 \"aaa\" 2");
+    if(err)return err;
+    err = run_test(
+        "1 $STR (lines(\"aaa\" \"bbb\")) 2",
+        "1 \"aaa\\nbbb\\n\" 2");
+    if(err)return err;
+    err = run_test(
+        "1 $STR (lines(at(2 1) \"aaa\" \"bbb\")) 2",
+        "1 \"\\n  aaa\\n  bbb\\n\" 2");
     if(err)return err;
     err = run_test(
         "1 2 $SET_STR X xx $GET_STR X 3 4",
