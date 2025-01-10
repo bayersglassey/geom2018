@@ -1017,31 +1017,6 @@ HERE'S THE PLAN:
     And force you to escape through a bunch of deathrollers...
     So, remove player's ability to just press "1" and magically appear back at
     a savepoint...
-[X] data/maps/trees/start7.fus: the edges and water are both blue...
-    Can we maybe make water a different colour in earth tileset?..
-    Nah, I tried it and it's weird.
-    So, how about an earth tileset with modified tiles?..
-    OR BETTER YET, HAVE ADJECENT WATER TILES AFFECT THE EARTH TILES!
-    Currently, we have:
-        verts:
-            "0": when_faces_solid:
-                none: "earth_vert0_grass"
-                some: "earth_vert0"
-                all:  "earth_vert0_dirt"
-            ...etc...
-        edges:
-            "0": when_faces_solid:
-                neither: "earth_edge0_grass_both"
-                bottom:  "earth_edge0_grass_top"
-                top:     "earth_edge0_grass_bottom"
-                both:    "earth_edge0_dirt"
-            ...etc...
-        faces:
-            "0": "earth_face0" "earth_face0_r1"
-            ...etc...
-    ...so, can we uhhhhh have uhhhh "earth_edge0_water", etc?..
-    And also, let's have face "0" have a when_adjacent_faces_water
-    kind of a thing?..
 [ ] LOOK AT MEMORY USAGE
     ...it may be causin' fans to blow
 
@@ -1059,3 +1034,47 @@ Jan 8, 2024:
     But I think we should just remove tutorial3/start_exit.fus and its door
     entirely.
     I thiiiiink you should probably be rescuing a spider from tutorial3...
+
+
+[ ] I'd like a way to combine palettes.
+    So, do a linear transform between 2 palettes (pal1, pal2, percent).
+    Also a linear transform on a palette with a colour (pal, colour, percent).
+    And then, we can have an area where there's a series of submaps, each one
+    progressing linearly from one palette to another.
+
+[ ] Instead of text, let's show people where to go using the minimap.
+    So far, we haven't even taught players about the minimap during the
+    tutorial!..
+    So, let's do things like:
+
+    [X] Add "target" bodies, which flash on the minimap like the player's
+        body does! But a different colour, maybe even a different rgraph,
+        not just a triangle?..
+        [X] There is actually already a body->visible_expr, used for bodies which
+            come from submap recordings!.. so... we could actually add support
+            for a "target" field on recording "parts".
+    [X] Add "target" submaps, which are rendered on the minimap using a
+        palmapper.
+        (hexmap_submap_t has two fields, rgraph_map and rgraph_minimap.
+        We can apply a palmapper to rgraph_minimap before using it in
+        camera_render_map.)
+        [X] The same way submaps have a visible_expr, they can have a target_expr.
+            ...except, really we want that to go by hexmap_submap_group, right?..
+    [X] Add "doors" which show you the minimap
+        [ ] Make this a separate type of door, i.e. anim/minimap_door.fus
+        [ ] Add support for custom text for each such "door"
+
+    ...okay? And now, let's think about how to make use of those things...
+    But like, without giving up our "naturalist" feel.
+    I think if there are things on the map which let you use the minimap,
+    instead of a dedicated button, that might be really nice.
+    So then people aren't jumping in and out of the minimap; they're forced
+    to plot a course and then explode it bodily, as it were.
+    But also, the minimap tells people where to go next!
+    And if we're going to show text, maybe we can do it while "using the
+    minimap" like that.
+
+    But we also need some kind of "dialogue system", I think...
+    Like, it needs to be clearer that another character is speaking to you.
+    Maybe?.. and we could like, point the camera at them while they're
+    speaking, and zoom in a bit?..
