@@ -329,6 +329,13 @@ static int camera_render_map(camera_t *camera,
         for(int i = 0; i < map->bodies_len; i++){
             body_t *body = map->bodies[i];
 
+            if(!body->state || !body->state->rgraph)continue;
+
+            bool visible;
+            err = body_is_visible(body, &visible);
+            if(err)return err;
+            if(!visible)continue;
+
             bool is_target;
             err = body_is_target(body, &is_target);
             if(err)return err;
