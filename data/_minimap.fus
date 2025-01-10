@@ -15,8 +15,23 @@ palmappers:
 
     "minimap_target":
         :
-        1,  8: eval: 1 + 4
-        10, 8: eval: 1 + 8 + 4
+        eval(1 + 1): eval: 1 + 4
+        #eval(1 + 2): eval: 1 + 4
+        #eval(1 + 3): eval: 1 + 4
+        eval(1 + 4): eval: 1 + 4
+        eval(1 + 5): eval: 1 + 4
+        eval(1 + 6): eval: 1 + 4
+        eval(1 + 7): eval: 1 + 4
+        #eval(1 + 8): eval: 1 + 4
+
+        eval(9 + 1): eval: 9 + 4
+        #eval(9 + 2): eval: 9 + 4
+        #eval(9 + 3): eval: 9 + 4
+        eval(9 + 4): eval: 9 + 4
+        eval(9 + 5): eval: 9 + 4
+        eval(9 + 6): eval: 9 + 4
+        eval(9 + 7): eval: 9 + 4
+        #eval(9 + 8): eval: 9 + 4
 
 shapes:
 

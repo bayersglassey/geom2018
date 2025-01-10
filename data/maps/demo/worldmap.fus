@@ -7,8 +7,14 @@ tileset: "data/tileset1.fus"
 actors:
     : "actor/guide/actor.fus" "spider_cpu"
     : "actor/eyespider_tunnels.fus"
+        empty # no palmapper... this is needed so we can specify target... TODO: fix this madness
+        target: T
     : "actor/eyespider_dodecas.fus"
+        empty # no palmapper... this is needed so we can specify target... TODO: fix this madness
+        target: T
     : "actor/eyespider_vines.fus"
+        empty # no palmapper... this is needed so we can specify target... TODO: fix this madness
+        target: T
 
 vars:
     "guide_passed_start": F

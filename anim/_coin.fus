@@ -29,6 +29,12 @@ state "crouch":
 
 state "collected":
     rgraph: "dead_once_centered"
+    if() then: goto immediate: "collected_wait"
+
+state "collected_wait":
+    # Like "collected", but with no rgraph, so we don't show up as
+    # a target on the minimap!
+
     if() then:
         # Do whatever it is coin-like things do while they've been collected...
         call: "while_collected"

@@ -18,6 +18,7 @@ vars:
 submaps:
     "spidertown":
         file: "data/maps/demo/map3.fus"
+        target: T
         pos: (0 0)
         camera: (0 4)
         mapper: ("triple")
@@ -41,7 +42,7 @@ submaps:
                 file: "data/maps/test/map3x_blocker.fus"
                 visible: ! mapvar("map3x_blocker")
                 pos: eval: (1 10) + (-2 4)
-    "spidertown":
+    "spidertown_outskirts":
         pos: (-1 -10)
         camera: (4 0)
         mapper: ("triple")

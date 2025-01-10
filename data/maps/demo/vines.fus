@@ -1,5 +1,6 @@
 parts:
     "E": recording "data/recs/mini_eye_crouch.fus"
+        target: T
         vars:
             "key": "eyespider_vines_ran_away_3"
             "antikey": "eyespider_vines_ran_away_4"
