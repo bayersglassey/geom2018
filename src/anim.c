@@ -434,6 +434,11 @@ static int _parse_cond(state_context_t *context, fus_lexer_t *lexer,
         CLOSE
         cond->type = STATE_COND_TYPE_DEAD;
         cond->u.dead = dead;
+    }else if(GOT("is_player")){
+        NEXT
+        OPEN
+        CLOSE
+        cond->type = STATE_COND_TYPE_IS_PLAYER;
     }else if(GOT("chance")){
         NEXT
         OPEN
@@ -477,6 +482,27 @@ static int _parse_cond(state_context_t *context, fus_lexer_t *lexer,
         NEXT
         err = valexpr_parse(&cond->u.valexpr, lexer);
         if(err)return err;
+    }else if(GOT("as")){
+        NEXT
+        cond->type = STATE_COND_TYPE_AS;
+
+        if(GOT("you")){
+            NEXT
+            cond->u.as.type = AS_YOU;
+        }else{
+            return UNEXPECTED("you");
+        }
+
+        ARRAY_INIT(cond->u.as.sub_conds)
+
+        OPEN
+        while(!GOT(")")){
+            ARRAY_PUSH_NEW(state_cond_t*, cond->u.as.sub_conds,
+                sub_cond)
+            err = _parse_cond(context, lexer, prend, space, sub_cond);
+            if(err)return err;
+        }
+        NEXT
     }else{
         return UNEXPECTED(NULL);
     }
@@ -768,7 +794,7 @@ static int _parse_effect(state_context_t *context, fus_lexer_t *lexer,
 
         if(GOT("you")){
             NEXT
-            effect->u.as.type = EFFECT_AS_YOU;
+            effect->u.as.type = AS_YOU;
         }else{
             return UNEXPECTED("you");
         }
@@ -1315,6 +1341,10 @@ void state_cond_cleanup(state_cond_t *cond){
         case STATE_COND_TYPE_EXPR:
         case STATE_COND_TYPE_EXISTS:
             valexpr_cleanup(&cond->u.valexpr);
+            break;
+        case STATE_COND_TYPE_AS:
+            ARRAY_FREE_PTR(state_cond_t*, cond->u.as.sub_conds,
+                state_cond_cleanup)
             break;
         default: break;
     }

@@ -151,6 +151,7 @@ int state_cond_match(state_cond_t *cond,
     hexgame_t *game = context->game;
     actor_t *actor = context->actor;
     body_t *body = context->body;
+    body_t *your_body = context->your_body;
 
     switch(cond->type){
     case STATE_COND_TYPE_FALSE: {
@@ -263,6 +264,11 @@ int state_cond_match(state_cond_t *cond,
             body->dead == cond->u.dead;
         break;
     }
+    case STATE_COND_TYPE_IS_PLAYER: {
+        CHECK_BODY
+        matched = body_get_player(body) != NULL;
+        break;
+    }
     case STATE_COND_TYPE_CHANCE: {
         int n = rand() % cond->u.ratio.b;
         matched = n <= cond->u.ratio.a;
@@ -302,6 +308,39 @@ int state_cond_match(state_cond_t *cond,
         if(err)return err;
 
         matched = result.val != NULL && result.val->type != VAL_TYPE_NULL;
+        break;
+    }
+    case STATE_COND_TYPE_AS: {
+        switch(cond->u.as.type){
+            case AS_YOU: {
+                if(!your_body){
+                    fprintf(stderr, "No your_body!\n");
+                    return 2;
+                }
+
+                /* We apply our sub-conditions "as you", that is, as your_body.
+                The terminology here is just too silly, eh?
+                Anyway, long story short, sub_context is like context but with
+                body and your_body swapped. */
+                hexgame_state_context_t sub_context = *context;
+                sub_context.body = your_body;
+                sub_context.your_body = body;
+
+                matched = true;
+                for(int i = 0; i < cond->u.as.sub_conds_len; i++){
+                    state_cond_t *sub_cond = cond->u.as.sub_conds[i];
+                    err = state_cond_match(sub_cond, &sub_context, &matched);
+                    if(err)return err;
+                    if(!matched)break;
+                }
+
+                break;
+            }
+            default:
+                fprintf(stderr, "Unrecognized \"as\" type: %i\n",
+                    cond->u.as.type);
+                return 2;
+        }
         break;
     }
     default: {
@@ -791,7 +830,7 @@ int state_effect_apply(state_effect_t *effect,
     }
     case STATE_EFFECT_TYPE_AS: {
         switch(effect->u.as.type){
-            case EFFECT_AS_YOU: {
+            case AS_YOU: {
                 if(!your_body){
                     fprintf(stderr, "No your_body!\n");
                     return 2;

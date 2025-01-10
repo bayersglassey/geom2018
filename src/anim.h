@@ -49,8 +49,8 @@ enum effect_boolean {
     EFFECT_BOOLEAN_TOGGLE
 };
 
-enum effect_as {
-    EFFECT_AS_YOU
+enum anim_as {
+    AS_YOU
 };
 
 
@@ -205,12 +205,14 @@ enum state_cond_type {
     STATE_COND_TYPE_KEY,
     STATE_COND_TYPE_COLL,
     STATE_COND_TYPE_DEAD,
+    STATE_COND_TYPE_IS_PLAYER,
     STATE_COND_TYPE_CHANCE,
     STATE_COND_TYPE_ANY,
     STATE_COND_TYPE_ALL,
     STATE_COND_TYPE_NOT,
     STATE_COND_TYPE_EXPR,
     STATE_COND_TYPE_EXISTS,
+    STATE_COND_TYPE_AS,
     STATE_COND_TYPES
 };
 
@@ -221,12 +223,14 @@ static const char *state_cond_type_name(int type){
         case STATE_COND_TYPE_KEY: return "key";
         case STATE_COND_TYPE_COLL: return "coll";
         case STATE_COND_TYPE_DEAD: return "dead";
+        case STATE_COND_TYPE_IS_PLAYER: return "is_player";
         case STATE_COND_TYPE_CHANCE: return "chance";
         case STATE_COND_TYPE_ANY: return "any";
         case STATE_COND_TYPE_ALL: return "all";
         case STATE_COND_TYPE_NOT: return "not";
         case STATE_COND_TYPE_EXPR: return "expr";
         case STATE_COND_TYPE_EXISTS: return "exists";
+        case STATE_COND_TYPE_AS: return "as";
         default: return "unknown";
     }
 }
@@ -266,6 +270,10 @@ typedef struct state_cond {
         struct {
             ARRAY_DECL(struct state_cond*, conds)
         } subconds;
+        struct {
+            int type; /* enum anim_as */
+            ARRAY_DECL(struct state_cond*, sub_conds)
+        } as;
         valexpr_t valexpr;
         int dead;
     } u;
@@ -392,7 +400,7 @@ typedef struct state_effect {
         } set;
         struct state_effect_ite *ite;
         struct {
-            int type; /* enum effect_as */
+            int type; /* enum anim_as */
             ARRAY_DECL(struct state_effect*, sub_effects)
         } as;
     } u;
