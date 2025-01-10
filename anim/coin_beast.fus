@@ -172,6 +172,7 @@ state "uncrawling":
     if() then: goto: "stand"
 
 state "start_jump":
+    unsafe
     "default"
     if() then:
         goto: "jump"

@@ -1,6 +1,7 @@
 parts:
     "R": actor "actor/aibig_roller.fus"
     "u": recording "data/recs/switch.fus"
+        target: T
         vars:
             "key": "start4_blocker"
 

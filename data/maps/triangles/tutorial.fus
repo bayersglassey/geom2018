@@ -1,7 +1,6 @@
 spawn: (-6 -6) 1 n
 parts:
     "L": recording "data/recs/big_roller_l.fus"
-    "R": recording "data/recs/big_roller_r.fus"
 
 collmap:
     ;;

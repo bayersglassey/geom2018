@@ -1,5 +1,6 @@
 parts:
     "t": recording "data/recs/switch.fus"
+        target: T
         vars:
             "key": "start2_blocker"
 

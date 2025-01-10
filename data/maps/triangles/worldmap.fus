@@ -76,6 +76,7 @@ submaps:
         submaps:
             "tutorial":
                 file: "data/maps/triangles/tutorial.fus"
+                target: ! mapvar("start_blocker2")
                 pos: (-10 -6)
                 camera: (-5 -10)
                 mapper: ("triple")
@@ -105,8 +106,9 @@ submaps:
                         pos: (19 12)
                         camera: (3 0)
                         mapper: ("triple")
-                    :
+                    "start2b":
                         file: "data/maps/triangles/start2b.fus"
+                        target: && mapvar("start_blocker2") ! mapvar("start2_blocker")
                         pos: (16 0)
                         camera: (-5 0)
                         mapper: ("triple")
@@ -134,6 +136,7 @@ submaps:
                     : "data/maps/triangles/recs/caged_eyespider.fus"
             "start4":
                 file: "data/maps/triangles/start4.fus"
+                target: && mapvar("start2_blocker") ! mapvar("start3_blocker")
                 pos: eval: (14 12) + (22 15) + (-4 3)
                 camera: (3 -7)
                 mapper: ("double")

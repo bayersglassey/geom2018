@@ -1,5 +1,6 @@
 
 state "start_jump":
+    unsafe
 
     "fly"
     if:

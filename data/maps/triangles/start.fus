@@ -1,6 +1,7 @@
 spawn: (1 3) 0 n
 parts:
     "s": recording "data/recs/switch.fus"
+        target: T
         vars:
             "key": "start_blocker2"
     "D": recording "data/recs/door.fus"
