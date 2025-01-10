@@ -77,3 +77,5 @@ shapes:
         shapes:
             : "doorframe" (0 0 0 0)  0 f
             : "doorstuff" (0 0 0 0)  0 f
+
+    "minimap_door": palmap ("cycle3") ("door")

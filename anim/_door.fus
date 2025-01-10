@@ -2,6 +2,7 @@
 # Expected variables:
 # RGRAPH_NS (str): e.g. "", "ability_"
 # ABILITY (bool)
+# MINIMAP (bool)
 
 
 $SET_STR NS "spider_"
@@ -44,7 +45,6 @@ collmap "cooldown":
 
 vars:
     "oneway": F
-    "show_minimap": F
     "location": null
     "map": null
     "anim": null
@@ -101,7 +101,12 @@ state "open":
         # me: door
         # you: a body which just entered this door
 
-        if: expr: yourvar(".safe")
+        if:
+            expr: yourvar(".safe")
+
+            # A body can't use a minimap-door unless the body
+            # is controlled by a player
+            $IF MINIMAP: as you: is_player()
         then:
 
             # Relocate whatever entered the door
@@ -125,8 +130,7 @@ state "open":
                 set myvar(yourvar("set_yourbool")): T
                 call: "update_vars"
 
-            if: expr: myvar("show_minimap")
-            then: show_minimap()
+            $IF MINIMAP: show_minimap()
 
             if: exists myvar("set_mapvar.name")
             then: set mapvar(myvar("set_mapvar.name")): myvar("set_mapvar.value")

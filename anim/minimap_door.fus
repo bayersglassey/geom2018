@@ -1,0 +1,5 @@
+
+$SET_STR RGRAPH_NS "minimap_"
+$UNSET_BOOL ABILITY
+$SET_BOOL MINIMAP
+import "anim/_door.fus"

@@ -1,4 +1,5 @@
 
 $SET_STR RGRAPH_NS "ability_"
 $SET_BOOL ABILITY
+$UNSET_BOOL MINIMAP
 import "anim/_door.fus"
