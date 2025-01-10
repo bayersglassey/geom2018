@@ -59,9 +59,9 @@ shapes:
         #      ---|   |---
         #         +---+
         prismels:
-            : "tri" (1 0 0  0) 11 f eval: 1 + 8 + 1
-            : "sq"  (1 1 0 -1)  0 f eval: 1 + 0 + 1
-            : "tri" (2 2 0 -1)  5 f eval: 1 + 8 + 1
+            : "tri" (1 0 0  0) 11 f eval: 1 + 0 + 2
+            : "sq"  (1 1 0 -1)  0 f eval: 1 + 0 + 6
+            : "tri" (2 2 0 -1)  5 f eval: 1 + 0 + 2
 
     "_earth_edge0_grass_top":
         #         +---+---+
