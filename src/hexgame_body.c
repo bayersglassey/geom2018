@@ -103,6 +103,7 @@ int fus_lexer_get_keyinfo(fus_lexer_t *lexer,
 
 void body_cleanup(body_t *body){
     valexpr_cleanup(&body->visible_expr);
+    valexpr_cleanup(&body->target_expr);
     vars_cleanup(&body->vars);
     recording_cleanup(&body->recording);
     ARRAY_FREE_PTR(label_mapping_t*, body->label_mappings,
@@ -152,6 +153,7 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
     body->cur_submap = NULL;
 
     valexpr_set_literal_bool(&body->visible_expr, true);
+    valexpr_set_literal_bool(&body->target_expr, false);
 
     vars_init_with_props(&body->vars, hexgame_vars_prop_names);
     body->vars.callback = &body_vars_callback;
@@ -167,7 +169,6 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
     body->cooldown = 0;
     body->no_key_reset = false;
     body->dead = BODY_NOT_DEAD;
-    body->safe = false;
     body->remove = false;
     body->just_spawned = false;
 
@@ -269,6 +270,34 @@ int body_is_visible(body_t *body, bool *visible_ptr){
     }
 
     *visible_ptr = visible;
+    return 0;
+}
+
+int body_is_target(body_t *body, bool *target_ptr){
+    int err;
+
+    /* NOTE: not a minimap target by default. */
+    bool target = false;
+
+    valexpr_result_t result = {0};
+    valexpr_context_t context = {
+        .myvars = &body->vars,
+        .mapvars = &body->map->vars,
+        .globalvars = &body->game->vars
+    };
+    err = valexpr_get(&body->target_expr, &context, &result);
+    if(err){
+        fprintf(stderr,
+            "Error while evaluating visibility for body:\n");
+        body_dump(body, 0);
+        return err;
+    }else if(!result.val){
+        /* Val not found: use default target value */
+    }else{
+        target = val_get_bool(result.val);
+    }
+
+    *target_ptr = target;
     return 0;
 }
 
@@ -501,6 +530,12 @@ static var_t *_get_nosave_var(vars_t *vars, const char *name){
 int body_refresh_vars(body_t *body){
     int err;
     vars_t *vars = &body->vars;
+
+    {
+        var_t *var = _get_nosave_var(vars, ".safe");
+        if(var == NULL)return 1;
+        val_set_bool(&var->value, body->state? body->state->safe: false);
+    }
 
     {
         var_t *var = _get_nosave_var(vars, ".turn");

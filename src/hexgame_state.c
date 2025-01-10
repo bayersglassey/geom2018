@@ -633,6 +633,9 @@ int state_effect_apply(state_effect_t *effect,
         if(err)return err;
         break;
     }
+    case STATE_EFFECT_TYPE_SHOW_MINIMAP: {
+        game->show_minimap = 2;
+    }
     case STATE_EFFECT_TYPE_DIE: {
         CHECK_BODY
         body->dead = effect->u.dead;

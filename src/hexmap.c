@@ -126,11 +126,12 @@ int hexmap_get_or_add_submap_group(hexmap_t *map, const char *name,
 static int hexmap_parse_recording(fus_lexer_t *lexer, prismelrenderer_t *prend,
     const char **filename_ptr, const char **palmapper_name_ptr, int *frame_offset_ptr,
     trf_t *trf, vars_t *vars, vars_t *bodyvars, bool *relative_ptr,
-    valexpr_t *visible_expr
+    valexpr_t *visible_expr, valexpr_t *target_expr
 ){
     INIT
 
     valexpr_set_literal_bool(visible_expr, true);
+    valexpr_set_literal_bool(target_expr, false);
 
     OPEN
 
@@ -172,6 +173,14 @@ static int hexmap_parse_recording(fus_lexer_t *lexer, prismelrenderer_t *prend,
         NEXT
         OPEN
         err = valexpr_parse(visible_expr, lexer);
+        if(err)return err;
+        CLOSE
+    }
+
+    if(GOT("target")){
+        NEXT
+        OPEN
+        err = valexpr_parse(target_expr, lexer);
         if(err)return err;
         CLOSE
     }
@@ -229,6 +238,8 @@ static int hexmap_load_hexmap_recording(
 
         err = valexpr_copy(&body->visible_expr, &recording->visible_expr);
         if(err)return err;
+        err = valexpr_copy(&body->target_expr, &recording->target_expr);
+        if(err)return err;
 
         /* We uhhhh, don't do anything with recording->bodyvars,
         interestingly enough. */
@@ -250,6 +261,8 @@ static int hexmap_load_hexmap_recording(
         if(err)return err;
 
         err = valexpr_copy(&body->visible_expr, &recording->visible_expr);
+        if(err)return err;
+        err = valexpr_copy(&body->target_expr, &recording->target_expr);
         if(err)return err;
 
         err = vars_copy(&body->vars, &recording->bodyvars);
@@ -350,9 +363,10 @@ static int _hexmap_parse(hexmap_t *map, fus_lexer_t *lexer,
                 vars_init_with_props(&bodyvars, hexgame_vars_prop_names);
                 bool relative; /* unused here -- only used when parsing submaps */
                 valexpr_t visible_expr;
+                valexpr_t target_expr;
                 err = hexmap_parse_recording(lexer, prend,
                     &filename, &palmapper_name, &frame_offset, &trf,
-                    &vars, &bodyvars, &relative, &visible_expr);
+                    &vars, &bodyvars, &relative, &visible_expr, &target_expr);
                 if(err)return err;
 
                 ARRAY_PUSH_NEW(hexmap_recording_t*, map->recordings,
@@ -365,6 +379,7 @@ static int _hexmap_parse(hexmap_t *map, fus_lexer_t *lexer,
                 recording->vars = vars;
                 recording->bodyvars = bodyvars;
                 recording->visible_expr = visible_expr;
+                recording->target_expr = target_expr;
             }
             NEXT
         }
@@ -849,9 +864,10 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
             vars_init_with_props(&bodyvars, hexgame_vars_prop_names);
             bool relative;
             valexpr_t visible_expr;
+            valexpr_t target_expr;
             err = hexmap_parse_recording(lexer, prend,
                 &filename, &palmapper_name, &frame_offset, &trf,
-                &vars, &bodyvars, &relative, &visible_expr);
+                &vars, &bodyvars, &relative, &visible_expr, &target_expr);
             if(err)return err;
 
             if(relative){
@@ -869,6 +885,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
             recording->vars = vars;
             recording->bodyvars = bodyvars;
             recording->visible_expr = visible_expr;
+            recording->target_expr = target_expr;
         }
         NEXT
     }

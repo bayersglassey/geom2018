@@ -73,6 +73,7 @@ void hexcollmap_normalize_face(trf_t *index){
 
 void hexmap_recording_cleanup(hexmap_recording_t *recording){
     valexpr_cleanup(&recording->visible_expr);
+    valexpr_cleanup(&recording->target_expr);
     vars_cleanup(&recording->vars);
     vars_cleanup(&recording->bodyvars);
 }
@@ -87,6 +88,7 @@ void hexmap_recording_init(hexmap_recording_t *recording, int type,
     trf_zero(&recording->trf);
 
     valexpr_set_literal_bool(&recording->visible_expr, true);
+    valexpr_set_literal_bool(&recording->target_expr, false);
 
     vars_init_with_props(&recording->vars, hexgame_vars_prop_names);
     vars_init_with_props(&recording->bodyvars, hexgame_vars_prop_names);
@@ -104,6 +106,8 @@ int hexmap_recording_clone(hexmap_recording_t *recording1,
     recording1->trf = recording2->trf;
 
     err = valexpr_copy(&recording1->visible_expr, &recording2->visible_expr);
+    if(err)return err;
+    err = valexpr_copy(&recording1->target_expr, &recording2->target_expr);
     if(err)return err;
 
     err = vars_copy(&recording1->vars, &recording2->vars);
@@ -151,7 +155,7 @@ void hexmap_location_init(hexmap_location_t *location, const char *name){
 
 void hexcollmap_part_init(hexcollmap_part_t *part, int type,
     char part_c, const char *filename, const char *palmapper_name,
-    int frame_offset, valexpr_t *visible_expr,
+    int frame_offset, valexpr_t *visible_expr, valexpr_t *target_expr,
     vars_t *vars, vars_t *bodyvars
 ){
     part->type = type;
@@ -164,8 +168,9 @@ void hexcollmap_part_init(hexcollmap_part_t *part, int type,
     part->trf.rot = 0;
     part->trf.flip = false;
 
-    /* NOTE: we take ownership of *visible_expr from caller */
+    /* NOTE: we take ownership of *visible_expr and *target_expr from caller */
     part->visible_expr = *visible_expr;
+    part->target_expr = *target_expr;
 
     /* vars_t must guarantee that it can be freely copied.
     Which it does. (See the comment in definition of vars_t.) */
@@ -175,6 +180,7 @@ void hexcollmap_part_init(hexcollmap_part_t *part, int type,
 
 void hexcollmap_part_cleanup(hexcollmap_part_t *part){
     valexpr_cleanup(&part->visible_expr);
+    valexpr_cleanup(&part->target_expr);
     vars_cleanup(&part->vars);
     vars_cleanup(&part->bodyvars);
 }

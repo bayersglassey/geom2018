@@ -136,6 +136,7 @@ typedef struct body {
     hexgame_location_t loc;
     keyinfo_t keyinfo;
     valexpr_t visible_expr;
+    valexpr_t target_expr;
     vars_t vars;
 
     ARRAY_DECL(label_mapping_t*, label_mappings)
@@ -150,7 +151,6 @@ typedef struct body {
     int cooldown;
     bool no_key_reset; /* don't reset keyinfo when cooldown reaches zero */
     int dead; /* enum body_dead */
-    bool safe; /* lets player know it should update its safe_location */
     bool remove;
         /* marks body for removal (for use e.g. while iterating over bodies) */
     bool just_spawned;
@@ -199,6 +199,7 @@ int body_init(body_t *body, struct hexgame *game, hexmap_t *map,
     palettemapper_t *palmapper);
 void body_dump(body_t *body, int depth);
 int body_is_visible(body_t *body, bool *visible_ptr);
+int body_is_target(body_t *body, bool *target_ptr);
 int body_get_index(body_t *body);
 bool body_is_done_for(body_t *body);
 int body_respawn(body_t *body, vec_t pos, rot_t rot, bool turn,

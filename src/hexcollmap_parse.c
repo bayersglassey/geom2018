@@ -360,6 +360,8 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
 
         err = valexpr_copy(&recording->visible_expr, &part->visible_expr);
         if(err)return err;
+        err = valexpr_copy(&recording->target_expr, &part->target_expr);
+        if(err)return err;
 
         err = vars_copy(&recording->vars, &part->vars);
         if(err)return err;
@@ -753,6 +755,8 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
 
     valexpr_t visible_expr;
     valexpr_set_literal_bool(&visible_expr, true);
+    valexpr_t target_expr;
+    valexpr_set_literal_bool(&target_expr, false);
 
     vars_t vars;
     vars_init_with_props(&vars, hexgame_vars_prop_names);
@@ -783,7 +787,8 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
             if(err)return err;
         }
 
-        if(!GOT(")") && !GOT("visible") && !GOT("vars") && !GOT("bodyvars")){
+        /* NOTE: THIS IF STATEMENT SUCKS */
+        if(!GOT(")") && !GOT("visible") && !GOT("target") && !GOT("vars") && !GOT("bodyvars")){
             if(GOT("empty")){
                 NEXT
             }else{
@@ -798,6 +803,14 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
             NEXT
             OPEN
             err = valexpr_parse(&visible_expr, lexer);
+            if(err)return err;
+            CLOSE
+        }
+
+        if(GOT("target")){
+            NEXT
+            OPEN
+            err = valexpr_parse(&target_expr, lexer);
             if(err)return err;
             CLOSE
         }
@@ -822,7 +835,7 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
 
     hexcollmap_part_init(part, type, part_c,
         filename, palmapper_name, frame_offset,
-        &visible_expr, &vars, &bodyvars);
+        &visible_expr, &target_expr, &vars, &bodyvars);
     trf_cpy(collmap->space, &part->trf, &trf);
     part->draw_z = draw_z;
     return 0;

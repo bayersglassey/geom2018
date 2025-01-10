@@ -794,6 +794,13 @@ static int _parse_effect(state_context_t *context, fus_lexer_t *lexer,
         effect->u.play_filename = play_filename;
 
         CLOSE
+    }else if(GOT("show_minimap")){
+        NEXT
+        OPEN
+
+        effect->type = STATE_EFFECT_TYPE_SHOW_MINIMAP;
+
+        CLOSE
     }else{
         return UNEXPECTED(NULL);
     }

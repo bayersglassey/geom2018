@@ -301,6 +301,7 @@ enum state_effect_type {
     STATE_EFFECT_TYPE_UNSET,
     STATE_EFFECT_TYPE_IF,
     STATE_EFFECT_TYPE_AS,
+    STATE_EFFECT_TYPE_SHOW_MINIMAP,
     STATE_EFFECT_TYPES
 };
 
@@ -330,6 +331,7 @@ static const char *state_effect_type_name(int type){
         case STATE_EFFECT_TYPE_UNSET: return "unset";
         case STATE_EFFECT_TYPE_IF: return "if";
         case STATE_EFFECT_TYPE_AS: return "as";
+        case STATE_EFFECT_TYPE_SHOW_MINIMAP: return "show_minimap";
         default: return "unknown";
     }
 }

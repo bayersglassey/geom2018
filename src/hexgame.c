@@ -320,6 +320,32 @@ static int camera_render_map(camera_t *camera,
             return 2;
         }
 
+        rendergraph_t *target_marker_rgraph;
+        err = palettemapper_apply_to_rendergraph(target_palmapper,
+            prend, marker_rgraph, NULL, prend_space, &target_marker_rgraph);
+        if(err)return err;
+
+        /* Render a minimap marker for bodies which are "targets" */
+        for(int i = 0; i < map->bodies_len; i++){
+            body_t *body = map->bodies[i];
+
+            bool is_target;
+            err = body_is_target(body, &is_target);
+            if(err)return err;
+            if(!is_target)continue;
+
+            trf_t trf;
+            hexgame_location_init_trf(&body->loc, &trf);
+
+            err = _render_rgraph(
+                target_marker_rgraph,
+                trf.add, trf.rot, trf.flip, frame_i, pos_mul,
+                camera_renderpos, mapper, surface,
+                pal, x0, y0, zoom);
+            if(err)return err;
+        }
+
+        /* Render a minimap marker for players' bodies */
         for(int i = 0; i < game->players_len; i++){
             player_t *player = game->players[i];
             if(!player->body)continue;
@@ -332,6 +358,7 @@ static int camera_render_map(camera_t *camera,
                 trf.add, trf.rot, trf.flip, frame_i, pos_mul,
                 camera_renderpos, mapper, surface,
                 pal, x0, y0, zoom);
+            if(err)return err;
         }
     }
 
@@ -398,6 +425,7 @@ int camera_render(camera_t *camera,
             body_t *body = actor->body;
             if(!body || body->map != map)continue;
 
+            /* Actor's state can have an rgraph to be rendered at actor's body */
             if(state->rgraph){
                 err = body_render_rgraph(body, state->rgraph,
                     surface, pal, x0, y0, zoom, camera_renderpos, mapper,
