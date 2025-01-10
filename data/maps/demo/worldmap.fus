@@ -20,6 +20,8 @@ vars:
     "guide_passed_start": F
     "guide_passed_start2": F
 
+    "start2_minimap": F
+
     "eyespider_tunnels_ran_away_1": F
 
 

@@ -11,6 +11,9 @@ parts:
         vars:
             "need_key": "eyespider_vines_mini_eye_respawn"
             "key": "spider_left_vines"
+    "M": recording "data/recs/minimap_door.fus"
+        vars:
+            "set_mapbool": "start2_minimap"
 default_vert: "1"
 default_edge: "1"
 default_face: "1"
@@ -20,7 +23,7 @@ collmap:
     ;;
     ;;
     ;;
-    ;;
+    ;;                                                       ?                                 [M]
     ;;                                                                       S
     ;;                                                     + - + - + - + - + - + - + - +
     ;;                                                    /                             \
