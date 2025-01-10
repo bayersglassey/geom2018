@@ -19,9 +19,6 @@ collmap "start4":
     ;;                  + - + - + - + - + - + - + - + - +
 
 state "create_body":
-    if: expr: mapvar("guide_at_start4")
-    then: goto immediate: "start4"
-
     if: expr: mapvar("guide_passed_start2")
     then: goto immediate: "start3"
 
@@ -57,29 +54,5 @@ state "start2":
         play: "actor/guide/rec/start2.fus"
 
 state "start3":
-    if:
-        coll: bodies("touch") any yes
-            ;;   + - + - + - + - +
-            ;;  /*\*/*\*/*\*/*\*/*\
-            ;; + - + - + - + - + - +
-            ;;  \*/*\*/*\*/*\*/*\*/
-            ;;  (+)- + - + - + - +
-    then:
-        set mapvar("guide_at_start4"): T
-        play: "actor/guide/rec/start3_to_start4.fus"
-        goto: "start4"
     if() then:
         play: "actor/guide/rec/start3.fus"
-
-state "start4":
-    if:
-        not: coll: bodies("anim/hexroller.fus") any yes collmap("start4")
-    then:
-        play: "actor/guide/rec/start4_to_dodecas_0_0.fus"
-        goto: "dodecas_0_0"
-    if() then:
-        play: "actor/guide/rec/start4.fus"
-
-state "dodecas_0_0":
-    if() then:
-        play: "actor/guide/rec/dodecas_0_0.fus"

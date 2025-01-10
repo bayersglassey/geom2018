@@ -19,7 +19,6 @@ actors:
 vars:
     "guide_passed_start": F
     "guide_passed_start2": F
-    "guide_at_start4": F
 
     "eyespider_tunnels_ran_away_1": F
 
