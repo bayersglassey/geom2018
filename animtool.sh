@@ -3,8 +3,7 @@
 set -eu
 
 usage() {
-    echo "Usage: $0 [--ext EXT] [--open] ANIM [OPTION ...]" >&2
-    echo "...where the file anim/ANIM.fus is expected to exist." >&2
+    echo "Usage: $0 [--ext EXT] [--open] FILE [OPTION ...]" >&2
     echo "The OPTIONs are those of bin/animtool, run it with --help to see them." >&2
 }
 
@@ -26,13 +25,13 @@ test "$#" -ge 1 || {
     exit 1
 }
 
-anim="$1"
+infile="$1"
 shift
 
+filename="$(basename "$infile")"
 outdir="output"
-infile="anim/$anim.fus"
-dotfile="$outdir/$anim.dot"
-outfile="$outdir/$anim.$ext"
+dotfile="$outdir/$filename.dot"
+outfile="$outdir/$filename.$ext"
 
 
 
