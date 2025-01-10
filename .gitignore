@@ -16,6 +16,9 @@
 # www stuff
 /www/
 
+# tool stuff
+/output/
+
 # nano stuff
 *.swp
 
