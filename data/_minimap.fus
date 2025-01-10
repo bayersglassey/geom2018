@@ -11,6 +11,13 @@ $IF !ALT:
 
 import "data/prismel_shapes.fus"
 
+palmappers:
+
+    "minimap_target":
+        :
+        1,  8: eval: 1 + 4
+        10, 8: eval: 1 + 8 + 4
+
 shapes:
 
     ##########

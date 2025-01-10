@@ -105,17 +105,20 @@ hexmap_submap_group_t *hexmap_get_submap_group(hexmap_t *map,
     return NULL;
 }
 
+int hexmap_add_submap_group(hexmap_t *map, const char *name,
+    hexmap_submap_group_t **group_ptr
+){
+    ARRAY_PUSH_NEW(hexmap_submap_group_t*, map->submap_groups, new_group)
+    hexmap_submap_group_init(new_group, name);
+    *group_ptr = new_group;
+    return 0;
+}
+
 int hexmap_get_or_add_submap_group(hexmap_t *map, const char *name,
     hexmap_submap_group_t **group_ptr
 ){
-
     hexmap_submap_group_t *group = hexmap_get_submap_group(map, name);
-    if(!group){
-        ARRAY_PUSH_NEW(hexmap_submap_group_t*, map->submap_groups, new_group)
-        hexmap_submap_group_init(new_group, name);
-        group = new_group;
-    }
-
+    if(!group)return hexmap_add_submap_group(map, name, group_ptr);
     *group_ptr = group;
     return 0;
 }
@@ -670,6 +673,19 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
         CLOSE
     }
 
+    if(GOT("target")){
+        NEXT
+        OPEN
+        if(group == NULL){
+            fprintf(stderr, "No submap group\n");
+            return 2;
+        }
+        valexpr_cleanup(&group->target_expr);
+        err = valexpr_parse(&group->target_expr, lexer);
+        if(err)return err;
+        CLOSE
+    }
+
     if(GOT("pos")){
         NEXT
         OPEN
@@ -1189,7 +1205,7 @@ const char *submap_camera_type_msg(int camera_type){
 }
 
 void hexmap_submap_group_cleanup(hexmap_submap_group_t *group){
-    /* Nothin */
+    valexpr_cleanup(&group->target_expr);
 }
 
 void hexmap_submap_group_init(hexmap_submap_group_t *group,
@@ -1197,6 +1213,7 @@ void hexmap_submap_group_init(hexmap_submap_group_t *group,
 ){
     group->name = name;
     group->visited = false;
+    valexpr_set_literal_bool(&group->target_expr, false);
 }
 
 void hexmap_submap_cleanup(hexmap_submap_t *submap){
@@ -1265,6 +1282,11 @@ void hexmap_submap_visit(hexmap_submap_t *submap){
 bool hexmap_submap_is_visited(hexmap_submap_t *submap){
     if(!submap->group)return true;
     return submap->group->visited;
+}
+
+bool hexmap_submap_is_target(hexmap_submap_t *submap){
+    if(!submap->group)return false;
+    return submap->group->target;
 }
 
 int hexmap_submap_is_visible(hexmap_submap_t *submap, bool *visible_ptr){

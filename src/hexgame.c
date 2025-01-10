@@ -259,21 +259,51 @@ static int camera_render_map(camera_t *camera,
         pos_mul = camera->map->unit;
     }
 
+    palettemapper_t *target_palmapper = NULL;
+    if(minimap){
+        static const char *palmapper_name = "minimap_target";
+        target_palmapper = prismelrenderer_get_palmapper(
+            prend, palmapper_name);
+        if(!target_palmapper){
+            fprintf(stderr, "Couldn't find palmapper %s\n",
+                palmapper_name);
+            return 2;
+        }
+    }
+
+    /* Determine which submap groups are "targets" on the minimap */
+    for(int i = 0; i < map->submap_groups_len; i++){
+        hexmap_submap_group_t *group = map->submap_groups[i];
+        valexpr_context_t context = {
+            .mapvars = &map->vars,
+            .globalvars = &game->vars
+        };
+        group->target = valexpr_get_bool(&group->target_expr, &context);
+    }
+
     /* Render map's submaps */
     for(int i = 0; i < map->submaps_len; i++){
         hexmap_submap_t *submap = map->submaps[i];
-
-        if(minimap && !hexmap_submap_is_visited(submap))continue;
 
         bool visible;
         err = hexmap_submap_is_visible(submap, &visible);
         if(err)return err;
         if(!visible)continue;
 
-        if(minimap && !submap->solid)continue;
+        rendergraph_t *rgraph = submap->rgraph_map;
+        if(minimap){
+            rgraph = submap->rgraph_minimap;
+            bool is_target = hexmap_submap_is_target(submap);
+            if(!submap->solid)continue;
+            if(!hexmap_submap_is_visited(submap) && !is_target)continue;
+            if(is_target){
+                err = palettemapper_apply_to_rendergraph(target_palmapper,
+                    prend, rgraph, NULL, prend_space, &rgraph);
+                if(err)return err;
+            }
+        }
 
-        err = _render_rgraph(
-            minimap? submap->rgraph_minimap: submap->rgraph_map,
+        err = _render_rgraph(rgraph,
             submap->pos, rot, flip, frame_i, pos_mul,
             camera_renderpos, mapper, surface,
             pal, x0, y0, zoom);

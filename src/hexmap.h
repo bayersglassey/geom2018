@@ -49,6 +49,12 @@ typedef struct hexmap_submap_group {
         /* Name is never NULL; there is one group per map with the name "",
         which is the "root" group (to which submaps belong by default) */
 
+    valexpr_t target_expr;
+        /* Whether this group's submaps should be rendered as "targets" on
+        the minimap */
+    bool target;
+        /* Cached evaluation of target_expr each frame */
+
     bool visited;
         /* Controls whether this group's submaps show up on minimap */
 } hexmap_submap_group_t;
@@ -144,6 +150,8 @@ int hexmap_reload(hexmap_t *map);
 hexgame_location_t *hexmap_get_location(hexmap_t *map, const char *name);
 hexmap_submap_group_t *hexmap_get_submap_group(hexmap_t *map,
     const char *name);
+int hexmap_add_submap_group(hexmap_t *map, const char *name,
+    hexmap_submap_group_t **group_ptr);
 int hexmap_get_or_add_submap_group(hexmap_t *map, const char *name,
     hexmap_submap_group_t **group_ptr);
 int hexmap_load(hexmap_t *map, vars_t *vars);
@@ -172,6 +180,7 @@ int hexmap_submap_init_from_parser_context(hexmap_t *map,
     hexmap_submap_parser_context_t *context);
 void hexmap_submap_visit(hexmap_submap_t *submap);
 bool hexmap_submap_is_visited(hexmap_submap_t *submap);
+bool hexmap_submap_is_target(hexmap_submap_t *submap);
 int hexmap_submap_is_visible(hexmap_submap_t *submap, bool *visible_ptr);
 int hexmap_submap_is_solid(hexmap_submap_t *submap, bool *solid_ptr);
 int rendergraph_add_rgraphs_from_collmap(
