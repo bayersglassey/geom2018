@@ -16,6 +16,15 @@ val_t val_false = { .type = VAL_TYPE_BOOL, .u.b = false };
 
 
 
+static int super_strcmp(const char *s1, const char *s2){
+    /* Compares two strings, with NULL considered equal to the empty string */
+    if(s1 == NULL)return s2 == NULL? 0: -1;
+    if(s2 == NULL)return s1 == NULL? 0: 1;
+    return strcmp(s1, s2);
+}
+
+
+
 /*******
  * VAR *
  *******/
@@ -41,13 +50,11 @@ void var_set_prop(var_t *var, unsigned i){
  *******/
 
 void val_cleanup(val_t *val){
-    free(val->s);
-    val->s = NULL;
+    if(val->type == VAL_TYPE_STR)free(val->u.s.own_s);
 }
 
 void val_init(val_t *val){
     val->type = VAL_TYPE_NULL;
-    val->s = NULL;
 }
 
 void val_fprintf(val_t *val, FILE *file){
@@ -55,7 +62,7 @@ void val_fprintf(val_t *val, FILE *file){
         case VAL_TYPE_NULL: fputs("null", file); break;
         case VAL_TYPE_BOOL: putc(val->u.b? 'T': 'F', file); break;
         case VAL_TYPE_INT: fprintf(file, "%i", val->u.i); break;
-        case VAL_TYPE_STR: fus_write_str(file, val->u.s); break;
+        case VAL_TYPE_STR: fus_write_str(file, val->u.s.s); break;
         default: fputs("???", file); break;
     }
 }
@@ -72,7 +79,7 @@ const char *val_type_name(int type){
 bool val_get_bool(val_t *val){
     if(val->type == VAL_TYPE_BOOL)return val->u.b;
     if(val->type == VAL_TYPE_INT)return val->u.i;
-    if(val->type == VAL_TYPE_STR)return val->u.s;
+    if(val->type == VAL_TYPE_STR)return val->u.s.s && strlen(val->u.s.s);
     return false;
 }
 int val_get_int(val_t *val){
@@ -80,7 +87,7 @@ int val_get_int(val_t *val){
     return val->u.i;
 }
 const char *val_get_str(val_t *val){
-    if(val->type == VAL_TYPE_STR)return val->u.s;
+    if(val->type == VAL_TYPE_STR)return val->u.s.s;
     return NULL;
 }
 
@@ -101,13 +108,14 @@ void val_set_int(val_t *val, int i){
 void val_set_str(val_t *val, char *s){
     val_cleanup(val);
     val->type = VAL_TYPE_STR;
-    val->u.s = s;
-    val->s = s;
+    val->u.s.s = s;
+    val->u.s.own_s = s;
 }
 void val_set_const_str(val_t *val, const char *s){
     val_cleanup(val);
     val->type = VAL_TYPE_STR;
-    val->u.s = s;
+    val->u.s.s = s;
+    val->u.s.own_s = NULL;
 }
 
 int val_copy(val_t *val1, val_t *val2){
@@ -123,12 +131,12 @@ int val_copy(val_t *val1, val_t *val2){
             val_set_int(val1, val2->u.i);
             break;
         case VAL_TYPE_STR: {
-            if(val2->s){
-                char *s2 = strdup(val2->s);
-                if(!s2)return 1;
-                val_set_str(val1, s2);
+            if(val2->u.s.own_s){
+                char *own_s = strdup(val2->u.s.own_s);
+                if(!own_s)return 1;
+                val_set_str(val1, own_s);
             }else{
-                val_set_const_str(val1, val2->u.s);
+                val_set_const_str(val1, val2->u.s.s);
             }
             break;
         }
@@ -145,20 +153,13 @@ bool val_eq(val_t *val1, val_t *val2){
         case VAL_TYPE_NULL: return true;
         case VAL_TYPE_BOOL: return val1->u.b == val2->u.b;
         case VAL_TYPE_INT: return val1->u.i == val2->u.i;
-        case VAL_TYPE_STR: return !strcmp(val1->u.s, val2->u.s);
+        case VAL_TYPE_STR: return super_strcmp(val1->u.s.s, val2->u.s.s) == 0;
         default: return false;
     }
 }
 
 bool val_ne(val_t *val1, val_t *val2){
-    if(val1->type != val2->type)return true;
-    switch(val1->type){
-        case VAL_TYPE_NULL: return false;
-        case VAL_TYPE_BOOL: return val1->u.b != val2->u.b;
-        case VAL_TYPE_INT: return val1->u.i != val2->u.i;
-        case VAL_TYPE_STR: return strcmp(val1->u.s, val2->u.s);
-        default: return true;
-    }
+    return !val_eq(val1, val2);
 }
 
 bool val_lt(val_t *val1, val_t *val2){
@@ -167,7 +168,7 @@ bool val_lt(val_t *val1, val_t *val2){
         case VAL_TYPE_NULL: return false;
         case VAL_TYPE_BOOL: return val1->u.b < val2->u.b;
         case VAL_TYPE_INT: return val1->u.i < val2->u.i;
-        case VAL_TYPE_STR: return strcmp(val1->u.s, val2->u.s) < 0;
+        case VAL_TYPE_STR: return super_strcmp(val1->u.s.s, val2->u.s.s) < 0;
         default: return false;
     }
 }
@@ -178,7 +179,7 @@ bool val_le(val_t *val1, val_t *val2){
         case VAL_TYPE_NULL: return true;
         case VAL_TYPE_BOOL: return val1->u.b <= val2->u.b;
         case VAL_TYPE_INT: return val1->u.i <= val2->u.i;
-        case VAL_TYPE_STR: return strcmp(val1->u.s, val2->u.s) <= 0;
+        case VAL_TYPE_STR: return super_strcmp(val1->u.s.s, val2->u.s.s) <= 0;
         default: return false;
     }
 }
@@ -189,7 +190,7 @@ bool val_gt(val_t *val1, val_t *val2){
         case VAL_TYPE_NULL: return false;
         case VAL_TYPE_BOOL: return val1->u.b > val2->u.b;
         case VAL_TYPE_INT: return val1->u.i > val2->u.i;
-        case VAL_TYPE_STR: return strcmp(val1->u.s, val2->u.s) > 0;
+        case VAL_TYPE_STR: return super_strcmp(val1->u.s.s, val2->u.s.s) > 0;
         default: return false;
     }
 }
@@ -200,7 +201,7 @@ bool val_ge(val_t *val1, val_t *val2){
         case VAL_TYPE_NULL: return true;
         case VAL_TYPE_BOOL: return val1->u.b >= val2->u.b;
         case VAL_TYPE_INT: return val1->u.i >= val2->u.i;
-        case VAL_TYPE_STR: return strcmp(val1->u.s, val2->u.s) >= 0;
+        case VAL_TYPE_STR: return super_strcmp(val1->u.s.s, val2->u.s.s) >= 0;
         default: return false;
     }
 }

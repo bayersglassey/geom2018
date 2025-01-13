@@ -21,9 +21,11 @@ typedef struct val {
     union {
         bool b;
         int i;
-        const char *s;
+        struct {
+            const char *s;
+            char *own_s; /* If s == own_s, we own the string */
+        } s;
     } u;
-    char *s; /* If s == u.s, we own the string */
 } val_t;
 
 /* Constant values, for e.g. valexpr_t, which likes to return pointers
