@@ -573,7 +573,7 @@ int state_effect_apply(state_effect_t *effect,
                 continues_ptr);
             if(err){
                 if(err == 2){
-                    fprintf(stderr, "...in \"call\" statement\n");
+                    fprintf(stderr, "...while calling proc: %s\n", name);
                 }
                 return err;
             }
