@@ -76,6 +76,8 @@ enum valexpr_op {
     VALEXPR_OP_AND,
     VALEXPR_OP_OR,
     VALEXPR_OP_NOT,
+    VALEXPR_OP_LEN,
+    VALEXPR_OP_GET,
 };
 
 static const char *valexpr_op_msg(int op){
@@ -89,6 +91,8 @@ static const char *valexpr_op_msg(int op){
         case VALEXPR_OP_AND: return "&&";
         case VALEXPR_OP_OR: return "||";
         case VALEXPR_OP_NOT: return "!";
+        case VALEXPR_OP_LEN: return "len";
+        case VALEXPR_OP_GET: return "get";
         default: return "???";
     }
 }

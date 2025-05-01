@@ -97,6 +97,22 @@ int testrunner(int *n_tests_ptr, int *n_fails_ptr){
         ASSERT(!val_ge(&val1, &val2));
     }
 
+    /* ARR VAL OPERATIONS */
+    {
+        val_t vals1[2] = {
+            {.type = VAL_TYPE_INT, .u.i = 1},
+            {.type = VAL_TYPE_INT, .u.i = 2}
+        };
+        val_t vals2[2] = {
+            {.type = VAL_TYPE_INT, .u.i = 1},
+            {.type = VAL_TYPE_INT, .u.i = 3}
+        };
+        val_t val1 = {.type = VAL_TYPE_ARR, .u.a = {.vals = vals1, .len = 2}};
+        val_t val2 = {.type = VAL_TYPE_ARR, .u.a = {.vals = vals2, .len = 2}};
+        ASSERT(val_eq(&val1, &val1));
+        ASSERT(!val_eq(&val1, &val2));
+    }
+
     /* VARS TESTS */
     {
         vars_t _vars, *vars=&_vars;
@@ -174,6 +190,12 @@ int testrunner(int *n_tests_ptr, int *n_fails_ptr){
         var_t *var = vars_get(vars, "nothing");
         ASSERT(var != NULL)
         ASSERT(var->value.type == VAL_TYPE_NULL)
+
+        ASSERT(vars_get_arr_len(vars, "nums") == 3)
+        ASSERT(vars_get_arr_len(vars, "nested") == 1)
+        ASSERT(val_safe(vars_get_arr_item(vars, "nums", 0))->type == VAL_TYPE_INT)
+        ASSERT(val_safe(vars_get_arr_item(vars, "nums", 3))->type == VAL_TYPE_NULL)
+        ASSERT(vars_get_arr_item(vars, "nums", 3) == NULL)
 
         vars_cleanup(vars);
     }
@@ -361,6 +383,18 @@ int testrunner(int *n_tests_ptr, int *n_fails_ptr){
             err = parse_valexpr(expr, "! || F F");
             if(err)return err;
             ASSERT(valexpr_get_bool(expr, &context));
+            valexpr_cleanup(expr);
+        }
+
+        {
+            err = parse_valexpr(expr, "len arr(1 2 3)");
+            if(err)return err;
+            ASSERT(valexpr_get_int(expr, &context) == 3);
+            valexpr_cleanup(expr);
+
+            err = parse_valexpr(expr, "get arr(1 2 3) 0");
+            if(err)return err;
+            ASSERT(valexpr_get_int(expr, &context) == 1);
             valexpr_cleanup(expr);
         }
 

@@ -3,3 +3,5 @@
 "yes": T
 "no": F
 "nothing": null
+"nums": arr: 1 2 3
+"nested": arr(arr(arr()))

@@ -31,6 +31,26 @@ int val_parse(val_t *val, fus_lexer_t *lexer){
     }else if(GOT("F")){
         NEXT
         val_set_bool(val, false);
+    }else if(GOT("arr")){
+        NEXT
+        GET("(")
+        int len = 8;
+        int i = 0;
+        err = val_set_arr(val, len);
+        if(err)return err;
+        while(!GOT(")")){
+            if(i >= len){
+                len *= 2;
+                err = val_resize_arr(val, len);
+                if(err)return err;
+            }
+            err = val_parse(&val->u.a.vals[i], lexer);
+            if(err)return err;
+            i++;
+        }
+        NEXT
+        err = val_resize_arr(val, i);
+        if(err)return err;
     }else if(GOT("(")){
         NEXT
 

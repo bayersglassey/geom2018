@@ -202,6 +202,8 @@ int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer){
     else if(GOT("&&")){ type = VALEXPR_TYPE_BINOP; op = VALEXPR_OP_AND; }
     else if(GOT("||")){ type = VALEXPR_TYPE_BINOP; op = VALEXPR_OP_OR; }
     else if(GOT("!")){ type = VALEXPR_TYPE_UNOP; op = VALEXPR_OP_NOT; }
+    else if(GOT("len")){ type = VALEXPR_TYPE_UNOP; op = VALEXPR_OP_LEN; }
+    else if(GOT("get")){ type = VALEXPR_TYPE_BINOP; op = VALEXPR_OP_GET; }
     else type =
         GOT("yourvar")? VALEXPR_TYPE_YOURVAR:
         GOT("mapvar")? VALEXPR_TYPE_MAPVAR:
@@ -436,23 +438,24 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
                 }
             }
 
-            bool b = false;
             switch(expr->u.op.op){
-                case VALEXPR_OP_EQ: b = val_eq(val1, val2); break;
-                case VALEXPR_OP_NE: b = val_ne(val1, val2); break;
-                case VALEXPR_OP_LT: b = val_lt(val1, val2); break;
-                case VALEXPR_OP_LE: b = val_le(val1, val2); break;
-                case VALEXPR_OP_GT: b = val_gt(val1, val2); break;
-                case VALEXPR_OP_GE: b = val_ge(val1, val2); break;
-                case VALEXPR_OP_AND: b = val_and(val1, val2); break;
-                case VALEXPR_OP_OR: b = val_or(val1, val2); break;
-                case VALEXPR_OP_NOT: b = val_not(val1); break;
+                case VALEXPR_OP_EQ: result->val = val_bool(val_eq(val1, val2)); break;
+                case VALEXPR_OP_NE: result->val = val_bool(val_ne(val1, val2)); break;
+                case VALEXPR_OP_LT: result->val = val_bool(val_lt(val1, val2)); break;
+                case VALEXPR_OP_LE: result->val = val_bool(val_le(val1, val2)); break;
+                case VALEXPR_OP_GT: result->val = val_bool(val_gt(val1, val2)); break;
+                case VALEXPR_OP_GE: result->val = val_bool(val_ge(val1, val2)); break;
+                case VALEXPR_OP_AND: result->val = val_bool(val_and(val1, val2)); break;
+                case VALEXPR_OP_OR: result->val = val_bool(val_or(val1, val2)); break;
+                case VALEXPR_OP_NOT: result->val = val_bool(val_not(val1)); break;
+                case VALEXPR_OP_LEN: result->val = val_get_arr_len_val(val1); break;
+                case VALEXPR_OP_GET: result->val = val2->type == VAL_TYPE_INT?
+                    val_get_arr_item(val1, val2->u.i): NULL; break;
                 default:
                     fprintf(stderr, "Unrecognized op: %i\n", expr->u.op.op);
                     return 2;
             }
 
-            result->val = b? &val_true: &val_false;
             break;
         }
         default: {

@@ -13,6 +13,7 @@ enum var_type {
     VAL_TYPE_BOOL,
     VAL_TYPE_INT,
     VAL_TYPE_STR,
+    VAL_TYPE_ARR,
     VAL_TYPES
 };
 
@@ -25,6 +26,17 @@ typedef struct val {
             const char *s;
             char *own_s; /* If s == own_s, we own the string */
         } s;
+        struct {
+            int len;
+            struct val *vals;
+                /* Must always contain an extra element, which is a val with
+                .type = VAL_TYPE_INT, .u.i == len.
+                See also: val_get_arr_len_val, which returns that element.
+                Why do we do this?.. because currently, valexpr_eval doesn't
+                manage give you any way to manage the memory of the returned
+                val: it's assumed to be owned by something.
+                So it can't just create a fresh val of type VAL_TYPE_INT. */
+        } a;
     } u;
 } val_t;
 
@@ -102,14 +114,23 @@ void val_init(val_t *val);
 void val_fprintf(val_t *val, FILE *file);
 const char *val_type_name(int type);
 
+val_t *val_bool(bool b);
+val_t *val_safe(val_t *val);
+
 bool val_get_bool(val_t *val);
 int val_get_int(val_t *val);
 const char *val_get_str(val_t *val);
+int val_get_arr_len(val_t *val);
+val_t *val_get_arr_len_val(val_t *val);
+val_t *val_get_arr_item(val_t *val, int i);
+
 void val_set_null(val_t *val);
 void val_set_bool(val_t *val, bool b);
 void val_set_int(val_t *val, int i);
 void val_set_str(val_t *val, char *s);
 void val_set_const_str(val_t *val, const char *s);
+int val_set_arr(val_t *val, int len);
+int val_resize_arr(val_t *val, int len);
 
 int val_copy(val_t *val1, val_t *val2);
 
@@ -137,6 +158,8 @@ int vars_get_prop_i(vars_t *vars, const char *prop_name);
 bool vars_get_bool(vars_t *vars, const char *key);
 int vars_get_int(vars_t *vars, const char *key);
 const char *vars_get_str(vars_t *vars, const char *key);
+int vars_get_arr_len(vars_t *vars, const char *key);
+val_t *vars_get_arr_item(vars_t *vars, const char *key, int i);
 
 int vars_set_null(vars_t *vars, const char *key);
 int vars_set_bool(vars_t *vars, const char *key, bool b);

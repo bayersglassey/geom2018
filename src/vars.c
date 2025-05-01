@@ -50,7 +50,15 @@ void var_set_prop(var_t *var, unsigned i){
  *******/
 
 void val_cleanup(val_t *val){
-    if(val->type == VAL_TYPE_STR)free(val->u.s.own_s);
+    switch(val->type){
+        case VAL_TYPE_STR: free(val->u.s.own_s); break;
+        case VAL_TYPE_ARR: {
+            for(int i = 0; i < val->u.a.len; i++)val_cleanup(&val->u.a.vals[i]);
+            free(val->u.a.vals);
+            break;
+        }
+        default: break;
+    }
 }
 
 void val_init(val_t *val){
@@ -63,16 +71,33 @@ void val_fprintf(val_t *val, FILE *file){
         case VAL_TYPE_BOOL: putc(val->u.b? 'T': 'F', file); break;
         case VAL_TYPE_INT: fprintf(file, "%i", val->u.i); break;
         case VAL_TYPE_STR: fus_write_str(file, val->u.s.s); break;
+        case VAL_TYPE_ARR: {
+            fprintf(file, "arr(");
+            for(int i = 0; i < val->u.a.len; i++){
+                if(i > 0)fputc(' ', file);
+                val_fprintf(&val->u.a.vals[i], file);
+            }
+            fputc(')', file);
+            break;
+        }
         default: fputs("???", file); break;
     }
 }
 
 const char *val_type_name(int type){
     static const char *names[VAL_TYPES] = {
-        "null", "bool", "int", "str"
+        "null", "bool", "int", "str", "arr"
     };
     if(type < 0 || type >= VAL_TYPES)return "unknown";
     return names[type];
+}
+
+
+val_t *val_bool(bool b){
+    return b? &val_true: &val_false;
+}
+val_t *val_safe(val_t *val){
+    return val? val: &val_null;
 }
 
 
@@ -80,6 +105,7 @@ bool val_get_bool(val_t *val){
     if(val->type == VAL_TYPE_BOOL)return val->u.b;
     if(val->type == VAL_TYPE_INT)return val->u.i;
     if(val->type == VAL_TYPE_STR)return val->u.s.s && strlen(val->u.s.s);
+    if(val->type == VAL_TYPE_ARR)return val->u.a.len;
     return false;
 }
 int val_get_int(val_t *val){
@@ -87,8 +113,22 @@ int val_get_int(val_t *val){
     return val->u.i;
 }
 const char *val_get_str(val_t *val){
-    if(val->type == VAL_TYPE_STR)return val->u.s.s;
-    return NULL;
+    if(val->type != VAL_TYPE_STR)return NULL;
+    return val->u.s.s;
+}
+int val_get_arr_len(val_t *val){
+    if(val->type != VAL_TYPE_ARR)return 0;
+    return val->u.a.len;
+}
+val_t *val_get_arr_len_val(val_t *val){
+    if(val->type != VAL_TYPE_ARR)return NULL;
+    /* See comment on val_t's u.a.vals field */
+    return &val->u.a.vals[val->u.a.len];
+}
+val_t *val_get_arr_item(val_t *val, int i){
+    if(val->type != VAL_TYPE_ARR)return NULL;
+    if(i < 0 || i >= val->u.a.len)return NULL;
+    return &val->u.a.vals[i];
 }
 
 void val_set_null(val_t *val){
@@ -117,6 +157,35 @@ void val_set_const_str(val_t *val, const char *s){
     val->u.s.s = s;
     val->u.s.own_s = NULL;
 }
+int val_set_arr(val_t *val, int len){
+    val_cleanup(val);
+    val->type = VAL_TYPE_ARR;
+    val->u.a.len = len;
+    val->u.a.vals = malloc((len + 1) * sizeof(val_t));
+    if(!val->u.a.vals)return 1;
+    for(int i = 0; i < val->u.a.len; i++)val_init(&val->u.a.vals[i]);
+    val_set_int(&val->u.a.vals[len], len); /* See: val_get_arr_len_val */
+    return 0;
+}
+int val_resize_arr(val_t *val, int len){
+    if(val->type != VAL_TYPE_ARR){
+        fprintf(stderr, "Tried to reize (to %i) something which is not an array (type=%i)\n",
+            len, val->type);
+        return 2;
+    }
+    if(len > val->u.a.len){
+        /* grow arr */
+        val_t *new_vals = realloc(val->u.a.vals, (len + 1) * sizeof(val_t));
+        if(new_vals)return 1;
+        val->u.a.vals = new_vals;
+    }else{
+        /* shrink arr */
+        for(int i = len; i < val->u.a.len; i++)val_cleanup(&val->u.a.vals[i]);
+    }
+    val->u.a.len = len;
+    val_set_int(&val->u.a.vals[len], len); /* See: val_get_arr_len_val */
+    return 0;
+}
 
 int val_copy(val_t *val1, val_t *val2){
     int err;
@@ -140,6 +209,16 @@ int val_copy(val_t *val1, val_t *val2){
             }
             break;
         }
+        case VAL_TYPE_ARR: {
+            int len = val2->u.a.len;
+            err = val_set_arr(val1, len);
+            if(err)return err;
+            for(int i = 0; i < len; i++){
+                err = val_copy(&val1->u.a.vals[i], &val2->u.a.vals[i]);
+                if(err)return err;
+            }
+            break;
+        }
         default:
             fprintf(stderr, "Unrecognized var type: %i\n", val2->type);
             return 2;
@@ -154,6 +233,12 @@ bool val_eq(val_t *val1, val_t *val2){
         case VAL_TYPE_BOOL: return val1->u.b == val2->u.b;
         case VAL_TYPE_INT: return val1->u.i == val2->u.i;
         case VAL_TYPE_STR: return super_strcmp(val1->u.s.s, val2->u.s.s) == 0;
+        case VAL_TYPE_ARR: {
+            if(val1->u.a.len != val2->u.a.len)return false;
+            int len = val1->u.a.len;
+            for(int i = 0; i < len; i++)if(!val_eq(&val1->u.a.vals[i], &val2->u.a.vals[i]))return false;
+            return true;
+        } break;
         default: return false;
     }
 }
@@ -341,6 +426,16 @@ const char *vars_get_str(vars_t *vars, const char *key){
     var_t *var = vars_get(vars, key);
     if(var == NULL)return NULL;
     return val_get_str(&var->value);
+}
+int vars_get_arr_len(vars_t *vars, const char *key){
+    var_t *var = vars_get(vars, key);
+    if(var == NULL)return 0;
+    return val_get_arr_len(&var->value);
+}
+val_t *vars_get_arr_item(vars_t *vars, const char *key, int i){
+    var_t *var = vars_get(vars, key);
+    if(var == NULL)return NULL;
+    return val_get_arr_item(&var->value, i);
 }
 
 int vars_set_null(vars_t *vars, const char *key){
