@@ -1069,6 +1069,7 @@ Jan 8, 2024:
     [X] Add "doors" which show you the minimap
         [ ] Make this a separate type of door, i.e. anim/minimap_door.fus
         [ ] Add support for custom text for each such "door"
+        [ ] Teach about these in the tutorial?.. or just in demo/start3.fus?..
 
     ...okay? And now, let's think about how to make use of those things...
     But like, without giving up our "naturalist" feel.
@@ -1084,3 +1085,151 @@ Jan 8, 2024:
     Like, it needs to be clearer that another character is speaking to you.
     Maybe?.. and we could like, point the camera at them while they're
     speaking, and zoom in a bit?..
+
+
+[ ] The cpu spider (actors/guide) in demo/start3.fus shouldn't leave there.
+    They should just hang out by the save point and minimap-door, and
+    tell you something encouraging.
+    Also, they obviously shouldn't trigger the minimap-door!!!
+    [ ] Also, the cpu spider shouldn't spit, and spitting shouldn't "scare
+        off" the eyespiders.
+        Rather, viewing the minimap for the first time should trigger the
+        eyespiders.
+    [ ] Also, having a non-player body next to a door currently keeps it
+        closed!.. fix that!..
+        Look for collmap("cooldown") in anim/_door.fus
+
+
+[ ] Ummmmmm we don't always want an rgraph's palmapper to apply to its labels.
+    E.g. when a spider is carrying something... like if aispiders pick up food
+    in dodecas area, the food turns purple.
+[ ] How can we extend the rules in actor/_aispider.fus?..
+    Like, right now we have to manually add combinations, like "jump short",
+    "jump medium", "jump long", "backflip after first jumping short", etc.
+    Clearly, we want some kind of recursive algorithm...
+    We already have a STATE_EFFECT_TYPE_CALL, maybe we need a
+    STATE_EFFECT_TYPE_COND?.. boolean-valued, recursive functions?..
+    No doubt we could implement such a thing.
+    But what about memoization, or some other trick to make sure we didn't
+    recursively make too many calls?..
+    Actually, it's not gonna be too bad if we don't try to get too general.
+    Like, imagine our current thing, plus at most 1 recursive call.
+    Just so we can detect "jump + backflip", or "step over gap + backflip", etc.
+    We would need to add localvars.
+    Currently, STATE_EFFECT_TYPE_CALL uses the surrounding context directly,
+    so we would need it to create a fresh context, with new localvars, and
+    clean those up once done.
+    Also, presumably we might like to add parameters to STATE_EFFECT_TYPE_CALL?..
+
+    What would the syntax for params be?
+    In anim/_spit.fus:
+
+        proc "on_collide":
+            ...etc...
+
+    So uhhhh maybe:
+
+        proc "on_collide" "x" "y":
+            ...etc...
+
+    ...or:
+
+        proc "on_collide" params("x" "y"):
+            ...etc...
+
+    ...and then you could refer to localvars("x"), etc.
+    Ugly, but if it works, it works!..
+    And frankly, at that point why call them localvars?..
+    Could use params("x") etc?..
+    Erm. But having arbitrary local variables is obviously nice. So.
+
+    In actor/_aispider.fus:
+
+        all:
+            # Step up
+            coll: all yes
+                ;;        +
+                ;;       /
+                ;; ( )  +
+        all:
+            # Step up over a small gap
+            coll: all yes
+                ;;            +
+                ;;           /
+                ;; ( )  .   +
+            coll: all no
+                ;;       \*/*
+                ;;        + -
+                ;;       /*\*
+                ;; ( )
+
+    ...now, it seems to me that the second rule there could be broken down...
+    Basically, we need a recursive algorithm which answers the question:
+    if we jump here, do we land safely?
+
+        proc "land_safe" params(...etc...):
+            ...etc...
+
+    Oh shoot, but we would need to need to apply the effects like "move", "rot",
+    "turn", etc through params/localvars somehow. O_o
+    Or like, add hexgame_location as a vars_t datatype.
+
+    OH, and also it might be possible to use this to get the AI to find paths to
+    safe spots, food, etc?..
+
+    Anyway. Can we add a hexgame_location_t type to vars_t?
+
+        typedef struct val {
+            int type; /* enum var_type */
+            union {
+                bool b;
+                int i;
+                const char *s;
+            } u;
+            char *s; /* If s == u.s, we own the string */
+        } val_t;
+
+    What aboooout a special "boxed" type?
+    It needs an associated cleanup function, too...
+
+        typedef val_box {
+            void *data;
+            void cleanup(void *data);
+        } val_box_t;
+
+    But how do we keep track of the type of box->data?..
+    Could just use a big ol' juicy enum...
+    But then why not just use the existing val->type...
+    So ok, forget about val_box_t.
+    One thing we could usefully do would be to add arrays as a val type.
+    That is, currently val's types are: null, bool, int str.
+    And we could add: arr.
+    And we could probably even add obj (i.e. dict with str keys).
+    So then, hexgame_location_t can be encoded as an arr(int int int bool):
+
+        "location": arr: 0 0 0 F
+
+    Of course we could encode it as an obj, but it would be inefficient:
+
+        "location": obj:
+            "pos": arr: 0 0
+            "rot": 0
+            "turn": F
+
+    Let's start with arr, and only add obj one day if we need it...
+
+
+Jan 19, 2025:
+-------------
+
+Roller spider: when you're a roller, you can't be crushed!
+No hitbox?..
+
+
+Apr 29, 2025:
+-------------
+
+Enable teleportation between save points on the minimap?.. they already show up all
+nice and green on the minimap.
+
+
