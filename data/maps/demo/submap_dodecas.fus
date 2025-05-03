@@ -2,14 +2,6 @@
 mapper: ("double")
 
 recs:
-    : "data/maps/demo/recs/dodecas_000.fus" "spider_cpu"
-    : "data/maps/demo/recs/dodecas_001.fus" "spider_cpu"
-    : "data/maps/demo/recs/dodecas_002.fus" "spider_cpu"
-    : "data/maps/demo/recs/dodecas_003.fus" "spider_cpu"
-    : "data/maps/demo/recs/dodecas_000.fus" "spider_cpu" 1000
-    : "data/maps/demo/recs/dodecas_001.fus" "spider_cpu" 1000
-    : "data/maps/demo/recs/dodecas_002.fus" "spider_cpu" 1000
-    : "data/maps/demo/recs/dodecas_003.fus" "spider_cpu" 1000
     : "data/maps/demo/recs/dodecas_hexroller_000.fus"
     : "data/maps/demo/recs/dodecas_hexroller_001.fus" "spider_cpu"
 

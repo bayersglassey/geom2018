@@ -3,6 +3,7 @@ parts:
     "D": "data/maps/demo/tiles/hex_vec4/dodecas3.fus"
     "s": "data/maps/demo/tiles/hex_vec4/dodeca_sign.fus"
     "g": "data/maps/demo/tiles/hex_vec4/dodeca_sign_solid.fus"
+    "s": actor "actor/aispider.fus" "spider_cpu"
 
 collmap:
     ;;

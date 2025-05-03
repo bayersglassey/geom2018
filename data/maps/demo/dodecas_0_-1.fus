@@ -5,6 +5,7 @@ parts:
     "f": recording "data/recs/food.fus"
     "F": recording "data/recs/food_crouch.fus"
     "r": actor "actor/airoller.fus"
+    "s": actor "actor/aispider.fus" "spider_cpu"
 
 collmap:
     ;;
