@@ -1170,53 +1170,73 @@ Jan 8, 2024:
         proc "land_safe" params(...etc...):
             ...etc...
 
-    Oh shoot, but we would need to need to apply the effects like "move", "rot",
-    "turn", etc through params/localvars somehow. O_o
-    Or like, add hexgame_location as a vars_t datatype.
-
     OH, and also it might be possible to use this to get the AI to find paths to
     safe spots, food, etc?..
 
-    Anyway. Can we add a hexgame_location_t type to vars_t?
-
-        typedef struct val {
-            int type; /* enum var_type */
-            union {
-                bool b;
-                int i;
-                const char *s;
-            } u;
-            char *s; /* If s == u.s, we own the string */
-        } val_t;
-
-    What aboooout a special "boxed" type?
-    It needs an associated cleanup function, too...
-
-        typedef val_box {
-            void *data;
-            void cleanup(void *data);
-        } val_box_t;
-
-    But how do we keep track of the type of box->data?..
-    Could just use a big ol' juicy enum...
-    But then why not just use the existing val->type...
-    So ok, forget about val_box_t.
-    One thing we could usefully do would be to add arrays as a val type.
-    That is, currently val's types are: null, bool, int str.
-    And we could add: arr.
-    And we could probably even add obj (i.e. dict with str keys).
-    So then, hexgame_location_t can be encoded as an arr(int int int bool):
+    Oh shoot, but we would need to need to apply the effects like "move", "rot",
+    "turn", etc through params/localvars somehow. O_o
+    We added an "arr" type, so hexgame_location_t can be encoded like so:
 
         "location": arr: 0 0 0 F
 
-    Of course we could encode it as an obj, but it would be inefficient:
+    Don't we also need a stack/heap for vals, though?..
+    Or maybe the stack of function calls will suffice.
+    That is, "localvars" refers to the current stack frame, as it were.
+    And if we want to have functions which return complex values, like "arr",
+    then we'll need caller to allocate them, pass them in, and have callee modify them.
+    Or do something like... ummmm... when you return a val, it's always copied, and
+    you're always returning *somewhere*.
+    Like:
 
-        "location": obj:
-            "pos": arr: 0 0
-            "rot": 0
-            "turn": F
+        proc "add" params("x" "y"):
+            inc "x": localvars("y")
+            return localvars("x")
 
-    Let's start with arr, and only add obj one day if we need it...
+        # The result is stored in localvars("sum")
+        call "add" to localvars("sum"): 1 2
+
+    Jeez, this is getting gross. So be it, perhaps?..
+    OH HOLD UP! We probably only need a loop, not recursive function
+    calls. Because we don't need to do branching logic right now, we
+    just need to determine whether jumping is safe.
+
+    So, it all comes together something like this:
+
+        set myvar("_transform"): arr: 0 0 0 F
+        while(T):
+            if: any:
+                coll: all yes with myvar("_transform")
+                    ;; (+)- +
+                coll: all yes with myvar("_transform")
+                    ;;        +
+                    ;;       /
+                    ;; ( )  +
+            then:
+                set myvar("_safe_to_jump"): T
+                break
+            if:
+                coll: any yes with myvar("_transform")
+                    ;;       \*/*
+                    ;;        + -
+                    ;;       /*\*
+                    ;; ( )
+            then:
+                set myvar("_safe_to_jump"): F
+                break
+            if:
+                coll: all yes with myvar("_transform")
+                    ;;        +
+                    ;;
+                    ;; ( )  +
+            then:
+                move myvar("_transform"): 1 0
+                rot myvar("_transform"): 1
+            else:
+                move myvar("_transform"): 1 0
+
+        if: expr: myvar("_safe_to_jump")
+        then:
+            key: down u
 
 
 Jan 19, 2025:
@@ -1232,4 +1252,5 @@ Apr 29, 2025:
 Enable teleportation between save points on the minimap?.. they already show up all
 nice and green on the minimap.
 
-
+[ ] When you get rollerspider at the end of tutorial3, we should give you
+    a little puzzley area where you can learn how to use it.
