@@ -166,7 +166,7 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
             test_app_menu_set_screen(&app->menu, TEST_APP_MENU_SCREEN_PAUSED);
             app->show_menu = true;
         }else if(event->key.keysym.sym == SDLK_RETURN){
-                game->show_minimap = 0;
+            game->show_minimap = 0;
         }else if(event->key.keysym.sym == SDLK_TAB && app->developer_mode){
             if(!(event->key.keysym.mod & KMOD_ALT) && !(event->key.repeat)){
                 /* Cycle between 3 values: 0 means don't show minimap, and
