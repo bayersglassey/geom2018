@@ -1254,3 +1254,37 @@ nice and green on the minimap.
 
 [ ] When you get rollerspider at the end of tutorial3, we should give you
     a little puzzley area where you can learn how to use it.
+[X] When showing minimap, say "press Tab" or something!
+    Actually, what if we remove Tab key, and in minimap you press Enter?..
+    And each minimap door controls the zoom at which you view the minimap?..
+[ ] Replace the "red door" sprite with something minimap-specific
+    Maybe... red "save point" sprite?..
+    Maybe all save points show you the minimap?..
+    Or like, if you press Enter while standing on a save point, you see minimap?..
+    Can you teleport between save points?.. only red ones?..
+    TELEPORT BETWEEN ALL SAVE POINTS, I THINK.
+    That way, it's never "bad" to touch a save point, like you can never accidentally
+    lose the ability to reappear at the one you "wanted".
+    But this makes the controls & UI more complicated.
+    With the minimap "doors", we need them to deactivate until you take a few
+    steps away; but if you need to press Enter on a save point, that's kind of
+    simpler.
+    Don't we need a way to visually show which save points you've touched/activated?..
+    That can presumably be a palette swap...
+    But then save points need to stop being part of the map (the 'S' tile_c).
+    But perhaps that's for the best anyway.
+    Errr, except then we need to like, manually add them to "parts", and come
+    up with a unique "mapvar" for each one (to mark it as having been activated).
+    Ewwww. So... can we just continue to use an 'S' tile_c, but like... automatically
+    keep track of all such tiles? Use the position as a unique identifier?
+    AH -- or can we just use "whether you've visited a given submap or not"???
+    That's *much* simpler, since we already have it implemented.
+    But it gives us far less control, like now you don't even have to touch the
+    save point in order to activate it (you just need to visit its submap).
+
+    Also, what are the controls/UI for moving between save points on the minimap?
+    Maybe steal Cave Story's teleporter UI.
+    Have an explicit, finite list of named areas, and you scroll through them
+    and choose one.
+    Maybe we can have a different list of named areas for each worldmap?..
+    So e.g. trees worldmap would have an area called "entrance", that kind of thing.
