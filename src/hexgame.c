@@ -372,9 +372,10 @@ static int camera_render_map(camera_t *camera,
     return 0;
 }
 
-int camera_render(camera_t *camera,
+static int _camera_render(camera_t *camera,
     SDL_Surface *surface,
-    SDL_Palette *pal, int x0, int y0, int zoom
+    SDL_Palette *pal, int x0, int y0, int zoom,
+    bool show_minimap
 ){
     int err;
 
@@ -389,23 +390,22 @@ int camera_render(camera_t *camera,
 
     /* Figure out which prismelmapper to use when rendering */
     prismelmapper_t *mapper = NULL;
-    if(game->show_minimap){
-        /* HACK: show_minimap is both a "boolean" and a zoom value. */
-        zoom = game->show_minimap;
-    }else if(camera->mapper != NULL){
-        mapper = camera->mapper;
-    }else if(camera->cur_submap != NULL){
-        mapper = camera->cur_submap->mapper;
-    }else{
-        mapper = map->default_mapper;
+    if(!show_minimap){
+        if(camera->mapper != NULL){
+            mapper = camera->mapper;
+        }else if(camera->cur_submap != NULL){
+            mapper = camera->cur_submap->mapper;
+        }else{
+            mapper = map->default_mapper;
+        }
     }
 
     err = camera_render_map(camera,
-        camera_renderpos, mapper, game->show_minimap? true: false,
+        camera_renderpos, mapper, show_minimap,
         surface, pal, x0, y0, zoom);
     if(err)return err;
 
-    if(!game->show_minimap){
+    if(!show_minimap){
         /* Render map's bodies */
         for(int i = 0; i < map->bodies_len; i++){
             body_t *body = map->bodies[i];
@@ -453,6 +453,20 @@ int camera_render(camera_t *camera,
     }
 
     return 0;
+}
+
+int camera_render(camera_t *camera,
+    SDL_Surface *surface,
+    SDL_Palette *pal, int x0, int y0, int zoom
+){
+    hexgame_t *game = camera->game;
+    if(game->show_minimap){
+        /* HACK: show_minimap is both a "boolean" and a zoom value. */
+        int _zoom = game->show_minimap;
+        return _camera_render(camera, surface, pal, x0, y0, _zoom, true);
+    }else{
+        return _camera_render(camera, surface, pal, x0, y0, zoom, false);
+    }
 }
 
 
