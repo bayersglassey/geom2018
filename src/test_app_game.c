@@ -114,6 +114,8 @@ int test_app_render_game(test_app_t *app){
     }else if(game->show_minimap){
         /* Rendering of the minimap is handled, interestingly, by
         camera_render, which was already called above */
+        test_app_printf(app, 0, app->lines_printed * app->font.char_h,
+            "Press Enter...\n");
     }else{
 
         /* Show messages like "you hit a wall!", "you were crushed!" etc */
@@ -163,7 +165,9 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
         }else if(event->key.keysym.sym == SDLK_ESCAPE){
             test_app_menu_set_screen(&app->menu, TEST_APP_MENU_SCREEN_PAUSED);
             app->show_menu = true;
-        }else if(event->key.keysym.sym == SDLK_TAB){
+        }else if(event->key.keysym.sym == SDLK_RETURN){
+                game->show_minimap = 0;
+        }else if(event->key.keysym.sym == SDLK_TAB && app->developer_mode){
             if(!(event->key.keysym.mod & KMOD_ALT) && !(event->key.repeat)){
                 /* Cycle between 3 values: 0 means don't show minimap, and
                 1 and 2 are zoom values. */

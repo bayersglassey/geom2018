@@ -825,6 +825,10 @@ static int _parse_effect(state_context_t *context, fus_lexer_t *lexer,
         OPEN
 
         effect->type = STATE_EFFECT_TYPE_SHOW_MINIMAP;
+        effect->u.i = 2;
+        if(!GOT(")")){
+            GET_INT(effect->u.i)
+        }
 
         CLOSE
     }else{
