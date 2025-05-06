@@ -929,6 +929,9 @@ NEXT STEPS:
         versa!..
         Or an underwater area (vines tileset) is drained!
 [ ] Expand water area
+    [ ] The tunnels near its start are actually really cool, like where you
+        swim one direction & crouch, and then to get back, you swim "upside down"
+        and crawl again.
     [ ] Make a swimming creature, faster than player. In the water worldmap,
         it chases you; you have to run on the ground to escape, and use air
         bubbles.
@@ -1042,7 +1045,7 @@ Jan 8, 2024:
     And then, we can have an area where there's a series of submaps, each one
     progressing linearly from one palette to another.
 
-[ ] Instead of text, let's show people where to go using the minimap.
+[X] Instead of text, let's show people where to go using the minimap.
     So far, we haven't even taught players about the minimap during the
     tutorial!..
     So, let's do things like:
@@ -1053,7 +1056,7 @@ Jan 8, 2024:
         [X] There is actually already a body->visible_expr, used for bodies which
             come from submap recordings!.. so... we could actually add support
             for a "target" field on recording "parts".
-        [ ] doors should show up on the minimap as cyan!..
+        [-] doors should show up on the minimap as cyan!..
             So, when camera_render_map is rendering bodies on the minimap,
             it should somehow detect doors...
             I think a body_t field is prooooobably the most straightforward
@@ -1067,9 +1070,9 @@ Jan 8, 2024:
         [X] The same way submaps have a visible_expr, they can have a target_expr.
             ...except, really we want that to go by hexmap_submap_group, right?..
     [X] Add "doors" which show you the minimap
-        [ ] Make this a separate type of door, i.e. anim/minimap_door.fus
-        [ ] Add support for custom text for each such "door"
-        [ ] Teach about these in the tutorial?.. or just in demo/start3.fus?..
+        [X] Make this a separate type of door, i.e. anim/minimap_door.fus
+        [-] Add support for custom text for each such "door"
+        [X] Teach about these in the tutorial?.. or just in demo/start3.fus?..
 
     ...okay? And now, let's think about how to make use of those things...
     But like, without giving up our "naturalist" feel.
@@ -1086,20 +1089,9 @@ Jan 8, 2024:
     Maybe?.. and we could like, point the camera at them while they're
     speaking, and zoom in a bit?..
 
-
-[ ] The cpu spider (actors/guide) in demo/start3.fus shouldn't leave there.
-    They should just hang out by the save point and minimap-door, and
-    tell you something encouraging.
-    Also, they obviously shouldn't trigger the minimap-door!!!
-    [ ] Also, the cpu spider shouldn't spit, and spitting shouldn't "scare
-        off" the eyespiders.
-        Rather, viewing the minimap for the first time should trigger the
-        eyespiders.
-    [ ] Also, having a non-player body next to a door currently keeps it
-        closed!.. fix that!..
-        Look for collmap("cooldown") in anim/_door.fus
-
-
+[ ] Having a non-player body next to a door currently keeps it
+    closed!.. fix that!..
+    Look for collmap("cooldown") in anim/_door.fus
 [ ] Ummmmmm we don't always want an rgraph's palmapper to apply to its labels.
     E.g. when a spider is carrying something... like if aispiders pick up food
     in dodecas area, the food turns purple.
@@ -1288,3 +1280,36 @@ nice and green on the minimap.
     and choose one.
     Maybe we can have a different list of named areas for each worldmap?..
     So e.g. trees worldmap would have an area called "entrance", that kind of thing.
+
+    Here's how this could all work:
+    * Add an 'M' tile_c, which is a red save point which opens the minimap
+    * A hexmap_submap_group can have a "minimap name", which is displayed when
+        you're in that group at the minimap
+    * In the minimap, tap left/right arrow keys to switch between submap groups
+        (only ones you've visited, and which contain an 'M')
+    * When you switch to a submap group, you are teleported to the first 'M'
+        found within it
+
+[ ] Demo is too open.
+    Currently, it has 3 basic sub-areas you can visit immediately:
+    * jungle
+    * dodecas
+    * spidertown
+    And there are spiders and rollers everywhere.
+    Instead, let's start with the sub-areas closed, except for one, and after
+    exploring for a bit, you meet someone who asks you to do something.
+    Or you go to another worldmap -- maybe tutorial2 or tutorial3?..
+    And when you come back, more of the demo worldmap has been opened, and
+    some of it has been changed (some rollers, spiders, whatever; also some
+    tunnels added, or something; and of course, the way cleared to one of the
+    sub-areas).
+
+[ ] EXPERIMENT WITH THE MAGIC 't' TILE TYPE!..
+    As the code sayeth:
+
+        else if(elem->tile_c == 't'){
+            /* We found a "tunnel" -- some non-colliding stuff which
+            overrides anything solid which might be (in a submap)
+            underneath it!..
+            So, we break out of iterating over submaps. */
+
