@@ -67,6 +67,7 @@ static char get_elem_type(char c){
             return c;
         case '*':
         case 'S':
+        case 'M':
         case 'w':
         case 'o':
             return '*';

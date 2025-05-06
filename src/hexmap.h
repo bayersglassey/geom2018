@@ -36,6 +36,7 @@ typedef struct hexmap_collision_elem {
 
 typedef struct hexmap_collision {
     hexmap_collision_elem_t savepoint;
+    hexmap_collision_elem_t minimap;
     hexmap_collision_elem_t water;
 } hexmap_collision_t;
 

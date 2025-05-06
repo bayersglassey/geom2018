@@ -19,7 +19,7 @@ palmappers:
         #eval(1 + 2): eval: 1 + 4
         #eval(1 + 3): eval: 1 + 4
         eval(1 + 4): eval: 1 + 4
-        eval(1 + 5): eval: 1 + 4
+        #eval(1 + 5): eval: 1 + 4
         eval(1 + 6): eval: 1 + 4
         eval(1 + 7): eval: 1 + 4
         #eval(1 + 8): eval: 1 + 4
@@ -28,7 +28,7 @@ palmappers:
         #eval(9 + 2): eval: 9 + 4
         #eval(9 + 3): eval: 9 + 4
         eval(9 + 4): eval: 9 + 4
-        eval(9 + 5): eval: 9 + 4
+        #eval(9 + 5): eval: 9 + 4
         eval(9 + 6): eval: 9 + 4
         eval(9 + 7): eval: 9 + 4
         #eval(9 + 8): eval: 9 + 4
@@ -123,8 +123,16 @@ shapes:
             : "tri" (0 0 0 0)  0 f eval: 1 + 0 + 1
 
     "minimap.save":
+        animation: cycle 12
         prismels:
-            : "tri" (0 0 0 0)  0 f eval: 1 + 8 + 2
+            : "tri" (0 0 0 0)  0 f eval(1 + 8 + 2) (0 6)
+            : "tri" (0 0 0 0)  0 f eval(1 + 0 + 2) (6 6)
+
+    "minimap.minimap":
+        animation: cycle 12
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval(1 + 8 + 5) (0 6)
+            : "tri" (0 0 0 0)  0 f eval(1 + 0 + 5) (6 6)
 
     "minimap.door":
         prismels:

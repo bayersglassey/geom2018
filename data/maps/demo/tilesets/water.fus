@@ -24,4 +24,5 @@ faces:
     "1": "map_face1"
     "2": "map_face0"
     "S": "map_savepoint"
+    "M": "map_minimap"
     "w": frame_offset(1) "map_water"

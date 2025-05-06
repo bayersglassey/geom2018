@@ -24,4 +24,5 @@ faces:
     "t": "minimap.face.tunnel"
     "E": "minimap.face"
     "S": "minimap.save"
+    "M": "minimap.minimap"
     "w": frame_offset(1) "minimap.water"

@@ -216,17 +216,17 @@ shapes:
     "map_savepoint_third":
         animation: oscillate 6
         prismels:
-            : "tri" ( 0 0 0 0)  0 f eval(1 + 8 + 7) (0 3)
-            : "tri" ( 0 0 0 0)  2 f eval(1 + 8 + 7) (0 3)
-            : "sq"  (-1 0 1 0)  0 f eval(1 + 8 + 7) (0 3)
+            : "tri" ( 0 0 0 0)  0 f eval(1 + 8 + 7) (0 2)
+            : "tri" ( 0 0 0 0)  2 f eval(1 + 8 + 7) (0 2)
+            : "sq"  (-1 0 1 0)  0 f eval(1 + 8 + 7) (0 2)
 
-            : "tri" ( 0 0 0 0)  0 f eval(1 + 8 + 2) (3 1)
-            : "tri" ( 0 0 0 0)  2 f eval(1 + 8 + 2) (3 1)
-            : "sq"  (-1 0 1 0)  0 f eval(1 + 8 + 2) (3 1)
+            : "tri" ( 0 0 0 0)  0 f eval(1 + 8 + 2) (2 1)
+            : "tri" ( 0 0 0 0)  2 f eval(1 + 8 + 2) (2 1)
+            : "sq"  (-1 0 1 0)  0 f eval(1 + 8 + 2) (2 1)
 
-            : "tri" ( 0 0 0 0)  0 f eval(1 + 0 + 2) (4 1)
-            : "tri" ( 0 0 0 0)  2 f eval(1 + 0 + 2) (4 1)
-            : "sq"  (-1 0 1 0)  0 f eval(1 + 0 + 2) (4 1)
+            : "tri" ( 0 0 0 0)  0 f eval(1 + 0 + 2) (3 1)
+            : "tri" ( 0 0 0 0)  2 f eval(1 + 0 + 2) (3 1)
+            : "sq"  (-1 0 1 0)  0 f eval(1 + 0 + 2) (3 1)
 
     "map_savepoint":
         animation: cycle 12
@@ -234,6 +234,28 @@ shapes:
             : "map_savepoint_third" (1 1 1 0)  0 f  0+
             : "map_savepoint_third" (1 1 1 0)  4 f  4+
             : "map_savepoint_third" (1 1 1 0)  8 f  8+
+
+    "map_minimap_third":
+        animation: oscillate 6
+        prismels:
+            : "tri" ( 0 0 0 0)  0 f eval(1 + 8 + 7) (0 2)
+            : "tri" ( 0 0 0 0)  2 f eval(1 + 8 + 7) (0 2)
+            : "sq"  (-1 0 1 0)  0 f eval(1 + 8 + 7) (0 2)
+
+            : "tri" ( 0 0 0 0)  0 f eval(1 + 8 + 5) (2 1)
+            : "tri" ( 0 0 0 0)  2 f eval(1 + 8 + 5) (2 1)
+            : "sq"  (-1 0 1 0)  0 f eval(1 + 8 + 5) (2 1)
+
+            : "tri" ( 0 0 0 0)  0 f eval(1 + 0 + 5) (3 1)
+            : "tri" ( 0 0 0 0)  2 f eval(1 + 0 + 5) (3 1)
+            : "sq"  (-1 0 1 0)  0 f eval(1 + 0 + 5) (3 1)
+
+    "map_minimap":
+        animation: cycle 12
+        shapes:
+            : "map_minimap_third" (1 1 1 0)  0 f  0+
+            : "map_minimap_third" (1 1 1 0)  4 f  4+
+            : "map_minimap_third" (1 1 1 0)  8 f  8+
 
     "map_door":
         animation: cycle "door"

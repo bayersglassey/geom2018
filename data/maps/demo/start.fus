@@ -1,7 +1,3 @@
-parts:
-    "M": recording "data/recs/minimap_door.fus"
-        vars:
-            "set_mapbool": "start_minimap"
 collmap:
     ;;
     ;;                                                                           */
@@ -21,8 +17,8 @@ collmap:
     ;;                  /                 \                       \   \*/  */*\*       *
     ;;                 +   + -             +                       +   +               +   .
     ;;                /   /               /                         \   \
-    ;;               +       + - + - + - +                       ?   +   +               .   +     [M]
-    ;;                \     /                                       /   /
+    ;;               +       + - + - + - +                           +   +               .   +
+    ;;                \     /                                    M  /   /
     ;;                 + - +               .   + - +       + - + - +   +
     ;;                                        /     \     /             \
     ;;                   .      (+)- + - + - +       + - +     - + -     +

@@ -10,3 +10,4 @@ faces:
         "bark_simple_face_r0"
         "bark_simple_face_r1"
     "S": "map_savepoint"
+    "M": "map_minimap"

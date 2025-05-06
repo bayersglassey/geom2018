@@ -53,6 +53,12 @@ int player_init(player_t *player, hexgame_t *game, int keymap,
     return 0;
 }
 
+static bool is_player0(player_t *player){
+    /* HACK!!! Player 0 is special, can e.g. use minimap */
+    hexgame_t *game = player->game;
+    return player == game->players[0];
+}
+
 int player_get_index(player_t *player){
     hexgame_t *game = player->game;
     for(int i = 0; i < game->players_len; i++){
@@ -259,10 +265,11 @@ int player_step(player_t *player, hexgame_t *game){
         if(err)return err;
 
         hexmap_submap_t *savepoint_submap = collision.savepoint.submap;
+        hexmap_submap_t *minimap_submap = collision.minimap.submap;
         hexmap_submap_t *water_submap = collision.water.submap;
 
         bool touching_savepoint =
-            savepoint_submap != NULL &&
+            (savepoint_submap != NULL || minimap_submap != NULL) &&
 
             /* Don't save in an unsafe position, like flying through
             the air */
@@ -282,6 +289,9 @@ int player_step(player_t *player, hexgame_t *game){
         if(use_savepoint){
             err = player_use_savepoint(player);
             if(err)return err;
+            if(minimap_submap != NULL && is_player0(player)){
+                game->show_minimap = 2;
+            }
         }
     }
 

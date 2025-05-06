@@ -23,6 +23,7 @@ faces:
     "2": "map_face1"
     "3": "map_face3"
     "S": "map_savepoint"
+    "M": "map_minimap"
     "w": frame_offset(1) "map_water"
     "o": "map_bgface"
     "E": frame_offset(1) "map_face_energy_on"
