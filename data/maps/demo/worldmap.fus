@@ -5,7 +5,6 @@ palette: "data/pal1.fus"
 tileset: "data/tileset1.fus"
 
 actors:
-    : "actor/guide/actor.fus" "spider_cpu"
     : "actor/eyespider_tunnels.fus"
         empty # no palmapper... this is needed so we can specify target... TODO: fix this madness
         target: T
@@ -17,9 +16,6 @@ actors:
         target: T
 
 vars:
-    "guide_passed_start": F
-    "guide_passed_start2": F
-
     "start2_minimap": F
 
     "eyespider_tunnels_ran_away_1": F
