@@ -2,6 +2,8 @@
 state "stand":
     collmsgs: "crush"
     on "touch":
+        if: exists myvar("key")
+        then: set mapvar(myvar("key")): T
         remove
     rgraph: "spikeball"
     hitbox:

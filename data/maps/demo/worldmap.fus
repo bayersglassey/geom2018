@@ -7,15 +7,16 @@ tileset: "data/tileset1.fus"
 actors:
     : "actor/eyespider_tunnels.fus"
         empty # no palmapper... this is needed so we can specify target... TODO: fix this madness
-        target: T
+        target: mapvar("start2_minimap")
     : "actor/eyespider_dodecas.fus"
         empty # no palmapper... this is needed so we can specify target... TODO: fix this madness
-        target: T
+        target: mapvar("start2_minimap")
     : "actor/eyespider_vines.fus"
         empty # no palmapper... this is needed so we can specify target... TODO: fix this madness
-        target: T
+        target: mapvar("start2_minimap")
 
 vars:
+    "start_minimap": F
     "start2_minimap": F
 
     "eyespider_tunnels_ran_away_1": F
@@ -28,11 +29,18 @@ $SET_STR START3_SPIDERS: lines: at(13 3)
 
 submaps:
     "start":
-        file: "data/maps/demo/start.fus"
         pos: (0 0)
         camera: (6 4)
         mapper: ("quadruple")
         palette: "data/maps/demo/pals/start.fus"
+        submaps:
+            :
+                file: "data/maps/demo/start.fus"
+            :
+                file: "data/maps/demo/start_blocker.fus"
+                visible: ! mapvar("start_minimap")
+                pos: (-3 -1)
+                rot: 1
     "start2":
         file: "data/maps/demo/start2.fus"
         pos: (7 11)

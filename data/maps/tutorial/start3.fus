@@ -4,6 +4,9 @@ $SET_STR SAVEPOINT_A: lines: at(28 32)
     ;;  shiny
     ;;  thing
     ;;  to save.
+$SET_STR SAVEPOINT_C: lines: at(41 28)
+    ;;I sure hope
+    ;;   you saved!..
 $SET_STR SAVEPOINT_B: lines: at(22 34)
     ;;You will
     ;; reappear there
@@ -15,7 +18,12 @@ $SET_STR SAVEPOINT_B: lines: at(22 34)
 $SET_STR ONWARD: lines:
     ;;Onward and upward!
 
-text: if mapvar("start3_eye_b_open") then if mapvar("made_it_underneath") then null else $GET_STR SAVEPOINT_A else null
+text:
+    if ! mapvar("made_it_underneath") then
+        if mapvar("start3_eye_b_open") then $GET_STR SAVEPOINT_A
+        else if mapvar("start3_eye_c_open") then $GET_STR SAVEPOINT_C
+        else null
+    else null
 parts:
     "h": recording "data/recs/hotspot.fus"
         vars:
@@ -28,8 +36,11 @@ parts:
             "opened_key": "start3_eye_b_open"
     "c": recording "data/recs/eye.fus"
         vars:
+            "antikey": "touched_spikeball"
             "opened_key": "start3_eye_c_open"
     "s": recording "data/recs/spikeball.fus"
+        vars:
+            "key": "touched_spikeball"
 collmap:
     ;;
     ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
@@ -64,7 +75,7 @@ collmap:
     ;;              \
     ;;   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                \
-    ;;     .   .   .   +   .   .   .   .   .   .   .   .   + - +   .   .   .   .   ?   .     [s]
+    ;;     .   .   .   +   .   .   .   .   .   .   .   .   + - +   .   .   .   .   ?   ?     [s][s]
     ;;                /                                   /     \
     ;;   .   .   .   +   .   .   .   .   .   .   .   .   +   .   + - + - +   .   + - + - +
     ;;              /                                     \               \     /

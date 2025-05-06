@@ -6,6 +6,8 @@ tileset: "data/tileset1.fus"
 song: "symphony"
 
 vars:
+    "touched_spikeball": F
+    "reached_cage": F
     "made_it_underneath": F
     "going_upwards": F
     nosave "start_eye_a_open": 0
@@ -20,6 +22,7 @@ vars:
     nosave "loop_eye_a_open": 0
     nosave "start4_eye_a_open": 0
     nosave "start4_eye_b_open": 0
+    nosave "start4_eye_c_open": 0
     nosave "skypipes_eye_a_open": 0
     nosave "skypipes4_eye_a_open": 0
 
