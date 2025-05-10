@@ -8,6 +8,8 @@ song: "symphony"
 vars:
     "touched_spikeball": F
     "reached_cage": F
+    "start5_minimap": F
+    "reached_skypipes": F
     "made_it_underneath": F
     "going_upwards": F
     nosave "start_eye_a_open": 0
@@ -89,6 +91,7 @@ submaps:
         mapper: ("triple")
         submaps:
             "skypipes":
+                target: && mapvar("start5_minimap") ! mapvar("reached_skypipes")
                 pos: eval: (19 0) + (19 -1) + (24 17)
                 camera: (8 0)
                 submaps:
@@ -115,11 +118,13 @@ submaps:
                     : "data/maps/tutorial/recs/eyespider0.fus"
             "skypipes3":
                 file: "data/maps/tutorial/skypipes3.fus"
+                target: mapvar("reached_skypipes")
                 pos: eval: (19 0) + (19 -1) + (24 17) + (28 12) + (27 10)
                 camera: (9 0)
                 actors:
                     : "data/maps/tutorial/recs/eyespider1.fus"
             "skypipes4":
                 file: "data/maps/tutorial/skypipes4.fus"
+                target: mapvar("reached_skypipes")
                 pos: eval: (19 0) + (19 -1) + (24 17) + (28 12) + (27 10) + (25 3)
                 camera: (10 0)

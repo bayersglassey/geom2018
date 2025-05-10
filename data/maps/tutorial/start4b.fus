@@ -1,7 +1,11 @@
+parts:
+    "h": recording "data/recs/hotspot.fus"
+        vars:
+            "key": "reached_skypipes"
 collmap:
     ;;  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;;    .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;    .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .      [h]
     ;;
     ;;  .   .   .   .   .   .   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .
     ;;                                                 /* * *\

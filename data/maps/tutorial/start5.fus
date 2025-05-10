@@ -1,5 +1,8 @@
 parts:
     "M": recording "data/recs/minimap_door.fus"
+        vars:
+            "set_mapvar.name": "start5_minimap"
+            "set_mapvar.value": T
 collmap:
     ;;
     ;;     .   .   .   .   .   + - +   + - +   .   .   .   .   .   .   .   .   .   .   .
