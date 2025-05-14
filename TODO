@@ -1290,6 +1290,29 @@ nice and green on the minimap.
     * When you switch to a submap group, you are teleported to the first 'M'
         found within it
 
+    What's the name for an 'M' tile (or red door)?..
+    Calling them "minimaps" makes no sense. Minimap savepoint? Minimap door?
+    => MAP POINTS.
+    Also, do we distinguish between "things which make/let you open the
+    minimap", and "things to which you can jump via the minimap"?
+    Do you jump to savepoints, or doors, or submap groups (and if so, where
+    within them)?
+
+    When you press left/right in minimap, how do we know which map point
+    you should jump to? I.e. how do we know which one you're currently at?
+    When you touch a map point, we could store it in the hexgame.
+    Or, if we go by current submap group, then we can calculate your current
+    map point.
+    AH -- when you open the minimap, we set the "current mappoint".
+    That is then what you scroll through.
+    Possibly, at this time we also *calculate the array of available map
+    points*.
+
+    Currently, the game's minimap state lives in game->show_minimap.
+    Perhaps we need game->minimap_state. It can have zoom (i.e. the
+    equivalent of game->show_minimap currently), and an array of map
+    points, and a current map point index.
+
 [ ] Demo is too open.
     Currently, it has 3 basic sub-areas you can visit immediately:
     * jungle
