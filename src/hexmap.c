@@ -992,7 +992,7 @@ static int hexmap_collide_elem(hexmap_t *map, int all_type,
                 hexmap_collision_elem_t *collision_elem = NULL;
 
                 if(elem->tile_c == 'S')collision_elem = &collision->savepoint;
-                else if(elem->tile_c == 'M')collision_elem = &collision->minimap;
+                else if(elem->tile_c == 'M')collision_elem = &collision->mappoint;
                 else if(elem->tile_c == 'w')collision_elem = &collision->water;
                 else if(elem->tile_c == 't'){
                     /* We found a "tunnel" -- some non-colliding stuff which
@@ -1032,7 +1032,7 @@ static void hexmap_collision_elem_init(hexmap_collision_elem_t *elem){
 
 static void hexmap_collision_init(hexmap_collision_t *collision){
     hexmap_collision_elem_init(&collision->savepoint);
-    hexmap_collision_elem_init(&collision->minimap);
+    hexmap_collision_elem_init(&collision->mappoint);
     hexmap_collision_elem_init(&collision->water);
 }
 

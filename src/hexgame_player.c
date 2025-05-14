@@ -54,7 +54,9 @@ int player_init(player_t *player, hexgame_t *game, int keymap,
 }
 
 static bool is_player0(player_t *player){
-    /* HACK!!! Player 0 is special, can e.g. use minimap */
+    /* HACK!!! Player 0 is special, can e.g. use minimap.
+    TODO: figure out how this should really work... should presumably
+    be something like app->main_player?.. */
     hexgame_t *game = player->game;
     return player == game->players[0];
 }
@@ -265,7 +267,7 @@ int player_step(player_t *player, hexgame_t *game){
         if(err)return err;
 
         hexmap_submap_t *savepoint_submap = collision.savepoint.submap;
-        hexmap_submap_t *minimap_submap = collision.minimap.submap;
+        hexmap_submap_t *minimap_submap = collision.mappoint.submap;
         hexmap_submap_t *water_submap = collision.water.submap;
 
         bool touching_savepoint =
