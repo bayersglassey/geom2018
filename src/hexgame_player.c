@@ -32,7 +32,7 @@ int player_init(player_t *player, hexgame_t *game, int keymap,
     player->savepoint_cooldown = 0;
 
     for(int i = 0; i < KEYINFO_KEYS; i++)player->key_code[i] = 0;
-    if(keymap == 0){
+    if(keymap == HEXGAME_PLAYER_0){
         player->key_code[KEYINFO_KEY_ACTION1] = SDLK_RSHIFT;
         player->key_code[KEYINFO_KEY_ACTION2] = SDLK_SPACE;
         player->key_code[KEYINFO_KEY_U] = SDLK_UP;
@@ -51,14 +51,6 @@ int player_init(player_t *player, hexgame_t *game, int keymap,
     player->respawn_location = *respawn_location;
     player->safe_location = *respawn_location;
     return 0;
-}
-
-static bool is_player0(player_t *player){
-    /* HACK!!! Player 0 is special, can e.g. use minimap.
-    TODO: figure out how this should really work... should presumably
-    be something like app->main_player?.. */
-    hexgame_t *game = player->game;
-    return player == game->players[0];
 }
 
 int player_get_index(player_t *player){
@@ -291,7 +283,7 @@ int player_step(player_t *player, hexgame_t *game){
         if(use_savepoint){
             err = player_use_savepoint(player);
             if(err)return err;
-            if(minimap_submap != NULL && is_player0(player)){
+            if(minimap_submap != NULL && player->keymap == HEXGAME_PLAYER_0){
                 game->show_minimap = 2;
             }
         }

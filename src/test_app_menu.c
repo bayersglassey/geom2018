@@ -178,7 +178,8 @@ int test_app_menu_select(test_app_menu_t *menu){
                     app->show_menu = false;
                     break;
                 case 1: /* RESTART FROM SAVE POINT */
-                    err = hexgame_reset_player_by_keymap(&app->hexgame, 0,
+                    err = hexgame_reset_player_by_keymap(
+                        &app->hexgame, HEXGAME_PLAYER_0,
                         RESET_SOFT, NULL);
                     if(err)return err;
                     app->show_menu = false;

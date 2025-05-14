@@ -21,6 +21,9 @@
 
 #define DEBUG_RECORDINGS false
 
+#define HEXGAME_PLAYER_0 0
+    /* player 0 is special... e.g. they control the menu */
+
 /* RESET_TO_SAFETY is to player->safe_location, RESET_SOFT is to
 player->respawn_location. */
 enum reset_level {

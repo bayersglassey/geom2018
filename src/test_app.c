@@ -179,7 +179,7 @@ static int _test_app_restart(test_app_t *app,
     }
 
     /* Find player0 and their body (if any) */
-    player_t *player0 = hexgame_get_player_by_keymap(game, 0);
+    player_t *player0 = hexgame_get_player_by_keymap(game, HEXGAME_PLAYER_0);
     body_t *body0 = player0? player0->body: NULL;
 
     /* Create camera */

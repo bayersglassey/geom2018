@@ -143,7 +143,112 @@ int test_app_render_game(test_app_t *app){
 }
 
 
+static int _save_recording(test_app_t *app){
+    /* When you press F9 at the menu */
+    int err;
+
+    hexgame_t *game = &app->hexgame;
+    player_t *player = hexgame_get_player_by_keymap(game, HEXGAME_PLAYER_0);
+    if(!player)return 0;
+
+    body_t *body = player->body;
+    if(!body){
+        fprintf(stderr,
+            "Can't record without a body!\n");
+    }else if(body->recording.action != RECORDING_ACTION_RECORD){
+        const char *_recording_filename =
+            test_app_get_save_recording_filename(app);
+
+        /* In case this is where we got the filename, we now set
+        it to NULL so next time we start recording, we won't
+        overwrite this one */
+        app->save_recording_filename = NULL;
+
+        const char *recording_filename = stringstore_get(
+            &app->prend.filename_store, _recording_filename);
+        if(!recording_filename)return 1;
+
+        /* So that the next time we play a recording with F10,
+        we play the one we're recording now */
+        app->load_recording_filename = recording_filename;
+
+        fprintf(stderr, "Recording to file: %s "
+            " (When finished, press F9 to save!)\n",
+            recording_filename);
+        err = body_start_recording(body, recording_filename);
+        if(err)return err;
+    }else{
+        fprintf(stderr, "Finished recording. "
+            "Press F10 to play it back, or Shift+F10 to "
+            "play it back using your current body.\n");
+        err = body_stop_recording(body);
+        if(err)return err;
+    }
+
+    return 0;
+}
+
+
+static int _load_recording(test_app_t *app, bool shift){
+    /* When you press F10 at the menu.
+    When shift is true, use player's existing body; otherwise, create a
+    new body (not controlled by player). */
+    int err;
+
+    hexgame_t *game = &app->hexgame;
+    player_t *player = hexgame_get_player_by_keymap(game, HEXGAME_PLAYER_0);
+    if(!player)return 0;
+
+    body_t *body = player->body;
+    if(!body){
+        fprintf(stderr,
+            "Can't play back recording without a body!\n");
+        return 0;
+    }
+
+    const char *_recording_filename =
+        test_app_get_load_recording_filename(app);
+    if(_recording_filename == NULL){
+        fprintf(stderr, "Couldn't find file of last recording. "
+            "Maybe you need to record your first one with F9?\n");
+    }else{
+        const char *recording_filename = stringstore_get(
+            &app->prend.filename_store, _recording_filename);
+        if(!recording_filename)return 1;
+        fprintf(stderr, "Playing back from file: %s\n",
+            recording_filename);
+        /* If we're recording, save the recording so it can be loaded. */
+        if(body->recording.action == RECORDING_ACTION_RECORD){
+            err = body_stop_recording(body);
+            if(err)return err;
+        }
+
+        if(shift){
+            /* Play the recording using player's existing body */
+            err = body_load_recording(body, recording_filename,
+                true);
+            if(err)return err;
+            err = body_play_recording(body);
+            if(err)return err;
+        }else{
+            /* Create a new body & play the recording with it */
+            /* TODO: Recordings need to state which map they
+            expect! The following is a hack: you must play
+            recordings belonging to your correct map... */
+            err = hexmap_load_recording(body->map,
+                recording_filename, NULL, true, 0, NULL, NULL);
+            if(err)return err;
+        }
+    }
+
+    return 0;
+}
+
+
 int test_app_process_event_game(test_app_t *app, SDL_Event *event){
+    /* Handle special keys (the F1-F12 keys, Escape, Tab, Enter, etc).
+    Regular player keypresses are handled separately by caller; we don't
+    affect them, can't override them, etc. */
     int err;
 
     hexgame_t *game = &app->hexgame;
@@ -191,96 +296,24 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
             fprintf(stderr, "Anim debug mode: %s\n", game->anim_debug? "on": "off");
         }else if(event->key.keysym.sym == SDLK_F9 && app->developer_mode){
             /* save recording */
-            player_t *player = hexgame_get_player_by_keymap(game, 0);
-            if(player){
-                body_t *body = player->body;
-                if(!body){
-                    fprintf(stderr,
-                        "Can't record without a body!\n");
-                }else if(body->recording.action != RECORDING_ACTION_RECORD){
-                    const char *_recording_filename =
-                        test_app_get_save_recording_filename(app);
-
-                    /* In case this is where we got the filename, we now set
-                    it to NULL so next time we start recording, we won't
-                    overwrite this one */
-                    app->save_recording_filename = NULL;
-
-                    const char *recording_filename = stringstore_get(
-                        &app->prend.filename_store, _recording_filename);
-                    if(!recording_filename)return 1;
-
-                    /* So that the next time we play a recording with F10,
-                    we play the one we're recording now */
-                    app->load_recording_filename = recording_filename;
-
-                    fprintf(stderr, "Recording to file: %s "
-                        " (When finished, press F9 to save!)\n",
-                        recording_filename);
-                    err = body_start_recording(body, recording_filename);
-                    if(err)return err;
-                }else{
-                    fprintf(stderr, "Finished recording. "
-                        "Press F10 to play it back, or Shift+F10 to "
-                        "play it back using your current body.\n");
-                    err = body_stop_recording(body);
-                    if(err)return err;
-                }
-            }
+            err = _save_recording(app);
+            if(err)return err;
         }else if(event->key.keysym.sym == SDLK_F10 && app->developer_mode){
             /* load recording */
             bool shift = event->key.keysym.mod & KMOD_SHIFT;
-            const char *_recording_filename =
-                test_app_get_load_recording_filename(app);
-            if(_recording_filename == NULL){
-                fprintf(stderr, "Couldn't find file of last recording. "
-                    "Maybe you need to record your first one with F9?\n");
-            }else{
-                const char *recording_filename = stringstore_get(
-                    &app->prend.filename_store, _recording_filename);
-                if(!recording_filename)return 1;
-                fprintf(stderr, "Playing back from file: %s\n",
-                    recording_filename);
-                player_t *player = hexgame_get_player_by_keymap(game, 0);
-                if(player){
-                    body_t *body = player->body;
-                    if(!body){
-                        fprintf(stderr,
-                            "Can't play back recording without a body!\n");
-                    }else{
-                        /* If we're recording, save the recording so it can be loaded. */
-                        if(body->recording.action == RECORDING_ACTION_RECORD){
-                            err = body_stop_recording(body);
-                            if(err)return err;
-                        }
-
-                        if(shift){
-                            /* Play the recording using player's existing body */
-                            err = body_load_recording(body, recording_filename,
-                                true);
-                            if(err)return err;
-                            err = body_play_recording(body);
-                            if(err)return err;
-                        }else{
-                            /* Create a new body & play the recording with it */
-                            /* TODO: Recordings need to state which map they
-                            expect! The following is a hack: you must play
-                            recordings belonging to your correct map... */
-                            err = hexmap_load_recording(body->map,
-                                recording_filename, NULL, true, 0, NULL, NULL);
-                            if(err)return err;
-                        }
-                    }
-                }
-            }
+            err = _load_recording(app, shift);
+            if(err)return err;
         }else if(event->key.keysym.sym == SDLK_F12 && app->developer_mode){
+            /* Dump information about all players and their bodies */
             for(int i = 0; i < game->players_len; i++){
                 player_t *player = game->players[i];
                 if(player->keymap < 0)continue;
                 if(event->key.keysym.mod & KMOD_CTRL){
+                    /* Dump details about player's body's stateset */
                     if(!player->body)continue;
                     stateset_dump(player->body->stateset, stderr, 0);
                 }else{
+                    /* Dump details about player & their body */
                     player_dump(player, 0);
                 }
             }
