@@ -140,8 +140,9 @@ void test_app_hide_console(test_app_t *app);
 
 
 /* test_app_game.c */
-int test_app_process_event_game(test_app_t *app, SDL_Event *event);
 int test_app_render_game(test_app_t *app);
+int test_app_process_event_game(test_app_t *app, SDL_Event *event);
+int test_app_process_event_minimap(test_app_t *app, SDL_Event *event);
 
 
 /* test_app_editor.c */

@@ -245,6 +245,16 @@ static int _load_recording(test_app_t *app, bool shift){
 }
 
 
+static void _handle_tab_key(hexgame_t *game, SDL_Event *event){
+    /* When you press the TAB key */
+    if(!(event->key.keysym.mod & KMOD_ALT) && !(event->key.repeat)){
+        /* Cycle between 3 values: 0 means don't show minimap, and
+        1 and 2 are zoom values. */
+        game->show_minimap = (game->show_minimap + 3 - 1) % 3;
+    }
+}
+
+
 int test_app_process_event_game(test_app_t *app, SDL_Event *event){
     /* Handle special keys (the F1-F12 keys, Escape, Tab, Enter, etc).
     Regular player keypresses are handled separately by caller; we don't
@@ -270,14 +280,8 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
         }else if(event->key.keysym.sym == SDLK_ESCAPE){
             test_app_menu_set_screen(&app->menu, TEST_APP_MENU_SCREEN_PAUSED);
             app->show_menu = true;
-        }else if(event->key.keysym.sym == SDLK_RETURN){
-            game->show_minimap = 0;
         }else if(event->key.keysym.sym == SDLK_TAB && app->developer_mode){
-            if(!(event->key.keysym.mod & KMOD_ALT) && !(event->key.repeat)){
-                /* Cycle between 3 values: 0 means don't show minimap, and
-                1 and 2 are zoom values. */
-                game->show_minimap = (game->show_minimap + 3 - 1) % 3;
-            }
+            _handle_tab_key(game, event);
         }else if(event->key.keysym.sym == SDLK_F6 && app->developer_mode){
             /* Hack, we really want to force camera->mapper to NULL, but
             instead we assume the existence of this mapper called "single" */
@@ -330,6 +334,23 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
     }else if(event->type == SDL_KEYUP){
         if(event->key.keysym.sym == SDLK_F6 && app->developer_mode){
             app->camera_mapper = NULL;
+        }
+    }
+    return 0;
+}
+
+
+int test_app_process_event_minimap(test_app_t *app, SDL_Event *event){
+    /* Handle keys pressed while the minimap is open */
+    int err;
+
+    hexgame_t *game = &app->hexgame;
+
+    if(event->type == SDL_KEYDOWN){
+        if(event->key.keysym.sym == SDLK_RETURN){
+            game->show_minimap = 0;
+        }else if(event->key.keysym.sym == SDLK_TAB && app->developer_mode){
+            _handle_tab_key(game, event);
         }
     }
     return 0;

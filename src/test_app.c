@@ -520,13 +520,19 @@ static int test_app_poll_events(test_app_t *app){
         }
 
         if(app->mode == TEST_APP_MODE_GAME){
-            /* Handle special keypresses (F1-F12, etc) */
-            err = test_app_process_event_game(app, event);
-            if(err)return err;
+            if(game->show_minimap){
+                /* Handle minimap keypresses */
+                err = test_app_process_event_minimap(app, event);
+                if(err)return err;
+            }else{
+                /* Handle special keypresses (F1-F12, etc) */
+                err = test_app_process_event_game(app, event);
+                if(err)return err;
 
-            /* Handle players' keypresses */
-            err = hexgame_process_event(game, event);
-            if(err)return err;
+                /* Handle players' keypresses */
+                err = hexgame_process_event(game, event);
+                if(err)return err;
+            }
         }else if(app->mode == TEST_APP_MODE_EDITOR){
             /* Handle special keypresses (arrow keys, etc) */
             err = test_app_process_event_editor(app, event);
