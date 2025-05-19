@@ -283,10 +283,6 @@ int player_step(player_t *player, hexgame_t *game){
         if(use_savepoint){
             err = player_use_savepoint(player);
             if(err)return err;
-            if(minimap_submap != NULL && player->keymap == HEXGAME_PLAYER_0){
-                err = hexgame_use_mappoint(game, map, minimap_submap);
-                if(err)return err;
-            }
         }
     }
 

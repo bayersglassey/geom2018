@@ -149,6 +149,7 @@ int body_init(body_t *body, hexgame_t *game, hexmap_t *map,
     body->confused = false;
 
     body->out_of_bounds = false;
+    body->touching_mappoint = false;
     body->map = map;
     body->cur_submap = NULL;
 
@@ -806,8 +807,8 @@ char body_get_key_c(body_t *body, int key_i, bool absolute){
  *************/
 
 int body_update_cur_submap(body_t *body){
-    /* Sets body->cur_submap, body->out_of_bounds by colliding body
-    against body->map */
+    /* Sets body->cur_submap, body->out_of_bounds, body->touching_mappoint
+    by colliding body against body->map */
     int err;
 
     hexmap_t *map = body->map;
@@ -844,24 +845,26 @@ int body_update_cur_submap(body_t *body){
     }
     body->out_of_bounds = out_of_bounds;
 
-    if(new_submap == NULL){
-        /* Check if body's hitbox is touching the water face of
-        any submap */
+    bool touching_mappoint = false;
+    hexcollmap_t *hitbox = body->state? body->state->hitbox: NULL;
+    if(hitbox != NULL){
+        trf_t hitbox_trf;
+        hexgame_location_init_trf(&body->loc, &hitbox_trf);
 
-        hexcollmap_t *hitbox = body->state? body->state->hitbox: NULL;
-        if(hitbox != NULL){
-            trf_t hitbox_trf;
-            hexgame_location_init_trf(&body->loc, &hitbox_trf);
+        hexmap_collision_t collision;
+        err = hexmap_collide_special(map, hitbox, &hitbox_trf,
+            &collision);
+        if(err)return err;
 
-            hexmap_collision_t collision;
-            err = hexmap_collide_special(map, hitbox, &hitbox_trf,
-                &collision);
-            if(err)return err;
+        /* If body isn't touching solid ground, but *is* touching water,
+        then body is in the submap which has the water. */
+        hexmap_submap_t *water_submap = collision.water.submap;
+        if(new_submap == NULL && water_submap)new_submap = water_submap;
 
-            hexmap_submap_t *water_submap = collision.water.submap;
-            if(water_submap)new_submap = water_submap;
-        }
+        /* Is body touching a mappoint? */
+        if(collision.mappoint.submap)touching_mappoint = true;
     }
+    body->touching_mappoint = touching_mappoint;
 
     if(new_submap != NULL){
         body->cur_submap = new_submap;

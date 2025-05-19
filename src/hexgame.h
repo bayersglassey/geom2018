@@ -163,6 +163,7 @@ typedef struct body {
     bool confused; /* Reverses l/r keys */
 
     bool out_of_bounds;
+    bool touching_mappoint;
 
     /* Weakrefs: */
     struct hexgame *game;

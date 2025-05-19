@@ -78,6 +78,10 @@ int test_app_render_game(test_app_t *app){
     int err;
 
     hexgame_t *game = &app->hexgame;
+    minimap_state_t *minimap_state = &game->minimap_state;
+
+    player_t *player = hexgame_get_player_by_keymap(game, HEXGAME_PLAYER_0);
+    body_t *body = player? player->body: NULL;
 
     RET_IF_SDL_NZ(SDL_FillRect(app->surface, NULL, 255));
 
@@ -88,7 +92,7 @@ int test_app_render_game(test_app_t *app){
     }
 
     /* NOTE/HACK: camera_render takes care of rendering the minimap if
-    game->minimap_state.zoom is truthy */
+    minimap_state->zoom is truthy */
     err = camera_render(app->camera,
         app->surface,
         app->sdl_palette, app->scw/2, app->sch/2,
@@ -111,12 +115,21 @@ int test_app_render_game(test_app_t *app){
 
     if(app->show_menu){
         test_app_menu_render(&app->menu);
-    }else if(game->minimap_state.zoom){
+    }else if(minimap_state->zoom){
         /* Rendering of the minimap is handled, interestingly, by
         camera_render, which was already called above */
+        if(minimap_state->mappoints_len > 1){
+            test_app_printf(app, 0, app->lines_printed * app->font.char_h,
+                "Press Left/Right to travel to places you've been before.\n");
+        }
         test_app_printf(app, 0, app->lines_printed * app->font.char_h,
-            "Press Enter...\n");
+            "Press Enter to close this minimap...\n");
     }else{
+
+        if(body && body->touching_mappoint){
+            test_app_printf(app, 0, app->lines_printed * app->font.char_h,
+                "Press Enter to open the minimap...\n");
+        }
 
         /* Show messages like "you hit a wall!", "you were crushed!" etc */
         bool showed_dead_msg;
@@ -294,6 +307,13 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
         }else if(event->key.keysym.sym == SDLK_ESCAPE){
             test_app_menu_set_screen(&app->menu, TEST_APP_MENU_SCREEN_PAUSED);
             app->show_menu = true;
+        }else if(event->key.keysym.sym == SDLK_RETURN){
+            player_t *player = hexgame_get_player_by_keymap(game, HEXGAME_PLAYER_0);
+            body_t *body = player == NULL? NULL: player->body;
+            if(body && body->touching_mappoint){
+                err = hexgame_use_mappoint(game, body->map, body->cur_submap);
+                if(err)return err;
+            }
         }else if(event->key.keysym.sym == SDLK_TAB && app->developer_mode){
             err = _handle_tab_key(game, event);
             if(err)return err;
