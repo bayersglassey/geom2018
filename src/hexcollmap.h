@@ -318,10 +318,10 @@ hexcollmap_tile_t *hexcollmap_get_tile(hexcollmap_t *collmap, trf_t *index);
 hexcollmap_elem_t *hexcollmap_get_vert(hexcollmap_t *collmap, trf_t *index);
 hexcollmap_elem_t *hexcollmap_get_edge(hexcollmap_t *collmap, trf_t *index);
 hexcollmap_elem_t *hexcollmap_get_face(hexcollmap_t *collmap, trf_t *index);
+bool hexcollmap_has_mappoint(hexcollmap_t *collmap);
 bool hexcollmap_collide(
     hexcollmap_t *collmap1, trf_t *trf1,
     hexcollmap_t *collmap2, trf_t *trf2,
     vecspace_t *space, bool all);
-
 
 #endif

@@ -139,4 +139,20 @@ T new_elem = NULL; \
     elem_cleanup(array[array##_len]); \
     free(array[array##_len]);
 
+#define ARRAY_TRUNCATE(array, elem_cleanup) \
+{ \
+    for(int i = 0; i < array##_len; i++){ \
+        elem_cleanup(&array[i]);} \
+    array##_len = 0; \
+}
+
+#define ARRAY_TRUNCATE_PTR(array, elem_cleanup) \
+{ \
+    for(int i = 0; i < array##_len; i++){ \
+        elem_cleanup(&array[i]); \
+        free(array[i]); \
+    } \
+    array##_len = 0; \
+}
+
 #endif

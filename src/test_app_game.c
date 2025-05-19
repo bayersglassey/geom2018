@@ -245,13 +245,27 @@ static int _load_recording(test_app_t *app, bool shift){
 }
 
 
-static void _handle_tab_key(hexgame_t *game, SDL_Event *event){
+static int _handle_tab_key(hexgame_t *game, SDL_Event *event){
     /* When you press the TAB key */
-    if(!(event->key.keysym.mod & KMOD_ALT) && !(event->key.repeat)){
+    int err;
+
+    /* Try to detect when player alt-tabbed to/from this window */
+    if((event->key.keysym.mod & KMOD_ALT) || (event->key.repeat))return 0;
+
+    if(event->key.keysym.mod & KMOD_SHIFT){
+        player_t *player = hexgame_get_player_by_keymap(game, HEXGAME_PLAYER_0);
+        body_t *body = player? player->body: NULL;
+        if(body){
+            err = hexgame_use_mappoint(game, body->map, body->cur_submap);
+            if(err)return err;
+        }
+    }else{
         /* Cycle between 3 values: 0 means don't show minimap, and
         1 and 2 are zoom values. */
-        game->minimap_state.zoom = (game->minimap_state.zoom + 3 - 1) % 3;
+        int zoom = (game->minimap_state.zoom + 3 - 1) % 3;
+        hexgame_set_minimap_zoom(game, zoom);
     }
+    return 0;
 }
 
 
@@ -281,7 +295,8 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
             test_app_menu_set_screen(&app->menu, TEST_APP_MENU_SCREEN_PAUSED);
             app->show_menu = true;
         }else if(event->key.keysym.sym == SDLK_TAB && app->developer_mode){
-            _handle_tab_key(game, event);
+            err = _handle_tab_key(game, event);
+            if(err)return err;
         }else if(event->key.keysym.sym == SDLK_F6 && app->developer_mode){
             /* Hack, we really want to force camera->mapper to NULL, but
             instead we assume the existence of this mapper called "single" */
@@ -340,17 +355,66 @@ int test_app_process_event_game(test_app_t *app, SDL_Event *event){
 }
 
 
+static int _use_cur_mappoint(hexgame_t *game, int cur_mappoint){
+    int err;
+
+    if(cur_mappoint < 0)return 0;
+
+    minimap_state_t *minimap_state = &game->minimap_state;
+    if(minimap_state->cur_mappoint == cur_mappoint)return 0;
+
+    minimap_state->cur_mappoint = cur_mappoint;
+    minimap_state_mappoint_t *mappoint = &minimap_state->mappoints[cur_mappoint];
+
+    player_t *player = hexgame_get_player_by_keymap(game, HEXGAME_PLAYER_0);
+    body_t *body = player == NULL? NULL: player->body;
+    if(body == NULL)return 0;
+
+    err = body_relocate(body, NULL, &mappoint->location, NULL, NULL);
+    if(err)return err;
+
+    return 0;
+}
+
+
 int test_app_process_event_minimap(test_app_t *app, SDL_Event *event){
     /* Handle keys pressed while the minimap is open */
     int err;
 
     hexgame_t *game = &app->hexgame;
+    minimap_state_t *minimap_state = &game->minimap_state;
+
+    /* We should only be handling minimap events if minimap is open! */
+    if(!minimap_state->zoom)return 0;
 
     if(event->type == SDL_KEYDOWN){
         if(event->key.keysym.sym == SDLK_RETURN){
-            game->minimap_state.zoom = 0;
+            hexgame_set_minimap_zoom(game, 0);
         }else if(event->key.keysym.sym == SDLK_TAB && app->developer_mode){
-            _handle_tab_key(game, event);
+            err = _handle_tab_key(game, event);
+            if(err)return err;
+        }else if(event->key.keysym.sym == SDLK_LEFT){
+            int cur_mappoint = minimap_state->cur_mappoint;
+            if(cur_mappoint < 0){
+                if(minimap_state->mappoints_len > 0)cur_mappoint = 0;
+            }else{
+                if(--cur_mappoint < 0){
+                    cur_mappoint = minimap_state->mappoints_len - 1;
+                }
+            }
+            err = _use_cur_mappoint(game, cur_mappoint);
+            if(err)return err;
+        }else if(event->key.keysym.sym == SDLK_RIGHT){
+            int cur_mappoint = minimap_state->cur_mappoint;
+            if(cur_mappoint < 0){
+                if(minimap_state->mappoints_len > 0)cur_mappoint = 0;
+            }else{
+                if(++cur_mappoint >= minimap_state->mappoints_len){
+                    cur_mappoint = 0;
+                }
+            }
+            err = _use_cur_mappoint(game, cur_mappoint);
+            if(err)return err;
         }
     }
     return 0;

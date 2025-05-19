@@ -514,7 +514,6 @@ int body_move_to_map(body_t *body, hexmap_t *map){
     /* Update any cameras following this body */
     FOREACH_BODY_CAMERA(body, camera, {
         camera->map = map;
-        camera->cur_submap = body->cur_submap;
     })
     return 0;
 }
@@ -618,6 +617,11 @@ int body_relocate(body_t *body, const char *map_filename,
     /* Flash screen so player knows something happened */
     body_flash_cameras(body, flash_r, flash_g, flash_b, 60);
     body_reset_cameras(body);
+
+    /* Update body's cur_submap */
+    err = body_update_cur_submap(body);
+    if(err)return err;
+
     return 0;
 }
 
@@ -866,6 +870,11 @@ int body_update_cur_submap(body_t *body){
         player_t *player = body_get_player(body);
         if(player)hexmap_submap_visit(new_submap);
     }
+
+    /* Update any cameras following this body */
+    FOREACH_BODY_CAMERA(body, camera, {
+        camera->cur_submap = body->cur_submap;
+    })
 
     return 0;
 }

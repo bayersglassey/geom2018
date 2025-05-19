@@ -419,6 +419,17 @@ static int hexcollmap_collide_elem(hexcollmap_t *collmap1, bool all,
     return 2; /* Caller should keep looking for a collision */
 }
 
+bool hexcollmap_has_mappoint(hexcollmap_t *collmap){
+    int tiles_len = collmap->w * collmap->h;
+    for(int i = 0; i < tiles_len; i++){
+        hexcollmap_tile_t *tile = &collmap->tiles[i];
+        for(int j = 0; j < 2; j++){
+            if(tile->face[j].tile_c == 'M')return true;
+        }
+    }
+    return false;
+}
+
 bool hexcollmap_collide(
     hexcollmap_t *collmap1, trf_t *trf1,
     hexcollmap_t *collmap2, trf_t *trf2,

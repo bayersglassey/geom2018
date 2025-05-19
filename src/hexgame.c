@@ -170,7 +170,10 @@ int camera_step(camera_t *camera){
     }
 
     /* Scroll renderpos */
-    if(!camera->should_reset){
+    if(camera->should_reset){
+        vec_cpy(space->dims, camera->scrollpos, camera->pos);
+        camera->should_reset = false;
+    }else{
         vec_ptr_t scrollpos = camera->scrollpos;
 
         vec_t target_scrollpos;
@@ -195,11 +198,6 @@ int camera_step(camera_t *camera){
             }
             hexspace_rot(add, rot);
             vec_add(space->dims, scrollpos, add);
-        }
-    }else{
-        if(camera->should_reset){
-            vec_cpy(space->dims, camera->scrollpos, camera->pos);
-            camera->should_reset = false;
         }
     }
 
@@ -475,11 +473,14 @@ int camera_render(camera_t *camera,
  ****************/
 
 static void minimap_state_cleanup(minimap_state_t *minimap_state){
-    /* Nothing to do... */
+    ARRAY_FREE(minimap_state_mappoint_t, minimap_state->mappoints,
+        (void))
 }
 
 static void minimap_state_init(minimap_state_t *minimap_state){
     minimap_state->zoom = 0;
+    minimap_state->cur_mappoint = -1;
+    ARRAY_INIT(minimap_state->mappoints)
 }
 
 
@@ -854,5 +855,42 @@ int hexgame_update_audio_data(hexgame_t *game, camera_t *camera){
     }else{
         hexgame_audio_data_set_callback(data, map->song);
     }
+    return 0;
+}
+
+void hexgame_set_minimap_zoom(hexgame_t *game, int zoom){
+    minimap_state_t *minimap_state = &game->minimap_state;
+    ARRAY_TRUNCATE(minimap_state->mappoints, (void))
+    minimap_state->cur_mappoint = -1;
+    minimap_state->zoom = zoom;
+}
+
+int hexgame_use_mappoint(hexgame_t *game, hexmap_t *map,
+    hexmap_submap_t *cur_submap
+){
+    int err;
+
+    minimap_state_t *minimap_state = &game->minimap_state;
+    hexgame_set_minimap_zoom(game, 2);
+
+    for(int i = 0; i < map->submaps_len; i++){
+        hexmap_submap_t *submap = map->submaps[i];
+
+        /* Only consider submaps which are visible, visited, and have a
+        mappoint */
+        if(!submap->has_mappoint)continue;
+        if(!hexmap_submap_is_visited(submap))continue;
+        bool visible;
+        err = hexmap_submap_is_visible(submap, &visible);
+        if(err)return err;
+        if(!visible)continue;
+
+        if(submap == cur_submap)minimap_state->cur_mappoint = minimap_state->mappoints_len;
+
+        minimap_state_mappoint_t mappoint = {0};
+        hexmap_submap_get_spawn(submap, &mappoint.location);
+        ARRAY_PUSH(minimap_state_mappoint_t, minimap_state->mappoints, mappoint)
+    }
+
     return 0;
 }

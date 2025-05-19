@@ -64,6 +64,7 @@ typedef struct hexmap_submap {
     bool solid;
     vec_t pos;
     vec_t camera_pos;
+    bool has_mappoint;
     int camera_type; /* enum camera_type */
     const char *filename;
     ARRAY_DECL(valexpr_t*, text_exprs)
@@ -176,9 +177,10 @@ void hexmap_submap_group_cleanup(hexmap_submap_group_t *group);
 void hexmap_submap_group_init(hexmap_submap_group_t *group,
     const char *name);
 void hexmap_submap_cleanup(hexmap_submap_t *submap);
-int hexmap_submap_init_from_parser_context(hexmap_t *map,
+int hexmap_submap_init(hexmap_t *map,
     hexmap_submap_t *submap, const char *filename,
     hexmap_submap_parser_context_t *context);
+void hexmap_submap_get_spawn(hexmap_submap_t *submap, hexgame_location_t *location);
 void hexmap_submap_visit(hexmap_submap_t *submap);
 bool hexmap_submap_is_visited(hexmap_submap_t *submap);
 bool hexmap_submap_is_target(hexmap_submap_t *submap);

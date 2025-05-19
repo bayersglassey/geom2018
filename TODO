@@ -1308,10 +1308,16 @@ nice and green on the minimap.
     Possibly, at this time we also *calculate the array of available map
     points*.
 
-    Currently, the game's minimap state lives in game->show_minimap.
-    Perhaps we need game->minimap_state. It can have zoom (i.e. the
-    equivalent of game->show_minimap currently), and an array of map
-    points, and a current map point index.
+    [X] Currently, the game's minimap state lives in game->show_minimap.
+        Perhaps we need game->minimap_state. It can have zoom (i.e. the
+        equivalent of game->show_minimap currently), and an array of map
+        points, and a current map point index.
+
+    So, how do we calculate the available map points?
+    If they are 'M' tiles, then they naturally disappear when their submap
+    ceases to be visible, which might be useful.
+    Let's go with 'M' tiles for now.
+    So, how do we find them all?
 
 [ ] Demo is too open.
     Currently, it has 3 basic sub-areas you can visit immediately:

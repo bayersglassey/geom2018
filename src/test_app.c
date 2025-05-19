@@ -120,11 +120,7 @@ static int _test_app_restart(test_app_t *app,
                     submap_filename);
                 return 2;}
 
-            hexgame_location_t *spawn_submap_spawn =
-                &spawn_submap->collmap.spawn;
-
-            spawn = *spawn_submap_spawn;
-            vec_add(map->space->dims, spawn.pos, spawn_submap->pos);
+            hexmap_submap_get_spawn(spawn_submap, &spawn);
         }
 
         hexgame_savelocation_t respawn_location;

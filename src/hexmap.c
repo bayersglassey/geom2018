@@ -611,8 +611,7 @@ int hexmap_parse(hexmap_t *map, fus_lexer_t *lexer){
             fprintf(stderr, "Couldn't find submap with filename: %s\n",
                 spawn_filename);
             return 2;}
-        map->spawn = spawn_submap->collmap.spawn;
-        vec_add(map->space->dims, map->spawn.pos, spawn_submap->pos);
+        hexmap_submap_get_spawn(spawn_submap, &map->spawn);
     }
 
     /* pheeew */
@@ -803,7 +802,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
 
         /* WARNING: submap's init does *NOT* init its collmap, so need
         to load submap->collmap immediately after this call. */
-        err = hexmap_submap_init_from_parser_context(map, submap,
+        err = hexmap_submap_init(map, submap,
             submap_filename, context);
         if(err)return err;
 
@@ -831,6 +830,9 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
                 &prend->name_store, &prend->filename_store);
             if(err)return err;
         }
+
+        /* Check for 'M' tiles, cache the result on submap->has_mappoint */
+        submap->has_mappoint = hexcollmap_has_mappoint(&submap->collmap);
 
         /* render submap->rgraph_map, submap->rgraph_minimap */
         err = hexmap_submap_create_rgraph_map(submap);
@@ -1242,7 +1244,7 @@ void hexmap_submap_cleanup(hexmap_submap_t *submap){
     vars_cleanup(&submap->song_vars);
 }
 
-int hexmap_submap_init_from_parser_context(hexmap_t *map,
+int hexmap_submap_init(hexmap_t *map,
     hexmap_submap_t *submap, const char *filename,
     hexmap_submap_parser_context_t *context
 ){
@@ -1292,6 +1294,12 @@ int hexmap_submap_init_from_parser_context(hexmap_t *map,
     submap->tileset = context->tileset;
 
     return 0;
+}
+
+void hexmap_submap_get_spawn(hexmap_submap_t *submap, hexgame_location_t *location){
+    hexmap_t *map = submap->map;
+    *location = submap->collmap.spawn;
+    vec_add(map->space->dims, location->pos, submap->pos);
 }
 
 void hexmap_submap_visit(hexmap_submap_t *submap){

@@ -399,12 +399,18 @@ int camera_render(camera_t *camera,
 struct hexgame;
 typedef int hexgame_save_callback_t(struct hexgame *game);
 
+typedef struct minimap_state_mappoint {
+    hexgame_location_t location;
+} minimap_state_mappoint_t;
+
 typedef struct minimap_state {
     int zoom;
         /* HACK: zoom is used as both a bool and an int.
         It's a bool in that it controls whether minimap is shown; but
         it's also an int in that when nonzeo, it represents the zoom
         of the minimap. */
+    ARRAY_DECL(minimap_state_mappoint_t, mappoints)
+    int cur_mappoint;
 } minimap_state_t;
 
 typedef struct hexgame {
@@ -474,6 +480,9 @@ int hexgame_unpauseable_step(hexgame_t *game);
 int hexgame_step(hexgame_t *game);
 int hexgame_step_cameras(hexgame_t *game);
 int hexgame_update_audio_data(hexgame_t *game, camera_t *camera);
+void hexgame_set_minimap_zoom(hexgame_t *game, int zoom);
+int hexgame_use_mappoint(hexgame_t *game, hexmap_t *map,
+    hexmap_submap_t *cur_submap);
 
 
 #endif
