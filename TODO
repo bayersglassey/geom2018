@@ -1241,84 +1241,15 @@ No hitbox?..
 Apr 29, 2025:
 -------------
 
-Enable teleportation between save points on the minimap?.. they already show up all
-nice and green on the minimap.
-
 [ ] When you get rollerspider at the end of tutorial3, we should give you
     a little puzzley area where you can learn how to use it.
 [X] When showing minimap, say "press Tab" or something!
     Actually, what if we remove Tab key, and in minimap you press Enter?..
     And each minimap door controls the zoom at which you view the minimap?..
 [ ] Replace the "red door" sprite with something minimap-specific
-    Maybe... red "save point" sprite?..
-    Maybe all save points show you the minimap?..
-    Or like, if you press Enter while standing on a save point, you see minimap?..
-    Can you teleport between save points?.. only red ones?..
-    TELEPORT BETWEEN ALL SAVE POINTS, I THINK.
-    That way, it's never "bad" to touch a save point, like you can never accidentally
-    lose the ability to reappear at the one you "wanted".
-    But this makes the controls & UI more complicated.
-    With the minimap "doors", we need them to deactivate until you take a few
-    steps away; but if you need to press Enter on a save point, that's kind of
-    simpler.
-    Don't we need a way to visually show which save points you've touched/activated?..
-    That can presumably be a palette swap...
-    But then save points need to stop being part of the map (the 'S' tile_c).
-    But perhaps that's for the best anyway.
-    Errr, except then we need to like, manually add them to "parts", and come
-    up with a unique "mapvar" for each one (to mark it as having been activated).
-    Ewwww. So... can we just continue to use an 'S' tile_c, but like... automatically
-    keep track of all such tiles? Use the position as a unique identifier?
-    AH -- or can we just use "whether you've visited a given submap or not"???
-    That's *much* simpler, since we already have it implemented.
-    But it gives us far less control, like now you don't even have to touch the
-    save point in order to activate it (you just need to visit its submap).
-
-    Also, what are the controls/UI for moving between save points on the minimap?
-    Maybe steal Cave Story's teleporter UI.
-    Have an explicit, finite list of named areas, and you scroll through them
-    and choose one.
-    Maybe we can have a different list of named areas for each worldmap?..
-    So e.g. trees worldmap would have an area called "entrance", that kind of thing.
-
-    Here's how this could all work:
-    * Add an 'M' tile_c, which is a red save point which opens the minimap
-    * A hexmap_submap_group can have a "minimap name", which is displayed when
-        you're in that group at the minimap
-    * In the minimap, tap left/right arrow keys to switch between submap groups
-        (only ones you've visited, and which contain an 'M')
-    * When you switch to a submap group, you are teleported to the first 'M'
-        found within it
-
-    What's the name for an 'M' tile (or red door)?..
-    Calling them "minimaps" makes no sense. Minimap savepoint? Minimap door?
-    => MAP POINTS.
-    Also, do we distinguish between "things which make/let you open the
-    minimap", and "things to which you can jump via the minimap"?
-    Do you jump to savepoints, or doors, or submap groups (and if so, where
-    within them)?
-
-    When you press left/right in minimap, how do we know which map point
-    you should jump to? I.e. how do we know which one you're currently at?
-    When you touch a map point, we could store it in the hexgame.
-    Or, if we go by current submap group, then we can calculate your current
-    map point.
-    AH -- when you open the minimap, we set the "current mappoint".
-    That is then what you scroll through.
-    Possibly, at this time we also *calculate the array of available map
-    points*.
-
-    [X] Currently, the game's minimap state lives in game->show_minimap.
-        Perhaps we need game->minimap_state. It can have zoom (i.e. the
-        equivalent of game->show_minimap currently), and an array of map
-        points, and a current map point index.
-
-    So, how do we calculate the available map points?
-    If they are 'M' tiles, then they naturally disappear when their submap
-    ceases to be visible, which might be useful.
-    Let's go with 'M' tiles for now.
-    So, how do we find them all?
-
+[ ] Replace the "red savepoint" sprite with something minimap-specific
+[ ] A hexmap_submap_group can have a "minimap name", which is displayed when
+    you're in that group at the minimap?
 [ ] Demo is too open.
     Currently, it has 3 basic sub-areas you can visit immediately:
     * jungle
