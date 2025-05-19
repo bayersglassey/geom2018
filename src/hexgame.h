@@ -399,16 +399,22 @@ int camera_render(camera_t *camera,
 struct hexgame;
 typedef int hexgame_save_callback_t(struct hexgame *game);
 
+typedef struct minimap_state {
+    int zoom;
+        /* HACK: zoom is used as both a bool and an int.
+        It's a bool in that it controls whether minimap is shown; but
+        it's also an int in that when nonzeo, it represents the zoom
+        of the minimap. */
+} minimap_state_t;
+
 typedef struct hexgame {
     int frame_i;
     int unpauseable_frame_i;
         /* For animations which continue when game is paused */
-    int show_minimap;
-        /* HACK: show_minimap is used as both a bool and an int.
-        It's a bool in that it controls whether minimap is shown; but
-        it's also an int in that when nonzeo, it represents the zoom
-        of the minimap. */
+
     tileset_t minimap_tileset;
+
+    minimap_state_t minimap_state;
 
     vars_t vars;
 

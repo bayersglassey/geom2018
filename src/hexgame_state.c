@@ -673,7 +673,7 @@ int state_effect_apply(state_effect_t *effect,
         break;
     }
     case STATE_EFFECT_TYPE_SHOW_MINIMAP: {
-        game->show_minimap = effect->u.i;
+        game->minimap_state.zoom = effect->u.i;
     }
     case STATE_EFFECT_TYPE_DIE: {
         CHECK_BODY

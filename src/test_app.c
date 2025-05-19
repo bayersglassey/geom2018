@@ -520,7 +520,7 @@ static int test_app_poll_events(test_app_t *app){
         }
 
         if(app->mode == TEST_APP_MODE_GAME){
-            if(game->show_minimap){
+            if(game->minimap_state.zoom){
                 /* Handle minimap keypresses */
                 err = test_app_process_event_minimap(app, event);
                 if(err)return err;
@@ -546,7 +546,7 @@ static int test_app_poll_events(test_app_t *app){
         app->mode != TEST_APP_MODE_GAME ||
 
         app->show_menu ||
-        app->hexgame.show_minimap ||
+        app->hexgame.minimap_state.zoom ||
         app->process_console
         /* NOTE: *don't* look at app->hexgame_running for this check -- that's
         the F5 pause, and we want to be able to e.g. observe keyinfo in the
@@ -599,7 +599,7 @@ int test_app_mainloop_step(test_app_t *app){
 
     if(app->show_menu && test_app_menu_pauses_game(&app->menu)){
         /* Menu doesn't need to do anything each frame */
-    }else if(app->hexgame.show_minimap){
+    }else if(app->hexgame.minimap_state.zoom){
         /* Minimap doesn't need to do anything each frame */
     }else if(app->hexgame_running){
         err = hexgame_step(game);

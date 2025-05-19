@@ -88,7 +88,7 @@ int test_app_render_game(test_app_t *app){
     }
 
     /* NOTE/HACK: camera_render takes care of rendering the minimap if
-    game->show_minimap is truthy */
+    game->minimap_state.zoom is truthy */
     err = camera_render(app->camera,
         app->surface,
         app->sdl_palette, app->scw/2, app->sch/2,
@@ -111,7 +111,7 @@ int test_app_render_game(test_app_t *app){
 
     if(app->show_menu){
         test_app_menu_render(&app->menu);
-    }else if(game->show_minimap){
+    }else if(game->minimap_state.zoom){
         /* Rendering of the minimap is handled, interestingly, by
         camera_render, which was already called above */
         test_app_printf(app, 0, app->lines_printed * app->font.char_h,
@@ -250,7 +250,7 @@ static void _handle_tab_key(hexgame_t *game, SDL_Event *event){
     if(!(event->key.keysym.mod & KMOD_ALT) && !(event->key.repeat)){
         /* Cycle between 3 values: 0 means don't show minimap, and
         1 and 2 are zoom values. */
-        game->show_minimap = (game->show_minimap + 3 - 1) % 3;
+        game->minimap_state.zoom = (game->minimap_state.zoom + 3 - 1) % 3;
     }
 }
 
@@ -348,7 +348,7 @@ int test_app_process_event_minimap(test_app_t *app, SDL_Event *event){
 
     if(event->type == SDL_KEYDOWN){
         if(event->key.keysym.sym == SDLK_RETURN){
-            game->show_minimap = 0;
+            game->minimap_state.zoom = 0;
         }else if(event->key.keysym.sym == SDLK_TAB && app->developer_mode){
             _handle_tab_key(game, event);
         }

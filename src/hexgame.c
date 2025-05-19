@@ -460,13 +460,26 @@ int camera_render(camera_t *camera,
     SDL_Palette *pal, int x0, int y0, int zoom
 ){
     hexgame_t *game = camera->game;
-    if(game->show_minimap){
+    if(game->minimap_state.zoom){
         /* HACK: show_minimap is both a "boolean" and a zoom value. */
-        int _zoom = game->show_minimap;
+        int _zoom = game->minimap_state.zoom;
         return _camera_render(camera, surface, pal, x0, y0, _zoom, true);
     }else{
         return _camera_render(camera, surface, pal, x0, y0, zoom, false);
     }
+}
+
+
+/*****************
+ * MINIMAP STATE *
+ ****************/
+
+static void minimap_state_cleanup(minimap_state_t *minimap_state){
+    /* Nothing to do... */
+}
+
+static void minimap_state_init(minimap_state_t *minimap_state){
+    minimap_state->zoom = 0;
 }
 
 
@@ -537,7 +550,7 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
 
     game->minimap_prend = minimap_prend;
 
-    game->show_minimap = 0;
+    minimap_state_init(&game->minimap_state);
 
     game->save_callback = save_callback;
     game->save_callback_data = save_callback_data;

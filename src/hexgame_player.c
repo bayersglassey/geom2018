@@ -284,7 +284,7 @@ int player_step(player_t *player, hexgame_t *game){
             err = player_use_savepoint(player);
             if(err)return err;
             if(minimap_submap != NULL && player->keymap == HEXGAME_PLAYER_0){
-                game->show_minimap = 2;
+                game->minimap_state.zoom = 2;
             }
         }
     }
