@@ -1230,6 +1230,75 @@ Jan 8, 2024:
         then:
             key: down u
 
+    How can we test the above logic?..
+    I wanna like... be able to load a tiny map, and stick a spider
+    on it, and run some of this "code", and make assertions. O_o
+    So, these might be test cases:
+
+        :
+            stateset: "anim/spider.fus"
+            state: "stand"
+            collmap:
+                ;;    .   .   .
+                ;;
+                ;; (+)- +   + - +
+            after:
+                call: "safe_to_jump"
+                assert: myvar("_safe_to_jump")
+        :
+            stateset: "anim/spider.fus"
+            state: "stand"
+            collmap:
+                ;;    .   .   .
+                ;;            *
+                ;; (+)- +   + - +
+            after:
+                call: "safe_to_jump"
+                assert: ! myvar("_safe_to_jump")
+
+    Some other test case fields we might want to use sometimes:
+    * steps: 3 # run hexgame_step some number of times
+    * before: ... # effects to run before running hexgame_step (e.g. `key: up f`)
+
+    What do we need in order to "run" those?..
+    [ ] add STATE_EFFECT_TYPE_ASSERT
+    [ ] add bin/animtest (src/main/animtest.c)
+    [ ] load an array of structs (call 'em anim_testcase_t)
+    [ ] run the test cases
+        [ ] we need to instantiate an entire hexgame!..
+            currently this only ever happens in test_app_init.
+
+                int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
+                    const char *worldmaps_filename,
+                    prismelrenderer_t *minimap_prend,
+                    const char *minimap_tileset_filename,
+                    const char *map_filename, hexmap_t **map_ptr,
+                    hexgame_save_callback_t *save_callback, void *save_callback_data,
+                    bool have_audio);
+
+            The worldmaps_filename thing is a bit obnoxious...
+            And we don't really want to pass a map_filename, either...
+            Also we want prismelrenderer to be NULL, don't we?..
+            Errr maybe not?.. it doesn't require an SDL_Renderer.
+            It'll create SDL_Surface objects and stuff, but I think that's fine
+            even if SDL isn't initialized.
+    [ ] in order to parse "effect"s, we need a context... and contexts live on
+        a stateset...
+        basically, in order to parse effects, we need to be able to modify a
+        stateset -- to add the effects to a context on it.
+        So, when parsing a test case, instead of using hexgame_get_or_load_stateset,
+        let's use stateset_load directly: test cases can have statesets living on them.
+
+    hexgame_step
+        hexmap_step
+            body_step
+                body_handle_rules
+                    state_handle_rules
+                        state_rule_match
+                            state_cond_match
+                        state_rule_apply
+                            state_effect_apply
+
 
 Jan 19, 2025:
 -------------
