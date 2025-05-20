@@ -456,12 +456,11 @@ typedef struct hexgame {
 
 void hexgame_cleanup(hexgame_t *game);
 int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
-    const char *worldmaps_filename,
     prismelrenderer_t *minimap_prend,
     const char *minimap_tileset_filename,
-    const char *map_filename, hexmap_t **map_ptr,
     hexgame_save_callback_t *save_callback, void *save_callback_data,
     bool have_audio);
+int hexgame_load_worldmaps(hexgame_t *game, const char *worldmaps_filename);
 int hexgame_load_map(hexgame_t *game, const char *map_filename,
     hexmap_t **map_ptr);
 int hexgame_get_or_load_map(hexgame_t *game, const char *map_filename,

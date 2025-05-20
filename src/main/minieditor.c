@@ -8,13 +8,10 @@
 #include "../util.h"
 #include "../vec4.h"
 #include "../minieditor.h"
+#include "../defaults.h"
 
 
-#define DEFAULT_PREND_FILENAME "data/test.fus"
 #define DEFAULT_IMAGE_FILENAME "screen.bmp"
-#define DEFAULT_PALETTE_FILENAME "data/pal1.fus"
-#define DEFAULT_FONT_FILENAME "data/font.fus"
-#define DEFAULT_FONTS_FILENAME "data/fonts.fus"
 
 #define DEFAULT_SCW 1024
 #define DEFAULT_SCH 768

@@ -6,10 +6,7 @@
 #include "../anim.h"
 #include "../vec4.h"
 #include "../prismelrenderer.h"
-
-
-const char *DEFAULT_PREND_FILENAME = "data/test.fus";
-
+#include "../defaults.h"
 
 
 typedef struct opts{
@@ -247,20 +244,16 @@ int main(int n_args, char **args){
 
         fprintf(stderr, "Loading prismelrenderer from file: %s\n",
             prend_filename);
-
         prismelrenderer_t prend;
         err = prismelrenderer_init(&prend, &vec4);
         if(err)return err;
-
         err = prismelrenderer_load(&prend, prend_filename, NULL, NULL);
         if(err)return err;
 
         fprintf(stderr, "Loading stateset from file: %s\n",
             stateset_filename);
-
         stateset_t stateset;
         stateset_init(&stateset, stateset_filename);
-
         err = stateset_load(&stateset, stateset_filename,
             &prend, &hexspace);
         if(err)return err;

@@ -8,9 +8,7 @@
 #include "../directory.h"
 #include "../directory_shell.h"
 #include "../vec4.h"
-
-
-const char *DEFAULT_PREND_FILENAME = "data/test.fus";
+#include "../defaults.h"
 
 
 static int _max(int a, int b){return a > b? a: b;}

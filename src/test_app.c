@@ -22,6 +22,7 @@
 #include "hexspace.h"
 #include "generic_printf.h"
 #include "save_slots.h"
+#include "defaults.h"
 
 const char *RECORDING_FILENAME_TEMPLATE = "recs/000.fus";
 
@@ -82,14 +83,16 @@ static int _test_app_restart(test_app_t *app,
             TEST_MAP_HEXMAP_FILENAME_NEW_GAME;
     }
 
-    hexmap_t *map;
     err = hexgame_init(game, prend,
-        "data/worldmaps.fus",
         minimap_prend,
-        "data/tileset_minimap.fus",
-        hexmap_filename, &map,
+        HEXGAME_DEFAULT_MINIMAP_TILESET,
         &_save_callback, app,
         app->have_audio);
+    if(err)return err;
+    err = hexgame_load_worldmaps(game, HEXGAME_DEFAULT_WORLDMAPS_FILENAME);
+    if(err)return err;
+    hexmap_t *map;
+    err = hexgame_load_map(game, hexmap_filename, &map);
     if(err)return err;
     game->animate_palettes = app->animate_palettes;
 
@@ -328,7 +331,9 @@ int test_app_reload_prismelrenderers(test_app_t *app){
     if(err)return err;
 
     err = prismelrenderer_load(&app->minimap_prend,
-        app->minimap_alt? "data/minimap_alt.fus": "data/minimap.fus",
+        app->minimap_alt?
+            DEFAULT_MINIMAP_PREND_ALT_FILENAME:
+            DEFAULT_MINIMAP_PREND_FILENAME,
         NULL, NULL);
     if(err)return err;
 

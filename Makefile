@@ -10,7 +10,8 @@ LIBS += $(shell sdl2-config --libs) -lm
 
 PROGS = \
  bin/lexertool bin/collmaptool bin/hexpicturetest bin/sdltest bin/directorytest \
- bin/prendtool bin/demo bin/minieditor bin/geomtool bin/animtool bin/audiotool
+ bin/prendtool bin/demo bin/minieditor bin/geomtool bin/animtool bin/animtest \
+ bin/audiotool
 
 TESTS = \
  bin/lexertest bin/frozenstringtest bin/geomtest bin/stringstoretest bin/varstest
@@ -108,6 +109,10 @@ bin/geomtool: src/main/geomtool.o $(OFILES)
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 bin/animtool: src/main/animtool.o $(OFILES) $(SDL_OFILES)
+	mkdir -p bin
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
+
+bin/animtest: src/main/animtest.o $(OFILES) $(SDL_OFILES)
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 

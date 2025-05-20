@@ -352,7 +352,6 @@ typedef struct state_effect_goto {
 } state_effect_goto_t;
 
 typedef struct state_effect_call {
-    state_context_t *state_context;
     const char *name;
 } state_effect_call_t;
 
@@ -442,5 +441,8 @@ void state_cond_dump(state_cond_t *cond, FILE *file, int depth);
 
 void state_effect_cleanup(state_effect_t *effect);
 void state_effect_dump(state_effect_t *effect, FILE *file, int depth);
+int state_effect_parse(state_effect_t *effect,
+    state_context_t *context, fus_lexer_t *lexer,
+    prismelrenderer_t *prend, vecspace_t *space);
 
 #endif

@@ -1,0 +1,37 @@
+cases:
+    "should_step":
+        stateset: "anim/spider.fus"
+        state: "stand"
+        collmap:
+            ;;    .   .
+            ;;
+            ;; (+)- + - +
+        before:
+            key: down f
+        steps: 1
+        after:
+            print: "AAA"
+    "should_jump":
+        stateset: "anim/spider.fus"
+        state: "stand"
+        collmap:
+            ;;    .   .
+            ;;
+            ;; (+)- +   .
+        before:
+            key: down f
+        steps: 1
+        after:
+            print: "AAA"
+    "should_stay":
+        stateset: "anim/spider.fus"
+        state: "stand"
+        collmap:
+            ;;    .   .
+            ;;        *
+            ;; (+)- +   .
+        before:
+            key: down f
+        steps: 1
+        after:
+            print: "AAA"

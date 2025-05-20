@@ -500,45 +500,9 @@ void hexgame_cleanup(hexgame_t *game){
     ARRAY_FREE_PTR(actor_t*, game->actors, actor_cleanup)
 }
 
-static int hexgame_load_worldmaps(hexgame_t *game, const char *worldmaps_filename){
-    int err;
-    fus_lexer_t _lexer, *lexer = &_lexer;
-
-    char *text = load_file(worldmaps_filename);
-    if(text == NULL)return 1;
-
-    err = fus_lexer_init(lexer, text, worldmaps_filename);
-    if(err)return err;
-
-    GET("vars")
-    OPEN
-    err = vars_parse(&game->vars, lexer);
-    if(err)return err;
-    CLOSE
-
-    GET("worldmaps")
-    OPEN
-    while(1){
-        if(GOT(")"))break;
-        OPEN
-        char *worldmap;
-        GET_STR(worldmap)
-        ARRAY_PUSH(char*, game->worldmaps, worldmap)
-        CLOSE
-    }
-    NEXT
-
-    fus_lexer_cleanup(lexer);
-
-    free(text);
-    return 0;
-}
-
 int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
-    const char *worldmaps_filename,
     prismelrenderer_t *minimap_prend,
     const char *minimap_tileset_filename,
-    const char *map_filename, hexmap_t **map_ptr,
     hexgame_save_callback_t *save_callback, void *save_callback_data,
     bool have_audio
 ){
@@ -577,19 +541,6 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
         minimap_tileset_filename, NULL);
     if(err)return err;
 
-    err = hexgame_load_worldmaps(game, worldmaps_filename);
-    if(err)return err;
-
-    if(game->worldmaps_len == 0){
-        fprintf(stderr, "No worldmaps specified!\n");
-        return 2;
-    }
-
-    hexmap_t *map;
-    err = hexgame_load_map(game, map_filename, &map);
-    if(err)return err;
-
-    *map_ptr = map;
     return 0;
 }
 
@@ -599,6 +550,40 @@ static const char *hexgame_get_worldmap(hexgame_t *game, const char *filename){
         if(!strcmp(filename, worldmap))return worldmap;
     }
     return NULL;
+}
+
+int hexgame_load_worldmaps(hexgame_t *game, const char *worldmaps_filename){
+    int err;
+    fus_lexer_t _lexer, *lexer = &_lexer;
+
+    char *text = load_file(worldmaps_filename);
+    if(text == NULL)return 1;
+
+    err = fus_lexer_init(lexer, text, worldmaps_filename);
+    if(err)return err;
+
+    GET("vars")
+    OPEN
+    err = vars_parse(&game->vars, lexer);
+    if(err)return err;
+    CLOSE
+
+    GET("worldmaps")
+    OPEN
+    while(1){
+        if(GOT(")"))break;
+        OPEN
+        char *worldmap;
+        GET_STR(worldmap)
+        ARRAY_PUSH(char*, game->worldmaps, worldmap)
+        CLOSE
+    }
+    NEXT
+
+    fus_lexer_cleanup(lexer);
+
+    free(text);
+    return 0;
 }
 
 int hexgame_load_map(hexgame_t *game, const char *map_filename,

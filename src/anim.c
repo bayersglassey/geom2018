@@ -96,9 +96,6 @@ static int _parse_collmap(state_context_t *context, fus_lexer_t *lexer,
 }
 
 
-static int _parse_effect(state_context_t *context, fus_lexer_t *lexer,
-    prismelrenderer_t *prend, vecspace_t *space,
-    state_effect_t *effect);
 static int _parse_collmsg_handler(state_context_t *context, fus_lexer_t *lexer,
     collmsg_handler_t *handler, prismelrenderer_t *prend, vecspace_t *space
 ){
@@ -113,7 +110,7 @@ static int _parse_collmsg_handler(state_context_t *context, fus_lexer_t *lexer,
     while(true){
         if(GOT(")"))break;
         ARRAY_PUSH_NEW(state_effect_t*, handler->effects, effect)
-        err = _parse_effect(context, lexer, prend, space, effect);
+        err = state_effect_parse(effect, context, lexer, prend, space);
         if(err)return err;
     }
     NEXT
@@ -170,7 +167,7 @@ static int _parse_stateset_proc(state_context_t *context, fus_lexer_t *lexer,
     while(true){
         if(GOT(")"))break;
         ARRAY_PUSH_NEW(state_effect_t*, proc->effects, effect)
-        err = _parse_effect(context, lexer, prend, space, effect);
+        err = state_effect_parse(effect, context, lexer, prend, space);
         if(err)return err;
     }
     NEXT
@@ -509,9 +506,9 @@ static int _parse_cond(state_context_t *context, fus_lexer_t *lexer,
     return 0;
 }
 
-static int _parse_effect(state_context_t *context, fus_lexer_t *lexer,
-    prismelrenderer_t *prend, vecspace_t *space,
-    state_effect_t *effect
+int state_effect_parse(state_effect_t *effect,
+    state_context_t *context, fus_lexer_t *lexer,
+    prismelrenderer_t *prend, vecspace_t *space
 ){
     INIT
     if(GOT("noop")){
@@ -607,7 +604,6 @@ static int _parse_effect(state_context_t *context, fus_lexer_t *lexer,
         GET_STR_CACHED(name, &prend->name_store)
 
         effect->type = STATE_EFFECT_TYPE_CALL;
-        effect->u.call.state_context = context;
         effect->u.call.name = name;
 
         CLOSE
@@ -647,7 +643,7 @@ static int _parse_effect(state_context_t *context, fus_lexer_t *lexer,
             OPEN
             while(!GOT(")")){
                 ARRAY_PUSH_NEW(state_effect_t*, spawn.effects, effect)
-                err = _parse_effect(context, lexer, prend, space, effect);
+                err = state_effect_parse(effect, context, lexer, prend, space);
                 if(err)return err;
             }
             NEXT
@@ -773,7 +769,7 @@ static int _parse_effect(state_context_t *context, fus_lexer_t *lexer,
         OPEN
         while(!GOT(")")){
             ARRAY_PUSH_NEW(state_effect_t*, ite->then_effects, effect)
-            err = _parse_effect(context, lexer, prend, space, effect);
+            err = state_effect_parse(effect, context, lexer, prend, space);
             if(err)return err;
         }
         NEXT
@@ -783,7 +779,7 @@ static int _parse_effect(state_context_t *context, fus_lexer_t *lexer,
             OPEN
             while(!GOT(")")){
                 ARRAY_PUSH_NEW(state_effect_t*, ite->else_effects, effect)
-                err = _parse_effect(context, lexer, prend, space, effect);
+                err = state_effect_parse(effect, context, lexer, prend, space);
                 if(err)return err;
             }
             NEXT
@@ -805,7 +801,7 @@ static int _parse_effect(state_context_t *context, fus_lexer_t *lexer,
         while(!GOT(")")){
             ARRAY_PUSH_NEW(state_effect_t*, effect->u.as.sub_effects,
                 sub_effect)
-            err = _parse_effect(context, lexer, prend, space, sub_effect);
+            err = state_effect_parse(sub_effect, context, lexer, prend, space);
             if(err)return err;
         }
         NEXT
@@ -875,7 +871,7 @@ static int _state_parse_rule(state_t *state, fus_lexer_t *lexer,
     while(1){
         if(GOT(")"))break;
         ARRAY_PUSH_NEW(state_effect_t*, rule->effects, effect)
-        err = _parse_effect(context, lexer, prend, space, effect);
+        err = state_effect_parse(effect, context, lexer, prend, space);
         if(err)return err;
     }
     NEXT
