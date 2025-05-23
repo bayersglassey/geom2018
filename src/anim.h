@@ -287,6 +287,7 @@ typedef struct state_cond {
 enum state_effect_type {
     STATE_EFFECT_TYPE_NOOP,
     STATE_EFFECT_TYPE_NO_KEY_RESET,
+    STATE_EFFECT_TYPE_DUMP,
     STATE_EFFECT_TYPE_PRINT,
     STATE_EFFECT_TYPE_MOVE,
     STATE_EFFECT_TYPE_ROT,
@@ -310,6 +311,7 @@ enum state_effect_type {
     STATE_EFFECT_TYPE_IF,
     STATE_EFFECT_TYPE_AS,
     STATE_EFFECT_TYPE_SHOW_MINIMAP,
+    STATE_EFFECT_TYPE_ASSERT,
     STATE_EFFECT_TYPES
 };
 
@@ -340,6 +342,7 @@ static const char *state_effect_type_name(int type){
         case STATE_EFFECT_TYPE_IF: return "if";
         case STATE_EFFECT_TYPE_AS: return "as";
         case STATE_EFFECT_TYPE_SHOW_MINIMAP: return "show_minimap";
+        case STATE_EFFECT_TYPE_ASSERT: return "assert";
         default: return "unknown";
     }
 }
@@ -378,6 +381,9 @@ typedef struct state_effect {
         int i;
         valexpr_t expr;
         struct {
+            int varstype; /* enum valexpr_type */
+        } dump;
+        struct {
             valexpr_t loc_expr;
             valexpr_t map_filename_expr;
             valexpr_t stateset_filename_expr;
@@ -402,6 +408,10 @@ typedef struct state_effect {
             int type; /* enum anim_as */
             ARRAY_DECL(struct state_effect*, sub_effects)
         } as;
+        struct {
+            bool debug;
+            valexpr_t valexpr;
+        } assert;
     } u;
 } state_effect_t;
 

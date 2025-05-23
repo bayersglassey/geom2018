@@ -134,6 +134,7 @@ typedef struct valexpr_cond {
 
 
 typedef struct valexpr_context {
+    bool debug;
     vars_t *yourvars;
     vars_t *mapvars;
     vars_t *globalvars;

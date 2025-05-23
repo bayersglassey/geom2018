@@ -301,6 +301,9 @@ int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer){
     }else{
         expr->type = type;
         err = val_parse(&expr->u.val, lexer);
+        if(err == 2){
+            fprintf(stderr, "...while parsing a valexpr, and seeing what we assumed to be a literal value\n");
+        }
         if(err)return err;
     }
     return 0;

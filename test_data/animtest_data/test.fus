@@ -10,7 +10,9 @@ cases:
             key: down f
         steps: 1
         after:
-            print: "AAA"
+            assert: == myvar(".state") "step"
+            assert: == myvar(".x") 1
+            assert: == myvar(".y") 0
     "should_jump":
         stateset: "anim/spider.fus"
         state: "stand"
@@ -22,7 +24,9 @@ cases:
             key: down f
         steps: 1
         after:
-            print: "AAA"
+            assert: == myvar(".state") "jump"
+            assert: == myvar(".x") 1
+            assert: == myvar(".y") 0
     "should_stay":
         stateset: "anim/spider.fus"
         state: "stand"
@@ -34,4 +38,6 @@ cases:
             key: down f
         steps: 1
         after:
-            print: "AAA"
+            assert: == myvar(".state") "stand"
+            assert: == myvar(".x") 0
+            assert debug: == myvar(".y") 0

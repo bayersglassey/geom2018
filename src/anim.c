@@ -517,6 +517,26 @@ int state_effect_parse(state_effect_t *effect,
     }else if(GOT("no_key_reset")){
         NEXT
         effect->type = STATE_EFFECT_TYPE_NO_KEY_RESET;
+    }else if(GOT("dump")){
+        NEXT
+        OPEN
+        effect->type = STATE_EFFECT_TYPE_DUMP;
+        if(GOT("myvars")){
+            NEXT
+            effect->u.dump.varstype = VALEXPR_TYPE_MYVAR;
+        }else if(GOT("yourvars")){
+            NEXT
+            effect->u.dump.varstype = VALEXPR_TYPE_YOURVAR;
+        }else if(GOT("mapvars")){
+            NEXT
+            effect->u.dump.varstype = VALEXPR_TYPE_MAPVAR;
+        }else if(GOT("globalvars")){
+            NEXT
+            effect->u.dump.varstype = VALEXPR_TYPE_GLOBALVAR;
+        }else{
+            return UNEXPECTED("myvars, yourvars, mapvars, globalvars");
+        }
+        CLOSE
     }else if(GOT("print")){
         NEXT
         OPEN
@@ -819,13 +839,23 @@ int state_effect_parse(state_effect_t *effect,
     }else if(GOT("show_minimap")){
         NEXT
         OPEN
-
         effect->type = STATE_EFFECT_TYPE_SHOW_MINIMAP;
         effect->u.i = 2;
         if(!GOT(")")){
             GET_INT(effect->u.i)
         }
-
+        CLOSE
+    }else if(GOT("assert")){
+        NEXT
+        effect->type = STATE_EFFECT_TYPE_ASSERT;
+        effect->u.assert.debug = false;
+        if(GOT("debug")){
+            NEXT
+            effect->u.assert.debug = true;
+        }
+        OPEN
+        err = valexpr_parse(&effect->u.assert.valexpr, lexer);
+        if(err)return err;
         CLOSE
     }else{
         return UNEXPECTED(NULL);
@@ -1412,6 +1442,9 @@ void state_effect_cleanup(state_effect_t *effect){
         case STATE_EFFECT_TYPE_AS:
             ARRAY_FREE_PTR(state_effect_t*, effect->u.as.sub_effects,
                 state_effect_cleanup)
+            break;
+        case STATE_EFFECT_TYPE_ASSERT:
+            valexpr_cleanup(&effect->u.assert.valexpr);
             break;
         default: break;
     }

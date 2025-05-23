@@ -39,7 +39,19 @@ bool hexgame_state_context_debug(hexgame_state_context_t *context){
         return 2;}
 
 
-static int _get_vars(hexgame_state_context_t *context,
+static vars_t *_context_get_vars(valexpr_context_t *context, int varstype){
+    switch(varstype){
+    case VALEXPR_TYPE_YOURVAR: return context->yourvars;
+    case VALEXPR_TYPE_MAPVAR: return context->mapvars;
+    case VALEXPR_TYPE_GLOBALVAR: return context->globalvars;
+    case VALEXPR_TYPE_MYVAR: return context->myvars;
+    default:
+        fprintf(stderr, "Dunno how to get %s vars\n", valexpr_type_msg(varstype));
+        return NULL;
+    }
+}
+
+static int _context_set_vars(hexgame_state_context_t *context,
     valexpr_context_t *valexpr_context
 ){
     /* NOTE: caller promises that valexpr_context is zeroed out */
@@ -206,7 +218,7 @@ int state_cond_match(state_cond_t *cond,
 
             if(against_bodies){
                 valexpr_context_t valexpr_context = {0};
-                err = _get_vars(context, &valexpr_context);
+                err = _context_set_vars(context, &valexpr_context);
                 if(err)return err;
 
                 const char *collmsg = valexpr_get_str(
@@ -292,7 +304,7 @@ int state_cond_match(state_cond_t *cond,
     }
     case STATE_COND_TYPE_EXPR: {
         valexpr_context_t valexpr_context = {0};
-        err = _get_vars(context, &valexpr_context);
+        err = _context_set_vars(context, &valexpr_context);
         if(err)return err;
 
         matched = valexpr_get_bool(&cond->u.valexpr, &valexpr_context);
@@ -300,7 +312,7 @@ int state_cond_match(state_cond_t *cond,
     }
     case STATE_COND_TYPE_EXISTS: {
         valexpr_context_t valexpr_context = {0};
-        err = _get_vars(context, &valexpr_context);
+        err = _context_set_vars(context, &valexpr_context);
         if(err)return err;
 
         valexpr_result_t result = {0};
@@ -445,9 +457,23 @@ int state_effect_apply(state_effect_t *effect,
         body->no_key_reset = true;
         break;
     }
+    case STATE_EFFECT_TYPE_DUMP: {
+        valexpr_context_t valexpr_context = {0};
+        err = _context_set_vars(context, &valexpr_context);
+        if(err)return err;
+
+        vars_t *vars = _context_get_vars(&valexpr_context, effect->u.dump.varstype);
+        fprintf(stderr, "Dumping %ss:\n", valexpr_type_msg(effect->u.dump.varstype));
+        if(vars == NULL){
+            fprintf(stderr, "...NULL!\n");
+        }else{
+            vars_dump(vars);
+        }
+        break;
+    }
     case STATE_EFFECT_TYPE_PRINT: {
         valexpr_context_t valexpr_context = {0};
-        err = _get_vars(context, &valexpr_context);
+        err = _context_set_vars(context, &valexpr_context);
         if(err)return err;
 
         valexpr_result_t result = {0};
@@ -500,7 +526,7 @@ int state_effect_apply(state_effect_t *effect,
     case STATE_EFFECT_TYPE_RELOCATE: {
         CHECK_BODY
         valexpr_context_t valexpr_context = {0};
-        err = _get_vars(context, &valexpr_context);
+        err = _context_set_vars(context, &valexpr_context);
         if(err)return err;
 
 #       define GET_VALEXPR_STR(STR, EXPR) \
@@ -591,7 +617,7 @@ int state_effect_apply(state_effect_t *effect,
         }
 
         valexpr_context_t valexpr_context = {0};
-        err = _get_vars(context, &valexpr_context);
+        err = _context_set_vars(context, &valexpr_context);
         if(err)return err;
 
         int delay = valexpr_get_int(&effect->u.expr, &valexpr_context);
@@ -605,7 +631,7 @@ int state_effect_apply(state_effect_t *effect,
     case STATE_EFFECT_TYPE_SPAWN: {
         CHECK_BODY
         valexpr_context_t valexpr_context = {0};
-        err = _get_vars(context, &valexpr_context);
+        err = _context_set_vars(context, &valexpr_context);
         if(err)return err;
 
         state_effect_spawn_t *spawn = &effect->u.spawn;
@@ -674,6 +700,27 @@ int state_effect_apply(state_effect_t *effect,
     }
     case STATE_EFFECT_TYPE_SHOW_MINIMAP: {
         hexgame_set_minimap_zoom(game, effect->u.i);
+        break;
+    }
+    case STATE_EFFECT_TYPE_ASSERT: {
+        bool debug = effect->u.assert.debug;
+        if(debug){
+            fprintf(stderr, "Making assertion:\n");
+            valexpr_fprintf(&effect->u.assert.valexpr, stderr);
+            fputc('\n', stderr);
+        }
+        valexpr_context_t valexpr_context = {.debug = debug};
+        err = _context_set_vars(context, &valexpr_context);
+        if(err)return err;
+
+        bool matched = valexpr_get_bool(&effect->u.assert.valexpr, &valexpr_context);
+        if(!matched){
+            fprintf(stderr, "*** FAILED ASSERTION:\n");
+            valexpr_fprintf(&effect->u.assert.valexpr, stderr);
+            fputc('\n', stderr);
+            return 2;
+        }
+        break;
     }
     case STATE_EFFECT_TYPE_DIE: {
         CHECK_BODY
@@ -723,7 +770,7 @@ int state_effect_apply(state_effect_t *effect,
     case STATE_EFFECT_TYPE_SET:
     case STATE_EFFECT_TYPE_UNSET: {
         valexpr_context_t valexpr_context = {0};
-        err = _get_vars(context, &valexpr_context);
+        err = _context_set_vars(context, &valexpr_context);
         if(err)return err;
 
         valexpr_result_t var_result = {0};
@@ -797,7 +844,7 @@ int state_effect_apply(state_effect_t *effect,
     }
     case STATE_EFFECT_TYPE_IF: {
         valexpr_context_t valexpr_context = {0};
-        err = _get_vars(context, &valexpr_context);
+        err = _context_set_vars(context, &valexpr_context);
         if(err)return err;
 
         state_effect_ite_t *ite = effect->u.ite;
