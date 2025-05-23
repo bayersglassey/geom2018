@@ -1,0 +1,9 @@
+cases:
+    "while":
+        after:
+            set mapvar("x"): 0
+            while:
+                expr: < mapvar("x") 5
+            do:
+                inc mapvar("x")
+            assert: == mapvar("x") 5

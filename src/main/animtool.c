@@ -72,7 +72,7 @@ static int dump_effect(stateset_t *stateset, state_effect_t *effect,
             break;
         }
         case STATE_EFFECT_TYPE_IF: {
-            state_effect_ite_t *ite = effect->u.ite;
+            state_effect_ite_t *ite = &effect->u.ite;
             for(int i = 0; i < ite->then_effects_len; i++){
                 state_effect_t *sub_effect = ite->then_effects[i];
                 err = dump_effect(stateset, sub_effect, context, parent,
@@ -80,6 +80,15 @@ static int dump_effect(stateset_t *stateset, state_effect_t *effect,
             }
             for(int i = 0; i < ite->else_effects_len; i++){
                 state_effect_t *sub_effect = ite->else_effects[i];
+                err = dump_effect(stateset, sub_effect, context, parent,
+                    opts);
+            }
+            break;
+        }
+        case STATE_EFFECT_TYPE_WHILE: {
+            state_effect_while_t *_while = &effect->u._while;
+            for(int i = 0; i < _while->effects_len; i++){
+                state_effect_t *sub_effect = _while->effects[i];
                 err = dump_effect(stateset, sub_effect, context, parent,
                     opts);
             }

@@ -11,6 +11,7 @@ both anim.h and hexgame.h */
 
 typedef struct hexgame_state_context {
     hexgame_t *game;
+    hexmap_t *map;
     body_t *body;
     actor_t *actor;
     body_t *your_body;

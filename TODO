@@ -1107,7 +1107,8 @@ Jan 8, 2024:
 
         proc "safe_to_jump":
             set myvar("_transform"): arr: 0 0 0 F
-            while(T):
+            while: T
+            do:
                 if: any:
                     coll: all yes with myvar("_transform")
                         ;; (+)- +
@@ -1147,7 +1148,7 @@ Jan 8, 2024:
 
     ...and so, we need:
 
-        [ ] STATE_EFFECT_TYPE_WHILE
+        [X] STATE_EFFECT_TYPE_WHILE
         [ ] support:
             move myvar("_transform"): 1 0
             rot myvar("_transform"): 1

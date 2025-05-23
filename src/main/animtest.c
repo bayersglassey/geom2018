@@ -18,7 +18,7 @@
 
 
 typedef struct test_case {
-    stateset_t stateset;
+    stateset_t *stateset;
     hexcollmap_t *collmap;
     int steps;
     ARRAY_DECL(state_effect_t*, before_effects)
@@ -35,7 +35,10 @@ typedef struct test_suite {
 
 
 static void test_case_cleanup(test_case_t *test_case){
-    stateset_cleanup(&test_case->stateset);
+    if(test_case->stateset){
+        stateset_cleanup(test_case->stateset);
+        free(test_case->stateset);
+    }
     if(test_case->collmap){
         hexcollmap_cleanup(test_case->collmap);
         free(test_case->collmap);
@@ -84,8 +87,11 @@ static int test_case_run(test_case_t *test_case, hexgame_t *game){
 
     /* Use the test case's stateset
     NOTE: we need to remove it at the end of the test! */
-    err = hexgame_swap_stateset(game, &test_case->stateset, NULL);
-    if(err)return err;
+    stateset_t *stateset = test_case->stateset;
+    if(stateset){
+        err = hexgame_swap_stateset(game, stateset, NULL);
+        if(err)return err;
+    }
 
     /* Add a map for this test case */
     ARRAY_PUSH_NEW(hexmap_t*, game->maps, map)
@@ -93,26 +99,33 @@ static int test_case_run(test_case_t *test_case, hexgame_t *game){
     if(err)return err;
 
     /* Add a submap for this test case */
-    hexmap_submap_parser_context_t submap_context;
-    err = hexmap_submap_parser_context_init_root(&submap_context, map);
-    if(err)return err;
-    ARRAY_PUSH_NEW(hexmap_submap_t*, map->submaps, submap)
-    err = hexmap_submap_init(map, submap, "<test submap>", &submap_context);
-    if(err)return err;
-    hexcollmap_init_clone(&submap->collmap, test_case->collmap, submap->filename);
-    err = hexcollmap_clone(&submap->collmap, test_case->collmap, submap_context.rot);
-    if(err)return err;
+    if(test_case->collmap){
+        hexmap_submap_parser_context_t submap_context;
+        err = hexmap_submap_parser_context_init_root(&submap_context, map);
+        if(err)return err;
+        ARRAY_PUSH_NEW(hexmap_submap_t*, map->submaps, submap)
+        err = hexmap_submap_init(map, submap, "<test submap>", &submap_context);
+        if(err)return err;
+        hexcollmap_init_clone(&submap->collmap, test_case->collmap, submap->filename);
+        err = hexcollmap_clone(&submap->collmap, test_case->collmap, submap_context.rot);
+        if(err)return err;
+    }
 
     /* Add a body using the test case's stateset */
-    ARRAY_PUSH_NEW(body_t*, map->bodies, body)
-    err = body_init(body, game, map,
-        test_case->stateset.filename,
-        test_case->state_name,
-        NULL);
-    if(err)return err;
+    body_t *body = NULL;
+    if(stateset){
+        ARRAY_PUSH_NEW(body_t*, map->bodies, _body)
+        body = _body;
+        err = body_init(body, game, map,
+            stateset->filename,
+            test_case->state_name,
+            NULL);
+        if(err)return err;
+    }
 
     hexgame_state_context_t state_context = {
         .game = game,
+        .map = map,
         .body = body,
     };
 
@@ -141,7 +154,9 @@ static int test_case_run(test_case_t *test_case, hexgame_t *game){
 
     /* HACK: remove our stateset from hexgame, since it's owned by test_case,
     and we don't want hexgame_cleanup to touch it */
-    ARRAY_REMOVE(game->statesets, &test_case->stateset, (void))
+    if(stateset){
+        ARRAY_REMOVE(game->statesets, test_case->stateset, (void))
+    }
 
     /* HACK: remove our test map from hexgame (which also removes the submap,
     bodies, etc */
@@ -181,17 +196,22 @@ static int test_suite_load(test_suite_t *suite, const char *filename,
         OPEN
         ARRAY_PUSH_NEW(test_case_t*, suite->test_cases, test_case)
         test_case_init(test_case, name);
-        {
-            GET("stateset")
+        if(GOT("stateset")){
+            NEXT
             OPEN
             const char *stateset_filename;
             GET_STR_CACHED(stateset_filename, &prend->filename_store)
-            stateset_t *stateset = &test_case->stateset;
+
+            stateset_t *stateset = calloc(1, sizeof(*stateset));
+            if(stateset == NULL)return 1;
             err = stateset_load(stateset, stateset_filename,
                 prend, space);
             if(err)return err;
+
             ARRAY_PUSH_NEW(state_context_t*, stateset->contexts, context)
             state_context_init(context, stateset, stateset->root_context);
+
+            test_case->stateset = stateset;
             test_case->context = context;
             CLOSE
         }
@@ -344,6 +364,10 @@ int main(int n_args, char **args){
                     i + 1, suite->test_cases_len,
                     test_case->name? test_case->name: "<no name>");
                 err = test_case_run(test_case, game);
+                if(err == 2){
+                    fprintf(stderr, "Test %i/%i *** FAILED ***\n",
+                        i + 1, suite->test_cases_len);
+                }
                 if(err)return err;
                 fprintf(stderr, "Test %i/%i OK!\n",
                     i + 1, suite->test_cases_len);

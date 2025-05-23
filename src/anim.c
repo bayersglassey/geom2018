@@ -769,10 +769,7 @@ int state_effect_parse(state_effect_t *effect,
         NEXT
         effect->type = STATE_EFFECT_TYPE_IF;
 
-        state_effect_ite_t *ite = calloc(1, sizeof(*ite));
-        if(!ite)return 1;
-        effect->u.ite = ite;
-
+        state_effect_ite_t *ite = &effect->u.ite;
         ARRAY_INIT(ite->conds)
         ARRAY_INIT(ite->then_effects)
         ARRAY_INIT(ite->else_effects)
@@ -804,6 +801,30 @@ int state_effect_parse(state_effect_t *effect,
             }
             NEXT
         }
+    }else if(GOT("while")){
+        NEXT
+        effect->type = STATE_EFFECT_TYPE_WHILE;
+
+        state_effect_while_t *_while = &effect->u._while;
+        ARRAY_INIT(_while->conds)
+        ARRAY_INIT(_while->effects)
+
+        OPEN
+        while(!GOT(")")){
+            ARRAY_PUSH_NEW(state_cond_t*, _while->conds, cond)
+            err = _parse_cond(context, lexer, prend, space, cond);
+            if(err)return err;
+        }
+        NEXT
+
+        GET("do")
+        OPEN
+        while(!GOT(")")){
+            ARRAY_PUSH_NEW(state_effect_t*, _while->effects, effect)
+            err = state_effect_parse(effect, context, lexer, prend, space);
+            if(err)return err;
+        }
+        NEXT
     }else if(GOT("as")){
         NEXT
         effect->type = STATE_EFFECT_TYPE_AS;
@@ -1427,16 +1448,21 @@ void state_effect_cleanup(state_effect_t *effect){
                 state_effect_cleanup)
             break;
         case STATE_EFFECT_TYPE_IF: {
-            state_effect_ite_t *ite = effect->u.ite;
-            if(ite){
-                ARRAY_FREE_PTR(state_cond_t*, ite->conds,
-                    state_cond_cleanup)
-                ARRAY_FREE_PTR(state_effect_t*, ite->then_effects,
-                    state_effect_cleanup)
-                ARRAY_FREE_PTR(state_effect_t*, ite->else_effects,
-                    state_effect_cleanup)
-                free(ite);
-            }
+            state_effect_ite_t *ite = &effect->u.ite;
+            ARRAY_FREE_PTR(state_cond_t*, ite->conds,
+                state_cond_cleanup)
+            ARRAY_FREE_PTR(state_effect_t*, ite->then_effects,
+                state_effect_cleanup)
+            ARRAY_FREE_PTR(state_effect_t*, ite->else_effects,
+                state_effect_cleanup)
+            break;
+        }
+        case STATE_EFFECT_TYPE_WHILE: {
+            state_effect_while_t *_while = &effect->u._while;
+            ARRAY_FREE_PTR(state_cond_t*, _while->conds,
+                state_cond_cleanup)
+            ARRAY_FREE_PTR(state_effect_t*, _while->effects,
+                state_effect_cleanup)
             break;
         }
         case STATE_EFFECT_TYPE_AS:

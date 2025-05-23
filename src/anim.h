@@ -309,6 +309,7 @@ enum state_effect_type {
     STATE_EFFECT_TYPE_SET,
     STATE_EFFECT_TYPE_UNSET,
     STATE_EFFECT_TYPE_IF,
+    STATE_EFFECT_TYPE_WHILE,
     STATE_EFFECT_TYPE_AS,
     STATE_EFFECT_TYPE_SHOW_MINIMAP,
     STATE_EFFECT_TYPE_ASSERT,
@@ -340,6 +341,7 @@ static const char *state_effect_type_name(int type){
         case STATE_EFFECT_TYPE_SET: return "set";
         case STATE_EFFECT_TYPE_UNSET: return "unset";
         case STATE_EFFECT_TYPE_IF: return "if";
+        case STATE_EFFECT_TYPE_WHILE: return "while";
         case STATE_EFFECT_TYPE_AS: return "as";
         case STATE_EFFECT_TYPE_SHOW_MINIMAP: return "show_minimap";
         case STATE_EFFECT_TYPE_ASSERT: return "assert";
@@ -365,6 +367,19 @@ typedef struct state_effect_spawn {
     hexgame_location_t loc;
     ARRAY_DECL(struct state_effect*, effects)
 } state_effect_spawn_t;
+
+typedef struct state_effect_ite {
+    /* ite: if-then-else */
+    ARRAY_DECL(struct state_cond*, conds)
+    ARRAY_DECL(struct state_effect*, then_effects)
+    ARRAY_DECL(struct state_effect*, else_effects)
+} state_effect_ite_t;
+
+typedef struct state_effect_while {
+    /* a while loop */
+    ARRAY_DECL(struct state_cond*, conds)
+    ARRAY_DECL(struct state_effect*, effects)
+} state_effect_while_t;
 
 typedef struct state_effect {
     int type; /* enum state_effect_type */
@@ -403,7 +418,8 @@ typedef struct state_effect {
             valexpr_t var_expr;
             valexpr_t val_expr;
         } set;
-        struct state_effect_ite *ite;
+        struct state_effect_ite ite;
+        struct state_effect_while _while;
         struct {
             int type; /* enum anim_as */
             ARRAY_DECL(struct state_effect*, sub_effects)
@@ -414,14 +430,6 @@ typedef struct state_effect {
         } assert;
     } u;
 } state_effect_t;
-
-typedef struct state_effect_ite {
-    /* ite: if-then-else */
-    ARRAY_DECL(struct state_cond*, conds)
-    ARRAY_DECL(struct state_effect*, then_effects)
-    ARRAY_DECL(struct state_effect*, else_effects)
-} state_effect_ite_t;
-
 
 
 /*************

@@ -60,7 +60,7 @@ static int _context_set_vars(hexgame_state_context_t *context,
     actor_t *actor = context->actor;
     body_t *body = context->body;
     body_t *your_body = context->your_body;
-    hexmap_t *map = body? body->map: NULL;
+    hexmap_t *map = body? body->map: context->map;
     hexgame_t *game =
         actor? actor->game:
         body? body->game:
@@ -847,7 +847,7 @@ int state_effect_apply(state_effect_t *effect,
         err = _context_set_vars(context, &valexpr_context);
         if(err)return err;
 
-        state_effect_ite_t *ite = effect->u.ite;
+        state_effect_ite_t *ite = &effect->u.ite;
 
         bool matched = true;
         for(int i = 0; i < ite->conds_len; i++){
@@ -871,6 +871,37 @@ int state_effect_apply(state_effect_t *effect,
                     fprintf(stderr, "...in \"if\" statement\n");
                 }
                 return err;
+            }
+        }
+        break;
+    }
+    case STATE_EFFECT_TYPE_WHILE: {
+        valexpr_context_t valexpr_context = {0};
+        err = _context_set_vars(context, &valexpr_context);
+        if(err)return err;
+
+        state_effect_while_t *_while = &effect->u._while;
+
+        while(true){
+            bool matched = true;
+            for(int i = 0; i < _while->conds_len; i++){
+                state_cond_t *cond = _while->conds[i];
+                err = state_cond_match(cond, context, &matched);
+                if(err)return err;
+                if(!matched)break;
+            }
+            if(!matched)break;
+
+            for(int i = 0; i < _while->effects_len; i++){
+                state_effect_t *effect = _while->effects[i];
+                err = state_effect_apply(effect, context, gotto_ptr,
+                    continues_ptr);
+                if(err){
+                    if(err == 2){
+                        fprintf(stderr, "...in \"while\" statement\n");
+                    }
+                    return err;
+                }
             }
         }
         break;
