@@ -194,6 +194,8 @@ int hexmap_submap_create_rgraph_minimap(hexmap_submap_t *submap);
 
 void hexmap_submap_parser_context_init(hexmap_submap_parser_context_t *context,
     hexmap_submap_parser_context_t *parent);
+int hexmap_submap_parser_context_init_root(hexmap_submap_parser_context_t *context,
+    hexmap_t *map);
 void hexmap_submap_parser_context_cleanup(hexmap_submap_parser_context_t *context);
 
 

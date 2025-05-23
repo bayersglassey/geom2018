@@ -515,16 +515,10 @@ int hexmap_parse(hexmap_t *map, fus_lexer_t *lexer){
     }
     CLOSE
 
+    /* the root parser context */
     hexmap_submap_parser_context_t context;
-    hexmap_submap_parser_context_init(&context, NULL);
-
-    /* The "root" submap group (to which submaps belong by default) */
-    {
-        hexmap_submap_group_t *root_group;
-        err = hexmap_get_or_add_submap_group(map, "", &root_group);
-        if(err)return err;
-        context.submap_group = root_group;
-    }
+    err = hexmap_submap_parser_context_init_root(&context, map);
+    if(err)return err;
 
     /* default palette */
     {
@@ -800,8 +794,6 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
         /* TODO: if map->loaded, try to get existing submap & modify it... */
         ARRAY_PUSH_NEW(hexmap_submap_t*, map->submaps, submap)
 
-        /* WARNING: submap's init does *NOT* init its collmap, so need
-        to load submap->collmap immediately after this call. */
         err = hexmap_submap_init(map, submap,
             submap_filename, context);
         if(err)return err;
@@ -1250,14 +1242,11 @@ int hexmap_submap_init(hexmap_t *map,
 ){
     int err;
 
-    /* WARNING: we do *NOT* init submap->collmap here, that is handled
-    by hexcollmap_parse and friends, which should be called by our caller
-    immediately after us */
-
     vecspace_t *space = map->space;
 
     submap->map = map;
     submap->filename = filename;
+    hexcollmap_init_empty(&submap->collmap);
 
     submap->solid = context->solid;
     vec_cpy(space->dims, submap->pos, context->pos);
@@ -1395,6 +1384,21 @@ void hexmap_submap_parser_context_init(hexmap_submap_parser_context_t *context,
     context->mapper = parent? parent->mapper: NULL;
     context->palette = parent? parent->palette: NULL;
     context->tileset = parent? parent->tileset: NULL;
+}
+
+int hexmap_submap_parser_context_init_root(hexmap_submap_parser_context_t *context,
+    hexmap_t *map
+){
+    int err;
+
+    /* The "root" submap group (to which submaps belong by default) */
+    hexmap_submap_group_t *root_group;
+    err = hexmap_get_or_add_submap_group(map, "", &root_group);
+    if(err)return err;
+
+    hexmap_submap_parser_context_init(context, NULL);
+    context->submap_group = root_group;
+    return 0;
 }
 
 void hexmap_submap_parser_context_cleanup(hexmap_submap_parser_context_t *context){

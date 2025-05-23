@@ -198,10 +198,14 @@ void hexcollmap_cleanup(hexcollmap_t *collmap){
         valexpr_cleanup)
 }
 
+void hexcollmap_init_empty(hexcollmap_t *collmap){
+    memset(collmap, 0, sizeof(*collmap));
+}
+
 void hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
     const char *filename
 ){
-    memset(collmap, 0, sizeof(*collmap));
+    hexcollmap_init_empty(collmap);
     collmap->filename = filename;
     collmap->space = space;
     ARRAY_INIT(collmap->recordings);

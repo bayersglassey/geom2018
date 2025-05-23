@@ -277,6 +277,7 @@ void hexcollmap_part_init(hexcollmap_part_t *part, int type,
 void hexcollmap_part_cleanup(hexcollmap_part_t *part);
 
 void hexcollmap_cleanup(hexcollmap_t *collmap);
+void hexcollmap_init_empty(hexcollmap_t *collmap);
 void hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
     const char *filename);
 void hexcollmap_init_clone(hexcollmap_t *collmap,

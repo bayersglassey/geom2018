@@ -26,14 +26,16 @@ typedef struct test_case {
 } test_case_t;
 typedef struct test_suite {
     const char *filename;
-    prismelrenderer_t *prend;
     ARRAY_DECL(test_case_t*, test_cases)
 } test_suite_t;
 
 
 static void test_case_cleanup(test_case_t *test_case){
     stateset_cleanup(&test_case->stateset);
-    if(test_case->collmap)hexcollmap_cleanup(test_case->collmap);
+    if(test_case->collmap){
+        hexcollmap_cleanup(test_case->collmap);
+        free(test_case->collmap);
+    }
     ARRAY_FREE_PTR(state_effect_t*, test_case->before_effects,
         state_effect_cleanup)
     ARRAY_FREE_PTR(state_effect_t*, test_case->after_effects,
@@ -47,7 +49,30 @@ static void test_case_init(test_case_t *test_case, const char *name){
 }
 static int test_case_run(test_case_t *test_case, hexgame_t *game){
     int err;
-    /* TODO */
+
+    ARRAY_PUSH_NEW(hexmap_t*, game->maps, map)
+    err = hexmap_init(map, game, "<test map>");
+    if(err)return err;
+
+    /* the root parser context */
+    hexmap_submap_parser_context_t _context, *context=&_context;
+    err = hexmap_submap_parser_context_init_root(context, map);
+    if(err)return err;
+
+    ARRAY_PUSH_NEW(hexmap_submap_t*, map->submaps, submap)
+    err = hexmap_submap_init(map, submap, "<test submap>", context);
+    if(err)return err;
+
+    /* copy collmap from test case to submap */
+    hexcollmap_init_clone(&submap->collmap, test_case->collmap, submap->filename);
+    err = hexcollmap_clone(&submap->collmap, test_case->collmap, context->rot);
+    if(err)return err;
+
+    /* Add a body using the test case's stateset */
+    /* Run before_effects */
+    /* Run steps */
+    /* Run after_effects */
+
     return 0;
 }
 
@@ -55,11 +80,8 @@ static int test_case_run(test_case_t *test_case, hexgame_t *game){
 static void test_suite_cleanup(test_suite_t *suite){
     ARRAY_FREE_PTR(test_case_t*, suite->test_cases, test_case_cleanup)
 }
-static void test_suite_init(test_suite_t *suite, const char *filename,
-    prismelrenderer_t *prend
-){
+static void test_suite_init(test_suite_t *suite, const char *filename){
     suite->filename = filename;
-    suite->prend = prend;
     ARRAY_INIT(suite->test_cases)
 }
 static int test_suite_load(test_suite_t *suite, const char *filename,
@@ -74,7 +96,7 @@ static int test_suite_load(test_suite_t *suite, const char *filename,
     err = fus_lexer_init(lexer, text, filename);
     if(err)return err;
 
-    test_suite_init(suite, filename, prend);
+    test_suite_init(suite, filename);
     GET("cases")
     OPEN
     while(!GOT(")")){
@@ -224,6 +246,14 @@ int main(int n_args, char **args){
             NULL, NULL);
         if(err)return err;
 
+        hexgame_t _game, *game=&_game;
+        err = hexgame_init(game, prend,
+            &minimap_prend,
+            HEXGAME_DEFAULT_MINIMAP_TILESET,
+            &_save_callback, NULL, /* no callback data */
+            false /* no audio */);
+        if(err)return err;
+
         fprintf(stderr, "Loading test suite from file: %s\n",
             suite_filename);
         test_suite_t _suite, *suite=&_suite;
@@ -236,13 +266,6 @@ int main(int n_args, char **args){
             fprintf(stderr, "Running test %i/%i: %s\n",
                 i + 1, suite->test_cases_len,
                 test_case->name? test_case->name: "<no name>");
-            hexgame_t _game, *game=&_game;
-            err = hexgame_init(game, prend,
-                &minimap_prend,
-                HEXGAME_DEFAULT_MINIMAP_TILESET,
-                &_save_callback, NULL, /* no callback data */
-                false /* no audio */);
-            if(err)return err;
             err = test_case_run(test_case, game);
             if(err)return err;
             fprintf(stderr, "Test %i/%i OK!\n",
@@ -251,6 +274,7 @@ int main(int n_args, char **args){
         fprintf(stderr, "%i tests OK!\n", suite->test_cases_len);
 
         test_suite_cleanup(suite);
+        hexgame_cleanup(game);
         prismelrenderer_cleanup(&minimap_prend);
         prismelrenderer_cleanup(prend);
     }
