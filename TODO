@@ -1261,11 +1261,11 @@ Jan 8, 2024:
     * before: ... # effects to run before running hexgame_step (e.g. `key: up f`)
 
     What do we need in order to "run" those?..
-    [ ] add STATE_EFFECT_TYPE_ASSERT
-    [ ] add bin/animtest (src/main/animtest.c)
-    [ ] load an array of structs (call 'em anim_testcase_t)
-    [ ] run the test cases
-        [ ] we need to instantiate an entire hexgame!..
+    [X] add STATE_EFFECT_TYPE_ASSERT
+    [X] add bin/animtest (src/main/animtest.c)
+    [X] load an array of structs (call 'em anim_testcase_t)
+    [X] run the test cases
+        [X] we need to instantiate an entire hexgame!..
             currently this only ever happens in test_app_init.
 
                 int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
@@ -1282,7 +1282,7 @@ Jan 8, 2024:
             Errr maybe not?.. it doesn't require an SDL_Renderer.
             It'll create SDL_Surface objects and stuff, but I think that's fine
             even if SDL isn't initialized.
-    [ ] in order to parse "effect"s, we need a context... and contexts live on
+    [X] in order to parse "effect"s, we need a context... and contexts live on
         a stateset...
         basically, in order to parse effects, we need to be able to modify a
         stateset -- to add the effects to a context on it.

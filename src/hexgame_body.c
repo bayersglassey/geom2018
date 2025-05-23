@@ -538,6 +538,24 @@ int body_refresh_vars(body_t *body){
     }
 
     {
+        var_t *var = _get_nosave_var(vars, ".x");
+        if(var == NULL)return 1;
+        val_set_int(&var->value, body->loc.pos[0]);
+    }
+
+    {
+        var_t *var = _get_nosave_var(vars, ".y");
+        if(var == NULL)return 1;
+        val_set_int(&var->value, body->loc.pos[1]);
+    }
+
+    {
+        var_t *var = _get_nosave_var(vars, ".rot");
+        if(var == NULL)return 1;
+        val_set_int(&var->value, body->loc.rot);
+    }
+
+    {
         var_t *var = _get_nosave_var(vars, ".turn");
         if(var == NULL)return 1;
         val_set_bool(&var->value, body->loc.turn);

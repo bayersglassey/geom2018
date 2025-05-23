@@ -1,7 +1,6 @@
 cases:
     "should_step":
         stateset: "anim/spider.fus"
-        state: "stand"
         collmap:
             ;;    .   .
             ;;
@@ -10,10 +9,11 @@ cases:
             key: down f
         steps: 1
         after:
-            print: "AAA"
+            assert: == myvar(".state") "step"
+            assert: == myvar(".x") 1
+            assert: == myvar(".y") 0
     "should_jump":
         stateset: "anim/spider.fus"
-        state: "stand"
         collmap:
             ;;    .   .
             ;;
@@ -22,10 +22,11 @@ cases:
             key: down f
         steps: 1
         after:
-            print: "AAA"
+            assert: == myvar(".state") "jump"
+            assert: == myvar(".x") 1
+            assert: == myvar(".y") 0
     "should_stay":
         stateset: "anim/spider.fus"
-        state: "stand"
         collmap:
             ;;    .   .
             ;;        *
@@ -34,4 +35,34 @@ cases:
             key: down f
         steps: 1
         after:
-            print: "AAA"
+            assert: == myvar(".state") "stand"
+            assert: == myvar(".x") 0
+            assert debug: == myvar(".y") 0
+    "should_step_up":
+        stateset: "anim/spider.fus"
+        collmap:
+            ;;    .   +
+            ;;       /
+            ;; (+)- +
+        before:
+            key: down f
+        steps: 1
+        after:
+            assert: == myvar(".state") "step_up"
+            assert: == myvar(".x") 1
+            assert: == myvar(".y") 0
+            assert: == myvar(".rot") 1
+    "should_jump_up":
+        stateset: "anim/spider.fus"
+        collmap:
+            ;;    .   .
+            ;;       /
+            ;; (+)- +
+        before:
+            key: down f
+        steps: 1
+        after:
+            assert: == myvar(".state") "jump"
+            assert: == myvar(".x") 1
+            assert: == myvar(".y") 0
+            assert: == myvar(".rot") 1

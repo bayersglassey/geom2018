@@ -13,6 +13,9 @@
 #include "../hexgame_state.h"
 #include "../defaults.h"
 
+#define THICK_LINE "==================================================\n"
+#define THIN_LINE  "----------------------------------------\n"
+
 
 typedef struct test_case {
     stateset_t stateset;
@@ -291,13 +294,12 @@ int main(int n_args, char **args){
         }
     }
 
-    int remaining_args = n_args - arg_i;
-    if(remaining_args != 1){
+    int n_suites = n_args - arg_i;
+    if(n_suites < 1){
         print_usage(stderr);
         return 2;
     }
 
-    const char *suite_filename = args[arg_i];
     {
         int err;
 
@@ -325,26 +327,36 @@ int main(int n_args, char **args){
             false /* no audio */);
         if(err)return err;
 
-        fprintf(stderr, "Loading test suite from file: %s\n",
-            suite_filename);
-        test_suite_t _suite, *suite=&_suite;
-        err = test_suite_load(suite, suite_filename, prend);
-        if(err)return err;
-
-        fprintf(stderr, "Running %i tests...\n", suite->test_cases_len);
-        for(int i = 0; i < suite->test_cases_len; i++){
-            test_case_t *test_case = suite->test_cases[i];
-            fprintf(stderr, "Running test %i/%i: %s\n",
-                i + 1, suite->test_cases_len,
-                test_case->name? test_case->name: "<no name>");
-            err = test_case_run(test_case, game);
+        for(int suite_i = 0; suite_i < n_suites; suite_i++){
+            const char *suite_filename = args[arg_i + suite_i];
+            fprintf(stderr, THICK_LINE);
+            fprintf(stderr, "Loading test suite from file: %s\n",
+                suite_filename);
+            test_suite_t _suite, *suite=&_suite;
+            err = test_suite_load(suite, suite_filename, prend);
             if(err)return err;
-            fprintf(stderr, "Test %i/%i OK!\n",
-                i + 1, suite->test_cases_len);
-        }
-        fprintf(stderr, "%i tests OK!\n", suite->test_cases_len);
 
-        test_suite_cleanup(suite);
+            fprintf(stderr, "Running %i tests...\n", suite->test_cases_len);
+            for(int i = 0; i < suite->test_cases_len; i++){
+                test_case_t *test_case = suite->test_cases[i];
+                fprintf(stderr, THIN_LINE);
+                fprintf(stderr, "Running test %i/%i: %s\n",
+                    i + 1, suite->test_cases_len,
+                    test_case->name? test_case->name: "<no name>");
+                err = test_case_run(test_case, game);
+                if(err)return err;
+                fprintf(stderr, "Test %i/%i OK!\n",
+                    i + 1, suite->test_cases_len);
+            }
+            fprintf(stderr, THIN_LINE);
+            fprintf(stderr, "Suite %i/%i (%i tests) OK!\n",
+                suite_i + 1, n_suites, suite->test_cases_len);
+            test_suite_cleanup(suite);
+        }
+
+        fprintf(stderr, THICK_LINE);
+        fprintf(stderr, "%i suites OK!\n", n_suites);
+
         hexgame_cleanup(game);
         prismelrenderer_cleanup(&minimap_prend);
         prismelrenderer_cleanup(prend);
