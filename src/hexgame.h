@@ -465,6 +465,8 @@ int hexgame_load_map(hexgame_t *game, const char *map_filename,
     hexmap_t **map_ptr);
 int hexgame_get_or_load_map(hexgame_t *game, const char *map_filename,
     hexmap_t **map_ptr);
+int hexgame_swap_stateset(hexgame_t *game, stateset_t *new_stateset,
+    stateset_t **old_stateset_ptr);
 int hexgame_get_or_load_stateset(hexgame_t *game, const char *filename,
     stateset_t **stateset_ptr);
 int hexgame_get_map_index(hexgame_t *game, hexmap_t *map);

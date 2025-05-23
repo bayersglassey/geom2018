@@ -50,28 +50,46 @@ static void test_case_init(test_case_t *test_case, const char *name){
 static int test_case_run(test_case_t *test_case, hexgame_t *game){
     int err;
 
+    /* Use the test case's stateset
+    NOTE: we need to remove it at the end of the test! */
+    err = hexgame_swap_stateset(game, &test_case->stateset, NULL);
+    if(err)return err;
+
+    /* Add a map for this test case */
     ARRAY_PUSH_NEW(hexmap_t*, game->maps, map)
     err = hexmap_init(map, game, "<test map>");
     if(err)return err;
 
-    /* the root parser context */
-    hexmap_submap_parser_context_t _context, *context=&_context;
-    err = hexmap_submap_parser_context_init_root(context, map);
+    /* Add a submap for this test case */
+    hexmap_submap_parser_context_t submap_context;
+    err = hexmap_submap_parser_context_init_root(&submap_context, map);
     if(err)return err;
-
     ARRAY_PUSH_NEW(hexmap_submap_t*, map->submaps, submap)
-    err = hexmap_submap_init(map, submap, "<test submap>", context);
+    err = hexmap_submap_init(map, submap, "<test submap>", &submap_context);
     if(err)return err;
-
-    /* copy collmap from test case to submap */
     hexcollmap_init_clone(&submap->collmap, test_case->collmap, submap->filename);
-    err = hexcollmap_clone(&submap->collmap, test_case->collmap, context->rot);
+    err = hexcollmap_clone(&submap->collmap, test_case->collmap, submap_context.rot);
     if(err)return err;
 
     /* Add a body using the test case's stateset */
+    ARRAY_PUSH_NEW(body_t*, map->bodies, body)
+    err = body_init(body, game, map,
+        test_case->stateset.filename,
+        test_case->state_name,
+        NULL);
+    if(err)return err;
+
     /* Run before_effects */
     /* Run steps */
     /* Run after_effects */
+
+    /* HACK: remove our stateset from hexgame, since it's owned by test_case,
+    and we don't want hexgame_cleanup to touch it */
+    ARRAY_REMOVE(game->statesets, &test_case->stateset, (void))
+
+    /* HACK: remove our test map from hexgame (which also removes the submap,
+    bodies, etc */
+    ARRAY_REMOVE_PTR(game->maps, map, hexmap_cleanup)
 
     return 0;
 }
