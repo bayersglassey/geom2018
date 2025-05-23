@@ -10,6 +10,7 @@
 #include "../lexer.h"
 #include "../lexer_macros.h"
 #include "../hexgame.h"
+#include "../hexgame_state.h"
 #include "../defaults.h"
 
 
@@ -47,6 +48,34 @@ static void test_case_init(test_case_t *test_case, const char *name){
     ARRAY_INIT(test_case->before_effects)
     ARRAY_INIT(test_case->after_effects)
 }
+static int _run_effects(state_effect_t *effects[], int effects_len,
+    const char *effect_kind, hexgame_state_context_t *context
+){
+    int err;
+    if(effects_len <= 0)return 0;
+    fprintf(stderr, "Running %i \"%s\" effects...\n", effects_len, effect_kind);
+    state_effect_goto_t *gotto = NULL;
+    for(int i = 0; i < effects_len; i++){
+        state_effect_t *effect = effects[i];
+        err = state_effect_apply(effect, context, &gotto, NULL);
+        if(!err && gotto){
+            fprintf(stderr, "Can't use \"goto\"");
+            err = 2;
+        }
+        if(err){
+            if(err == 2){
+                fprintf(stderr, "...in \"%s\" effect %i/%i\n",
+                    effect_kind, i + 1, effects_len);
+                if(context->body){
+                    fprintf(stderr, "...with body:\n");
+                    body_dump(context->body, 1);
+                }
+            }
+            return err;
+        }
+    }
+    return 0;
+}
 static int test_case_run(test_case_t *test_case, hexgame_t *game){
     int err;
 
@@ -79,9 +108,33 @@ static int test_case_run(test_case_t *test_case, hexgame_t *game){
         NULL);
     if(err)return err;
 
+    hexgame_state_context_t state_context = {
+        .game = game,
+        .body = body,
+    };
+
     /* Run before_effects */
+    err = _run_effects(
+        test_case->before_effects,
+        test_case->before_effects_len,
+        "before", &state_context);
+    if(err)return err;
+
     /* Run steps */
+    if(test_case->steps){
+        fprintf(stderr, "Running %i game steps...\n", test_case->steps);
+        for(int i = 0; i < test_case->steps; i++){
+            err = hexgame_step(game);
+            if(err)return err;
+        }
+    }
+
     /* Run after_effects */
+    err = _run_effects(
+        test_case->after_effects,
+        test_case->after_effects_len,
+        "after", &state_context);
+    if(err)return err;
 
     /* HACK: remove our stateset from hexgame, since it's owned by test_case,
     and we don't want hexgame_cleanup to touch it */

@@ -525,6 +525,7 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
 
     game->animate_palettes = true;
 
+    game->anim_debug = false;
     game->anim_debug_body = NULL;
     game->anim_debug_actor = NULL;
 
