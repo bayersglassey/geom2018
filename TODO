@@ -1099,205 +1099,61 @@ Jan 8, 2024:
     Like, right now we have to manually add combinations, like "jump short",
     "jump medium", "jump long", "backflip after first jumping short", etc.
     Clearly, we want some kind of recursive algorithm...
-    We already have a STATE_EFFECT_TYPE_CALL, maybe we need a
-    STATE_EFFECT_TYPE_COND?.. boolean-valued, recursive functions?..
-    No doubt we could implement such a thing.
-    But what about memoization, or some other trick to make sure we didn't
-    recursively make too many calls?..
-    Actually, it's not gonna be too bad if we don't try to get too general.
-    Like, imagine our current thing, plus at most 1 recursive call.
-    Just so we can detect "jump + backflip", or "step over gap + backflip", etc.
-    We would need to add localvars.
-    Currently, STATE_EFFECT_TYPE_CALL uses the surrounding context directly,
-    so we would need it to create a fresh context, with new localvars, and
-    clean those up once done.
-    Also, presumably we might like to add parameters to STATE_EFFECT_TYPE_CALL?..
-
-    What would the syntax for params be?
-    In anim/_spit.fus:
-
-        proc "on_collide":
-            ...etc...
-
-    So uhhhh maybe:
-
-        proc "on_collide" "x" "y":
-            ...etc...
-
-    ...or:
-
-        proc "on_collide" params("x" "y"):
-            ...etc...
-
-    ...and then you could refer to localvars("x"), etc.
-    Ugly, but if it works, it works!..
-    And frankly, at that point why call them localvars?..
-    Could use params("x") etc?..
-    Erm. But having arbitrary local variables is obviously nice. So.
-
-    In actor/_aispider.fus:
-
-        all:
-            # Step up
-            coll: all yes
-                ;;        +
-                ;;       /
-                ;; ( )  +
-        all:
-            # Step up over a small gap
-            coll: all yes
-                ;;            +
-                ;;           /
-                ;; ( )  .   +
-            coll: all no
-                ;;       \*/*
-                ;;        + -
-                ;;       /*\*
-                ;; ( )
-
-    ...now, it seems to me that the second rule there could be broken down...
-    Basically, we need a recursive algorithm which answers the question:
-    if we jump here, do we land safely?
-
-        proc "land_safe" params(...etc...):
-            ...etc...
-
-    OH, and also it might be possible to use this to get the AI to find paths to
-    safe spots, food, etc?..
-
-    Oh shoot, but we would need to need to apply the effects like "move", "rot",
-    "turn", etc through params/localvars somehow. O_o
-    We added an "arr" type, so hexgame_location_t can be encoded like so:
-
-        "location": arr: 0 0 0 F
-
-    Don't we also need a stack/heap for vals, though?..
-    Or maybe the stack of function calls will suffice.
-    That is, "localvars" refers to the current stack frame, as it were.
-    And if we want to have functions which return complex values, like "arr",
-    then we'll need caller to allocate them, pass them in, and have callee modify them.
-    Or do something like... ummmm... when you return a val, it's always copied, and
-    you're always returning *somewhere*.
-    Like:
-
-        proc "add" params("x" "y"):
-            inc "x": localvars("y")
-            return localvars("x")
-
-        # The result is stored in localvars("sum")
-        call "add" to localvars("sum"): 1 2
-
-    Jeez, this is getting gross. So be it, perhaps?..
     OH HOLD UP! We probably only need a loop, not recursive function
     calls. Because we don't need to do branching logic right now, we
     just need to determine whether jumping is safe.
 
     So, it all comes together something like this:
 
-        set myvar("_transform"): arr: 0 0 0 F
-        while(T):
-            if: any:
-                coll: all yes with myvar("_transform")
-                    ;; (+)- +
-                coll: all yes with myvar("_transform")
-                    ;;        +
-                    ;;       /
-                    ;; ( )  +
-            then:
-                set myvar("_safe_to_jump"): T
-                break
-            if:
-                coll: any yes with myvar("_transform")
-                    ;;       \*/*
-                    ;;        + -
-                    ;;       /*\*
-                    ;; ( )
-            then:
-                set myvar("_safe_to_jump"): F
-                break
-            if:
-                coll: all yes with myvar("_transform")
-                    ;;        +
-                    ;;
-                    ;; ( )  +
-            then:
-                move myvar("_transform"): 1 0
-                rot myvar("_transform"): 1
-            else:
-                move myvar("_transform"): 1 0
+        proc "safe_to_jump":
+            set myvar("_transform"): arr: 0 0 0 F
+            while(T):
+                if: any:
+                    coll: all yes with myvar("_transform")
+                        ;; (+)- +
+                    coll: all yes with myvar("_transform")
+                        ;;        +
+                        ;;       /
+                        ;; ( )  +
+                then:
+                    set myvar("safe_to_jump"): T
+                    break
+                if:
+                    coll: any yes with myvar("_transform")
+                        ;;       \*/*
+                        ;;        + -
+                        ;;       /*\*
+                        ;; ( )
+                then:
+                    set myvar("safe_to_jump"): F
+                    break
+                if:
+                    coll: all yes with myvar("_transform")
+                        ;;        +
+                        ;;
+                        ;; ( )  +
+                then:
+                    move myvar("_transform"): 1 0
+                    rot myvar("_transform"): 1
+                else:
+                    move myvar("_transform"): 1 0
 
-        if: expr: myvar("_safe_to_jump")
+    ...and then later on, we can do stuff like:
+
+        call: "safe_to_jump"
+        if: expr: myvar("safe_to_jump")
         then:
             key: down u
 
-    How can we test the above logic?..
-    I wanna like... be able to load a tiny map, and stick a spider
-    on it, and run some of this "code", and make assertions. O_o
-    So, these might be test cases:
+    ...and so, we need:
 
-        :
-            stateset: "anim/spider.fus"
-            state: "stand"
-            collmap:
-                ;;    .   .   .
-                ;;
-                ;; (+)- +   + - +
-            after:
-                call: "safe_to_jump"
-                assert: myvar("_safe_to_jump")
-        :
-            stateset: "anim/spider.fus"
-            state: "stand"
-            collmap:
-                ;;    .   .   .
-                ;;            *
-                ;; (+)- +   + - +
-            after:
-                call: "safe_to_jump"
-                assert: ! myvar("_safe_to_jump")
-
-    Some other test case fields we might want to use sometimes:
-    * steps: 3 # run hexgame_step some number of times
-    * before: ... # effects to run before running hexgame_step (e.g. `key: up f`)
-
-    What do we need in order to "run" those?..
-    [X] add STATE_EFFECT_TYPE_ASSERT
-    [X] add bin/animtest (src/main/animtest.c)
-    [X] load an array of structs (call 'em anim_testcase_t)
-    [X] run the test cases
-        [X] we need to instantiate an entire hexgame!..
-            currently this only ever happens in test_app_init.
-
-                int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
-                    const char *worldmaps_filename,
-                    prismelrenderer_t *minimap_prend,
-                    const char *minimap_tileset_filename,
-                    const char *map_filename, hexmap_t **map_ptr,
-                    hexgame_save_callback_t *save_callback, void *save_callback_data,
-                    bool have_audio);
-
-            The worldmaps_filename thing is a bit obnoxious...
-            And we don't really want to pass a map_filename, either...
-            Also we want prismelrenderer to be NULL, don't we?..
-            Errr maybe not?.. it doesn't require an SDL_Renderer.
-            It'll create SDL_Surface objects and stuff, but I think that's fine
-            even if SDL isn't initialized.
-    [X] in order to parse "effect"s, we need a context... and contexts live on
-        a stateset...
-        basically, in order to parse effects, we need to be able to modify a
-        stateset -- to add the effects to a context on it.
-        So, when parsing a test case, instead of using hexgame_get_or_load_stateset,
-        let's use stateset_load directly: test cases can have statesets living on them.
-
-    hexgame_step
-        hexmap_step
-            body_step
-                body_handle_rules
-                    state_handle_rules
-                        state_rule_match
-                            state_cond_match
-                        state_rule_apply
-                            state_effect_apply
+        [ ] STATE_EFFECT_TYPE_WHILE
+        [ ] support:
+            move myvar("_transform"): 1 0
+            rot myvar("_transform"): 1
+            flip myvar("_transform")
+        [ ] support:
+            coll: all yes with myvar("_transform")
 
 
 Jan 19, 2025:
