@@ -158,13 +158,24 @@ void val_set_const_str(val_t *val, const char *s){
     val->u.s.own_s = NULL;
 }
 int val_set_arr(val_t *val, int len){
-    val_cleanup(val);
-    val->type = VAL_TYPE_ARR;
-    val->u.a.len = len;
-    val->u.a.vals = malloc((len + 1) * sizeof(val_t));
-    if(!val->u.a.vals)return 1;
-    for(int i = 0; i < val->u.a.len; i++)val_init(&val->u.a.vals[i]);
-    val_set_int(&val->u.a.vals[len], len); /* See: val_get_arr_len_val */
+    int err;
+    if(val->type == VAL_TYPE_ARR){
+        err = val_resize_arr(val, len);
+        if(err)return err;
+        for(int i = 0; i < val->u.a.len; i++)val_set_null(&val->u.a.vals[i]);
+    }else{
+        val_cleanup(val);
+        val->type = VAL_TYPE_ARR;
+        val->u.a.len = len;
+        val->u.a.vals = malloc((len + 1) * sizeof(val_t));
+        if(!val->u.a.vals)return 1;
+        for(int i = 0; i < val->u.a.len; i++)val_init(&val->u.a.vals[i]);
+
+        /* There is an extra array element, in which we store the array's
+        length. See: val_get_arr_len_val */
+        val_init(&val->u.a.vals[len]);
+        val_set_int(&val->u.a.vals[len], len);
+    }
     return 0;
 }
 int val_resize_arr(val_t *val, int len){

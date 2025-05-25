@@ -80,7 +80,7 @@ state $PREFIX ANIM_NS "stand":
         then:
             goto: "crawl"
             rot: -2
-            turn
+            turn()
 
 
     ################################################
@@ -197,7 +197,7 @@ state $PREFIX ANIM_NS "stand":
         key: not isdown f
         key: wasdown b
     then:
-        turn
+        turn()
         rot: 2
         delay: 1
 
@@ -381,7 +381,7 @@ state $PREFIX ANIM_NS "grab":
         then:
             move: 2 1
             rot: 3
-            turn
+            turn()
             rot: 2
             $IF GOTO_GRABBED:
                 goto: $PREFIX ANIM_NS "grabbed"
@@ -392,7 +392,7 @@ state $PREFIX ANIM_NS "grab":
         key: wasdown b
         key: not isdown f
     then:
-        turn
+        turn()
         rot: 2
         delay: 1
 
@@ -418,7 +418,7 @@ state $PREFIX ANIM_NS "grab_flipped":
         key: wasdown b
     then:
         goto: $PREFIX ANIM_NS "stand"
-        turn
+        turn()
         rot: 1
         delay: 1
 
@@ -475,7 +475,7 @@ state $PREFIX ANIM_NS "grab_flipped":
         key: wasdown b
         key: not isdown f
     then:
-        turn
+        turn()
         rot: 1
         delay: 1
 

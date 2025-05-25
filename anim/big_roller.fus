@@ -71,7 +71,7 @@ state "stand":
         key: not isdown f
         key: wasdown b
     then:
-        turn
+        turn()
         rot: 2
         delay: 1
 

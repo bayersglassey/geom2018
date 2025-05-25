@@ -139,7 +139,7 @@ state "crawl":
         key: wasdown b
     then:
         move: 1 0
-        turn
+        turn()
         delay: 1
 
 state "crawl_step":

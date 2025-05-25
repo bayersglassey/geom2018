@@ -29,7 +29,7 @@ state "stand_r0":
     if:
         key: wasdown b
     then:
-        turn
+        turn()
         rot: -1
         goto: "stand_r2"
         delay: 4
@@ -124,7 +124,7 @@ state "stand_r1":
     if:
         key: wasdown b
     then:
-        turn
+        turn()
         rot: -1
         goto: "stand_r1"
         delay: 4
@@ -219,7 +219,7 @@ state "stand_r2":
     if:
         key: wasdown b
     then:
-        turn
+        turn()
         rot: -1
         goto: "stand_r0"
         delay: 4
@@ -314,7 +314,7 @@ state "stand_r3":
     if:
         key: wasdown b
     then:
-        turn
+        turn()
         rot: -1
         goto: "stand_r3"
         delay: 4

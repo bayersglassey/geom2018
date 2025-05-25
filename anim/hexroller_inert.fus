@@ -17,7 +17,7 @@ on "spit":
         expr: != myvar(".turn") yourvar(".turn")
     then:
         rot: -1
-        turn
+        turn()
         delay: $GET_INT DELAY
     set myvar("speed"): 7
 

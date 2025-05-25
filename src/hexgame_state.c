@@ -60,7 +60,7 @@ static int _context_set_vars(hexgame_state_context_t *context,
     actor_t *actor = context->actor;
     body_t *body = context->body;
     body_t *your_body = context->your_body;
-    hexmap_t *map = body? body->map: context->map;
+    hexmap_t *map = context->map? context->map: body->map;
     hexgame_t *game =
         actor? actor->game:
         body? body->game:
@@ -439,6 +439,41 @@ int state_effect_apply(state_effect_t *effect,
 ){
     #define RULE_PERROR() \
         fprintf(stderr, "Error in effect: %s\n", state_effect_type_name(effect->type));
+    #define BODY_LOC_EFFECT_SETUP(EXPR) \
+        if(!map){ \
+            fprintf(stderr, "No map!\n"); \
+            return 2; \
+        } \
+        vecspace_t *space = map->space; \
+        hexgame_location_t _loc, *loc; \
+        valexpr_result_t result = {0}; \
+            /* NOTE: result is also used by BODY_LOC_EFFECT_FINISH */ \
+        if(valexpr_is_literal_null(EXPR)){ \
+            CHECK_BODY \
+            loc = &body->loc; \
+        }else{ \
+            loc = &_loc; \
+            valexpr_context_t valexpr_context = {0}; \
+            err = _context_set_vars(context, &valexpr_context); \
+            if(err)return err; \
+            \
+            err = valexpr_get(EXPR, &valexpr_context, &result); \
+            if(err)return err; \
+            if(result.var == NULL){ \
+                RULE_PERROR() \
+                fprintf(stderr, "Couldn't resolve expr to a var reference\n"); \
+                return 2; \
+            } \
+            err = hexgame_location_from_val(loc, result.val); \
+            if(err)return err; \
+        }
+    #define BODY_LOC_EFFECT_FINISH(EXPR) \
+        if(!valexpr_is_literal_null(EXPR)){ \
+            /* NOTE: result was defined in BODY_LOC_EFFECT_SETUP */ \
+            /* and is guaranteed to be a var reference */ \
+            err = hexgame_location_to_val(loc, result.val); \
+            if(err)return err; \
+        }
 
     int err;
 
@@ -447,6 +482,7 @@ int state_effect_apply(state_effect_t *effect,
     actor_t *actor = context->actor;
     body_t *body = context->body;
     body_t *your_body = context->your_body;
+    hexmap_t *map = context->map? context->map: body->map;
 
     bool anim_debug = hexgame_state_context_debug(context);
 
@@ -498,29 +534,27 @@ int state_effect_apply(state_effect_t *effect,
         break;
     }
     case STATE_EFFECT_TYPE_MOVE: {
-        CHECK_BODY
-        vecspace_t *space = body->map->space;
+        BODY_LOC_EFFECT_SETUP(&effect->u.move.expr)
         vec_t vec;
-        vec_cpy(space->dims, vec, effect->u.vec);
-        rot_t rot = hexgame_location_get_rot(&body->loc);
-        space->vec_flip(vec, body->loc.turn);
+        vec_cpy(space->dims, vec, effect->u.move.vec);
+        rot_t rot = hexgame_location_get_rot(loc);
+        space->vec_flip(vec, loc->turn);
         space->vec_rot(vec, rot);
-        vec_add(space->dims, body->loc.pos, vec);
+        vec_add(space->dims, loc->pos, vec);
+        BODY_LOC_EFFECT_FINISH(&effect->u.move.expr)
         break;
     }
     case STATE_EFFECT_TYPE_ROT: {
-        CHECK_BODY
-        vecspace_t *space = body->map->space;
-        rot_t effect_rot = effect->u.rot;
-        body->loc.rot = rot_rot(space->rot_max,
-            body->loc.rot, effect_rot);
+        BODY_LOC_EFFECT_SETUP(&effect->u.rot.expr)
+        loc->rot = rot_rot(space->rot_max, loc->rot, effect->u.rot.rot);
+        BODY_LOC_EFFECT_FINISH(&effect->u.rot.expr)
         break;
     }
     case STATE_EFFECT_TYPE_TURN: {
-        CHECK_BODY
-        vecspace_t *space = body->map->space;
-        body->loc.turn = !body->loc.turn;
-        body->loc.rot = rot_flip(space->rot_max, body->loc.rot, true);
+        BODY_LOC_EFFECT_SETUP(&effect->u.turn.expr)
+        loc->turn = !loc->turn;
+        loc->rot = rot_flip(space->rot_max, loc->rot, true);
+        BODY_LOC_EFFECT_FINISH(&effect->u.turn.expr)
         break;
     }
     case STATE_EFFECT_TYPE_RELOCATE: {
@@ -705,9 +739,10 @@ int state_effect_apply(state_effect_t *effect,
     case STATE_EFFECT_TYPE_ASSERT: {
         bool debug = effect->u.assert.debug;
         if(debug){
-            fprintf(stderr, "Making assertion:\n");
-            valexpr_fprintf(&effect->u.assert.valexpr, stderr);
-            fputc('\n', stderr);
+            fprintf(stderr, "Making assertion: ");
+            /* No need to print the expr here, because we'll pass debug=true
+            along to valexpr_eval, which will print the expr along with its
+            LHS and RHS */
         }
         valexpr_context_t valexpr_context = {.debug = debug};
         err = _context_set_vars(context, &valexpr_context);
@@ -774,8 +809,8 @@ int state_effect_apply(state_effect_t *effect,
         if(err)return err;
 
         valexpr_result_t var_result = {0};
-        err = valexpr_set(&effect->u.set.var_expr, &valexpr_context,
-            &var_result);
+        err = valexpr_get_or_create_var(&effect->u.set.var_expr,
+            &valexpr_context, &var_result);
         if(err)return err;
         vars_t *vars = var_result.vars;
         var_t *var = var_result.var;

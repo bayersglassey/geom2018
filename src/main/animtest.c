@@ -18,6 +18,7 @@
 
 
 typedef struct test_case {
+    bool skip;
     stateset_t *stateset;
     hexcollmap_t *collmap;
     int steps;
@@ -49,6 +50,7 @@ static void test_case_cleanup(test_case_t *test_case){
         state_effect_cleanup)
 }
 static void test_case_init(test_case_t *test_case, const char *name){
+    test_case->skip = false;
     test_case->name = name;
     test_case->state_name = NULL;
     ARRAY_INIT(test_case->before_effects)
@@ -196,6 +198,10 @@ static int test_suite_load(test_suite_t *suite, const char *filename,
         OPEN
         ARRAY_PUSH_NEW(test_case_t*, suite->test_cases, test_case)
         test_case_init(test_case, name);
+        if(GOT("skip")){
+            NEXT
+            test_case->skip = true;
+        }
         if(GOT("stateset")){
             NEXT
             OPEN
@@ -360,6 +366,12 @@ int main(int n_args, char **args){
             for(int i = 0; i < suite->test_cases_len; i++){
                 test_case_t *test_case = suite->test_cases[i];
                 fprintf(stderr, THIN_LINE);
+                if(test_case->skip){
+                    fprintf(stderr, "SKIPPING test %i/%i: %s\n",
+                        i + 1, suite->test_cases_len,
+                        test_case->name? test_case->name: "<no name>");
+                    continue;
+                }
                 fprintf(stderr, "Running test %i/%i: %s\n",
                     i + 1, suite->test_cases_len,
                     test_case->name? test_case->name: "<no name>");

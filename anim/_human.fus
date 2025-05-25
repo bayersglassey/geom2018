@@ -13,7 +13,7 @@ state "stand":
     if: key: isdown b
     then:
         move: 1 0
-        turn
+        turn()
         goto: "stand"
         delay: $GET_INT MOVE_DELAY
 

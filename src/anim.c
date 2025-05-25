@@ -546,23 +546,43 @@ int state_effect_parse(state_effect_t *effect,
         CLOSE
     }else if(GOT("move")){
         NEXT
-        OPEN
         effect->type = STATE_EFFECT_TYPE_MOVE;
+        if(!GOT("(")){
+            err = valexpr_parse(&effect->u.move.expr, lexer);
+            if(err)return err;
+        }else{
+            valexpr_set_literal_null(&effect->u.move.expr);
+        }
+        OPEN
         for(int i = 0; i < space->dims; i++){
-            GET_INT(effect->u.vec[i]);
+            GET_INT(effect->u.move.vec[i]);
         }
         CLOSE
     }else if(GOT("rot")){
         NEXT
+        effect->type = STATE_EFFECT_TYPE_ROT;
+        if(!GOT("(")){
+            err = valexpr_parse(&effect->u.rot.expr, lexer);
+            if(err)return err;
+        }else{
+            valexpr_set_literal_null(&effect->u.rot.expr);
+        }
         OPEN
         int rot;
         GET_INT(rot)
-        effect->type = STATE_EFFECT_TYPE_ROT;
-        effect->u.rot = rot_contain(space->rot_max, rot);
+        effect->u.rot.rot = rot_contain(space->rot_max, rot);
         CLOSE
     }else if(GOT("turn")){
         NEXT
         effect->type = STATE_EFFECT_TYPE_TURN;
+        if(!GOT("(")){
+            err = valexpr_parse(&effect->u.turn.expr, lexer);
+            if(err)return err;
+        }else{
+            valexpr_set_literal_null(&effect->u.turn.expr);
+        }
+        OPEN
+        CLOSE
     }else if(GOT("relocate")){
         NEXT
         effect->type = STATE_EFFECT_TYPE_RELOCATE;
@@ -1427,6 +1447,15 @@ void state_effect_cleanup(state_effect_t *effect){
         case STATE_EFFECT_TYPE_DELAY:
         case STATE_EFFECT_TYPE_ADD_DELAY:
             valexpr_cleanup(&effect->u.expr);
+            break;
+        case STATE_EFFECT_TYPE_MOVE:
+            valexpr_cleanup(&effect->u.move.expr);
+            break;
+        case STATE_EFFECT_TYPE_ROT:
+            valexpr_cleanup(&effect->u.rot.expr);
+            break;
+        case STATE_EFFECT_TYPE_TURN:
+            valexpr_cleanup(&effect->u.turn.expr);
             break;
         case STATE_EFFECT_TYPE_RELOCATE:
             valexpr_cleanup(&effect->u.relocate.loc_expr);

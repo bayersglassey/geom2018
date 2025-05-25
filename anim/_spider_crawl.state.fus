@@ -37,7 +37,7 @@ if:
         ;;     *
         ;;     .
 then:
-    turn
+    turn()
     rot: 3
     goto delay: "crawl_flip"
 
@@ -58,6 +58,6 @@ $SKIP:
             ;;     *
             ;;     .
     then:
-        turn
+        turn()
         rot: 3
         goto delay: "crawl_flip"

@@ -71,7 +71,7 @@ if:
     key: not isdown f
 then:
     move: 1 0
-    turn
+    turn()
     goto delay: "turn"
 
 "look_up"

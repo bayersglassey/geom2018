@@ -164,6 +164,11 @@ void valexpr_fprintf(valexpr_t *expr, FILE *file){
     }
 }
 
+bool valexpr_is_literal_null(valexpr_t *expr){
+    return expr->type == VALEXPR_TYPE_LITERAL &&
+        expr->u.val.type == VAL_TYPE_NULL;
+}
+
 void valexpr_set_literal_null(valexpr_t *expr){
     expr->type = VALEXPR_TYPE_LITERAL;
     val_init(&expr->u.val);
@@ -311,7 +316,7 @@ int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer){
 
 
 int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
-    valexpr_result_t *result, bool set
+    valexpr_result_t *result, bool get_or_create_var
 ){
     int err;
 
@@ -357,16 +362,14 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
             }
 
             var_t *var;
-            if(set){
-                /* If we're setting this value, then create the var if
-                it doesn't exist yet */
+            if(get_or_create_var){
                 var = vars_get_or_add(vars, key);
                 if(!var)return 1;
             }else{
-                /* If we're getting this value... */
                 var = vars_get(vars, key);
                 if(!var){
-                    /* ...return result->val = NULL */
+                    /* ...this will cause us to return 0, with
+                    result->val == NULL */
                     break;
                 }
             }
@@ -383,11 +386,11 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
 
             if(cond){
                 err = valexpr_eval(expr->u.if_expr.then_expr,
-                    context, result, set);
+                    context, result, get_or_create_var);
                 if(err)return err;
             }else{
                 err = valexpr_eval(expr->u.if_expr.else_expr,
-                    context, result, set);
+                    context, result, get_or_create_var);
                 if(err)return err;
             }
             break;
@@ -403,7 +406,7 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
                     sub_context.myvars = context->yourvars;
 
                     err = valexpr_eval(expr->u.as.sub_expr,
-                        &sub_context, result, set);
+                        &sub_context, result, get_or_create_var);
                     if(err)return err;
                     break;
                 }
@@ -416,6 +419,13 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
         }
         case VALEXPR_TYPE_BINOP:
         case VALEXPR_TYPE_UNOP: {
+
+            if(context->debug){
+                fprintf(stderr, "Evaluating: ");
+                valexpr_fprintf(expr, stderr);
+                fputc('\n', stderr);
+            }
+
             valexpr_result_t result1 = {0};
             err = valexpr_get(expr->u.op.sub_expr1, context, &result1);
             if(err)return err;
@@ -425,6 +435,11 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
                 valexpr_fprintf(expr->u.op.sub_expr1, stderr);
                 fputc('\n', stderr);
                 return 2;
+            }
+            if(context->debug){
+                fprintf(stderr, "...with LHS as: ");
+                val_fprintf(val1, stderr);
+                fputc('\n', stderr);
             }
 
             val_t *val2 = NULL;
@@ -438,6 +453,11 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
                     valexpr_fprintf(expr->u.op.sub_expr2, stderr);
                     fputc('\n', stderr);
                     return 2;
+                }
+                if(context->debug){
+                    fprintf(stderr, "....and RHS as: ");
+                    val_fprintf(val2, stderr);
+                    fputc('\n', stderr);
                 }
             }
 
@@ -475,15 +495,18 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
 int valexpr_get(valexpr_t *expr, valexpr_context_t *context,
     valexpr_result_t *result
 ){
-    /* NOTE: Caller needs to check whether result->val is NULL. */
+    /* Attempt to get a value.
+    NOTE: Caller needs to check whether result->val is NULL. */
     return valexpr_eval(expr, context, result, false);
 }
 
-int valexpr_set(valexpr_t *expr, valexpr_context_t *context,
+int valexpr_get_or_create_var(valexpr_t *expr, valexpr_context_t *context,
     valexpr_result_t *result
 ){
-    /* NOTE: valexpr_set guarantees that we find (or create, if necessary)
-    a val, so caller doesn't need to check whether result->val is NULL. */
+    /* Gets or creates the indicated var.
+    NOTE: if the var is created, its val is initialized to VAL_TYPE_NULL.
+    So as long as there wasn't an error, i.e. as long as we return 0,
+    result->vars, result->var, and result->val will all not be NULL. */
     return valexpr_eval(expr, context, result, true);
 }
 

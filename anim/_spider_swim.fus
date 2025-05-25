@@ -231,7 +231,7 @@ state "swim":
         key: isdown b
     then:
         move: 1 0
-        turn
+        turn()
         delay: 2
 
     "land"

@@ -97,5 +97,5 @@ state $SUFFIX R0 $PREFIX ANIM_NS "stand":
         expr: myvar("b")
     then:
         rot: -1
-        turn
+        turn()
         delay: $GET_INT DELAY

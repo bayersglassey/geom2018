@@ -1149,7 +1149,7 @@ Jan 8, 2024:
     ...and so, we need:
 
         [X] STATE_EFFECT_TYPE_WHILE
-        [ ] support:
+        [X] support:
             move myvar("_transform"): 1 0
             rot myvar("_transform"): 1
             flip myvar("_transform")

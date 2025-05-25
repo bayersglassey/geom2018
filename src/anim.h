@@ -390,8 +390,17 @@ typedef struct state_effect {
         int dead; /* enum body_dead */
         state_effect_spawn_t spawn;
         const char *play_filename;
-        vec_t vec;
-        rot_t rot;
+        struct {
+            valexpr_t expr;
+            vec_t vec;
+        } move;
+        struct {
+            valexpr_t expr;
+            rot_t rot;
+        } rot;
+        struct {
+            valexpr_t expr;
+        } turn;
         int boolean; /* enum effect_boolean */
         int i;
         valexpr_t expr;

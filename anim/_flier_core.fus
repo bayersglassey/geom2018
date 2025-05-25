@@ -33,7 +33,7 @@ state $PREFIX ANIM_NS "hover":
                 ;;   ( )
         then:
             move: 0 1
-            turn
+            turn()
             rot: 3
             goto: "crawl"
             delay: 2
@@ -163,7 +163,7 @@ state $PREFIX ANIM_NS "hover":
         then:
             move: 1 1
             rot: 2
-            turn
+            turn()
             goto: "crawl"
             delay: 2
 

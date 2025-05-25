@@ -75,5 +75,7 @@ void hexgame_location_apply(hexgame_location_t *loc, trf_t *trf);
 void hexgame_location_write(hexgame_location_t *loc, FILE *file, int indent);
 int hexgame_location_parse(hexgame_location_t *loc, fus_lexer_t *lexer);
 int hexgame_location_parse_string(hexgame_location_t *loc, const char *s);
+int hexgame_location_from_val(hexgame_location_t *loc, val_t *val);
+int hexgame_location_to_val(hexgame_location_t *loc, val_t *val);
 
 #endif

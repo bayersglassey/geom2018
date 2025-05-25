@@ -59,7 +59,7 @@ state "stand":
         key: wasdown b
         key: not isdown f
     then:
-        turn
+        turn()
         rot: 2
         delay: 1
 
@@ -107,7 +107,7 @@ state "stand_flipped":
         key: wasdown b
         key: not isdown f
     then:
-        turn
+        turn()
         rot: 1
         delay: 1
 

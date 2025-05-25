@@ -152,7 +152,7 @@ state "crawl":
         key: not isdown f
     then:
         move: 1 0
-        turn
+        turn()
         goto: "crawl_turn"
         delay: 2
 

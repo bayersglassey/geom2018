@@ -158,6 +158,7 @@ typedef struct valexpr_result {
 void valexpr_cleanup(valexpr_t *expr);
 int valexpr_copy(valexpr_t *expr1, valexpr_t *expr2);
 void valexpr_fprintf(valexpr_t *expr, FILE *file);
+bool valexpr_is_literal_null(valexpr_t *expr);
 void valexpr_set_literal_null(valexpr_t *expr);
 void valexpr_set_literal_bool(valexpr_t *expr, bool b);
 void valexpr_set_literal_int(valexpr_t *expr, int i);
@@ -167,7 +168,7 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
     valexpr_result_t *result, bool set);
 int valexpr_get(valexpr_t *expr, valexpr_context_t *context,
     valexpr_result_t *result);
-int valexpr_set(valexpr_t *expr, valexpr_context_t *context,
+int valexpr_get_or_create_var(valexpr_t *expr, valexpr_context_t *context,
     valexpr_result_t *result);
 
 bool valexpr_get_bool(valexpr_t *expr, valexpr_context_t *context);

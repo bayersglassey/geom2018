@@ -9,6 +9,7 @@
 #include "hexspace.h"
 #include "lexer.h"
 #include "geom_lexer_utils.h"
+#include "vars.h"
 
 
 static void _print_tabs(FILE *file, int indent){
@@ -106,5 +107,37 @@ int hexgame_location_parse_string(hexgame_location_t *loc, const char *s){
     loc->pos[1] = y;
     loc->rot = r;
     loc->turn = c == 'y';
+    return 0;
+}
+
+int hexgame_location_from_val(hexgame_location_t *loc, val_t *val){
+    /* Converts loc to a val of the form: arr(x y rot turn) */
+    int err;
+    if(val->type != VAL_TYPE_ARR){
+        fprintf(stderr, "%s: Got %s, expected arr\n",
+            __func__, val_type_name(val->type));
+        return 2;
+    }
+    if(val->u.a.len != 4){
+        fprintf(stderr, "%s: Got arr of len %i, expected 4\n",
+            __func__, val->u.a.len);
+        return 2;
+    }
+    loc->pos[0] = val_get_int(&val->u.a.vals[0]);
+    loc->pos[1] = val_get_int(&val->u.a.vals[1]);
+    loc->rot = val_get_int(&val->u.a.vals[2]);
+    loc->turn = val_get_bool(&val->u.a.vals[3]);
+    return 0;
+}
+
+int hexgame_location_to_val(hexgame_location_t *loc, val_t *val){
+    /* Initializes loc from a val of the form: arr(x y rot turn) */
+    int err;
+    err = val_set_arr(val, 4);
+    if(err)return err;
+    val_set_int(&val->u.a.vals[0], loc->pos[0]);
+    val_set_int(&val->u.a.vals[1], loc->pos[1]);
+    val_set_int(&val->u.a.vals[2], loc->rot);
+    val_set_bool(&val->u.a.vals[3], loc->turn);
     return 0;
 }
