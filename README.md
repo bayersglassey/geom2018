@@ -18,6 +18,15 @@ is rendered, and cached for the lifetime of the running executable.
 
 So if you enjoy playing it at all, consider cloning this repo and attempting to build it locally! :)
 
+If you want to read up on the underlying math and design process, complete with
+pictures from old notebooks, you can find that here:
+
+[Blog post](https://github.com/bayersglassey/bagblog/blob/master/entries/2021/oct/spidergame.md)
+
+...and here's an example picture from an old notebook:
+
+![Notebook](/img/notebooks/IMG_1613.png)
+
 
 ## How to compile & run the game
 
