@@ -42,7 +42,7 @@ TEST_APP_OFILES = \
  src/test_app_list_bodies.o src/test_app_list_players.o src/test_app_list_actors.o \
  src/test_app_list_recording.o src/test_app_list_utils.o src/test_app_menu.o
 
-.PHONY: all clean check www
+.PHONY: all clean check www lib
 
 all: $(PROGS)
 
@@ -51,6 +51,12 @@ clean:
 
 check: $(TESTS)
 	./runtests.sh $(TESTS) tests/*.sh
+
+lib/libgeom2018.so:
+	mkdir -p lib
+	$(CC) $(CFLAGS) -shared -fPIC -o $@ src/*.c $^ $(LIBS)
+
+lib: lib/libgeom2018.so
 
 bin/collmaptool: src/main/collmaptool.o $(OFILES) src/mapeditor.o src/rawinput.o
 	mkdir -p bin

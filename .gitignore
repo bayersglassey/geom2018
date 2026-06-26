@@ -1,5 +1,6 @@
 # executables
 /bin/*
+/lib/*
 
 # gcc stuff
 *.o
@@ -34,3 +35,7 @@ vgcore.*
 
 # screencast output (e.g. byzanz, recordmydesktop, vlc)
 out.*
+
+# Python stuff
+venv/
+*.pyc
