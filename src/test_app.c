@@ -40,6 +40,7 @@ void test_app_cleanup(test_app_t *app){
     palette_cleanup(&app->palette);
     SDL_FreePalette(app->sdl_palette);
     SDL_FreeSurface(app->surface);
+    SDL_DestroyTexture(app->texture);
     prismelrenderer_cleanup(&app->prend);
     prismelrenderer_cleanup(&app->minimap_prend);
     console_cleanup(&app->console);
@@ -254,6 +255,10 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
         app->sdl_palette);
     if(app->surface == NULL)return 1;
 
+    app->texture = SDL_CreateTextureFromSurface(
+        app->renderer, app->surface);
+    RET_IF_SDL_NULL(app->texture);
+
     prismelrenderer_t *prend = &app->prend;
     err = prismelrenderer_init(prend, &vec4);
     if(err)return err;
@@ -287,7 +292,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->list = NULL;
 
     minieditor_init(&app->editor,
-        app->surface, app->sdl_palette,
+        app->surface, app->texture, app->sdl_palette,
         NULL, NULL, /* no mapper or palmapper */
         app->prend_filename,
         &app->font, app->geomfont, &app->prend,
@@ -404,12 +409,13 @@ static int test_app_render(test_app_t *app){
         }
     }
 
-    SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
-        app->renderer, app->surface);
-    RET_IF_SDL_NULL(render_texture);
-    SDL_RenderCopy(app->renderer, render_texture, NULL, NULL);
-    SDL_DestroyTexture(render_texture);
-
+    {
+        SDL_LockSurface(app->surface);
+        SDL_UpdateTexture(app->texture, NULL,
+            app->surface->pixels, app->surface->pitch);
+        SDL_UnlockSurface(app->surface);
+    }
+    SDL_RenderCopy(app->renderer, app->texture, NULL, NULL);
     SDL_RenderPresent(app->renderer);
     return 0;
 }

@@ -785,6 +785,8 @@ int rendergraph_render(
     */
     int err;
 
+    /* Not sure why we're checking surface == NULL here... I don't think we
+    actually support it being NULL */
     bool cache_bitmaps = surface == NULL? true:
         (rgraph->cache_bitmaps && prend->cache_bitmaps);
 

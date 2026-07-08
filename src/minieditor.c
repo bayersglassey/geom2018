@@ -15,7 +15,9 @@ void minieditor_cleanup(minieditor_t *editor){
 }
 
 void minieditor_init(minieditor_t *editor,
-    SDL_Surface *surface, SDL_Palette *sdl_palette,
+    SDL_Surface *surface,
+    SDL_Texture *texture,
+    SDL_Palette *sdl_palette,
     prismelmapper_t *mapper,
     palettemapper_t *palmapper,
     const char *prend_filename,
@@ -24,6 +26,7 @@ void minieditor_init(minieditor_t *editor,
     int delay_goal, int scw, int sch
 ){
     editor->surface = surface;
+    editor->texture = texture;
     editor->sdl_palette = sdl_palette;
     editor->mapper = mapper;
     editor->palmapper = palmapper;

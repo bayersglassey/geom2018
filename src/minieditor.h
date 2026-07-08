@@ -17,6 +17,7 @@ typedef struct minieditor {
     int delay_goal;
 
     SDL_Surface *surface;
+    SDL_Texture *texture;
     SDL_Palette *sdl_palette;
 
     prismelmapper_t *mapper;
@@ -54,7 +55,9 @@ typedef struct minieditor {
 
 void minieditor_cleanup(minieditor_t *editor);
 void minieditor_init(minieditor_t *editor,
-    SDL_Surface *surface, SDL_Palette *sdl_palette,
+    SDL_Surface *surface,
+    SDL_Texture *texture,
+    SDL_Palette *sdl_palette,
     prismelmapper_t *mapper,
     palettemapper_t *palmapper,
     const char *prend_filename,

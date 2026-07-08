@@ -319,13 +319,12 @@ static int _render(minieditor_t *editor, SDL_Renderer *renderer){
     if(err)return err;
 
     {
-        SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
-            renderer, editor->surface);
-        RET_IF_SDL_NULL(render_texture);
-        SDL_RenderCopy(renderer, render_texture, NULL, NULL);
-        SDL_DestroyTexture(render_texture);
+        SDL_LockSurface(editor->surface);
+        SDL_UpdateTexture(editor->texture, NULL,
+            editor->surface->pixels, editor->surface->pitch);
+        SDL_UnlockSurface(editor->surface);
     }
-
+    SDL_RenderCopy(renderer, editor->texture, NULL, NULL);
     SDL_RenderPresent(renderer);
     return 0;
 }
@@ -440,6 +439,10 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
         opts->scw, opts->sch, false, false, sdl_palette);
     if(surface == NULL)return 1;
 
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(
+        renderer, surface);
+    RET_IF_SDL_NULL(texture);
+
     palette_t _palette, *palette = &_palette;
     err = palette_load(palette, opts->palette_filename, NULL);
     if(err)return err;
@@ -492,7 +495,7 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
 
     minieditor_t _editor, *editor=&_editor;
     minieditor_init(editor,
-        surface, sdl_palette,
+        surface, texture, sdl_palette,
         mapper, palmapper,
         opts->prend_filename,
         font, geomfont, prend,
@@ -610,6 +613,7 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
     palette_cleanup(palette);
     font_cleanup(font);
     SDL_FreeSurface(surface);
+    SDL_DestroyTexture(texture);
     SDL_FreePalette(sdl_palette);
 
     return err;

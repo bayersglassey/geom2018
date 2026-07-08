@@ -60,8 +60,7 @@ SDL_Surface *surface8_create(int w, int h,
     RET_NULL_IF_SDL_NULL(surface);
 
     if(use_rle){
-        RET_NULL_IF_SDL_NZ(use_rle
-            && SDL_SetSurfaceRLE(surface, 1));}
+        RET_NULL_IF_SDL_NZ(SDL_SetSurfaceRLE(surface, 1));}
 
     if(use_colorkey){
         RET_NULL_IF_SDL_NZ(SDL_SetColorKey(surface, SDL_TRUE, 0));}
