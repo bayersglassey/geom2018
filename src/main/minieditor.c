@@ -8,6 +8,7 @@
 #include "../util.h"
 #include "../vec4.h"
 #include "../minieditor.h"
+#include "../screen.h"
 #include "../defaults.h"
 
 
@@ -37,6 +38,7 @@ typedef struct label_mapping_def {
 typedef struct options {
     bool quiet;
     Uint32 window_flags;
+    Uint32 renderer_flags;
     const char *prend_filename;
     const char *rgraph_name;
     const char *image_filename;
@@ -67,6 +69,7 @@ static void options_cleanup(options_t *opts){
 
 static void options_init(options_t *opts){
     opts->window_flags = SDL_WINDOW_SHOWN;
+    opts->renderer_flags = 0;
     opts->prend_filename = DEFAULT_PREND_FILENAME;
     opts->palette_filename = DEFAULT_PALETTE_FILENAME;
     opts->mapper_name = NULL;
@@ -90,6 +93,8 @@ static void print_help(FILE *file){
         "  -h | --help      Print this message and exit\n"
         "  -F               Fullscreen\n"
         "  -FD              Fullscreen Desktop\n"
+        "  --accel          Use accelerated rendering\n"
+        "  --vsync          Use vsync\n"
         "  -q               Quiet mode (less output to stderr)\n"
         "  -f  FILENAME     Load prend data (default: " DEFAULT_PREND_FILENAME ")\n"
         "  -if FILENAME     Where to save screenshot (default: " DEFAULT_IMAGE_FILENAME ")\n"
@@ -144,6 +149,10 @@ static int parse_options(options_t *opts,
             opts->window_flags |= SDL_WINDOW_FULLSCREEN;
         }else if(!strcmp(arg, "-FD")){
             opts->window_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+        }else if(!strcmp(arg, "--accel")){
+            opts->renderer_flags |= SDL_RENDERER_ACCELERATED;
+        }else if(!strcmp(arg, "--vsync")){
+            opts->renderer_flags |= SDL_RENDERER_PRESENTVSYNC;
         }else if(!strcmp(arg, "-q")){
             opts->quiet = true;
         }else if(!strcmp(arg, "-f")){
@@ -300,7 +309,7 @@ static void _print_args(minieditor_t *editor, FILE *file){
     if(rgraph)fprintf(file, " -n '%s'", rgraph->name);
 
     fprintf(file, " -s %i %i -p %i %i -i %i -z %i -r %i -t %i",
-        editor->scw, editor->sch, editor->x0, editor->y0,
+        editor->screen->w, editor->screen->h, editor->x0, editor->y0,
         editor->frame_i, editor->zoom, editor->rot, editor->flip);
 
     if(!editor->show_editor_controls)fprintf(file, " --nocontrols");
@@ -309,23 +318,19 @@ static void _print_args(minieditor_t *editor, FILE *file){
 }
 
 
-static int _render(minieditor_t *editor, SDL_Renderer *renderer){
+static int _render(minieditor_t *editor){
     int err;
 
-    RET_IF_SDL_NZ(SDL_FillRect(editor->surface, NULL, 0));
+    err = screen_begin_render(editor->screen);
+    if(err)return err;
+
+    RET_IF_SDL_NZ(SDL_FillRect(editor->screen->surface, NULL, 0));
 
     int line_y = 0;
     err = minieditor_render(editor, &line_y);
     if(err)return err;
 
-    {
-        SDL_LockSurface(editor->surface);
-        SDL_UpdateTexture(editor->texture, NULL,
-            editor->surface->pixels, editor->surface->pitch);
-        SDL_UnlockSurface(editor->surface);
-    }
-    SDL_RenderCopy(renderer, editor->texture, NULL, NULL);
-    SDL_RenderPresent(renderer);
+    screen_finish_render(editor->screen);
     return 0;
 }
 
@@ -333,7 +338,7 @@ static int _render(minieditor_t *editor, SDL_Renderer *renderer){
 static int _save_image(minieditor_t *editor, options_t *opts){
     const char *filename = opts->image_filename;
     if(!opts->quiet)fprintf(stderr, "Saving image to: %s\n", filename);
-    RET_IF_SDL_NZ(SDL_SaveBMP(editor->surface, filename))
+    RET_IF_SDL_NZ(SDL_SaveBMP(editor->screen->surface, filename))
     return 0;
 }
 
@@ -400,7 +405,7 @@ static int _poll_events(minieditor_t *editor, options_t *opts, bool *loop){
 
 
 static int _mainloop(minieditor_t *editor, options_t *opts,
-    palette_t *palette, SDL_Renderer *renderer
+    palette_t *palette
 ){
     int err;
 
@@ -408,12 +413,12 @@ static int _mainloop(minieditor_t *editor, options_t *opts,
     while(loop){
         Uint32 tick0 = SDL_GetTicks();
 
-        err = palette_update_sdl_palette(palette, editor->sdl_palette);
+        err = palette_update_sdl_palette(palette, editor->screen->palette);
         if(err)return err;
         err = palette_step(palette);
         if(err)return err;
 
-        err = _render(editor, renderer);
+        err = _render(editor);
         if(err)return err;
 
         err = _poll_events(editor, opts, &loop);
@@ -427,21 +432,8 @@ static int _mainloop(minieditor_t *editor, options_t *opts,
     return 0;
 }
 
-static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
-    /* NOTE: renderer may be NULL, in which case we're running without a
-    GUI */
+static int _init_and_mainloop(options_t *opts, screen_t *screen){
     int err;
-
-    SDL_Palette *sdl_palette = SDL_AllocPalette(256);
-    RET_IF_SDL_NULL(sdl_palette);
-
-    SDL_Surface *surface = surface8_create(
-        opts->scw, opts->sch, false, false, sdl_palette);
-    if(surface == NULL)return 1;
-
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(
-        renderer, surface);
-    RET_IF_SDL_NULL(texture);
 
     palette_t _palette, *palette = &_palette;
     err = palette_load(palette, opts->palette_filename, NULL);
@@ -494,12 +486,11 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
     }
 
     minieditor_t _editor, *editor=&_editor;
-    minieditor_init(editor,
-        surface, texture, sdl_palette,
+    minieditor_init(editor, screen,
         mapper, palmapper,
         opts->prend_filename,
         font, geomfont, prend,
-        opts->delay_goal, opts->scw, opts->sch);
+        opts->delay_goal);
     editor->frame_i = opts->frame_i;
     editor->zoom = opts->zoom;
     editor->rot = opts->rot;
@@ -532,9 +523,9 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
         }
     }
 
-    if(renderer){
+    if(screen->gui){
         /* We're running in a window -- interactive GUI mode, go! */
-        err = _mainloop(editor, opts, palette, renderer);
+        err = _mainloop(editor, opts, palette);
         if(err)return err;
 
         fprintf(stderr, "Cleaning up...\n");
@@ -542,8 +533,13 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
         /* We're running at the bare commandline, no GUI. */
 
         case ACTION_SCREENSHOT: {
-            err = palette_update_sdl_palette(palette, editor->sdl_palette);
+            err = palette_update_sdl_palette(palette, editor->screen->palette);
             if(err)return err;
+
+            err = screen_begin_render(editor->screen);
+            if(err)return err;
+
+            RET_IF_SDL_NZ(SDL_FillRect(editor->screen->surface, NULL, 0));
 
             int line_y = 0;
             err = minieditor_render(editor, &line_y);
@@ -551,6 +547,8 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
 
             err = _save_image(editor, opts);
             if(err)return err;
+
+            screen_finish_render(editor->screen);
         } break;
         case ACTION_DUMP: {
             rendergraph_t *rgraph = minieditor_get_rgraph(editor);
@@ -612,9 +610,6 @@ static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
     prismelrenderer_cleanup(prend);
     palette_cleanup(palette);
     font_cleanup(font);
-    SDL_FreeSurface(surface);
-    SDL_DestroyTexture(texture);
-    SDL_FreePalette(sdl_palette);
 
     return err;
 }
@@ -630,30 +625,14 @@ int main_gui(options_t *opts){
         err = 1;
         fprintf(stderr, "SDL_Init error: %s\n", SDL_GetError());
     }else{
-        SDL_Window *window = SDL_CreateWindow(window_title,
-            SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-            opts->scw, opts->sch, opts->window_flags);
+        screen_t screen;
+        err = screen_init_gui(&screen, opts->scw, opts->sch, window_title,
+            opts->window_flags, opts->renderer_flags);
+        if(err)return err;
 
-        if(!window){
-            err = 1;
-            fprintf(stderr, "SDL_CreateWindow error: %s\n",
-                SDL_GetError());
-        }else{
-            SDL_Renderer *renderer = SDL_CreateRenderer(window, -1,
-                SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+        err = _init_and_mainloop(opts, &screen);
 
-            if(!renderer){
-                err = 1;
-                fprintf(stderr, "SDL_CreateRenderer error: %s\n",
-                    SDL_GetError());
-            }else{
-
-                err = _init_and_mainloop(opts, renderer);
-
-                SDL_DestroyRenderer(renderer);
-            }
-            SDL_DestroyWindow(window);
-        }
+        screen_cleanup(&screen);
         SDL_Quit();
     }
     fprintf(stderr, "Exiting with code: %i\n", err);
@@ -663,7 +642,13 @@ int main_gui(options_t *opts){
 
 int main_nogui(options_t *opts){
     /* What happens when we run at the bare commandline */
-    return _init_and_mainloop(opts, NULL);
+    int err;
+    screen_t screen;
+    err = screen_init_no_gui(&screen, opts->scw, opts->sch);
+    if(err)return err;
+    err = _init_and_mainloop(opts, &screen);
+    screen_cleanup(&screen);
+    return err;
 }
 
 

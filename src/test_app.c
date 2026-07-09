@@ -38,9 +38,6 @@ const char *TEST_MAP_HEXMAP_FILENAME_NEW_GAME_SKIP_TUTORIAL = "data/maps/demo/wo
 
 void test_app_cleanup(test_app_t *app){
     palette_cleanup(&app->palette);
-    SDL_FreePalette(app->sdl_palette);
-    SDL_FreeSurface(app->surface);
-    SDL_DestroyTexture(app->texture);
     prismelrenderer_cleanup(&app->prend);
     prismelrenderer_cleanup(&app->minimap_prend);
     console_cleanup(&app->console);
@@ -210,8 +207,8 @@ static int test_app_restart(test_app_t *app){
     return _test_app_restart(app, prend, minimap_prend, NULL, NULL, NULL);
 }
 
-int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
-    SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
+int test_app_init(test_app_t *app, screen_t *screen, int delay_goal,
+    const char *prend_filename,
     const char *stateset_filename, const char *actor_filename,
     const char *hexmap_filename, const char *submap_filename,
     const char *location_name,
@@ -224,8 +221,7 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 ){
     int err;
 
-    app->scw = scw;
-    app->sch = sch;
+    app->screen = screen;
     app->delay_goal = delay_goal;
     app->took = 0;
     app->developer_mode = developer_mode;
@@ -233,8 +229,6 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->n_players = n_players;
     app->animate_palettes = animate_palettes;
 
-    app->window = window;
-    app->renderer = renderer;
     app->prend_filename = prend_filename;
     app->stateset_filename = stateset_filename;
     app->actor_filename = actor_filename;
@@ -243,21 +237,9 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
     app->load_recording_filename = load_recording_filename;
     app->save_recording_filename = save_recording_filename;
 
-    SDL_Palette *sdl_palette = SDL_AllocPalette(256);
-    app->sdl_palette = sdl_palette;
-    RET_IF_SDL_NULL(sdl_palette);
-
     palette_t *palette = &app->palette;
     err = palette_load(palette, "data/pal1.fus", NULL);
     if(err)return err;
-
-    app->surface = surface8_create(scw, sch, false, false,
-        app->sdl_palette);
-    if(app->surface == NULL)return 1;
-
-    app->texture = SDL_CreateTextureFromSurface(
-        app->renderer, app->surface);
-    RET_IF_SDL_NULL(app->texture);
 
     prismelrenderer_t *prend = &app->prend;
     err = prismelrenderer_init(prend, &vec4);
@@ -291,12 +273,11 @@ int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
 
     app->list = NULL;
 
-    minieditor_init(&app->editor,
-        app->surface, app->texture, app->sdl_palette,
+    minieditor_init(&app->editor, app->screen,
         NULL, NULL, /* no mapper or palmapper */
         app->prend_filename,
         &app->font, app->geomfont, &app->prend,
-        app->delay_goal, app->scw, app->sch);
+        app->delay_goal);
 
     test_app_menu_init(&app->menu, app);
 
@@ -383,6 +364,9 @@ static int test_app_render(test_app_t *app){
     /* We haven't printed any lines so far this frame... */
     app->lines_printed = 0;
 
+    err = screen_begin_render(app->screen);
+    if(err)return err;
+
     if(app->mode == TEST_APP_MODE_GAME){
         err = test_app_render_game(app);
         if(err)return err;
@@ -399,7 +383,7 @@ static int test_app_render(test_app_t *app){
         /* Dump some info to bottom of screen */
 
         int geomfont_prismel_height = 2; /* Hardcoded, actually depends on the geomfont */
-        int bottom_of_screen_in_prismels = app->sch / geomfont_prismel_height;
+        int bottom_of_screen_in_prismels = app->screen->h / geomfont_prismel_height;
 
         if(app->took > app->delay_goal && app->developer_mode){
             test_app_printf(app, 0,
@@ -409,14 +393,7 @@ static int test_app_render(test_app_t *app){
         }
     }
 
-    {
-        SDL_LockSurface(app->surface);
-        SDL_UpdateTexture(app->texture, NULL,
-            app->surface->pixels, app->surface->pitch);
-        SDL_UnlockSurface(app->surface);
-    }
-    SDL_RenderCopy(app->renderer, app->texture, NULL, NULL);
-    SDL_RenderPresent(app->renderer);
+    screen_finish_render(app->screen);
     return 0;
 }
 
@@ -590,7 +567,7 @@ int test_app_mainloop_step(test_app_t *app){
         if(err)return err;
     }
 
-    err = palette_update_sdl_palette(&app->palette, app->sdl_palette);
+    err = palette_update_sdl_palette(&app->palette, app->screen->palette);
     if(err)return err;
     err = palette_step(&app->palette);
     if(err)return err;
@@ -683,7 +660,7 @@ int test_app_printf(test_app_t *app, int col, int row, const char *msg, ...){
 
     geomfont_blitter_t blitter;
     geomfont_blitter_render_init(&blitter, app->geomfont,
-        app->surface, app->sdl_palette,
+        app->screen->surface, app->screen->palette,
         0, 0, col, row, 1, NULL, NULL);
     err = generic_vprintf(&geomfont_blitter_putc_callback, &blitter,
         msg, vlist);

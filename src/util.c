@@ -64,9 +64,6 @@ SDL_Surface *surface8_create(int w, int h,
 
     if(use_colorkey){
         RET_NULL_IF_SDL_NZ(SDL_SetColorKey(surface, SDL_TRUE, 0));}
-    //if(use_colorkey){
-    //    RET_NULL_IF_SDL_NZ(SDL_SetColorKey(surface, SDL_TRUE,
-    //        use_rle? SDL_RLEACCEL: 0));}
 
     RET_NULL_IF_SDL_NZ(SDL_SetSurfacePalette(surface, pal));
     return surface;

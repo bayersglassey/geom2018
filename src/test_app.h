@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <SDL2/SDL.h>
 
+#include "screen.h"
 #include "prismelrenderer.h"
 #include "vec4.h"
 #include "font.h"
@@ -48,21 +49,16 @@ enum test_app_mode {
 
 
 typedef struct test_app {
-    int scw, sch;
     int delay_goal;
     Uint32 took;
 
-    SDL_Window *window;
-    SDL_Renderer *renderer;
-    SDL_Surface *surface;
-    SDL_Texture *texture;
+    screen_t *screen;
 
     const char *prend_filename;
     const char *stateset_filename;
     const char *actor_filename;
 
     palette_t palette;
-    SDL_Palette *sdl_palette;
     prismelrenderer_t prend;
     prismelrenderer_t minimap_prend;
     font_t font;
@@ -103,8 +99,8 @@ typedef struct test_app {
 
 
 void test_app_cleanup(test_app_t *app);
-int test_app_init(test_app_t *app, int scw, int sch, int delay_goal,
-    SDL_Window *window, SDL_Renderer *renderer, const char *prend_filename,
+int test_app_init(test_app_t *app, screen_t *screen, int delay_goal,
+    const char *prend_filename,
     const char *stateset_filename, const char *actor_filename,
     const char *hexmap_filename, const char *submap_filename,
     const char *location_name,

@@ -122,6 +122,8 @@ void print_help(FILE *file){
         "   -h   --help           Shows this message\n"
         "   -F                    Fullscreen mode\n"
         "   -FD                   Software simulated fullscreen mode\n"
+        "   --accel               Use accelerated rendering\n"
+        "   --vsync               Use vsync\n"
         "   -f            FILE    Prismelrenderer filename (default: %s)\n"
         "   -a   --anim   FILE    Stateset filename (default: %s)\n"
         "   -m   --map    FILE    Map filename (default: NULL)\n"
@@ -160,6 +162,7 @@ void print_help(FILE *file){
 /* Global variables largely just to make them easier to use after
 calling emscripten_exit_with_live_runtime */
 Uint32 window_flags = SDL_WINDOW_SHOWN;
+Uint32 renderer_flags = 0;
 const char *prend_filename = NULL;
 const char *stateset_filename = NULL;
 const char *actor_filename = NULL;
@@ -177,14 +180,13 @@ const char *load_recording_filename = NULL;
 const char *save_recording_filename = NULL;
 bool have_audio = true;
 bool load_save_slot = false;
-SDL_Window *window = NULL;
-SDL_Renderer *renderer = NULL;
+screen_t screen;
 
 static test_app_t *get_test_app(){
     test_app_t *app = calloc(1, sizeof(*app));
     if(!app){ perror("calloc"); return NULL; }
-    int err = test_app_init(app, SCW, SCH, delay_goal,
-        window, renderer, prend_filename,
+    int err = test_app_init(app, &screen, delay_goal,
+        prend_filename,
         stateset_filename, actor_filename,
         hexmap_filename, submap_filename,
         location_name,
@@ -219,6 +221,10 @@ int main(int n_args, char *args[]){
             window_flags |= SDL_WINDOW_FULLSCREEN;
         }else if(!strcmp(arg, "-FD")){
             window_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+        }else if(!strcmp(arg, "--accel")){
+            renderer_flags |= SDL_RENDERER_ACCELERATED;
+        }else if(!strcmp(arg, "--vsync")){
+            renderer_flags |= SDL_RENDERER_PRESENTVSYNC;
         }else if(!strcmp(arg, "-f")){
             arg_i++;
             if(arg_i >= n_args){
@@ -374,63 +380,47 @@ int main(int n_args, char *args[]){
             have_audio = false;
         }
 
-        window = SDL_CreateWindow("Spider Game",
-            SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-            SCW, SCH, window_flags);
+        err = screen_init_gui(&screen, SCW, SCH, "Spider Game",
+            window_flags, renderer_flags);
+        if(err)return err;
 
-        if(!window){
-            err = 1;
-            fprintf(stderr, "SDL_CreateWindow error: %s\n",
-                SDL_GetError());
-        }else{
-            renderer = SDL_CreateRenderer(window, -1,
-                SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-
-            if(!renderer){
-                err = 1;
-                fprintf(stderr, "SDL_CreateRenderer error: %s\n",
-                    SDL_GetError());
-            }else{
 #ifdef __EMSCRIPTEN__
-                /* Load save files from IndexedDB */
-                emccdemo_initial_syncfs();
+        /* Load save files from IndexedDB */
+        emccdemo_initial_syncfs();
 
-                /* Now kill the current call stack!!!
-                Why? Because emccdemo_initial_syncfs has kicked off an
-                async JS operation which, when it completes, will set
-                current thread's "main loop" to emccdemo_step.
-                So the current call to main() never returns.
-                Hooray, it's callback hell with C *and* Javascript! */
-                emscripten_exit_with_live_runtime();
+        /* Now kill the current call stack!!!
+        Why? Because emccdemo_initial_syncfs has kicked off an
+        async JS operation which, when it completes, will set
+        current thread's "main loop" to emccdemo_step.
+        So the current call to main() never returns.
+        Hooray, it's callback hell with C *and* Javascript! */
+        emscripten_exit_with_live_runtime();
 #endif
-                test_app_t *app = get_test_app();
-                if(app == NULL){
-                    err = 1;
-                    fprintf(stderr, "Couldn't init test app\n");
-                }else{
-                    if(have_audio){
-                        /* Open an audio device */
-                        SDL_AudioSpec want_spec, spec;
-                        err = hexgame_audio_sdl_open_device(
-                            &app->hexgame.audio_data,
-                            &want_spec, &spec, &app->audio_id
-                        );
-                        if(!err){
-                            /* Start playing sound */
-                            SDL_PauseAudioDevice(app->audio_id, 0);
-                        }
-                    }
-                    if(!err){
-                        err = test_app_mainloop(app);
-                    }
-                    fprintf(stderr, "Cleaning up...\n");
-                    SDL_CloseAudioDevice(app->audio_id);
-                    test_app_cleanup(app);
-                    free(app);
+
+        test_app_t *app = get_test_app();
+        if(app == NULL){
+            err = 1;
+            fprintf(stderr, "Couldn't init test app\n");
+        }else{
+            if(have_audio){
+                /* Open an audio device */
+                SDL_AudioSpec want_spec, spec;
+                err = hexgame_audio_sdl_open_device(
+                    &app->hexgame.audio_data,
+                    &want_spec, &spec, &app->audio_id
+                );
+                if(!err){
+                    /* Start playing sound */
+                    SDL_PauseAudioDevice(app->audio_id, 0);
                 }
-                SDL_DestroyRenderer(renderer);
             }
-            SDL_DestroyWindow(window);
+            if(!err){
+                err = test_app_mainloop(app);
+            }
+            fprintf(stderr, "Cleaning up...\n");
+            SDL_CloseAudioDevice(app->audio_id);
+            test_app_cleanup(app);
+            free(app);
         }
         SDL_Quit();
     }

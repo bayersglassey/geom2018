@@ -9,7 +9,7 @@
 int test_app_render_editor(test_app_t *app){
     int err;
 
-    RET_IF_SDL_NZ(SDL_FillRect(app->surface, NULL, 0));
+    RET_IF_SDL_NZ(SDL_FillRect(app->screen->surface, NULL, 0));
 
     int line_y = 0;
 

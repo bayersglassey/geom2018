@@ -83,7 +83,7 @@ int test_app_render_game(test_app_t *app){
     player_t *player = hexgame_get_player_by_keymap(game, HEXGAME_PLAYER_0);
     body_t *body = player? player->body: NULL;
 
-    RET_IF_SDL_NZ(SDL_FillRect(app->surface, NULL, 255));
+    RET_IF_SDL_NZ(SDL_FillRect(app->screen->surface, NULL, 255));
 
     if(app->camera_mapper){
         /* camera->mapper is set to NULL at start of each step, it's up
@@ -94,8 +94,8 @@ int test_app_render_game(test_app_t *app){
     /* NOTE/HACK: camera_render takes care of rendering the minimap if
     minimap_state->zoom is truthy */
     err = camera_render(app->camera,
-        app->surface,
-        app->sdl_palette, app->scw/2, app->sch/2,
+        app->screen->surface,
+        app->screen->palette, app->screen->w/2, app->screen->h/2,
         1 /* app->zoom */);
     if(err)return err;
 

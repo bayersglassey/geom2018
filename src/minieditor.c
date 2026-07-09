@@ -14,20 +14,15 @@ void minieditor_cleanup(minieditor_t *editor){
         label_mapping_cleanup);
 }
 
-void minieditor_init(minieditor_t *editor,
-    SDL_Surface *surface,
-    SDL_Texture *texture,
-    SDL_Palette *sdl_palette,
+void minieditor_init(minieditor_t *editor, screen_t *screen,
     prismelmapper_t *mapper,
     palettemapper_t *palmapper,
     const char *prend_filename,
     font_t *font, geomfont_t *geomfont,
     prismelrenderer_t *prend,
-    int delay_goal, int scw, int sch
+    int delay_goal
 ){
-    editor->surface = surface;
-    editor->texture = texture;
-    editor->sdl_palette = sdl_palette;
+    editor->screen = screen;
     editor->mapper = mapper;
     editor->palmapper = palmapper;
     editor->prend_filename = prend_filename;
@@ -40,8 +35,6 @@ void minieditor_init(minieditor_t *editor,
     editor->cur_rgraph_i = 0;
     editor->frame_i = 0;
     editor->delay_goal = delay_goal;
-    editor->scw = scw;
-    editor->sch = sch;
     editor->x0 = 0;
     editor->y0 = 0;
     editor->rot = 0;
@@ -94,7 +87,7 @@ static void minieditor_print_controls(minieditor_t *editor,
     FILE *file, int *line_y_ptr
 ){
     /* If file is provided, fprintf to it.
-    Otherwise, "print" to editor->surface.
+    Otherwise, "print" to editor->screen->surface.
     NOTE: line_y_ptr is optional. */
 
     int line_y = line_y_ptr? *line_y_ptr: 0;
@@ -138,10 +131,10 @@ int minieditor_render(minieditor_t *editor, int *line_y_ptr){
     rendergraph_t *rgraph = minieditor_get_rgraph(editor);
     if(rgraph){
         /* Render rgraph */
-        int x0 = editor->scw / 2 + editor->x0;
-        int y0 = editor->sch / 2 + editor->y0;
-        err = rendergraph_render_with_labels(rgraph, editor->surface,
-            editor->sdl_palette, editor->prend, x0, y0, editor->zoom,
+        int x0 = editor->screen->w / 2 + editor->x0;
+        int y0 = editor->screen->h / 2 + editor->y0;
+        err = rendergraph_render_with_labels(rgraph, editor->screen->surface,
+            editor->screen->palette, editor->prend, x0, y0, editor->zoom,
             (vec_t){0}, editor->rot, editor->flip, editor->frame_i,
             NULL, NULL, /* mapper and palmapper */
             editor->label_mappings_len, editor->label_mappings);
@@ -265,7 +258,7 @@ int minieditor_vprintf(minieditor_t *editor, int col, int row,
 ){
     geomfont_blitter_t blitter;
     geomfont_blitter_render_init(&blitter, editor->geomfont,
-        editor->surface, editor->sdl_palette,
+        editor->screen->surface, editor->screen->palette,
         0, 0, col, row, 1, NULL, NULL);
     return generic_vprintf(&geomfont_blitter_putc_callback, &blitter,
         msg, vlist);
