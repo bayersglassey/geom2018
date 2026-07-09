@@ -38,7 +38,6 @@ typedef struct label_mapping_def {
 typedef struct options {
     bool quiet;
     Uint32 window_flags;
-    Uint32 renderer_flags;
     const char *prend_filename;
     const char *rgraph_name;
     const char *image_filename;
@@ -69,7 +68,6 @@ static void options_cleanup(options_t *opts){
 
 static void options_init(options_t *opts){
     opts->window_flags = SDL_WINDOW_SHOWN;
-    opts->renderer_flags = 0;
     opts->prend_filename = DEFAULT_PREND_FILENAME;
     opts->palette_filename = DEFAULT_PALETTE_FILENAME;
     opts->mapper_name = NULL;
@@ -93,8 +91,6 @@ static void print_help(FILE *file){
         "  -h | --help      Print this message and exit\n"
         "  -F               Fullscreen\n"
         "  -FD              Fullscreen Desktop\n"
-        "  --accel          Use accelerated rendering\n"
-        "  --vsync          Use vsync\n"
         "  -q               Quiet mode (less output to stderr)\n"
         "  -f  FILENAME     Load prend data (default: " DEFAULT_PREND_FILENAME ")\n"
         "  -if FILENAME     Where to save screenshot (default: " DEFAULT_IMAGE_FILENAME ")\n"
@@ -149,10 +145,6 @@ static int parse_options(options_t *opts,
             opts->window_flags |= SDL_WINDOW_FULLSCREEN;
         }else if(!strcmp(arg, "-FD")){
             opts->window_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-        }else if(!strcmp(arg, "--accel")){
-            opts->renderer_flags |= SDL_RENDERER_ACCELERATED;
-        }else if(!strcmp(arg, "--vsync")){
-            opts->renderer_flags |= SDL_RENDERER_PRESENTVSYNC;
         }else if(!strcmp(arg, "-q")){
             opts->quiet = true;
         }else if(!strcmp(arg, "-f")){
@@ -627,7 +619,7 @@ int main_gui(options_t *opts){
     }else{
         screen_t screen;
         err = screen_init_gui(&screen, opts->scw, opts->sch, window_title,
-            opts->window_flags, opts->renderer_flags);
+            opts->window_flags);
         if(err)return err;
 
         err = _init_and_mainloop(opts, &screen);

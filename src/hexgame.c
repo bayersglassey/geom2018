@@ -377,9 +377,6 @@ static int _camera_render(camera_t *camera,
 ){
     int err;
 
-    err = update_sdl_palette(pal, camera->colors);
-    if(err)return err;
-
     hexgame_t *game = camera->game;
     hexmap_t *map = camera->map;
 

@@ -83,7 +83,14 @@ int test_app_render_game(test_app_t *app){
     player_t *player = hexgame_get_player_by_keymap(game, HEXGAME_PLAYER_0);
     body_t *body = player? player->body: NULL;
 
-    RET_IF_SDL_NZ(SDL_FillRect(app->screen->surface, NULL, 255));
+    /* NOTE: make sure to update the palette *before* calling SDL_FillRect
+    etc below! */
+    err = update_sdl_palette(app->screen->palette, app->camera->colors);
+    if(err)return err;
+
+    /* Fill the background with a solid colour */
+    Uint32 bgcolor = screen_get_palette_color(app->screen, 255);
+    RET_IF_SDL_NZ(SDL_FillRect(app->screen->surface, NULL, bgcolor));
 
     if(app->camera_mapper){
         /* camera->mapper is set to NULL at start of each step, it's up

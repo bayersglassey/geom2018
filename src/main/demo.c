@@ -122,8 +122,6 @@ void print_help(FILE *file){
         "   -h   --help           Shows this message\n"
         "   -F                    Fullscreen mode\n"
         "   -FD                   Software simulated fullscreen mode\n"
-        "   --accel               Use accelerated rendering\n"
-        "   --vsync               Use vsync\n"
         "   -f            FILE    Prismelrenderer filename (default: %s)\n"
         "   -a   --anim   FILE    Stateset filename (default: %s)\n"
         "   -m   --map    FILE    Map filename (default: NULL)\n"
@@ -151,7 +149,7 @@ void print_help(FILE *file){
         "                         (where to save recording to, used by F9)\n"
         "   -rf --recording-filename FILE\n"
         "                         Equivalent to `-srf FILE -lrf FILE`\n"
-        "        --no-audio       Disable audio\n"
+        "        --audio          Enable audio\n"
         "        --actor FILE     Use the given actor, instead of a player\n"
         , DEFAULT_PREND_FILENAME, DEFAULT_STATESET_FILENAME, ENV_DEVEL,
         DEFAULT_DELAY_GOAL, DEFAULT_PLAYERS
@@ -162,7 +160,6 @@ void print_help(FILE *file){
 /* Global variables largely just to make them easier to use after
 calling emscripten_exit_with_live_runtime */
 Uint32 window_flags = SDL_WINDOW_SHOWN;
-Uint32 renderer_flags = 0;
 const char *prend_filename = NULL;
 const char *stateset_filename = NULL;
 const char *actor_filename = NULL;
@@ -178,7 +175,7 @@ int delay_goal = DEFAULT_DELAY_GOAL;
 int save_slot = 0;
 const char *load_recording_filename = NULL;
 const char *save_recording_filename = NULL;
-bool have_audio = true;
+bool have_audio = false;
 bool load_save_slot = false;
 screen_t screen;
 
@@ -221,10 +218,6 @@ int main(int n_args, char *args[]){
             window_flags |= SDL_WINDOW_FULLSCREEN;
         }else if(!strcmp(arg, "-FD")){
             window_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-        }else if(!strcmp(arg, "--accel")){
-            renderer_flags |= SDL_RENDERER_ACCELERATED;
-        }else if(!strcmp(arg, "--vsync")){
-            renderer_flags |= SDL_RENDERER_PRESENTVSYNC;
         }else if(!strcmp(arg, "-f")){
             arg_i++;
             if(arg_i >= n_args){
@@ -356,8 +349,8 @@ int main(int n_args, char *args[]){
             }
             load_recording_filename = args[arg_i];
             save_recording_filename = args[arg_i];
-        }else if(!strcmp(arg, "--no-audio")){
-            have_audio = false;
+        }else if(!strcmp(arg, "--audio")){
+            have_audio = true;
         }else{
             fprintf(stderr, "Unrecognized option: %s\n", arg);
             goto parse_failure;
@@ -380,8 +373,7 @@ int main(int n_args, char *args[]){
             have_audio = false;
         }
 
-        err = screen_init_gui(&screen, SCW, SCH, "Spider Game",
-            window_flags, renderer_flags);
+        err = screen_init_gui(&screen, SCW, SCH, "Spider Game", window_flags);
         if(err)return err;
 
 #ifdef __EMSCRIPTEN__
