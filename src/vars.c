@@ -212,7 +212,7 @@ int val_copy(val_t *val1, val_t *val2){
             break;
         case VAL_TYPE_STR: {
             if(val2->u.s.own_s){
-                char *own_s = strdup(val2->u.s.own_s);
+                char *own_s = str_dup(val2->u.s.own_s);
                 if(!own_s)return 1;
                 val_set_str(val1, own_s);
             }else{
@@ -404,9 +404,9 @@ var_t *vars_get(vars_t *vars, const char *key){
 var_t *vars_get_or_add(vars_t *vars, const char *key){
     var_t *var = vars_get(vars, key);
     if(!var){
-        char *new_key = strdup(key);
+        char *new_key = str_dup(key);
         if(new_key == NULL){
-            perror("strdup");
+            perror("str_dup");
             return NULL;
         }
         int err = vars_add(vars, new_key, &var);

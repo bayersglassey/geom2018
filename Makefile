@@ -78,7 +78,7 @@ bin/geomtest: src/main/geomtest.o $(OFILES)
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
-bin/stringstoretest: src/main/stringstoretest.o src/stringstore.o
+bin/stringstoretest: src/main/stringstoretest.o src/stringstore.o src/str_utils.o
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 

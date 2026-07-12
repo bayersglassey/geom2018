@@ -1461,7 +1461,7 @@ static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
                 token_type = FUS_LEXER_TOKEN_STR;
             }else{
                 /* lexer->token == "GET_SYM" */
-                token = strdup(val);
+                token = str_dup(val);
                 if(!token)return 1;
                 token_type = FUS_LEXER_TOKEN_SYM;
             }

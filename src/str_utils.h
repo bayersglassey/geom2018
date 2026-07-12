@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 bool streq(const char *s1, const char *s2);
-char *strdup(const char *s1);
+char *str_dup(const char *s1);
 char *strdupcat(const char *s1, const char *s2);
 size_t strnlen(const char *s, size_t maxlen);
 char *strndup(const char *s1, size_t len);

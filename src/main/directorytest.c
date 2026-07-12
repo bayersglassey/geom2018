@@ -84,7 +84,7 @@ fusnode_t *load_fusnode(const char *filename){
         perror("calloc fusnode");
         return NULL;
     }
-    fusnode->name = strdup(filename);
+    fusnode->name = str_dup(filename);
 
     err = parse_fusnode(fusnode, &lexer);
     if(err)return NULL;

@@ -33,7 +33,7 @@ int stringstore_tests(){
     const char *y1 = stringstore_get(store, "y");
     ASSERT(store->entries_len == 2)
 
-    char *z1 = strdup("z");
+    char *z1 = str_dup("z");
     ASSERT(z1 != NULL)
 
     const char *z2 = stringstore_get_donate(store, z1);

@@ -6,6 +6,7 @@
 #include "../vars.h"
 #include "../valexpr.h"
 #include "../var_utils.h"
+#include "../str_utils.h"
 
 
 #define ASSERT(COND) n_tests++; if(COND){ \
@@ -13,13 +14,6 @@
 }else { \
     n_fails++; \
     fprintf(stderr, "FAIL: " #COND "\n"); \
-}
-
-static char *strdup(const char *s1){
-    char *s2 = malloc(strlen(s1) + 1);
-    if(s2 == NULL)return NULL;
-    strcpy(s2, s1);
-    return s2;
 }
 
 static int parse_valexpr(valexpr_t *expr, const char *text){
@@ -147,7 +141,7 @@ int testrunner(int *n_tests_ptr, int *n_fails_ptr){
         ASSERT(!strcmp(vars_get_str(vars, "y"), "HAHA"))
         ASSERT(vars_get_bool(vars, "y"))
 
-        ASSERT(!vars_set_str(vars, "z", strdup("LAWL")))
+        ASSERT(!vars_set_str(vars, "z", str_dup("LAWL")))
         ASSERT(vars->vars_len == 3)
         ASSERT(!strcmp(vars_get_str(vars, "z"), "LAWL"))
 

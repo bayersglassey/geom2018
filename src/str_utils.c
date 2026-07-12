@@ -11,7 +11,10 @@ bool streq(const char *s1, const char *s2){
     return strcmp(s1, s2) == 0;
 }
 
-char *strdup(const char *s1){
+char *str_dup(const char *s1){
+    // NOTE: called str_dup instead of strdup because some compilation
+    // environments, e.g. Emscripten for me at the moment, have their own
+    // strdup definition which we would clash with
     size_t s1_len = strlen(s1);
     char *s2 = malloc(s1_len + 1);
     if(s2 == NULL)return NULL;
