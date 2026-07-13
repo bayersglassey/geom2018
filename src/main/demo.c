@@ -32,7 +32,6 @@ Uint32 tick0;
 
 /* "emccdemo_*" function prototypes */
 void emccdemo_initial_syncfs();
-void EMSCRIPTEN_KEEPALIVE emccdemo_syncfs();
 void EMSCRIPTEN_KEEPALIVE emccdemo_start();
 void emccdemo_step(void *arg);
 
@@ -49,21 +48,6 @@ EM_JS(void, emccdemo_initial_syncfs, (), {
             window._syncfs_broke = true;
         }
         ccall('emccdemo_start', 'v');
-    });
-})
-
-EM_JS(void, emccdemo_syncfs, (), {
-    console.log("Starting syncfs...");
-    FS.syncfs(false, function(err){
-        console.log("Syncfs finished.");
-        if(err){
-            console.error("There was an error in FS.syncfs.", err);
-            if(!window._syncfs_broke)alert(
-                "There was an error in FS.syncfs. " +
-                "Saved games may not persist between page refreshes! " +
-                "See the console for error details.");
-            window._syncfs_broke = true;
-        }
     });
 })
 

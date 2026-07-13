@@ -24,7 +24,21 @@ const char *save_slot_filenames[SAVE_SLOTS] = {
 
 
 #ifdef __EMSCRIPTEN__
-void emccdemo_syncfs();
+#include "../emscripten.h"
+EM_JS(void, emccdemo_syncfs, (), {
+    console.log("Starting syncfs...");
+    FS.syncfs(false, function(err){
+        console.log("Syncfs finished.");
+        if(err){
+            console.error("There was an error in FS.syncfs.", err);
+            if(!window._syncfs_broke)alert(
+                "There was an error in FS.syncfs. " +
+                "Saved games may not persist between page refreshes! " +
+                "See the console for error details.");
+            window._syncfs_broke = true;
+        }
+    });
+})
 #endif
 
 

@@ -12,11 +12,6 @@
 #include "write.h"
 
 
-#ifdef __EMSCRIPTEN__
-void emccdemo_syncfs();
-#endif
-
-
 void hexgame_savelocation_init(hexgame_savelocation_t *location){
     vec_zero(location->loc.pos);
     location->loc.rot = 0;
