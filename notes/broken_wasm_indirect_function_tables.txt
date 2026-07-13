@@ -1,0 +1,454 @@
+
+This is a backup of the www/ directory as it existed on http://depths.bayersglassey.com/
+in July 2026.
+That directory is the output of `./compile_www.sh release`.
+I literally downloaded the files via HTTP, because I don't have access to that server
+anymore, and those files aren't under source control!..
+I had last built them many months ago, probably a year or more, and on a different
+laptop.
+On my new laptop, I tried installing emscripten with `sudo apt install emscripten`,
+but the resulting www/ produced by `./compile_www.sh release` wasn't working.
+In particular, I was getting this error in the JS console:
+
+    main.js:271 Uncaught RuntimeError: function signature mismatch
+        at SDL_malloc (main.wasm:0x16127a)
+        at SDL_AddHintCallback (main.wasm:0x15b716)
+        at SDL_EventsInit (main.wasm:0x15498a)
+        at SDL_InitSubSystem (main.wasm:0xf4c16)
+        at SDL_Init (main.wasm:0xf50dd)
+        at main (main.wasm:0xf4950)
+        at main.js:1806:22
+        at callMain (main.js:41203:15)
+        at doRun (main.js:41290:23)
+        at main.js:41301:7
+
+...and I determined that all function pointers in the SDL library were broken.
+In particular, SDL_malloc looks like this:
+
+    void *SDL_malloc(size_t size)
+    {
+        void *mem;
+
+        if (!size) {
+            size = 1;
+        }
+
+        mem = s_mem.malloc_func(size);
+        if (mem) {
+            SDL_AtomicIncRef(&s_mem.num_allocations);
+        }
+        return mem;
+    }
+
+...and it's that `s_mem.malloc_func(size)` call which is failing.
+Its WASM looks like this:
+
+  (func $SDL_malloc (;1972;) (export "SDL_malloc") (param $var0 i32) (result i32)
+    block $label0
+      local.get $var0
+      i32.const 1
+      local.get $var0
+      select
+      global.get $__memory_base
+      i32.const 304060
+      i32.add
+      i32.load
+      call_indirect (param i32) (result i32)
+      local.tee $var0
+      i32.eqz
+      br_if $label0
+      global.get $__memory_base
+      i32.const 304060
+      i32.add
+      i32.const 16
+      i32.add
+      i32.const 1
+      call $SDL_AtomicAdd
+      drop
+    end $label0
+    local.get $var0
+  )
+
+...and that `call_indirect` is the thing which is failing.
+The value on top of the stack, i.e. the function pointer, is 433.
+The wasm module has one table, `$env.__indirect_function_table`, whose entry
+433 is `$SDL_LogOutput()`.
+The correct function is pointed to by entry 434: `$dlmalloc()`.
+So there's some kind of off-by-one error going on...
+
+I added `-c` to the `emcc` call in comple_www.sh, which causes it to output
+.o files.
+The SDL_malloc.c.o file's "indirect function table" looks correct:
+
+    $ wasm-objdump -x wasm-build/SDL_malloc.c.o
+    ...etc...
+    Import[10]:
+     ...etc...
+     - table[0] type=funcref initial=4 <- env.__indirect_function_table
+     ...etc...
+    Elem[1]:
+     - segment[0] flags=0 table=0 count=4 - init i32=1
+      - elem[1] = ref.func:3 <env.malloc>
+      - elem[2] = ref.func:4 <env.calloc>
+      - elem[3] = ref.func:5 <env.realloc>
+      - elem[4] = ref.func:6 <env.free>
+    ...etc...
+
+...specifically, those 4 indirect function table entries correspond to the
+4 function pointers being taken here (real_malloc, real_calloc, real_realloc,
+real_free):
+
+    #ifdef HAVE_MALLOC
+    static void* SDLCALL real_malloc(size_t s) { return malloc(s); }
+    static void* SDLCALL real_calloc(size_t n, size_t s) { return calloc(n, s); }
+    static void* SDLCALL real_realloc(void *p, size_t s) { return realloc(p,s); }
+    static void  SDLCALL real_free(void *p) { free(p); }
+    #else
+    #define real_malloc dlmalloc
+    #define real_calloc dlcalloc
+    #define real_realloc dlrealloc
+    #define real_free dlfree
+    #endif
+
+    /* Memory functions used by SDL that can be replaced by the application */
+    static struct
+    {
+        SDL_malloc_func malloc_func;
+        SDL_calloc_func calloc_func;
+        SDL_realloc_func realloc_func;
+        SDL_free_func free_func;
+        SDL_atomic_t num_allocations;
+    } s_mem = {
+        real_malloc, real_calloc, real_realloc, real_free, { 0 }
+    };
+
+...although, I'm confused about the table elements saying e.g. `env.malloc`
+while the code contains e.g. `dlmalloc` (which is also what I see in the JS
+console, in the wasm module's table).
+OH! Actually I think I see why, maybe: in the output of
+`wasm-objdump -x www-depths/main.wasm`, there is:
+
+    Export[16]:
+     - memory[0] -> "memory"
+     - func[240] <__wasm_call_ctors> -> "__wasm_call_ctors"
+     - func[1898] <dlfree> -> "free"
+     - func[1897] <dlmalloc> -> "malloc"
+    ...etc...
+
+...so maybe that Export section connects "dlmalloc" to "env.malloc"?..
+
+Anyway, putting aside those individual .o files, let's look at the main.wasm
+file which is generated when emcc links everything together.
+NOTE: www-depths/main.wasm is the old, *working* file, which I got from
+http://depths.bayersglassey.com/, while www/main.wasm is the new, *broken*
+file, which we are trying to debug.
+
+    $ wasm-objdump -x www-depths/main.wasm | grep 'table\[0\]'
+     - table[0] type=funcref initial=665 max=665
+     - table[0] -> "__indirect_function_table"
+    $ wasm-objdump -x www-depths/main.wasm | grep -B2 -A10 'segment\[0\]'
+     - func[1925] <legalstub$dynCall_ji> -> "dynCall_ji"
+    Elem[1]:
+     - segment[0] flags=0 table=0 count=664 - init i32=1
+      - elem[1] = ref.func:279 <console_putc_callback>
+      - elem[2] = ref.func:311 <geomfont_blitter_putc_callback>
+      - elem[3] = ref.func:365 <_audio_callback>
+      - elem[4] = ref.func:366 <hexgame_song_symphony>
+      - elem[5] = ref.func:367 <hexgame_song_house>
+      - elem[6] = ref.func:368 <hexgame_song_title>
+      - elem[7] = ref.func:369 <hexgame_song_intertime_dubstep>
+      - elem[8] = ref.func:377 <body_vars_callback>
+      - elem[9] = ref.func:504 <tileset_get_rgraph_vert>
+      - elem[10] = ref.func:505 <hexcollmap_tile_get_vert>
+
+    $ wasm-objdump -x www/main.wasm | grep 'table\[0\]'
+     - table[0] type=funcref initial=563 <- env.__indirect_function_table
+    $ wasm-objdump -x www/main.wasm | grep -B2 -A10 'segment\[0\]'
+     - start function: 150 <__wasm_apply_global_relocs>
+    Elem[1]:
+     - segment[0] flags=0 table=0 count=563 - init global=2 <__table_base>
+      - elem[0] = ref.func:215 <console_putc_callback>
+      - elem[1] = ref.func:282 <geomfont_blitter_putc_callback>
+      - elem[2] = ref.func:352 <_audio_callback>
+      - elem[3] = ref.func:353 <hexgame_song_symphony>
+      - elem[4] = ref.func:354 <hexgame_song_house>
+      - elem[5] = ref.func:355 <hexgame_song_title>
+      - elem[6] = ref.func:356 <hexgame_song_intertime_dubstep>
+      - elem[7] = ref.func:364 <body_vars_callback>
+      - elem[8] = ref.func:513 <tileset_get_rgraph_vert>
+      - elem[9] = ref.func:514 <hexcollmap_tile_get_vert>
+
+HEY!.. they are indeed off-by-one!.. console_putc_callback was elem[1] before,
+but now it's elem[0]!..
+And I believe elem[0] is wrong, because the 0th entry of the indirect function
+table corresponds to a function pointer value of 0, i.e. NULL.
+
+And also, entry 433 in the new table is dlmalloc, which is correct:
+
+    $ wasm-objdump -x www/main.wasm | grep "elem.*dlmalloc"
+      - elem[433] = ref.func:4597 <dlmalloc>
+
+...except that I'll betcha the entire table is indeed being shifted down by
+one, to allow entry 0 to be the "NULL function pointer"!..
+
+Let's look further into how each wasm file is declaring its table:
+
+    NOTE: the following output is snipped, leaving only lines of interest!
+
+    $ wasm-objdump -x www-depths/main.wasm
+    Table[1]:
+     - table[0] type=funcref initial=665 max=665
+    Export[16]:
+     - table[0] -> "__indirect_function_table"
+    Elem[1]:
+     - segment[0] flags=0 table=0 count=664 - init i32=1
+      - elem[1] = ref.func:279 <console_putc_callback>
+
+    $ wasm-objdump -x www/main.wasm
+    Import[435]:
+     - table[0] type=funcref initial=573 <- env.__indirect_function_table
+    Elem[1]:
+     - segment[0] flags=0 table=0 count=573 - init global=2 <__table_base>
+      - elem[0] = ref.func:222 <console_putc_callback>
+
+WHOAH!.. in the old wasm, we were exporting table[0] as __indirect_function_table,
+while in the new wasm, we're importing env.__indirect_function_table as table[0]!..
+Is that right?.. so if we're importing it, who's exporting it?!..
+I think maybe www/main.js is:
+
+    // include: runtime_init_table.js
+    // In RELOCATABLE mode we create the table in JS.
+    var wasmTable = new WebAssembly.Table({
+      'initial': 574,
+      'element': 'anyfunc'
+    });
+
+    var asmLibraryArg = {
+      ...etc...
+      "__indirect_function_table": wasmTable,
+      ...etc...
+    };
+
+OMFG whereas in www-depths/main.js, there's:
+
+    // include: runtime_init_table.js
+    // In regular non-RELOCATABLE mode the table is exported
+    // from the wasm module and this will be assigned once
+    // the exports are available.
+    var wasmTable;
+
+    function createWasm() {
+      ...etc...
+      function receiveInstance(instance, module) {
+        ...etc...
+        wasmTable = Module['asm']['__indirect_function_table'];
+
+HEYYYY so let's try passing `-s RELOCATABLE=0` to emcc?..
+Didn't work. I'm still seeing main.js claiming it's in RELOCATABLE mode.
+I had a look at `which emcc`, and it's a Python script, which runs an emcc.py
+somewhere on my computer.
+And in emcc.py... there is this!
+
+  if settings.MAIN_MODULE or settings.SIDE_MODULE:
+    settings.RELOCATABLE = 1
+
+Crazy, so this is all my fault for passing `-s MAIN_MODULE=1` to emcc in
+compile_www.sh.
+Which I had to add, or else main.js wouldn't call my main function.
+So... now what?
+
+Started looking through the emscripten stuff on my machine (i.e.
+/usr/share/emscripten), and found this description of MAIN_MODULE in
+src/settings.js:
+
+    // A main module is a file compiled in a way that allows us to link it to
+    // a side module at runtime.
+    //  1: Normal main module.
+    //  2: DCE'd main module. We eliminate dead code normally. If a side
+    //     module needs something from main, it is up to you to make sure
+    //     it is kept alive.
+    // [compile+link]
+    var MAIN_MODULE = 0;
+
+So okay, that's not what we want. We don't have a "side module".
+So what is it we actually wanted?..
+For main() to be called for us, probably via callMain().
+That's what the old wasm file was doing, and the new one wasn't, which was
+why I tried using MAIN_MODULE in the first place.
+
+In src/postamble.js, I see:
+
+    #if HAS_MAIN
+    function callMain(args) {
+
+    ...etc...
+
+    #if HAS_MAIN
+    // shouldRunNow refers to calling main(), not run().
+    #if INVOKE_RUN
+    var shouldRunNow = true;
+    #else
+    var shouldRunNow = false;
+    #endif
+
+    ...etc...
+
+    #if HAS_MAIN
+        if (shouldRunNow) callMain(args);
+
+So looks like HAS_MAIN and INVOKE_RUN are the things we actually care about.
+HAS_MAIN is set in emscripten.py, in update_settings_glue():
+
+    settings.HAS_MAIN = settings.MAIN_MODULE or settings.STANDALONE_WASM or 'main' in settings.WASM_EXPORTS
+
+...and INVOKE_RUN is apparently on by default, see src/settings.js:
+
+    // Whether we will run the main() function. Disable if you embed the generated
+    // code in your own, and will call main() yourself at the right time (which you
+    // can do with Module.callMain(), with an optional parameter of commandline args).
+    // [link]
+    var INVOKE_RUN = 1;
+
+So... is STANDALONE_WASM what we want?.. in src/settings.js:
+
+    // STANDALONE_WASM indicates that we want to emit a wasm file that can run
+    // without JavaScript. The file will use standard APIs such as wasi as much as
+    // possible to achieve that.
+    ...etc...
+    // We may still emit JS with this flag, but the JS should only be a convenient
+    // way to run the wasm on the Web or in Node.js, and you can run the wasm by
+    // itself without that JS (again, unless you use APIs for which there is no
+    // non-JS alternative) in a wasm runtime like wasmer or wasmtime.
+    ...etc...
+    var STANDALONE_WASM = 0;
+
+Heyyy, things are almost working, except not quite! In JS console:
+
+    Starting initial syncfs...
+    Initial syncfs finished.
+    Creating test app...
+    fopen: Operation not permitted
+    Could not open file: data/pal1.fus
+    Couldn't init test app
+
+...what's up with that "Operation not permitted"?..
+
+"wasm_standalone fopen operation not permitted"
+https://github.com/emscripten-core/emscripten/issues/12094
+
+    I think this is a current limitation, see
+    emscripten/system/lib/standalone/standalone.c
+     // open(), etc. - we just support the standard streams, with no 
+     // corner case error checking; everything else is not permitted. 
+     // TODO: full file support for WASI, or an option for it 
+
+...sooooo maybe STANDALONE_WASM isn't what we want?
+So then, how do we make it so that `'main' in settings.WASM_EXPORTS`?..
+WASM_EXPORTS is set in emscripten.py, in update_settings_glue():
+
+    settings.WASM_EXPORTS = metadata['exports'] + list(metadata['namedGlobals'].keys())
+
+I tried passing `-s EXPORTED_FUNCTIONS=main`, but then I get:
+
+    emcc: error: undefined exported symbol: "main" [-Wundefined] [-Werror]
+
+Man, wttttttttf.
+Okay, let's dig in further...
+
+    EMCC_DEBUG=1 ./compile_www.sh 2>build.log
+
+With EMCC_DEBUG=1, we get more debug output, but *also* the intermediate
+files (.o files, etc) get preserved:
+
+    $ ls /tmp/emscripten_temp/
+    anim_0.o                              mapeditor_31.o
+    bounds_1.o                            minieditor_32.o
+    console_2.o                           prismelrenderer_33.o
+    demo_64.o                             prismelrenderer_parse_34.o
+    directory_3.o                         rawinput_35.o
+    directory_shell_4.o                   rendergraph_36.o
+    emcc-0-base.wasm                      save_slots_37.o
+    emcc-1-wasm-emscripten-finalize.wasm  screen_38.o
+    emcc-2-post_finalize.wasm             sdlfont_39.o
+    emscripten.lock                       sdl_util_40.o
+    file_utils_5.o                        stringstore_41.o
+    font_6.o                              str_utils_42.o
+    frozen_string_7.o                     test_app_43.o
+    generic_printf_8.o                    test_app_commands_44.o
+    geom_9.o                              test_app_console_45.o
+    geomfont_10.o                         test_app_editor_46.o
+    geom_lexer_utils_11.o                 test_app_game_47.o
+    hexbox_12.o                           test_app_list_50.o
+    hexcollmap_13.o                       test_app_list_actors_48.o
+    hexcollmap_parse_14.o                 test_app_list_bodies_49.o
+    hexcollmap_write_15.o                 test_app_list_choices_51.o
+    hexgame_19.o                          test_app_list_maps_52.o
+    hexgame_actor_16.o                    test_app_list_players_53.o
+    hexgame_audio_17.o                    test_app_list_recording_54.o
+    hexgame_body_18.o                     test_app_list_submaps_55.o
+    hexgame_location_20.o                 test_app_list_utils_56.o
+    hexgame_player_21.o                   test_app_menu_57.o
+    hexgame_recording_22.o                tmp0t0ntl__.undefined
+    hexgame_savelocation_23.o             tmp3dk64ipb.json
+    hexgame_state_24.o                    tmpe8xof5pf.json
+    hexgame_vars_props_25.o               util_58.o
+    hexmap_26.o                           valexpr_59.o
+    hexmap_submap_create_rgraph_27.o      vars_60.o
+    hexpicture_28.o                       var_utils_61.o
+    hexspace_29.o                         vec4_62.o
+    lexer_30.o                            write_63.o
+
+Looks like the emcc-*.wasm files are what end up being main.wasm?..
+Anyway, let's look for our main() function, where'd it go?!
+
+    $ wasm-objdump -x demo_64.o | grep main
+     - func[2] sig=4 <env.emscripten_set_main_loop_arg> <- env.emscripten_set_main_loop_arg
+     - func[6] sig=5 <env.test_app_mainloop_step> <- env.test_app_mainloop_step
+     - func[27] sig=6 <__main_argc_argv>
+     - func[27] size=6964 <__main_argc_argv>
+      - 00001eb: 5374 6172 7469 6e67 206d 6169 6e20 6c6f  Starting main lo
+       - 11: F <env.emscripten_set_main_loop_arg> func=2 [ undefined binding=global vis=default ]
+       - 18: F <env.test_app_mainloop_step> func=6 [ undefined binding=global vis=default ]
+       - 25: F <__main_argc_argv> func=27 [ binding=global vis=default ]
+       - R_WASM_FUNCTION_INDEX_LEB offset=0x000110(file=0x0003a8) symbol=11 <env.emscripten_set_main_loop_arg>
+       - R_WASM_FUNCTION_INDEX_LEB offset=0x000523(file=0x0007bb) symbol=18 <env.test_app_mainloop_step>
+       - R_WASM_FUNCTION_OFFSET_I32 offset=0x000b4d(file=0x00b7c2) symbol=25 <__main_argc_argv>
+       - R_WASM_FUNCTION_OFFSET_I32 offset=0x000b96(file=0x00b80b) symbol=25 <__main_argc_argv>+0xbf
+       - R_WASM_FUNCTION_OFFSET_I32 offset=0x000bae(file=0x00b823) symbol=25 <__main_argc_argv>+0x100
+       - R_WASM_FUNCTION_OFFSET_I32 offset=0x000bcd(file=0x00b842) symbol=25 <__main_argc_argv>+0x183f
+       - R_WASM_FUNCTION_OFFSET_I32 offset=0x000bd2(file=0x00b847) symbol=25 <__main_argc_argv>+0xe63
+       - R_WASM_FUNCTION_OFFSET_I32 offset=0x000beb(file=0x00b860) symbol=25 <__main_argc_argv>+0x118c
+       - R_WASM_FUNCTION_OFFSET_I32 offset=0x000018(file=0x00c5b6) symbol=25 <__main_argc_argv>
+       - R_WASM_FUNCTION_OFFSET_I32 offset=0x00001c(file=0x00c5ba) symbol=25 <__main_argc_argv>+0x1b34
+       - R_WASM_FUNCTION_OFFSET_I32 offset=0x0004ef(file=0x00cad6) symbol=25 <__main_argc_argv>
+
+Cool, so it's truly not there.
+So... is it up to me to tell emcc not to treat it as "dead code" or whatever
+tf is going on here?
+
+LET'S CUT THE GORDIAN KNOT and try to install latest emscripten instead of
+whatever we got from apt.
+
+    $ emcc --version
+    emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.6 ()
+    Copyright (C) 2014 the Emscripten authors (see AUTHORS.txt)
+    This is free and open source software under the MIT license.
+    There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    $ ./emsdk list
+    The *recommended* precompiled SDK download is 6.0.3 (9074aa513b501925adb1361e208932ad32a29a5f).
+    To install/activate it use:
+             latest
+    This is equivalent to installing/activating:
+             6.0.3             
+
+Cool, so let's upgrade from 2014 to 2026, yeah?
+
+OMFG EVERYTHING IS ALMOST WORKING NOW.
+Maaaaan Emscripten is janky, dude.
+What's now not working is:
+
+    Tried to load a map which wasn't declared as a worldmap: (null)
+    emccdemo_step: Exiting with error: 2
+
+So, the worldmap name is NULL?.. that's wacky.
