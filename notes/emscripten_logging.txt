@@ -1,0 +1,18 @@
+
+How do we log C stuff with stack trace from Emscripten?..
+Like this!
+At top of file:
+
+    #ifdef __EMSCRIPTEN__
+    #include "../emscripten.h"
+    #endif
+
+...and then, later:
+
+    #ifdef __EMSCRIPTEN__
+    emscripten_log(EM_LOG_CONSOLE | EM_LOG_C_STACK, "WTF: %s\n", some_string);
+    #endif
+
+See also:
+* emscripten_log: https://emscripten.org/docs/api_reference/emscripten.h.html#id8
+* EM_LOG_CONSOLE, EM_LOG_C_STACK, etc: https://emscripten.org/docs/api_reference/emscripten.h.html#logging-utilities
