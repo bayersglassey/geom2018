@@ -1,0 +1,17 @@
+
+shapes:
+
+    "_dripper":
+        prismels:
+            : "tri" (0 0 0 0)  0 f eval(1 + 1)
+            : "tri" (1 0 0 0)  0 f eval(1 + 9)
+            : "tri" (0 0 1 0)  0 f eval(1 + 9)
+            : "tri" (1 0 0 0)  2 f eval(1 + 7)
+
+    "dripper":
+        animation: cycle 4
+        shapes:
+            : "_dripper" ( 0 2 3 0) 6 f  1 ( 0 1)
+            : "_dripper" ( 0 2 1 0) 0 f  0 ( 1 1)
+            : "_dripper" ( 2 2 3 0) 6 f  1 ( 2 1)
+            : "_dripper" ( 2 2 1 0) 0 f  0 ( 3 1)

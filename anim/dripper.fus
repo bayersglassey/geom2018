@@ -1,0 +1,76 @@
+
+vars:
+    "age": 0
+    "max_age": 50
+
+state "rolling":
+    rgraph: "dripper"
+
+    "age"
+    if() then:
+        inc myvar("age")
+        continue
+
+    "die_of_age"
+    if:
+        exists myvar("max_age")
+        expr: >= myvar("age") myvar("max_age")
+    then:
+        remove
+
+    "step_up"
+    if:
+        coll: any yes
+            ;;        .
+            ;;       /
+            ;; (.)  .
+        coll: all no
+            ;;        .
+            ;;     \*
+            ;; (.)  .
+    then:
+        move: 1 0
+        rot: 1
+        goto delay: "rolling"
+
+    #"step_down"
+    #if:
+    #    coll: all yes
+    #        ;; (.)  +
+    #        ;;       \
+    #        ;;        +
+    #    coll: all no
+    #        ;;     \*/*
+    #        ;; (.)  . -
+    #        ;;        *
+    #then:
+    #    move: 1 0
+    #    rot: -1
+    #    goto delay: "rolling"
+
+    "step"
+    if:
+        coll: all no
+            ;;     \*/*
+            ;; (.)  .   .
+    then:
+        move: 1 0
+        goto delay: "rolling"
+
+    #"turn"
+    #if() then:
+    #    turn()
+    #    goto delay: "rolling"
+
+    "die_on_crash"
+    if() then:
+        remove
+        #goto delay: "explode"
+
+state "spawn":
+    if() then:
+        goto immediate: "rolling"
+
+state "explode":
+    rgraph: "dead_cycle"
+    if() then: remove

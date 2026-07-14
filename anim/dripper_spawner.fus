@@ -1,0 +1,24 @@
+
+vars:
+    "timer": 0
+    "max_age": 50
+    "timer_min": 60
+    "timer_max": 120
+
+state "initial":
+    if() then:
+        set myvar("timer"): randint myvar("timer_min") myvar("timer_max")
+        goto immediate: "ongoing"
+
+state "ongoing":
+
+    "spawn"
+    if: expr: <= myvar("timer") 0
+    then:
+        spawn: "anim/dripper.fus" "spawn" (0 0) 0 f do:
+            set yourvar("max_age"): myvar("max_age")
+        set myvar("timer"): randint myvar("timer_min") myvar("timer_max")
+
+    "timer"
+    if() then:
+        dec myvar("timer")
