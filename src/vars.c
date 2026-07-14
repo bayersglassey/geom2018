@@ -96,6 +96,23 @@ const char *val_type_name(int type){
 val_t *val_bool(bool b){
     return b? &val_true: &val_false;
 }
+val_t _val_static_int[VAL_STATIC_INT_SIZE];
+bool _val_static_int_initialized = false;
+static void _val_static_int_init(){
+    for(int i=0; i<VAL_STATIC_INT_SIZE; i++){
+        val_t *val = &_val_static_int[i];
+        val->type = VAL_TYPE_INT;
+        val->u.i = i + VAL_STATIC_INT_MIN;
+    }
+}
+val_t *val_static_int(int i){
+    if(i < VAL_STATIC_INT_MIN || i > VAL_STATIC_INT_MAX) return &val_null;
+    if(!_val_static_int_initialized){
+        _val_static_int_init();
+        _val_static_int_initialized = true;
+    }
+    return &_val_static_int[i - VAL_STATIC_INT_MIN];
+}
 val_t *val_safe(val_t *val){
     return val? val: &val_null;
 }
@@ -261,7 +278,7 @@ bool val_ne(val_t *val1, val_t *val2){
 bool val_lt(val_t *val1, val_t *val2){
     if(val1->type != val2->type)return false;
     switch(val1->type){
-        case VAL_TYPE_NULL: return false;
+        case VAL_TYPE_NULL: return false; // ! < null null
         case VAL_TYPE_BOOL: return val1->u.b < val2->u.b;
         case VAL_TYPE_INT: return val1->u.i < val2->u.i;
         case VAL_TYPE_STR: return super_strcmp(val1->u.s.s, val2->u.s.s) < 0;
@@ -272,7 +289,7 @@ bool val_lt(val_t *val1, val_t *val2){
 bool val_le(val_t *val1, val_t *val2){
     if(val1->type != val2->type)return false;
     switch(val1->type){
-        case VAL_TYPE_NULL: return true;
+        case VAL_TYPE_NULL: return true; // <= null null
         case VAL_TYPE_BOOL: return val1->u.b <= val2->u.b;
         case VAL_TYPE_INT: return val1->u.i <= val2->u.i;
         case VAL_TYPE_STR: return super_strcmp(val1->u.s.s, val2->u.s.s) <= 0;
@@ -283,7 +300,7 @@ bool val_le(val_t *val1, val_t *val2){
 bool val_gt(val_t *val1, val_t *val2){
     if(val1->type != val2->type)return false;
     switch(val1->type){
-        case VAL_TYPE_NULL: return false;
+        case VAL_TYPE_NULL: return false; // ! > null null
         case VAL_TYPE_BOOL: return val1->u.b > val2->u.b;
         case VAL_TYPE_INT: return val1->u.i > val2->u.i;
         case VAL_TYPE_STR: return super_strcmp(val1->u.s.s, val2->u.s.s) > 0;
@@ -294,7 +311,7 @@ bool val_gt(val_t *val1, val_t *val2){
 bool val_ge(val_t *val1, val_t *val2){
     if(val1->type != val2->type)return false;
     switch(val1->type){
-        case VAL_TYPE_NULL: return true;
+        case VAL_TYPE_NULL: return true; // > null null
         case VAL_TYPE_BOOL: return val1->u.b >= val2->u.b;
         case VAL_TYPE_INT: return val1->u.i >= val2->u.i;
         case VAL_TYPE_STR: return super_strcmp(val1->u.s.s, val2->u.s.s) >= 0;

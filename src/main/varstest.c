@@ -16,6 +16,18 @@
     fprintf(stderr, "FAIL: " #COND "\n"); \
 }
 
+#define ASSERT_EQ(T, X, Y) { \
+    T _x = (X), _y = (Y); \
+    n_tests++; \
+    if(_x == _y){ \
+        fprintf(stderr, "OK: " #X " == " #Y "\n"); \
+    }else { \
+        n_fails++; \
+        fprintf(stderr, "FAIL: " #X " == " #Y "\n"); \
+        fprintf(stderr, "  ...because %i != %i\n", _x, _y); \
+    }\
+}
+
 static int parse_valexpr(valexpr_t *expr, const char *text){
     int err;
     fus_lexer_t lexer;
@@ -377,6 +389,12 @@ int testrunner(int *n_tests_ptr, int *n_fails_ptr){
             err = parse_valexpr(expr, "! || F F");
             if(err)return err;
             ASSERT(valexpr_get_bool(expr, &context));
+            valexpr_cleanup(expr);
+
+            srand(0);
+            err = parse_valexpr(expr, "randint 2 4");
+            if(err)return err;
+            ASSERT_EQ(int, valexpr_get_int(expr, &context), 3);
             valexpr_cleanup(expr);
         }
 

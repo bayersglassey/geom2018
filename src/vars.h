@@ -35,7 +35,8 @@ typedef struct val {
                 Why do we do this?.. because currently, valexpr_eval doesn't
                 give you any way to manage the memory of the returned val:
                 it's assumed to be owned by something.
-                So it can't just create a fresh val of type VAL_TYPE_INT. */
+                So it can't just create a fresh val of type VAL_TYPE_INT.
+                See also: VAL_STATIC_INT_MIN, VAL_STATIC_INT_MAX */
         } a;
     } u;
 } val_t;
@@ -114,7 +115,12 @@ void val_init(val_t *val);
 void val_fprintf(val_t *val, FILE *file);
 const char *val_type_name(int type);
 
+#define VAL_STATIC_INT_MIN -1000
+#define VAL_STATIC_INT_MAX 1000
+#define VAL_STATIC_INT_SIZE (VAL_STATIC_INT_MAX - VAL_STATIC_INT_MIN)
+
 val_t *val_bool(bool b);
+val_t *val_static_int(int i);
 val_t *val_safe(val_t *val);
 
 bool val_get_bool(val_t *val);

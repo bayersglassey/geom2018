@@ -8,6 +8,7 @@
 #include "vars.h"
 #include "var_utils.h"
 #include "valexpr.h"
+#include "util.h"
 
 
 
@@ -209,6 +210,7 @@ int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer){
     else if(GOT("!")){ type = VALEXPR_TYPE_UNOP; op = VALEXPR_OP_NOT; }
     else if(GOT("len")){ type = VALEXPR_TYPE_UNOP; op = VALEXPR_OP_LEN; }
     else if(GOT("get")){ type = VALEXPR_TYPE_BINOP; op = VALEXPR_OP_GET; }
+    else if(GOT("randint")){ type = VALEXPR_TYPE_BINOP; op = VALEXPR_OP_RANDINT; }
     else type =
         GOT("yourvar")? VALEXPR_TYPE_YOURVAR:
         GOT("mapvar")? VALEXPR_TYPE_MAPVAR:
@@ -474,6 +476,17 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
                 case VALEXPR_OP_LEN: result->val = val_get_arr_len_val(val1); break;
                 case VALEXPR_OP_GET: result->val = val2->type == VAL_TYPE_INT?
                     val_get_arr_item(val1, val2->u.i): NULL; break;
+                case VALEXPR_OP_RANDINT: {
+                    if (val1->type == VAL_TYPE_INT && val2->type == VAL_TYPE_INT) {
+                        int i = randint(val1->u.i, val2->u.i);
+                        /* NOTE: will be VAL_TYPE_NULL if i is outside the
+                        statically allocated range, see VAL_STATIC_INT_MIN,
+                        VAL_STATIC_INT_MAX */
+                        result->val = val_static_int(i);
+                    } else {
+                        result->val = &val_null;
+                    }
+                } break;
                 default:
                     fprintf(stderr, "Unrecognized op: %i\n", expr->u.op.op);
                     return 2;
