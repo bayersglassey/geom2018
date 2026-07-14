@@ -1,4 +1,6 @@
 set -euo pipefail
+
+# Set $IP
 . ip.sh
 
 echo "### Updating repo..." >&2
