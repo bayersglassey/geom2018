@@ -1,5 +1,6 @@
 
 #include "screen.h"
+#include "sdl_util.h"
 #include "util.h"
 
 

@@ -20,7 +20,7 @@ PROGS += $(TESTS)
 
 OFILES = \
  src/hexcollmap.o src/hexcollmap_parse.o src/hexcollmap_write.o \
- src/str_utils.o src/file_utils.o src/lexer.o src/write.o src/stringstore.o \
+ src/util.o src/str_utils.o src/file_utils.o src/lexer.o src/write.o src/stringstore.o \
  src/geom_lexer_utils.o src/vars.o src/var_utils.o src/valexpr.c \
  src/geom.o src/vec4.o src/hexspace.o src/bounds.o src/hexbox.o src/hexgame_location.o \
  src/font.o src/console.o src/directory.o src/directory_shell.o \
@@ -28,7 +28,7 @@ OFILES = \
 
 SDL_OFILES = \
  src/screen.o src/prismelrenderer.o src/prismelrenderer_parse.o \
- src/rendergraph.o src/anim.o src/util.o src/sdl_util.o \
+ src/rendergraph.o src/anim.o src/sdl_util.o src/sdl_blit.o \
  src/sdlfont.o src/geomfont.o src/minieditor.o \
  src/hexmap.o src/hexmap_submap_create_rgraph.o \
  src/hexgame.o src/hexgame_body.o src/hexgame_player.o src/hexgame_recording.o \
@@ -82,7 +82,7 @@ bin/stringstoretest: src/main/stringstoretest.o src/stringstore.o src/str_utils.
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
-bin/varstest: src/main/varstest.o src/vars.o src/valexpr.o src/lexer.o src/write.o src/str_utils.o src/file_utils.o src/var_utils.o
+bin/varstest: src/main/varstest.o src/vars.o src/valexpr.o src/lexer.o src/write.o src/util.o src/str_utils.o src/file_utils.o src/var_utils.o
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 

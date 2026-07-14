@@ -11,6 +11,7 @@
 #include "bounds.h"
 #include "util.h"
 #include "sdl_util.h"
+#include "sdl_blit.h"
 #include "array.h"
 #include "write.h"
 

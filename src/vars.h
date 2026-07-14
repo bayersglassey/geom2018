@@ -33,8 +33,8 @@ typedef struct val {
                 .type = VAL_TYPE_INT, .u.i == len.
                 See also: val_get_arr_len_val, which returns that element.
                 Why do we do this?.. because currently, valexpr_eval doesn't
-                manage give you any way to manage the memory of the returned
-                val: it's assumed to be owned by something.
+                give you any way to manage the memory of the returned val:
+                it's assumed to be owned by something.
                 So it can't just create a fresh val of type VAL_TYPE_INT. */
         } a;
     } u;

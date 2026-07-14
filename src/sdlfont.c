@@ -8,6 +8,7 @@
 
 
 #include "util.h"
+#include "sdl_util.h"
 #include "font.h"
 #include "sdlfont.h"
 #include "generic_printf.h"

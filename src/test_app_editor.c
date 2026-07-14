@@ -4,6 +4,7 @@
 #include <SDL2/SDL.h>
 
 #include "test_app.h"
+#include "sdl_util.h"
 
 
 int test_app_render_editor(test_app_t *app){

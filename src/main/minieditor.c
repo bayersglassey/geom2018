@@ -5,7 +5,7 @@
 #include <time.h>
 #include <SDL2/SDL.h>
 
-#include "../util.h"
+#include "../sdl_util.h"
 #include "../vec4.h"
 #include "../minieditor.h"
 #include "../screen.h"

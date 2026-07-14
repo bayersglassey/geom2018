@@ -11,6 +11,7 @@
 #include "lexer_macros.h"
 #include "bounds.h"
 #include "util.h"
+#include "sdl_util.h"
 #include "array.h"
 #include "write.h"
 #include "font.h"

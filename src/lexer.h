@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "vars.h"
+#include "util.h"
 
 /*
     Lexer usage example:

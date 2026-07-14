@@ -11,6 +11,7 @@
 #include "prismelrenderer.h"
 #include "array.h"
 #include "util.h"
+#include "sdl_util.h"
 #include "hexgame_location.h"
 #include "lexer.h"
 #include "lexer_macros.h"

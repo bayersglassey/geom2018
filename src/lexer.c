@@ -3,6 +3,7 @@
 #include "str_utils.h"
 #include "vars.h"
 #include "lexer.h"
+#include "util.h"
 
 
 /* HELPER FUNCTIONS */
@@ -939,8 +940,7 @@ int fus_lexer_get_int_fancy(fus_lexer_t *lexer, int *i_ptr){
                     lo = hi;
                     hi = tmp;
                 }
-                int diff = hi - lo;
-                add = (diff? rand() % (hi - lo): 0) + lo;
+                add = randint(lo, hi);
             }else{
                 err = fus_lexer_get_int(lexer, &add);
                 if(err)goto err;

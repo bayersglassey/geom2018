@@ -4,7 +4,6 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
-#include <SDL2/SDL.h>
 
 #include "str_utils.h"
 #include "file_utils.h"
@@ -19,44 +18,13 @@
 #   define BACKTRACE(N) ;
 #endif
 
-#define ERR_INFO() fprintf(stderr, "%s:%s:%i: ", \
-    __FILE__, __func__, __LINE__)
-#define RET_IF_SDL_NZ(x) { \
-    if((x) != 0){ \
-        ERR_INFO(); \
-        fprintf(stderr, "SDL error: %s\n", SDL_GetError()); \
-        return 2;}}
-#define RET_IF_SDL_NULL(x) { \
-    if((x) == NULL){ \
-        ERR_INFO(); \
-        fprintf(stderr, "SDL error: %s\n", SDL_GetError()); \
-        return 2;}}
-#define RET_NULL_IF_SDL_NZ(x) { \
-    if((x) != 0){ \
-        ERR_INFO(); \
-        fprintf(stderr, "SDL error: %s\n", SDL_GetError()); \
-        return NULL;}}
-#define RET_NULL_IF_SDL_NULL(x) { \
-    if((x) == NULL){ \
-        ERR_INFO(); \
-        fprintf(stderr, "SDL error: %s\n", SDL_GetError()); \
-        return NULL;}}
-
 #define MAX_SPACES 256
 
 bool get_bool_env(const char *name);
 int int_min(int x, int y);
 int int_max(int x, int y);
+int randint(int min, int max);
 int linear_interpolation(int x0, int x1, int t, int t_max);
-void interpolate_color(SDL_Color *c, Uint8 r, Uint8 g, Uint8 b,
-    int t, int t_max);
 void get_spaces(char *spaces, int max_spaces, int n_spaces);
-void palette_printf(SDL_Palette *pal);
-SDL_Surface *surface8_create(int w, int h,
-    bool use_rle, bool use_colorkey, SDL_Palette *pal);
-SDL_Surface *surface32_create(int w, int h,
-    bool use_rle, bool use_colorkey);
-Uint8 *surface8_get_pixel_ptr(SDL_Surface *surface, int x, int y);
-Uint32 *surface32_get_pixel_ptr(SDL_Surface *surface, int x, int y);
 
 #endif

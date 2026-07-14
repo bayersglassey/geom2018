@@ -5,7 +5,7 @@
 
 #include "test_app.h"
 #include "hexgame.h"
-
+#include "sdl_util.h"
 
 
 
