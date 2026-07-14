@@ -31,6 +31,10 @@ void fus_nwrite_str(FILE *f, const char *s, int n){
 
 void fus_write_str(FILE *f, const char *s){
     /* Writes given string s to file f */
+    if(s == NULL){
+        fputs("NULL", f);
+        return;
+    }
     fputc('\"', f);
     char c;
     while(c = *s, c != '\0'){

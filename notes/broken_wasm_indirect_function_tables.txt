@@ -452,3 +452,8 @@ What's now not working is:
     emccdemo_step: Exiting with error: 2
 
 So, the worldmap name is NULL?.. that's wacky.
+OMG FIXED IT!!!!!!!!!!!!!!!!
+There was actually a flat-out bug in the code, which I guess gcc was compiling
+away (incorrectly), while emcc/clang was (correctly) including the bug in the
+compiled code.
+See commit: 8bec8f518c2b695c9c54f1a7c7b6a6f256df2652

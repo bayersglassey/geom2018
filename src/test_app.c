@@ -124,7 +124,6 @@ static int _test_app_restart(test_app_t *app,
             hexmap_submap_get_spawn(spawn_submap, &spawn);
         }
 
-        hexgame_savelocation_t respawn_location;
         hexgame_savelocation_set(&respawn_location, map->space,
             spawn.pos, spawn.rot, spawn.turn, map->filename,
             NULL, NULL);
