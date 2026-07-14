@@ -1,17 +1,3 @@
-$SET_STR WHERE: lines: at(35 34)
-    ;;Where haven't
-    ;;  you been yet?..
-$SET_STR NEW: lines: at(19 31)
-    ;;Ah ha,
-    ;;
-    ;;  this
-    ;;  is new!..
-text:
-    if && mapvar("start4_eye_c_open") ! mapvar("made_it_underneath")
-        then $GET_STR WHERE
-    else if && mapvar("start4_eye_b_open") mapvar("made_it_underneath")
-        then $GET_STR NEW
-    else null
 parts:
     "e": recording "data/recs/eye.fus"
     "a": recording "data/recs/eye.fus"
@@ -42,17 +28,17 @@ collmap:
     ;;
     ;;                  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;
-    ;;                .   .   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .
+    ;;                .   .   .   .   .   .   .   .   + - + = @ = @ = @   .   .   .   .   .   .   .   .
     ;;                                               /* * *\
     ;;              .   .   .   .   .   .   .   .   +   .   +   .   .   .   .   .   .   .   .   .   .
     ;;                                             /* * * */
     ;;            + -(+)- + - +   .   .   + - + - +   .   +   .   .   .   .   .   .   .   .   .   .   .
     ;;                     \   \           \      * * * *  \
-    ;;              .   .   +   +   .   .   + - +   .   .   + - + - +   .   .   .   .   .   .   .   .
+    ;;              .   .   +   +   .   .   + - +   .   .   + - + - + = @ = @ = @   .   .   .   .   .
     ;;                       \   \          * * *\* * *              \
     ;;            .   .   .   +   +   .   .   .   +   .   .   .   .   +   .   .   .   .   .   .   .   .
     ;;                       /     \      * * * */* *                /
-    ;;      .   .   .   .   +   .   + - + - + - +   .   .   .   + - +   .   .   .   .   .   .   .   .
+    ;;      .   .   .   .   +   .   + - + - + - +   .   .   .   + - + = @ = @   .   .   .   .   .   .
     ;;      * * *            \              * * * *            /
     ;;    .   .   .   .   .   + - + - + - +   ?   + - +   .   +   .   .   .   .   .   .   .   .   .   .           [b^3]
     ;;     \* * *                          \* * */     \       \  S

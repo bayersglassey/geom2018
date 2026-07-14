@@ -3,13 +3,6 @@ parts:
     "a": recording "data/recs/eye.fus"
         vars:
             "opened_key": "loop_eye_a_open"
-    "w": recording "data/recs/door.fus"
-        vars:
-            "oneway": T
-            "location": "cage"
-    "h": recording "data/recs/hotspot.fus"
-        vars:
-            "key": "reached_cage"
 collmap:
     ;;
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
@@ -24,7 +17,7 @@ collmap:
     ;;                 * * * * *                 S                     * * *
     ;;     .   .   .   .   .   .   .   .   + - + - + - +   .   .   .   .   .   .   .   .
     ;;                                    /             \                          * * *\
-    ;;   .   .   .   .   .   .   .   .   +   .   ?   .   +   .   .   .   .   .   .   .   +         [w]
+    ;;   .   .   .   .   .   .   .   .   +   .   .   .   +   .   .   .   .   .   .   .   +
     ;;                                  /                 \                        * * */
     ;;     .   .   .   .   .   .   .   +   .   .   .   .   +   .   .   .   .   .   .   .
     ;;                     * * *        \                 /
@@ -38,7 +31,7 @@ collmap:
     ;;                                                       * * * * * *                 * * *
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                                                             * * * * * *
-    ;;     .   .   .   .   ?   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .              [w] [h]
+    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                                                                   * * *
     ;;   .   .  (.)  . - + - +   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                    \   \
