@@ -1203,213 +1203,24 @@ Apr 29, 2025:
 Jul 7, 2026:
 ------------
 
-[ ]
+[X] Currently we're creating a fresh texture each frame!..
+    Should we... not do that?!
+    => YES! Fixed it, see: notes/dont_create_a_texture_every_frame.txt
 
-[ ] Currently we're creating a fresh texture each frame!..
-Should we... not do that?!
-See test_app_render:
+[ ] Get rid of the excessive "teach people about save points" stuff.
+    Leave the one spikey ball, that's it!
+    Maybe once you run into it, say "it's gone!" or something.
 
-    SDL_Texture *render_texture = SDL_CreateTextureFromSurface(
-        app->renderer, app->surface);
-    RET_IF_SDL_NULL(render_texture);
-    SDL_RenderCopy(app->renderer, render_texture, NULL, NULL);
-    SDL_DestroyTexture(render_texture);
+[ ] Add something visual to the bottom of data/maps/tutorial/entrance.fus
+    to attract players, so they're not trying to figure out how to jump
+    back up the "slides".
 
-...so like, can we just have app->texture?..
-But also, how do we test whether it's "better" or not?
-Look into these profilers:
-* gprof: https://ftp.gnu.org/old-gnu/Manuals/gprof-2.9.1/html_mono/gprof.html
-* callgrind: https://valgrind.org/docs/manual/cl-manual.html
-* pprof: https://github.com/gperftools/gperftools
-
-...ok so in fact, SDL_CreateTextureFromSurface seemed to be like *half*
-of the damn time taken by test_app_mainloop_step. O_o
-The rest of the time was split between test_app_render_game (whose time
-is mostly SDL_UpperBlitScaled) and hexgame_step (whose time is mostly
-hexmap collisions), which is fine.
-
-FWIW, in SDL's src/render/SDL_render.c, I found this:
-
-    int SDL_LockTextureToSurface(SDL_Texture *texture, const SDL_Rect *rect,
-                                 SDL_Surface **surface)
-
-...which *produces* an SDL_Surface from the given texture.
-But I assume that doesn't work for us, because we want to use 8-bit surfaces,
-which that doesn't guarantee AFAICT...
-Errrr, except we create our text from a surface. O_o
-Ooh, but also, we can create a texture from a format:
-
-    SDL_Texture *SDL_CreateTexture(SDL_Renderer *renderer, Uint32 format, int access, int w, int h)
-
-OK OK I think we need to do something like this:
-
-    Uint32 format = SDL_MasksToPixelFormatEnum(8, 0, 0, 0, 0);
-    if (format == SDL_PIXELFORMAT_UNKNOWN) {
-        SDL_SetError("Unknown pixel format");
-        return NULL;
-    }
-
-    texture = SDL_CreateTexture(renderer, format, SDL_TEXTUREACCESS_STREAMING, w, h);
-    RET_IF_SDL_NULL(texture);
-
-    {
-        SDL_Surface *surface;
-        RET_NULL_IF_SDL_NZ(SDL_LockTextureToSurface(texture, NULL, &surface));
-        RET_NULL_IF_SDL_NZ(SDL_SetSurfacePalette(surface, app->sdl_palette));
-
-        // Render to surface...
-
-        SDL_UnlockTexture(texture);
-    }
-
-...ah, but e.g. test_app_printf uses app->surface, so actually let's keep it
-around... ahhh shit, but also minieditor has editor->surface.
-Oooookay, let's factor out the SDL things (renderer, texture, surface) from
-test_app_t and minieditor_t into a separate thing, which both of them can
-have a pointer to, and that thing can have start/finish render methods.
-Let's call this thing... sdl_renderer_t???? No, screen_t.
-
-OK HANG ON NOW.
-Actually let's have screen_t own the SDL_Window, and SDL_Renderer, etc.
-And then, in Python, we can have a Screen class which wraps it.
-So basically, we want Screen and PrismelRenderer.
-PrismelRenderer does *not* own any SDL stuff except some bitmaps, look here:
-
-    int prismelrenderer_init(prismelrenderer_t *prend, vecspace_t *space);
-
-What are some other things we might want the, uhh, "screen" to own?..
-Probably the palette_t and SDL_Palette?..
-
-    err = palette_update_sdl_palette(palette, editor->sdl_palette);
-    if(err)return err;
-    err = palette_step(palette);
-    if(err)return err;
-
-And maybe the ticks?
-
-    Uint32 tick1 = SDL_GetTicks();
-    Uint32 took = tick1 - tick0;
-    if(took < editor->delay_goal)SDL_Delay(editor->delay_goal - took);
-
-So then, instead of a Screen, do we waaaaant a Game class?
-Ehh whatever. Let's call it Screen.
-
-Hold on, actually. Our palette_t needs to be parsed; and then we have
-camera_t->colors, which is where fading/flashing is implemented; but from
-Python, do we want to deal with palette_t?.. why not just manage the palette
-as a list of colors?..
-So let's keep palette_t out of screen_t.
-I do think managing the ticks there makes some sense, because it wraps the
-SDL_GetTicks and SDL_Delay calls.
-So from Python, we could just say `screen.delay()` or whatever?..
-
-    with screen.render():
-        # render stuff to the screen, e.g. using a prismelrenderer...
-        screen.delay()
-
-What about test_app_printf?.. that could be a separate class, like ScreenPrinter.
-And we also have our console_t.
-Ummm also though, test_app_printf has varargs, and basically just wraps a
-geomfont_blitter_t.
-Which basically centers around this:
-
-    int geomfont_blitter_putc(geomfont_blitter_t *blitter, char c);
-
-Ohhh jeez, but geomfont uses a prismelrender. O_o Each char is rendered as an
-rgraph.
-Okay, screw that for now, let's just focus on getting Screen and PrismelRenderer
-working...
-But ok, I think creating a screen_t should also create the underlying SDL window,
-renderer, texture, and palette.
-And let's leave the delay stuff out. That should be a separate class, or Python
-can just implement that itself with time.monotonic() and time.sleep(), etc.
-
-BY THE WAY, our Python wrapper will need to call SDL_Init and SDL_Quit.
-We can use atexit with SDL_Quit, and we can use SDL_WasInit to check if SDL_Init
-was already called.
-
-    static void sdl_cleanup() {
-        fprintf(stderr, "Shutting down SDL...\n");
-        SDL_Quit();
-    }
-
-    int ensure_sdl_init() {
-        if(SDL_WasInit(SDL_INIT_VIDEO))return 0;
-        fprintf(stderr, "Initializing SDL...\n");
-        if(SDL_Init(SDL_INIT_VIDEO)){
-            fprintf(stderr, "SDL_Init error: %s\n", SDL_GetError());
-            return 1;
-        }
-        fprintf(stderr, "...SDL initialized!\n");
-        atexit(&sdl_cleanup);
-        return 0;
-    }
-
-OH SHOOT, sometimes we apparently want the SDL palette and surface without the
-screen... is that gonna be a problem?.. see e.g. src/main/minieditor.c:
-
-    static int _init_and_mainloop(options_t *opts, SDL_Renderer *renderer){
-        /* NOTE: renderer may be NULL, in which case we're running without a
-        GUI */
-
-Maybe that's fine; we just need screen_t to support GUI and non-GUI modes.
-
-......dammit, after a bunch of refactoring, adding screen_t etc, we're getting:
-
-    $ bin/demo
-    Couldn't create texture: Palettized textures are not supported
-
-...which comes from screen_init_gui(), called from main() in src/main/demo.c.
-Soooooooooooooooo wtf; I guess we... create the texture, but not w/ 8-bit format...
-Wait, why were we able to use SDL_CreateTextureFromSurface before, to produce
-textures from surfaces which used palettes?..
-
-OOOHHHH we switched to SDL_{Get,Update}WindowSurface, no need for texture or
-renderer!..
-Only issue is palette entry 255 (which we use for backgrounds) is now
-apparently showing up as 100% blue. O_o
-
-    src/test_app_game.c
-    86:    RET_IF_SDL_NZ(SDL_FillRect(app->screen->surface, NULL, 255));
-
-Despite e.g. data/pal1.fus having this:
-
-    255: 30 50 80
-
-I suspect entry 255 is being used as the transparent colour, or something...
-OHHHHHHHHHHHH no, it's because app->screen->surface doesn't actually have
-a palette!.. lol. So 255 ends up being a 32-bit RGB value which is all blue!
-
-I tried calling SDL_SetSurfacePalette to force a palette onto the surface
-we got from SDL_GetWindowSurface, but it doesn't like it.
-So okay, we can blit from other surfaces to the one we got from the window,
-but we can't do fills and stuff to it, unless we have a way of getting
-colour values from the palette... which it seems must be possible...
-Looking in SDL's src/video/SDL_pixels.c, I see e.g.
-
-    void SDL_GetRGB(Uint32 pixel, const SDL_PixelFormat *format, Uint8 *r, Uint8 *g,
-                    Uint8 *b)
-
-    Uint32 SDL_MapRGB(const SDL_PixelFormat *format, Uint8 r, Uint8 g, Uint8 b)
-
-...and presumably we could use that to get an RGB triple from a palette value,
-then convert the triple to a Unit32 for use with FillRect...
-Are we allowed to access surface->format directly?.. yup!
-Anyway, it's working now.
-EXCEPT! There are apparently 2 places calling update_sdl_palette:
-
-    * test_app_mainloop_step
-        * palette_update_sdl_palette:
-            * update_sdl_palette <== HERE...
-        * test_app_render
-            * test_app_render_game
-                * SDL_FillRect
-                * camera_render
-                    * update_sdl_palette <== ...AND HERE
-
-...and the issue is that SDL_FillRect is being called between those two
-calls to update_sdl_palette, i.e. when we're filling the background, we're
-doing so after test_app updated the SDL palette, but before the camera did.
-So... I think we should move the update_sdl_palette call out of camera_render,
-and into something like camera_step.
-AAAAND IT WORKED!
+    [ ] Add some "creatures" like... wavy grass... which you can brush
+        past?.. maybe a "dripping water" kind of thing, too?..
+        Except there's no gravity, so what's the equivalent of dripping
+        water in a place with no gravity?..
+        Water droplets which... roll off a surface, like how the spider
+        does?..
+        Actually that's kind of perfect.
+        Let's have "rolling water droplets" which travel exactly the path
+        the spider should in entrance.fus.
