@@ -1207,20 +1207,24 @@ Jul 7, 2026:
     Should we... not do that?!
     => YES! Fixed it, see: notes/dont_create_a_texture_every_frame.txt
 
-[ ] Get rid of the excessive "teach people about save points" stuff.
+[X] Get rid of the excessive "teach people about save points" stuff.
     Leave the one spikey ball, that's it!
     Maybe once you run into it, say "it's gone!" or something.
 
-[ ] Add something visual to the bottom of data/maps/tutorial/entrance.fus
+[X] Add something visual to the bottom of data/maps/tutorial/entrance.fus
     to attract players, so they're not trying to figure out how to jump
     back up the "slides".
 
-    [ ] Add some "creatures" like... wavy grass... which you can brush
-        past?.. maybe a "dripping water" kind of thing, too?..
-        Except there's no gravity, so what's the equivalent of dripping
-        water in a place with no gravity?..
-        Water droplets which... roll off a surface, like how the spider
-        does?..
-        Actually that's kind of perfect.
-        Let's have "rolling water droplets" which travel exactly the path
-        the spider should in entrance.fus.
+[ ] Figure out why the window opens, then closes, then opens again...
+
+[ ] Add some "creatures" like... wavy grass... which you can brush
+    past?.. maybe a "dripping water" kind of thing, too?..
+    Except there's no gravity, so what's the equivalent of dripping
+    water in a place with no gravity?..
+    Water droplets which... roll off a surface, like how the spider
+    does?..
+    Actually that's kind of perfect.
+    Let's have "rolling water droplets" which travel exactly the path
+    the spider should in entrance.fus.
+    ===> OKAY, added "dripper".
+    But it was too distracting in entrance.fus, so didn't add it there.
