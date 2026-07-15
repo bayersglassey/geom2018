@@ -14,9 +14,13 @@ vars:
     "switches3_a": F
     "switches3_b": F
 
+$SET_STR INSTRUCTIONS: lines: at(8 42)
+    ;;Press space to spit!
+
 submaps:
     "switches":
         file: "data/maps/tutorial_switches/switches.fus"
+        text: $GET_STR INSTRUCTIONS
         pos: (-100 0)
         camera: (12 5)
         mapper: ("triple")

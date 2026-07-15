@@ -646,8 +646,14 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
     }
 
     /* You can inherit parent's texts, and/or define your own. */
+    bool inherit_text = true;
     if(GOT("inherit_text")){
         NEXT
+        OPEN
+        GET_BOOL(inherit_text)
+        CLOSE
+    }
+    if(inherit_text){
         for(int i = 0; i < parent_context->text_exprs_len; i++){
             valexpr_t *text_expr = parent_context->text_exprs[i];
             ARRAY_PUSH_NEW(valexpr_t*, context->text_exprs, new_text_expr)
