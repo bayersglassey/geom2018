@@ -12,6 +12,7 @@
 #include "../hexgame.h"
 #include "../hexgame_state.h"
 #include "../defaults.h"
+#include "../tooling.h"
 
 #define THICK_LINE "==================================================\n"
 #define THIN_LINE  "----------------------------------------\n"
@@ -275,14 +276,6 @@ static int test_suite_load(test_suite_t *suite, const char *filename,
 }
 
 
-static hexgame_save_callback_t _save_callback;
-static int _save_callback(hexgame_t *game){
-    /* Should presumably never happen when running tests! */
-    fprintf(stderr, "WARNING: tried to save!..");
-    return 0;
-}
-
-
 static void print_usage(FILE *file){
     fprintf(stderr,
         "Usage: animtest [OPTION ...] [--] FILENAME"
@@ -329,28 +322,8 @@ int main(int n_args, char **args){
     {
         int err;
 
-        fprintf(stderr, "Loading prismelrenderer from file: %s\n",
-            prend_filename);
-        prismelrenderer_t _prend, *prend=&_prend;
-        err = prismelrenderer_init(prend, &vec4);
-        if(err)return err;
-        err = prismelrenderer_load(prend, prend_filename, NULL, NULL);
-        if(err)return err;
-
-        prismelrenderer_t minimap_prend;
-        err = prismelrenderer_init(&minimap_prend, &vec4);
-        if(err)return err;
-        err = prismelrenderer_load(&minimap_prend,
-            DEFAULT_MINIMAP_PREND_FILENAME,
-            NULL, NULL);
-        if(err)return err;
-
         hexgame_t _game, *game=&_game;
-        err = hexgame_init(game, prend,
-            &minimap_prend,
-            HEXGAME_DEFAULT_MINIMAP_TILESET,
-            &_save_callback, NULL, /* no callback data */
-            false /* no audio */);
+        err = hexgame_init_for_tooling(game, prend_filename);
         if(err)return err;
 
         for(int suite_i = 0; suite_i < n_suites; suite_i++){
@@ -359,7 +332,7 @@ int main(int n_args, char **args){
             fprintf(stderr, "Loading test suite from file: %s\n",
                 suite_filename);
             test_suite_t _suite, *suite=&_suite;
-            err = test_suite_load(suite, suite_filename, prend);
+            err = test_suite_load(suite, suite_filename, game->prend);
             if(err)return err;
 
             fprintf(stderr, "Running %i tests...\n", suite->test_cases_len);
@@ -393,9 +366,7 @@ int main(int n_args, char **args){
         fprintf(stderr, THICK_LINE);
         fprintf(stderr, "%i suites OK!\n", n_suites);
 
-        hexgame_cleanup(game);
-        prismelrenderer_cleanup(&minimap_prend);
-        prismelrenderer_cleanup(prend);
+        hexgame_cleanup_for_tooling(game);
     }
     return 0;
 }

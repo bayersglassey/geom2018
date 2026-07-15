@@ -604,20 +604,27 @@ int hexgame_load_map(hexgame_t *game, const char *map_filename,
     return 0;
 }
 
+hexmap_t *hexgame_get_map(hexgame_t *game, const char *map_filename){
+    for(int i = 0; i < game->maps_len; i++){
+        hexmap_t *map = game->maps[i];
+        if(map->filename == map_filename || !strcmp(map->filename, map_filename)){
+            return map;
+        }
+    }
+    return NULL;
+}
+
 int hexgame_get_or_load_map(hexgame_t *game, const char *map_filename,
     hexmap_t **map_ptr
 ){
     int err;
-
-    for(int i = 0; i < game->maps_len; i++){
-        hexmap_t *map = game->maps[i];
-        if(map->filename == map_filename || !strcmp(map->filename, map_filename)){
-            *map_ptr = map;
-            return 0;
-        }
+    hexmap_t *map = hexgame_get_map(game, map_filename);
+    if(map){
+        *map_ptr = map;
+        return 0;
+    }else{
+        return hexgame_load_map(game, map_filename, map_ptr);
     }
-
-    return hexgame_load_map(game, map_filename, map_ptr);
 }
 
 int hexgame_swap_stateset(hexgame_t *game, stateset_t *new_stateset,

@@ -143,7 +143,8 @@ void hexmap_location_cleanup(hexmap_location_t *location){
     /* Nuthin */
 }
 
-void hexmap_location_init(hexmap_location_t *location, const char *name){
+void hexmap_location_init(hexmap_location_t *location, hexcollmap_t *collmap, const char *name){
+    location->collmap = collmap;
     location->name = name;
     memset(&location->loc, 0, sizeof(location->loc));
 }

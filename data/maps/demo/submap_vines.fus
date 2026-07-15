@@ -178,7 +178,7 @@ submaps:
         camera: (-7 3)
         mapper: ("quadruple")
         submaps:
-            "vines2":
+            :
                 file: "data/maps/demo/vines3.fus"
                 text:
                     if > mapvar("eyespider_vines_mini_eye_respawn") 0
@@ -200,7 +200,7 @@ submaps:
                         file: "data/maps/demo/vines3_blocker.fus"
                         visible: ! mapvar("vines3_door")
                         pos: (-8 13)
-            "vines2":
+            :
                 file: "data/maps/demo/vines4.fus"
                 text:
                     if mapvar("eyespider_vines_ran_away_4")
@@ -210,7 +210,7 @@ submaps:
                     else null
                 pos: (-40 4)
                 camera: (0 0)
-            "vines2":
+            :
                 pos: (-40 4)
                 camera: (-10 -10)
                 tileset: "data/tileset1.fus"

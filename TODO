@@ -1215,6 +1215,46 @@ Jul 7, 2026:
     to attract players, so they're not trying to figure out how to jump
     back up the "slides".
 
+[X] Similar to how animtool generates graphs of an anim's states, can
+    we have a tool which shows the connections between worldmaps?..
+    Actually, what we could definitely do is create a graph showing
+    worldmaps and their trees of submaps.
+    What's trickier is doors, because these days there's no door_t,
+    rather we have anim/door.fus, which sets player's map via the
+    "effect" system.
+    Buuuut maybe we can just check for anim/door.fus?..
+    Or do we need to worry about its "subclasses"?..
+
+        $ ack _door.fus anim
+        anim/ability_door.fus
+        5:import "anim/_door.fus"
+
+        anim/minimap_door.fus
+        5:import "anim/_door.fus"
+
+        anim/door.fus
+        5:import "anim/_door.fus"
+
+    Errrrm. And actually, maps don't refer directly to anim/door.fus,
+    they refer to data/recs/door.fus, aaaand pass it some vars:
+    E.g. in data/maps/test/map3_end.fus:
+
+        "E": recording "data/recs/door.fus"
+            vars:
+                "map": "data/maps/test/worldmap.fus"
+                "location": "test_exit"
+        "D": recording "data/recs/ability_door.fus"
+            vars:
+                "location": "puzzle"
+                "set_yourbool": "is_aimerspider"
+
+    ...so actually then, maybe we can just check in hexmap_recording->vars
+    for "map" and "location" vars?..
+    And there is hexcollmap->recordings to look through for that, and
+    hexcollmap->locations which "location" refers to.
+
+[ ] Fullscreen mode is being weird!..
+
 [ ] Figure out why the window opens, then closes, then opens again...
 
 [ ] Add some "creatures" like... wavy grass... which you can brush

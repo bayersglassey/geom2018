@@ -300,7 +300,7 @@ static int hexcollmap_draw(hexcollmap_t *collmap1, hexcollmap_t *collmap2,
 
         ARRAY_PUSH_NEW(hexmap_location_t*, collmap1->locations,
             location1)
-        hexmap_location_init(location1, location2->name);
+        hexmap_location_init(location1, collmap2, location2->name);
 
         trf_t trf2;
         hexgame_location_init_trf(&location2->loc, &trf2);
@@ -377,7 +377,7 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
     }else if(part->type == HEXCOLLMAP_PART_TYPE_LOCATION){
         ARRAY_PUSH_NEW(hexmap_location_t*, collmap->locations,
             location)
-        hexmap_location_init(location, part->filename);
+        hexmap_location_init(location, collmap, part->filename);
         hexgame_location_from_trf(&location->loc, &trf2);
     }else{
         fprintf(stderr, "Unrecognized part type: %i\n", part->type);

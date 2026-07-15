@@ -13,6 +13,7 @@
 #include "hexgame_location.h"
 
 
+typedef struct hexcollmap hexcollmap_t;
 
 /************************
  * HELPERS & ALGORITHMS *
@@ -93,12 +94,13 @@ void hexmap_rendergraph_init(hexmap_rendergraph_t *rendergraph,
  *******************/
 
 typedef struct hexmap_location {
+    hexcollmap_t *collmap;
     const char *name;
     hexgame_location_t loc;
 } hexmap_location_t;
 
 void hexmap_location_cleanup(hexmap_location_t *location);
-void hexmap_location_init(hexmap_location_t *location, const char *name);
+void hexmap_location_init(hexmap_location_t *location, hexcollmap_t *collmap, const char *name);
 
 
 /**************
@@ -184,7 +186,7 @@ typedef struct hexcollmap_part {
     vars_t bodyvars;
 } hexcollmap_part_t;
 
-typedef struct hexcollmap {
+struct hexcollmap {
     /*
     Hexcollmap's dimensions are:
 
@@ -236,7 +238,7 @@ typedef struct hexcollmap {
 
     /* Weakrefs */
     vecspace_t *space;
-} hexcollmap_t;
+};
 
 
 

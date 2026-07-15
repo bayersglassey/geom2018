@@ -463,6 +463,7 @@ int hexgame_init(hexgame_t *game, prismelrenderer_t *prend,
 int hexgame_load_worldmaps(hexgame_t *game, const char *worldmaps_filename);
 int hexgame_load_map(hexgame_t *game, const char *map_filename,
     hexmap_t **map_ptr);
+hexmap_t *hexgame_get_map(hexgame_t *game, const char *map_filename);
 int hexgame_get_or_load_map(hexgame_t *game, const char *map_filename,
     hexmap_t **map_ptr);
 int hexgame_swap_stateset(hexgame_t *game, stateset_t *new_stateset,

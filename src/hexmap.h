@@ -58,6 +58,8 @@ typedef struct hexmap_submap_group {
 
     bool visited;
         /* Controls whether this group's submaps show up on minimap */
+
+    struct hexmap_submap_group *parent;
 } hexmap_submap_group_t;
 
 typedef struct hexmap_submap {
@@ -100,7 +102,7 @@ typedef struct hexmap_submap_parser_context {
     ARRAY_DECL(struct valexpr*, text_exprs)
 
     /* Weakrefs */
-    hexmap_submap_group_t *submap_group;
+    hexmap_submap_group_t *submap_group; /* never NULL */
     struct hexmap_submap_parser_context *parent;
     prismelmapper_t *mapper;
     palette_t *palette;
@@ -150,6 +152,7 @@ void hexmap_cleanup(hexmap_t *map);
 int hexmap_init(hexmap_t *map, struct hexgame *game, const char *filename);
 int hexmap_reload(hexmap_t *map);
 hexgame_location_t *hexmap_get_location(hexmap_t *map, const char *name);
+hexmap_submap_t *hexmap_get_location_submap(hexmap_t *map, const char *name);
 hexmap_submap_group_t *hexmap_get_submap_group(hexmap_t *map,
     const char *name);
 int hexmap_add_submap_group(hexmap_t *map, const char *name,

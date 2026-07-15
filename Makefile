@@ -2,7 +2,7 @@
 # Used to be able to print stacktraces (with GNU backtrace) if I included
 # these in CFLAGS: -g -rdynamic
 # ...but it doesn't seem to work anymore.
-CFLAGS += -O2 -std=c99 \
+CFLAGS += -O2 -g -rdynamic -std=c99 \
  $(shell sdl2-config --cflags) \
  -Wall -Werror -Wno-unused -Wno-missing-braces -Wno-tautological-compare -Wno-parentheses
 
@@ -11,7 +11,7 @@ LIBS += $(shell sdl2-config --libs) -lm
 PROGS = \
  bin/lexertool bin/collmaptool bin/hexpicturetest bin/sdltest bin/directorytest \
  bin/prendtool bin/demo bin/minieditor bin/geomtool bin/animtool bin/animtest \
- bin/audiotool
+ bin/audiotool bin/mapgraphtool
 
 TESTS = \
  bin/lexertest bin/frozenstringtest bin/geomtest bin/stringstoretest bin/varstest
@@ -33,7 +33,7 @@ SDL_OFILES = \
  src/hexmap.o src/hexmap_submap_create_rgraph.o \
  src/hexgame.o src/hexgame_body.o src/hexgame_player.o src/hexgame_recording.o \
  src/hexgame_state.o src/hexgame_actor.o src/hexgame_audio.o \
- src/hexgame_savelocation.o src/save_slots.o
+ src/hexgame_savelocation.o src/save_slots.o src/tooling.o
 
 TEST_APP_OFILES = \
  src/test_app.o src/test_app_console.o src/test_app_game.o src/test_app_editor.o \
@@ -123,5 +123,9 @@ bin/animtest: src/main/animtest.o $(OFILES) $(SDL_OFILES)
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 bin/audiotool: src/main/audiotool.o $(OFILES) $(SDL_OFILES)
+	mkdir -p bin
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
+
+bin/mapgraphtool: src/main/mapgraphtool.o $(OFILES) $(SDL_OFILES)
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)

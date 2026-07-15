@@ -95,6 +95,20 @@ hexgame_location_t *hexmap_get_location(hexmap_t *map, const char *name){
     return NULL;
 }
 
+hexmap_submap_t *hexmap_get_location_submap(hexmap_t *map, const char *name){
+    for(int i = 0; i < map->locations_len; i++){
+        hexmap_location_t *location = map->locations[i];
+        if(!strcmp(location->name, name)){
+            for(int j = 0; j < map->submaps_len; j++){
+                hexmap_submap_t *submap = map->submaps[j];
+                if(&submap->collmap == location->collmap)return submap;
+            }
+            return NULL;
+        }
+    }
+    return NULL;
+}
+
 hexmap_submap_group_t *hexmap_get_submap_group(hexmap_t *map,
     const char *name
 ){
@@ -424,10 +438,38 @@ static int _hexmap_parse(hexmap_t *map, fus_lexer_t *lexer,
 
             hexmap_submap_group_t *group = context->submap_group;
             if(GOT_STR){
+                hexmap_submap_group_t *parent = group;
                 const char *group_name;
                 GET_STR_CACHED(group_name, &prend->name_store)
                 err = hexmap_get_or_add_submap_group(map, group_name, &group);
                 if(err)return err;
+
+                /* We support multiple "declarations" of the same group, mostly
+                just so we can avoid having to indent so much, e.g.
+
+                    "my_group":
+                        file: "...file1.fus"
+                    "my_group":
+                        file: "...file2.fus"
+
+                ...instead of:
+
+                    "my_group":
+                        submaps:
+                            :
+                                file: "...file1.fus"
+                            :
+                                file: "...file2.fus"
+
+                However, we do require that all declarations of the same group
+                have the same parent!
+                */
+                if(group->parent && group->parent != parent){
+                    fprintf(stderr, "Duplicate declarations of group \"%s\", but with different parents: \"%s\" != \"%s\"\n",
+                        group->name, parent->name, group->parent->name);
+                    return 2;
+                }
+                group->parent = parent;
             }
 
             OPEN
@@ -842,7 +884,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
         for(int i = 0; i < submap->collmap.locations_len; i++){
             hexmap_location_t *location = submap->collmap.locations[i];
             ARRAY_PUSH_NEW(hexmap_location_t*, map->locations, new_location)
-            hexmap_location_init(new_location, location->name);
+            hexmap_location_init(new_location, &submap->collmap, location->name);
             new_location->loc = location->loc;
             vec_add(space->dims, new_location->loc.pos, submap->pos);
         }
@@ -1232,6 +1274,7 @@ void hexmap_submap_group_init(hexmap_submap_group_t *group,
 ){
     group->name = name;
     group->visited = false;
+    group->parent = NULL;
     valexpr_set_literal_bool(&group->target_expr, false);
 }
 
