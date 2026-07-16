@@ -1217,7 +1217,7 @@ Jul 7, 2026:
 Jul 15, 2026:
 -------------
 
-[ ] How can we extend the rules in actor/_aispider.fus?..
+[X] How can we extend the rules in actor/_aispider.fus?..
     Like, right now we have to manually add combinations, like "jump short",
     "jump medium", "jump long", "backflip after first jumping short", etc.
     Clearly, we want some kind of recursive algorithm...
@@ -1306,3 +1306,5 @@ Jul 15, 2026:
             flip myvar("_jump_location")
         [X] support:
             coll: all yes at myvar("_jump_location")
+
+    ...HOLY MOLY IT APPEARS TO BE WORKING!!!!!

@@ -74,55 +74,9 @@ state "run_around":
     "jump"
     if:
         chance: 40%
-        any:
-            all:
-                # Jump forward small, land forward
-                coll: all yes
-                    ;; ( )  .   .   + - +
-                coll: any no
-                    ;; ( )  . - + - .   .
-                coll: all no
-                    ;;       \*/*\*/*\*/*
-                    ;;        + - + - + -
-                    ;;       /*\*/*\*/*\*
-                    ;; ( )  .   .   .   .
-            all:
-                # Jump forward small, land up
-                coll: all yes
-                    ;;                +
-                    ;;               /
-                    ;; ( )  .   .   +
-                coll: any no
-                    ;; ( )  . - + - .
-                coll: all no
-                    ;;       \*/*\*/*
-                    ;;        + - + -
-                    ;;       /*\*/*\*
-                    ;; ( )  .   .   .
-            all:
-                # Jump forward medium, land forward
-                coll: all yes
-                    ;; ( )  .   .   .   + - +
-                coll: any no
-                    ;; ( )  . - + - + - .   .
-                coll: all no
-                    ;;       \*/*\*/*\*/*\*/*
-                    ;;        + - + - + - + -
-                    ;;       /*\*/*\*/*\*/*\*
-                    ;; ( )  .   .   .   .   .
-            all:
-                # Jump forward medium, land up
-                coll: all yes
-                    ;;                    +
-                    ;;                   /
-                    ;; ( )  .   .   .   +
-                coll: any no
-                    ;; ( )  . - + - + - .
-                coll: all no
-                    ;;       \*/*\*/*\*/*
-                    ;;        + - + - + -
-                    ;;       /*\*/*\*/*\*
-                    ;; ( )  .   .   .   .
+        as body:
+            do: call: "safe_to_jump"
+            expr: myvar("safe_to_jump")
     then:
         key: down u
 

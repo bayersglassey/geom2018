@@ -495,8 +495,11 @@ static int _parse_cond(state_context_t *context, fus_lexer_t *lexer,
         if(GOT("you")){
             NEXT
             cond->u.as.type = AS_YOU;
+        }else if(GOT("body")){
+            NEXT
+            cond->u.as.type = AS_BODY;
         }else{
-            return UNEXPECTED("you");
+            return UNEXPECTED("you or body");
         }
 
         ARRAY_INIT(cond->u.as.sub_conds)
@@ -506,6 +509,16 @@ static int _parse_cond(state_context_t *context, fus_lexer_t *lexer,
             ARRAY_PUSH_NEW(state_cond_t*, cond->u.as.sub_conds,
                 sub_cond)
             err = _parse_cond(context, lexer, prend, space, sub_cond);
+            if(err)return err;
+        }
+        NEXT
+    }else if(GOT("do")){
+        NEXT
+        cond->type = STATE_COND_TYPE_DO;
+        OPEN
+        while(!GOT(")")){
+            ARRAY_PUSH_NEW(state_effect_t*, cond->u._do.effects, effect)
+            err = state_effect_parse(effect, context, lexer, prend, space);
             if(err)return err;
         }
         NEXT
@@ -864,8 +877,11 @@ int state_effect_parse(state_effect_t *effect,
         if(GOT("you")){
             NEXT
             effect->u.as.type = AS_YOU;
+        }else if(GOT("body")){
+            NEXT
+            effect->u.as.type = AS_BODY;
         }else{
-            return UNEXPECTED("you");
+            return UNEXPECTED("you or body");
         }
 
         ARRAY_INIT(effect->u.as.sub_effects)

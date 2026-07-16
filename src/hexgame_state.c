@@ -53,6 +53,29 @@ bool hexgame_state_context_debug(hexgame_state_context_t *context){
         return 2;}
 
 
+static int _context_apply_as(hexgame_state_context_t *context, int as_type){
+    switch(as_type){
+        case AS_YOU: {
+            if(!context->your_body){
+                fprintf(stderr, "No your_body!\n");
+                return 2;
+            }
+            context->body = context->your_body;
+            context->your_body = context->body;
+            break;
+        }
+        case AS_BODY: {
+            /* Let's just be a body, not an actor with a body. */
+            context->actor = NULL;
+            break;
+        }
+        default:
+            fprintf(stderr, "Unrecognized \"as\" type: %i\n", as_type);
+            return 2;
+    }
+    return 0;
+}
+
 static vars_t *_context_get_vars(valexpr_context_t *context, int varstype){
     switch(varstype){
     case VALEXPR_TYPE_YOURVAR: return context->yourvars;
@@ -358,35 +381,46 @@ int state_cond_match(state_cond_t *cond,
         break;
     }
     case STATE_COND_TYPE_AS: {
-        switch(cond->u.as.type){
-            case AS_YOU: {
-                if(!your_body){
-                    fprintf(stderr, "No your_body!\n");
-                    return 2;
+        /* We apply our sub-conditions "as" someone or something else,
+        e.g. as your_body. O_o
+        That is, sub_context is like context but with some of its fields
+        swapped with each other, like .body and .your_body, etc. */
+        hexgame_state_context_t sub_context = *context;
+        err = _context_apply_as(&sub_context, cond->u.as.type);
+        if(err)return err;
+
+        matched = true;
+        for(int i = 0; i < cond->u.as.sub_conds_len; i++){
+            state_cond_t *sub_cond = cond->u.as.sub_conds[i];
+            err = state_cond_match(sub_cond, &sub_context, &matched);
+            if(err)return err;
+            if(!matched)break;
+        }
+        break;
+    }
+    case STATE_COND_TYPE_DO: {
+        /* A condition which... just runs a bunch of effects!
+        What?! Why?! Ah ha, because maybe you want to run a proc which
+        generates some useful output!.. */
+        matched = true; /* Always trivially matches! */
+        hexgame_state_controlflow_t controlflow;
+        hexgame_state_controlflow_init(&controlflow, false);
+        for(int i = 0; i < cond->u._do.effects_len; i++){
+            state_effect_t *effect = cond->u._do.effects[i];
+            state_effect_goto_t *gotto = NULL;
+            err = state_effect_apply(effect, context, &gotto, &controlflow);
+            if(err){
+                if(err == 2){
+                    fprintf(stderr, "...in \"%s\" statement\n",
+                        state_effect_type_name(effect->type));
                 }
-
-                /* We apply our sub-conditions "as you", that is, as your_body.
-                The terminology here is just too silly, eh?
-                Anyway, long story short, sub_context is like context but with
-                body and your_body swapped. */
-                hexgame_state_context_t sub_context = *context;
-                sub_context.body = your_body;
-                sub_context.your_body = body;
-
-                matched = true;
-                for(int i = 0; i < cond->u.as.sub_conds_len; i++){
-                    state_cond_t *sub_cond = cond->u.as.sub_conds[i];
-                    err = state_cond_match(sub_cond, &sub_context, &matched);
-                    if(err)return err;
-                    if(!matched)break;
-                }
-
-                break;
+                return err;
             }
-            default:
-                fprintf(stderr, "Unrecognized \"as\" type: %i\n",
-                    cond->u.as.type);
+            if(gotto != NULL){
+                fprintf(stderr, "Not allowed to use \"goto\" inside a \"do\" condition!\n");
                 return 2;
+            }
+            if(hexgame_state_controlflow_is_unrolling(&controlflow))break;
         }
         break;
     }
@@ -1015,33 +1049,19 @@ int state_effect_apply(state_effect_t *effect,
         break;
     }
     case STATE_EFFECT_TYPE_AS: {
-        switch(effect->u.as.type){
-            case AS_YOU: {
-                if(!your_body){
-                    fprintf(stderr, "No your_body!\n");
-                    return 2;
-                }
+        /* We apply our sub-effects "as" someone or something else,
+        e.g. as your_body. O_o
+        That is, sub_context is like context but with some of its fields
+        swapped with each other, like .body and .your_body, etc. */
+        hexgame_state_context_t sub_context = *context;
+        err = _context_apply_as(&sub_context, effect->u.as.type);
+        if(err)return err;
 
-                /* We apply our sub-effects "as you", that is, as your_body.
-                The terminology here is just too silly, eh?
-                Anyway, long story short, sub_context is like context but with
-                body and your_body swapped. */
-                hexgame_state_context_t sub_context = *context;
-                sub_context.body = your_body;
-                sub_context.your_body = body;
-
-                err = _apply_sub_effects(effect,
-                    effect->u.as.sub_effects_len,
-                    effect->u.as.sub_effects,
-                    &sub_context);
-                if(err)return err;
-                break;
-            }
-            default:
-                fprintf(stderr, "Unrecognized \"as\" type: %i\n",
-                    effect->u.as.type);
-                return 2;
-        }
+        err = _apply_sub_effects(effect,
+            effect->u.as.sub_effects_len,
+            effect->u.as.sub_effects,
+            &sub_context);
+        if(err)return err;
         break;
     }
     default: {

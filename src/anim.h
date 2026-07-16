@@ -50,7 +50,8 @@ enum effect_boolean {
 };
 
 enum anim_as {
-    AS_YOU
+    AS_YOU,
+    AS_BODY
 };
 
 
@@ -214,6 +215,7 @@ enum state_cond_type {
     STATE_COND_TYPE_EXPR,
     STATE_COND_TYPE_EXISTS,
     STATE_COND_TYPE_AS,
+    STATE_COND_TYPE_DO,
     STATE_COND_TYPES
 };
 
@@ -232,6 +234,7 @@ static const char *state_cond_type_name(int type){
         case STATE_COND_TYPE_EXPR: return "expr";
         case STATE_COND_TYPE_EXISTS: return "exists";
         case STATE_COND_TYPE_AS: return "as";
+        case STATE_COND_TYPE_DO: return "do";
         default: return "unknown";
     }
 }
@@ -281,6 +284,9 @@ typedef struct state_cond {
             int type; /* enum anim_as */
             ARRAY_DECL(struct state_cond*, sub_conds)
         } as;
+        struct {
+            ARRAY_DECL(struct state_effect*, effects)
+        } _do;
         valexpr_t valexpr;
         int dead;
     } u;
