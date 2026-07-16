@@ -1022,7 +1022,11 @@ HERE'S THE PLAN:
     a savepoint...
 [ ] LOOK AT MEMORY USAGE
     ...it may be causin' fans to blow
-
+    ...ah ha, but in Jul 2026, we discovered we were creating a fresh texture
+    every frame, and fixed it.
+    It had been taking up almost half the CPU instructions involved with a
+    step of the test_app.
+    Sooo... maybe that will have helped!
 
 
 Jan 8, 2024:
@@ -1095,66 +1099,6 @@ Jan 8, 2024:
 [ ] Ummmmmm we don't always want an rgraph's palmapper to apply to its labels.
     E.g. when a spider is carrying something... like if aispiders pick up food
     in dodecas area, the food turns purple.
-[ ] How can we extend the rules in actor/_aispider.fus?..
-    Like, right now we have to manually add combinations, like "jump short",
-    "jump medium", "jump long", "backflip after first jumping short", etc.
-    Clearly, we want some kind of recursive algorithm...
-    OH HOLD UP! We probably only need a loop, not recursive function
-    calls. Because we don't need to do branching logic right now, we
-    just need to determine whether jumping is safe.
-
-    So, it all comes together something like this:
-
-        proc "safe_to_jump":
-            set myvar("_transform"): arr: 0 0 0 F
-            while: T
-            do:
-                if: any:
-                    coll: all yes with myvar("_transform")
-                        ;; (+)- +
-                    coll: all yes with myvar("_transform")
-                        ;;        +
-                        ;;       /
-                        ;; ( )  +
-                then:
-                    set myvar("safe_to_jump"): T
-                    break
-                if:
-                    coll: any yes with myvar("_transform")
-                        ;;       \*/*
-                        ;;        + -
-                        ;;       /*\*
-                        ;; ( )
-                then:
-                    set myvar("safe_to_jump"): F
-                    break
-                if:
-                    coll: all yes with myvar("_transform")
-                        ;;        +
-                        ;;
-                        ;; ( )  +
-                then:
-                    move myvar("_transform"): 1 0
-                    rot myvar("_transform"): 1
-                else:
-                    move myvar("_transform"): 1 0
-
-    ...and then later on, we can do stuff like:
-
-        call: "safe_to_jump"
-        if: expr: myvar("safe_to_jump")
-        then:
-            key: down u
-
-    ...and so, we need:
-
-        [X] STATE_EFFECT_TYPE_WHILE
-        [X] support:
-            move myvar("_transform"): 1 0
-            rot myvar("_transform"): 1
-            flip myvar("_transform")
-        [ ] support:
-            coll: all yes with myvar("_transform")
 
 
 Jan 19, 2025:
@@ -1268,3 +1212,97 @@ Jul 7, 2026:
     the spider should in entrance.fus.
     ===> OKAY, added "dripper".
     But it was too distracting in entrance.fus, so didn't add it there.
+
+
+Jul 15, 2026:
+-------------
+
+[ ] How can we extend the rules in actor/_aispider.fus?..
+    Like, right now we have to manually add combinations, like "jump short",
+    "jump medium", "jump long", "backflip after first jumping short", etc.
+    Clearly, we want some kind of recursive algorithm...
+    OH HOLD UP! We probably only need a loop, not recursive function
+    calls. Because we don't need to do branching logic right now, we
+    just need to determine whether jumping is safe.
+
+    So, it all comes together something like this:
+
+        proc "safe_to_jump":
+
+            #set myvar("_jump_location"): arr: 0 0 0 F
+            set myvar("_jump_location"): my_location
+
+            while: T
+            do:
+                if: any:
+                    coll: all yes at myvar("_jump_location")
+                        ;; (+)- +
+                    coll: all yes at myvar("_jump_location")
+                        ;;        +
+                        ;;       /
+                        ;; ( )  +
+                then:
+                    set myvar("safe_to_jump"): T
+                    break
+                if:
+                    coll: any yes at myvar("_jump_location")
+                        ;;       \*/*
+                        ;;        + -
+                        ;;       /*\*
+                        ;; ( )
+                then:
+                    set myvar("safe_to_jump"): F
+                    break
+                if:
+                    coll: all yes at myvar("_jump_location")
+                        ;;        +
+                        ;;
+                        ;; ( )  +
+                then:
+                    move myvar("_jump_location"): 1 0
+                    rot myvar("_jump_location"): 1
+                else:
+                    move myvar("_jump_location"): 1 0
+
+    ...and then later on, we can do stuff like:
+
+        call: "safe_to_jump"
+        if: expr: myvar("safe_to_jump")
+        then:
+            key: down u
+
+    ...and so, we need:
+
+        [X] STATE_EFFECT_TYPE_WHILE
+        [X] STATE_EFFECT_TYPE_BREAK/CONTINUE
+        [X] everywhere we iterate over a bunch of effects and call
+            state_effect_apply, we should factor that out into a function,
+            and have it pay attention to controlflow.should_continue/break
+            ...hmmm looks like we can't quite do a straight-up factor-out,
+            but anyway we can add controlflow checks into the existing
+            loops.
+            See: hexgame_state_controlflow_t
+        [X] support:
+            set myvar("_jump_location"): my_location
+            ...NOTE: `my_location` should allocate a fresh VAL_TYPE_ARR.
+            How is that memory managed?..
+            Under the hood, `set myvar("_jump_location"): ...` when the value
+            of `...` is VAL_TYPE_ARR does make a copy of the array.
+            But where does the memory for `my_location` live?..
+            Actually, I think it can just live on the body?! O_o
+            OH HOLD UP, maybe we can just create it in `body_refresh_vars`?!..
+            So instead of a separate `my_location`, we can just have
+            `myvar(".location")`.
+            Which is equivalent to:
+                arr: myvar(".x") myvar(".y") myvar(".rot") myvar(".turn")
+            ...in which case... why don't we just use that?..
+            AH HA! Because there is no such `arr: ...` syntax when evaluating
+            an *expression*, only when evaluating a value *literal*.
+            That is, currently only `val_parse` supports `arr`.
+            So anyway, yeah `body_refresh_vars` would make sense.
+        [X] support:
+            move myvar("_jump_location"): 1 0
+            rot myvar("_jump_location"): 1
+            flip myvar("_jump_location")
+        [ ] support:
+            coll: all yes at myvar("_jump_location")

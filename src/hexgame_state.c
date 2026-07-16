@@ -17,6 +17,20 @@
 #include "write.h"
 
 
+void hexgame_state_controlflow_init(hexgame_state_controlflow_t *controlflow, bool can_continue){
+    controlflow->can_continue = can_continue;
+    controlflow->can_break = true;
+    controlflow->should_continue = false;
+    controlflow->should_break = false;
+}
+
+bool hexgame_state_controlflow_is_unrolling(hexgame_state_controlflow_t *controlflow){
+    /* Is the "call stack" being unrolled?.. that is, everywhere we're
+    iterating over some effects, should we stop that iteration?.. */
+    return controlflow->should_break || controlflow->should_continue;
+}
+
+
 bool hexgame_state_context_debug(hexgame_state_context_t *context){
     return
         (context->body && context->body == context->game->anim_debug_body) ||
@@ -402,14 +416,20 @@ static int _apply_sub_effects(state_effect_t *effect,
     int sub_effects_len, state_effect_t **sub_effects,
     hexgame_state_context_t *context
 ){
+    /* Applies effects for STATE_EFFECT_TYPE_SPAWN, STATE_EFFECT_TYPE_AS,
+    etc.
+    Note that in these situations, we generally have a new body, and a
+    new context.
+    And we don't use the same controlflow_t as the caller. */
     int err;
 
+    hexgame_state_controlflow_t controlflow;
+    hexgame_state_controlflow_init(&controlflow, false);
     for(int i = 0; i < sub_effects_len; i++){
         state_effect_t *sub_effect = sub_effects[i];
 
         state_effect_goto_t *gotto = NULL;
-        err = state_effect_apply(sub_effect, context, &gotto,
-            NULL);
+        err = state_effect_apply(sub_effect, context, &gotto, &controlflow);
         if(err){
             if(err == 2){
                 fprintf(stderr, "...in \"%s\" statement\n",
@@ -426,8 +446,11 @@ static int _apply_sub_effects(state_effect_t *effect,
                 then we immediately handle the new state's rules */
                 err = body_handle_rules(context->body, context->your_body);
                 if(err)return err;
+                controlflow.should_break = true;
             }
         }
+
+        if(hexgame_state_controlflow_is_unrolling(&controlflow))break;
     }
 
     return 0;
@@ -435,7 +458,8 @@ static int _apply_sub_effects(state_effect_t *effect,
 
 int state_effect_apply(state_effect_t *effect,
     hexgame_state_context_t *context,
-    state_effect_goto_t **gotto_ptr, bool *continues_ptr
+    state_effect_goto_t **gotto_ptr,
+    hexgame_state_controlflow_t *controlflow
 ){
     #define RULE_PERROR() \
         fprintf(stderr, "Error in effect: %s\n", state_effect_type_name(effect->type));
@@ -627,16 +651,27 @@ int state_effect_apply(state_effect_t *effect,
                 name, state_context->stateset->filename);
             return 2;
         }
+
+        /* NOTE: we set up a fresh controlflow for this call, so that
+        STATE_EFFECT_TYPE_BREAK/CONTINUE within the proc don't affect the
+        caller.
+        However, we pass in gotto_ptr!.. so STATE_EFFECT_TYPE_GOTO within
+        the proc can change the anim's state.
+        Although `goto immediate` will only affect the controlflow within
+        the proc. O_o
+        Our programming language's semantics are kind of a mess. */
+        hexgame_state_controlflow_t controlflow;
+        hexgame_state_controlflow_init(&controlflow, false);
         for(int i = 0; i < proc->effects_len; i++){
             state_effect_t *effect = proc->effects[i];
-            err = state_effect_apply(effect, context, gotto_ptr,
-                continues_ptr);
+            err = state_effect_apply(effect, context, gotto_ptr, &controlflow);
             if(err){
                 if(err == 2){
                     fprintf(stderr, "...while calling proc: %s\n", name);
                 }
                 return err;
             }
+            if(hexgame_state_controlflow_is_unrolling(&controlflow))break;
         }
         break;
     }
@@ -768,12 +803,21 @@ int state_effect_apply(state_effect_t *effect,
         break;
     }
     case STATE_EFFECT_TYPE_CONTINUE: {
-        if(!continues_ptr){
+        if(!controlflow || !controlflow->can_continue){
             RULE_PERROR()
             fprintf(stderr, "Can't use \"continue\" here\n");
             return 2;
         }
-        *continues_ptr = true;
+        controlflow->should_continue = true;
+        break;
+    }
+    case STATE_EFFECT_TYPE_BREAK: {
+        if(!controlflow || !controlflow->can_break){
+            RULE_PERROR()
+            fprintf(stderr, "Can't use \"break\" here\n");
+            return 2;
+        }
+        controlflow->should_break = true;
         break;
     }
     case STATE_EFFECT_TYPE_CONFUSED: {
@@ -899,14 +943,14 @@ int state_effect_apply(state_effect_t *effect,
 
         for(int i = 0; i < effects_len; i++){
             state_effect_t *effect = effects[i];
-            err = state_effect_apply(effect, context, gotto_ptr,
-                continues_ptr);
+            err = state_effect_apply(effect, context, gotto_ptr, controlflow);
             if(err){
                 if(err == 2){
                     fprintf(stderr, "...in \"if\" statement\n");
                 }
                 return err;
             }
+            if(hexgame_state_controlflow_is_unrolling(controlflow))break;
         }
         break;
     }
@@ -927,17 +971,21 @@ int state_effect_apply(state_effect_t *effect,
             }
             if(!matched)break;
 
+            hexgame_state_controlflow_t controlflow;
+            hexgame_state_controlflow_init(&controlflow, true);
             for(int i = 0; i < _while->effects_len; i++){
                 state_effect_t *effect = _while->effects[i];
-                err = state_effect_apply(effect, context, gotto_ptr,
-                    continues_ptr);
+                err = state_effect_apply(effect, context, gotto_ptr, &controlflow);
                 if(err){
                     if(err == 2){
                         fprintf(stderr, "...in \"while\" statement\n");
                     }
                     return err;
                 }
+                if(hexgame_state_controlflow_is_unrolling(&controlflow))break;
             }
+            if(controlflow.should_break)break;
+            if(controlflow.should_continue)continue;
         }
         break;
     }
@@ -984,16 +1032,18 @@ int state_effect_apply(state_effect_t *effect,
 
 static int state_rule_apply(state_rule_t *rule,
     hexgame_state_context_t *context,
-    state_effect_goto_t **gotto_ptr, bool *continues_ptr
+    state_effect_goto_t **gotto_ptr
 ){
     int err;
 
     /* NOTE: body and/or actor may be NULL.
     See comment on rule_match. */
 
+    hexgame_state_controlflow_t controlflow;
+    hexgame_state_controlflow_init(&controlflow, false);
     for(int i = 0; i < rule->effects_len; i++){
         state_effect_t *effect = rule->effects[i];
-        err = state_effect_apply(effect, context, gotto_ptr, continues_ptr);
+        err = state_effect_apply(effect, context, gotto_ptr, &controlflow);
         if(err){
             if(err == 2){
                 fprintf(stderr, "...in: state=%s, stateset=%s\n",
@@ -1001,6 +1051,7 @@ static int state_rule_apply(state_rule_t *rule,
             }
             return err;
         }
+        if(hexgame_state_controlflow_is_unrolling(&controlflow))break;
     }
     return 0;
 }
@@ -1025,10 +1076,17 @@ int state_handle_rules(state_t *state,
                 else fprintf(stderr, "#%i", i);
                 fprintf(stderr, "\n");
             }
-            bool continues = false;
-            err = state_rule_apply(rule, context, gotto_ptr, &continues);
+
+            err = state_rule_apply(rule, context, gotto_ptr);
             if(err)return err;
-            if(!continues)break;
+
+            /* We are iterating over a bunch of rules here, and one matched,
+            so we applied its effects.
+            After applying the rule, by default we *stop* iterating over the
+            rules.
+            That default behaviour can be changed with "nostop" when defining
+            the rule. */
+            if(rule->stop_on_match)break;
         }
     }
 
@@ -1036,16 +1094,17 @@ int state_handle_rules(state_t *state,
 }
 
 int collmsg_handler_apply(collmsg_handler_t *handler,
-    hexgame_state_context_t *context,
-    bool *continues_ptr
+    hexgame_state_context_t *context
 ){
     int err;
 
+    hexgame_state_controlflow_t controlflow;
+    hexgame_state_controlflow_init(&controlflow, false);
     for(int i = 0; i < handler->effects_len; i++){
         state_effect_t *effect = handler->effects[i];
 
         state_effect_goto_t *gotto = NULL;
-        err = state_effect_apply(effect, context, &gotto, continues_ptr);
+        err = state_effect_apply(effect, context, &gotto, &controlflow);
         if(err)return err;
 
         actor_t *actor = context->actor;
@@ -1062,6 +1121,7 @@ int collmsg_handler_apply(collmsg_handler_t *handler,
                     then we immediately handle the new state's rules */
                     err = actor_handle_rules(actor, your_body);
                     if(err)return err;
+                    controlflow.should_break = true;
                 }
             }else{
                 /* BODY */
@@ -1072,9 +1132,11 @@ int collmsg_handler_apply(collmsg_handler_t *handler,
                     then we immediately handle the new state's rules */
                     err = body_handle_rules(body, your_body);
                     if(err)return err;
+                    controlflow.should_break = true;
                 }
             }
         }
+        if(hexgame_state_controlflow_is_unrolling(&controlflow))break;
     }
     return 0;
 }

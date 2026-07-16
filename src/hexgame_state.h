@@ -9,6 +9,18 @@ both anim.h and hexgame.h */
 #include "anim.h"
 #include "hexgame.h"
 
+
+typedef struct hexgame_state_controlflow {
+    bool can_break; /* Allow STATE_EFFECT_TYPE_BREAK */
+    bool can_continue; /* Allow STATE_EFFECT_TYPE_CONTINUE */
+    bool should_break; /* E.g. via STATE_EFFECT_TYPE_BREAK, or "goto immediate", etc */
+    bool should_continue; /* E.g. via STATE_EFFECT_TYPE_CONTINUE */
+} hexgame_state_controlflow_t;
+
+void hexgame_state_controlflow_init(hexgame_state_controlflow_t *controlflow, bool can_continue);
+bool hexgame_state_controlflow_is_unrolling(hexgame_state_controlflow_t *controlflow);
+
+
 typedef struct hexgame_state_context {
     hexgame_t *game;
     hexmap_t *map;
@@ -35,11 +47,11 @@ int state_cond_match(state_cond_t *cond,
 
 int state_effect_apply(state_effect_t *effect,
     hexgame_state_context_t *context,
-    state_effect_goto_t **gotto_ptr, bool *continues_ptr);
+    state_effect_goto_t **gotto_ptr,
+    hexgame_state_controlflow_t *controlflow);
 
 int collmsg_handler_apply(collmsg_handler_t *handler,
-    hexgame_state_context_t *context,
-    bool *continues_ptr);
+    hexgame_state_context_t *context);
 
 
 #endif

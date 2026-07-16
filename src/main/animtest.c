@@ -64,9 +64,11 @@ static int _run_effects(state_effect_t *effects[], int effects_len,
     if(effects_len <= 0)return 0;
     fprintf(stderr, "Running %i \"%s\" effects...\n", effects_len, effect_kind);
     state_effect_goto_t *gotto = NULL;
+    hexgame_state_controlflow_t controlflow;
+    hexgame_state_controlflow_init(&controlflow, false);
     for(int i = 0; i < effects_len; i++){
         state_effect_t *effect = effects[i];
-        err = state_effect_apply(effect, context, &gotto, NULL);
+        err = state_effect_apply(effect, context, &gotto, &controlflow);
         if(!err && gotto){
             fprintf(stderr, "Can't use \"goto\"");
             err = 2;
@@ -82,6 +84,7 @@ static int _run_effects(state_effect_t *effects[], int effects_len,
             }
             return err;
         }
+        if(hexgame_state_controlflow_is_unrolling(&controlflow))break;
     }
     return 0;
 }
@@ -176,6 +179,13 @@ static void test_suite_init(test_suite_t *suite, const char *filename){
     suite->filename = filename;
     ARRAY_INIT(suite->test_cases)
 }
+static test_case_t *test_suite_get_case(test_suite_t *suite, const char *name){
+    for(int i = 0; i < suite->test_cases_len; i++){
+        test_case_t *test_case = suite->test_cases[i];
+        if(!strcmp(test_case->name, name))return test_case;
+    }
+    return NULL;
+}
 static int test_suite_load(test_suite_t *suite, const char *filename,
     prismelrenderer_t *prend
 ){
@@ -195,6 +205,10 @@ static int test_suite_load(test_suite_t *suite, const char *filename,
         const char *name = NULL;
         if(GOT_STR){
             GET_STR_CACHED(name, &prend->name_store)
+            if(test_suite_get_case(suite, name)){
+                fprintf(stderr, "Duplicate case name: \"%s\"\n", name);
+                return 2;
+            }
         }
         OPEN
         ARRAY_PUSH_NEW(test_case_t*, suite->test_cases, test_case)

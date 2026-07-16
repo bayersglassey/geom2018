@@ -4,10 +4,9 @@ state "stand":
     hitbox: collmap("stand")
 
     "always"
-    if:
+    nostop if:
     then:
         set myvar("bubble_toggle"): T
-        continue
 
     # Crawling, turning
     import "anim/_walker_stand.state.fus"

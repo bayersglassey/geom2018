@@ -111,7 +111,7 @@ int hexgame_location_parse_string(hexgame_location_t *loc, const char *s){
 }
 
 int hexgame_location_from_val(hexgame_location_t *loc, val_t *val){
-    /* Converts loc to a val of the form: arr(x y rot turn) */
+    /* Initializes loc from a val of the form: arr(x y rot turn) */
     int err;
     if(val->type != VAL_TYPE_ARR){
         fprintf(stderr, "%s: Got %s, expected arr\n",
@@ -131,7 +131,7 @@ int hexgame_location_from_val(hexgame_location_t *loc, val_t *val){
 }
 
 int hexgame_location_to_val(hexgame_location_t *loc, val_t *val){
-    /* Initializes loc from a val of the form: arr(x y rot turn) */
+    /* Converts loc to a val of the form: arr(x y rot turn) */
     int err;
     err = val_set_arr(val, 4);
     if(err)return err;

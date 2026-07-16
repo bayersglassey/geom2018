@@ -5,6 +5,7 @@ $SET_BOOL NO_COLLECT_ON_TOUCH
 on "crush": goto: "dead"
 
 import "anim/_coin.behaviour.fus"
+import "anim/_walker_procs.fus"
 
 state "_crouch":
     if() then: goto: "crawl"
@@ -195,10 +196,9 @@ state "collected":
     rgraph: "dead_once"
     unsafe
     "call_collected"
-    if() then:
+    nostop if() then:
         # Do whatever it is coin-like things do while they've been collected...
         call: "while_collected"
-        continue
     "default"
     if() then: die
 

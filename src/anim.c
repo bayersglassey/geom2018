@@ -404,6 +404,14 @@ static int _parse_cond(state_context_t *context, fus_lexer_t *lexer,
         else return UNEXPECTED("yes or no");
         NEXT
 
+        valexpr_t at_expr;
+        valexpr_set_literal_null(&at_expr);
+        if(GOT("at")){
+            NEXT
+            err = valexpr_parse(&at_expr, lexer);
+            if(err)return err;
+        }
+
         hexcollmap_t *own_collmap;
         hexcollmap_t *collmap;
         err = _parse_collmap(context, lexer, prend, space,
@@ -417,6 +425,7 @@ static int _parse_cond(state_context_t *context, fus_lexer_t *lexer,
         cond->u.coll.collmap = collmap;
         cond->u.coll.flags = flags;
         cond->u.coll.collmsg_expr = collmsg_expr;
+        cond->u.coll.at_expr = at_expr;
     }else if(GOT("dead")){
         NEXT
         OPEN
@@ -723,6 +732,9 @@ int state_effect_parse(state_effect_t *effect,
     }else if(GOT("continue")){
         effect->type = STATE_EFFECT_TYPE_CONTINUE;
         NEXT
+    }else if(GOT("break")){
+        effect->type = STATE_EFFECT_TYPE_BREAK;
+        NEXT
     }else if(GOT("confused")){
         NEXT
         OPEN
@@ -924,8 +936,14 @@ static int _state_parse_rule(state_t *state, fus_lexer_t *lexer,
         }
     }
 
+    bool stop_on_match = true;
+    if(GOT("nostop")){
+        NEXT
+        stop_on_match = false;
+    }
+
     ARRAY_PUSH_NEW(state_rule_t*, state->rules, rule)
-    state_rule_init(rule, state, name);
+    state_rule_init(rule, state, name, stop_on_match);
 
     GET("if")
     OPEN
@@ -1520,15 +1538,17 @@ void state_rule_cleanup(state_rule_t *rule){
     ARRAY_FREE_PTR(state_effect_t*, rule->effects, state_effect_cleanup)
 }
 
-void state_rule_init(state_rule_t *rule, state_t *state, const char *name){
+void state_rule_init(state_rule_t *rule, state_t *state, const char *name, bool stop_on_match){
     rule->state = state;
     ARRAY_INIT(rule->conds)
     ARRAY_INIT(rule->effects)
     rule->name = name;
+    rule->stop_on_match = stop_on_match;
 }
 
 void state_rule_dump(state_rule_t *rule, FILE *file, int depth){
     _print_tabs(file, depth);
+    if(!rule->stop_on_match)fprintf(file, "nostop ");
     fprintf(file, "if:\n");
     for(int i = 0; i < rule->conds_len; i++){
         state_cond_t *cond = rule->conds[i];

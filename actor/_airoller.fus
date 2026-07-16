@@ -10,32 +10,28 @@
 
 state "mainloop":
 
-    if:
+    nostop if:
     then:
         key: up b
         key: up u
-        continue
 
-    if:
+    nostop if:
         chance: $GET_INT KUP_F/1000
     then:
         key: up f
-        continue
 
-    if:
+    nostop if:
         chance: $GET_INT KDOWN_F/1000
     then:
         key: down f
-        continue
 
-    if:
+    nostop if:
         chance: $GET_INT TURN/1000
     then:
         key: up f
         key: down b
-        continue
 
-    if: all:
+    nostop if: all:
         chance: $GET_INT GRAB/1000
         coll: all yes
             $IF BIGROLLER:
@@ -61,9 +57,8 @@ state "mainloop":
                 ;; (.)  .
     then:
         key: down u
-        continue
 
-    if: any:
+    nostop if: any:
         chance: $GET_INT KDOWN_D/1000
         coll: all yes
             $IF BIGROLLER:
@@ -78,9 +73,8 @@ state "mainloop":
                 ;; (+)  +
     then:
         key: down d
-        continue
 
-    if:
+    nostop if:
         chance: $GET_INT KUP_D/1000
         not: coll: all yes
             $IF BIGROLLER:
@@ -95,5 +89,4 @@ state "mainloop":
                 ;; (+)  +
     then:
         key: up d
-        continue
 

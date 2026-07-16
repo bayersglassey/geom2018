@@ -16,6 +16,7 @@ $SET_INT ROLLER_STAND_DELAY 1
 
 
 import "anim/_spider_vars.fus"
+import "anim/_walker_procs.fus"
 
 
 collmsgs:

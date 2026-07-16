@@ -18,10 +18,9 @@ state "_string_appear":
 state "string_stay":
     rgraph: $PREFIX RGRAPH_NS "string_stay"
 
-    if:
+    nostop if:
     then:
         inc myvar("age")
-        continue
 
     if: expr: > myvar("age") $GET_INT MAX_AGE
     then: goto delay: "string_disappear"

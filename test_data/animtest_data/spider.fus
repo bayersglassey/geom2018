@@ -1,4 +1,8 @@
 cases:
+
+    ##################################################################
+    # Tests of pressing "f" while standing
+
     "should_step":
         stateset: "anim/spider.fus"
         collmap:
@@ -12,6 +16,7 @@ cases:
             assert: == myvar(".state") "step"
             assert: == myvar(".x") 1
             assert: == myvar(".y") 0
+
     "should_jump":
         stateset: "anim/spider.fus"
         collmap:
@@ -25,6 +30,7 @@ cases:
             assert: == myvar(".state") "jump"
             assert: == myvar(".x") 1
             assert: == myvar(".y") 0
+
     "should_stay":
         stateset: "anim/spider.fus"
         collmap:
@@ -38,6 +44,7 @@ cases:
             assert: == myvar(".state") "stand"
             assert: == myvar(".x") 0
             assert debug: == myvar(".y") 0
+
     "should_step_up":
         stateset: "anim/spider.fus"
         collmap:
@@ -52,6 +59,7 @@ cases:
             assert: == myvar(".x") 1
             assert: == myvar(".y") 0
             assert: == myvar(".rot") 1
+
     "should_jump_up":
         stateset: "anim/spider.fus"
         collmap:
@@ -66,3 +74,110 @@ cases:
             assert: == myvar(".x") 1
             assert: == myvar(".y") 0
             assert: == myvar(".rot") 1
+
+# TODO!!!!
+$SKIP:
+
+    ##################################################################
+    # Tests of proc "safe_to_jump"
+
+    "can_jump_short1":
+        stateset: "anim/spider.fus"
+        collmap:
+            ;;    .   .
+            ;;
+            ;; (+)- + - +
+        before:
+            call: "safe_to_jump"
+        after:
+            assert: myvar("safe_to_jump")
+
+    "cant_jump_short0_infinity":
+        stateset: "anim/spider.fus"
+        collmap:
+            ;;    .
+            ;;
+            ;; (+)- +
+        before:
+            call: "safe_to_jump"
+        after:
+            assert: ! myvar("safe_to_jump")
+            assert: == myvar("_reason") "infinity"
+
+    "can_jump_short2":
+        stateset: "anim/spider.fus"
+        collmap:
+            ;;    .   .   .
+            ;;
+            ;; (+)- +   + - +
+        before:
+            call: "safe_to_jump"
+        after:
+            assert: myvar("safe_to_jump")
+
+    "cant_jump_short2_crash":
+        stateset: "anim/spider.fus"
+        collmap:
+            ;;          + - +
+            ;;         /*\*/*\
+            ;;    .   + - + - +
+            ;;         \*/*\*/
+            ;; (+)- +   + - +
+        before:
+            call: "safe_to_jump"
+        after:
+            assert: ! myvar("safe_to_jump")
+            assert: == myvar("_reason") "crash"
+
+    "can_jump_redirect":
+        stateset: "anim/spider.fus"
+        collmap:
+            ;;      .   .   +
+            ;;             /
+            ;;    .   .   +
+            ;;
+            ;; (+)- +   +
+        before:
+            call: "safe_to_jump"
+        after:
+            assert: myvar("safe_to_jump")
+
+    "cant_jump_redirect_infinity":
+        stateset: "anim/spider.fus"
+        collmap:
+            ;;    .   .   +
+            ;;
+            ;; (+)- +   +
+        before:
+            call: "safe_to_jump"
+        after:
+            assert: ! myvar("safe_to_jump")
+            assert: == myvar("_reason") "infinity"
+
+    "cant_jump_redirect_crash":
+        stateset: "anim/spider.fus"
+        collmap:
+            ;;            *\*/*
+            ;;      .   .   .
+            ;;
+            ;;    .   .   +
+            ;;
+            ;; (+)- +   +
+        before:
+            call: "safe_to_jump"
+        after:
+            assert: ! myvar("safe_to_jump")
+            assert: == myvar("_reason") "crash"
+
+    "can_jump_redirect_loop":
+        stateset: "anim/spider.fus"
+        collmap:
+            ;;    +   +   +
+            ;;
+            ;;  +   .   .   +
+            ;;
+            ;;   (+)- +   +
+        before:
+            call: "safe_to_jump"
+        after:
+            assert: myvar("safe_to_jump")

@@ -538,6 +538,12 @@ int body_refresh_vars(body_t *body){
     }
 
     {
+        var_t *var = _get_nosave_var(vars, ".loc");
+        err = hexgame_location_to_val(&body->loc, &var->value);
+        if(err)return err;
+    }
+
+    {
         var_t *var = _get_nosave_var(vars, ".x");
         if(var == NULL)return 1;
         val_set_int(&var->value, body->loc.pos[0]);
@@ -667,9 +673,11 @@ int body_execute_procs(body_t *body, int type /* enum stateset_proc_type */){
                 fprintf(stderr, "Executing \"%s\" proc: \"%s\"\n",
                     stateset_proc_type_msg(type), proc->name);
             }
+            hexgame_state_controlflow_t controlflow;
+            hexgame_state_controlflow_init(&controlflow, false);
             for(int k = 0; k < proc->effects_len; k++){
                 state_effect_t *effect = proc->effects[k];
-                err = state_effect_apply(effect, &context, &gotto, NULL);
+                err = state_effect_apply(effect, &context, &gotto, &controlflow);
                 if(!err && gotto){
                     fprintf(stderr, "Can't use \"goto\" in \"%s\" procs\n",
                         stateset_proc_type_msg(type));
@@ -683,6 +691,7 @@ int body_execute_procs(body_t *body, int type /* enum stateset_proc_type */){
                     }
                     return err;
                 }
+                if(hexgame_state_controlflow_is_unrolling(&controlflow))break;
             }
         }
     }
@@ -1093,7 +1102,7 @@ int body_collide_against_body(body_t *body, body_t *body_other){
             fprintf(stderr, "Executing handler for collmsg: \"%s\"\n",
                 handler->msg);
         }
-        err = collmsg_handler_apply(handler, &context, NULL);
+        err = collmsg_handler_apply(handler, &context);
         if(err)return err;
     }
 

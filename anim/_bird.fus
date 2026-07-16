@@ -532,17 +532,15 @@ state $PREFIX ANIM_NS "flying":
         ;;   */*\*
         ;;  (.)- .
 
-    if:
+    nostop if:
         key: wentdown u
     then:
         rot: 1
-        continue
 
-    if:
+    nostop if:
         key: wentdown d
     then:
         rot: -1
-        continue
 
     if:
         key: not isdown u

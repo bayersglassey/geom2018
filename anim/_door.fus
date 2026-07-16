@@ -60,7 +60,7 @@ vars:
 
 state "init":
     $IF ABILITY:
-        if: exists myvar("set_yourbool")
+        nostop if: exists myvar("set_yourbool")
         then:
             # E.g. sets myvar("is_spikeyspider"): T, which kicks off the
             # "update_vars" proc from anim/_spider_vars.fus, which sets
@@ -68,7 +68,6 @@ state "init":
             # with the associated ability!..
             set myvar(myvar("set_yourbool")): T
             call: "update_vars"
-            continue
 
     if: any:
         not: exists myvar("key")

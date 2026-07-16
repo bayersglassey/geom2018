@@ -1,11 +1,10 @@
 
 state "mainloop":
 
-    if:
+    nostop if:
     then:
         key: up f
         key: up b
-        continue
 
     if: any:
         all:

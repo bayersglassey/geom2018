@@ -15,17 +15,15 @@ state $SUFFIX R0 $PREFIX ANIM_NS "stand":
         ;;  (.)  .
 
     $IF INERT:
-        if() then:
+        nostop if() then:
             set myvar("f"): F
-            continue
-        if:
+        nostop if:
             expr: > myvar("speed") 0
         then:
             dec myvar("speed")
             set myvar("f"): T
-            continue
     $IF !INERT:
-        if() then:
+        nostop if() then:
             set myvar("u"): F
             set myvar("d"): F
             set myvar("f"): F
@@ -38,7 +36,6 @@ state $SUFFIX R0 $PREFIX ANIM_NS "stand":
             then: set myvar("f"): T
             if: key: wasdown b
             then: set myvar("b"): T
-            continue
 
     if:
         expr: myvar("u")

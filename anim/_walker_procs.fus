@@ -1,0 +1,54 @@
+
+$SET_INT MAX_ITERATIONS 50
+
+proc "safe_to_jump":
+    set myvar("safe_to_jump"): F
+    set myvar("_jump_location"): myvar(".loc")
+    set myvar("_iterations"): 0
+    set myvar("_reason"): null
+    while: expr: T
+    do:
+
+        # Avoid infinite loops
+        inc myvar("_iterations")
+        if: expr: >= myvar("_iterations") $GET_INT MAX_ITERATIONS
+        then:
+            set myvar("_reason"): "infinity"
+            break
+
+        # Safe to jump, because we can land here?
+        if: any:
+            coll: all yes at myvar("_jump_location")
+                ;; (+)- +
+            coll: all yes at myvar("_jump_location")
+                ;;        +
+                ;;       /
+                ;; ( )  +
+        then:
+            set myvar("safe_to_jump"): T
+            break
+
+        # Deflected upwards?
+        if:
+            coll: all yes at myvar("_jump_location")
+                ;;        +
+                ;;
+                ;; ( )  +
+        then:
+            move myvar("_jump_location"): 1 0
+            rot myvar("_jump_location"): 1
+            continue
+
+        # Not safe to jump, because we would crash into something?
+        if:
+            coll: any yes at myvar("_jump_location")
+                ;;       \*/*
+                ;;        + -
+                ;;       /*\*
+                ;; ( )
+        then:
+            set myvar("_reason"): "crash"
+            break
+
+        # Move forward and repeat!
+        move myvar("_jump_location"): 1 0

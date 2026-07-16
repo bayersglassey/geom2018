@@ -38,10 +38,9 @@ state "jump":
     hitbox: collmap("stand")
 
     "spawn_string"
-    if:
+    nostop if:
     then:
         spawn: "anim/string.fus" "string_appear" (0 0) 0 f
-        continue
 
     # Landing, jumping, crashing
     import "anim/_walker_jumping.state.fus"

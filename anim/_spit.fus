@@ -62,10 +62,9 @@ state "fly":
         call: "on_collide"
         goto delay: "dead"
 
-    if:
+    nostop if:
     then:
         inc myvar("age")
-        continue
 
     if: any:
         expr: > myvar("age") $GET_INT MAX_AGE
@@ -113,10 +112,9 @@ state "crouch_fly":
         call: "on_collide"
         goto delay: "crouch_dead"
 
-    if:
+    nostop if:
     then:
         inc myvar("age")
-        continue
 
     if: any:
         expr: > myvar("age") $GET_INT MAX_AGE

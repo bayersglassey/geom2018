@@ -5,7 +5,7 @@ state "mainloop":
     # Main AI loop
 
     "always"
-    if() then:
+    nostop if() then:
         key: up u
         key: up d
         key: up l
@@ -14,7 +14,6 @@ state "mainloop":
         key: up y
 
         inc myvar("wait_time")
-        continue
 
     "wait"
     if: expr: < myvar("wait_time") 14
@@ -36,7 +35,7 @@ state "mainloop":
 state "run_around":
 
     "always"
-    if() then:
+    nostop if() then:
         key: up u
         key: up d
         key: up l
@@ -45,7 +44,6 @@ state "run_around":
         key: up y
 
         inc myvar("run_time")
-        continue
 
 
     "dead"
@@ -274,7 +272,7 @@ state "run_around":
 state "mainloop_crawl":
 
     "always"
-    if() then:
+    nostop if() then:
         key: up u
         #key: up d # Don't uncrawl by default!..
         key: up l
@@ -283,7 +281,6 @@ state "mainloop_crawl":
         key: up y
 
         inc myvar("crawl_time")
-        continue
 
 
     # Sometimes, stand!

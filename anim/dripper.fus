@@ -7,9 +7,8 @@ state "rolling":
     rgraph: "dripper"
 
     "age"
-    if() then:
+    nostop if() then:
         inc myvar("age")
-        continue
 
     "die_of_age"
     if:

@@ -1,19 +1,23 @@
 cases:
+
     "move var":
         after:
             set mapvar("x"): arr: 1 2 0 F
             move mapvar("x"): 10 20
             assert debug: == mapvar("x") arr: 11 22 0 F
+
     "rot var":
         after:
             set mapvar("x"): arr: 1 2 0 F
             rot mapvar("x"): 3
             assert debug: == mapvar("x") arr: 1 2 3 F
+
     "turn var":
         after:
             set mapvar("x"): arr: 1 2 0 F
             turn mapvar("x")()
             assert debug: == mapvar("x") arr: 1 2 0 T
+
     "while":
         after:
             set mapvar("x"): 0

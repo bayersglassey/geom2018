@@ -27,7 +27,7 @@ state "swim_jump":
     unsafe
 
     "spawn_bubbles"
-    if:
+    nostop if:
     then:
         if: expr: myvar("bubble_toggle")
         then:
@@ -35,7 +35,6 @@ state "swim_jump":
             set myvar("bubble_toggle"): F
         else:
             set myvar("bubble_toggle"): T
-        continue
 
     "land_up"
     if:
@@ -129,10 +128,9 @@ state "swim":
     unsafe
 
     "always"
-    if:
+    nostop if:
     then:
         set myvar("bubble_toggle"): T
-        continue
 
     "spit"
     if:

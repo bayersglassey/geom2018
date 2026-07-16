@@ -190,6 +190,7 @@ typedef struct stateset {
 typedef struct state_rule {
     const char *name;
     struct state *state;
+    bool stop_on_match; /* If this rule matches, should we stop matching rules?.. */
     ARRAY_DECL(struct state_cond*, conds)
     ARRAY_DECL(struct state_effect*, effects)
 } state_rule_t;
@@ -251,6 +252,12 @@ typedef struct state_cond {
             hexcollmap_t *collmap;
                 /* Cannot be NULL. If own_collmap != NULL, then
                 collmap == own_collmap */
+            valexpr_t at_expr;
+                /* If not VAL_TYPE_NULL, should be VAL_TYPE_ARR, an array
+                of length 4 representing a hexgame_location_t, i.e.
+                (x y rot turn). See: hexgame_location_from_val
+                The idea being that collision will be done using that
+                hexgame_location_t instead of current body's. */
         } coll;
         struct {
             bool yes;
@@ -304,6 +311,7 @@ enum state_effect_type {
     STATE_EFFECT_TYPE_INC,
     STATE_EFFECT_TYPE_DEC,
     STATE_EFFECT_TYPE_CONTINUE,
+    STATE_EFFECT_TYPE_BREAK,
     STATE_EFFECT_TYPE_CONFUSED,
     STATE_EFFECT_TYPE_KEY,
     STATE_EFFECT_TYPE_SET,
@@ -336,6 +344,7 @@ static const char *state_effect_type_name(int type){
         case STATE_EFFECT_TYPE_INC: return "inc";
         case STATE_EFFECT_TYPE_DEC: return "dec";
         case STATE_EFFECT_TYPE_CONTINUE: return "continue";
+        case STATE_EFFECT_TYPE_BREAK: return "break";
         case STATE_EFFECT_TYPE_CONFUSED: return "confused";
         case STATE_EFFECT_TYPE_KEY: return "key";
         case STATE_EFFECT_TYPE_SET: return "set";
@@ -460,7 +469,7 @@ void state_init(state_t *state, stateset_t *stateset, const char *name,
 void state_dump(state_t *state, FILE *file, int depth);
 
 void state_rule_cleanup(state_rule_t *rule);
-void state_rule_init(state_rule_t *rule, state_t *state, const char *name);
+void state_rule_init(state_rule_t *rule, state_t *state, const char *name, bool stop_on_match);
 void state_rule_dump(state_rule_t *rule, FILE *file, int depth);
 
 void state_cond_cleanup(state_cond_t *cond);
