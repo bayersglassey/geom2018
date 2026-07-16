@@ -140,9 +140,22 @@ static int fus_lexer_depth(fus_lexer_t *lexer){
 void fus_lexer_info(fus_lexer_t *lexer, FILE *f){
     fprintf(f, "[%s: row=%i col=%i pos=%i] ",
         lexer->filename,
+        /* NOTE: if you change the math here, make sure to update the math
+        in fus_lexer_get_info to match it!.. */
         lexer->row + 1,
         lexer->col - lexer->_token_len + 1,
         lexer->pos - lexer->_token_len + 1);
+}
+
+void fus_lexer_get_info(fus_lexer_t *lexer,
+    const char **filename_ptr,
+    int *row_ptr, int *col_ptr, int *pos_ptr
+){
+    /* NOTE: the math here is based on that in fus_lexer_info */
+    *row_ptr = lexer->row + 1;
+    *col_ptr = lexer->col - lexer->_token_len + 1;
+    *pos_ptr = lexer->pos - lexer->_token_len + 1;
+    *filename_ptr = lexer->filename;
 }
 
 void fus_lexer_err_info(fus_lexer_t *lexer){

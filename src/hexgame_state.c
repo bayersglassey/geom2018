@@ -213,73 +213,94 @@ int state_cond_match(state_cond_t *cond,
         break;
     }
     case STATE_COND_TYPE_COLL: {
+        /* NOTE: even if we're using at_expr, we need a body so we can get
+        its map, etc */
         CHECK_BODY
         if(body->state == NULL){
             matched = false;
+            break;
+        }
+
+        hexmap_t *map = body->map;
+        vecspace_t *space = map->space;
+
+        trf_t hitbox_trf;
+        valexpr_t *at_expr = &cond->u.coll.at_expr;
+        bool using_at = !valexpr_is_literal_null(at_expr);
+        if(using_at){
+            valexpr_context_t valexpr_context = {0};
+            err = _context_set_vars(context, &valexpr_context);
+            if(err)return err;
+
+            val_t val;
+            err = valexpr_get_val(at_expr, &val, &valexpr_context);
+            if(err)return err;
+
+            hexgame_location_t loc;
+            err = hexgame_location_from_val(&loc, &val);
+            if(err)return err;
+
+            hexgame_location_init_trf(&loc, &hitbox_trf);
         }else{
-            hexmap_t *map = body->map;
-            vecspace_t *space = map->space;
-
-            trf_t hitbox_trf;
             hexgame_location_init_trf(&body->loc, &hitbox_trf);
-            hexcollmap_t *hitbox = cond->u.coll.collmap;
+        }
+        hexcollmap_t *hitbox = cond->u.coll.collmap;
 
-            int flags = cond->u.coll.flags;
-            bool all = flags & ANIM_COND_FLAGS_ALL;
-            bool yes = flags & ANIM_COND_FLAGS_YES;
-            bool water = flags & ANIM_COND_FLAGS_WATER;
-            bool against_bodies = flags & ANIM_COND_FLAGS_BODIES;
+        int flags = cond->u.coll.flags;
+        bool all = flags & ANIM_COND_FLAGS_ALL;
+        bool yes = flags & ANIM_COND_FLAGS_YES;
+        bool water = flags & ANIM_COND_FLAGS_WATER;
+        bool against_bodies = flags & ANIM_COND_FLAGS_BODIES;
 
-            if(against_bodies){
-                valexpr_context_t valexpr_context = {0};
-                err = _context_set_vars(context, &valexpr_context);
+        if(against_bodies){
+            valexpr_context_t valexpr_context = {0};
+            err = _context_set_vars(context, &valexpr_context);
+            if(err)return err;
+
+            const char *collmsg = valexpr_get_str(
+                &cond->u.coll.collmsg_expr, &valexpr_context);
+
+            int n_matches = 0;
+            for(int j = 0; j < map->bodies_len; j++){
+                body_t *body_other = map->bodies[j];
+                if(body == body_other)continue;
+                if(body_other->state == NULL)continue;
+                hexcollmap_t *hitbox_other = body_other->state->hitbox;
+                if(hitbox_other == NULL)continue;
+
+                bool visible;
+                err = body_is_visible(body_other, &visible);
                 if(err)return err;
+                if(!visible)continue;
 
-                const char *collmsg = valexpr_get_str(
-                    &cond->u.coll.collmsg_expr, &valexpr_context);
+                if(collmsg && !(
+                    !strcmp(body_other->stateset->filename, collmsg) ||
+                    body_sends_collmsg(body_other, collmsg)
+                ))continue;
 
-                int n_matches = 0;
-                for(int j = 0; j < map->bodies_len; j++){
-                    body_t *body_other = map->bodies[j];
-                    if(body == body_other)continue;
-                    if(body_other->state == NULL)continue;
-                    hexcollmap_t *hitbox_other = body_other->state->hitbox;
-                    if(hitbox_other == NULL)continue;
+                trf_t hitbox_other_trf;
+                hexgame_location_init_trf(&body_other->loc, &hitbox_other_trf);
 
-                    bool visible;
-                    err = body_is_visible(body_other, &visible);
-                    if(err)return err;
-                    if(!visible)continue;
-
-                    if(collmsg && !(
-                        !strcmp(body_other->stateset->filename, collmsg) ||
-                        body_sends_collmsg(body_other, collmsg)
-                    ))continue;
-
-                    trf_t hitbox_other_trf;
-                    hexgame_location_init_trf(&body_other->loc, &hitbox_other_trf);
-
-                    /* The other body has a hitbox! Do the collision... */
-                    bool collide = hexcollmap_collide(hitbox, &hitbox_trf,
-                        hitbox_other, &hitbox_other_trf, space,
-                        yes? all: !all);
-                    if(yes? collide: !collide)n_matches++;
-                }
-                matched = n_matches > 0;
-            }else if(water){
-                hexmap_collision_t collision;
-                err = hexmap_collide_special(map, hitbox, &hitbox_trf,
-                    &collision);
-                if(err)return err;
-                bool collide = collision.water.submap != NULL;
-                matched = yes? collide: !collide;
-            }else{
-                bool collide;
-                err = hexmap_collide(map, hitbox, &hitbox_trf,
-                    yes? all: !all, &collide);
-                if(err)return err;
-                matched = yes? collide: !collide;
+                /* The other body has a hitbox! Do the collision... */
+                bool collide = hexcollmap_collide(hitbox, &hitbox_trf,
+                    hitbox_other, &hitbox_other_trf, space,
+                    yes? all: !all);
+                if(yes? collide: !collide)n_matches++;
             }
+            matched = n_matches > 0;
+        }else if(water){
+            hexmap_collision_t collision;
+            err = hexmap_collide_special(map, hitbox, &hitbox_trf,
+                &collision);
+            if(err)return err;
+            bool collide = collision.water.submap != NULL;
+            matched = yes? collide: !collide;
+        }else{
+            bool collide;
+            err = hexmap_collide(map, hitbox, &hitbox_trf,
+                yes? all: !all, &collide);
+            if(err)return err;
+            matched = yes? collide: !collide;
         }
         break;
     }
@@ -785,7 +806,11 @@ int state_effect_apply(state_effect_t *effect,
 
         bool matched = valexpr_get_bool(&effect->u.assert.valexpr, &valexpr_context);
         if(!matched){
-            fprintf(stderr, "*** FAILED ASSERTION:\n");
+            fprintf(stderr, "*** FAILED ASSERTION [%s: row=%i col=%i pos=%i]:\n",
+                effect->u.assert.lexer_filename,
+                effect->u.assert.lexer_row,
+                effect->u.assert.lexer_col,
+                effect->u.assert.lexer_pos);
             valexpr_fprintf(&effect->u.assert.valexpr, stderr);
             fputc('\n', stderr);
             return 2;

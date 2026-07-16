@@ -195,7 +195,7 @@ static int test_suite_load(test_suite_t *suite, const char *filename,
     char *text = load_file(filename);
     if(text == NULL)return 1;
     fus_lexer_t _lexer, *lexer=&_lexer;
-    err = fus_lexer_init(lexer, text, filename);
+    err = fus_lexer_init_with_vars(lexer, text, filename, NULL);
     if(err)return err;
 
     test_suite_init(suite, filename);

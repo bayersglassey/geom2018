@@ -3,7 +3,16 @@ $SET_INT MAX_ITERATIONS 50
 
 proc "safe_to_jump":
     set myvar("safe_to_jump"): F
+
+    # Uncomment this here, or set it before calling this proc, to see a
+    # bunch of debug printing...
+    #set myvar("_safe_to_jump_debug"): T
+
+    # NOTE: we move the location by (1 0) right off the bat, because we
+    # assume that our current location would already be safe to land on!
     set myvar("_jump_location"): myvar(".loc")
+    move myvar("_jump_location"): 1 0
+
     set myvar("_iterations"): 0
     set myvar("_reason"): null
     while: expr: T
@@ -13,7 +22,24 @@ proc "safe_to_jump":
         inc myvar("_iterations")
         if: expr: >= myvar("_iterations") $GET_INT MAX_ITERATIONS
         then:
+            if: expr: myvar("_safe_to_jump_debug")
+            then: print: "INFINITY!"
+
             set myvar("_reason"): "infinity"
+            break
+
+        # Not safe to jump, because we would crash into something?
+        if:
+            coll: any yes at myvar("_jump_location")
+                ;;  *\*/*
+                ;;  - + -
+                ;;  */*\*
+                ;; ( )
+        then:
+            if: expr: myvar("_safe_to_jump_debug")
+            then: print: "CRASH!"
+
+            set myvar("_reason"): "crash"
             break
 
         # Safe to jump, because we can land here?
@@ -25,6 +51,9 @@ proc "safe_to_jump":
                 ;;       /
                 ;; ( )  +
         then:
+            if: expr: myvar("_safe_to_jump_debug")
+            then: print: "SAFE!"
+
             set myvar("safe_to_jump"): T
             break
 
@@ -35,20 +64,18 @@ proc "safe_to_jump":
                 ;;
                 ;; ( )  +
         then:
+            if: expr: myvar("_safe_to_jump_debug")
+            then: print: "DEFLECTED!"
+
             move myvar("_jump_location"): 1 0
             rot myvar("_jump_location"): 1
             continue
 
-        # Not safe to jump, because we would crash into something?
-        if:
-            coll: any yes at myvar("_jump_location")
-                ;;       \*/*
-                ;;        + -
-                ;;       /*\*
-                ;; ( )
-        then:
-            set myvar("_reason"): "crash"
-            break
-
         # Move forward and repeat!
+        if: expr: myvar("_safe_to_jump_debug")
+        then: print: "FORWARD!"
         move myvar("_jump_location"): 1 0
+
+    # Turn off debug printing for this proc
+    # (it should be set each time before calling the proc, if desired)
+    set myvar("_safe_to_jump_debug"): F

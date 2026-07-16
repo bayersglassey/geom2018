@@ -110,6 +110,9 @@ int fus_lexer_init_with_vars(fus_lexer_t *lexer, const char *text,
     const char *filename, vars_t *vars);
 const char *fus_lexer_token_type_msg(fus_lexer_token_type_t token_type);
 void fus_lexer_info(fus_lexer_t *lexer, FILE *f);
+void fus_lexer_get_info(fus_lexer_t *lexer,
+    const char **filename_ptr,
+    int *row_ptr, int *col_ptr, int *pos_ptr);
 void fus_lexer_err_info(fus_lexer_t *lexer);
 int fus_lexer_get_pos(fus_lexer_t *lexer);
 void fus_lexer_set_pos(fus_lexer_t *lexer, int pos);

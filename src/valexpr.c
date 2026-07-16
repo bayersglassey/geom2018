@@ -525,6 +525,24 @@ int valexpr_get_or_create_var(valexpr_t *expr, valexpr_context_t *context,
 
 
 
+int valexpr_get_val(valexpr_t *expr, val_t *val, valexpr_context_t *context){
+    valexpr_result_t result = {0};
+    int err = valexpr_get(expr, context, &result);
+    if(err){
+        fprintf(stderr, "Error while getting val from valexpr: ");
+        valexpr_fprintf(expr, stderr);
+        fputc('\n', stderr);
+        return err;
+    }else if(!result.val){
+        /* E.g. we referenced a nonexistant variable, right?.. */
+        val_set_null(val);
+        return 0;
+    }else{
+        val_copy(val, result.val);
+        return 0;
+    }
+}
+
 #define VALEXPR_GET_TYPE(TYPE, VAL_TYPE) \
 TYPE valexpr_get_##VAL_TYPE(valexpr_t *expr, \
     valexpr_context_t *context \
@@ -539,14 +557,14 @@ TYPE valexpr_get_##VAL_TYPE(valexpr_t *expr, \
         return 0; \
     }else if(!result.val){ \
         return 0; \
+    }else{ \
+        return val_get_##VAL_TYPE(result.val); \
     } \
-    return val_get_##VAL_TYPE(result.val); \
 }
 VALEXPR_GET_TYPE(bool, bool)
 VALEXPR_GET_TYPE(int, int)
 VALEXPR_GET_TYPE(const char *, str)
 #undef VALEXPR_GET_TYPE
-
 
 
 

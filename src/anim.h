@@ -443,6 +443,10 @@ typedef struct state_effect {
             ARRAY_DECL(struct state_effect*, sub_effects)
         } as;
         struct {
+            int lexer_pos;
+            int lexer_row;
+            int lexer_col;
+            const char *lexer_filename;
             bool debug;
             valexpr_t valexpr;
         } assert;

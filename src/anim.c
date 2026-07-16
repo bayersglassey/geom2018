@@ -899,6 +899,12 @@ int state_effect_parse(state_effect_t *effect,
         }
         CLOSE
     }else if(GOT("assert")){
+        /* NOTE: get lexer info *before* we call NEXT */
+        fus_lexer_get_info(lexer,
+            &effect->u.assert.lexer_filename,
+            &effect->u.assert.lexer_row,
+            &effect->u.assert.lexer_col,
+            &effect->u.assert.lexer_pos);
         NEXT
         effect->type = STATE_EFFECT_TYPE_ASSERT;
         effect->u.assert.debug = false;

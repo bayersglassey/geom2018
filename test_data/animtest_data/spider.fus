@@ -1,6 +1,79 @@
 cases:
 
     ##################################################################
+    # Tests of `coll at`
+
+    "coll_at":
+        stateset: "anim/spider.fus"
+        collmap:
+            # Let's call the 3 hexagons in this collmap A, B, and C:
+            #
+            #   C
+            #   A B
+            #
+            # ...our comments below will refer to them.
+            ;;           + - +
+            ;;          /     \
+            ;;         +   .   +
+            ;;        /*\     /*\
+            ;;       + - + - + - + - +
+            ;;        \*/     \*/     \
+            ;;         +   .   +   .   +
+            ;;          \     /*\     /
+            ;;          (+)- + - + - +
+        after:
+
+            # Standing in hexagon A: NO collision!
+            set mapvar("location"): arr: 0 0 0 F
+            if: coll: any yes at mapvar("location")
+                ;;   .   .
+                ;;   *\*/*
+                ;; . - + - .
+                ;;   */*\*
+                ;;  (.)  .
+            then: assert: F
+
+            # Standing halfway between hexagons A and B: YES collision!
+            set mapvar("location"): arr: 1 0 0 F
+            if: not: coll: any yes at mapvar("location")
+                ;;   .   .
+                ;;   *\*/*
+                ;; . - + - .
+                ;;   */*\*
+                ;;  (.)  .
+            then: assert: F
+
+            # Standing in hexagon B: NO collision!
+            set mapvar("location"): arr: 2 0 0 F
+            if: coll: any yes at mapvar("location")
+                ;;   .   .
+                ;;   *\*/*
+                ;; . - + - .
+                ;;   */*\*
+                ;;  (.)  .
+            then: assert: F
+
+            # Standing in hexagon A, then rotated once... YES collision!
+            set mapvar("location"): arr: 0 0 1 F
+            if: not: coll: any yes at mapvar("location")
+                ;;   .   .
+                ;;   *\*/*
+                ;; . - + - .
+                ;;   */*\*
+                ;;  (.)  .
+            then: assert: F
+
+            # Standing in hexagon A, then rotated once, but then moved into hexagon C... NO collision!
+            set mapvar("location"): arr: 2 2 1 F
+            if: coll: any yes at mapvar("location")
+                ;;   .   .
+                ;;   *\*/*
+                ;; . - + - .
+                ;;   */*\*
+                ;;  (.)  .
+            then: assert: F
+
+    ##################################################################
     # Tests of pressing "f" while standing
 
     "should_step":
@@ -16,6 +89,7 @@ cases:
             assert: == myvar(".state") "step"
             assert: == myvar(".x") 1
             assert: == myvar(".y") 0
+            assert: == myvar(".loc") arr: 1 0 0 F
 
     "should_jump":
         stateset: "anim/spider.fus"
@@ -30,6 +104,7 @@ cases:
             assert: == myvar(".state") "jump"
             assert: == myvar(".x") 1
             assert: == myvar(".y") 0
+            assert: == myvar(".loc") arr: 1 0 0 F
 
     "should_stay":
         stateset: "anim/spider.fus"
@@ -43,7 +118,8 @@ cases:
         after:
             assert: == myvar(".state") "stand"
             assert: == myvar(".x") 0
-            assert debug: == myvar(".y") 0
+            assert: == myvar(".y") 0
+            assert: == myvar(".loc") arr: 0 0 0 F
 
     "should_step_up":
         stateset: "anim/spider.fus"
@@ -59,6 +135,7 @@ cases:
             assert: == myvar(".x") 1
             assert: == myvar(".y") 0
             assert: == myvar(".rot") 1
+            assert: == myvar(".loc") arr: 1 0 1 F
 
     "should_jump_up":
         stateset: "anim/spider.fus"
@@ -74,9 +151,7 @@ cases:
             assert: == myvar(".x") 1
             assert: == myvar(".y") 0
             assert: == myvar(".rot") 1
-
-# TODO!!!!
-$SKIP:
+            assert: == myvar(".loc") arr: 1 0 1 F
 
     ##################################################################
     # Tests of proc "safe_to_jump"
@@ -91,6 +166,20 @@ $SKIP:
             call: "safe_to_jump"
         after:
             assert: myvar("safe_to_jump")
+
+    "cant_jump_short1_crash":
+        stateset: "anim/spider.fus"
+        collmap:
+            ;;          + - +
+            ;;         /*\*/*\
+            ;;    .   + - + - +
+            ;;         \*/*\*/
+            ;; (+)- +   + - +
+        before:
+            call: "safe_to_jump"
+        after:
+            assert: ! myvar("safe_to_jump")
+            assert: == myvar("_reason") "crash"
 
     "cant_jump_short0_infinity":
         stateset: "anim/spider.fus"
@@ -118,11 +207,11 @@ $SKIP:
     "cant_jump_short2_crash":
         stateset: "anim/spider.fus"
         collmap:
-            ;;          + - +
-            ;;         /*\*/*\
-            ;;    .   + - + - +
-            ;;         \*/*\*/
-            ;; (+)- +   + - +
+            ;;              + - +
+            ;;             /*\*/*\
+            ;;    .   .   + - + - +
+            ;;             \*/*\*/
+            ;; (+)- +   .   + - +
         before:
             call: "safe_to_jump"
         after:

@@ -174,6 +174,7 @@ int valexpr_get(valexpr_t *expr, valexpr_context_t *context,
 int valexpr_get_or_create_var(valexpr_t *expr, valexpr_context_t *context,
     valexpr_result_t *result);
 
+int valexpr_get_val(valexpr_t *expr, val_t *val, valexpr_context_t *context);
 bool valexpr_get_bool(valexpr_t *expr, valexpr_context_t *context);
 int valexpr_get_int(valexpr_t *expr, valexpr_context_t *context);
 const char *valexpr_get_str(valexpr_t *expr, valexpr_context_t *context);

@@ -1304,5 +1304,5 @@ Jul 15, 2026:
             move myvar("_jump_location"): 1 0
             rot myvar("_jump_location"): 1
             flip myvar("_jump_location")
-        [ ] support:
+        [X] support:
             coll: all yes at myvar("_jump_location")
