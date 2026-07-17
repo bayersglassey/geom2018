@@ -487,6 +487,8 @@ int test_app_process_console_input(test_app_t *app){
     int err;
     fus_lexer_t lexer;
 
+    fprintf(stderr, "Processing console input: %s\n", app->console.input);
+
     err = fus_lexer_init(&lexer, app->console.input, "<console input>");
     if(err)return err;
 
