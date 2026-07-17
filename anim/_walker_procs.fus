@@ -53,8 +53,12 @@ proc "safe_to_jump":
             break
 
         # Safe to jump, because we can land here?
-        if: coll: all yes at procvar("location")
-            ;; (+)- +
+        if: all:
+            # Make sure this isn't the first iteration, because after pressing
+            # jump, we always travel a distance of at least one.
+            expr: > procvar("iterations") 1
+            coll: all yes at procvar("location")
+                ;; (+)- +
         then:
             if: expr: procvar("debug")
             then: print: "SAFE!"

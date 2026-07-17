@@ -1312,13 +1312,7 @@ Jul 15, 2026:
 Jul 16, 2026:
 -------------
 
-[ ] We need a way to tell AI spiders to avoid certain spaces.
-    So basically, "invisible walls" for them.
-    That way, we can keep them out of some places, e.g. keep them from
-    going from spidertown through the door to trees, or keep them hiding
-    inside the safe parts of dodecas so they don't get run over by hexrollers.
-
-[ ] Sometimes, aispiders in dodecas are making jumps which cause them to
+[X] Sometimes, aispiders in dodecas are making jumps which cause them to
     crash!.. is that a bug in "safe_to_jump" proc?..
     Let's add a way to parse and run arbitrary effects from the console!..
     OKAY ADDED!
@@ -1328,6 +1322,16 @@ Jul 16, 2026:
     ...and it looks to me like we are *not* incorrectly reporting that these
     jumps are safe... unless the way "safe_to_jump" is being called from an
     actor is the issue?..
+
+    OHHHHHHHHH it's because when you jump, you travel at least *two* units
+    forward, not just one!
+    So the proc needs to account for that.
+
+[ ] We need a way to tell AI spiders to avoid certain spaces.
+    So basically, "invisible walls" for them.
+    That way, we can keep them out of some places, e.g. keep them from
+    going from spidertown through the door to trees, or keep them hiding
+    inside the safe parts of dodecas so they don't get run over by hexrollers.
 
 [ ] Sometimes, aispiders in dodecas are making really far jumps, and landing,
     but then sitting there for a second before disappearing.
@@ -1339,3 +1343,9 @@ Jul 16, 2026:
     *immediately* restarted if the body is only "unsafe", not fully dead.
     Another thing we could do would be to stop aispider from making such
     far jumps!..
+
+[ ] Maybe after picking up food, you can... pick up rollers?!?!?!
+    Or leave them somewhere?.. how would that work, though...
+    Ooh maybe you leave a trail. Invisible "scent" objects.
+    They have a "freshness" which counts down, and rollers (and maybe other
+    things) will go towards whichever side of them has the freshest scent.
