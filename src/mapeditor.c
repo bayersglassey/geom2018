@@ -28,7 +28,7 @@ static void print_help(FILE *file, const char *collmap_filename) {
         "  PgUp/PgDown Flip\n"
         "  0           Return to map's origin\n"
         "  1           Return to map's spawn point\n"
-        "  Enter       Show/hide marker\n"
+        "  Enter       Show/hide cursor\n"
         "\n"
         "  a/s/d       Set vert/edge/face primary char\n"
         "  A/S/D       Set vert/edge/face secondary char\n"
@@ -62,12 +62,12 @@ int mapeditor(const char *collmap_filename, hexcollmap_write_options_t *opts,
     err = enable_raw_mode();
     if(err)return err;
 
-    trf_t _marker = {
+    trf_t _cursor = {
         .add = {collmap->ox, -collmap->oy},
     };
-    trf_t *marker=&_marker;
+    trf_t *cursor=&_cursor;
 
-    bool marker_visible = true;
+    bool cursor_visible = true;
 
     /* FOR DEBUGGING KEY CODES: */
     //while(1)printf("Got: %i\n", raw_getch());
@@ -82,18 +82,18 @@ int mapeditor(const char *collmap_filename, hexcollmap_write_options_t *opts,
     bool quit = false;
     while(!quit){
         cls();
-        opts->marker = marker_visible? marker: NULL;
+        opts->marker = cursor_visible? cursor: NULL;
         hexcollmap_write_with_parts(collmap, stdout, opts, parts, parts_len);
         printf("Vert: [%c][%c] | Edge: [%c][%c] | Face: [%c][%c]\n",
             vert_c, vert_c2, edge_c, edge_c2, face_c, face_c2);
         printf("Origin: (%i %i) | Marker: (%i %i) %i %c (%s)\n",
             collmap->ox,
             -collmap->oy,
-            marker->add[0],
-            marker->add[1],
-            marker->rot,
-            marker->flip? 'y': 'n',
-            marker_visible? "Visible": "Hidden");
+            cursor->add[0],
+            cursor->add[1],
+            cursor->rot,
+            cursor->flip? 'y': 'n',
+            cursor_visible? "Visible": "Hidden");
         printf("Press '?' for help!\n");
 
         int ch = raw_getch();
@@ -117,7 +117,7 @@ int mapeditor(const char *collmap_filename, hexcollmap_write_options_t *opts,
                 opts->marker = NULL;
                 hexcollmap_write_with_parts(collmap, file, opts,
                     parts, parts_len);
-                opts->marker = marker;
+                opts->marker = cursor;
                 if(fclose(file)){
                     perror("fclose");
                     return 1;
@@ -133,46 +133,46 @@ int mapeditor(const char *collmap_filename, hexcollmap_write_options_t *opts,
             } break;
 
             case ARROW_LEFT: {
-                marker_visible = true;
-                marker->rot = rot_contain(space->rot_max, marker->rot + 1);
+                cursor_visible = true;
+                cursor->rot = rot_contain(space->rot_max, cursor->rot + 1);
             } break;
             case ARROW_RIGHT: {
-                marker_visible = true;
-                marker->rot = rot_contain(space->rot_max, marker->rot - 1);
+                cursor_visible = true;
+                cursor->rot = rot_contain(space->rot_max, cursor->rot - 1);
             } break;
             case ARROW_UP: {
-                marker_visible = true;
+                cursor_visible = true;
                 vec_t unit = {1, 0};
-                space->vec_rot(unit, marker->rot);
-                vec_add(space->dims, marker->add, unit);
+                space->vec_rot(unit, cursor->rot);
+                vec_add(space->dims, cursor->add, unit);
             } break;
             case ARROW_DOWN: {
-                marker_visible = true;
+                cursor_visible = true;
                 vec_t unit = {1, 0};
-                space->vec_rot(unit, marker->rot);
-                vec_sub(space->dims, marker->add, unit);
+                space->vec_rot(unit, cursor->rot);
+                vec_sub(space->dims, cursor->add, unit);
             } break;
             case PAGE_UP:
             case PAGE_DOWN: {
-                marker_visible = true;
-                marker->flip = !marker->flip;
+                cursor_visible = true;
+                cursor->flip = !cursor->flip;
             } break;
             case '0': {
                 /* Go to origin */
-                marker_visible = true;
-                marker->add[0] = collmap->ox;
-                marker->add[1] = -collmap->oy;
-                marker->rot = 0;
-                marker->flip = false;
+                cursor_visible = true;
+                cursor->add[0] = collmap->ox;
+                cursor->add[1] = -collmap->oy;
+                cursor->rot = 0;
+                cursor->flip = false;
             } break;
             case '1': {
                 /* Go to spawn point */
-                marker_visible = true;
-                hexgame_location_init_trf(&collmap->spawn, marker);
-                marker->add[0] += collmap->ox;
-                marker->add[1] -= collmap->oy;
+                cursor_visible = true;
+                hexgame_location_init_trf(&collmap->spawn, cursor);
+                cursor->add[0] += collmap->ox;
+                cursor->add[1] -= collmap->oy;
             } break;
-            case ENTER: marker_visible = !marker_visible; break;
+            case ENTER: cursor_visible = !cursor_visible; break;
 
             case 'a':
             case 's':
@@ -207,8 +207,8 @@ int mapeditor(const char *collmap_filename, hexcollmap_write_options_t *opts,
             case 'X':
             case 'C': {
                 /* Draw vert/edge/face */
-                marker_visible = false;
-                trf_t index = *marker;
+                cursor_visible = false;
+                trf_t index = *cursor;
                 index.add[0] -= collmap->ox;
                 index.add[1] = -index.add[1] - collmap->oy;
                 char c;
@@ -232,7 +232,7 @@ int mapeditor(const char *collmap_filename, hexcollmap_write_options_t *opts,
             } break;
             case '!': {
                 /* Set spawn point */
-                hexgame_location_from_trf(&collmap->spawn, marker);
+                hexgame_location_from_trf(&collmap->spawn, cursor);
                 collmap->spawn.pos[0] -= collmap->ox;
                 collmap->spawn.pos[1] += collmap->oy;
 
