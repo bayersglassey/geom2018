@@ -1,5 +1,5 @@
 
-$SET_INT MAX_ITERATIONS 50
+$SET_INT DEFAULT_MAX_ITERATIONS 50
 
 proc "safe_to_jump":
     set myvar("safe_to_jump"): F
@@ -20,7 +20,7 @@ proc "safe_to_jump":
 
         # Avoid infinite loops
         inc myvar("_iterations")
-        if: expr: >= myvar("_iterations") $GET_INT MAX_ITERATIONS
+        if: expr: >= myvar("_iterations") myvar("_safe_to_jump_max_iterations")
         then:
             if: expr: myvar("_safe_to_jump_debug")
             then: print: "INFINITY!"
@@ -43,13 +43,8 @@ proc "safe_to_jump":
             break
 
         # Safe to jump, because we can land here?
-        if: any:
-            coll: all yes at myvar("_jump_location")
-                ;; (+)- +
-            coll: all yes at myvar("_jump_location")
-                ;;        +
-                ;;       /
-                ;; ( )  +
+        if: coll: all yes at myvar("_jump_location")
+            ;; (+)- +
         then:
             if: expr: myvar("_safe_to_jump_debug")
             then: print: "SAFE!"
@@ -79,3 +74,7 @@ proc "safe_to_jump":
     # Turn off debug printing for this proc
     # (it should be set each time before calling the proc, if desired)
     set myvar("_safe_to_jump_debug"): F
+
+    # Reset this to its default value.
+    # Callers can optionally set it to something else before calling us.
+    set myvar("_safe_to_jump_max_iterations"): $GET_INT DEFAULT_MAX_ITERATIONS
