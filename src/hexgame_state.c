@@ -261,6 +261,7 @@ int state_cond_match(state_cond_t *cond,
             if(err)return err;
 
             val_t val;
+            val_init(&val);
             err = valexpr_get_val(at_expr, &val, &valexpr_context);
             if(err)return err;
 
@@ -269,6 +270,7 @@ int state_cond_match(state_cond_t *cond,
             if(err)return err;
 
             hexgame_location_init_trf(&loc, &hitbox_trf);
+            val_cleanup(&val);
         }else{
             hexgame_location_init_trf(&body->loc, &hitbox_trf);
         }

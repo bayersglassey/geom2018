@@ -1454,6 +1454,7 @@ void state_cond_cleanup(state_cond_t *cond){
                 hexcollmap_cleanup(collmap);
                 free(collmap);
             }
+            valexpr_cleanup(&cond->u.coll.at_expr);
             break;
         }
         case STATE_COND_TYPE_ANY:
@@ -1469,6 +1470,10 @@ void state_cond_cleanup(state_cond_t *cond){
         case STATE_COND_TYPE_AS:
             ARRAY_FREE_PTR(state_cond_t*, cond->u.as.sub_conds,
                 state_cond_cleanup)
+            break;
+        case STATE_COND_TYPE_DO:
+            ARRAY_FREE_PTR(state_effect_t*, cond->u._do.effects,
+                state_effect_cleanup)
             break;
         default: break;
     }
