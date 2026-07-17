@@ -60,8 +60,9 @@ static int _context_apply_as(hexgame_state_context_t *context, int as_type){
                 fprintf(stderr, "No your_body!\n");
                 return 2;
             }
+            body_t *body = context->body;
             context->body = context->your_body;
-            context->your_body = context->body;
+            context->your_body = body;
             break;
         }
         case AS_BODY: {
