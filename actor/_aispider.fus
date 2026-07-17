@@ -77,7 +77,7 @@ state "run_around":
         as body:
             do:
                 # Call the "safe_to_jump" proc, with a smallish number
-                # of max iterations, so AI spiders don't try too make
+                # of max iterations, so AI spiders don't try to make
                 # crazy jumps (even if they would succeed)
                 set myvar("_safe_to_jump_max_iterations"): 15
                 call: "safe_to_jump"
@@ -139,6 +139,11 @@ state "run_around":
     # Always walk straight ahead if we can
     "step"
     if: any:
+        # NOTE: some of these conditions could be handled as a jump... but
+        # we only have a chance of jumping, whereas we always walk "straight
+        # ahead" if we can.
+        # So, we're including all cases here which we think we should always
+        # move forwards for if we can.
         all:
             # Step forward
             coll: all yes
