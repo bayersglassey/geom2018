@@ -14,6 +14,7 @@ enum valexpr_type {
     VALEXPR_TYPE_MAPVAR,
     VALEXPR_TYPE_GLOBALVAR,
     VALEXPR_TYPE_MYVAR,
+    VALEXPR_TYPE_PROCVAR,
     VALEXPR_TYPE_IF,
     VALEXPR_TYPE_AS,
     VALEXPR_TYPE_BINOP,
@@ -28,6 +29,7 @@ static const char *valexpr_type_msg(int type){
         case VALEXPR_TYPE_MAPVAR: return "mapvar";
         case VALEXPR_TYPE_GLOBALVAR: return "globalvar";
         case VALEXPR_TYPE_MYVAR: return "myvar";
+        case VALEXPR_TYPE_PROCVAR: return "procvar";
         case VALEXPR_TYPE_IF: return "if";
         case VALEXPR_TYPE_AS: return "as";
         case VALEXPR_TYPE_BINOP: return "binop";
@@ -142,7 +144,10 @@ typedef struct valexpr_context {
     vars_t *mapvars;
     vars_t *globalvars;
     vars_t *myvars;
+    vars_t *procvars;
 } valexpr_context_t;
+
+void valexpr_context_init(valexpr_context_t *context);
 
 
 typedef struct valexpr_result {
@@ -188,5 +193,20 @@ int valexpr_cond_parse(valexpr_cond_t *cond, fus_lexer_t *lexer);
 int valexpr_cond_eval(valexpr_cond_t *cond, valexpr_context_t *context,
     bool *result_ptr);
 bool valexpr_cond_get_bool(valexpr_cond_t *cond, valexpr_context_t *context);
+
+
+typedef struct valexpr_vars_entry {
+    const char *name;
+    valexpr_t valexpr;
+} valexpr_vars_entry_t;
+
+typedef struct valexpr_vars {
+    ARRAY_DECL(valexpr_vars_entry_t, entries)
+} valexpr_vars_t;
+
+void valexpr_vars_cleanup(valexpr_vars_t *valexpr_vars);
+void valexpr_vars_init(valexpr_vars_t *valexpr_vars);
+int valexpr_vars_add(valexpr_vars_t *valexpr_vars, const char *name, valexpr_t **valexpr_ptr);
+valexpr_t *valexpr_vars_get(valexpr_vars_t *valexpr_vars, const char *name);
 
 #endif

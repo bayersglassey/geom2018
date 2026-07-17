@@ -212,15 +212,18 @@ int testrunner(int *n_tests_ptr, int *n_fails_ptr){
         vars_t mapvars;
         vars_t globalvars;
         vars_t myvars;
+        vars_t procvars;
         vars_init(&yourvars);
         vars_init(&mapvars);
         vars_init(&globalvars);
         vars_init(&myvars);
+        vars_init(&procvars);
         valexpr_context_t context = {
             .yourvars = &yourvars,
             .mapvars = &mapvars,
             .globalvars = &globalvars,
-            .myvars = &myvars
+            .myvars = &myvars,
+            .procvars = &procvars
         };
 
         valexpr_t _expr, *expr=&_expr;
@@ -414,6 +417,7 @@ int testrunner(int *n_tests_ptr, int *n_fails_ptr){
         vars_cleanup(&mapvars);
         vars_cleanup(&globalvars);
         vars_cleanup(&myvars);
+        vars_cleanup(&procvars);
     }
 
     *n_tests_ptr = n_tests;

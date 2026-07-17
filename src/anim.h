@@ -373,6 +373,7 @@ typedef struct state_effect_goto {
 
 typedef struct state_effect_call {
     const char *name;
+    valexpr_vars_t valexpr_vars;
 } state_effect_call_t;
 
 typedef struct state_effect_spawn {

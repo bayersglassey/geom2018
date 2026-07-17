@@ -3,31 +3,33 @@ $SET_INT DEFAULT_MAX_ITERATIONS 50
 
 proc "safe_to_jump":
 
-    # Default value for an optional thing caller can set before calling us
-    if: not: exists myvar("_safe_to_jump_max_iterations")
-    then: set myvar("_safe_to_jump_max_iterations"): $GET_INT DEFAULT_MAX_ITERATIONS
-
-    set myvar("safe_to_jump"): F
+    # Optional inputs
+    if: not: exists procvar("max_iterations")
+    then: set procvar("max_iterations"): $GET_INT DEFAULT_MAX_ITERATIONS
 
     # Uncomment this here, or set it before calling this proc, to see a
     # bunch of debug printing...
-    #set myvar("_safe_to_jump_debug"): T
+    #set procvar("debug"): T
+
+    # Stuff we "return" to caller
+    # NOTE: the "_reason" is for unit testing purposes!
+    set myvar("safe_to_jump"): F
+    set myvar("_reason"): null
 
     # NOTE: we move the location by (1 0) right off the bat, because we
     # assume that our current location would already be safe to land on!
-    set myvar("_jump_location"): myvar(".loc")
-    move myvar("_jump_location"): 1 0
+    set procvar("location"): myvar(".loc")
+    move procvar("location"): 1 0
 
-    set myvar("_iterations"): 0
-    set myvar("_reason"): null
+    set procvar("iterations"): 0
     while: expr: T
     do:
 
         # Avoid infinite loops
-        inc myvar("_iterations")
-        if: expr: >= myvar("_iterations") myvar("_safe_to_jump_max_iterations")
+        inc procvar("iterations")
+        if: expr: >= procvar("iterations") procvar("max_iterations")
         then:
-            if: expr: myvar("_safe_to_jump_debug")
+            if: expr: procvar("debug")
             then: print: "INFINITY!"
 
             set myvar("_reason"): "infinity"
@@ -35,23 +37,23 @@ proc "safe_to_jump":
 
         # Not safe to jump, because we would crash into something?
         if:
-            coll: any yes at myvar("_jump_location")
+            coll: any yes at procvar("location")
                 ;;  *\*/*
                 ;;  - + -
                 ;;  */*\*
                 ;; ( )
         then:
-            if: expr: myvar("_safe_to_jump_debug")
+            if: expr: procvar("debug")
             then: print: "CRASH!"
 
             set myvar("_reason"): "crash"
             break
 
         # Safe to jump, because we can land here?
-        if: coll: all yes at myvar("_jump_location")
+        if: coll: all yes at procvar("location")
             ;; (+)- +
         then:
-            if: expr: myvar("_safe_to_jump_debug")
+            if: expr: procvar("debug")
             then: print: "SAFE!"
 
             set myvar("safe_to_jump"): T
@@ -59,27 +61,19 @@ proc "safe_to_jump":
 
         # Deflected upwards?
         if:
-            coll: all yes at myvar("_jump_location")
+            coll: all yes at procvar("location")
                 ;;        +
                 ;;
                 ;; ( )  +
         then:
-            if: expr: myvar("_safe_to_jump_debug")
+            if: expr: procvar("debug")
             then: print: "DEFLECTED!"
 
-            move myvar("_jump_location"): 1 0
-            rot myvar("_jump_location"): 1
+            move procvar("location"): 1 0
+            rot procvar("location"): 1
             continue
 
         # Move forward and repeat!
-        if: expr: myvar("_safe_to_jump_debug")
+        if: expr: procvar("debug")
         then: print: "FORWARD!"
-        move myvar("_jump_location"): 1 0
-
-    # Turn off debug printing for this proc
-    # (it should be set each time before calling the proc, if desired)
-    set myvar("_safe_to_jump_debug"): F
-
-    # Reset this "optional" thing so it gets its default value next time
-    # we're called
-    set myvar("_safe_to_jump_max_iterations"): null
+        move procvar("location"): 1 0

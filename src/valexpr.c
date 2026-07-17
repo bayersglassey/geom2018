@@ -12,6 +12,15 @@
 
 
 
+void valexpr_context_init(valexpr_context_t *context){
+    context->debug = false;
+    context->yourvars = NULL;
+    context->mapvars = NULL;
+    context->globalvars = NULL;
+    context->myvars = NULL;
+    context->procvars = NULL;
+}
+
 void valexpr_cleanup(valexpr_t *expr){
     switch(expr->type){
         case VALEXPR_TYPE_LITERAL:
@@ -21,6 +30,7 @@ void valexpr_cleanup(valexpr_t *expr){
         case VALEXPR_TYPE_MAPVAR:
         case VALEXPR_TYPE_GLOBALVAR:
         case VALEXPR_TYPE_MYVAR:
+        case VALEXPR_TYPE_PROCVAR:
             valexpr_cleanup(expr->u.key_expr);
             free(expr->u.key_expr);
             break;
@@ -62,6 +72,7 @@ int valexpr_copy(valexpr_t *expr1, valexpr_t *expr2){
         case VALEXPR_TYPE_MAPVAR:
         case VALEXPR_TYPE_GLOBALVAR:
         case VALEXPR_TYPE_MYVAR:
+        case VALEXPR_TYPE_PROCVAR:
             expr1->u.key_expr = calloc(1, sizeof(valexpr_t));
             if(!expr1->u.key_expr)return 1;
 
@@ -132,6 +143,7 @@ void valexpr_fprintf(valexpr_t *expr, FILE *file){
         case VALEXPR_TYPE_MAPVAR:
         case VALEXPR_TYPE_GLOBALVAR:
         case VALEXPR_TYPE_MYVAR:
+        case VALEXPR_TYPE_PROCVAR:
             fprintf(file, "%s(", valexpr_type_msg(expr->type));
             valexpr_fprintf(expr->u.key_expr, file);
             fputc(')', file);
@@ -216,6 +228,7 @@ int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer){
         GOT("mapvar")? VALEXPR_TYPE_MAPVAR:
         GOT("globalvar")? VALEXPR_TYPE_GLOBALVAR:
         GOT("myvar")? VALEXPR_TYPE_MYVAR:
+        GOT("procvar")? VALEXPR_TYPE_PROCVAR:
         GOT("if")? VALEXPR_TYPE_IF:
         GOT("as")? VALEXPR_TYPE_AS:
         VALEXPR_TYPE_LITERAL;
@@ -242,7 +255,8 @@ int valexpr_parse(valexpr_t *expr, fus_lexer_t *lexer){
         type == VALEXPR_TYPE_YOURVAR ||
         type == VALEXPR_TYPE_MAPVAR ||
         type == VALEXPR_TYPE_GLOBALVAR ||
-        type == VALEXPR_TYPE_MYVAR
+        type == VALEXPR_TYPE_MYVAR ||
+        type == VALEXPR_TYPE_PROCVAR
     ){
         NEXT
         expr->type = type;
@@ -330,12 +344,14 @@ int valexpr_eval(valexpr_t *expr, valexpr_context_t *context,
         case VALEXPR_TYPE_YOURVAR:
         case VALEXPR_TYPE_MAPVAR:
         case VALEXPR_TYPE_GLOBALVAR:
-        case VALEXPR_TYPE_MYVAR: {
+        case VALEXPR_TYPE_MYVAR:
+        case VALEXPR_TYPE_PROCVAR: {
             vars_t *vars =
                 expr->type == VALEXPR_TYPE_YOURVAR? context->yourvars:
                 expr->type == VALEXPR_TYPE_MAPVAR? context->mapvars:
                 expr->type == VALEXPR_TYPE_GLOBALVAR? context->globalvars:
-                context->myvars;
+                expr->type == VALEXPR_TYPE_MYVAR? context->myvars:
+                context->procvars;
 
             if(!vars){
                 fprintf(stderr, "valexpr_eval: No \"%s\" vars provided\n",
@@ -735,4 +751,39 @@ bool valexpr_cond_get_bool(valexpr_cond_t *cond, valexpr_context_t *context){
         return false;
     }
     return result;
+}
+
+
+static void valexpr_vars_entry_cleanup(valexpr_vars_entry_t *entry){
+    valexpr_cleanup(&entry->valexpr);
+}
+
+void valexpr_vars_cleanup(valexpr_vars_t *valexpr_vars){
+    ARRAY_FREE(valexpr_vars_entry_t, valexpr_vars->entries, valexpr_vars_entry_cleanup)
+}
+
+void valexpr_vars_init(valexpr_vars_t *valexpr_vars){
+    ARRAY_INIT(valexpr_vars->entries)
+}
+
+int valexpr_vars_add(valexpr_vars_t *valexpr_vars, const char *name, valexpr_t **valexpr_ptr){
+    int err;
+    if(valexpr_vars_get(valexpr_vars, name)){
+        fprintf(stderr, "Duplicate valexpr var: \"%s\"\n", name);
+        return 2;
+    }
+    ARRAY_PUSH_UNINITIALIZED(valexpr_vars_entry_t, valexpr_vars->entries)
+    valexpr_vars_entry_t *entry = &valexpr_vars->entries[valexpr_vars->entries_len - 1];
+    entry->name = name;
+    valexpr_set_literal_null(&entry->valexpr);
+    *valexpr_ptr = &entry->valexpr;
+    return 0;
+}
+
+valexpr_t *valexpr_vars_get(valexpr_vars_t *valexpr_vars, const char *name){
+    for(int i = 0; i < valexpr_vars->entries_len; i++){
+        valexpr_vars_entry_t *entry = &valexpr_vars->entries[i];
+        if(!strcmp(entry->name, name))return &entry->valexpr;
+    }
+    return NULL;
 }

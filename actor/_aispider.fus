@@ -79,8 +79,8 @@ state "run_around":
                 # Call the "safe_to_jump" proc, with a smallish number
                 # of max iterations, so AI spiders don't try to make
                 # crazy jumps (even if they would succeed)
-                set myvar("_safe_to_jump_max_iterations"): 15
-                call: "safe_to_jump"
+                call: "safe_to_jump" vars:
+                    "max_iterations": 15
             expr: myvar("safe_to_jump")
     then:
         key: down u

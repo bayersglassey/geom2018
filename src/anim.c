@@ -659,15 +659,28 @@ int state_effect_parse(state_effect_t *effect,
         CLOSE
     }else if(GOT("call")){
         NEXT
-
         OPEN
-
         const char *name;
         GET_STR_CACHED(name, &prend->name_store)
-
         effect->type = STATE_EFFECT_TYPE_CALL;
         effect->u.call.name = name;
-
+        valexpr_vars_init(&effect->u.call.valexpr_vars);
+        if(GOT("vars")){
+            NEXT
+            OPEN
+            while(!GOT(")")){
+                const char *name;
+                GET_STR_CACHED(name, &prend->name_store)
+                OPEN
+                valexpr_t *valexpr;
+                err = valexpr_vars_add(&effect->u.call.valexpr_vars, name, &valexpr);
+                if(err)return err;
+                err = valexpr_parse(valexpr, lexer);
+                if(err)return err;
+                CLOSE
+            }
+            NEXT
+        }
         CLOSE
     }else if(GOT("delay")){
         NEXT
@@ -1502,6 +1515,9 @@ void state_effect_cleanup(state_effect_t *effect){
             valexpr_cleanup(&effect->u.relocate.map_filename_expr);
             valexpr_cleanup(&effect->u.relocate.stateset_filename_expr);
             valexpr_cleanup(&effect->u.relocate.state_name_expr);
+            break;
+        case STATE_EFFECT_TYPE_CALL:
+            valexpr_vars_cleanup(&effect->u.call.valexpr_vars);
             break;
         case STATE_EFFECT_TYPE_INC:
         case STATE_EFFECT_TYPE_DEC:

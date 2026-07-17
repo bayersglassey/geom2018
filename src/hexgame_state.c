@@ -83,6 +83,7 @@ static vars_t *_context_get_vars(valexpr_context_t *context, int varstype){
     case VALEXPR_TYPE_MAPVAR: return context->mapvars;
     case VALEXPR_TYPE_GLOBALVAR: return context->globalvars;
     case VALEXPR_TYPE_MYVAR: return context->myvars;
+    case VALEXPR_TYPE_PROCVAR: return context->procvars;
     default:
         fprintf(stderr, "Dunno how to get %s vars\n", valexpr_type_msg(varstype));
         return NULL;
@@ -92,8 +93,10 @@ static vars_t *_context_get_vars(valexpr_context_t *context, int varstype){
 static int _context_set_vars(hexgame_state_context_t *context,
     valexpr_context_t *valexpr_context
 ){
-    /* NOTE: caller promises that valexpr_context is zeroed out */
+    /* Sets up valexpr_context based on state_context */
     int err;
+
+    valexpr_context_init(valexpr_context);
 
     actor_t *actor = context->actor;
     body_t *body = context->body;
@@ -136,6 +139,7 @@ static int _context_set_vars(hexgame_state_context_t *context,
     valexpr_context->yourvars = your_body? &your_body->vars: NULL;
     valexpr_context->mapvars = map? &map->vars: NULL;
     valexpr_context->globalvars = game? &game->vars: NULL;
+    valexpr_context->procvars = context->procvars;
 
     return 0;
 }
@@ -252,7 +256,7 @@ int state_cond_match(state_cond_t *cond,
         valexpr_t *at_expr = &cond->u.coll.at_expr;
         bool using_at = !valexpr_is_literal_null(at_expr);
         if(using_at){
-            valexpr_context_t valexpr_context = {0};
+            valexpr_context_t valexpr_context;
             err = _context_set_vars(context, &valexpr_context);
             if(err)return err;
 
@@ -277,7 +281,7 @@ int state_cond_match(state_cond_t *cond,
         bool against_bodies = flags & ANIM_COND_FLAGS_BODIES;
 
         if(against_bodies){
-            valexpr_context_t valexpr_context = {0};
+            valexpr_context_t valexpr_context;
             err = _context_set_vars(context, &valexpr_context);
             if(err)return err;
 
@@ -362,7 +366,7 @@ int state_cond_match(state_cond_t *cond,
         break;
     }
     case STATE_COND_TYPE_EXPR: {
-        valexpr_context_t valexpr_context = {0};
+        valexpr_context_t valexpr_context;
         err = _context_set_vars(context, &valexpr_context);
         if(err)return err;
 
@@ -370,7 +374,7 @@ int state_cond_match(state_cond_t *cond,
         break;
     }
     case STATE_COND_TYPE_EXISTS: {
-        valexpr_context_t valexpr_context = {0};
+        valexpr_context_t valexpr_context;
         err = _context_set_vars(context, &valexpr_context);
         if(err)return err;
 
@@ -533,7 +537,7 @@ int state_effect_apply(state_effect_t *effect,
             loc = &body->loc; \
         }else{ \
             loc = &_loc; \
-            valexpr_context_t valexpr_context = {0}; \
+            valexpr_context_t valexpr_context; \
             err = _context_set_vars(context, &valexpr_context); \
             if(err)return err; \
             \
@@ -574,7 +578,7 @@ int state_effect_apply(state_effect_t *effect,
         break;
     }
     case STATE_EFFECT_TYPE_DUMP: {
-        valexpr_context_t valexpr_context = {0};
+        valexpr_context_t valexpr_context;
         err = _context_set_vars(context, &valexpr_context);
         if(err)return err;
 
@@ -588,7 +592,7 @@ int state_effect_apply(state_effect_t *effect,
         break;
     }
     case STATE_EFFECT_TYPE_PRINT: {
-        valexpr_context_t valexpr_context = {0};
+        valexpr_context_t valexpr_context;
         err = _context_set_vars(context, &valexpr_context);
         if(err)return err;
 
@@ -639,7 +643,7 @@ int state_effect_apply(state_effect_t *effect,
     }
     case STATE_EFFECT_TYPE_RELOCATE: {
         CHECK_BODY
-        valexpr_context_t valexpr_context = {0};
+        valexpr_context_t valexpr_context;
         err = _context_set_vars(context, &valexpr_context);
         if(err)return err;
 
@@ -708,6 +712,25 @@ int state_effect_apply(state_effect_t *effect,
             return 2;
         }
 
+        vars_t procvars;
+        vars_init(&procvars);
+        {
+            valexpr_context_t valexpr_context;
+            err = _context_set_vars(context, &valexpr_context);
+            if(err)return err;
+            valexpr_vars_t *valexpr_vars = &effect->u.call.valexpr_vars;
+            for(int i = 0; i < valexpr_vars->entries_len; i++){
+                valexpr_vars_entry_t *entry = &valexpr_vars->entries[i];
+                var_t *var = vars_get_or_add(&procvars, entry->name);
+                if(!var)return 1;
+                err = valexpr_get_val(&entry->valexpr, &var->value, &valexpr_context);
+                if(err)return err;
+            }
+        }
+
+        hexgame_state_context_t proc_context = *context;
+        proc_context.procvars = &procvars;
+
         /* NOTE: we set up a fresh controlflow for this call, so that
         STATE_EFFECT_TYPE_BREAK/CONTINUE within the proc don't affect the
         caller.
@@ -720,7 +743,7 @@ int state_effect_apply(state_effect_t *effect,
         hexgame_state_controlflow_init(&controlflow, false);
         for(int i = 0; i < proc->effects_len; i++){
             state_effect_t *effect = proc->effects[i];
-            err = state_effect_apply(effect, context, gotto_ptr, &controlflow);
+            err = state_effect_apply(effect, &proc_context, gotto_ptr, &controlflow);
             if(err){
                 if(err == 2){
                     fprintf(stderr, "...while calling proc: %s\n", name);
@@ -729,6 +752,7 @@ int state_effect_apply(state_effect_t *effect,
             }
             if(hexgame_state_controlflow_is_unrolling(&controlflow))break;
         }
+        vars_cleanup(&procvars);
         break;
     }
     case STATE_EFFECT_TYPE_DELAY:
@@ -741,7 +765,7 @@ int state_effect_apply(state_effect_t *effect,
             delay_ptr = &body->cooldown;
         }
 
-        valexpr_context_t valexpr_context = {0};
+        valexpr_context_t valexpr_context;
         err = _context_set_vars(context, &valexpr_context);
         if(err)return err;
 
@@ -755,7 +779,7 @@ int state_effect_apply(state_effect_t *effect,
     }
     case STATE_EFFECT_TYPE_SPAWN: {
         CHECK_BODY
-        valexpr_context_t valexpr_context = {0};
+        valexpr_context_t valexpr_context;
         err = _context_set_vars(context, &valexpr_context);
         if(err)return err;
 
@@ -835,9 +859,10 @@ int state_effect_apply(state_effect_t *effect,
             along to valexpr_eval, which will print the expr along with its
             LHS and RHS */
         }
-        valexpr_context_t valexpr_context = {.debug = debug};
+        valexpr_context_t valexpr_context;
         err = _context_set_vars(context, &valexpr_context);
         if(err)return err;
+        valexpr_context.debug = debug;
 
         bool matched = valexpr_get_bool(&effect->u.assert.valexpr, &valexpr_context);
         if(!matched){
@@ -908,7 +933,7 @@ int state_effect_apply(state_effect_t *effect,
     case STATE_EFFECT_TYPE_DEC:
     case STATE_EFFECT_TYPE_SET:
     case STATE_EFFECT_TYPE_UNSET: {
-        valexpr_context_t valexpr_context = {0};
+        valexpr_context_t valexpr_context;
         err = _context_set_vars(context, &valexpr_context);
         if(err)return err;
 
@@ -982,7 +1007,7 @@ int state_effect_apply(state_effect_t *effect,
         break;
     }
     case STATE_EFFECT_TYPE_IF: {
-        valexpr_context_t valexpr_context = {0};
+        valexpr_context_t valexpr_context;
         err = _context_set_vars(context, &valexpr_context);
         if(err)return err;
 
@@ -1015,7 +1040,7 @@ int state_effect_apply(state_effect_t *effect,
         break;
     }
     case STATE_EFFECT_TYPE_WHILE: {
-        valexpr_context_t valexpr_context = {0};
+        valexpr_context_t valexpr_context;
         err = _context_set_vars(context, &valexpr_context);
         if(err)return err;
 

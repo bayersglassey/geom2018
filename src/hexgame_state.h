@@ -27,6 +27,7 @@ typedef struct hexgame_state_context {
     body_t *body;
     actor_t *actor;
     body_t *your_body;
+    vars_t *procvars;
 } hexgame_state_context_t;
 
 bool hexgame_state_context_debug(hexgame_state_context_t *context);
