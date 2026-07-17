@@ -2,6 +2,11 @@
 $SET_INT DEFAULT_MAX_ITERATIONS 50
 
 proc "safe_to_jump":
+
+    # Default value for an optional thing caller can set before calling us
+    if: not: exists myvar("_safe_to_jump_max_iterations")
+    then: set myvar("_safe_to_jump_max_iterations"): $GET_INT DEFAULT_MAX_ITERATIONS
+
     set myvar("safe_to_jump"): F
 
     # Uncomment this here, or set it before calling this proc, to see a
@@ -75,6 +80,6 @@ proc "safe_to_jump":
     # (it should be set each time before calling the proc, if desired)
     set myvar("_safe_to_jump_debug"): F
 
-    # Reset this to its default value.
-    # Callers can optionally set it to something else before calling us.
-    set myvar("_safe_to_jump_max_iterations"): $GET_INT DEFAULT_MAX_ITERATIONS
+    # Reset this "optional" thing so it gets its default value next time
+    # we're called
+    set myvar("_safe_to_jump_max_iterations"): null
