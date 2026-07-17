@@ -1545,6 +1545,13 @@ void state_effect_cleanup(state_effect_t *effect){
     }
 }
 
+void state_effect_init_noop(state_effect_t *effect){
+    /* Initializes the effect just enough that it's safe to call
+    state_effect_cleanup on it, but also fine to call state_effect_parse
+    on it, which is the usual way of "initializing" an effect */
+    effect->type = STATE_EFFECT_TYPE_NOOP;
+}
+
 void state_effect_dump(state_effect_t *effect, FILE *file, int depth){
     _print_tabs(file, depth);
     fprintf(file, "%s\n", state_effect_type_name(effect->type));

@@ -7,6 +7,7 @@
 #include "test_app.h"
 #include "test_app_list.h"
 #include "lexer_macros.h"
+#include "hexgame_state.h"
 
 
 
@@ -321,6 +322,86 @@ static int _test_app_command_load_recording_filename(test_app_t *app, fus_lexer_
     return 0;
 }
 
+static int _test_app_command_apply_effect(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
+    int err;
+    int player_i = 0;
+
+    if(GOT_INT){
+        err = fus_lexer_get_int(lexer, &player_i);
+        if(err)goto lexer_err;
+    }
+
+    hexgame_t *game = &app->hexgame;
+    if(player_i < 0 || player_i >= game->players_len){
+        console_write_msg(&app->console, "Player # invalid\n");
+        return 0;
+    }
+
+    player_t *player = game->players[player_i];
+    body_t *body = player->body;
+    if(!body){
+        console_printf(&app->console, "Player #%i has no body\n", player_i);
+        return 0;
+    }
+    stateset_t *stateset = body->stateset;
+    if(!stateset){
+        console_printf(&app->console, "Player #%i's body has no stateset\n", player_i);
+        return 0;
+    }
+
+    /* NOTE: we never cleanup this effect, so we are allowing memory leaks
+    here on purpose.
+    That's because state_effect_parse makes no guarantees about leaving the
+    effect in a valid state if parsing fails!..
+    We could try to enforce that guarantee, but we never need it except for
+    here, so we would probably fail to meet that guarantee. */
+    state_effect_t effect;
+    err = state_effect_parse(&effect, stateset->root_context, lexer,
+        game->prend, game->space);
+    if(err == 2)goto lexer_err;
+    else if(err)return err;
+
+    /* NOTE: whenever err == 2, we return 0.
+    In some cases, this is useful, like if you try to call a nonexistent
+    proc; but in other cases, the error may have actually resulted in
+    corrupted game data, and we should really let the error "bubble up".
+    Ah well, maybe some day we'll introduce err == 3 for recoverable
+    errors, or something. (Not likely!) */
+    hexgame_state_context_t _context = {
+        .game = body->game,
+        .body = body,
+    }, *context=&_context;
+    hexgame_state_controlflow_t controlflow;
+    hexgame_state_controlflow_init(&controlflow, false);
+    state_effect_goto_t *gotto = NULL;
+    err = state_effect_apply(&effect, context, &gotto, &controlflow);
+    if(err == 2){
+        console_write_msg(&app->console, "Error applying effect!\n");
+        return 0;
+    }else if(err)return err;
+    if(gotto != NULL){
+        err = state_effect_goto_apply_to_body(gotto, body);
+        if(err == 2){
+            console_printf(&app->console, "Error applying goto: \"%s\"\n", gotto->name);
+            return 0;
+        }else if(err)return err;
+        if(gotto->immediate){
+            /* If there was an "immediate goto" effect,
+            then we immediately handle the new state's rules */
+            err = body_handle_rules(context->body, context->your_body);
+            if(err == 2){
+                console_printf(&app->console, "Error applying goto immediate: \"%s\"\n", gotto->name);
+                return 0;
+            }else if(err)return err;
+        }
+    }
+
+    return 0;
+lexer_err:
+    *lexer_err_ptr = true;
+    return 0;
+}
+
 
 #define COMMAND(NAME, ALT_NAME, PARAMS) (test_app_command_t){ \
     .name = #NAME, \
@@ -348,6 +429,7 @@ test_app_command_t _test_app_commands[] = {
     COMMAND(visit_all, "va", NULL),
     COMMAND(save_recording_filename, "srf", NULL),
     COMMAND(load_recording_filename, "lrf", NULL),
+    COMMAND(apply_effect, "ae", "[PLAYER_INDEX] EFFECT"),
     NULLCOMMAND
 };
 

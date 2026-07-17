@@ -486,6 +486,7 @@ void state_cond_cleanup(state_cond_t *cond);
 void state_cond_dump(state_cond_t *cond, FILE *file, int depth);
 
 void state_effect_cleanup(state_effect_t *effect);
+void state_effect_init_noop(state_effect_t *effect);
 void state_effect_dump(state_effect_t *effect, FILE *file, int depth);
 int state_effect_parse(state_effect_t *effect,
     state_context_t *context, fus_lexer_t *lexer,
