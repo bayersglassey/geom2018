@@ -146,13 +146,14 @@ int main(int n_args, char **args){
     stringstore_init(&name_store);
     stringstore_init(&filename_store);
 
-    hexcollmap_part_t **parts;
-    int parts_len;
+    hexcollmap_part_t **parts = NULL;
+    int parts_len = 0;
 
     /* Load collmap */
     hexcollmap_t *collmap;
     {
         FILE *collmap_file = stdin;
+        bool creating = false;
         if(!strcmp(collmap_filename, "-")){
             if(use_editor){
                 fprintf(stderr, "Interactive editor requires a filename.\n");
@@ -162,21 +163,35 @@ int main(int n_args, char **args){
         }else{
             collmap_file = fopen(collmap_filename, "r");
             if(!collmap_file){
-                perror("fopen");
-                return 1;
+                if(!use_editor){
+                    perror("fopen");
+                    return 1;
+                }else{
+                    fprintf(stderr, "Attempting to create %s\n", collmap_filename);
+                    creating = true;
+                }
             }
         }
 
-        collmap = load_collmap(collmap_file,
-            collmap_filename, opts.just_coll,
-            &parts, &parts_len,
-            &name_store, &filename_store);
-        if(!collmap)return 2;
-
-        if(collmap_file != stdin){
-            if(fclose(collmap_file) == EOF){
-                perror("fclose");
+        if(creating){
+            collmap = calloc(1, sizeof(*collmap));
+            if(!collmap){
+                perror("calloc collmap");
                 return 1;
+            }
+            hexcollmap_init(collmap, &hexspace, collmap_filename);
+        }else{
+            collmap = load_collmap(collmap_file,
+                collmap_filename, opts.just_coll,
+                &parts, &parts_len,
+                &name_store, &filename_store);
+            if(!collmap)return 2;
+
+            if(collmap_file != stdin){
+                if(fclose(collmap_file) == EOF){
+                    perror("fclose");
+                    return 1;
+                }
             }
         }
     }
@@ -214,7 +229,7 @@ int main(int n_args, char **args){
         hexcollmap_part_cleanup(parts[i]);
         free(parts[i]);
     }
-    free(parts);
+    if(parts)free(parts);
     hexcollmap_cleanup(collmap);
     free(collmap);
 

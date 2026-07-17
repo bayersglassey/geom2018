@@ -52,6 +52,29 @@ static void press_any_key() {
 }
 
 
+static int save_collmap(const char *filename, hexcollmap_write_options_t *opts,
+    hexcollmap_t *collmap, hexcollmap_part_t **parts, int parts_len, trf_t *cursor
+){
+    int err;
+    FILE *file = fopen(filename, "w");
+    if(!file){
+        perror("fopen");
+        return 1;
+    }
+    opts->marker = NULL;
+    hexcollmap_write_with_parts(collmap, file, opts,
+        parts, parts_len);
+    opts->marker = cursor;
+    if(fclose(file)){
+        perror("fclose");
+        return 1;
+    }
+    printf("\n*** Saved to: %s\n", filename);
+    press_any_key();
+    return 0;
+}
+
+
 static int fit_map_to_cursor(hexcollmap_t *collmap, trf_t *cursor){
     int err;
 
@@ -130,28 +153,22 @@ int mapeditor(const char *collmap_filename, hexcollmap_write_options_t *opts,
         }
 
         switch(ch){
-            case 'Q': quit = true; break;
+            case 'Q': {
+                printf("Do you want to save first (y/n)?\n");
+                int ch = raw_getch();
+                if(ch == 'y'){
+                    err = save_collmap(collmap_filename, opts, collmap,
+                        parts, parts_len, cursor);
+                    if(err)return err;
+                    quit = true;
+                }else if(ch == 'n'){
+                    quit = true;
+                }
+            } break;
             case 'W': {
-                if(!strcmp(collmap_filename, "<stdin>")){
-                    fprintf(stderr, "Can't save to stdin!\n");
-                    return 2;
-                }
-                FILE *file = fopen(collmap_filename, "w");
-                if(!file){
-                    perror("fopen");
-                    return 1;
-                }
-                opts->marker = NULL;
-                hexcollmap_write_with_parts(collmap, file, opts,
-                    parts, parts_len);
-                opts->marker = cursor;
-                if(fclose(file)){
-                    perror("fclose");
-                    return 1;
-                }
-
-                printf("\n*** Saved to: %s\n", collmap_filename);
-                press_any_key();
+                err = save_collmap(collmap_filename, opts, collmap,
+                    parts, parts_len, cursor);
+                if(err)return err;
             } break;
             case '?': {
                 cls();

@@ -1334,6 +1334,9 @@ Jul 16, 2026:
     Why bother?.. because for e.g. blockers and things, I think it'll be way
     faster to use arrow keys to sketch out a shape.
 
+[X] Map editor should create a new file if it doesn't find the one you
+    specified
+
 [ ] We need a way to tell AI spiders to avoid certain spaces.
     So basically, "invisible walls" for them.
     That way, we can keep them out of some places, e.g. keep them from
@@ -1356,6 +1359,3 @@ Jul 16, 2026:
     Ooh maybe you leave a trail. Invisible "scent" objects.
     They have a "freshness" which counts down, and rollers (and maybe other
     things) will go towards whichever side of them has the freshest scent.
-
-[ ] Map editor should create a new file if it doesn't find the one you
-    specified
