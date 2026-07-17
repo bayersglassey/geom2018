@@ -1327,6 +1327,13 @@ Jul 16, 2026:
     forward, not just one!
     So the proc needs to account for that.
 
+[X] The map editor, `bin/collmaptool -E`, currently doesn't grow the map.
+    But we have hexcollmap_union_hexbox for that!..
+    So, let's have the editor union the collmap by e.g. a hexagon around the
+    cursor each time you move it.
+    Why bother?.. because for e.g. blockers and things, I think it'll be way
+    faster to use arrow keys to sketch out a shape.
+
 [ ] We need a way to tell AI spiders to avoid certain spaces.
     So basically, "invisible walls" for them.
     That way, we can keep them out of some places, e.g. keep them from
@@ -1349,3 +1356,6 @@ Jul 16, 2026:
     Ooh maybe you leave a trail. Invisible "scent" objects.
     They have a "freshness" which counts down, and rollers (and maybe other
     things) will go towards whichever side of them has the freshest scent.
+
+[ ] Map editor should create a new file if it doesn't find the one you
+    specified

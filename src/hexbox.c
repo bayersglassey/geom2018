@@ -39,6 +39,15 @@ void hexbox_set(hexbox_t *hexbox,
     hexbox->values[5] = max_z;
 }
 
+void hexbox_set_radius(hexbox_t *hexbox, int radius){
+    /* The hexbox will become a regular hexagon, with given radius, centered
+    at the origin */
+    hexbox_set(hexbox,
+        -radius, radius,
+        -radius, radius,
+        -radius, radius);
+}
+
 void hexbox_zero(hexbox_t *hexbox){
     memset(hexbox, 0, sizeof(*hexbox));
 }
@@ -83,6 +92,8 @@ void hexbox_rot(hexbox_t *hexbox, rot_t rot){
 
 void hexbox_flip1(hexbox_t *hexbox){
     /*
+    Recall, hexbox looks like:
+
                MAX_Y
                * - *
         MIN_Z / \   \ MAX_X
@@ -90,6 +101,7 @@ void hexbox_flip1(hexbox_t *hexbox){
         MIN_X \   \ / MAX_Z
                * - *
                MIN_Y
+
     */
 #define HEXBOX_FLIP1_SWAP(_X, _Y, _OP) { \
     int _temp = _X; \

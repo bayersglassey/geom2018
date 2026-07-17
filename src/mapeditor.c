@@ -52,6 +52,30 @@ static void press_any_key() {
 }
 
 
+static int fit_map_to_cursor(hexcollmap_t *collmap, trf_t *cursor){
+    int err;
+
+    int old_ox = collmap->ox;
+    int old_oy = collmap->oy;
+
+    vec_t add;
+    add[0] = cursor->add[0] - old_ox;
+    add[1] = cursor->add[1] + old_oy;
+
+    hexbox_t hexbox;
+    hexbox_set_radius(&hexbox, 1); /* Regular hexagon */
+    hexbox_add(&hexbox, add);
+
+    err = hexcollmap_union_hexbox(collmap, &hexbox);
+    if(err)return err;
+
+    cursor->add[0] += -old_ox + collmap->ox;
+    cursor->add[1] -= -old_oy + collmap->oy;
+
+    return 0;
+}
+
+
 int mapeditor(const char *collmap_filename, hexcollmap_write_options_t *opts,
     hexcollmap_t *collmap, hexcollmap_part_t **parts, int parts_len
 ){
@@ -66,6 +90,9 @@ int mapeditor(const char *collmap_filename, hexcollmap_write_options_t *opts,
         .add = {collmap->ox, -collmap->oy},
     };
     trf_t *cursor=&_cursor;
+
+    err = fit_map_to_cursor(collmap, cursor);
+    if(err)return err;
 
     bool cursor_visible = true;
 
@@ -145,12 +172,16 @@ int mapeditor(const char *collmap_filename, hexcollmap_write_options_t *opts,
                 vec_t unit = {1, 0};
                 space->vec_rot(unit, cursor->rot);
                 vec_add(space->dims, cursor->add, unit);
+                err = fit_map_to_cursor(collmap, cursor);
+                if(err)return err;
             } break;
             case ARROW_DOWN: {
                 cursor_visible = true;
                 vec_t unit = {1, 0};
                 space->vec_rot(unit, cursor->rot);
                 vec_sub(space->dims, cursor->add, unit);
+                err = fit_map_to_cursor(collmap, cursor);
+                if(err)return err;
             } break;
             case PAGE_UP:
             case PAGE_DOWN: {
@@ -164,6 +195,8 @@ int mapeditor(const char *collmap_filename, hexcollmap_write_options_t *opts,
                 cursor->add[1] = -collmap->oy;
                 cursor->rot = 0;
                 cursor->flip = false;
+                err = fit_map_to_cursor(collmap, cursor);
+                if(err)return err;
             } break;
             case '1': {
                 /* Go to spawn point */
@@ -171,6 +204,8 @@ int mapeditor(const char *collmap_filename, hexcollmap_write_options_t *opts,
                 hexgame_location_init_trf(&collmap->spawn, cursor);
                 cursor->add[0] += collmap->ox;
                 cursor->add[1] -= collmap->oy;
+                err = fit_map_to_cursor(collmap, cursor);
+                if(err)return err;
             } break;
             case ENTER: cursor_visible = !cursor_visible; break;
 

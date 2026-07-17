@@ -76,6 +76,7 @@ void hexbox_set(hexbox_t *hexbox,
     int min_x, int max_x,
     int min_y, int max_y,
     int min_z, int max_z);
+void hexbox_set_radius(hexbox_t *hexbox, int radius);
 void hexbox_zero(hexbox_t *hexbox);
 void hexbox_add(hexbox_t *hexbox, vec_t add);
 void hexbox_rot1(hexbox_t *hexbox);
