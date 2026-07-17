@@ -515,6 +515,7 @@ static int _parse_cond(state_context_t *context, fus_lexer_t *lexer,
     }else if(GOT("do")){
         NEXT
         cond->type = STATE_COND_TYPE_DO;
+        ARRAY_INIT(cond->u._do.effects)
         OPEN
         while(!GOT(")")){
             ARRAY_PUSH_NEW(state_effect_t*, cond->u._do.effects, effect)
@@ -903,6 +904,17 @@ int state_effect_parse(state_effect_t *effect,
         while(!GOT(")")){
             ARRAY_PUSH_NEW(state_effect_t*, effect->u.as.sub_effects,
                 sub_effect)
+            err = state_effect_parse(sub_effect, context, lexer, prend, space);
+            if(err)return err;
+        }
+        NEXT
+    }else if(GOT("do")){
+        NEXT
+        effect->type = STATE_EFFECT_TYPE_DO;
+        ARRAY_INIT(effect->u._do.sub_effects)
+        OPEN
+        while(!GOT(")")){
+            ARRAY_PUSH_NEW(state_effect_t*, effect->u._do.sub_effects, sub_effect)
             err = state_effect_parse(sub_effect, context, lexer, prend, space);
             if(err)return err;
         }
@@ -1557,6 +1569,10 @@ void state_effect_cleanup(state_effect_t *effect){
         }
         case STATE_EFFECT_TYPE_AS:
             ARRAY_FREE_PTR(state_effect_t*, effect->u.as.sub_effects,
+                state_effect_cleanup)
+            break;
+        case STATE_EFFECT_TYPE_DO:
+            ARRAY_FREE_PTR(state_effect_t*, effect->u._do.sub_effects,
                 state_effect_cleanup)
             break;
         case STATE_EFFECT_TYPE_ASSERT:

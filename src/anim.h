@@ -325,6 +325,7 @@ enum state_effect_type {
     STATE_EFFECT_TYPE_IF,
     STATE_EFFECT_TYPE_WHILE,
     STATE_EFFECT_TYPE_AS,
+    STATE_EFFECT_TYPE_DO,
     STATE_EFFECT_TYPE_SHOW_MINIMAP,
     STATE_EFFECT_TYPE_ASSERT,
     STATE_EFFECT_TYPES
@@ -358,6 +359,7 @@ static const char *state_effect_type_name(int type){
         case STATE_EFFECT_TYPE_IF: return "if";
         case STATE_EFFECT_TYPE_WHILE: return "while";
         case STATE_EFFECT_TYPE_AS: return "as";
+        case STATE_EFFECT_TYPE_DO: return "do";
         case STATE_EFFECT_TYPE_SHOW_MINIMAP: return "show_minimap";
         case STATE_EFFECT_TYPE_ASSERT: return "assert";
         default: return "unknown";
@@ -449,6 +451,9 @@ typedef struct state_effect {
             int type; /* enum anim_as */
             ARRAY_DECL(struct state_effect*, sub_effects)
         } as;
+        struct {
+            ARRAY_DECL(struct state_effect*, sub_effects)
+        } _do;
         struct {
             int lexer_pos;
             int lexer_row;

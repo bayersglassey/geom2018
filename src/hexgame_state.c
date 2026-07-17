@@ -476,22 +476,17 @@ static void effect_apply_boolean(int boolean, bool *b_ptr){
 
 static int _apply_sub_effects(state_effect_t *effect,
     int sub_effects_len, state_effect_t **sub_effects,
-    hexgame_state_context_t *context
+    hexgame_state_context_t *context,
+    hexgame_state_controlflow_t *controlflow
 ){
     /* Applies effects for STATE_EFFECT_TYPE_SPAWN, STATE_EFFECT_TYPE_AS,
-    etc.
-    Note that in these situations, we generally have a new body, and a
-    new context.
-    And we don't use the same controlflow_t as the caller. */
+    STATE_EFFECT_TYPE_DO, etc */
     int err;
-
-    hexgame_state_controlflow_t controlflow;
-    hexgame_state_controlflow_init(&controlflow, false);
     for(int i = 0; i < sub_effects_len; i++){
         state_effect_t *sub_effect = sub_effects[i];
 
         state_effect_goto_t *gotto = NULL;
-        err = state_effect_apply(sub_effect, context, &gotto, &controlflow);
+        err = state_effect_apply(sub_effect, context, &gotto, controlflow);
         if(err){
             if(err == 2){
                 fprintf(stderr, "...in \"%s\" statement\n",
@@ -500,7 +495,11 @@ static int _apply_sub_effects(state_effect_t *effect,
             return err;
         }
 
-        if(gotto != NULL && context->body != NULL){
+        if(gotto != NULL){
+            if(context->body == NULL){
+                fprintf(stderr, "Can't goto \"%s\" without a body\n", gotto->name);
+                return 2;
+            }
             err = state_effect_goto_apply_to_body(gotto, context->body);
             if(err)return err;
             if(gotto->immediate){
@@ -508,11 +507,11 @@ static int _apply_sub_effects(state_effect_t *effect,
                 then we immediately handle the new state's rules */
                 err = body_handle_rules(context->body, context->your_body);
                 if(err)return err;
-                controlflow.should_break = true;
+                controlflow->should_break = true;
             }
         }
 
-        if(hexgame_state_controlflow_is_unrolling(&controlflow))break;
+        if(hexgame_state_controlflow_is_unrolling(controlflow))break;
     }
 
     return 0;
@@ -831,10 +830,13 @@ int state_effect_apply(state_effect_t *effect,
         hexgame_state_context_t sub_context = *context;
         sub_context.your_body = new_body;
 
+        hexgame_state_controlflow_t controlflow;
+        hexgame_state_controlflow_init(&controlflow, false);
         err = _apply_sub_effects(effect,
             spawn->effects_len,
             spawn->effects,
-            &sub_context);
+            &sub_context,
+            &controlflow);
         if(err)return err;
 
         break;
@@ -1085,11 +1087,35 @@ int state_effect_apply(state_effect_t *effect,
         err = _context_apply_as(&sub_context, effect->u.as.type);
         if(err)return err;
 
+        hexgame_state_controlflow_t controlflow;
+        hexgame_state_controlflow_init(&controlflow, false);
         err = _apply_sub_effects(effect,
             effect->u.as.sub_effects_len,
             effect->u.as.sub_effects,
-            &sub_context);
+            &sub_context,
+            &controlflow);
         if(err)return err;
+        break;
+    }
+    case STATE_EFFECT_TYPE_DO: {
+        /* This one effect has a bunch of sub-effects!..
+        What's the point?.. I added it so I could do one-liners in the
+        test app console, like:
+
+            ae do: call("safe_to_jump") print(myvar("safe_to_jump"))
+
+        */
+        err = _apply_sub_effects(effect,
+            effect->u._do.sub_effects_len,
+            effect->u._do.sub_effects,
+            context,
+            controlflow);
+        if(err){
+            if(err == 2){
+                fprintf(stderr, "...in \"do\" statement\n");
+            }
+            return err;
+        }
         break;
     }
     default: {

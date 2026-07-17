@@ -349,17 +349,20 @@ static int _test_app_command_apply_effect(test_app_t *app, fus_lexer_t *lexer, b
         return 0;
     }
 
-    /* NOTE: we never cleanup this effect, so we are allowing memory leaks
-    here on purpose.
-    That's because state_effect_parse makes no guarantees about leaving the
-    effect in a valid state if parsing fails!..
-    We could try to enforce that guarantee, but we never need it except for
-    here, so we would probably fail to meet that guarantee. */
     state_effect_t effect;
     err = state_effect_parse(&effect, stateset->root_context, lexer,
         game->prend, game->space);
-    if(err == 2)goto lexer_err;
-    else if(err)return err;
+    if(err == 2){
+        /* NOTE: if we couldn't fully parse the effect, we don't attempt to
+        do cleanup of it, since state_effect_parse makes no guarantees about
+        leaving the effect in a valid state if parsing fails!.. */
+        goto lexer_err;
+    }else if(err)return err;
+    if(!fus_lexer_done(lexer)){
+        console_write_msg(&app->console, "Extra input\n");
+        state_effect_cleanup(&effect);
+        goto lexer_err;
+    }
 
     /* NOTE: whenever err == 2, we return 0.
     In some cases, this is useful, like if you try to call a nonexistent
@@ -377,13 +380,13 @@ static int _test_app_command_apply_effect(test_app_t *app, fus_lexer_t *lexer, b
     err = state_effect_apply(&effect, context, &gotto, &controlflow);
     if(err == 2){
         console_write_msg(&app->console, "Error applying effect!\n");
-        return 0;
+        goto cleanup_effect;
     }else if(err)return err;
     if(gotto != NULL){
         err = state_effect_goto_apply_to_body(gotto, body);
         if(err == 2){
             console_printf(&app->console, "Error applying goto: \"%s\"\n", gotto->name);
-            return 0;
+            goto cleanup_effect;
         }else if(err)return err;
         if(gotto->immediate){
             /* If there was an "immediate goto" effect,
@@ -391,11 +394,14 @@ static int _test_app_command_apply_effect(test_app_t *app, fus_lexer_t *lexer, b
             err = body_handle_rules(context->body, context->your_body);
             if(err == 2){
                 console_printf(&app->console, "Error applying goto immediate: \"%s\"\n", gotto->name);
-                return 0;
+                goto cleanup_effect;
             }else if(err)return err;
         }
     }
 
+    return 0;
+cleanup_effect:
+    state_effect_cleanup(&effect);
     return 0;
 lexer_err:
     *lexer_err_ptr = true;
