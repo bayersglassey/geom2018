@@ -21,6 +21,9 @@ proc "safe_to_jump":
     set procvar("location"): myvar(".loc")
     move procvar("location"): 1 0
 
+    if: expr: procvar("debug")
+    then: print: "Checking jump safety..."
+
     set procvar("iterations"): 0
     while: expr: T
     do:
