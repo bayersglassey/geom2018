@@ -71,6 +71,7 @@ typedef struct hexmap_submap {
     const char *filename;
     ARRAY_DECL(valexpr_t*, text_exprs)
         /* Text displayed when camera is on this submap */
+    valexpr_t colltag_expr; /* Collision tag */
     valexpr_t visible_expr; /* Whether this submap is visible */
     hexcollmap_t collmap;
 
@@ -94,6 +95,7 @@ typedef struct hexmap_submap_parser_context {
     vec_t camera_pos;
     int camera_type;
 
+    valexpr_t colltag_expr;
     valexpr_t visible_expr;
 
     hexgame_audio_callback_t *song;
@@ -170,6 +172,8 @@ int hexmap_load_recording(hexmap_t *map, const char *filename,
     struct body **body_ptr);
 int hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf, bool all, bool *collide_ptr);
+int hexmap_collide_with_colltag(hexmap_t *map, hexcollmap_t *collmap2,
+    trf_t *trf, bool all, bool *collide_ptr, const char *colltag);
 int hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf,
     hexmap_collision_t *collision);
@@ -187,6 +191,7 @@ void hexmap_submap_get_spawn(hexmap_submap_t *submap, hexgame_location_t *locati
 void hexmap_submap_visit(hexmap_submap_t *submap);
 bool hexmap_submap_is_visited(hexmap_submap_t *submap);
 bool hexmap_submap_is_target(hexmap_submap_t *submap);
+int hexmap_submap_get_colltag(hexmap_submap_t *submap, const char **colltag_ptr);
 int hexmap_submap_is_visible(hexmap_submap_t *submap, bool *visible_ptr);
 int hexmap_submap_is_solid(hexmap_submap_t *submap, bool *solid_ptr);
 int rendergraph_add_rgraphs_from_collmap(

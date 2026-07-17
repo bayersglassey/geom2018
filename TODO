@@ -1342,6 +1342,7 @@ Jul 16, 2026:
     That way, we can keep them out of some places, e.g. keep them from
     going from spidertown through the door to trees, or keep them hiding
     inside the safe parts of dodecas so they don't get run over by hexrollers.
+    ==> OKAY, adding a "colltag" concept to submaps...
 
 [ ] Sometimes, aispiders in dodecas are making really far jumps, and landing,
     but then sitting there for a second before disappearing.
@@ -1359,3 +1360,13 @@ Jul 16, 2026:
     Ooh maybe you leave a trail. Invisible "scent" objects.
     They have a "freshness" which counts down, and rollers (and maybe other
     things) will go towards whichever side of them has the freshest scent.
+
+[ ] Map collisions are expensive!.. are we doing enough, like are we using
+    hexboxes to avoid iterating over tiles?..
+    HOLY MOLY, we're iterating over elems of the hitbox, then iterating over
+    all submaps for each of those elems!!!!
+    AND FOR EACH SUBMAP, WE'RE RECALCULATING ITS VISIBILITY ETC EACH TIME!..
+    (in hexmap_collide_elem, in src/hexmap.c)
+    So that's awful. We should iterate over submaps first, check bounding box
+    (i.e. submap->collmap->hexbox) in case we can exit early, then check
+    visibility in case we can exit early, *THEN* iterate over hitbox elems.

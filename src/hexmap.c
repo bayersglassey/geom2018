@@ -712,21 +712,20 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
         CLOSE
     }
 
-    /* You can *either* inherit parent context's visibility, or define your
-    own.
-    (NOTE: context->visible_expr is initialized to a literal bool, which doesn't
-    need to be cleaned up, so we can freely overwrite it, *once*.) */
-    if(GOT("inherit_visible")){
-        NEXT
-        err = valexpr_copy(&context->visible_expr,
-            &parent_context->visible_expr);
-        if(err)return err;
-    }else if(GOT("visible")){
+    /* You can either inherit parent context's visibility (the default
+    behaviour), or define your own.
+    NOTE: context->visible_expr is initialized to a literal bool, which doesn't
+    need to be cleaned up, so we can freely overwrite it, *once*. */
+    if(GOT("visible")){
         NEXT
         OPEN
         err = valexpr_parse(&context->visible_expr, lexer);
         if(err)return err;
         CLOSE
+    }else{
+        err = valexpr_copy(&context->visible_expr,
+            &parent_context->visible_expr);
+        if(err)return err;
     }
 
     if(GOT("target")){
@@ -984,7 +983,12 @@ static int hexmap_collide_elem(hexmap_t *map, int all_type,
 
     /* *collide_ptr: true (1) or false (0), or 2 if caller should continue
     checking for a collision. */
-    int *collide_ptr
+    int *collide_ptr,
+
+    /* colltag: if not NULL, then instead of checking for collisions with
+    solid submaps, we should instead check for collisions against collmaps
+    having the same colltag */
+    const char *colltag
 ){
     int err;
 
@@ -1015,10 +1019,21 @@ static int hexmap_collide_elem(hexmap_t *map, int all_type,
         for(int i = map->submaps_len - 1; i >= 0; i--){
             hexmap_submap_t *submap = map->submaps[i];
 
-            bool solid;
-            err = hexmap_submap_is_solid(submap, &solid);
-            if(err)return err;
-            if(!solid)continue;
+            if(colltag){
+                /* Only check for collisions with submaps having the indicated
+                colltag */
+                const char *submap_colltag;
+                err = hexmap_submap_get_colltag(submap, &submap_colltag);
+                if(err)return err;
+                bool match = submap_colltag && !strcmp(submap_colltag, colltag);
+                if(!match)continue;
+            }else{
+                /* Only check for collisions with solid submaps */
+                bool solid;
+                err = hexmap_submap_is_solid(submap, &solid);
+                if(err)return err;
+                if(!solid)continue;
+            }
 
             hexcollmap_t *collmap1 = &submap->collmap;
 
@@ -1079,7 +1094,8 @@ static void hexmap_collision_init(hexmap_collision_t *collision){
 }
 
 static int _hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
-    trf_t *trf, int all_type, hexmap_collision_t *collision, bool *collide_ptr
+    trf_t *trf, int all_type, hexmap_collision_t *collision, bool *collide_ptr,
+    const char *colltag
 ){
 #   define _RETURN(_collide) {*collide_ptr = _collide; return 0;}
     int err;
@@ -1111,7 +1127,7 @@ static int _hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
                 tile2->vert, 1,
                 hexcollmap_normalize_vert,
                 hexcollmap_get_vert,
-                collision, &collide);
+                collision, &collide, colltag);
             if(err)return err;
             if(collide != 2)_RETURN(collide)
             err = hexmap_collide_elem(map, all_type,
@@ -1119,7 +1135,7 @@ static int _hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
                 tile2->edge, 3,
                 hexcollmap_normalize_edge,
                 hexcollmap_get_edge,
-                collision, &collide);
+                collision, &collide, colltag);
             if(err)return err;
             if(collide != 2)_RETURN(collide)
             err = hexmap_collide_elem(map, all_type,
@@ -1127,7 +1143,7 @@ static int _hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
                 tile2->face, 2,
                 hexcollmap_normalize_face,
                 hexcollmap_get_face,
-                collision, &collide);
+                collision, &collide, colltag);
             if(err)return err;
             if(collide != 2)_RETURN(collide)
         }
@@ -1155,7 +1171,14 @@ int hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf, bool all, bool *collide_ptr
 ){
     hexmap_collision_t collision;
-    return _hexmap_collide(map, collmap2, trf, all, &collision, collide_ptr);
+    return _hexmap_collide(map, collmap2, trf, all, &collision, collide_ptr, NULL);
+}
+
+int hexmap_collide_with_colltag(hexmap_t *map, hexcollmap_t *collmap2,
+    trf_t *trf, bool all, bool *collide_ptr, const char *colltag
+){
+    hexmap_collision_t collision;
+    return _hexmap_collide(map, collmap2, trf, all, &collision, collide_ptr, colltag);
 }
 
 int hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
@@ -1163,7 +1186,7 @@ int hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
 ){
     int all_type = 2;
     bool collide; /* unused */
-    return _hexmap_collide(map, collmap2, trf, all_type, collision, &collide);
+    return _hexmap_collide(map, collmap2, trf, all_type, collision, &collide, NULL);
 }
 
 
@@ -1281,6 +1304,7 @@ void hexmap_submap_group_init(hexmap_submap_group_t *group,
 void hexmap_submap_cleanup(hexmap_submap_t *submap){
     ARRAY_FREE_PTR(valexpr_t*, submap->text_exprs, valexpr_cleanup)
     valexpr_cleanup(&submap->visible_expr);
+    valexpr_cleanup(&submap->colltag_expr);
     hexcollmap_cleanup(&submap->collmap);
     vars_cleanup(&submap->song_vars);
 }
@@ -1303,6 +1327,8 @@ int hexmap_submap_init(hexmap_t *map,
     submap->camera_type = context->camera_type;
 
     err = valexpr_copy(&submap->visible_expr, &context->visible_expr);
+    if(err)return err;
+    err = valexpr_copy(&submap->colltag_expr, &context->colltag_expr);
     if(err)return err;
 
     submap->song = context->song;
@@ -1354,28 +1380,53 @@ bool hexmap_submap_is_target(hexmap_submap_t *submap){
     return submap->group->target;
 }
 
+int hexmap_submap_get_colltag(hexmap_submap_t *submap, const char **colltag_ptr){
+    int err;
+
+    const char *colltag = NULL;
+
+    valexpr_result_t result = {0};
+    valexpr_context_t context = {
+        .mapvars = &submap->map->vars,
+        .globalvars = &submap->map->game->vars
+    };
+    err = valexpr_get(&submap->colltag_expr, &context, &result);
+    if(err){
+        fprintf(stderr,
+            "Error while evaluating colltag for submap: %s\n",
+            submap->filename);
+        return err;
+    }else if(!result.val){
+        /* Val not found: no colltag by default */
+    }else{
+        colltag = val_get_str(result.val);
+    }
+
+    *colltag_ptr = colltag;
+    return 0;
+}
+
 int hexmap_submap_is_visible(hexmap_submap_t *submap, bool *visible_ptr){
     int err;
 
     /* NOTE: visible by default. */
     bool visible = true;
-    {
-        valexpr_result_t result = {0};
-        valexpr_context_t context = {
-            .mapvars = &submap->map->vars,
-            .globalvars = &submap->map->game->vars
-        };
-        err = valexpr_get(&submap->visible_expr, &context, &result);
-        if(err){
-            fprintf(stderr,
-                "Error while evaluating visibility for submap: %s\n",
-                submap->filename);
-            return err;
-        }else if(!result.val){
-            /* Val not found: use default visible value */
-        }else{
-            visible = val_get_bool(result.val);
-        }
+
+    valexpr_result_t result = {0};
+    valexpr_context_t context = {
+        .mapvars = &submap->map->vars,
+        .globalvars = &submap->map->game->vars
+    };
+    err = valexpr_get(&submap->visible_expr, &context, &result);
+    if(err){
+        fprintf(stderr,
+            "Error while evaluating visibility for submap: %s\n",
+            submap->filename);
+        return err;
+    }else if(!result.val){
+        /* Val not found: use default visible value */
+    }else{
+        visible = val_get_bool(result.val);
     }
 
     *visible_ptr = visible;
@@ -1422,9 +1473,8 @@ void hexmap_submap_parser_context_init(hexmap_submap_parser_context_t *context,
     context->song = parent? parent->song: NULL;
     vars_init(&context->song_vars);
 
-    /* Visibility is *NOT* inherited by default.
-    Opt in with the "inherit_visible" syntax. */
     valexpr_set_literal_bool(&context->visible_expr, true);
+    valexpr_set_literal_null(&context->colltag_expr);
 
     ARRAY_INIT(context->text_exprs)
 
@@ -1452,6 +1502,7 @@ int hexmap_submap_parser_context_init_root(hexmap_submap_parser_context_t *conte
 
 void hexmap_submap_parser_context_cleanup(hexmap_submap_parser_context_t *context){
     valexpr_cleanup(&context->visible_expr);
+    valexpr_cleanup(&context->colltag_expr);
     vars_cleanup(&context->song_vars);
     ARRAY_FREE_PTR(valexpr_t*, context->text_exprs, valexpr_cleanup)
 }

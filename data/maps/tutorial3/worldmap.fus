@@ -108,7 +108,6 @@ submaps:
                 submaps:
                     :
                         file: "data/maps/tutorial3/start3_switched_b.fus"
-                        inherit_visible
                         pos: (11 2)
             :
                 file: "data/maps/tutorial3/start3_switched_blocker.fus"
