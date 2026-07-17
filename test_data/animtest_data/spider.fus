@@ -156,7 +156,19 @@ cases:
     ##################################################################
     # Tests of proc "safe_to_jump"
 
-    "can_jump_short1":
+    "cant_jump_short0_infinity":
+        stateset: "anim/spider.fus"
+        collmap:
+            ;;    .
+            ;;
+            ;; (+)- +
+        before:
+            call: "safe_to_jump"
+        after:
+            assert: ! myvar("safe_to_jump")
+            assert: == myvar("_reason") "infinity"
+
+    "cant_jump_short1_infinity":
         stateset: "anim/spider.fus"
         collmap:
             ;;    .   .
@@ -165,7 +177,8 @@ cases:
         before:
             call: "safe_to_jump"
         after:
-            assert: myvar("safe_to_jump")
+            assert: ! myvar("safe_to_jump")
+            assert: == myvar("_reason") "infinity"
 
     "cant_jump_short1_crash":
         stateset: "anim/spider.fus"
@@ -180,18 +193,6 @@ cases:
         after:
             assert: ! myvar("safe_to_jump")
             assert: == myvar("_reason") "crash"
-
-    "cant_jump_short0_infinity":
-        stateset: "anim/spider.fus"
-        collmap:
-            ;;    .
-            ;;
-            ;; (+)- +
-        before:
-            call: "safe_to_jump"
-        after:
-            assert: ! myvar("safe_to_jump")
-            assert: == myvar("_reason") "infinity"
 
     "can_jump_short2":
         stateset: "anim/spider.fus"
