@@ -259,7 +259,7 @@ static int hexmap_load_hexmap_recording(
         interestingly enough. */
         err = vars_copy(&body->vars, &recording->vars);
         if(err)return err;
-        err = body_execute_procs(body, STATESET_PROC_TYPE_ONSTATESETCHANGE);
+        err = body_execute_procs(body, STATESET_PROC_TYPE_STATESET_CHANGE);
         if(err)return err;
     }else if(recording->type == HEXMAP_RECORDING_TYPE_ACTOR){
         /* We create a body with NULL stateset, state.
@@ -286,7 +286,7 @@ static int hexmap_load_hexmap_recording(
         We basically expect the actor's initial state to "play" a recording
         which will give the body its stateset.
         TODO: FIX THIS GODAWFUL HACK T__T
-         err = body_execute_procs(body, STATESET_PROC_TYPE_ONSTATESETCHANGE);
+         err = body_execute_procs(body, STATESET_PROC_TYPE_STATESET_CHANGE);
          if(err)return err;
         */
 

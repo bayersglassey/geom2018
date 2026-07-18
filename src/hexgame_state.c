@@ -727,6 +727,7 @@ int state_effect_apply(state_effect_t *effect,
         if(anim_debug)fprintf(stderr, "Call: \"%s\"\n", name);
         stateset_proc_t *proc = state_context_get_proc(state_context, name);
         if(!proc){
+            if(effect->u.call.if_exists)break;
             RULE_PERROR()
             fprintf(stderr,
                 "Couldn't find proc \"%s\" for stateset \"%s\"\n",
@@ -956,6 +957,7 @@ int state_effect_apply(state_effect_t *effect,
     }
     case STATE_EFFECT_TYPE_INC:
     case STATE_EFFECT_TYPE_DEC:
+    case STATE_EFFECT_TYPE_MUL:
     case STATE_EFFECT_TYPE_SET:
     case STATE_EFFECT_TYPE_UNSET: {
         valexpr_context_t valexpr_context;
@@ -1003,7 +1005,8 @@ int state_effect_apply(state_effect_t *effect,
 
         if(
             effect->type == STATE_EFFECT_TYPE_INC ||
-            effect->type == STATE_EFFECT_TYPE_DEC
+            effect->type == STATE_EFFECT_TYPE_DEC ||
+            effect->type == STATE_EFFECT_TYPE_MUL
         ){
             if(val_val->type != VAL_TYPE_INT){
                 RULE_PERROR()
@@ -1015,10 +1018,14 @@ int state_effect_apply(state_effect_t *effect,
                 fputc('\n', stderr);
                 return 2;
             }
-            int inc = val_get_int(val_val);
-            if(effect->type == STATE_EFFECT_TYPE_DEC)inc = -inc;
-
-            val_set_int(&var->value, val_get_int(&var->value) + inc);
+            int n = val_get_int(val_val);
+            if(effect->type == STATE_EFFECT_TYPE_INC){
+                val_set_int(&var->value, val_get_int(&var->value) + n);
+            }else if(effect->type == STATE_EFFECT_TYPE_DEC){
+                val_set_int(&var->value, val_get_int(&var->value) - n);
+            }else{
+                val_set_int(&var->value, val_get_int(&var->value) * n);
+            }
             err = vars_callback(vars, var);
             if(err)return err;
         }else{

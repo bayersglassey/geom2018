@@ -1,6 +1,9 @@
 
 import "anim/_coin.behaviour.fus"
 
+vars:
+    "coin_power": 10
+
 state "_crouch":
     if() then: goto: "crouch"
 

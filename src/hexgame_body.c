@@ -498,7 +498,7 @@ int body_move_to_map(body_t *body, hexmap_t *map){
     if(body->map == map)return 0;
 
     /* Run any procs which need to e.g. clean up mapvars in the old map */
-    err = body_execute_procs(body, STATESET_PROC_TYPE_ONMAPCHANGE);
+    err = body_execute_procs(body, STATESET_PROC_TYPE_MAP_CHANGE);
     if(err)return err;
 
     /* Do the thing we all came here for */
@@ -735,8 +735,8 @@ int body_set_stateset(body_t *body, const char *stateset_filename,
         err = vars_copy(&body->vars, &body->stateset->vars);
         if(err)return err;
 
-        /* Execute any "onstatesetchange" procs */
-        err = body_execute_procs(body, STATESET_PROC_TYPE_ONSTATESETCHANGE);
+        /* Execute any "on_stateset_change" procs */
+        err = body_execute_procs(body, STATESET_PROC_TYPE_STATESET_CHANGE);
         if(err)return err;
     }
 
@@ -964,6 +964,11 @@ int body_step(body_t *body, hexgame_t *game){
         mapping->frame_i = _increment_frame_i(mapping->frame_i);
     }
 
+    /* Execute any procs which should happen at the start of the frame,
+    i.e. before any stateset rules are handled */
+    err = body_execute_procs(body, STATESET_PROC_TYPE_FRAME_START);
+    if(err)return err;
+
     /* Handle animation & input */
     if(body->cooldown > 0){
         body->cooldown--;
@@ -987,6 +992,10 @@ int body_step(body_t *body, hexgame_t *game){
             }
         }
     }
+
+    /* Execute any procs which should happen at the end of the frame,
+    i.e. after all stateset rules were handled */
+    err = body_execute_procs(body, STATESET_PROC_TYPE_FRAME_END);
 
     /* Figure out current submap */
     err = body_update_cur_submap(body);

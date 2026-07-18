@@ -30,3 +30,43 @@ shapes:
         animation: cycle 12
         shapes:
             : "coin" (1 1 1 0)  0 f
+
+    "coin_power_crystal":
+        animation: cycle 12
+        prismels:
+            : "tri" (0 0 0 0)  1 f eval(7 + 8 + 1) (3 1)
+
+            : "tri" (0 0 0 0)  1 f eval(5 + 8 + 1) (2 1)
+            : "tri" (0 0 0 0)  3 f eval(7 + 8 + 1) (2 1)
+
+            : "tri" (0 0 0 0)  1 f eval(5 + 0 + 1) (1 1)
+            : "tri" (0 0 0 0)  3 f eval(5 + 8 + 1) (1 1)
+
+            : "tri" (0 0 0 0)  3 f eval(5 + 0 + 1) (0 1)
+
+    "coin_power_crystals":
+        animation: cycle 12
+        shapes:
+            : "coin_power_crystal" (3 0 0 0)  0 f  0+
+            : "coin_power_crystal" (0 3 0 0)  1 f  0+
+
+    "coin_power":
+        animation: cycle 12
+        shapes:
+            : "coin_power_crystals" (0 0 0 0)  0 f  0+
+            : "coin_power_crystals" (0 0 0 0)  2 f  2+
+            : "coin_power_crystals" (0 0 0 0)  4 f  4+
+            : "coin_power_crystals" (0 0 0 0)  6 f  6+
+            : "coin_power_crystals" (0 0 0 0)  8 f  8+
+            : "coin_power_crystals" (0 0 0 0) 10 f 10+
+
+    "coin_power_2":
+        animation: cycle 12
+        shapes:
+            : "coin_power" (0 0 0 0)  0 f  6+
+            : "coin_power_crystals" (0 0 0 0)  0 f  0+
+            : "coin_power_crystals" (0 0 0 0)  2 f  2+
+            : "coin_power_crystals" (0 0 0 0)  4 f  4+
+            : "coin_power_crystals" (0 0 0 0)  6 f  6+
+            : "coin_power_crystals" (0 0 0 0)  8 f  8+
+            : "coin_power_crystals" (0 0 0 0) 10 f 10+

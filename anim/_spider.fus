@@ -46,7 +46,7 @@ $IF !EYESPIDER: on "carryable":
             goto immediate: "_collected"
 
 
-proc onmapchange "mapchange":
+proc on map_change "on_map_change":
 
     # Decrement a mapvar tracking how many of this thing are
     # being carried

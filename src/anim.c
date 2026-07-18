@@ -132,14 +132,23 @@ static int _parse_stateset_proc(state_context_t *context, fus_lexer_t *lexer,
             toplevel = true;
             continue;
         }
-        if(GOT("onstatesetchange")){
+        if(GOT("on")){
             NEXT
-            type = STATESET_PROC_TYPE_ONSTATESETCHANGE;
-            continue;
-        }
-        if(GOT("onmapchange")){
-            NEXT
-            type = STATESET_PROC_TYPE_ONMAPCHANGE;
+            if(GOT("stateset_change")){
+                NEXT
+                type = STATESET_PROC_TYPE_STATESET_CHANGE;
+            }else if(GOT("map_change")){
+                NEXT
+                type = STATESET_PROC_TYPE_MAP_CHANGE;
+            }else if(GOT("frame_start")){
+                NEXT
+                type = STATESET_PROC_TYPE_FRAME_START;
+            }else if(GOT("frame_end")){
+                NEXT
+                type = STATESET_PROC_TYPE_FRAME_END;
+            }else{
+                return UNEXPECTED("a proc type");
+            }
             continue;
         }
         break;
@@ -671,10 +680,15 @@ int state_effect_parse(state_effect_t *effect,
         CLOSE
     }else if(GOT("call")){
         NEXT
+        effect->type = STATE_EFFECT_TYPE_CALL;
+        effect->u.call.if_exists = false;
+        if(GOT("if_exists")){
+            NEXT
+            effect->u.call.if_exists = true;
+        }
         OPEN
         const char *name;
         GET_STR_CACHED(name, &prend->name_store)
-        effect->type = STATE_EFFECT_TYPE_CALL;
         effect->u.call.name = name;
         valexpr_vars_init(&effect->u.call.valexpr_vars);
         if(GOT("vars")){
@@ -750,9 +764,11 @@ int state_effect_parse(state_effect_t *effect,
     }else if(GOT("remove")){
         NEXT
         effect->type = STATE_EFFECT_TYPE_REMOVE;
-    }else if(GOT("inc") || GOT("dec")){
-        effect->type = GOT("dec")?
-            STATE_EFFECT_TYPE_DEC: STATE_EFFECT_TYPE_INC;
+    }else if(GOT("inc") || GOT("dec") || GOT("mul")){
+        effect->type =
+            GOT("inc")? STATE_EFFECT_TYPE_INC:
+            GOT("dec")? STATE_EFFECT_TYPE_DEC:
+            STATE_EFFECT_TYPE_MUL;
         NEXT
 
         err = valexpr_parse(&effect->u.set.var_expr, lexer);
@@ -1550,6 +1566,7 @@ void state_effect_cleanup(state_effect_t *effect){
             break;
         case STATE_EFFECT_TYPE_INC:
         case STATE_EFFECT_TYPE_DEC:
+        case STATE_EFFECT_TYPE_MUL:
         case STATE_EFFECT_TYPE_SET:
         case STATE_EFFECT_TYPE_UNSET:
             valexpr_cleanup(&effect->u.set.var_expr);

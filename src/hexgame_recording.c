@@ -359,10 +359,10 @@ int body_play_recording(body_t *body){
     err = vars_copy(&body->vars, &rec->vars);
     if(err)return err;
 
-    /* Execute any "onstatesetchange" procs
+    /* Execute any "on_stateset_change" procs
     NOTE: this was already likely done by body_set_stateset, before rec->vars
     was copied... so we're probably unnecessarily executing these procs twice!.. */
-    err = body_execute_procs(body, STATESET_PROC_TYPE_ONSTATESETCHANGE);
+    err = body_execute_procs(body, STATESET_PROC_TYPE_STATESET_CHANGE);
     if(err)return err;
 
     body->recording.action = RECORDING_ACTION_PLAY;

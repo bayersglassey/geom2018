@@ -81,16 +81,20 @@ struct state_effect_goto;
 
 enum stateset_proc_type {
     STATESET_PROC_TYPE_NORMAL,
-    STATESET_PROC_TYPE_ONSTATESETCHANGE,
-    STATESET_PROC_TYPE_ONMAPCHANGE,
+    STATESET_PROC_TYPE_STATESET_CHANGE,
+    STATESET_PROC_TYPE_MAP_CHANGE,
+    STATESET_PROC_TYPE_FRAME_START,
+    STATESET_PROC_TYPE_FRAME_END,
     STATESET_PROC_TYPES
 };
 
 static const char *stateset_proc_type_msg(int type){
     switch(type){
         case STATESET_PROC_TYPE_NORMAL: return "normal";
-        case STATESET_PROC_TYPE_ONSTATESETCHANGE: return "onstatesetchange";
-        case STATESET_PROC_TYPE_ONMAPCHANGE: return "onmapchange";
+        case STATESET_PROC_TYPE_STATESET_CHANGE: return "on_stateset_change";
+        case STATESET_PROC_TYPE_MAP_CHANGE: return "on_map_change";
+        case STATESET_PROC_TYPE_FRAME_START: return "on_frame_start";
+        case STATESET_PROC_TYPE_FRAME_END: return "on_frame_end";
         default: return "unknown";
     }
 }
@@ -317,6 +321,7 @@ enum state_effect_type {
     STATE_EFFECT_TYPE_REMOVE,
     STATE_EFFECT_TYPE_INC,
     STATE_EFFECT_TYPE_DEC,
+    STATE_EFFECT_TYPE_MUL,
     STATE_EFFECT_TYPE_CONTINUE,
     STATE_EFFECT_TYPE_BREAK,
     STATE_EFFECT_TYPE_CONFUSED,
@@ -351,6 +356,7 @@ static const char *state_effect_type_name(int type){
         case STATE_EFFECT_TYPE_REMOVE: return "remove";
         case STATE_EFFECT_TYPE_INC: return "inc";
         case STATE_EFFECT_TYPE_DEC: return "dec";
+        case STATE_EFFECT_TYPE_MUL: return "mul";
         case STATE_EFFECT_TYPE_CONTINUE: return "continue";
         case STATE_EFFECT_TYPE_BREAK: return "break";
         case STATE_EFFECT_TYPE_CONFUSED: return "confused";
@@ -375,6 +381,7 @@ typedef struct state_effect_goto {
 } state_effect_goto_t;
 
 typedef struct state_effect_call {
+    bool if_exists;
     const char *name;
     valexpr_vars_t valexpr_vars;
 } state_effect_call_t;

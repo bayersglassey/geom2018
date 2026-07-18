@@ -221,6 +221,13 @@ shapes:
             : $PREFIX NS "_jump" (-2 0 0  0) 0 f  0 (0 1)
             : $PREFIX NS "_jump" ( 0 0 0  0) 0 f  0 (1 1)
 
+    $PREFIX NS "power_jump":
+        # Like "jump", but POWERFUL!.. basically just faster.
+        # Used when you have "coin_power".
+        animation: cycle 1
+        shapes:
+            : $PREFIX NS "_jump" (-1 0 0  0) 0 f  0 (0 1)
+
     $PREFIX NS "swim_jump":
         animation: cycle 5
         shapes:

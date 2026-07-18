@@ -39,9 +39,13 @@ vars:
     nosave "carrying_respawn_counter": null
     nosave label "label:carrying": null
 
+    nosave "coin_power": 0
+    nosave label "label:coin_power": null
+
     nosave "spit_anim": null
 
-proc toplevel onstatesetchange "update_vars":
+
+proc toplevel on stateset_change "update_vars":
     # Sets various vars which depend on the "is_*spider" vars.
 
     # Default label values:
@@ -84,3 +88,25 @@ proc toplevel onstatesetchange "update_vars":
         if: expr: myvar("is_spikeyspider")
         then: set myvar("spit_anim"): "anim/spikeyspit.fus"
         else: set myvar("spit_anim"): "anim/spit.fus"
+
+
+proc toplevel "coin_collected":
+    # Adds coin's power to ours!..
+    set myvar("_coin_power_add"): yourvar("coin_power")
+    # Multiply by a magic number to affect how many frames coin power
+    # actually lasts for
+    mul myvar("_coin_power_add"): 15
+    inc myvar("coin_power"): myvar("_coin_power_add")
+
+
+proc toplevel on frame_end "update_coin_power":
+    # Decrements spider's coin power...
+    if: expr: > myvar("coin_power") 0
+    then:
+        dec myvar("coin_power")
+        if: expr: == myvar("coin_power") 0
+        then: set myvar("label:coin_power"): null
+        else:
+            if: expr: > myvar("coin_power"): 26
+            then: set myvar("label:coin_power"): "coin_power_2"
+            else: set myvar("label:coin_power"): "coin_power"

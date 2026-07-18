@@ -14,6 +14,7 @@ label "label:toe": default null
 label "label:headbump": default null
 label "label:head_spikes": default null
 label "label:head_spikes_extended": default null
+label "label:coin_power": default null
 label "label:carrying": default null
 
 
@@ -220,6 +221,7 @@ shapes:
             : "label:nose"                 (1 1 0 -1) 0 f
             : "label:headbump"             (0 0 0  0) 0 f
             : "label:head_spikes"          (0 0 0  0) 0 f
+            : "label:coin_power"           (0 0 0  0) 0 f
 
     $PREFIX NS "head":
         $IF EYESPIDER:
