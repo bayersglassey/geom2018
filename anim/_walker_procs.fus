@@ -52,6 +52,24 @@ proc "safe_to_jump":
             set myvar("_reason"): "crash"
             break
 
+        # It might or might not be *safe* to jump, but we are not *allowed*
+        # to make this jump!
+        if:
+            exists procvar("not_allowed_colltag")
+            coll: any yes
+                colltag: procvar("not_allowed_colltag")
+                at procvar("location")
+                ;;  *\*/*
+                ;;  - + -
+                ;;  */*\*
+                ;; ( )
+        then:
+            if: expr: procvar("debug")
+            then: print: "NOT ALLOWED!"
+
+            set myvar("_reason"): "not_allowed"
+            break
+
         # Safe to jump, because we can land here?
         if: all:
             # Make sure this isn't the first iteration, because after pressing

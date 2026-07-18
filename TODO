@@ -1342,7 +1342,7 @@ Jul 16, 2026:
 Jul 17, 2026:
 -------------
 
-[ ] We need a way to tell AI spiders to avoid certain spaces.
+[X] We need a way to tell AI spiders to avoid certain spaces.
     So basically, "invisible walls" for them.
     That way, we can keep them out of some places, e.g. keep them from
     going from spidertown through the door to trees, or keep them hiding
@@ -1424,6 +1424,15 @@ Jul 17, 2026:
                  \
                   + - + - +
 
+    ...but should also teach player about holding "d", e.g. alternating
+    between holes to be avoided (don't press "d") and holes to be taken
+    (do press "d"):
+                              *\*/*
+        + - +   + - + - +   + - + - +   + - +   + - +
+           /     \       \             /   /     \
+          +       +       + - + - + - +   +       +
+            */*\*                           */*\*
+
 [ ] In data/maps/trees/bubbles3-0.fus, make a better "puzzle which teaches
     you how to be a spikeyspider".
     Basically, "you're invincible when you crouch".
@@ -1470,9 +1479,9 @@ Jul 17, 2026:
         there's a countdown, at the end of which you simply find yourself
         flying straight forward in the usual way (i.e. jumping).
 
+        Also, probably if you fly into the water, your rocket disappears.
+
 [ ] Add cli args for setting mapvars?.. `--mapvar name value`
     Only usable with `-m map`?..
     Although FWIW we can use _test_app_command_apply_effect, i.e. "ae" at
     the test app console: `ae set mapvar(name): value`
-
-[ ] data/maps/trees/bubbles3-0.fus

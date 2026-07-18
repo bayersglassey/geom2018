@@ -1,3 +1,6 @@
+vars:
+    "not_allowed_colltag": "coin_beast_not_allowed"
+
 state "create_body":
     if() then:
         play: "actor/rec/aicoin_beast.fus"

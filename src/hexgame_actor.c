@@ -62,6 +62,9 @@ int actor_init_stateset(actor_t *actor, const char *stateset_filename,
         &actor->stateset);
     if(err)return err;
 
+    err = vars_copy(&actor->vars, &actor->stateset->vars);
+    if(err)return err;
+
     if(state_name == NULL){
         state_name = actor->stateset->default_state_name;
     }

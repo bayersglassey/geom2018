@@ -879,7 +879,7 @@ int body_update_cur_submap(body_t *body){
         hexgame_location_init_trf(&body->loc, &hitbox_trf);
 
         hexmap_collision_t collision;
-        err = hexmap_collide_special(map, hitbox, &hitbox_trf,
+        err = hexmap_collide_special(map, hitbox, &hitbox_trf, NULL,
             &collision);
         if(err)return err;
 

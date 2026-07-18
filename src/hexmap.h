@@ -171,11 +171,9 @@ int hexmap_load_recording(hexmap_t *map, const char *filename,
     palettemapper_t *palmapper, bool loop, int offset, trf_t *trf,
     struct body **body_ptr);
 int hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
-    trf_t *trf, bool all, bool *collide_ptr);
-int hexmap_collide_with_colltag(hexmap_t *map, hexcollmap_t *collmap2,
-    trf_t *trf, bool all, bool *collide_ptr, const char *colltag);
+    trf_t *trf, bool all, const char *colltag, bool *collide_ptr);
 int hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
-    trf_t *trf,
+    trf_t *trf, const char *colltag,
     hexmap_collision_t *collision);
 int hexmap_step(hexmap_t *map);
 int hexmap_refresh_vars(hexmap_t *map);

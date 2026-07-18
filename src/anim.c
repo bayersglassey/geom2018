@@ -379,6 +379,8 @@ static int _parse_cond(state_context_t *context, fus_lexer_t *lexer,
         int flags = 0;
         valexpr_t collmsg_expr;
         valexpr_set_literal_null(&collmsg_expr);
+        valexpr_t colltag_expr;
+        valexpr_set_literal_null(&colltag_expr);
 
         if(GOT("water")){
             NEXT
@@ -404,6 +406,14 @@ static int _parse_cond(state_context_t *context, fus_lexer_t *lexer,
         else return UNEXPECTED("yes or no");
         NEXT
 
+        if(GOT("colltag")){
+            NEXT
+            OPEN
+            err = valexpr_parse(&colltag_expr, lexer);
+            if(err)return err;
+            CLOSE
+        }
+
         valexpr_t at_expr;
         valexpr_set_literal_null(&at_expr);
         if(GOT("at")){
@@ -425,6 +435,7 @@ static int _parse_cond(state_context_t *context, fus_lexer_t *lexer,
         cond->u.coll.collmap = collmap;
         cond->u.coll.flags = flags;
         cond->u.coll.collmsg_expr = collmsg_expr;
+        cond->u.coll.colltag_expr = colltag_expr;
         cond->u.coll.at_expr = at_expr;
     }else if(GOT("dead")){
         NEXT
@@ -1461,6 +1472,7 @@ void state_cond_cleanup(state_cond_t *cond){
     switch(cond->type){
         case STATE_COND_TYPE_COLL: {
             valexpr_cleanup(&cond->u.coll.collmsg_expr);
+            valexpr_cleanup(&cond->u.coll.colltag_expr);
             hexcollmap_t *collmap = cond->u.coll.own_collmap;
             if(collmap != NULL){
                 hexcollmap_cleanup(collmap);

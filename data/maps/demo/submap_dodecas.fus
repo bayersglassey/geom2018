@@ -11,6 +11,32 @@ vars:
     nosave "big_switch": T
 
 submaps:
+
+    :
+        visible: F
+        colltag: "aispider_not_allowed"
+        submaps:
+            :
+                file: "data/maps/demo/aispider_blocker.fus"
+                pos: (-26 -5)
+            :
+                bg
+                file: "data/maps/demo/aispider_blocker.fus"
+                pos: (-12 -2)
+            :
+                bg
+                file: "data/maps/demo/aispider_blocker_sm.fus"
+                pos: (0 -2)
+                rot: 1
+            :
+                bg
+                file: "data/maps/demo/aispider_blocker.fus"
+                pos: (8 5)
+            :
+                bg
+                file: "data/maps/demo/aispider_blocker.fus"
+                pos: (18 5)
+
     :
         bg
         file: "data/maps/demo/dodecas_bg.fus"
@@ -48,6 +74,26 @@ submaps:
         target: T
         pos: (20 -50)
         submaps:
+            :
+                visible: F
+                colltag: "aispider_not_allowed"
+                submaps:
+                    :
+                        file: "data/maps/demo/aispider_blocker.fus"
+                        pos: (-10 -28)
+                        rot: 1
+                    :
+                        file: "data/maps/demo/aispider_blocker.fus"
+                        pos: (0 -18)
+                        rot: 1
+                    :
+                        file: "data/maps/demo/aispider_blocker_sm.fus"
+                        pos: (-59 -21)
+                        rot: 0
+                    :
+                        file: "data/maps/demo/aispider_blocker_sm.fus"
+                        pos: (-59 -28)
+                        rot: 1
             :
                 pos: (0 -28)
                 camera: (0 0)

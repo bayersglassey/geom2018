@@ -728,6 +728,18 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
         if(err)return err;
     }
 
+    if(GOT("colltag")){
+        NEXT
+        OPEN
+        err = valexpr_parse(&context->colltag_expr, lexer);
+        if(err)return err;
+        CLOSE
+    }else{
+        err = valexpr_copy(&context->colltag_expr,
+            &parent_context->colltag_expr);
+        if(err)return err;
+    }
+
     if(GOT("target")){
         NEXT
         OPEN
@@ -1094,8 +1106,8 @@ static void hexmap_collision_init(hexmap_collision_t *collision){
 }
 
 static int _hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
-    trf_t *trf, int all_type, hexmap_collision_t *collision, bool *collide_ptr,
-    const char *colltag
+    trf_t *trf, int all_type, const char *colltag,
+    hexmap_collision_t *collision, bool *collide_ptr
 ){
 #   define _RETURN(_collide) {*collide_ptr = _collide; return 0;}
     int err;
@@ -1168,25 +1180,18 @@ static int _hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
 }
 
 int hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
-    trf_t *trf, bool all, bool *collide_ptr
+    trf_t *trf, bool all, const char *colltag, bool *collide_ptr
 ){
     hexmap_collision_t collision;
-    return _hexmap_collide(map, collmap2, trf, all, &collision, collide_ptr, NULL);
-}
-
-int hexmap_collide_with_colltag(hexmap_t *map, hexcollmap_t *collmap2,
-    trf_t *trf, bool all, bool *collide_ptr, const char *colltag
-){
-    hexmap_collision_t collision;
-    return _hexmap_collide(map, collmap2, trf, all, &collision, collide_ptr, colltag);
+    return _hexmap_collide(map, collmap2, trf, all, colltag, &collision, collide_ptr);
 }
 
 int hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
-    trf_t *trf, hexmap_collision_t *collision
+    trf_t *trf, const char *colltag, hexmap_collision_t *collision
 ){
     int all_type = 2;
     bool collide; /* unused */
-    return _hexmap_collide(map, collmap2, trf, all_type, collision, &collide, NULL);
+    return _hexmap_collide(map, collmap2, trf, all_type, colltag, collision, &collide);
 }
 
 

@@ -229,13 +229,20 @@ state "run_around":
     "jump"
     if:
         chance: 40%
+
+        # HACK: copy a var from actor to a global var, so we can pass it
+        # to the "safe_to_jump" proc (when we don't have access to actor's
+        # vars)
+        do: set globalvar("_not_allowed_colltag"): myvar("not_allowed_colltag")
+
         as body:
             do:
                 # Call the "safe_to_jump" proc, with a smallish number
                 # of max iterations, so AI spiders don't try to make
                 # crazy jumps (even if they would succeed)
                 call: "safe_to_jump" vars:
-                    "max_iterations": 12
+                    "max_iterations": 15
+                    "not_allowed_colltag": globalvar("_not_allowed_colltag")
             expr: myvar("safe_to_jump")
     then:
         key: down u

@@ -282,11 +282,32 @@ int state_cond_match(state_cond_t *cond,
         bool water = flags & ANIM_COND_FLAGS_WATER;
         bool against_bodies = flags & ANIM_COND_FLAGS_BODIES;
 
-        if(against_bodies){
-            valexpr_context_t valexpr_context;
-            err = _context_set_vars(context, &valexpr_context);
-            if(err)return err;
+        /* Only initialize this if we really need to!.. */
+        valexpr_context_t valexpr_context;
+        bool valexpr_context_initialized = false;
 
+        const char *colltag = NULL;
+        if(!valexpr_is_literal_null(&cond->u.coll.colltag_expr)){
+            if(!valexpr_context_initialized){
+                err = _context_set_vars(context, &valexpr_context);
+                if(err)return err;
+                valexpr_context_initialized = true;
+            }
+            colltag = valexpr_get_str(
+                &cond->u.coll.colltag_expr, &valexpr_context);
+        }
+
+        if(against_bodies){
+            if(colltag){
+                fprintf(stderr, "Can't use colltag with against_bodies. Colltag was \"%s\".", colltag);
+                return 2;
+            }
+
+            if(!valexpr_context_initialized){
+                err = _context_set_vars(context, &valexpr_context);
+                if(err)return err;
+                valexpr_context_initialized = true;
+            }
             const char *collmsg = valexpr_get_str(
                 &cond->u.coll.collmsg_expr, &valexpr_context);
 
@@ -320,7 +341,7 @@ int state_cond_match(state_cond_t *cond,
             matched = n_matches > 0;
         }else if(water){
             hexmap_collision_t collision;
-            err = hexmap_collide_special(map, hitbox, &hitbox_trf,
+            err = hexmap_collide_special(map, hitbox, &hitbox_trf, colltag,
                 &collision);
             if(err)return err;
             bool collide = collision.water.submap != NULL;
@@ -328,7 +349,7 @@ int state_cond_match(state_cond_t *cond,
         }else{
             bool collide;
             err = hexmap_collide(map, hitbox, &hitbox_trf,
-                yes? all: !all, &collide);
+                yes? all: !all, colltag, &collide);
             if(err)return err;
             matched = yes? collide: !collide;
         }

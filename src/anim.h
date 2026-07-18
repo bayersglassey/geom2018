@@ -249,6 +249,7 @@ typedef struct state_cond {
                 that only bodies with that collmsg should collide
                 (or, and this is a bit of a hack, collmsg_expr can specify
                 a stateset filename instead) */
+            valexpr_t colltag_expr;
             hexcollmap_t *own_collmap;
                 /* own_collmap is for if we own the collmap, as opposed to
                 just pointing to one from context->collmaps. */
