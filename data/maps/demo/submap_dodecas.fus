@@ -20,20 +20,16 @@ submaps:
                 file: "data/maps/demo/aispider_blocker.fus"
                 pos: (-26 -5)
             :
-                bg
                 file: "data/maps/demo/aispider_blocker.fus"
                 pos: (-12 -2)
             :
-                bg
                 file: "data/maps/demo/aispider_blocker_sm.fus"
                 pos: (0 -2)
                 rot: 1
             :
-                bg
                 file: "data/maps/demo/aispider_blocker.fus"
                 pos: (8 5)
             :
-                bg
                 file: "data/maps/demo/aispider_blocker.fus"
                 pos: (18 5)
 
