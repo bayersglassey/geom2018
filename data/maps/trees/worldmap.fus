@@ -4,6 +4,9 @@ spawn: "data/maps/trees/start.fus"
 palette: "data/maps/trees/pals/trees.fus"
 tileset: "data/maps/trees/tilesets/trees.fus"
 
+vars:
+    "bubbles_minimap": F
+
 submaps:
     "start":
         pos: (0 0)
@@ -43,12 +46,10 @@ submaps:
                 file: "data/maps/trees/start5.fus"
                 pos: eval: (5 5) + (11 14)
                 camera: (6 6)
-                tileset: "data/maps/sprucetown/tilesets/earth.fus"
             "start6":
                 file: "data/maps/trees/start6.fus"
                 pos: eval: (5 5) + (11 14) + (10 16)
                 camera: (11 6)
-                tileset: "data/maps/sprucetown/tilesets/earth.fus"
                 submaps:
                     :
                         file: "data/maps/trees/start6-0.fus"
@@ -61,6 +62,7 @@ submaps:
                 tileset: "data/maps/trees/tilesets/trees_dark.fus"
             "start7":
                 file: "data/maps/trees/start7.fus"
+                target: T
                 pos: eval: (5 5) + (12 5) + (22 3)
                 camera: (6 6)
                 submaps:
@@ -79,15 +81,29 @@ submaps:
                         pos: (0 0)
                         camera: (10 0)
                     "bubbles2":
+                        bg
+                        file: "data/maps/trees/bubbles2_bg.fus"
+                        pos: eval: (25 7)
+                        tileset: "data/tileset1_bg.fus"
+                    "bubbles2":
                         file: "data/maps/trees/bubbles2.fus"
                         pos: eval: (25 7)
                         camera: (10 0)
+                    "bubbles2":
+                        file: "data/maps/trees/bubbles2-0.fus"
+                        pos: eval: (25 7)
+                        camera: (16 -5)
                     "bubbles3":
                         file: "data/maps/trees/bubbles3.fus"
                         pos: eval: (25 7) + (19 0)
                         camera: (8 0)
+                    "bubbles3":
+                        file: "data/maps/trees/bubbles3-tunnel.fus"
+                        pos: eval: (25 7) + (19 0) + (-1 11)
+                        camera: (11 -5)
                     "bubbles3-0":
                         file: "data/maps/trees/bubbles3-0.fus"
+                        target: mapvar("bubbles_minimap")
                         pos: eval: (25 7) + (19 0) + (25 12)
                         camera: (10 -10)
                     "bubbles3-1":
