@@ -1,6 +1,144 @@
 
 # May be used for spider *or* coin_beast!
 
+collmap "danger_check":
+    # This is obviously silly.
+    # Instead of a giant collmap, let's calculate distance instead.
+    # So, we want a rule cond which checks if any bodies with a given collmsg
+    # are within some distance (presumably a valexpr).
+    # Although... it's not so clear to me whether "danger_check_b/f"
+    # could be made to work that way...
+    # But perhaps that's fine; we only need them after "danger_check" has caused
+    # us to enter the "hiding" state, and *that* check at least should ideally
+    # be cheap.
+    ;;                                + - + - + - + - + - + - + - + - + - + - +
+    ;;                               /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;                              + - + - + - + - + - + - + - + - + - + - + - +
+    ;;                             /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;                            + - + - + - + - + - + - + - + - + - + - + - + - +
+    ;;                           /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;                          + - + - + - + - + - + - + - + - + - + - + - + - + - +
+    ;;                         /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;                        + - + - + - + - + - + - + - + - + - + - + - + - + - + - +
+    ;;                       /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;                      + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - +
+    ;;                     /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;                    + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - +
+    ;;                   /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;                  + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - +
+    ;;                 /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;                + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - +
+    ;;               /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;              + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - +
+    ;;             /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;            + - + - + - + - + - + - + - + - + - + -(+)- + - + - + - + - + - + - + - + - + - +
+    ;;             \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;              + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - +
+    ;;               \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;                + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - +
+    ;;                 \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;                  + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - +
+    ;;                   \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;                    + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - +
+    ;;                     \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;                      + - + - + - + - + - + - + - + - + - + - + - + - + - + - + - +
+    ;;                       \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;                        + - + - + - + - + - + - + - + - + - + - + - + - + - + - +
+    ;;                         \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;                          + - + - + - + - + - + - + - + - + - + - + - + - + - +
+    ;;                           \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;                            + - + - + - + - + - + - + - + - + - + - + - + - +
+    ;;                             \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;                              + - + - + - + - + - + - + - + - + - + - + - +
+    ;;                               \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;                                + - + - + - + - + - + - + - + - + - + - +
+
+collmap "danger_check_b":
+    ;;                                +
+    ;;                               /*\
+    ;;                              + - +
+    ;;                             /*\*/*\
+    ;;                            + - + - +
+    ;;                           /*\*/*\*/*\
+    ;;                          + - + - + - +
+    ;;                         /*\*/*\*/*\*/*\
+    ;;                        + - + - + - + - +
+    ;;                       /*\*/*\*/*\*/*\*/*\
+    ;;                      + - + - + - + - + - +
+    ;;                     /*\*/*\*/*\*/*\*/*\*/*\
+    ;;                    + - + - + - + - + - + - +
+    ;;                   /*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;                  + - + - + - + - + - + - + - +
+    ;;                 /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;                + - + - + - + - + - + - + - + - +
+    ;;               /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;              + - + - + - + - + - + - + - + - + - +
+    ;;             /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;            + - + - + - + - + - + - + - + - + - + -(+)
+    ;;             \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;              + - + - + - + - + - + - + - + - + - +
+    ;;               \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;                + - + - + - + - + - + - + - + - +
+    ;;                 \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;                  + - + - + - + - + - + - + - +
+    ;;                   \*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;                    + - + - + - + - + - + - +
+    ;;                     \*/*\*/*\*/*\*/*\*/*\*/
+    ;;                      + - + - + - + - + - +
+    ;;                       \*/*\*/*\*/*\*/*\*/
+    ;;                        + - + - + - + - +
+    ;;                         \*/*\*/*\*/*\*/
+    ;;                          + - + - + - +
+    ;;                           \*/*\*/*\*/
+    ;;                            + - + - +
+    ;;                             \*/*\*/
+    ;;                              + - +
+    ;;                               \*/
+    ;;                                +
+
+collmap "danger_check_f":
+    ;;                                +
+    ;;                               /*\
+    ;;                              + - +
+    ;;                             /*\*/*\
+    ;;                            + - + - +
+    ;;                           /*\*/*\*/*\
+    ;;                          + - + - + - +
+    ;;                         /*\*/*\*/*\*/*\
+    ;;                        + - + - + - + - +
+    ;;                       /*\*/*\*/*\*/*\*/*\
+    ;;                      + - + - + - + - + - +
+    ;;                     /*\*/*\*/*\*/*\*/*\*/*\
+    ;;                    + - + - + - + - + - + - +
+    ;;                   /*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;                  + - + - + - + - + - + - + - +
+    ;;                 /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;                + - + - + - + - + - + - + - + - +
+    ;;               /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;              + - + - + - + - + - + - + - + - + - +
+    ;;             /*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\
+    ;;           (+)- + - + - + - + - + - + - + - + - + - +
+    ;;             \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;              + - + - + - + - + - + - + - + - + - +
+    ;;               \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;                + - + - + - + - + - + - + - + - +
+    ;;                 \*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;                  + - + - + - + - + - + - + - +
+    ;;                   \*/*\*/*\*/*\*/*\*/*\*/*\*/
+    ;;                    + - + - + - + - + - + - +
+    ;;                     \*/*\*/*\*/*\*/*\*/*\*/
+    ;;                      + - + - + - + - + - +
+    ;;                       \*/*\*/*\*/*\*/*\*/
+    ;;                        + - + - + - + - +
+    ;;                         \*/*\*/*\*/*\*/
+    ;;                          + - + - + - +
+    ;;                           \*/*\*/*\*/
+    ;;                            + - + - +
+    ;;                             \*/*\*/
+    ;;                              + - +
+    ;;                               \*/
+    ;;                                +
+
 state "mainloop":
     # Main AI loop
 
@@ -15,6 +153,14 @@ state "mainloop":
 
         inc myvar("wait_time")
 
+    # Hide if there are dangerous things nearby
+    "hide"
+    if: coll: bodies("crush") any yes collmap("danger_check")
+    then:
+        key: down d
+        set myvar("wait_time"): 0
+        goto: "hiding"
+
     "wait"
     if: expr: < myvar("wait_time") 14
     then:
@@ -28,7 +174,7 @@ state "mainloop":
     "start_running"
     if: chance: 5%
     then:
-        set myvar("run_time"): 0
+        set myvar("wait_time"): 0
         goto: "run_around"
 
 
@@ -43,7 +189,7 @@ state "run_around":
         key: up x
         key: up y
 
-        inc myvar("run_time")
+        inc myvar("wait_time")
 
 
     "dead"
@@ -53,9 +199,18 @@ state "run_around":
         delay: 42
 
 
+    # Hide if there are dangerous things nearby
+    "hide"
+    if: coll: bodies("crush") any yes collmap("danger_check")
+    then:
+        key: down d
+        set myvar("wait_time"): 0
+        goto: "hiding"
+
+
     "stop_running"
     if:
-        expr: > myvar("run_time") 10
+        expr: > myvar("wait_time") 10
         chance: 5%
     then:
         set myvar("wait_time"): 0
@@ -80,7 +235,7 @@ state "run_around":
                 # of max iterations, so AI spiders don't try to make
                 # crazy jumps (even if they would succeed)
                 call: "safe_to_jump" vars:
-                    "max_iterations": 15
+                    "max_iterations": 12
             expr: myvar("safe_to_jump")
     then:
         key: down u
@@ -121,7 +276,7 @@ state "run_around":
                     ;;        *
     then:
         key: down d
-        set myvar("crawl_time"): 0
+        set myvar("wait_time"): 0
         goto: "mainloop_crawl"
 
 
@@ -244,13 +399,22 @@ state "mainloop_crawl":
         key: up x
         key: up y
 
-        inc myvar("crawl_time")
+        inc myvar("wait_time")
+
+
+    # Hide if there are dangerous things nearby
+    "hide"
+    if: coll: bodies("crush") any yes collmap("danger_check")
+    then:
+        key: down d
+        set myvar("wait_time"): 0
+        goto: "hiding"
 
 
     # Sometimes, stand!
     "stand"
     if:
-        expr: > myvar("crawl_time") 7 # Don't just stand up right after crouching...
+        expr: > myvar("wait_time") 7 # Don't just stand up right after crouching...
         chance: 25%
         coll: all no
             ;;    *\*/*
@@ -310,3 +474,42 @@ state "mainloop_crawl":
     "turn_because_stuck"
     if() then:
         key: down b
+
+
+state "hiding":
+    # Something scary is nearby, so hunker down, i.e. stay crouched!..
+    # (If we're a spikeyspider, we will be invincible.
+    # Otherwise, we'll just look craven and pathetic.)
+
+    "always"
+    nostop if() then:
+        key: up u
+        key: down d
+        key: up l
+        key: up r
+        key: up x
+        key: up y
+
+        inc myvar("wait_time")
+        key: down d
+
+    "wait"
+    if: expr: < myvar("wait_time") 14
+    then:
+
+    "escape_b"
+    if: coll: bodies("crush") any yes collmap("danger_check_f")
+    then: key: down b
+
+    "escape_f"
+    if: coll: bodies("crush") any yes collmap("danger_check_b")
+    then: key: down f
+
+    "unhide"
+    if:
+        chance: 20%
+        not: coll: bodies("crush") any yes collmap("danger_check")
+    then:
+        key: up d
+        set myvar("wait_time"): 0
+        goto: "mainloop"

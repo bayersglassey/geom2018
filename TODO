@@ -1198,8 +1198,10 @@ Jul 7, 2026:
     hexcollmap->locations which "location" refers to.
 
 [ ] Fullscreen mode is being weird!..
+    Ahhh, probably because of Wayland?..
 
 [ ] Figure out why the window opens, then closes, then opens again...
+    Maybe because of Wayland?..
 
 [ ] Add some "creatures" like... wavy grass... which you can brush
     past?.. maybe a "dripping water" kind of thing, too?..
@@ -1337,12 +1339,38 @@ Jul 16, 2026:
 [X] Map editor should create a new file if it doesn't find the one you
     specified
 
+Jul 17, 2026:
+-------------
+
 [ ] We need a way to tell AI spiders to avoid certain spaces.
     So basically, "invisible walls" for them.
     That way, we can keep them out of some places, e.g. keep them from
     going from spidertown through the door to trees, or keep them hiding
     inside the safe parts of dodecas so they don't get run over by hexrollers.
     ==> OKAY, adding a "colltag" concept to submaps...
+    Hmm, but how will we actually use it?..
+    We would need it in the "safe_to_jump" proc, but also throughout
+    actor/_aispider.fus, basically in every `coll: all no`, of which there
+    are a lot.
+    What if we only use it in "safe_to_jump"?.. so basically, we "allow"
+    aispiders to walk & crawl wherever they want, but if they're gonna jump,
+    they need to make sure we're okay with it.
+    That gives us a way to corral them e.g. within the dodecas area.
+    Is there a nice way to keep them safe from the hexrollers, though?..
+    Maybe we can implement a "search for safety" proc, which tries to see if
+    we can reach a "safe area" (e.g. space marked with a "safe" colltag) by
+    crawling.
+    So, we don't need a search tree, because crawling forwards is always
+    linear, i.e. you have no choices to make while doing it.
+    That's actually pretty slick... but do we have to manually add the
+    "safe spaces"?.. or can we... calculate the distance to the danger,
+    and move away from it, i.e. check if moving in one or the other direction
+    would decrease the distance?..
+    For now, let's just make aispiders crouch if they detect anything "crush"
+    nearby.
+    So they'll like... huddle down, waiting for the inevitable. So sad.
+    Unless they're spikeyspiders, of course.
+    ==> OK DONE! We even have them crawling away from the danger...
 
 [ ] Sometimes, aispiders in dodecas are making really far jumps, and landing,
     but then sitting there for a second before disappearing.
