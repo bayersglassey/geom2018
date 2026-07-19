@@ -1,0 +1,6 @@
+
+"create_body"
+if: dead()
+then:
+    goto: "create_body"
+    delay: 42

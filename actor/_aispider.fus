@@ -142,6 +142,8 @@ collmap "danger_check_f":
 state "mainloop":
     # Main AI loop
 
+    import "actor/_ai_standard.state.fus"
+
     "always"
     nostop if() then:
         key: up u
@@ -179,6 +181,7 @@ state "mainloop":
 
 
 state "run_around":
+    import "actor/_ai_standard.state.fus"
 
     "always"
     nostop if() then:
@@ -190,13 +193,6 @@ state "run_around":
         key: up y
 
         inc myvar("wait_time")
-
-
-    "dead"
-    if: dead()
-    then:
-        goto: "create_body"
-        delay: 42
 
 
     # Hide if there are dangerous things nearby
@@ -396,6 +392,7 @@ state "run_around":
 
 
 state "mainloop_crawl":
+    import "actor/_ai_standard.state.fus"
 
     "always"
     nostop if() then:
@@ -487,6 +484,8 @@ state "hiding":
     # Something scary is nearby, so hunker down, i.e. stay crouched!..
     # (If we're a spikeyspider, we will be invincible.
     # Otherwise, we'll just look craven and pathetic.)
+
+    import "actor/_ai_standard.state.fus"
 
     "always"
     nostop if() then:

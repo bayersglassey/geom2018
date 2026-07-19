@@ -9,6 +9,7 @@
 #  int TURN
 
 state "mainloop":
+    import "actor/_ai_standard.state.fus"
 
     nostop if:
     then:

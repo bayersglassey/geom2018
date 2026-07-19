@@ -1460,6 +1460,11 @@ Jul 17, 2026:
     reasons to explore.
     In particular, we can put some around data/maps/trees/bubbles2.fus.
 
+    [ ] Added "power jump" and invincibility
+
+    [ ] When you touch something dangerous and are not hurt, right now
+        nothing happens. We need some kind of purple effect to be spawned...
+
     [ ] YOUR SPIT SHOULD BE PURPLE AND SUPER FAST OR SOMETHING
 
     [ ] When your spit collects a coin, how does the spit know to give the
@@ -1504,8 +1509,29 @@ Jul 17, 2026:
     And let's finally add that shark in maps/water.
     And get it to chase swimming spiders...
 
-[ ] airollers need to respawn after being killed, like aispiders!..
+[X] airollers need to respawn after being killed, like aispiders!..
 
 [ ] Update src/main/animtool.c with recently added conds & effects
     (NOTE: EFFECT_TYPE_AS should be ignored, because we can't statically
     know what the stateset of "you" is...)
+
+[ ] Add a way to factor hitboxes off individual anims to something global.
+    Hitbox sets?.. like, game->hitbox_sets is a list of filenames, and we
+    load each file at most once, and doing so populates game->hitboxes,
+    which is a dict of hitboxes.
+    And then, in an anim, when you refer to a hitbox by name, it first
+    checks stateset->hitboxes, then game->hitboxes.
+    Although stateset doesn't have a reference to game, so maybe we need
+    a hitbox_set_t, which stores the list of filenames loaded so far,
+    plus the dict of hitboxes; and then we pass a hitbox_set_t when parsing
+    statesets, and in practise we use game->hitbox_set for that (except in
+    e.g. animtool).
+
+[ ] Add ai blockers to the "spidertown_outskirts" area.
+    Also, maybe rename some of those files?.. map1.fus, map3.fus etc?..
+    And add a way to stop aispiders from entering doors.
+    ...oh wait, I think we already added that?.. see anim/_door.fus:
+
+        # A body can't use a minimap-door unless the body
+        # is controlled by a player
+        $IF MINIMAP: as you: is_player()
