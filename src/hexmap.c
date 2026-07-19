@@ -894,6 +894,10 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
         /* copy submap->collmap's locations onto map */
         for(int i = 0; i < submap->collmap.locations_len; i++){
             hexmap_location_t *location = submap->collmap.locations[i];
+            if(hexmap_get_location(map, location->name)){
+                fprintf(stderr, "Duplicate location: \"%s\"\n", location->name);
+                return 2;
+            }
             ARRAY_PUSH_NEW(hexmap_location_t*, map->locations, new_location)
             hexmap_location_init(new_location, &submap->collmap, location->name);
             new_location->loc = location->loc;
