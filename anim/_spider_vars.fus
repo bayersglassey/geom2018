@@ -92,6 +92,10 @@ proc toplevel on stateset_change "update_vars":
 
 proc toplevel "coin_collected":
     # Adds coin's power to ours!..
+
+    # NOTE: DISABLED FOR NOW, BECAUSE THE COIN POWER STUFF IS A BIT JANKY
+    break
+
     set myvar("_coin_power_add"): yourvar("coin_power")
     # Multiply by a magic number to affect how many frames coin power
     # actually lasts for
