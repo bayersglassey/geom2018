@@ -1,4 +1,0 @@
-
-$SET_BOOL WATER
-$SET_STR RGRAPH_NS "water_"
-import "anim/_string.fus"

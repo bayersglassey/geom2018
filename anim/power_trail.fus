@@ -1,0 +1,5 @@
+state "appear":
+    rgraph: "power_trail"
+
+    if:
+    then: remove

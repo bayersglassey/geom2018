@@ -589,7 +589,7 @@ Concerning turning into non-spider things, e.g. rollers...
 That's not gonna interact well with e.g. myvars("carrying"), eh?
 So we either need to call a certain proc when transforming, or... uh... do something else.
 => Maybe... switch bodies?
-=> UPDATE: there are now "onstatesetchange" procs. Maaaaybe that could be a solution.
+=> UPDATE: there are now "on_stateset_change" procs. Maaaaybe that could be a solution.
 
 
 Jan 27, 2022:
@@ -1203,6 +1203,9 @@ Jul 7, 2026:
 [ ] Figure out why the window opens, then closes, then opens again...
     Maybe because of Wayland?..
 
+[ ] Maybe upgrade to SDL3 and see if it works better with Wayland?..
+    https://wiki.libsdl.org/SDL3/README-wayland
+
 [ ] Add some "creatures" like... wavy grass... which you can brush
     past?.. maybe a "dripping water" kind of thing, too?..
     Except there's no gravity, so what's the equivalent of dripping
@@ -1457,6 +1460,16 @@ Jul 17, 2026:
     reasons to explore.
     In particular, we can put some around data/maps/trees/bubbles2.fus.
 
+    [ ] YOUR SPIT SHOULD BE PURPLE AND SUPER FAST OR SOMETHING
+
+    [ ] When your spit collects a coin, how does the spit know to give the
+        coin power to you?.. we can run spit's "coin_collected" proc, but
+        it only has access to spit's vars, not yours...
+        Presumably we want something like `as parent`.
+        That is, we have body->parent which is set when one body spawns
+        another (be careful, if parent is removed, all children should set
+        that to NULL!..), and an AS_PARENT enum entry.
+
 [ ] Figure out what to do with the top of maps/trees...
     Ooh ooh, what about a switch which activates a bunch of rockets?..
     So like, from then on, all up and down the tree, you can get around
@@ -1485,3 +1498,14 @@ Jul 17, 2026:
     Only usable with `-m map`?..
     Although FWIW we can use _test_app_command_apply_effect, i.e. "ae" at
     the test app console: `ae set mapvar(name): value`
+
+[ ] Add an aibird, which checks along the ground to left & right, using a
+    proc similar to "safe_to_jump", and chases spiders.
+    And let's finally add that shark in maps/water.
+    And get it to chase swimming spiders...
+
+[ ] airollers need to respawn after being killed, like aispiders!..
+
+[ ] Update src/main/animtool.c with recently added conds & effects
+    (NOTE: EFFECT_TYPE_AS should be ignored, because we can't statically
+    know what the stateset of "you" is...)

@@ -24,7 +24,9 @@ state "start_jump":
 
     "default"
     if() then:
-        goto delay: "jump"
+        if: expr: > myvar("coin_power") 0
+        then: goto delay: "power_jump"
+        else: goto delay: "jump"
 
 state "jump":
     # NOTE: the only `goto: "jump"` is in "start_jump", which checks whether
@@ -40,7 +42,22 @@ state "jump":
     "spawn_string"
     nostop if:
     then:
-        spawn: "anim/string.fus" "string_appear" (0 0) 0 f
+        spawn: "anim/string.fus" "appear" (0 0) 0 f
+
+    # Landing, jumping, crashing
+    import "anim/_walker_jumping.state.fus"
+
+state "power_jump":
+    # Like "jump", but faster! For when we have coin power.
+
+    unsafe
+    rgraph: $PREFIX NS "power_jump"
+    hitbox: collmap("stand")
+
+    "spawn_trail"
+    nostop if:
+    then:
+        spawn: "anim/power_trail.fus" "appear" (0 0) 0 f
 
     # Landing, jumping, crashing
     import "anim/_walker_jumping.state.fus"

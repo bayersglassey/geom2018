@@ -6,6 +6,9 @@
 
 
 proc "crawl_crush":
+    if: expr: > myvar("coin_power") 0
+    then: break
+
     if: expr: myvar("is_spikeyspider")
     then: goto delay: "crawl_shielding"
     else: goto: "dead"
