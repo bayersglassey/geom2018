@@ -25,7 +25,7 @@ static void print_help(FILE *file, const char *collmap_filename) {
         "\n"
         "  Left/Right  Rotate left/right\n"
         "  Up/Down     Move forward/backward\n"
-        "  PgUp/PgDown Flip\n"
+        "  Backspace   Flip\n"
         "  0           Return to map's origin\n"
         "  1           Return to map's spawn point\n"
         "  Enter       Show/hide cursor\n"
@@ -200,8 +200,7 @@ int mapeditor(const char *collmap_filename, hexcollmap_write_options_t *opts,
                 err = fit_map_to_cursor(collmap, cursor);
                 if(err)return err;
             } break;
-            case PAGE_UP:
-            case PAGE_DOWN: {
+            case BACKSPACE: {
                 cursor_visible = true;
                 cursor->flip = !cursor->flip;
             } break;
