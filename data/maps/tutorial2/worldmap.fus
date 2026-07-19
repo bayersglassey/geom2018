@@ -37,6 +37,9 @@ vars:
     "start4b_solved": F
     "start4c_solved": F
 
+    "start4.2.a_solved": F
+    "start4.2.b_solved": F
+
 submaps:
     :
         pos: (0 0)
@@ -220,11 +223,11 @@ submaps:
                         rot: 4
                         tileset: "data/tileset1_bg.fus"
                     :
-                        file: "data/maps/tutorial2/start4.2.fus"
+                        file: "data/maps/tutorial2/start4.2.a.fus"
                         rot: 0
                     :
-                        file: "data/maps/tutorial2/start4.2.fus"
+                        file: "data/maps/tutorial2/start4.2.b.fus"
                         rot: 2
                     :
-                        file: "data/maps/tutorial2/start4.2.fus"
+                        file: "data/maps/tutorial2/start4.2.c.fus"
                         rot: 4

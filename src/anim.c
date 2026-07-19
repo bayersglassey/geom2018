@@ -37,6 +37,37 @@ static int _parse_trf(fus_lexer_t *lexer, vecspace_t *space, rot_t *rot_ptr){
 }
 
 
+void anim_as_header_cleanup(anim_as_header_t *header){
+    valexpr_cleanup(&header->name_expr);
+}
+
+void anim_as_header_init(anim_as_header_t *header, int type){
+    header->type = type;
+    valexpr_set_literal_null(&header->name_expr);
+}
+
+static int _parse_as_header(anim_as_header_t *header, fus_lexer_t *lexer){
+    int err;
+    if(GOT("you")){
+        NEXT
+        header->type = AS_YOU;
+        valexpr_set_literal_null(&header->name_expr);
+    }else if(GOT("body")){
+        NEXT
+        header->type = AS_BODY;
+        valexpr_set_literal_null(&header->name_expr);
+    }else if(GOT("map")){
+        NEXT
+        header->type = AS_MAP;
+        err = valexpr_parse(&header->name_expr, lexer);
+        if(err)return err;
+    }else{
+        return UNEXPECTED("valid \"as\" type");
+    }
+    return 0;
+}
+
+
 static int _parse_collmap(state_context_t *context, fus_lexer_t *lexer,
     prismelrenderer_t *prend, vecspace_t *space,
     hexcollmap_t **own_collmap_ptr, hexcollmap_t **collmap_ptr
@@ -511,19 +542,9 @@ static int _parse_cond(state_context_t *context, fus_lexer_t *lexer,
     }else if(GOT("as")){
         NEXT
         cond->type = STATE_COND_TYPE_AS;
-
-        if(GOT("you")){
-            NEXT
-            cond->u.as.type = AS_YOU;
-        }else if(GOT("body")){
-            NEXT
-            cond->u.as.type = AS_BODY;
-        }else{
-            return UNEXPECTED("you or body");
-        }
-
+        err = _parse_as_header(&cond->u.as.header, lexer);
+        if(err)return err;
         ARRAY_INIT(cond->u.as.sub_conds)
-
         OPEN
         while(!GOT(")")){
             ARRAY_PUSH_NEW(state_cond_t*, cond->u.as.sub_conds,
@@ -914,19 +935,9 @@ int state_effect_parse(state_effect_t *effect,
     }else if(GOT("as")){
         NEXT
         effect->type = STATE_EFFECT_TYPE_AS;
-
-        if(GOT("you")){
-            NEXT
-            effect->u.as.type = AS_YOU;
-        }else if(GOT("body")){
-            NEXT
-            effect->u.as.type = AS_BODY;
-        }else{
-            return UNEXPECTED("you or body");
-        }
-
+        err = _parse_as_header(&effect->u.as.header, lexer);
+        if(err)return err;
         ARRAY_INIT(effect->u.as.sub_effects)
-
         OPEN
         while(!GOT(")")){
             ARRAY_PUSH_NEW(state_effect_t*, effect->u.as.sub_effects,
@@ -1508,6 +1519,7 @@ void state_cond_cleanup(state_cond_t *cond){
             valexpr_cleanup(&cond->u.valexpr);
             break;
         case STATE_COND_TYPE_AS:
+            anim_as_header_cleanup(&cond->u.as.header);
             ARRAY_FREE_PTR(state_cond_t*, cond->u.as.sub_conds,
                 state_cond_cleanup)
             break;
@@ -1597,6 +1609,7 @@ void state_effect_cleanup(state_effect_t *effect){
             break;
         }
         case STATE_EFFECT_TYPE_AS:
+            anim_as_header_cleanup(&effect->u.as.header);
             ARRAY_FREE_PTR(state_effect_t*, effect->u.as.sub_effects,
                 state_effect_cleanup)
             break;

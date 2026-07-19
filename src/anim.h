@@ -51,8 +51,17 @@ enum effect_boolean {
 
 enum anim_as {
     AS_YOU,
-    AS_BODY
+    AS_BODY,
+    AS_MAP
 };
+
+typedef struct {
+    int type; /* enum anim_as */
+    valexpr_t name_expr; /* E.g. map filename if type == AS_MAP */
+} anim_as_header_t;
+
+void anim_as_header_cleanup(anim_as_header_t *header);
+void anim_as_header_init(anim_as_header_t *header, int type);
 
 
 struct stateset;
@@ -286,7 +295,7 @@ typedef struct state_cond {
             ARRAY_DECL(struct state_cond*, conds)
         } subconds;
         struct {
-            int type; /* enum anim_as */
+            anim_as_header_t header;
             ARRAY_DECL(struct state_cond*, sub_conds)
         } as;
         struct {
@@ -456,7 +465,7 @@ typedef struct state_effect {
         struct state_effect_ite ite;
         struct state_effect_while _while;
         struct {
-            int type; /* enum anim_as */
+            anim_as_header_t header;
             ARRAY_DECL(struct state_effect*, sub_effects)
         } as;
         struct {

@@ -23,7 +23,7 @@ bool hexgame_state_controlflow_is_unrolling(hexgame_state_controlflow_t *control
 
 typedef struct hexgame_state_context {
     hexgame_t *game;
-    hexmap_t *map;
+    hexmap_t *map; /* NOTE: not necessarily body->map, see AS_MAP! */
     body_t *body;
     actor_t *actor;
     body_t *your_body;

@@ -1402,40 +1402,6 @@ Jul 17, 2026:
     (i.e. submap->collmap->hexbox) in case we can exit early, then check
     visibility in case we can exit early, *THEN* iterate over hitbox elems.
 
-[ ] Get tutorial3 back into the demo!..
-    It can probably be where you get rollerspider!..
-    Especially at the end, like the 3 rotated copies of same submap which
-    form a kind of maze: at first that's quite difficult to navigate, but
-    then once you have rollerspider, it's probably much easier.
-    Although I guess we probably need a proper "puzzle which teaches you
-    how to be a rollerspider"...
-    But ok, maybe when you become a rollerspider, you go through such a
-    teaching puzzle, then come *back* to the "3 rotated copies" thing,
-    and this time it's much easier?..
-
-    Rollerspider puzzle can include stuff like this:
-
-        + - + - +
-                 \
-                  + - +
-                 /     \
-        + - +   +       +
-           /   /       /
-          +   +   +   + - +
-           \     /   /
-            + - +   +
-                 \
-                  + - + - +
-
-    ...but should also teach player about holding "d", e.g. alternating
-    between holes to be avoided (don't press "d") and holes to be taken
-    (do press "d"):
-                              *\*/*
-        + - +   + - + - +   + - + - +   + - +   + - +
-           /     \       \             /   /     \
-          +       +       + - + - + - +   +       +
-            */*\*                           */*\*
-
 [ ] In data/maps/trees/bubbles3-0.fus, make a better "puzzle which teaches
     you how to be a spikeyspider".
     Basically, "you're invincible when you crouch".
@@ -1528,10 +1494,83 @@ Jul 17, 2026:
     e.g. animtool).
 
 [ ] Add ai blockers to the "spidertown_outskirts" area.
-    Also, maybe rename some of those files?.. map1.fus, map3.fus etc?..
     And add a way to stop aispiders from entering doors.
     ...oh wait, I think we already added that?.. see anim/_door.fus:
 
         # A body can't use a minimap-door unless the body
         # is controlled by a player
         $IF MINIMAP: as you: is_player()
+
+Jul 19, 2026:
+-------------
+
+[X] Get tutorial2 back into the demo!..
+    It can probably be where you get rollerspider!..
+    Especially at the end, like the 3 rotated copies of same submap which
+    form a kind of maze: at first that's quite difficult to navigate, but
+    then once you have rollerspider, it's probably much easier.
+    (The submap in question is: data/maps/tutorial2/start4.2.fus)
+    Although I guess we probably need a proper "puzzle which teaches you
+    how to be a rollerspider"...
+    But ok, maybe when you become a rollerspider, you go through such a
+    teaching puzzle, then come *back* to the "3 rotated copies" thing,
+    and this time it's much easier?..
+
+    Rollerspider puzzle can include stuff like this:
+
+        + - + - +
+                 \
+                  + - +
+                 /     \
+        + - +   +       +
+           /   /       /
+          +   +   +   + - +
+           \     /   /
+            + - +   +
+                 \
+                  + - + - +
+
+    ...but should also teach player about holding "d", e.g. alternating
+    between holes to be avoided (don't press "d") and holes to be taken
+    (do press "d"):
+                              *\*/*
+        + - +   + - + - +   + - + - +   + - +   + - +
+           /     \       \             /   /     \
+          +       +       + - + - + - +   +       +
+            */*\*                           */*\*
+
+[ ] Add back the "guide" spider at start of demo.
+    Probably not quite as simple as this, but try:
+
+        git revert 9a341cf4c743e241f04de51ef6d5896f01c3094b
+
+[ ] Add some flashing arrows at the start of demo, to show the major options:
+        data/maps/demo/start3.fus: you can go left or right
+        data/maps/demo/pebbles2.fus: you can go left, down, or to the right
+
+[ ] Add purple savepoints to demo, and make it clear to player that they
+    can use them to jump around
+        data/maps/demo/start3.fus: this is the "hub"
+        data/maps/demo/vines4.fus: where you deliver the vines spider
+        data/maps/demo/jungle2.fus: currently has a purple savepoint, that's fine
+        data/maps/demo/fisheye.fus: at bottom of dodecas
+        data/maps/test/map2x.fus: in spidertown outskirts
+        data/maps/test/map2x.fus: in "dark spidertown", i.e. data/maps/test/worldmap.fus
+
+[ ] Currently, tutorial3 gives you stickyspider.
+    We need to add a data/maps/stickyspider/, similar to data/maps/rollerspider/,
+    which teaches you what it does!..
+
+[ ] Rename some of our map files...
+
+        data/maps/test/worldmap.fus -> data/maps/dark_spidertown/worldmap.fus
+
+    Also map1.fus, map3.fus, etc...
+
+[ ] Wow, looks like valexprs own *all* their strings. O_o
+    So like, when valexpr_parse encounters a literal, it uses val_parse on it,
+    which for string tokens results in the val owning the string.
+    So... can we have like, valexpr_parse_with_stringstore, or something?..
+
+[ ] When you touch an ability_door, it should set your spawn point there,
+    instead of at last save point.

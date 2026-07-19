@@ -1,0 +1,12 @@
+spawn: (-4 -1) 0 n
+parts:
+    "l": location "start4.2.a"
+    "m": location "start4.2.a_return"
+    "D": recording "data/recs/door.fus"
+        vars:
+            "map": "data/maps/demo/worldmap.fus"
+            "location": "tutorial2_exit"
+            "antikey": "start4.2.a_solved"
+    "b": actor "actor/airoller.fus"
+    "A": recording "data/recs/eye.fus"
+import "data/maps/tutorial2/_start4.2.fus"

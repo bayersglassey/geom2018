@@ -148,6 +148,11 @@ state $PREFIX ANIM_NS "stand":
                 coll: water any yes
                     ;; ( )  .
                     ;;    *
+        coll: all no
+            # Prevent spinning wildly in place when we're in a small space!
+            ;;    +
+            ;;
+            ;; ( )  .
     then:
         move: 1 0
         rot: 2

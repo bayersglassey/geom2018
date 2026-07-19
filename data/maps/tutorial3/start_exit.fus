@@ -1,7 +1,7 @@
 parts:
     "D": recording "data/recs/ability_door.fus"
         vars:
-            "set_yourbool": "is_rollerspider"
+            "set_yourbool": "is_stickyspider"
 collmap:
     ;;
     ;;   .   .   .   .   .   .   .   .

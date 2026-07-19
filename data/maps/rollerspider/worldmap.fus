@@ -1,0 +1,19 @@
+name: "rollerspider"
+unit: 3 2 0 -1
+spawn: "data/maps/rollerspider/start.fus"
+palette: "data/maps/trees/pals/trees.fus"
+tileset: "data/tileset1.fus"
+
+vars:
+    "switch_a": F
+
+submaps:
+    :
+        file: "data/maps/rollerspider/start.fus"
+        pos: (0 0)
+        camera: (10 0)
+        mapper: ("triple")
+    :
+        file: "data/maps/rollerspider/blocker.fus"
+        visible: ! mapvar("switch_a")
+        pos: (21 3)

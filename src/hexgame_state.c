@@ -52,31 +52,6 @@ bool hexgame_state_context_debug(hexgame_state_context_t *context){
         fprintf(stderr, "No actor\n"); \
         return 2;}
 
-
-static int _context_apply_as(hexgame_state_context_t *context, int as_type){
-    switch(as_type){
-        case AS_YOU: {
-            if(!context->your_body){
-                fprintf(stderr, "No your_body!\n");
-                return 2;
-            }
-            body_t *body = context->body;
-            context->body = context->your_body;
-            context->your_body = body;
-            break;
-        }
-        case AS_BODY: {
-            /* Let's just be a body, not an actor with a body. */
-            context->actor = NULL;
-            break;
-        }
-        default:
-            fprintf(stderr, "Unrecognized \"as\" type: %i\n", as_type);
-            return 2;
-    }
-    return 0;
-}
-
 static vars_t *_context_get_vars(valexpr_context_t *context, int varstype){
     switch(varstype){
     case VALEXPR_TYPE_YOURVAR: return context->yourvars;
@@ -141,6 +116,48 @@ static int _context_set_vars(hexgame_state_context_t *context,
     valexpr_context->globalvars = game? &game->vars: NULL;
     valexpr_context->procvars = context->procvars;
 
+    return 0;
+}
+
+static int _context_apply_as(hexgame_state_context_t *context, anim_as_header_t *header){
+    int err;
+    switch(header->type){
+        case AS_YOU: {
+            if(!context->your_body){
+                fprintf(stderr, "No your_body!\n");
+                return 2;
+            }
+            body_t *body = context->body;
+            context->body = context->your_body;
+            context->your_body = body;
+            break;
+        }
+        case AS_BODY: {
+            /* Let's just be a body, not an actor with a body. */
+            context->actor = NULL;
+            break;
+        }
+        case AS_MAP: {
+            /* Let's use a different map's mapvars. */
+            valexpr_context_t valexpr_context;
+            err = _context_set_vars(context, &valexpr_context);
+            if(err)return err;
+            const char *filename = valexpr_get_str(&header->name_expr, &valexpr_context);
+            hexmap_t *map = hexgame_get_map(context->game, filename);
+            if(!map){
+                fprintf(stderr, "Couldn't find map: %s\n", filename? filename: "NULL");
+                fprintf(stderr, "...while resolving \"as map\" expression:\n");
+                valexpr_fprintf(&header->name_expr, stderr);
+                fputc('\n', stderr);
+                return 2;
+            }
+            context->map = map;
+            break;
+        }
+        default:
+            fprintf(stderr, "Unrecognized \"as\" type: %i\n", header->type);
+            return 2;
+    }
     return 0;
 }
 
@@ -414,7 +431,7 @@ int state_cond_match(state_cond_t *cond,
         That is, sub_context is like context but with some of its fields
         swapped with each other, like .body and .your_body, etc. */
         hexgame_state_context_t sub_context = *context;
-        err = _context_apply_as(&sub_context, cond->u.as.type);
+        err = _context_apply_as(&sub_context, &cond->u.as.header);
         if(err)return err;
 
         matched = true;
@@ -1112,7 +1129,7 @@ int state_effect_apply(state_effect_t *effect,
         That is, sub_context is like context but with some of its fields
         swapped with each other, like .body and .your_body, etc. */
         hexgame_state_context_t sub_context = *context;
-        err = _context_apply_as(&sub_context, effect->u.as.type);
+        err = _context_apply_as(&sub_context, &effect->u.as.header);
         if(err)return err;
 
         hexgame_state_controlflow_t controlflow;

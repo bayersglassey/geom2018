@@ -52,6 +52,7 @@ vars:
     "set_yourbool": null
     "set_mapbool": null
     "set_globalbool": null
+    "set_mapvar.map": null
     "set_mapvar.name": null
     "set_mapvar.value": null
     "set_globalvar.name": null
@@ -69,9 +70,13 @@ state "init":
             set myvar(myvar("set_yourbool")): T
             call: "update_vars"
 
-    if: any:
-        not: exists myvar("key")
-        expr: mapvar(myvar("key"))
+    if:
+        any:
+            not: exists myvar("key")
+            expr: mapvar(myvar("key"))
+        any:
+            not: exists myvar("antikey")
+            expr: ! mapvar(myvar("antikey"))
     then:
         goto immediate: "open"
 
@@ -88,6 +93,9 @@ state "closed":
         any:
             not: exists myvar("key")
             expr: mapvar(myvar("key"))
+        any:
+            not: exists myvar("antikey")
+            expr: ! mapvar(myvar("antikey"))
         not: coll: bodies("touch") any yes collmap("cooldown")
     then:
         goto: "open"
@@ -132,7 +140,12 @@ state "open":
             $IF MINIMAP: show_minimap()
 
             if: exists myvar("set_mapvar.name")
-            then: set mapvar(myvar("set_mapvar.name")): myvar("set_mapvar.value")
+            then:
+                if: exists myvar("set_mapvar.map")
+                then: as map myvar("set_mapvar.map"):
+                    set mapvar(myvar("set_mapvar.name")): myvar("set_mapvar.value")
+                else:
+                    set mapvar(myvar("set_mapvar.name")): myvar("set_mapvar.value")
             if: exists myvar("set_mapbool")
             then: set mapvar(myvar("set_mapbool")): T
 
@@ -143,8 +156,12 @@ state "open":
 
             goto: "closed"
 
-    if:
-        exists myvar("key")
-        not: expr: mapvar(myvar("key"))
+    if: not:
+        any:
+            not: exists myvar("key")
+            expr: mapvar(myvar("key"))
+        any:
+            not: exists myvar("antikey")
+            expr: ! mapvar(myvar("antikey"))
     then:
         goto: "closed"

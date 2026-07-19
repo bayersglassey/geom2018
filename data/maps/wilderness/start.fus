@@ -1,8 +1,7 @@
 parts:
     "D": recording "data/recs/door.fus"
         vars:
-            "map": "data/maps/demo/worldmap.fus"
-            "location": "wilderness_exit"
+            # NOTE: wilderness isn't connected to anywhere else at the moment...
 collmap:
     # Size of the "house" in the middle: 8 x 8
     ;;

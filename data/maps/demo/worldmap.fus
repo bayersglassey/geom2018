@@ -84,12 +84,12 @@ submaps:
                         camera: (6 -5)
                         mapper: ("triple")
                         palette: "data/maps/demo/pals/tunnels.fus"
-                    "tunnels3":
-                        file: "data/maps/demo/tunnels3.fus"
-                        pos: eval: (13 1) + (30 -5)
-                        camera: (0 0)
-                        mapper: ("triple")
-                        palette: "data/maps/demo/pals/tunnels.fus"
+                    #"tunnels3":
+                    #    file: "data/maps/demo/tunnels3.fus"
+                    #    pos: eval: (13 1) + (30 -5)
+                    #    camera: (0 0)
+                    #    mapper: ("triple")
+                    #    palette: "data/maps/demo/pals/tunnels.fus"
                     "tunnels2":
                         file: "data/maps/demo/tunnels2.fus"
                         pos: eval: (13 1) + (18 8)
