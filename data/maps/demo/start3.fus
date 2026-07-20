@@ -1,4 +1,4 @@
-spawn: (8 2) 0 n
+spawn: (16 4) 0 n
 parts:
     "A": recording "data/recs/hotspot.fus"
         vars:
@@ -11,6 +11,13 @@ parts:
     "C": recording "data/recs/hotspot.fus"
         vars:
             "key": "start2_minimap"
+    "h": recording "data/recs/hotspot.fus"
+        vars:
+            "key": "start2_solved"
+    "a": recording "data/recs/arrow.fus"
+        visible: mapvar("start2_minimap")
+    "b": recording "data/recs/arrow.fus"
+        visible: mapvar("start2_minimap")
 default_vert: "1"
 default_edge: "1"
 default_face: "1"
@@ -18,26 +25,26 @@ collmap:
     ;;
     ;;   .   .   ?   .   .   ?   .   .   ?   .   .   ?   .   .   ?                             [A][A][A][A][A]
     ;;
+    ;;             .   .   .
     ;;
-    ;;
-    ;;                                                                       ?                  [C]
+    ;;               .   .                                                   ?                  [C]
     ;;                                                                       M
-    ;;                                                     + - + - + - + - + - + - + - +
+    ;;                 ?                                   + - + - + - + - + - + - + - +          [a^3]
     ;;                                                    /                             \
     ;;   .   .   ?   .   .   ?   .   .   ?       ?       +       + - + - + - + - +       +     [A][A][A][B]
     ;;                                                  /       /                 \     /
-    ;;                             @ = @ = @ = + - + - +       +       +       +   + - +
+    ;;                             @ = @ = @ = + - + - +       +       +       +   + - +   .   .   ?         [b^5]
     ;;                                        /               /         \       \
-    ;;                                       +       + - + - +           +       +
-    ;;              %*                        \     /                                           [0]
-    ;;           %(+)- .   .   .   .   .   .   + - +                       +       +            [00]
+    ;;                                       +       + - + - +           +       +           .   .
+    ;;              %*                        \     /                                                        [0]
+    ;;           %(+)- .   .   .   .   .   .   + - +                       +       +           .             [00]
     ;;
-    ;;           .                                                           .       .
+    ;;           .   ?                                                       .       .                       [h]
     ;;
     ;;         .                               .                               .       .
     ;;
     ;;       .                                                                   .       .
     ;;  %* */                                                                                  [000]
-    ;;  %  +                                   .                                   .       .   [  0]
+    ;;  %  +   .                               .                                   .       .   [  0]
     ;;  %* *\                                                                                  [000]
     ;;  %    +   .   .   .   .   .   .   .   .   .                                             [  0]

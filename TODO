@@ -1402,19 +1402,6 @@ Jul 17, 2026:
     (i.e. submap->collmap->hexbox) in case we can exit early, then check
     visibility in case we can exit early, *THEN* iterate over hitbox elems.
 
-[ ] In data/maps/trees/bubbles3-0.fus, make a better "puzzle which teaches
-    you how to be a spikeyspider".
-    Basically, "you're invincible when you crouch".
-    First, you can go through a tunnel which forces you to crawl, with death
-    rollers in it, and you discover that you are invincible to them.
-    Then, a section where you need to do a series of jumps, during which you
-    are not invincible. So you need to time the jumps, crouching in between
-    them to survive death rollers.
-    Add some spikey spiders whose AI knows to crouch when something dangerous
-    is nearby!
-    (By adding a collmap to aispider which collides with "crush" things in
-    the vicinity.)
-
 [ ] Can we make coins do something when you collect them?..
     Like, give you a temporary speed boost or something?..
     Ooh ooh or temporary invincibility. So you can power through death rollers,
@@ -1434,7 +1421,7 @@ Jul 17, 2026:
     [ ] YOUR SPIT SHOULD BE PURPLE AND SUPER FAST OR SOMETHING
 
     [ ] When your spit collects a coin, how does the spit know to give the
-        coin power to you?.. we can run spit's "coin_collected" proc, but
+        coin power to you?.. we can run spit's "collected_coin" proc, but
         it only has access to spit's vars, not yours...
         Presumably we want something like `as parent`.
         That is, we have body->parent which is set when one body spawns
@@ -1539,12 +1526,7 @@ Jul 19, 2026:
           +       +       + - + - + - +   +       +
             */*\*                           */*\*
 
-[ ] Add back the "guide" spider at start of demo.
-    Probably not quite as simple as this, but try:
-
-        git revert 9a341cf4c743e241f04de51ef6d5896f01c3094b
-
-[ ] Add some flashing arrows at the start of demo, to show the major options:
+[X] Add some flashing arrows at the start of demo, to show the major options:
         data/maps/demo/start3.fus: you can go left or right
         data/maps/demo/pebbles2.fus: you can go left, down, or to the right
 
@@ -1574,3 +1556,41 @@ Jul 19, 2026:
 
 [ ] When you touch an ability_door, it should set your spawn point there,
     instead of at last save point.
+
+[ ] MAYBE THE END OF THE GAME IS JUST GETTING THROUGH A SPACE WHICH REQUIRES
+    ALL SPIDER ABILITIES TO GET THROUGH
+    But how do we tell the player this?..
+    And why does the player want to get through this place?..
+
+    Also, ROOM FULL OF COINS!.. so you leave trails as you pass through them.
+
+[ ] In data/maps/trees/bubbles3-0.fus, make a better "puzzle which teaches
+    you how to be a spikeyspider".
+    Basically, "you're invincible when you crouch".
+    First, you can go through a tunnel which forces you to crawl, with death
+    rollers in it, and you discover that you are invincible to them.
+    Then, a section where you need to do a series of jumps, during which you
+    are not invincible. So you need to time the jumps, crouching in between
+    them to survive death rollers.
+    Add some spikey spiders whose AI knows to crouch when something dangerous
+    is nearby!
+    (By adding a collmap to aispider which collides with "crush" things in
+    the vicinity.)
+
+    [ ] The big roller should go *inside* the structure once you collect
+        spikeyspider, so you can have fun going spikey against him
+
+[ ] data/maps/tutorial/skypipes2.fus: the guy should wake up and show you
+    how to crawl
+    data/maps/tutorial/skypipes3.fus: the guy should crawl back and forth in
+    the correct spot, not just do it once and go to sleep
+    data/maps/tutorial/skypipes4.fus: the eye should open when player is
+    standing on the spot where they're supposed to jump left underneath...
+
+[ ] Look into this comment in data/maps/demo/worldmap.fus:
+
+        empty # no palmapper... this is needed so we can specify target... TODO: fix this madness
+
+[ ] When doing hexmap_collide_special for water, savepoints, etc, are we
+    currently bothering to check against verts and edges?.. if so, cut that
+    out!.. only faces are needed

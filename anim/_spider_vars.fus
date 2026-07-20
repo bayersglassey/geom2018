@@ -90,7 +90,7 @@ proc toplevel on stateset_change "update_vars":
         else: set myvar("spit_anim"): "anim/spit.fus"
 
 
-proc toplevel "coin_collected":
+proc toplevel "collected_coin":
     # Adds coin's power to ours!..
 
     # NOTE: DISABLED FOR NOW, BECAUSE THE COIN POWER STUFF IS A BIT JANKY

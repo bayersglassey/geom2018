@@ -1,5 +1,9 @@
 
 shapes:
+
+    ##################################################################
+    # POWER TRAIL
+
     "power_trail_sixth":
         animation: once 6
         prismels:
@@ -29,6 +33,9 @@ shapes:
             : "_power_trail" (2 1 0 2)  0 f 0+ (1 1)
             : "_power_trail" (3 1 0 2)  0 f 0+ (2 1)
             : "_power_trail" (4 1 0 2)  0 f 0+ (3 1)
+
+    ##################################################################
+    # DEAD
 
     "_dead_particle":
         animation: cycle 6
@@ -91,6 +98,9 @@ shapes:
         shapes:
             : "_dead_once" (1 1 2 0) 0 f 0+r
 
+##################################################################
+# OTHER STUFF
+
 $SET_STR NS ""
 $UNSET_BOOL SPIKEY
 $UNSET_BOOL EYE
@@ -110,3 +120,5 @@ $SET_STR NS ""
 import "data/_string.fus"
 
 import "data/bubbles.fus"
+
+import "data/arrow.fus"

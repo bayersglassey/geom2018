@@ -11,6 +11,11 @@ vars:
     nosave label "label:carrying": null
 
 
+proc toplevel "collected_coin":
+    call: "on_death"
+    remove
+
+
 proc "on_collide":
     # me: spit
     # you: thing we collided with

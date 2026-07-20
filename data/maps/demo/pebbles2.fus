@@ -1,11 +1,24 @@
-
+parts:
+    "a": recording "data/recs/arrow.fus"
+        visible: mapvar("start2_minimap")
+    "b": recording "data/recs/arrow.fus"
+        visible: mapvar("start2_minimap")
+    "h": recording "data/recs/hotspot.fus"
+        vars:
+            "key": "spider_passed_pebbles"
 collmap:
     ;;
-    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .        [a]
+    ;;
+    ;; .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .        [h]
     ;;
     ;;   .   .   .   .  (+)- +   .   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .   .   .   .   .
     ;;                  /     \                         /   /
-    ;; .   .   .   .   +   .   +   .   .   .   .   .   +   +   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;; .   .   .   .   +   .   +   .   ?   .   .   .   +   +   .   .   .   .   .   .   .   .   .   .   .   .   .        [b^5]
     ;;                  \     /                         \ /
     ;;   .   .   .   .   + - +   .   .   .   .   .   .   +   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;; .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;
+    ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
     ;;

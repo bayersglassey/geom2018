@@ -1,9 +1,9 @@
 
 $IF !NO_COLLECT_ON_SPIT: on "spit":
-    as you: call if_exists: "coin_collected"
+    as you: call if_exists: "collected_coin"
     goto immediate: "_collected"
 $IF !NO_COLLECT_ON_TOUCH: on "touch":
-    as you: call if_exists: "coin_collected"
+    as you: call if_exists: "collected_coin"
     goto immediate: "_collected"
 
 

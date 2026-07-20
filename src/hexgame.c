@@ -24,6 +24,12 @@
  * CAMERA *
  **********/
 
+/* Distance after which camera of type CAMERA_TYPE_FOLLOW will
+move to catch up to its target.
+TODO: don't hardcode this!.. instead, compute it from the current
+mapper's unit. */
+#define CAMERA_FOLLOW_MAX_DIST 5
+
 void camera_cleanup(camera_t *camera){
     /* Nuthin */
 }
@@ -162,6 +168,8 @@ int camera_step(camera_t *camera){
         /* body-following camera */
         if(body != NULL){
             int dist = hexspace_dist(camera->pos, body->loc.pos);
+            /* TODO: don't hardcode the max distance!.. calculate it here
+            from mapper's unit */
             if(dist > CAMERA_FOLLOW_MAX_DIST){
                 vec_cpy(space->dims, camera->pos,
                     body->loc.pos);

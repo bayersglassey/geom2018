@@ -4,8 +4,7 @@ parts:
     "m": location "start4.2.a_return"
     "D": recording "data/recs/door.fus"
         vars:
-            "map": "data/maps/demo/worldmap.fus"
-            "location": "tutorial2_exit"
+            "map": "data/maps/rollerspider/worldmap.fus"
             "antikey": "start4.2.a_solved"
     "b": actor "actor/airoller.fus"
     "A": recording "data/recs/eye.fus"

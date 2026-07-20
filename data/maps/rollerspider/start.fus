@@ -9,7 +9,7 @@ parts:
             "set_mapvar.map": "data/maps/tutorial2/worldmap.fus"
             "set_mapvar.name": "start4.2.a_solved"
             "set_mapvar.value": T
-    "s": recording "data/recs/switch_oneway.fus"
+    "s": recording "data/recs/switch.fus"
         vars:
             "key": "switch_a"
 collmap:

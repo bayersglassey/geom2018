@@ -5,18 +5,21 @@ palette: "data/pal1.fus"
 tileset: "data/tileset1.fus"
 
 actors:
-    : "actor/eyespider_tunnels.fus"
-        empty # no palmapper... this is needed so we can specify target... TODO: fix this madness
-        target: mapvar("start2_minimap")
-    : "actor/eyespider_dodecas.fus"
-        empty # no palmapper... this is needed so we can specify target... TODO: fix this madness
-        target: mapvar("start2_minimap")
+    #: "actor/eyespider_tunnels.fus"
+    #    empty # no palmapper... this is needed so we can specify target... TODO: fix this madness
+    #    target: mapvar("start2_minimap")
+    #: "actor/eyespider_dodecas.fus"
+    #    empty # no palmapper... this is needed so we can specify target... TODO: fix this madness
+    #    target: mapvar("start2_minimap")
     : "actor/eyespider_vines.fus"
         empty # no palmapper... this is needed so we can specify target... TODO: fix this madness
         target: mapvar("start2_minimap")
 
 vars:
     "start2_minimap": F
+    "start2_solved": F
+
+    "spider_passed_pebbles": F
 
     "eyespider_tunnels_ran_away_1": F
 
@@ -40,6 +43,10 @@ submaps:
         mapper: ("quadruple")
         palette: "data/maps/demo/pals/start.fus"
         submaps:
+            :
+                file: "data/maps/demo/start2_side.fus"
+                pos: (14 1)
+                camera: (0 6)
             "start3":
                 file: "data/maps/demo/start3.fus"
                 text:
@@ -62,7 +69,7 @@ submaps:
                 file: "data/maps/demo/pebbles.fus"
                 pos: (15 -2)
                 camera: (3 1)
-                mapper: ("solid_curvy")
+                mapper: ("quadruple")
                 submaps:
                     :
                         file: "data/maps/demo/pebbles3.fus"
@@ -74,15 +81,13 @@ submaps:
             "pebbles":
                 file: "data/maps/demo/pebbles2.fus"
                 pos: (22 9)
-                camera: (4 0)
+                camera: (2 -3)
                 mapper: ("solid_curvy")
                 submaps:
                     "tunnels":
                         file: "data/maps/demo/tunnels.fus"
                         pos: (13 1)
-                        #camera: follow
-                        camera: (6 -5)
-                        mapper: ("triple")
+                        camera: follow
                         palette: "data/maps/demo/pals/tunnels.fus"
                     #"tunnels3":
                     #    file: "data/maps/demo/tunnels3.fus"
