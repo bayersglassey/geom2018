@@ -143,9 +143,9 @@ static int dump_map(hexmap_t *map, const char ***worldmaps_ptr, opts_t *opts){
         hexmap_submap_t *submap = map->submaps[i];
         int submap_i = i;
         /* Node for submap */
-        fprintf(opts->file, "    \"map_%s_submap_%i\" [label=\"%s\", shape=\"box\", fontsize=%i]\n",
+        fprintf(opts->file, "    \"map_%s_submap_%i\" [label=\"%s%s\", shape=\"box\", fontsize=%i]\n",
             map->filename, submap_i,
-            submap->filename,
+            submap->filename, submap->has_mappoint? "\\n[MAP POINT]": "",
             DEFAULT_FONTSIZE);
         /* Edge to submap from its group */
         fprintf(opts->file, "    \"map_%s_group_%s\" -> \"map_%s_submap_%i\"\n",

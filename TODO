@@ -1533,7 +1533,7 @@ Jul 19, 2026:
 [ ] Add purple savepoints to demo, and make it clear to player that they
     can use them to jump around
         data/maps/demo/start3.fus: this is the "hub"
-        data/maps/demo/vines4.fus: where you deliver the vines spider
+        data/maps/demo/jungle.fus: below where you deliver the vines spider
         data/maps/demo/jungle2.fus: currently has a purple savepoint, that's fine
         data/maps/demo/fisheye.fus: at bottom of dodecas
         data/maps/test/map2x.fus: in spidertown outskirts
