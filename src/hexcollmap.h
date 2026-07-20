@@ -76,16 +76,16 @@ int hexmap_recording_clone(hexmap_recording_t *recording1,
 /* ...that is, enough information to display a rendergraph at a given
 location on a hexmap... */
 
-typedef struct hexmap_rendergraph {
+typedef struct hexmap_decal {
     const char *name;
     const char *palmapper_name;
     trf_t trf;
         /* NOTE: trf is in hexspace! It's up to you to convert to
         prend->space once you actually have a prend and an rgraph! */
-} hexmap_rendergraph_t;
+} hexmap_decal_t;
 
-void hexmap_rendergraph_cleanup(hexmap_rendergraph_t *rendergraph);
-void hexmap_rendergraph_init(hexmap_rendergraph_t *rendergraph,
+void hexmap_decal_cleanup(hexmap_decal_t *decal);
+void hexmap_decal_init(hexmap_decal_t *decal,
     const char *name, const char *palmapper_name);
 
 
@@ -131,7 +131,7 @@ enum hexcollmap_part_type {
     HEXCOLLMAP_PART_TYPE_HEXCOLLMAP,
     HEXCOLLMAP_PART_TYPE_RECORDING,
     HEXCOLLMAP_PART_TYPE_ACTOR,
-    HEXCOLLMAP_PART_TYPE_RENDERGRAPH,
+    HEXCOLLMAP_PART_TYPE_DECAL,
     HEXCOLLMAP_PART_TYPE_LOCATION,
 };
 
@@ -140,7 +140,7 @@ static const char *hexmap_part_type_msg(int type){
         case HEXCOLLMAP_PART_TYPE_HEXCOLLMAP: return "hexcollmap";
         case HEXCOLLMAP_PART_TYPE_RECORDING: return "recording";
         case HEXCOLLMAP_PART_TYPE_ACTOR: return "actor";
-        case HEXCOLLMAP_PART_TYPE_RENDERGRAPH: return "rendergraph";
+        case HEXCOLLMAP_PART_TYPE_DECAL: return "decal";
         case HEXCOLLMAP_PART_TYPE_LOCATION: return "location";
         default: return "unknown";
     }
@@ -232,7 +232,7 @@ struct hexcollmap {
     int oy; /* origin's y, in hexcollmap index space */
     hexcollmap_tile_t *tiles; /* array of length w * h */
     ARRAY_DECL(hexmap_recording_t*, recordings)
-    ARRAY_DECL(hexmap_rendergraph_t*, rendergraphs)
+    ARRAY_DECL(hexmap_decal_t*, decals)
     ARRAY_DECL(hexmap_location_t*, locations)
     ARRAY_DECL(valexpr_t*, text_exprs)
 

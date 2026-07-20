@@ -194,7 +194,7 @@ int hexmap_submap_is_visible(hexmap_submap_t *submap, bool *visible_ptr);
 int hexmap_submap_is_solid(hexmap_submap_t *submap, bool *solid_ptr);
 int rendergraph_add_rgraphs_from_collmap(
     rendergraph_t *rgraph, hexcollmap_t *collmap,
-    tileset_t *tileset, bool add_collmap_rendergraphs);
+    tileset_t *tileset, bool include_decals);
 int hexmap_submap_create_rgraph_map(hexmap_submap_t *submap);
 int hexmap_submap_create_rgraph_minimap(hexmap_submap_t *submap);
 

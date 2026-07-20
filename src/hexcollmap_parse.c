@@ -281,16 +281,13 @@ static int hexcollmap_draw(hexcollmap_t *collmap1, hexcollmap_t *collmap2,
         trf_apply(space, &recording1->trf, trf);
     }
 
-    /* "Draw" rendergraphs from collmap2 onto collmap1, in other words copy
-    them while adjusting rendergraph->trf appropriately */
-    for(int i = 0; i < collmap2->rendergraphs_len; i++){
-        hexmap_rendergraph_t *rendergraph2 = collmap2->rendergraphs[i];
-
-        ARRAY_PUSH_NEW(hexmap_rendergraph_t*, collmap1->rendergraphs,
-            rendergraph1)
-        hexmap_rendergraph_init(rendergraph1,
-            rendergraph2->name, rendergraph2->palmapper_name);
-        trf_apply(space, &rendergraph1->trf, trf);
+    /* "Draw" decals from collmap2 onto collmap1, in other words copy
+    them while adjusting decal->trf appropriately */
+    for(int i = 0; i < collmap2->decals_len; i++){
+        hexmap_decal_t *decal2 = collmap2->decals[i];
+        ARRAY_PUSH_NEW(hexmap_decal_t*, collmap1->decals, decal1)
+        hexmap_decal_init(decal1, decal2->name, decal2->palmapper_name);
+        trf_apply(space, &decal1->trf, trf);
     }
 
     /* "Draw" locations from collmap2 onto collmap1, in other words copy
@@ -368,12 +365,10 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
         if(err)return err;
         err = vars_copy(&recording->bodyvars, &part->bodyvars);
         if(err)return err;
-    }else if(part->type == HEXCOLLMAP_PART_TYPE_RENDERGRAPH){
-        ARRAY_PUSH_NEW(hexmap_rendergraph_t*, collmap->rendergraphs,
-            rendergraph)
-        hexmap_rendergraph_init(rendergraph,
-            part->filename, part->palmapper_name);
-        trf_cpy(space, &rendergraph->trf, &trf2);
+    }else if(part->type == HEXCOLLMAP_PART_TYPE_DECAL){
+        ARRAY_PUSH_NEW(hexmap_decal_t*, collmap->decals, decal)
+        hexmap_decal_init(decal, part->filename, part->palmapper_name);
+        trf_cpy(space, &decal->trf, &trf2);
     }else if(part->type == HEXCOLLMAP_PART_TYPE_LOCATION){
         ARRAY_PUSH_NEW(hexmap_location_t*, collmap->locations,
             location)
@@ -772,9 +767,9 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
         }else if(GOT("actor")){
             NEXT
             type = HEXCOLLMAP_PART_TYPE_ACTOR;
-        }else if(GOT("shape")){
+        }else if(GOT("shape")){ /* TODO: should be "decal" */
             NEXT
-            type = HEXCOLLMAP_PART_TYPE_RENDERGRAPH;
+            type = HEXCOLLMAP_PART_TYPE_DECAL;
         }else if(GOT("location")){
             NEXT
             type = HEXCOLLMAP_PART_TYPE_LOCATION;

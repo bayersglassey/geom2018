@@ -278,7 +278,7 @@ static void _init_n_faces_solid_edge(int *n_faces_solid,
 
 int rendergraph_add_rgraphs_from_collmap(
     rendergraph_t *rgraph, hexcollmap_t *collmap,
-    tileset_t *tileset, bool add_collmap_rendergraphs
+    tileset_t *tileset, bool include_decals
 ){
     /* Essentially renders a collmap onto an rgraph.
 
@@ -340,20 +340,19 @@ int rendergraph_add_rgraphs_from_collmap(
 
     free(_n_faces_solid);
 
-    /* A better name for collmap->rendergraphs might be collmap->decals...
-    They are rendergraphs attached to collmap for purely visual reasons,
-    e.g. text */
-    if(add_collmap_rendergraphs){
-        for(int i = 0; i < collmap->rendergraphs_len; i++){
-            hexmap_rendergraph_t *hexmap_rgraph = collmap->rendergraphs[i];
-            rendergraph_t *rgraph2 = prismelrenderer_get_rendergraph(
-                prend, hexmap_rgraph->name);
-            if(rgraph2 == NULL){
-                fprintf(stderr, "Couldn't find hexmap rgraph: %s\n",
-                    hexmap_rgraph->name);
+    /* NOTE: "decals" are rendergraphs attached to collmap for purely
+    visual reasons, e.g. text */
+    if(include_decals){
+        for(int i = 0; i < collmap->decals_len; i++){
+            hexmap_decal_t *decal = collmap->decals[i];
+            rendergraph_t *decal_rgraph = prismelrenderer_get_rendergraph(
+                prend, decal->name);
+            if(decal_rgraph == NULL){
+                fprintf(stderr, "Couldn't find rgraph for decal: %s\n",
+                    decal->name);
                 return 2;}
 
-            trf_t *trf = &hexmap_rgraph->trf;
+            trf_t *trf = &decal->trf;
 
             /* Convert trf from hexspace to vec4 and multiply by unit */
             vec_t v;
@@ -363,7 +362,7 @@ int rendergraph_add_rgraphs_from_collmap(
 
             int frame_i = 0;
 
-            err = rendergraph_add_rgraph(rgraph, rgraph2,
+            err = rendergraph_add_rgraph(rgraph, decal_rgraph,
                 v, r, frame_i);
             if(err)return err;
         }

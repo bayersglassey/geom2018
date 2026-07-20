@@ -144,19 +144,19 @@ void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
     }
 
     if(opts->extra)
-    for(int i = 0; i < collmap->rendergraphs_len; i++){
-        hexmap_rendergraph_t *rgraph = collmap->rendergraphs[i];
-        fprintf(f, "# rendergraph:\n");
-        fprintf(f, "#     name: %s\n", rgraph->name);
-        if(rgraph->palmapper_name){
+    for(int i = 0; i < collmap->decals_len; i++){
+        hexmap_decal_t *decal = collmap->decals[i];
+        fprintf(f, "# decal:\n");
+        fprintf(f, "#     name: %s\n", decal->name);
+        if(decal->palmapper_name){
             fprintf(f, "#     palmapper: %s\n",
-                rgraph->palmapper_name);
+                decal->palmapper_name);
         }
         fprintf(f, "#     trf: (%i %i) %i %c\n",
-            rgraph->trf.add[0],
-            rgraph->trf.add[1],
-            rgraph->trf.rot,
-            rgraph->trf.flip? 'y': 'n');
+            decal->trf.add[0],
+            decal->trf.add[1],
+            decal->trf.rot,
+            decal->trf.flip? 'y': 'n');
     }
 
     const char *tabs = "";
@@ -189,7 +189,7 @@ void hexcollmap_write_with_parts(hexcollmap_t *collmap, FILE *f,
                     fputs("recording ", f);
                 }else if(part->type == HEXCOLLMAP_PART_TYPE_ACTOR){
                     fputs("actor ", f);
-                }else if(part->type == HEXCOLLMAP_PART_TYPE_RENDERGRAPH){
+                }else if(part->type == HEXCOLLMAP_PART_TYPE_DECAL){
                     fputs("shape ", f);
                 }else if(part->type == HEXCOLLMAP_PART_TYPE_LOCATION){
                     fputs("location ", f);

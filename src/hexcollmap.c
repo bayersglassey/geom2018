@@ -122,16 +122,16 @@ int hexmap_recording_clone(hexmap_recording_t *recording1,
  * HEXMAP RENDERGRAPH *
  **********************/
 
-void hexmap_rendergraph_cleanup(hexmap_rendergraph_t *rendergraph){
+void hexmap_decal_cleanup(hexmap_decal_t *decal){
     /* Nuthin */
 }
 
-void hexmap_rendergraph_init(hexmap_rendergraph_t *rendergraph,
+void hexmap_decal_init(hexmap_decal_t *decal,
     const char *name, const char *palmapper_name
 ){
-    rendergraph->name = name;
-    rendergraph->palmapper_name = palmapper_name;
-    trf_zero(&rendergraph->trf);
+    decal->name = name;
+    decal->palmapper_name = palmapper_name;
+    trf_zero(&decal->trf);
 }
 
 
@@ -191,8 +191,8 @@ void hexcollmap_cleanup(hexcollmap_t *collmap){
     free(collmap->tiles);
     ARRAY_FREE_PTR(hexmap_recording_t*, collmap->recordings,
         hexmap_recording_cleanup)
-    ARRAY_FREE_PTR(hexmap_rendergraph_t*, collmap->rendergraphs,
-        hexmap_rendergraph_cleanup)
+    ARRAY_FREE_PTR(hexmap_decal_t*, collmap->decals,
+        hexmap_decal_cleanup)
     ARRAY_FREE_PTR(hexmap_location_t*, collmap->locations,
         hexmap_location_cleanup)
     ARRAY_FREE_PTR(valexpr_t*, collmap->text_exprs,
@@ -210,7 +210,7 @@ void hexcollmap_init(hexcollmap_t *collmap, vecspace_t *space,
     collmap->filename = filename;
     collmap->space = space;
     ARRAY_INIT(collmap->recordings);
-    ARRAY_INIT(collmap->rendergraphs);
+    ARRAY_INIT(collmap->decals);
     ARRAY_INIT(collmap->text_exprs);
 }
 

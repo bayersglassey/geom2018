@@ -1094,7 +1094,7 @@ static int parse_rgraph_reference(fus_lexer_t *lexer,
         /* Populate rgraph's children */
         err = rendergraph_add_rgraphs_from_collmap(
             rgraph, collmap, tileset,
-            false /* add_collmap_rendergraphs */);
+            false /* include_decals */);
         if(err)return err;
 
         hexcollmap_cleanup(collmap);
