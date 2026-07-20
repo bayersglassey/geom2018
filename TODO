@@ -1530,6 +1530,9 @@ Jul 19, 2026:
         data/maps/demo/start3.fus: you can go left or right
         data/maps/demo/pebbles2.fus: you can go left, down, or to the right
 
+[X] When you touch an ability_door, it should set your spawn point there,
+    instead of at last save point.
+
 [ ] Add purple savepoints to demo, and make it clear to player that they
     can use them to jump around
         data/maps/demo/start3.fus: this is the "hub"
@@ -1553,9 +1556,6 @@ Jul 19, 2026:
     So like, when valexpr_parse encounters a literal, it uses val_parse on it,
     which for string tokens results in the val owning the string.
     So... can we have like, valexpr_parse_with_stringstore, or something?..
-
-[ ] When you touch an ability_door, it should set your spawn point there,
-    instead of at last save point.
 
 [ ] MAYBE THE END OF THE GAME IS JUST GETTING THROUGH A SPACE WHICH REQUIRES
     ALL SPIDER ABILITIES TO GET THROUGH

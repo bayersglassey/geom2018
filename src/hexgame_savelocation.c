@@ -37,6 +37,16 @@ void hexgame_savelocation_set(hexgame_savelocation_t *location, vecspace_t *spac
     location->state_name = state_name;
 }
 
+void hexgame_savelocation_set_from_location(hexgame_savelocation_t *location,
+    hexgame_location_t *loc, const char *map_filename,
+    const char *stateset_filename, const char *state_name
+){
+    location->loc = *loc;
+    location->map_filename = map_filename;
+    location->stateset_filename = stateset_filename;
+    location->state_name = state_name;
+}
+
 void hexgame_savelocation_write(hexgame_savelocation_t *location, FILE *file){
     fprintf(file, "%i %i %i %c ", location->loc.pos[0], location->loc.pos[1],
         location->loc.rot, location->loc.turn? 'y': 'n');

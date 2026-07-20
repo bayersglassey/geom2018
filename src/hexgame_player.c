@@ -252,7 +252,7 @@ int player_step(player_t *player, hexgame_t *game){
     hexcollmap_t *hitbox = body->state->hitbox;
     if(hitbox != NULL){
         trf_t hitbox_trf;
-        hexgame_location_init_trf(&body->loc, &hitbox_trf);
+        hexgame_location_to_trf(&body->loc, &hitbox_trf);
 
         hexmap_collision_t collision;
         err = hexmap_collide_special(map, hitbox, &hitbox_trf, NULL, &collision);

@@ -52,7 +52,7 @@ typedef struct hexgame_location {
 
     The formula for trf.rot can be expressed in C as:
 
-        // Used by hexgame_location_init_trf
+        // Used by hexgame_location_to_trf
         // (And literally *is* hexgame_location_get_rot)
         trf.rot = loc.turn? (3 - loc.rot): loc.rot;
 
@@ -68,7 +68,7 @@ typedef struct hexgame_location {
 
 rot_t hexgame_location_get_rot(hexgame_location_t *loc);
 void hexgame_location_zero(hexgame_location_t *loc);
-void hexgame_location_init_trf(hexgame_location_t *loc, trf_t *trf);
+void hexgame_location_to_trf(hexgame_location_t *loc, trf_t *trf);
 void hexgame_location_from_trf(hexgame_location_t *loc, trf_t *trf);
 void hexgame_location_apply(hexgame_location_t *loc, trf_t *trf);
 

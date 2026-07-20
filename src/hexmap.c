@@ -164,7 +164,7 @@ static int hexmap_parse_recording(fus_lexer_t *lexer, prismelrenderer_t *prend,
         err = hexgame_location_parse(&loc, lexer);
         if(err)return err;
     }
-    hexgame_location_init_trf(&loc, trf);
+    hexgame_location_to_trf(&loc, trf);
 
     GET_STR_CACHED(*filename_ptr, &prend->filename_store)
     if(
@@ -1218,7 +1218,7 @@ int hexmap_step(hexmap_t *map){
         if(!visible)continue;
 
         trf_t hitbox_trf;
-        hexgame_location_init_trf(&body->loc, &hitbox_trf);
+        hexgame_location_to_trf(&body->loc, &hitbox_trf);
 
         /* This body has a hitbox! So collide it against all other bodies'
         hitboxes. */
@@ -1234,7 +1234,7 @@ int hexmap_step(hexmap_t *map){
             if(!visible_other)continue;
 
             trf_t hitbox_other_trf;
-            hexgame_location_init_trf(&body_other->loc, &hitbox_other_trf);
+            hexgame_location_to_trf(&body_other->loc, &hitbox_other_trf);
 
             /* The other body has a hitbox! Do the collision... */
             bool collide = hexcollmap_collide(hitbox, &hitbox_trf,

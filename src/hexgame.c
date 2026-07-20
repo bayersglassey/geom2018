@@ -349,7 +349,7 @@ static int camera_render_map(camera_t *camera,
             if(!is_target)continue;
 
             trf_t trf;
-            hexgame_location_init_trf(&body->loc, &trf);
+            hexgame_location_to_trf(&body->loc, &trf);
 
             err = _render_rgraph(
                 target_marker_rgraph,
@@ -365,7 +365,7 @@ static int camera_render_map(camera_t *camera,
             if(!player->body)continue;
 
             trf_t trf;
-            hexgame_location_init_trf(&player->body->loc, &trf);
+            hexgame_location_to_trf(&player->body->loc, &trf);
 
             err = _render_rgraph(
                 marker_rgraph,

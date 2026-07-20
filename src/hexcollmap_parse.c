@@ -300,7 +300,7 @@ static int hexcollmap_draw(hexcollmap_t *collmap1, hexcollmap_t *collmap2,
         hexmap_location_init(location1, collmap2, location2->name);
 
         trf_t trf2;
-        hexgame_location_init_trf(&location2->loc, &trf2);
+        hexgame_location_to_trf(&location2->loc, &trf2);
         trf_apply(space, &trf2, trf);
         hexgame_location_from_trf(&location1->loc, &trf2);
     }

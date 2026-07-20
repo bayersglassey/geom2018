@@ -64,6 +64,11 @@ void anim_as_header_cleanup(anim_as_header_t *header);
 void anim_as_header_init(anim_as_header_t *header, int type);
 
 
+enum anim_set_respawn {
+    SET_RESPAWN_YOU
+};
+
+
 struct stateset;
 
 
@@ -343,6 +348,7 @@ enum state_effect_type {
     STATE_EFFECT_TYPE_DO,
     STATE_EFFECT_TYPE_SHOW_MINIMAP,
     STATE_EFFECT_TYPE_ASSERT,
+    STATE_EFFECT_TYPE_SET_RESPAWN,
     STATE_EFFECT_TYPES
 };
 
@@ -378,6 +384,7 @@ static const char *state_effect_type_name(int type){
         case STATE_EFFECT_TYPE_DO: return "do";
         case STATE_EFFECT_TYPE_SHOW_MINIMAP: return "show_minimap";
         case STATE_EFFECT_TYPE_ASSERT: return "assert";
+        case STATE_EFFECT_TYPE_SET_RESPAWN: return "set_respawn";
         default: return "unknown";
     }
 }
@@ -479,6 +486,10 @@ typedef struct state_effect {
             bool debug;
             valexpr_t valexpr;
         } assert;
+        struct {
+            int type; /* enum anim_set_respawn */
+            trf_t trf;
+        } set_respawn;
     } u;
 } state_effect_t;
 

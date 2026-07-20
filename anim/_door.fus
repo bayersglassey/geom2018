@@ -5,6 +5,8 @@
 # MINIMAP (bool)
 
 
+# Import spider vars, particularly the labels, so if we're an ability_door,
+# we can look like the kind of spider whose ability we grant
 $SET_STR NS "spider_"
 import "anim/_spider_vars.fus"
 $UNSET NS
@@ -134,6 +136,10 @@ state "open":
             # TL;DR this is how a door can turn you into e.g. a rollerspider.
             if: exists myvar("set_yourbool")
             then: as you:
+                # Update respawn location, so player can't just jump back
+                # to last save point!.. they need to solve whatever puzzle
+                # we put in front of them after granting them a new ability...
+                set_respawn you: (-1 -1) 0 f
                 set myvar(yourvar("set_yourbool")): T
                 call: "update_vars"
 

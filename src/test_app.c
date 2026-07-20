@@ -187,7 +187,7 @@ static int _test_app_restart(test_app_t *app,
     /* Maybe add an actor for player0's body, if any */
     if(app->actor_filename != NULL && body0 != NULL){
         trf_t trf;
-        hexgame_location_init_trf(&respawn_location.loc, &trf);
+        hexgame_location_to_trf(&respawn_location.loc, &trf);
 
         ARRAY_PUSH_NEW(actor_t*, game->actors, actor)
         err = actor_init(actor, map, body0, app->actor_filename, NULL, &trf);

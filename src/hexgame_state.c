@@ -286,10 +286,10 @@ int state_cond_match(state_cond_t *cond,
             err = hexgame_location_from_val(&loc, &val);
             if(err)return err;
 
-            hexgame_location_init_trf(&loc, &hitbox_trf);
+            hexgame_location_to_trf(&loc, &hitbox_trf);
             val_cleanup(&val);
         }else{
-            hexgame_location_init_trf(&body->loc, &hitbox_trf);
+            hexgame_location_to_trf(&body->loc, &hitbox_trf);
         }
         hexcollmap_t *hitbox = cond->u.coll.collmap;
 
@@ -347,7 +347,7 @@ int state_cond_match(state_cond_t *cond,
                 ))continue;
 
                 trf_t hitbox_other_trf;
-                hexgame_location_init_trf(&body_other->loc, &hitbox_other_trf);
+                hexgame_location_to_trf(&body_other->loc, &hitbox_other_trf);
 
                 /* The other body has a hitbox! Do the collision... */
                 bool collide = hexcollmap_collide(hitbox, &hitbox_trf,
@@ -917,6 +917,36 @@ int state_effect_apply(state_effect_t *effect,
             valexpr_fprintf(&effect->u.assert.valexpr, stderr);
             fputc('\n', stderr);
             return 2;
+        }
+        break;
+    }
+    case STATE_EFFECT_TYPE_SET_RESPAWN: {
+        CHECK_BODY
+        player_t *player = body_get_player(body);
+        if(player){
+            int type = effect->u.set_respawn.type;
+            if(type == SET_RESPAWN_YOU){
+                if(!your_body){
+                    fprintf(stderr, "No \"your\" body available to \"set respawn\"\n");
+                    return 2;
+                }
+
+                trf_t loc_trf = effect->u.set_respawn.trf;
+                trf_t your_trf;
+                hexgame_location_to_trf(&your_body->loc, &your_trf);
+                trf_apply(game->space, &loc_trf, &your_trf);
+                hexgame_location_t loc;
+                hexgame_location_from_trf(&loc, &loc_trf);
+
+                hexgame_savelocation_t *respawn = &player->respawn_location;
+                hexgame_savelocation_set_from_location(respawn,
+                    &loc, your_body->map->filename,
+                    body->stateset? body->stateset->filename: NULL,
+                    body->state? body->state->name: NULL);
+            }else{
+                fprintf(stderr, "Unrecognized \"set respawn\" type: %i\n", type);
+                return 2;
+            }
         }
         break;
     }

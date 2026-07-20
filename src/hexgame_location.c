@@ -45,7 +45,7 @@ void hexgame_location_zero(hexgame_location_t *loc){
     loc->turn = false;
 }
 
-void hexgame_location_init_trf(hexgame_location_t *loc, trf_t *trf){
+void hexgame_location_to_trf(hexgame_location_t *loc, trf_t *trf){
     /* Converts loc to a trf_t. */
     vec_cpy(HEXSPACE_DIMS, trf->add, loc->pos);
     trf->rot = hexgame_location_get_rot(loc);
@@ -62,7 +62,7 @@ void hexgame_location_from_trf(hexgame_location_t *loc, trf_t *trf){
 void hexgame_location_apply(hexgame_location_t *loc, trf_t *trf){
     /* Applies a trf_t to loc. */
     trf_t loctrf;
-    hexgame_location_init_trf(loc, &loctrf);
+    hexgame_location_to_trf(loc, &loctrf);
     trf_apply(&hexspace, &loctrf, trf);
     hexgame_location_from_trf(loc, &loctrf);
 }

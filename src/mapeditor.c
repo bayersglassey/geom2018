@@ -217,7 +217,7 @@ int mapeditor(const char *collmap_filename, hexcollmap_write_options_t *opts,
             case '1': {
                 /* Go to spawn point */
                 cursor_visible = true;
-                hexgame_location_init_trf(&collmap->spawn, cursor);
+                hexgame_location_to_trf(&collmap->spawn, cursor);
                 cursor->add[0] += collmap->ox;
                 cursor->add[1] -= collmap->oy;
                 err = fit_map_to_cursor(collmap, cursor);

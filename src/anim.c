@@ -12,6 +12,7 @@
 #include "prismelrenderer.h"
 #include "lexer.h"
 #include "lexer_macros.h"
+#include "geom_lexer_utils.h"
 #include "var_utils.h"
 #include "hexgame_vars_props.h"
 
@@ -995,6 +996,19 @@ int state_effect_parse(state_effect_t *effect,
         err = valexpr_parse(&effect->u.assert.valexpr, lexer);
         if(err)return err;
         CLOSE
+    }else if(GOT("set_respawn")){
+        NEXT
+        int type;
+        effect->type = STATE_EFFECT_TYPE_SET_RESPAWN;
+        if(GOT("you")){
+            NEXT
+            effect->u.set_respawn.type = SET_RESPAWN_YOU;
+            OPEN
+            GET_TRF(space, effect->u.set_respawn.trf)
+            CLOSE
+        }else{
+            return UNEXPECTED("you");
+        }
     }else{
         return UNEXPECTED(NULL);
     }
