@@ -554,6 +554,17 @@ static int parse_shape_hexpicture(prismelrenderer_t *prend, fus_lexer_t *lexer,
     rendergraph_t *rgraph
 ){
     INIT
+
+    int frame_start = 0;
+    int frame_len = -1;
+    if(GOT("frames")){
+        NEXT
+        OPEN
+        GET_INT(frame_start)
+        GET_INT(frame_len)
+        CLOSE
+    }
+
     OPEN
 
     static const char *names[3] = {"sq", "tri", "dia"};
@@ -598,8 +609,8 @@ static int parse_shape_hexpicture(prismelrenderer_t *prend, fus_lexer_t *lexer,
         child->trf.rot = face->rot;
         child->trf.flip = false;
         child->u.prismel.color = face->color;
-        child->frame_start = 0;
-        child->frame_len = -1;
+        child->frame_start = frame_start;
+        child->frame_len = frame_len;
         vec4_set(child->trf.add,
             face->a, face->b, face->c, face->d);
     }
