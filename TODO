@@ -1392,16 +1392,6 @@ Jul 17, 2026:
     They have a "freshness" which counts down, and rollers (and maybe other
     things) will go towards whichever side of them has the freshest scent.
 
-[ ] Map collisions are expensive!.. are we doing enough, like are we using
-    hexboxes to avoid iterating over tiles?..
-    HOLY MOLY, we're iterating over elems of the hitbox, then iterating over
-    all submaps for each of those elems!!!!
-    AND FOR EACH SUBMAP, WE'RE RECALCULATING ITS VISIBILITY ETC EACH TIME!..
-    (in hexmap_collide_elem, in src/hexmap.c)
-    So that's awful. We should iterate over submaps first, check bounding box
-    (i.e. submap->collmap->hexbox) in case we can exit early, then check
-    visibility in case we can exit early, *THEN* iterate over hitbox elems.
-
 [ ] Can we make coins do something when you collect them?..
     Like, give you a temporary speed boost or something?..
     Ooh ooh or temporary invincibility. So you can power through death rollers,
@@ -1532,6 +1522,76 @@ Jul 19, 2026:
 
 [X] When you touch an ability_door, it should set your spawn point there,
     instead of at last save point.
+
+Jul 21, 2026:
+-------------
+
+[X] maps/rollerspider: make sure that one part can't be solved with stickyspider
+
+[X] Map collisions are expensive!.. are we doing enough, like are we using
+    hexboxes to avoid iterating over tiles?..
+    HOLY MOLY, we're iterating over elems of the hitbox, then iterating over
+    all submaps for each of those elems!!!!
+    AND FOR EACH SUBMAP, WE'RE RECALCULATING ITS VISIBILITY ETC EACH TIME!..
+    (in hexmap_collide_elem, in src/hexmap.c)
+    So that's awful. We should iterate over submaps first, check bounding box
+    (i.e. submap->collmap->hexbox) in case we can exit early, then check
+    visibility in case we can exit early, *THEN* iterate over hitbox elems.
+
+    Also, from callgrind, I'm seeing that 25% of our time is spent in
+    hexmap_submap_is_visible. O_o
+
+    Here's a more general breakdown:
+
+        100% test_app_mainloop_step:
+            90% hexgame_step:
+                7% actor_step
+                88% hexgame_step:
+                    81% hexmap_step:
+                        36% body_step:
+                            7% body_handle_rules
+                            28% body_update_cur_submap:
+                                24% hexmap_collide_special:
+                                    18% hexmap_submap_is_visible
+                        42% hexcollmap_collide:
+                            7% trf_apply
+                            10% strchr (for checking elem_is_solid, etc)
+            10% test_app_render_game:
+                6.30% SDL_UpperBlitScaled
+
+    [X] Cache submap->is_visible each frame! (And submap->colltag)
+
+    ...okay, after caching is_visible, we now have:
+
+        100% test_app_mainloop_step:
+            6% SDL_PollEvent
+            12% test_app_render_game:
+                8.65% SDL_UpperBlitScaled
+            80% hexgame_step:
+                74% hexmap_step:
+                    15% body_step:
+                        6% body_handle_rules
+                        7% body_update_cur_submap:
+                            6.21% hexmap_collide_special
+                    56% hexcollmap_collide:
+                        12.67% strchr
+                        9.13% trf_apply
+
+    HRMMMMM actually, I don't think we gain much from iterating over submaps
+    first. Looks like maps/demo only has 61 submaps??
+    And there is some trickiness which might make it difficult to change the
+    order of iteration, e.g. in hexmap_collide_elem:
+
+        else if(elem->tile_c == 't'){
+            /* We found a "tunnel" -- some non-colliding stuff which
+            overrides anything solid which might be (in a submap)
+            underneath it!..
+            So, we break out of iterating over submaps. */
+            break;
+        }
+
+    ...so maybe let's call it a day for now. We have submap->is_visible,
+    which is already a big improvement.
 
 [ ] Add purple savepoints to demo, and make it clear to player that they
     can use them to jump around
