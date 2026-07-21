@@ -94,6 +94,7 @@ typedef struct recording {
     bool resets_position; /* default: true, if false, looping doesn't reset body's position */
     const char *stateset_name;
     const char *state_name;
+    bool debug;
 
     hexgame_location_t loc0;
 

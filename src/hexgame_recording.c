@@ -59,6 +59,7 @@ void recording_init(recording_t *rec){
     rec->stateset_name = NULL;
     rec->state_name = NULL;
     rec->reacts = false;
+    rec->debug = false;
 
     vec_zero(rec->loc0.pos);
     rec->loc0.rot = 0;
@@ -82,7 +83,35 @@ void recording_reset(recording_t *rec){
     recording_init(rec);
 }
 
-static int recording_parse_nodes(recording_t *rec, const char *data){
+static int _recording_parse_nodes_from_lexer(recording_t *rec, fus_lexer_t *lexer){
+    int err;
+    while(1){
+        if(GOT(")"))break;
+
+        if(GOT("+") || GOT("-")){
+            bool keydown = GOT("+"); /* Otherwise, keyup */
+            NEXT
+            char key_c;
+            GET_CHR(key_c)
+            ARRAY_PUSH_UNINITIALIZED(recording_node_t, rec->nodes)
+            recording_node_init_key_c(&rec->nodes[rec->nodes_len - 1], keydown, key_c);
+        }else if(GOT("w")){
+            NEXT
+            int wait;
+            GET_INT(wait)
+            ARRAY_PUSH_UNINITIALIZED(recording_node_t, rec->nodes)
+            recording_node_init_wait(&rec->nodes[rec->nodes_len - 1], wait);
+        }else{
+            return UNEXPECTED("'+' or '-' or 'w'");
+        }
+    }
+    return 0;
+}
+
+static int _recording_parse_nodes_from_str(recording_t *rec, const char *data){
+    /* The old recording format used a single fus string literal for the data,
+    and then parsed that.
+    These days, we instead use _recording_parse_nodes_from_lexer */
     int err;
     int i = 0;
     while(1){
@@ -121,6 +150,7 @@ static int recording_parse(recording_t *rec,
     prismelrenderer_t *prend = map->prend;
     vecspace_t *space = map->space;
 
+    GET_ATTR_YESNO("debug", rec->debug, true)
     GET_ATTR_YESNO("reacts", rec->reacts, true)
     GET_ATTR_YESNO("loop", rec->loop, true)
     GET_ATTR_YESNO("resets_position", rec->resets_position, true)
@@ -156,11 +186,16 @@ static int recording_parse(recording_t *rec,
     if(GOT("data")){
         NEXT
         OPEN
-        char *data;
-        GET_STR(data)
-        err = recording_parse_nodes(rec, data);
-        if(err)return err;
-        free(data);
+        if(GOT_STR){
+            char *data;
+            GET_STR(data)
+            err = _recording_parse_nodes_from_str(rec, data);
+            if(err)return err;
+            free(data);
+        }else{
+            err = _recording_parse_nodes_from_lexer(rec, lexer);
+            if(err)return err;
+        }
         CLOSE
     }else{
         GET("nodata")
@@ -238,15 +273,18 @@ static int recording_step_play(recording_t *rec){
             recording_node_t *node = &rec->nodes[rec->node_i];
             switch(node->type){
                 case RECORDING_NODE_TYPE_WAIT: {
+                    if(rec->debug)fprintf(stderr, "%s: w %i\n", rec->filename, node->u.wait);
                     rec->wait = node->u.wait;
                     break;
                 }
                 case RECORDING_NODE_TYPE_KEYDOWN: {
+                    if(rec->debug)fprintf(stderr, "%s: + %c\n", rec->filename, node->u.key_c);
                     int key_i = body_get_key_i(body, node->u.key_c);
                     body_keydown(body, key_i);
                     break;
                 }
                 case RECORDING_NODE_TYPE_KEYUP: {
+                    if(rec->debug)fprintf(stderr, "%s: - %c\n", rec->filename, node->u.key_c);
                     int key_i = body_get_key_i(body, node->u.key_c);
                     body_keyup(body, key_i);
                     break;
@@ -446,7 +484,7 @@ int body_start_recording(body_t *body, const char *filename){
     fprintf(f, "vars:\n");
     vars_write_with_mask(&body->vars, f, 4, nowrite_props_mask);
 
-    fprintf(f, "data: \"");
+    fprintf(f, "data:\n");
 
     return 0;
 }
@@ -460,8 +498,6 @@ int body_stop_recording(body_t *body){
     err = body_maybe_record_wait(body);
     if(err)return err;
 
-    fprintf(f, "\"\n");
-
     recording_reset(&body->recording);
     return 0;
 }
@@ -470,19 +506,8 @@ static int body_maybe_record_wait(body_t *body){
     int wait = body->recording.wait;
     if(wait == 0)return 0;
 
-    fprintf(body->recording.file, " w%i", wait);
+    fprintf(body->recording.file, "    w %i\n", wait);
     if(DEBUG_RECORDINGS)printf("w%i\n", wait);
-
-    /*
-    char buffer[4];
-    buffer[0] = ' ';
-    buffer[1] = 'w';
-    buffer[2] = '1'; // <---- ummmmm
-    buffer[3] = '\0';
-
-    int err = recording_write(body, buffer);
-    if(err)return err;
-    */
 
     body->recording.wait = 0;
     return 0;
@@ -492,17 +517,8 @@ int body_record_keydown(body_t *body, int key_i){
     body_maybe_record_wait(body);
 
     char c = body_get_key_c(body, key_i, true);
-    fprintf(body->recording.file, " +%c", c);
+    fprintf(body->recording.file, "    + %c\n", c);
     if(DEBUG_RECORDINGS)printf("+%c\n", c);
-
-    /*
-    char buffer[3];
-    buffer[0] = '+';
-    buffer[1] = c;
-    buffer[2] = '\0';
-    int err = recording_write(body, buffer);
-    if(err)return err;
-    */
 
     return 0;
 }
@@ -511,17 +527,8 @@ int body_record_keyup(body_t *body, int key_i){
     body_maybe_record_wait(body);
 
     char c = body_get_key_c(body, key_i, true);
-    fprintf(body->recording.file, " -%c", c);
+    fprintf(body->recording.file, "    - %c\n", c);
     if(DEBUG_RECORDINGS)printf("-%c\n", c);
-
-    /*
-    char buffer[3];
-    buffer[0] = '-';
-    buffer[1] = c;
-    buffer[2] = '\0';
-    int err = recording_write(body, buffer);
-    if(err)return err;
-    */
 
     return 0;
 }
