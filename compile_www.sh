@@ -1,13 +1,13 @@
 set -euo pipefail
 
 RELEASE=0
-if [ "${1:-}" = "release" ]
+if [ "${1:-}" = "debug" ]
 then
-    RELEASE=1
     shift
-    echo "Starting a release build..."
-else
     echo "Starting a debug build..."
+else
+    RELEASE=1
+    echo "Starting a release build..."
 fi
 
 MAIN_C="src/main/demo.c"
