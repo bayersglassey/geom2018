@@ -45,6 +45,11 @@ vars:
     nosave "spit_anim": null
 
 
+proc toplevel "set_var":
+    set myvar(procvar("$1")): procvar("$2")
+    call: "update_vars"
+
+
 proc toplevel on stateset_change "update_vars":
     # Sets various vars which depend on the "is_*spider" vars.
 

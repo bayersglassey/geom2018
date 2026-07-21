@@ -69,8 +69,7 @@ state "init":
             # "update_vars" proc from anim/_spider_vars.fus, which sets
             # up various labels, so that our rgraph looks like a spider
             # with the associated ability!..
-            set myvar(myvar("set_yourbool")): T
-            call: "update_vars"
+            call: "set_var" myvar("set_yourbool") T
 
     if:
         any:
@@ -126,23 +125,14 @@ state "open":
                 yourvar("state")
 
             $IF ABILITY:
-                # Set a boolean variable and call the "update_vars" proc
-                # of the body which touched us.
-                # NOTE: this is a bit of a hack... the "spider" body has an
-                # "update_vars" proc, which it uses to set up its labels based
-                # on certain vars, e.g. "is_rollerspider".
-                # The idea is that some doors can set such vars of the spider,
-                # then run the "update_vars" proc so that its labels are
-                # recalculated.
-                # TL;DR this is how a door can turn you into e.g. a rollerspider.
+                # This is how a door can turn you into e.g. a rollerspider
                 if: exists myvar("set_yourbool")
                 then: as you:
                     # Update respawn location, so player can't just jump back
                     # to last save point!.. they need to solve whatever puzzle
                     # we put in front of them after granting them a new ability...
                     set_respawn you: (-1 -1) 0 f
-                    set myvar(yourvar("set_yourbool")): T
-                    call: "update_vars"
+                    call: "set_var" yourvar("set_yourbool") T
 
             $IF MINIMAP: show_minimap()
 
