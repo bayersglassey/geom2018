@@ -1600,6 +1600,10 @@ Jul 21, 2026:
     data/maps/tutorial/skypipes4.fus: the eye should open when player is
     standing on the spot where they're supposed to jump left underneath...
 
+[X] When doing hexmap_collide_special for water, savepoints, etc, are we
+    currently bothering to check against verts and edges?.. if so, cut that
+    out!.. only faces are needed
+
 [ ] Add purple savepoints to demo, and make it clear to player that they
     can use them to jump around
         data/maps/demo/start3.fus: this is the "hub"
@@ -1650,7 +1654,3 @@ Jul 21, 2026:
 [ ] Look into this comment in data/maps/demo/worldmap.fus:
 
         empty # no palmapper... this is needed so we can specify target... TODO: fix this madness
-
-[ ] When doing hexmap_collide_special for water, savepoints, etc, are we
-    currently bothering to check against verts and edges?.. if so, cut that
-    out!.. only faces are needed

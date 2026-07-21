@@ -1105,7 +1105,7 @@ static void hexmap_collision_init(hexmap_collision_t *collision){
 
 static int _hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf, int all_type, const char *colltag,
-    hexmap_collision_t *collision, bool *collide_ptr
+    hexmap_collision_t *collision, bool *collide_ptr, bool only_faces
 ){
 #   define _RETURN(_collide) {*collide_ptr = _collide; return 0;}
     int err;
@@ -1132,22 +1132,24 @@ static int _hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
 
             int x = x2 - ox2;
             int y = y2 - oy2;
-            err = hexmap_collide_elem(map, all_type,
-                x, y, trf,
-                tile2->vert, 1,
-                hexcollmap_normalize_vert,
-                hexcollmap_get_vert,
-                collision, &collide, colltag);
-            if(err)return err;
-            if(collide != 2)_RETURN(collide)
-            err = hexmap_collide_elem(map, all_type,
-                x, y, trf,
-                tile2->edge, 3,
-                hexcollmap_normalize_edge,
-                hexcollmap_get_edge,
-                collision, &collide, colltag);
-            if(err)return err;
-            if(collide != 2)_RETURN(collide)
+            if(!only_faces){
+                err = hexmap_collide_elem(map, all_type,
+                    x, y, trf,
+                    tile2->vert, 1,
+                    hexcollmap_normalize_vert,
+                    hexcollmap_get_vert,
+                    collision, &collide, colltag);
+                if(err)return err;
+                if(collide != 2)_RETURN(collide)
+                err = hexmap_collide_elem(map, all_type,
+                    x, y, trf,
+                    tile2->edge, 3,
+                    hexcollmap_normalize_edge,
+                    hexcollmap_get_edge,
+                    collision, &collide, colltag);
+                if(err)return err;
+                if(collide != 2)_RETURN(collide)
+            }
             err = hexmap_collide_elem(map, all_type,
                 x, y, trf,
                 tile2->face, 2,
@@ -1181,7 +1183,7 @@ int hexmap_collide(hexmap_t *map, hexcollmap_t *collmap2,
     trf_t *trf, bool all, const char *colltag, bool *collide_ptr
 ){
     hexmap_collision_t collision;
-    return _hexmap_collide(map, collmap2, trf, all, colltag, &collision, collide_ptr);
+    return _hexmap_collide(map, collmap2, trf, all, colltag, &collision, collide_ptr, false);
 }
 
 int hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
@@ -1189,7 +1191,7 @@ int hexmap_collide_special(hexmap_t *map, hexcollmap_t *collmap2,
 ){
     int all_type = 2;
     bool collide; /* unused */
-    return _hexmap_collide(map, collmap2, trf, all_type, colltag, collision, &collide);
+    return _hexmap_collide(map, collmap2, trf, all_type, colltag, collision, &collide, true);
 }
 
 
