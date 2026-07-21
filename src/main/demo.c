@@ -8,6 +8,8 @@
 #include "../test_app.h"
 #include "../save_slots.h"
 #include "../defaults.h"
+#include "../lexer.h"
+#include "../hexgame_state.h"
 
 
 #define SCW 1024
@@ -112,6 +114,7 @@ void print_help(FILE *file){
         "   -sm  --submap FILE    Submap filename (default: NULL)\n"
         "   -loc --location NAME  Location name (default: NULL)\n"
         "                         NOTE: this overrides --submap\n"
+        "   -e   --effect EFFECT  Execute the given effect(s) after game is loaded\n"
         "   -D   --devel          Developer mode\n"
         "                         (You can also use env var %s)\n"
         "   -d   --delay     N    Delay goal (in milliseconds) (default: %i)\n"
@@ -150,6 +153,7 @@ const char *actor_filename = NULL;
 const char *hexmap_filename = NULL;
 const char *submap_filename = NULL;
 const char *location_name = NULL;
+const char *effects_text = NULL;
 bool minimap_alt = true;
 bool cache_bitmaps = true;
 bool animate_palettes = true;
@@ -162,6 +166,53 @@ const char *save_recording_filename = NULL;
 bool have_audio = false;
 bool load_save_slot = false;
 screen_t screen;
+
+static int parse_and_execute_effects(hexgame_t *game, const char *effects_text){
+    int err;
+
+    if(game->players_len < 1){
+        fprintf(stderr, "Can't use CLI effects without a player\n");
+        return 2;
+    }
+    player_t *player = game->players[0];
+    body_t *body = player->body;
+    if(!body){
+        fprintf(stderr, "Can't use CLI effects without a body\n");
+        return 2;
+    }
+    if(!body->stateset){
+        fprintf(stderr, "Can't use CLI effects without a stateset\n");
+        return 2;
+    }
+
+    state_context_t parse_context;
+    state_context_init(&parse_context, body->stateset, NULL);
+    hexgame_state_context_t eval_context = {
+        .game = game,
+        .body = body,
+    };
+    hexgame_state_controlflow_t controlflow;
+    hexgame_state_controlflow_init(&controlflow, false);
+    state_effect_goto_t *gotto = NULL;
+
+    fus_lexer_t lexer;
+    fus_lexer_init(&lexer, effects_text, "<cli argument>");
+    while(!fus_lexer_done(&lexer)){
+        state_effect_t effect;
+        err = state_effect_parse(&effect, &parse_context, &lexer, game->prend, game->space);
+        if(err)return err;
+        err = state_effect_apply(&effect, &eval_context, &gotto, &controlflow);
+        if(err)return err;
+        if(gotto){
+            fprintf(stderr, "Can't use goto with CLI effects\n");
+            return 2;
+        }
+        if(hexgame_state_controlflow_is_unrolling(&controlflow))break;
+        state_effect_cleanup(&effect);
+    }
+    fus_lexer_cleanup(&lexer);
+    return 0;
+}
 
 static test_app_t *get_test_app(){
     test_app_t *app = calloc(1, sizeof(*app));
@@ -176,9 +227,10 @@ static test_app_t *get_test_app(){
         n_players, save_slot,
         load_recording_filename, save_recording_filename,
         have_audio, load_save_slot);
-    if(err){
-        free(app);
-        return NULL;
+    if(err)return NULL;
+    if(effects_text){
+        err = parse_and_execute_effects(&app->hexgame, effects_text);
+        if(err)return NULL;
     }
     return app;
 }
@@ -250,6 +302,13 @@ int main(int n_args, char *args[]){
             }
             arg = args[arg_i];
             location_name = arg;
+        }else if(!strcmp(arg, "-e") || !strcmp(arg, "--effect")){
+            arg_i++;
+            if(arg_i >= n_args){
+                fprintf(stderr, "Missing effect after %s\n", arg);
+                goto parse_failure;
+            }
+            effects_text = args[arg_i];
         }else if(!strcmp(arg, "-D") || !strcmp(arg, "--devel")){
             developer_mode = true;
         }else if(!strcmp(arg, "-d") || !strcmp(arg, "--delay")){

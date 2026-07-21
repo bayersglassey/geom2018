@@ -17,6 +17,16 @@
 #include "hexgame_vars_props.h"
 
 
+#define ARGNAMES_LEN 5
+static const char *ARGNAMES[ARGNAMES_LEN] = {
+    "$1",
+    "$2",
+    "$3",
+    "$4",
+    "$5",
+};
+
+
 static void _print_tabs(FILE *file, int depth){
     for(int i = 0; i < depth; i++)fputs("  ", file);
 }
@@ -713,6 +723,20 @@ int state_effect_parse(state_effect_t *effect,
         GET_STR_CACHED(name, &prend->name_store)
         effect->u.call.name = name;
         valexpr_vars_init(&effect->u.call.valexpr_vars);
+        int arg_i = 0;
+        while(!GOT(")") && !GOT("vars")){
+            if(arg_i >= ARGNAMES_LEN){
+                fprintf(stderr, "Can't have more than %i positional args in \"call\"\n", ARGNAMES_LEN);
+                return 2;
+            }
+            const char *name = ARGNAMES[arg_i];
+            valexpr_t *valexpr;
+            err = valexpr_vars_add(&effect->u.call.valexpr_vars, name, &valexpr);
+            if(err)return err;
+            err = valexpr_parse(valexpr, lexer);
+            if(err)return err;
+            arg_i++;
+        }
         if(GOT("vars")){
             NEXT
             OPEN
