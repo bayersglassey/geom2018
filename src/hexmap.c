@@ -1038,17 +1038,11 @@ static int hexmap_collide_elem(hexmap_t *map, int all_type,
             if(colltag){
                 /* Only check for collisions with submaps having the indicated
                 colltag */
-                const char *submap_colltag;
-                err = hexmap_submap_get_colltag(submap, &submap_colltag);
-                if(err)return err;
-                bool match = submap_colltag && !strcmp(submap_colltag, colltag);
+                bool match = submap->colltag && !strcmp(submap->colltag, colltag);
                 if(!match)continue;
             }else{
                 /* Only check for collisions with solid submaps */
-                bool solid;
-                err = hexmap_submap_is_solid(submap, &solid);
-                if(err)return err;
-                if(!solid)continue;
+                if(!hexmap_submap_is_solid(submap))continue;
             }
 
             hexcollmap_t *collmap1 = &submap->collmap;
@@ -1366,6 +1360,19 @@ int hexmap_submap_init(hexmap_t *map,
     submap->palette = context->palette;
     submap->tileset = context->tileset;
 
+    /* Initialize per-frame cached valexpr values */
+    err = hexmap_submap_refresh_cached_values(submap);
+    if(err)return err;
+
+    return 0;
+}
+
+int hexmap_submap_refresh_cached_values(hexmap_submap_t *submap){
+    int err;
+    err = hexmap_submap_is_visible(submap, &submap->is_visible);
+    if(err)return err;
+    err = hexmap_submap_get_colltag(submap, &submap->colltag);
+    if(err)return err;
     return 0;
 }
 
@@ -1442,20 +1449,8 @@ int hexmap_submap_is_visible(hexmap_submap_t *submap, bool *visible_ptr){
     return 0;
 }
 
-int hexmap_submap_is_solid(hexmap_submap_t *submap, bool *solid_ptr){
-    int err;
-    bool solid = true;
-    if(!submap->solid){
-        solid = false;
-        goto done;
-    }
-
-    err = hexmap_submap_is_visible(submap, &solid);
-    if(err)return err;
-
-done:
-    *solid_ptr = solid;
-    return 0;
+bool hexmap_submap_is_solid(hexmap_submap_t *submap){
+    return submap->solid && submap->is_visible;
 }
 
 void hexmap_submap_parser_context_init(hexmap_submap_parser_context_t *context,

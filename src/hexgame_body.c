@@ -850,9 +850,7 @@ int body_update_cur_submap(body_t *body){
     for(int i = map->submaps_len - 1; i >= 0; i--){
         hexmap_submap_t *submap = map->submaps[i];
         bool solid;
-        err = hexmap_submap_is_solid(submap, &solid);
-        if(err)return err;
-        if(!solid)continue;
+        if(!hexmap_submap_is_solid(submap))continue;
 
         hexcollmap_t *collmap = &submap->collmap;
 

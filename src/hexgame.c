@@ -291,11 +291,7 @@ static int camera_render_map(camera_t *camera,
     /* Render map's submaps */
     for(int i = 0; i < map->submaps_len; i++){
         hexmap_submap_t *submap = map->submaps[i];
-
-        bool visible;
-        err = hexmap_submap_is_visible(submap, &visible);
-        if(err)return err;
-        if(!visible)continue;
+        if(!submap->is_visible)continue;
 
         rendergraph_t *rgraph = submap->rgraph_map;
         if(minimap){
@@ -804,6 +800,16 @@ int hexgame_step(hexgame_t *game){
         camera->mapper = NULL;
     }
 
+    /* Refresh cached valexpr values for all submaps */
+    for(int i = 0; i < game->maps_len; i++){
+        hexmap_t *map = game->maps[i];
+        for(int j = 0; j < map->submaps_len; j++){
+            hexmap_submap_t *submap = map->submaps[j];
+            err = hexmap_submap_refresh_cached_values(submap);
+            if(err)return err;
+        }
+    }
+
     /* Do 1 gameplay step for each actor */
     for(int i = 0; i < game->actors_len; i++){
         actor_t *actor = game->actors[i];
@@ -899,10 +905,7 @@ int hexgame_use_mappoint(hexgame_t *game, hexmap_t *map,
         mappoint */
         if(!submap->has_mappoint)continue;
         if(!hexmap_submap_is_visited(submap))continue;
-        bool visible;
-        err = hexmap_submap_is_visible(submap, &visible);
-        if(err)return err;
-        if(!visible)continue;
+        if(!submap->is_visible)continue;
 
         if(submap == cur_submap)minimap_state->cur_mappoint = minimap_state->mappoints_len;
 
