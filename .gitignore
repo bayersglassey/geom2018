@@ -5,6 +5,9 @@
 # gcc stuff
 *.o
 
+# callgrind stuff
+callgrind.out.*
+
 # demo stuff
 /screen.bmp
 
