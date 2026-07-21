@@ -1593,6 +1593,13 @@ Jul 21, 2026:
     ...so maybe let's call it a day for now. We have submap->is_visible,
     which is already a big improvement.
 
+[X] data/maps/tutorial/skypipes2.fus: the guy should wake up and show you
+    how to crawl
+    data/maps/tutorial/skypipes3.fus: the guy should crawl back and forth in
+    the correct spot, not just do it once and go to sleep
+    data/maps/tutorial/skypipes4.fus: the eye should open when player is
+    standing on the spot where they're supposed to jump left underneath...
+
 [ ] Add purple savepoints to demo, and make it clear to player that they
     can use them to jump around
         data/maps/demo/start3.fus: this is the "hub"
@@ -1639,13 +1646,6 @@ Jul 21, 2026:
 
     [ ] The big roller should go *inside* the structure once you collect
         spikeyspider, so you can have fun going spikey against him
-
-[ ] data/maps/tutorial/skypipes2.fus: the guy should wake up and show you
-    how to crawl
-    data/maps/tutorial/skypipes3.fus: the guy should crawl back and forth in
-    the correct spot, not just do it once and go to sleep
-    data/maps/tutorial/skypipes4.fus: the eye should open when player is
-    standing on the spot where they're supposed to jump left underneath...
 
 [ ] Look into this comment in data/maps/demo/worldmap.fus:
 

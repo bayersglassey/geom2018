@@ -27,21 +27,53 @@ collmap "detect_partial":
 
 state "init":
     if() then:
+        # Appear at first position, at bottom of skypipes2
         play: "data/maps/tutorial/recs/eyespider0_a.fus"
-        goto: "start"
+        goto: "start_a"
 
-state "start":
+state "start_a":
     if:
         coll: bodies("touch") any yes collmap("detect")
     then:
+        # Run to second position, at left of skypipes2
         play: "data/maps/tutorial/recs/eyespider0_b.fus"
-        goto: "start2"
+        goto: "start_b"
 
-state "start2":
-    if:
+state "start_b":
+    if: any:
+        expr: mapvar("skypipes2_solved")
         coll: bodies("touch") any yes collmap("detect_partial")
     then:
+        # Run to third position, at right of skypipes2
         play: "data/maps/tutorial/recs/eyespider0_c.fus"
+        goto: "start_c"
+
+state "start_c":
+    if:
+        expr: mapvar("skypipes3_reached")
+    then:
+        # Jump from skypipes2 to skypipes 3
+        play: "data/maps/tutorial/recs/eyespider0_d.fus"
+        goto: "start_d"
+
+state "start_d":
+    if:
+    then:
+        # Run back and forth underneath skypipes3
+        play: "data/maps/tutorial/recs/eyespider0_e.fus"
+        goto: "start_e"
+
+state "start_e":
+    if:
+        expr: mapvar("skypipes4_reached")
+    then:
+        # Run to the end of skypipes4
+        play: "data/maps/tutorial/recs/eyespider0_f.fus"
         goto: "done"
+    if:
+    then:
+        # Loop current recording, i.e. keep running back and forth
+        # underneath skypipes3
+        play: "data/maps/tutorial/recs/eyespider0_e.fus"
 
 state "done":

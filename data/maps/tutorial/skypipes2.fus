@@ -1,9 +1,10 @@
-$SET_STR WATCH: lines: at(28 20)
-    ;;Watch.
-text: if mapvar("eyespider0_speak") then $GET_STR WATCH else null
+parts:
+    "h": recording "data/recs/hotspot.fus"
+        vars:
+            "key": "skypipes2_solved"
 collmap:
     ;;
-    ;;     .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;     .   .   .   .   .   .   .   .   .   .   ?   .   .   .   .   .   .   .   .   .   .   .    [h]
     ;;
     ;;   .   .   .   .   .   .   .   .   .   .   + - +   .   + - +   .   .   .   .   .   .   .   .
     ;;                                          /                 \

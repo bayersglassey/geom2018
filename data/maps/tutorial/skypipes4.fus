@@ -5,6 +5,9 @@ parts:
     "D": recording "data/recs/door.fus"
         vars:
             "map": "data/maps/tutorial_switches/worldmap.fus"
+    "h": recording "data/recs/hotspot.fus"
+        vars:
+            "key": "skypipes4_reached"
 collmap:
     ;;
     ;;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
@@ -29,7 +32,7 @@ collmap:
     ;;                                                /     \           \     /
     ;;   .   .   .   .   .   .   .   .   .   .   .   + - + - + = @ = @ = + - +   .   .   .   .   .   .   .   .
     ;;                                              =
-    ;;     .   .   .   .   .   .   .   .   .   .   @   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+    ;;     .   .   .   .   ?   .   .   .   .   .   @   .   .   .   .   .   .   .   .   .   .   .   .   .   .          [h]
     ;;                                            =
     ;;   .   .  (+)- + - + - + - + - +   + - + - +   .   .   .   .   .   + - +   .   .   .   .   .   .   .   .
     ;;            \     /     \     /     \     /                       /     \

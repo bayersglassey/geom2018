@@ -11,6 +11,10 @@ vars:
     "reached_skypipes": F
     "made_it_underneath": F
     "going_upwards": F
+    "skypipes2_solved": F
+    "skypipes3_reached": F
+    "skypipes3_underneath": F
+    "skypipes4_reached": F
     nosave "start_eye_a_open": 0
     nosave "start_eye_b_open": 0
     nosave "start_eye_c_open": 0
@@ -133,8 +137,6 @@ submaps:
                 target: mapvar("reached_skypipes")
                 pos: eval: (19 0) + (19 -1) + (24 17) + (28 12) + (27 10)
                 camera: (9 0)
-                actors:
-                    : "data/maps/tutorial/recs/eyespider1.fus"
             "skypipes4":
                 file: "data/maps/tutorial/skypipes4.fus"
                 target: mapvar("reached_skypipes")

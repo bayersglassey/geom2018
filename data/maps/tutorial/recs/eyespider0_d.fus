@@ -1,0 +1,21 @@
+anim: "anim/eyespider.fus"
+state: "eye_closed"
+pos: ( 112 38)
+rot: 0
+turn: yes
+keys:
+    x: is was
+    y:
+    u:
+    d:
+    l:
+    r:
+vars:
+    "is_rollerspider": F
+    "is_aimerspider": F
+    "is_spikeyspider": F
+    "is_flierspider": F
+    "is_birdspider": F
+    "is_flipspider": F
+    "is_stickyspider": F
+data: " w16 -x w6 +r w2 +u w3 -r -u w14 +l w2 -l w10"
