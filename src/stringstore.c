@@ -11,7 +11,7 @@ void stringstore_entry_cleanup(stringstore_entry_t *entry){
 }
 
 void stringstore_cleanup(stringstore_t *store){
-    ARRAY_FREE_PTR(entry_t*, store->entries, stringstore_entry_cleanup)
+    ARRAY_FREE_PTR(stringstore_entry_t*, store->entries, stringstore_entry_cleanup)
 }
 
 void stringstore_dump(stringstore_t *store, FILE *f){
