@@ -238,7 +238,7 @@ int main(int n_args, char **args){
             which we will then process in subsequent loop iterations.
             In other words, we're iterating over a set while it grows... */
             hexmap_t *map;
-            err = hexgame_load_map(game, worldmaps[i], &map);
+            err = hexgame_get_or_load_map(game, worldmaps[i], &map);
             if(err)return err;
             err = dump_map(map, &worldmaps, opts);
             if(err)return err;

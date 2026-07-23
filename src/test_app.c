@@ -90,7 +90,7 @@ static int _test_app_restart(test_app_t *app,
     err = hexgame_load_worldmaps(game, HEXGAME_DEFAULT_WORLDMAPS_FILENAME);
     if(err)return err;
     hexmap_t *map;
-    err = hexgame_load_map(game, hexmap_filename, &map);
+    err = hexgame_get_or_load_map(game, hexmap_filename, &map);
     if(err)return err;
     game->animate_palettes = app->animate_palettes;
 
