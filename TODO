@@ -1639,6 +1639,8 @@ Jul 21, 2026:
     little water bubbles, all the way under the big roller, and end up
     past his structure!
 
+[X] Delete unused frozen_string.[ch], bin/frozen_string_test
+
 [ ] Add purple savepoints to demo, and make it clear to player that they
     can use them to jump around
         data/maps/demo/start3.fus: this is the "hub"
@@ -1707,8 +1709,6 @@ Jul 21, 2026:
         we should copy whatever we got from the history
     [ ] pasting text which contains newlines is currently broken, at least for
         test_app_command stuff... fix it!
-
-[ ] Delete unused frozen_string.[ch], bin/frozen_string_test
 
 [ ] Add a way to factor hitboxes off individual anims to something global.
     Hitbox sets?.. like, game->hitbox_sets is a list of filenames, and we

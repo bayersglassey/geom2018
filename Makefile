@@ -14,7 +14,7 @@ PROGS = \
  bin/audiotool bin/mapgraphtool
 
 TESTS = \
- bin/lexertest bin/frozenstringtest bin/geomtest bin/stringstoretest bin/varstest
+ bin/lexertest bin/geomtest bin/stringstoretest bin/varstest
 
 PROGS += $(TESTS)
 
@@ -67,10 +67,6 @@ bin/lexertest: src/main/lexertest.o $(OFILES)
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 bin/lexertool: src/main/lexertool.o $(OFILES)
-	mkdir -p bin
-	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
-
-bin/frozenstringtest: src/main/frozen_string_test.o src/frozen_string.o
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
