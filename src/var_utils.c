@@ -150,13 +150,7 @@ void vars_write_with_mask(vars_t *vars, FILE *file, int indent,
         _print_props(file, vars, var);
         fus_write_str(file, var->key);
         fputs(": ", file);
-        switch(var->value.type){
-            case VAL_TYPE_NULL: fputs("null", file); break;
-            case VAL_TYPE_BOOL: putc(var->value.u.b? 'T': 'F', file); break;
-            case VAL_TYPE_INT: fprintf(file, "%i", var->value.u.i); break;
-            case VAL_TYPE_STR: fus_write_str(file, var->value.u.s.s); break;
-            default: fputs("???", file); break;
-        }
+        val_fprintf(&var->value, file);
         fputc('\n', file);
     }
 }

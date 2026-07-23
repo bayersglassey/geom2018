@@ -43,7 +43,7 @@ static int dump_effect(stateset_t *stateset, state_effect_t *effect,
     int err;
     switch(effect->type){
         case STATE_EFFECT_TYPE_CALL: if(opts->output_procs){
-            state_effect_call_t *call = &effect->u.call;
+            state_proc_call_t *call = &effect->u.call;
             stateset_proc_t *proc = state_context_get_proc(context, call->name);
             if(!proc){
                 fprintf(stderr, "Couldn't find proc \"%s\"\n", call->name);

@@ -79,6 +79,17 @@ static int _parse_as_header(anim_as_header_t *header, fus_lexer_t *lexer){
 }
 
 
+void state_proc_call_cleanup(state_proc_call_t *call){
+    valexpr_vars_cleanup(&call->valexpr_vars);
+}
+
+void state_proc_call_init(state_proc_call_t *call, const char *name, bool if_exists){
+    call->name = name;
+    call->if_exists = if_exists;
+    valexpr_vars_init(&call->valexpr_vars);
+}
+
+
 static int _parse_collmap(state_context_t *context, fus_lexer_t *lexer,
     prismelrenderer_t *prend, vecspace_t *space,
     hexcollmap_t **own_collmap_ptr, hexcollmap_t **collmap_ptr
@@ -226,6 +237,52 @@ static int _parse_stateset_proc(state_context_t *context, fus_lexer_t *lexer,
 }
 
 
+static int _parse_call(state_proc_call_t *call, fus_lexer_t *lexer){
+    int err;
+    bool if_exists = false;
+    if(GOT("if_exists")){
+        NEXT
+        if_exists = true;
+    }
+    OPEN
+    const char *name;
+    GET_STR(name)
+    state_proc_call_init(call, name, if_exists);
+    int arg_i = 0;
+    while(!GOT(")") && !GOT("vars")){
+        if(arg_i >= ARGNAMES_LEN){
+            fprintf(stderr, "Can't have more than %i positional args in \"call\"\n", ARGNAMES_LEN);
+            return 2;
+        }
+        const char *name = ARGNAMES[arg_i];
+        valexpr_t *valexpr;
+        err = valexpr_vars_add(&call->valexpr_vars, name, &valexpr);
+        if(err)return err;
+        err = valexpr_parse(valexpr, lexer);
+        if(err)return err;
+        arg_i++;
+    }
+    if(GOT("vars")){
+        NEXT
+        OPEN
+        while(!GOT(")")){
+            const char *name;
+            GET_STR(name)
+            OPEN
+            valexpr_t *valexpr;
+            err = valexpr_vars_add(&call->valexpr_vars, name, &valexpr);
+            if(err)return err;
+            err = valexpr_parse(valexpr, lexer);
+            if(err)return err;
+            CLOSE
+        }
+        NEXT
+    }
+    CLOSE
+    return 0;
+}
+
+
 /******************
 * COLLMSG_HANDLER *
 ******************/
@@ -365,7 +422,7 @@ int stateset_load(stateset_t *stateset, const char *filename,
     err = stateset_init(stateset, filename);
     if(err)return err;
 
-    err = stateset_parse(stateset, &lexer, prend, space);
+    err = stateset_parse(stateset, &lexer, prend, space, false);
     if(err)return err;
 
     fus_lexer_cleanup(&lexer);
@@ -573,6 +630,11 @@ static int _parse_cond(state_context_t *context, fus_lexer_t *lexer,
             if(err)return err;
         }
         NEXT
+    }else if(GOT("call")){
+        NEXT
+        cond->type = STATE_COND_TYPE_CALL;
+        err = _parse_call(&cond->u.call, lexer);
+        if(err)return err;
     }else{
         return UNEXPECTED(NULL);
     }
@@ -711,46 +773,14 @@ int state_effect_parse(state_effect_t *effect,
     }else if(GOT("call")){
         NEXT
         effect->type = STATE_EFFECT_TYPE_CALL;
-        effect->u.call.if_exists = false;
-        if(GOT("if_exists")){
-            NEXT
-            effect->u.call.if_exists = true;
-        }
+        err = _parse_call(&effect->u.call, lexer);
+        if(err)return err;
+    }else if(GOT("return")){
+        effect->type = STATE_EFFECT_TYPE_RETURN;
+        NEXT
         OPEN
-        const char *name;
-        GET_STR(name)
-        effect->u.call.name = name;
-        valexpr_vars_init(&effect->u.call.valexpr_vars);
-        int arg_i = 0;
-        while(!GOT(")") && !GOT("vars")){
-            if(arg_i >= ARGNAMES_LEN){
-                fprintf(stderr, "Can't have more than %i positional args in \"call\"\n", ARGNAMES_LEN);
-                return 2;
-            }
-            const char *name = ARGNAMES[arg_i];
-            valexpr_t *valexpr;
-            err = valexpr_vars_add(&effect->u.call.valexpr_vars, name, &valexpr);
-            if(err)return err;
-            err = valexpr_parse(valexpr, lexer);
-            if(err)return err;
-            arg_i++;
-        }
-        if(GOT("vars")){
-            NEXT
-            OPEN
-            while(!GOT(")")){
-                const char *name;
-                GET_STR(name)
-                OPEN
-                valexpr_t *valexpr;
-                err = valexpr_vars_add(&effect->u.call.valexpr_vars, name, &valexpr);
-                if(err)return err;
-                err = valexpr_parse(valexpr, lexer);
-                if(err)return err;
-                CLOSE
-            }
-            NEXT
-        }
+        err = valexpr_parse(&effect->u.expr, lexer);
+        if(err)return err;
         CLOSE
     }else if(GOT("delay")){
         NEXT
@@ -1017,6 +1047,18 @@ int state_effect_parse(state_effect_t *effect,
         OPEN
         err = valexpr_parse(&effect->u.assert.valexpr, lexer);
         if(err)return err;
+        CLOSE
+    }else if(GOT("fail")){
+        /* NOTE: get lexer info *before* we call NEXT */
+        fus_lexer_get_info(lexer,
+            &effect->u.fail.lexer_filename,
+            &effect->u.fail.lexer_row,
+            &effect->u.fail.lexer_col,
+            &effect->u.fail.lexer_pos);
+        NEXT
+        effect->type = STATE_EFFECT_TYPE_FAIL;
+        OPEN
+        GET_STR(effect->u.fail.message)
         CLOSE
     }else if(GOT("set_respawn")){
         NEXT
@@ -1286,7 +1328,7 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
 
     INIT
 
-    while(!DONE){
+    while(!DONE && !GOT(")")){
         if(GOT("debug_collision")){
             NEXT
             stateset->debug_collision = true;
@@ -1453,7 +1495,7 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
 }
 
 int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
-    prismelrenderer_t *prend, vecspace_t *space
+    prismelrenderer_t *prend, vecspace_t *space, bool not_done_okay
 ){
     INIT
 
@@ -1461,6 +1503,14 @@ int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
         stateset->root_context);
     if(err)return err;
 
+    if(!not_done_okay && !fus_lexer_done(lexer)){
+        return UNEXPECTED("end of file");
+    }
+
+    if(!stateset->states_len){
+        fprintf(stderr, "Stateset %s has no states!\n", stateset->filename);
+        return 2;
+    }
     stateset->default_state_name = stateset->states[0]->name;
 
     return 0;
@@ -1559,6 +1609,9 @@ void state_cond_cleanup(state_cond_t *cond){
             ARRAY_FREE_PTR(state_effect_t*, cond->u._do.effects,
                 state_effect_cleanup)
             break;
+        case STATE_COND_TYPE_CALL:
+            state_proc_call_cleanup(&cond->u.call);
+            break;
         default: break;
     }
 }
@@ -1606,7 +1659,10 @@ void state_effect_cleanup(state_effect_t *effect){
             valexpr_cleanup(&effect->u.relocate.state_name_expr);
             break;
         case STATE_EFFECT_TYPE_CALL:
-            valexpr_vars_cleanup(&effect->u.call.valexpr_vars);
+            state_proc_call_cleanup(&effect->u.call);
+            break;
+        case STATE_EFFECT_TYPE_RETURN:
+            valexpr_cleanup(&effect->u.expr);
             break;
         case STATE_EFFECT_TYPE_INC:
         case STATE_EFFECT_TYPE_DEC:

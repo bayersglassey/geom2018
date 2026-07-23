@@ -64,6 +64,16 @@ void anim_as_header_cleanup(anim_as_header_t *header);
 void anim_as_header_init(anim_as_header_t *header, int type);
 
 
+typedef struct state_proc_call {
+    bool if_exists;
+    const char *name;
+    valexpr_vars_t valexpr_vars;
+} state_proc_call_t;
+
+void state_proc_call_cleanup(state_proc_call_t *call);
+void state_proc_call_init(state_proc_call_t *call, const char *name, bool if_exists);
+
+
 enum anim_set_respawn {
     SET_RESPAWN_YOU
 };
@@ -234,6 +244,7 @@ enum state_cond_type {
     STATE_COND_TYPE_EXISTS,
     STATE_COND_TYPE_AS,
     STATE_COND_TYPE_DO,
+    STATE_COND_TYPE_CALL,
     STATE_COND_TYPES
 };
 
@@ -253,6 +264,7 @@ static const char *state_cond_type_name(int type){
         case STATE_COND_TYPE_EXISTS: return "exists";
         case STATE_COND_TYPE_AS: return "as";
         case STATE_COND_TYPE_DO: return "do";
+        case STATE_COND_TYPE_CALL: return "call";
         default: return "unknown";
     }
 }
@@ -281,6 +293,7 @@ typedef struct state_cond {
                 The idea being that collision will be done using that
                 hexgame_location_t instead of current body's. */
         } coll;
+        state_proc_call_t call;
         struct {
             bool yes;
             int kstate;
@@ -327,6 +340,7 @@ enum state_effect_type {
     STATE_EFFECT_TYPE_RELOCATE,
     STATE_EFFECT_TYPE_GOTO,
     STATE_EFFECT_TYPE_CALL,
+    STATE_EFFECT_TYPE_RETURN,
     STATE_EFFECT_TYPE_DELAY,
     STATE_EFFECT_TYPE_ADD_DELAY,
     STATE_EFFECT_TYPE_SPAWN,
@@ -348,6 +362,7 @@ enum state_effect_type {
     STATE_EFFECT_TYPE_DO,
     STATE_EFFECT_TYPE_SHOW_MINIMAP,
     STATE_EFFECT_TYPE_ASSERT,
+    STATE_EFFECT_TYPE_FAIL,
     STATE_EFFECT_TYPE_SET_RESPAWN,
     STATE_EFFECT_TYPES
 };
@@ -363,6 +378,7 @@ static const char *state_effect_type_name(int type){
         case STATE_EFFECT_TYPE_RELOCATE: return "relocate";
         case STATE_EFFECT_TYPE_GOTO: return "goto";
         case STATE_EFFECT_TYPE_CALL: return "call";
+        case STATE_EFFECT_TYPE_RETURN: return "return";
         case STATE_EFFECT_TYPE_DELAY: return "delay";
         case STATE_EFFECT_TYPE_ADD_DELAY: return "add_delay";
         case STATE_EFFECT_TYPE_SPAWN: return "spawn";
@@ -384,6 +400,7 @@ static const char *state_effect_type_name(int type){
         case STATE_EFFECT_TYPE_DO: return "do";
         case STATE_EFFECT_TYPE_SHOW_MINIMAP: return "show_minimap";
         case STATE_EFFECT_TYPE_ASSERT: return "assert";
+        case STATE_EFFECT_TYPE_FAIL: return "fail";
         case STATE_EFFECT_TYPE_SET_RESPAWN: return "set_respawn";
         default: return "unknown";
     }
@@ -395,12 +412,6 @@ typedef struct state_effect_goto {
     bool delay;
     int add_delay;
 } state_effect_goto_t;
-
-typedef struct state_effect_call {
-    bool if_exists;
-    const char *name;
-    valexpr_vars_t valexpr_vars;
-} state_effect_call_t;
 
 typedef struct state_effect_spawn {
     valexpr_t stateset_filename_expr;
@@ -428,7 +439,7 @@ typedef struct state_effect {
     union {
         const char *var_name;
         state_effect_goto_t gotto;
-        state_effect_call_t call;
+        state_proc_call_t call;
         int dead; /* enum body_dead */
         state_effect_spawn_t spawn;
         const char *play_filename;
@@ -487,6 +498,13 @@ typedef struct state_effect {
             valexpr_t valexpr;
         } assert;
         struct {
+            int lexer_pos;
+            int lexer_row;
+            int lexer_col;
+            const char *lexer_filename;
+            const char *message;
+        } fail;
+        struct {
             int type; /* enum anim_set_respawn */
             trf_t trf;
         } set_respawn;
@@ -504,7 +522,7 @@ void stateset_dump(stateset_t *stateset, FILE *file, int depth);
 int stateset_load(stateset_t *stateset, const char *filename,
     prismelrenderer_t *prend, vecspace_t *space);
 int stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
-    prismelrenderer_t *prend, vecspace_t *space);
+    prismelrenderer_t *prend, vecspace_t *space, bool not_done_okay);
 state_t *stateset_get_state(stateset_t *stateset, const char *name);
 
 void state_cleanup(state_t *state);

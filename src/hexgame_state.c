@@ -19,7 +19,6 @@
 
 void hexgame_state_controlflow_init(hexgame_state_controlflow_t *controlflow, bool can_continue){
     controlflow->can_continue = can_continue;
-    controlflow->can_break = true;
     controlflow->should_continue = false;
     controlflow->should_break = false;
 }
@@ -158,6 +157,81 @@ static int _context_apply_as(hexgame_state_context_t *context, anim_as_header_t 
             fprintf(stderr, "Unrecognized \"as\" type: %i\n", header->type);
             return 2;
     }
+    return 0;
+}
+
+
+static int _call_proc(state_proc_call_t *call,
+    hexgame_state_context_t *context,
+    state_effect_goto_t **gotto_ptr,
+    val_t *result_ptr /* may be NULL if a result is not desired */
+){
+    int err;
+    bool anim_debug = hexgame_state_context_debug(context);
+    body_t *body = context->body;
+
+    if(result_ptr)val_set_null(result_ptr);
+
+    state_context_t *state_context = body->state->context;
+    const char *name = call->name;
+    if(anim_debug)fprintf(stderr, "Call: \"%s\"\n", name);
+    stateset_proc_t *proc = state_context_get_proc(state_context, name);
+    if(!proc){
+        if(call->if_exists)return 0;
+        fprintf(stderr,
+            "Couldn't find proc \"%s\" for stateset \"%s\"\n",
+            name, state_context->stateset->filename);
+        return 2;
+    }
+
+    vars_t procvars;
+    vars_init(&procvars);
+    {
+        valexpr_context_t valexpr_context;
+        err = _context_set_vars(context, &valexpr_context);
+        if(err)return err;
+        valexpr_vars_t *valexpr_vars = &call->valexpr_vars;
+        for(int i = 0; i < valexpr_vars->entries_len; i++){
+            valexpr_vars_entry_t *entry = &valexpr_vars->entries[i];
+            var_t *var = vars_get_or_add(&procvars, entry->name);
+            if(!var)return 1;
+            err = valexpr_get_val(&entry->valexpr, &var->value, &valexpr_context);
+            if(err)return err;
+        }
+    }
+
+    hexgame_state_context_t proc_context = *context;
+    proc_context.procvars = &procvars;
+
+    /* NOTE: we set up a fresh controlflow for this call, so that
+    STATE_EFFECT_TYPE_BREAK/CONTINUE within the proc don't affect the
+    caller.
+    However, we pass in gotto_ptr!.. so STATE_EFFECT_TYPE_GOTO within
+    the proc can change the anim's state.
+    Although `goto immediate` will only affect the controlflow within
+    the proc. O_o
+    Our programming language's semantics are kind of a mess. */
+    hexgame_state_controlflow_t controlflow;
+    hexgame_state_controlflow_init(&controlflow, false);
+    for(int i = 0; i < proc->effects_len; i++){
+        state_effect_t *effect = proc->effects[i];
+        err = state_effect_apply(effect, &proc_context, gotto_ptr, &controlflow);
+        if(err){
+            if(err == 2){
+                fprintf(stderr, "...while calling proc: %s\n", name);
+            }
+            return err;
+        }
+        if(hexgame_state_controlflow_is_unrolling(&controlflow))break;
+    }
+    if(result_ptr){
+        var_t *result = vars_get(&procvars, "$return");
+        if(result){
+            err = val_copy(result_ptr, &result->value);
+            if(err)return err;
+        }
+    }
+    vars_cleanup(&procvars);
     return 0;
 }
 
@@ -469,6 +543,23 @@ int state_cond_match(state_cond_t *cond,
         }
         break;
     }
+    case STATE_COND_TYPE_CALL: {
+        CHECK_BODY
+        state_effect_goto_t *gotto = NULL;
+        val_t result;
+        err = _call_proc(&cond->u.call, context, &gotto, &result);
+        if(err){
+            if(err == 2)RULE_PERROR()
+            return err;
+        }
+        if(gotto != NULL){
+            fprintf(stderr, "Not allowed to use \"goto\" inside a \"call\" condition!\n");
+            return 2;
+        }
+        matched = val_get_bool(&result);
+        val_cleanup(&result);
+        break;
+    }
     default: {
         fprintf(stderr, "Unrecognized condition: %s\n",
             state_cond_type_name(cond->type));
@@ -739,60 +830,43 @@ int state_effect_apply(state_effect_t *effect,
     }
     case STATE_EFFECT_TYPE_CALL: {
         CHECK_BODY
-        state_context_t *state_context = body->state->context;
-        const char *name = effect->u.call.name;
-        if(anim_debug)fprintf(stderr, "Call: \"%s\"\n", name);
-        stateset_proc_t *proc = state_context_get_proc(state_context, name);
-        if(!proc){
-            if(effect->u.call.if_exists)break;
+        err = _call_proc(&effect->u.call, context, gotto_ptr, NULL);
+        if(err){
+            if(err == 2)RULE_PERROR()
+            return err;
+        }
+        break;
+    }
+    case STATE_EFFECT_TYPE_RETURN: {
+        valexpr_context_t valexpr_context;
+        err = _context_set_vars(context, &valexpr_context);
+        if(err)return err;
+        if(!valexpr_context.procvars){
             RULE_PERROR()
-            fprintf(stderr,
-                "Couldn't find proc \"%s\" for stateset \"%s\"\n",
-                name, state_context->stateset->filename);
+            fprintf(stderr, "Can't use \"return\" outside of a proc\n");
             return 2;
         }
 
-        vars_t procvars;
-        vars_init(&procvars);
-        {
-            valexpr_context_t valexpr_context;
-            err = _context_set_vars(context, &valexpr_context);
-            if(err)return err;
-            valexpr_vars_t *valexpr_vars = &effect->u.call.valexpr_vars;
-            for(int i = 0; i < valexpr_vars->entries_len; i++){
-                valexpr_vars_entry_t *entry = &valexpr_vars->entries[i];
-                var_t *var = vars_get_or_add(&procvars, entry->name);
-                if(!var)return 1;
-                err = valexpr_get_val(&entry->valexpr, &var->value, &valexpr_context);
-                if(err)return err;
-            }
+        var_t *var = vars_get_or_add(valexpr_context.procvars, "$return");
+        if(!var)return 1;
+
+        valexpr_result_t val_result = {0};
+        err = valexpr_get(&effect->u.expr, &valexpr_context,
+            &val_result);
+        if(err)return err;
+        val_t *val_val = val_result.val;
+        if(val_val == NULL){
+            RULE_PERROR()
+            fprintf(stderr, "Couldn't get value for expression: ");
+            valexpr_fprintf(&effect->u.expr, stderr);
+            fputc('\n', stderr);
+            return 2;
         }
 
-        hexgame_state_context_t proc_context = *context;
-        proc_context.procvars = &procvars;
+        err = val_copy(&var->value, val_val);
+        if(err)return err;
 
-        /* NOTE: we set up a fresh controlflow for this call, so that
-        STATE_EFFECT_TYPE_BREAK/CONTINUE within the proc don't affect the
-        caller.
-        However, we pass in gotto_ptr!.. so STATE_EFFECT_TYPE_GOTO within
-        the proc can change the anim's state.
-        Although `goto immediate` will only affect the controlflow within
-        the proc. O_o
-        Our programming language's semantics are kind of a mess. */
-        hexgame_state_controlflow_t controlflow;
-        hexgame_state_controlflow_init(&controlflow, false);
-        for(int i = 0; i < proc->effects_len; i++){
-            state_effect_t *effect = proc->effects[i];
-            err = state_effect_apply(effect, &proc_context, gotto_ptr, &controlflow);
-            if(err){
-                if(err == 2){
-                    fprintf(stderr, "...while calling proc: %s\n", name);
-                }
-                return err;
-            }
-            if(hexgame_state_controlflow_is_unrolling(&controlflow))break;
-        }
-        vars_cleanup(&procvars);
+        controlflow->should_break = true;
         break;
     }
     case STATE_EFFECT_TYPE_DELAY:
@@ -920,6 +994,15 @@ int state_effect_apply(state_effect_t *effect,
         }
         break;
     }
+    case STATE_EFFECT_TYPE_FAIL: {
+        fprintf(stderr, "*** FAILURE [%s: row=%i col=%i pos=%i]: %s\n",
+            effect->u.fail.lexer_filename,
+            effect->u.fail.lexer_row,
+            effect->u.fail.lexer_col,
+            effect->u.fail.lexer_pos,
+            effect->u.fail.message);
+        return 2;
+    }
     case STATE_EFFECT_TYPE_SET_RESPAWN: {
         CHECK_BODY
         player_t *player = body_get_player(body);
@@ -961,7 +1044,7 @@ int state_effect_apply(state_effect_t *effect,
         break;
     }
     case STATE_EFFECT_TYPE_CONTINUE: {
-        if(!controlflow || !controlflow->can_continue){
+        if(!controlflow->can_continue){
             RULE_PERROR()
             fprintf(stderr, "Can't use \"continue\" here\n");
             return 2;
@@ -970,11 +1053,6 @@ int state_effect_apply(state_effect_t *effect,
         break;
     }
     case STATE_EFFECT_TYPE_BREAK: {
-        if(!controlflow || !controlflow->can_break){
-            RULE_PERROR()
-            fprintf(stderr, "Can't use \"break\" here\n");
-            return 2;
-        }
         controlflow->should_break = true;
         break;
     }
@@ -1020,7 +1098,7 @@ int state_effect_apply(state_effect_t *effect,
         if(!vars){
             RULE_PERROR()
             fprintf(stderr, "Couldn't get var for expression: ");
-            valexpr_fprintf(&effect->u.set.val_expr, stderr);
+            valexpr_fprintf(&effect->u.set.var_expr, stderr);
             fputc('\n', stderr);
             fprintf(stderr, "...maybe you tried to assign to a literal?..\n");
             return 2;

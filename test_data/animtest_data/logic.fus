@@ -26,3 +26,17 @@ cases:
             do:
                 inc mapvar("x")
             assert: == mapvar("x") 5
+
+    "return":
+        stateset:
+            state "initial":
+            proc toplevel "equality":
+                return: == procvar("$1") procvar("$2")
+                fail: "we should never get here"
+        after:
+
+            if: not: call: "equality" 2 2
+            then: fail: "not equal"
+
+            if: call: "equality" 2 3
+            then: fail: "equal"

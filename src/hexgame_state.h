@@ -11,7 +11,6 @@ both anim.h and hexgame.h */
 
 
 typedef struct hexgame_state_controlflow {
-    bool can_break; /* Allow STATE_EFFECT_TYPE_BREAK */
     bool can_continue; /* Allow STATE_EFFECT_TYPE_CONTINUE */
     bool should_break; /* E.g. via STATE_EFFECT_TYPE_BREAK, or "goto immediate", etc */
     bool should_continue; /* E.g. via STATE_EFFECT_TYPE_CONTINUE */

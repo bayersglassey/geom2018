@@ -20,14 +20,14 @@
 
 typedef struct test_case {
     bool skip;
+    const char *name;
+    const char *state_name;
     stateset_t *stateset;
     hexcollmap_t *collmap;
     int steps;
     ARRAY_DECL(state_effect_t*, before_effects)
     ARRAY_DECL(state_effect_t*, after_effects)
     /* Weakrefs: */
-    const char *name;
-    const char *state_name;
     state_context_t *context;
 } test_case_t;
 typedef struct test_suite {
@@ -54,6 +54,10 @@ static void test_case_init(test_case_t *test_case, const char *name){
     test_case->skip = false;
     test_case->name = name;
     test_case->state_name = NULL;
+    test_case->stateset = NULL;
+    test_case->collmap = NULL;
+    test_case->steps = 0;
+    test_case->context = NULL;
     ARRAY_INIT(test_case->before_effects)
     ARRAY_INIT(test_case->after_effects)
 }
@@ -220,20 +224,29 @@ static int test_suite_load(test_suite_t *suite, const char *filename,
         if(GOT("stateset")){
             NEXT
             OPEN
-            const char *stateset_filename;
-            GET_STR(stateset_filename)
 
             stateset_t *stateset = calloc(1, sizeof(*stateset));
             if(stateset == NULL)return 1;
-            err = stateset_load(stateset, stateset_filename,
-                prend, space);
-            if(err)return err;
+            if(GOT_STR){
+                const char *stateset_filename;
+                GET_STR(stateset_filename)
+
+                err = stateset_load(stateset, stateset_filename,
+                    prend, space);
+                if(err)return err;
+            }else{
+                err = stateset_init(stateset, "<animtest>");
+                if(err)return err;
+                err = stateset_parse(stateset, lexer, prend, space, true);
+                if(err)return err;
+            }
 
             ARRAY_PUSH_NEW(state_context_t*, stateset->contexts, context)
             state_context_init(context, stateset, stateset->root_context);
 
             test_case->stateset = stateset;
             test_case->context = context;
+
             CLOSE
         }
         if(GOT("state")){

@@ -31,7 +31,7 @@ cases:
                 ;; . - + - .
                 ;;   */*\*
                 ;;  (.)  .
-            then: assert: F
+            then: fail: "collision!"
 
             # Standing halfway between hexagons A and B: YES collision!
             set mapvar("location"): arr: 1 0 0 F
@@ -41,7 +41,7 @@ cases:
                 ;; . - + - .
                 ;;   */*\*
                 ;;  (.)  .
-            then: assert: F
+            then: fail: "no collision!"
 
             # Standing in hexagon B: NO collision!
             set mapvar("location"): arr: 2 0 0 F
@@ -51,7 +51,7 @@ cases:
                 ;; . - + - .
                 ;;   */*\*
                 ;;  (.)  .
-            then: assert: F
+            then: fail: "collision!"
 
             # Standing in hexagon A, then rotated once... YES collision!
             set mapvar("location"): arr: 0 0 1 F
@@ -61,7 +61,7 @@ cases:
                 ;; . - + - .
                 ;;   */*\*
                 ;;  (.)  .
-            then: assert: F
+            then: fail: "no collision!"
 
             # Standing in hexagon A, then rotated once, but then moved into hexagon C... NO collision!
             set mapvar("location"): arr: 2 2 1 F
@@ -71,7 +71,7 @@ cases:
                 ;; . - + - .
                 ;;   */*\*
                 ;;  (.)  .
-            then: assert: F
+            then: fail: "collision!"
 
     ##################################################################
     # Tests of pressing "f" while standing
