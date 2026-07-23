@@ -167,20 +167,31 @@ static int _call_proc(state_proc_call_t *call,
     val_t *result_ptr /* may be NULL if a result is not desired */
 ){
     int err;
+    const char *name = call->name;
     bool anim_debug = hexgame_state_context_debug(context);
+    actor_t *actor = context->actor;
     body_t *body = context->body;
-
     if(result_ptr)val_set_null(result_ptr);
 
-    state_context_t *state_context = body->state->context;
-    const char *name = call->name;
     if(anim_debug)fprintf(stderr, "Call: \"%s\"\n", name);
-    stateset_proc_t *proc = state_context_get_proc(state_context, name);
+
+    stateset_proc_t *proc = NULL;
+    if(actor){
+        proc = state_context_get_proc(actor->state->context, name);
+    }
+    if(!proc){
+        proc = state_context_get_proc(body->state->context, name);
+    }
     if(!proc){
         if(call->if_exists)return 0;
+        if(actor){
+            fprintf(stderr,
+                "Couldn't find proc \"%s\" for actor's stateset: \"%s\"\n",
+                name, actor->stateset->filename);
+        }
         fprintf(stderr,
-            "Couldn't find proc \"%s\" for stateset \"%s\"\n",
-            name, state_context->stateset->filename);
+            "Couldn't find proc \"%s\" for body's stateset: \"%s\"\n",
+            name, body->stateset->filename);
         return 2;
     }
 
@@ -356,13 +367,21 @@ int state_cond_match(state_cond_t *cond,
             err = valexpr_get_val(at_expr, &val, &valexpr_context);
             if(err)return err;
 
-            hexgame_location_t loc;
-            err = hexgame_location_from_val(&loc, &val);
-            if(err)return err;
+            if(val.type == VAL_TYPE_NULL){
+                /* Can be handy to do e.g. `coll ... at myvar("whatever")`,
+                and allow myvar("whatever") to be null, meaning we should
+                use body's location after all. */
+                using_at = false;
+            }else{
+                hexgame_location_t loc;
+                err = hexgame_location_from_val(&loc, &val);
+                if(err)return err;
 
-            hexgame_location_to_trf(&loc, &hitbox_trf);
+                hexgame_location_to_trf(&loc, &hitbox_trf);
+            }
             val_cleanup(&val);
-        }else{
+        }
+        if(!using_at){
             hexgame_location_to_trf(&body->loc, &hitbox_trf);
         }
         hexcollmap_t *hitbox = cond->u.coll.collmap;
