@@ -49,7 +49,7 @@ all: $(PROGS)
 clean:
 	rm -f src/*.o src/main/*.o $(PROGS)
 
-check: $(TESTS)
+check: $(TESTS) bin/animtest bin/lexertool
 	./runtests.sh $(TESTS) tests/*.sh
 
 lib/libgeom2018.so:
@@ -82,7 +82,7 @@ bin/stringstoretest: src/main/stringstoretest.o src/stringstore.o src/str_utils.
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
-bin/varstest: src/main/varstest.o src/vars.o src/valexpr.o src/lexer.o src/write.o src/util.o src/str_utils.o src/file_utils.o src/var_utils.o
+bin/varstest: src/main/varstest.o src/vars.o src/valexpr.o src/lexer.o src/write.o src/util.o src/stringstore.o src/str_utils.o src/file_utils.o src/var_utils.o
 	mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 

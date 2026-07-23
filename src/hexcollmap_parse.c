@@ -383,13 +383,13 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
 }
 
 static int _hexcollmap_parse_lines_origin(
-    char **lines, int lines_len, int *ox_ptr, int *oy_ptr
+    const char **lines, int lines_len, int *ox_ptr, int *oy_ptr
 ){
     int err;
     int ox = -1;
     int oy = -1;
     for(int y = 0; y < lines_len; y++){
-        char *line = lines[y];
+        const char *line = lines[y];
         int line_len = strlen(line);
         for(int x = 0; x < line_len; x++){
             char c = line[x];
@@ -430,7 +430,7 @@ static int _hexcollmap_parse_lines_origin(
 }
 
 static int _hexcollmap_parse_lines_hexbox(
-    char **lines, int lines_len, int ox, int oy,
+    const char **lines, int lines_len, int ox, int oy,
     hexbox_t *hexbox
 ){
     /* Sets the values of hexbox */
@@ -438,7 +438,7 @@ static int _hexcollmap_parse_lines_hexbox(
     int err;
     hexbox_zero(hexbox);
     for(int y = 0; y < lines_len; y++){
-        char *line = lines[y];
+        const char *line = lines[y];
         int line_len = strlen(line);
         for(int x = 0; x < line_len; x++){
             char c = line[x];
@@ -464,7 +464,7 @@ static int _hexcollmap_parse_lines_hexbox(
 }
 
 static int _hexcollmap_parse_lines_tiles(hexcollmap_t *collmap,
-    char **lines, int lines_len, hexcollmap_part_t **parts, int parts_len,
+    const char **lines, int lines_len, hexcollmap_part_t **parts, int parts_len,
     char default_vert_c, char default_edge_c, char default_face_c,
     int ox, int oy, bool parsing_part_references,
     stringstore_t *name_store, stringstore_t *filename_store
@@ -482,10 +482,10 @@ static int _hexcollmap_parse_lines_tiles(hexcollmap_t *collmap,
     hexcollmap_tile_t *tiles = collmap->tiles;
 
     for(int y = 0; y < lines_len; y++){
-        char *line = lines[y];
+        const char *line = lines[y];
         int line_len = strlen(line);
 
-        char *tilebucket = NULL;
+        const char *tilebucket = NULL;
         bool tilebucket_active = false;
             /* A "tile bucket" is a group of characters at the end
             of the line, surrounded by square brackets, e.g. [1aq].
@@ -697,7 +697,7 @@ static int _hexcollmap_parse_lines_tiles(hexcollmap_t *collmap,
 }
 
 static int hexcollmap_parse_lines(hexcollmap_t *collmap,
-    char **lines, int lines_len, hexcollmap_part_t **parts, int parts_len,
+    const char **lines, int lines_len, hexcollmap_part_t **parts, int parts_len,
     char default_vert_c, char default_edge_c, char default_face_c,
     stringstore_t *name_store, stringstore_t *filename_store
 ){
@@ -778,7 +778,7 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
         if(GOT("empty")){
             NEXT
         }else{
-            GET_STR_CACHED(filename, filename_store)
+            GET_STR(filename)
             err = _parse_trf(lexer, collmap->space, &trf, &draw_z);
             if(err)return err;
         }
@@ -788,7 +788,7 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
             if(GOT("empty")){
                 NEXT
             }else{
-                GET_STR_CACHED(palmapper_name, name_store)
+                GET_STR(palmapper_name)
             }
             if(GOT_INT){
                 GET_INT(frame_offset)
@@ -848,7 +848,7 @@ static int _hexcollmap_parse_with_parts(hexcollmap_t *collmap,
     /* set up dynamic array of lines */
     int collmap_lines_len = 0;
     int collmap_lines_size = 8;
-    char **collmap_lines = calloc(collmap_lines_size,
+    const char **collmap_lines = calloc(collmap_lines_size,
         sizeof(*collmap_lines));
     if(collmap_lines == NULL)return 1;
 
@@ -857,7 +857,7 @@ static int _hexcollmap_parse_with_parts(hexcollmap_t *collmap,
         /* resize array of lines, if necessary */
         if(collmap_lines_len >= collmap_lines_size){
             int new_lines_size = collmap_lines_size * 2;
-            char **new_lines = realloc(collmap_lines,
+            const char **new_lines = realloc(collmap_lines,
                 sizeof(*collmap_lines) * new_lines_size);
             if(new_lines == NULL)return 1;
             for(int i = collmap_lines_size;
@@ -882,12 +882,7 @@ static int _hexcollmap_parse_with_parts(hexcollmap_t *collmap,
         fprintf(stderr, "Couldn't parse hexcollmap lines\n");
         return err;}
 
-    /* free lines and dynamic array thereof */
-    for(int i = 0; i < collmap_lines_len; i++){
-        free(collmap_lines[i]);
-        collmap_lines[i] = NULL;}
     free(collmap_lines);
-
     return 0;
 }
 
@@ -969,7 +964,7 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
             /* We use _fus_lexer_get_str to avoid calling fus_lexer_next until after
             the call to fus_lexer_init_with_vars is done, to make sure we don't modify
             lexer->vars first */
-            char *filename;
+            const char *filename;
             err = _fus_lexer_get_str(lexer, &filename);
             if(err)return err;
 
@@ -1003,7 +998,6 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
             if(err)return err;
 
             fus_lexer_cleanup(&sublexer);
-            free(filename);
             free(text);
         }else{
             GET("collmap")

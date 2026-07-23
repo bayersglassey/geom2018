@@ -25,7 +25,7 @@ static int parse_palmappers(prismelrenderer_t *prend, fus_lexer_t *lexer){
     while(1){
         const char *name;
         if(GOT(")"))break;
-        GET_STR_CACHED(name, &prend->name_store)
+        GET_STR(name)
 
         palettemapper_t *palmapper = prismelrenderer_get_palmapper(prend, name);
         if(!prend->loaded && palmapper != NULL){
@@ -49,7 +49,7 @@ int fus_lexer_get_palmapper(fus_lexer_t *lexer,
 
     if(GOT_STR){
         const char *name;
-        GET_STR_CACHED(name, &prend->name_store)
+        GET_STR(name)
         palmapper = prismelrenderer_get_palmapper(prend, name);
         if(palmapper == NULL){
             fprintf(stderr, "Couldn't find palette mapper: %s\n", name);
@@ -285,7 +285,7 @@ static int parse_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer){
     while(1){
         const char *name;
         if(GOT(")"))break;
-        GET_STR_CACHED(name, &prend->name_store)
+        GET_STR(name)
 
         prismel_t *prismel = prismelrenderer_get_prismel(prend, name);
         if(!prend->loaded && prismel != NULL){
@@ -338,62 +338,61 @@ static int parse_shape_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
     while(1){
         if(GOT(")"))break;
 
+        OPEN
+
         const char *name;
+        GET_STR(name)
+        rendergraph_t *found = prismelrenderer_get_rendergraph(
+            prend, name);
+        if(found == NULL){
+            /* WHY NOT?!?!?! */
+            fus_lexer_err_info(lexer);
+            fprintf(stderr, "Couldn't find shape: %s\n", name);
+            return 2;}
+
+        trf_t trf = {0};
+        GET_TRF(prend->space, trf)
+
+        /* palmapper */
         const char *palmapper_name = NULL;
         palettemapper_t *palmapper = NULL;
-        trf_t trf = {0};
-        int frame_start = 0;
-        int frame_len = -1;
-        int frame_i = 0;
-        bool frame_i_additive = true;
-        bool frame_i_reversed = false;
-
-        OPEN
-        {
-            GET_STR_CACHED(name, &prend->name_store)
-            GET_TRF(prend->space, trf)
-
-            /* palmapper */
-            if(GOT_STR){
-                GET_STR_CACHED(palmapper_name, &prend->name_store)
-            }
-
-            /* animation */
-            if(GOT_INT){
-                frame_i_additive = false;
-                GET_INT(frame_i)
-                if(GOT("+")){
-                    NEXT
-                    frame_i_additive = true;
-                }
-                if(GOT("r")){
-                    NEXT
-                    frame_i_reversed = true;
-                }
-                if(GOT("(")){
-                    NEXT
-                    GET_INT(frame_start)
-                    GET_INT(frame_len)
-                    CLOSE
-                }
-            }
-        }
-        CLOSE
-
-        if(palmapper_name != NULL){
+        if(GOT_STR){
+            GET_STR(palmapper_name)
             palmapper = prismelrenderer_get_palmapper(
                 prend, palmapper_name);
             if(palmapper == NULL){
+                fus_lexer_err_info(lexer);
                 fprintf(stderr, "Couldn't find palette mapper: %s\n",
                     palmapper_name);
                 return 2;}
         }
 
-        rendergraph_t *found = prismelrenderer_get_rendergraph(
-            prend, name);
-        if(found == NULL){
-            fprintf(stderr, "Couldn't find shape: %s\n", name);
-            return 2;}
+        /* animation */
+        int frame_start = 0;
+        int frame_len = -1;
+        int frame_i = 0;
+        bool frame_i_additive = true;
+        bool frame_i_reversed = false;
+        if(GOT_INT){
+            frame_i_additive = false;
+            GET_INT(frame_i)
+            if(GOT("+")){
+                NEXT
+                frame_i_additive = true;
+            }
+            if(GOT("r")){
+                NEXT
+                frame_i_reversed = true;
+            }
+            if(GOT("(")){
+                NEXT
+                GET_INT(frame_start)
+                GET_INT(frame_len)
+                CLOSE
+            }
+        }
+
+        CLOSE
 
         rendergraph_child_t *child;
         err = rendergraph_push_child(rgraph,
@@ -439,7 +438,7 @@ static int parse_shape_prismels(prismelrenderer_t *prend, fus_lexer_t *lexer,
 
         OPEN
         {
-            GET_STR_CACHED(name, &prend->name_store)
+            GET_STR(name)
             GET_VEC(prend->space, v)
             GET_INT(rot)
             GET_BOOL(flip)
@@ -500,7 +499,7 @@ static int parse_shape_labels(prismelrenderer_t *prend, fus_lexer_t *lexer,
 
         OPEN
         {
-            GET_STR_CACHED(name, &prend->name_store)
+            GET_STR(name)
             GET_VEC(prend->space, v)
             GET_INT(rot)
             GET_BOOL(flip)
@@ -577,15 +576,15 @@ static int parse_shape_hexpicture(prismelrenderer_t *prend, fus_lexer_t *lexer,
         }
     }
 
-    ARRAY_DECL(char *, lines)
+    ARRAY_DECL(const char *, lines)
     ARRAY_INIT(lines)
 
     while(1){
         if(GOT(")"))break;
 
-        char *line;
+        const char *line;
         GET_STR(line)
-        ARRAY_PUSH(char *, lines, line)
+        ARRAY_PUSH(const char *, lines, line)
     }
     NEXT
 
@@ -593,9 +592,7 @@ static int parse_shape_hexpicture(prismelrenderer_t *prend, fus_lexer_t *lexer,
     hexpicture_return_face_t *faces;
     size_t faces_len;
     err = hexpicture_parse(
-        &faces, &faces_len,
-        (const char **)lines, lines_len,
-        verbose);
+        &faces, &faces_len, lines, lines_len, verbose);
     if(err)return err;
 
     for(int i = 0; i < faces_len; i++){
@@ -616,7 +613,7 @@ static int parse_shape_hexpicture(prismelrenderer_t *prend, fus_lexer_t *lexer,
     }
 
     free(faces);
-    ARRAY_FREE_PTR(char *, lines, (void))
+    ARRAY_FREE(const char *, lines, (void))
     return 0;
 }
 
@@ -632,7 +629,7 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
 
     if(GOT_STR){
         const char *name;
-        GET_STR_CACHED(name, &prend->name_store)
+        GET_STR(name)
         rgraph = prismelrenderer_get_rendergraph(prend, name);
         if(rgraph == NULL){
             fprintf(stderr, "Couldn't find shape: %s\n", name);
@@ -697,7 +694,7 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
         animation_type = *animation_type_ptr;
         if(GOT_STR){
             const char *name;
-            GET_STR_CACHED(name, &prend->name_store)
+            GET_STR(name)
             rendergraph_t *rgraph = prismelrenderer_get_rgraph(prend, name);
             if(!rgraph)return UNEXPECTED("shape name");
             n_frames = rgraph->n_frames;
@@ -753,7 +750,7 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
             OPEN
 
             const char *geomfont_name;
-            GET_STR_CACHED(geomfont_name, &prend->name_store)
+            GET_STR(geomfont_name)
 
             geomfont_t *geomfont = prismelrenderer_get_geomfont(prend, geomfont_name);
             if(geomfont == NULL){
@@ -762,7 +759,7 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
                 return 2;
             }
 
-            char *text;
+            const char *text;
             GET_STR(text)
 
             int cx = 0, cy = 0;
@@ -776,7 +773,6 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
             err = geomfont_rgraph_printf(geomfont, rgraph, cx, cy,
                 NULL, "%s", text);
             if(err)return err;
-            free(text);
 
             CLOSE
             goto ok;
@@ -800,7 +796,7 @@ static int parse_shapes(prismelrenderer_t *prend, fus_lexer_t *lexer,
     while(1){
         const char *name;
         if(GOT(")"))break;
-        GET_STR_CACHED(name, &prend->name_store)
+        GET_STR(name)
 
         rendergraph_t *rgraph = prismelrenderer_get_rendergraph(prend, name);
         if(!prend->loaded && rgraph != NULL){
@@ -831,7 +827,7 @@ int fus_lexer_get_mapper(fus_lexer_t *lexer,
 
     if(GOT_STR){
         const char *name;
-        GET_STR_CACHED(name, &prend->name_store)
+        GET_STR(name)
         mapper = prismelrenderer_get_mapper(prend, name);
         if(mapper == NULL){
             fprintf(stderr, "Couldn't find mapper: %s\n", name);
@@ -902,7 +898,7 @@ int fus_lexer_get_mapper(fus_lexer_t *lexer,
             if(GOT(")"))break;
             OPEN
             const char *prismel_name;
-            GET_STR_CACHED(prismel_name, &prend->name_store)
+            GET_STR(prismel_name)
             prismel_t *prismel = prismelrenderer_get_prismel(
                 prend, prismel_name);
             if(prismel == NULL){
@@ -913,7 +909,7 @@ int fus_lexer_get_mapper(fus_lexer_t *lexer,
             GET("->")
 
             const char *rgraph_name;
-            GET_STR_CACHED(rgraph_name, &prend->name_store)
+            GET_STR(rgraph_name)
             rendergraph_t *rgraph = prismelrenderer_get_rendergraph(
                 prend, rgraph_name);
             if(rgraph == NULL){
@@ -941,7 +937,7 @@ static int parse_mappers(prismelrenderer_t *prend, fus_lexer_t *lexer){
     while(1){
         if(GOT(")"))break;
         const char *name;
-        GET_STR_CACHED(name, &prend->name_store)
+        GET_STR(name)
 
         prismelmapper_t *mapper = prismelrenderer_get_mapper(prend, name);
         if(!prend->loaded && mapper != NULL){
@@ -962,7 +958,7 @@ static int parse_geomfonts(prismelrenderer_t *prend, fus_lexer_t *lexer){
         if(GOT(")"))break;
 
         const char *name;
-        GET_STR_CACHED(name, &prend->name_store)
+        GET_STR(name)
 
         geomfont_t *geomfont = prismelrenderer_get_geomfont(prend, name);
         if(!prend->loaded && geomfont != NULL){
@@ -1009,7 +1005,7 @@ static int parse_geomfonts(prismelrenderer_t *prend, fus_lexer_t *lexer){
         OPEN
         {
             const char *font_filename;
-            GET_STR_CACHED(font_filename, &prend->filename_store)
+            GET_STR(font_filename)
             err = prismelrenderer_get_or_create_font(
                 prend, font_filename, &font);
             if(err)return err;
@@ -1020,7 +1016,7 @@ static int parse_geomfonts(prismelrenderer_t *prend, fus_lexer_t *lexer){
         OPEN
         {
             const char *prismel_name;
-            GET_STR_CACHED(prismel_name, &prend->name_store)
+            GET_STR(prismel_name)
 
             vec_t vx, vy;
             GET_VEC(prend->space, vx)
@@ -1071,7 +1067,7 @@ int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer,
         }else if(GOT("label")){
             NEXT
             const char *name;
-            GET_STR_CACHED(name, &prend->name_store)
+            GET_STR(name)
             if(prismelrenderer_localdata_get_label(localdata, name, false)){
                 fus_lexer_err_info(lexer);
                 fprintf(stderr, "Redefinition of label \"%s\"\n", name);
@@ -1085,7 +1081,7 @@ int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer,
                 NEXT
                 label->default_rgraph_name = NULL;
             }else{
-                GET_STR_CACHED(label->default_rgraph_name, &prend->name_store)
+                GET_STR(label->default_rgraph_name)
                 if(!GOT(")")){
                     GET_INT(label->default_frame_i)
                 }
@@ -1122,7 +1118,7 @@ int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer,
             /* We use _fus_lexer_get_str to avoid calling fus_lexer_next until after
             the call to prismelrenderer_load is done, to make sure we don't modify
             lexer->vars first */
-            char *filename;
+            const char *filename;
             err = _fus_lexer_get_str(lexer, &filename);
             if(err)return err;
 
@@ -1137,8 +1133,6 @@ int prismelrenderer_parse(prismelrenderer_t *prend, fus_lexer_t *lexer,
             above */
             err = fus_lexer_next(lexer);
             if(err)return err;
-
-            free(filename);
         }else{
             return UNEXPECTED(
                 "palmappers or prismels or shapes or mappers or geomfonts "

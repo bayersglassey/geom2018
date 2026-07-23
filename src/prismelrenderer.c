@@ -261,7 +261,7 @@ static int _tileset_parse_part(
                 return 2;
             }
             const char *rgraph_name;
-            GET_STR_CACHED(rgraph_name, &prend->name_store)
+            GET_STR(rgraph_name)
             rendergraph_t *rgraph =
                 prismelrenderer_get_rendergraph(prend, rgraph_name);
             if(rgraph == NULL){
@@ -892,7 +892,7 @@ int prismelrenderer_push_prismel(prismelrenderer_t *prend, const char *name,
     ){ \
         for(int i = 0; i < prend->THINGS##_len; i++){ \
             TYPE##_t *entry = prend->THINGS[i]; \
-            if(strcmp(entry->NAME, NAME) == 0)return entry; \
+            if(entry->NAME == NAME || strcmp(entry->NAME, NAME) == 0)return entry; \
         } \
         return NULL; \
     }

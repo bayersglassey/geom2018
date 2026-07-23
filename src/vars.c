@@ -30,11 +30,10 @@ static int super_strcmp(const char *s1, const char *s2){
  *******/
 
 void var_cleanup(var_t *var){
-    free(var->key);
     val_cleanup(&var->value);
 }
 
-void var_init(var_t *var, char *key){
+void var_init(var_t *var, const char *key){
     var->key = key;
     var->props = 0; /* Empty bit array */
     val_init(&var->value);
@@ -403,7 +402,7 @@ void vars_dumpvar(vars_t *vars, const char *key){
     _vars_dumpvar(vars, var);
 }
 
-int vars_add(vars_t *vars, char *key, var_t **var_ptr){
+int vars_add(vars_t *vars, const char *key, var_t **var_ptr){
     ARRAY_PUSH_NEW(var_t*, vars->vars, var)
     var_init(var, key);
     *var_ptr = var;
@@ -421,12 +420,7 @@ var_t *vars_get(vars_t *vars, const char *key){
 var_t *vars_get_or_add(vars_t *vars, const char *key){
     var_t *var = vars_get(vars, key);
     if(!var){
-        char *new_key = str_dup(key);
-        if(new_key == NULL){
-            perror("str_dup");
-            return NULL;
-        }
-        int err = vars_add(vars, new_key, &var);
+        int err = vars_add(vars, key, &var);
         if(err)return NULL;
     }
     return var;

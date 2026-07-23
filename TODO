@@ -1458,18 +1458,6 @@ Jul 17, 2026:
     (NOTE: EFFECT_TYPE_AS should be ignored, because we can't statically
     know what the stateset of "you" is...)
 
-[ ] Add a way to factor hitboxes off individual anims to something global.
-    Hitbox sets?.. like, game->hitbox_sets is a list of filenames, and we
-    load each file at most once, and doing so populates game->hitboxes,
-    which is a dict of hitboxes.
-    And then, in an anim, when you refer to a hitbox by name, it first
-    checks stateset->hitboxes, then game->hitboxes.
-    Although stateset doesn't have a reference to game, so maybe we need
-    a hitbox_set_t, which stores the list of filenames loaded so far,
-    plus the dict of hitboxes; and then we pass a hitbox_set_t when parsing
-    statesets, and in practise we use game->hitbox_set for that (except in
-    e.g. animtool).
-
 [ ] Add ai blockers to the "spidertown_outskirts" area.
     And add a way to stop aispiders from entering doors.
     ...oh wait, I think we already added that?.. see anim/_door.fus:
@@ -1604,6 +1592,53 @@ Jul 21, 2026:
     currently bothering to check against verts and edges?.. if so, cut that
     out!.. only faces are needed
 
+[X] Wow, looks like valexprs own *all* their strings. O_o
+    So like, when valexpr_parse encounters a literal, it uses val_parse on it,
+    which for string tokens results in the val owning the string.
+    So... can we have like, valexpr_parse_with_stringstore, or something?..
+
+    Make sure we're passing constant owned strings (e.g. living in a stringstore) to these!
+    [ ] vars_get_or_add -- make sure we always pass a const string, e.g. living in a
+        stringstore, and then get rid of the call to str_dup in here!
+        [X] check where _get_nosave_var is called
+        [ ] check where vars_set_* are called
+            [ ] in src/lexer.c, _fus_lexer_get_name returns a freshly allocated
+                string!..
+                It's used by e.g. GET_NAME, GET_NAME_OR_STR, _fus_lexer_parse_macro.
+                Do we need to give lexer a stringstore?..
+        [X] check valexpr_vars_entry_t.name
+            ...looks fine, valexpr_vars doesn't own its own entry names.
+    [X] val_parse -- replace GET_STR with GET_STR_CACHED
+    [X] var_cleanup -- get rid of the free()
+    [X] replace val_set_str with val_set_const_str
+    [ ] review all calls to free()
+
+    ...OKAY HOLD ON, instead of adding an explicit stringstore param to everything
+    (e.g. to valexpr_parse), let's instead:
+    [-] combine name_store and filename_store, which currently live on the
+        prismelrenderer, for whatever reason... anyway, just have one more-or-less
+        global stringstore.
+    [-] pass a stringstore into fus_lexer_init (and fus_lexer_init_with_vars).
+    [X] ACTUALLY, let's just have a global stringstore.
+    [X] now get rid of all owned strings in the universe, just `const char *`
+        everywhere, baby!
+    [X] review all calls to free()
+    [-] if this turns out to be slow somehow, stringstore can simply implement
+        some kind of "hash" or whatever, so its searches are better than linear.
+        Although, adding a call to stringstore_dump inside stringstore_cleanup,
+        and running demo then exiting, looks like we currently have 4 stores:
+        the name/filename stores for prend and prend_minimap.
+        The prend_minimap stores are negilible.
+        The prend filename store is negligible, like 100 entries.
+        The prend name store is the meat: like 1000 entries.
+        Even then, 1000 entries isn't that bad, since we're only ever doing it
+        while parsing.
+        TL;DR: I THINK WE DON'T CARE ENOUGH TO AIM FOR BETTER-THAN-LINEAR SEARCH.
+
+[X] From trees/start7.fus or something, you can jump underneath all the
+    little water bubbles, all the way under the big roller, and end up
+    past his structure!
+
 [ ] Add purple savepoints to demo, and make it clear to player that they
     can use them to jump around
         data/maps/demo/start3.fus: this is the "hub"
@@ -1622,11 +1657,6 @@ Jul 21, 2026:
         data/maps/test/worldmap.fus -> data/maps/dark_spidertown/worldmap.fus
 
     Also map1.fus, map3.fus, etc...
-
-[ ] Wow, looks like valexprs own *all* their strings. O_o
-    So like, when valexpr_parse encounters a literal, it uses val_parse on it,
-    which for string tokens results in the val owning the string.
-    So... can we have like, valexpr_parse_with_stringstore, or something?..
 
 [ ] MAYBE THE END OF THE GAME IS JUST GETTING THROUGH A SPACE WHICH REQUIRES
     ALL SPIDER ABILITIES TO GET THROUGH
@@ -1654,3 +1684,40 @@ Jul 21, 2026:
 [ ] Look into this comment in data/maps/demo/worldmap.fus:
 
         empty # no palmapper... this is needed so we can specify target... TODO: fix this madness
+
+[ ] Add aiflier, use it to replace the recording in spidertown outskirts.
+    The aiflier should try to fly more or less parallel to some solid map nearby.
+
+[ ] Spikeyspider + rollerspider: while rolling, show your spikes, have a
+    hitbox, and wiggle back & forth when crushed!
+
+[ ] Touma found a bug!.. one of the doors around "dark spidertown" resulted
+    in:
+
+        Loading submap: data/maps/test/map3x.fus
+        Duplicate location: "test_exit"
+        Cleaning up...
+        double free or corruption (!prev)
+        Aborted
+
+[ ] console.c improvements:
+    [ ] support left/right arrow keys?.. and a flashing cursor?..
+    [ ] support history via up/down arrow keys?.. maybe save to a file?..
+        and copying should work with it, like if we do up-up-up and then copy,
+        we should copy whatever we got from the history
+    [ ] pasting text which contains newlines is currently broken, at least for
+        test_app_command stuff... fix it!
+
+[ ] Delete unused frozen_string.[ch], bin/frozen_string_test
+
+[ ] Add a way to factor hitboxes off individual anims to something global.
+    Hitbox sets?.. like, game->hitbox_sets is a list of filenames, and we
+    load each file at most once, and doing so populates game->hitboxes,
+    which is a dict of hitboxes.
+    And then, in an anim, when you refer to a hitbox by name, it first
+    checks stateset->hitboxes, then game->hitboxes.
+    Although stateset doesn't have a reference to game, so maybe we need
+    a hitbox_set_t, which stores the list of filenames loaded so far,
+    plus the dict of hitboxes; and then we pass a hitbox_set_t when parsing
+    statesets, and in practise we use game->hitbox_set for that (except in
+    e.g. animtool).

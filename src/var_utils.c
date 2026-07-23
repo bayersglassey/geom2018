@@ -19,9 +19,9 @@ int val_parse(val_t *val, fus_lexer_t *lexer){
         GET_INT(i)
         val_set_int(val, i);
     }else if(GOT_STR){
-        char *s;
+        const char *s;
         GET_STR(s)
-        val_set_str(val, s);
+        val_set_const_str(val, s);
     }else if(GOT("null")){
         NEXT
         val_set_null(val);
@@ -178,7 +178,7 @@ int vars_parse(vars_t *vars, fus_lexer_t *lexer){
 
         var_props_t props = 0;
         while(GOT_NAME){
-            char *prop_name;
+            const char *prop_name;
             GET_NAME(prop_name)
             int prop_i = vars_get_prop_i(vars, prop_name);
             if(prop_i < 0){
@@ -192,11 +192,9 @@ int vars_parse(vars_t *vars, fus_lexer_t *lexer){
             }
 
             props |= 1 << prop_i;
-
-            free(prop_name);
         }
 
-        char *name;
+        const char *name;
         GET_STR(name)
         OPEN
         var_t *var = vars_get_or_add(vars, name);
@@ -207,8 +205,6 @@ int vars_parse(vars_t *vars, fus_lexer_t *lexer){
         err = vars_callback(vars, var);
         if(err)return err;
         CLOSE
-
-        free(name);
     }
     return 0;
 }

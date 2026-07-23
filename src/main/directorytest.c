@@ -15,7 +15,7 @@
 
 
 typedef struct fusnode {
-    char *name;
+    const char *name;
     ARRAY_DECL(struct fusnode *, children)
 } fusnode_t;
 
@@ -55,7 +55,7 @@ static void fusnode_list(directory_entry_t *root, struct directory_list *list, i
 int parse_fusnode(fusnode_t *fusnode, fus_lexer_t *lexer){
     INIT
     while(!DONE && !GOT(")")){
-        char *name;
+        const char *name;
         GET_NAME_OR_STR(name)
 
         ARRAY_PUSH_NEW(fusnode_t *, fusnode->children, child)

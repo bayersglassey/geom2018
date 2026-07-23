@@ -2,9 +2,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "array.h"
 #include "stringstore.h"
+
+
+bool global_stringstore_initialized = false;
+stringstore_t global_stringstore = {0};
+
 
 void stringstore_entry_cleanup(stringstore_entry_t *entry){
     free(entry->data);
@@ -28,7 +34,7 @@ void stringstore_init(stringstore_t *store){
     ARRAY_INIT(store->entries)
 }
 
-int stringstore_add(stringstore_t *store, const char *data,
+static int _stringstore_add(stringstore_t *store, const char *data,
     stringstore_entry_t **entry_ptr
 ){
     ARRAY_PUSH_NEW(stringstore_entry_t*, store->entries, entry)
@@ -41,7 +47,7 @@ int stringstore_add(stringstore_t *store, const char *data,
     return 0;
 }
 
-int stringstore_add_donate(stringstore_t *store, char *data,
+static int _stringstore_add_donate(stringstore_t *store, char *data,
     stringstore_entry_t **entry_ptr
 ){
     /* Caller "donates" (passes ownership of) data to store */
@@ -62,6 +68,17 @@ const char *stringstore_find(stringstore_t *store, const char *data){
     return NULL;
 }
 
+const char *stringstore_findn(stringstore_t *store, const char *data, int data_len){
+    if(!data)return NULL;
+    for(int i = 0; i < store->entries_len; i++){
+        stringstore_entry_t *entry = store->entries[i];
+        if(strlen(entry->data) == data_len && !strncmp(entry->data, data, data_len)){
+            return entry->data;
+        }
+    }
+    return NULL;
+}
+
 const char *stringstore_get(stringstore_t *store, const char *data){
     if(!data)return NULL;
 
@@ -69,7 +86,25 @@ const char *stringstore_get(stringstore_t *store, const char *data){
     if(found_data)return found_data;
 
     stringstore_entry_t *entry;
-    int err = stringstore_add(store, data, &entry);
+    int err = _stringstore_add(store, data, &entry);
+    if(err)return NULL;
+    return entry->data;
+}
+
+const char *stringstore_getn(stringstore_t *store, const char *data, int data_len){
+    if(!data)return NULL;
+
+    const char *found_data = stringstore_findn(store, data, data_len);
+    if(found_data)return found_data;
+
+    /* We didn't find the string, so we need to add it; but data isn't
+    NUL-terminated, so we need to make a NUL-terminated copy of it. */
+    char *new_data = malloc(sizeof(*new_data) * (data_len + 1));
+    strncpy(new_data, data, data_len);
+    new_data[data_len] = '\0';
+
+    stringstore_entry_t *entry;
+    int err = _stringstore_add_donate(store, new_data, &entry);
     if(err)return NULL;
     return entry->data;
 }
@@ -91,7 +126,20 @@ const char *stringstore_get_donate(stringstore_t *store, char *data){
     }
 
     stringstore_entry_t *entry;
-    int err = stringstore_add_donate(store, data, &entry);
+    int err = _stringstore_add_donate(store, data, &entry);
     if(err)return NULL;
     return entry->data;
+}
+
+static void cleanup_global_stringstore(void){
+    stringstore_cleanup(&global_stringstore);
+}
+
+stringstore_t *get_global_stringstore(void){
+    if(!global_stringstore_initialized){
+        stringstore_init(&global_stringstore);
+        atexit(&cleanup_global_stringstore);
+        global_stringstore_initialized = true;
+    }
+    return &global_stringstore;
 }

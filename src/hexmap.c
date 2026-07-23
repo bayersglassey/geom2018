@@ -166,7 +166,7 @@ static int hexmap_parse_recording(fus_lexer_t *lexer, prismelrenderer_t *prend,
     }
     hexgame_location_to_trf(&loc, trf);
 
-    GET_STR_CACHED(*filename_ptr, &prend->filename_store)
+    GET_STR(*filename_ptr)
     if(
         !GOT(")") &&
         !GOT("visible") &&
@@ -176,7 +176,7 @@ static int hexmap_parse_recording(fus_lexer_t *lexer, prismelrenderer_t *prend,
         if(GOT("empty")){
             NEXT
         }else{
-            GET_STR_CACHED(*palmapper_name_ptr, &prend->name_store)
+            GET_STR(*palmapper_name_ptr)
         }
         if(GOT_INT){
             GET_INT(*frame_offset_ptr)
@@ -440,7 +440,7 @@ static int _hexmap_parse(hexmap_t *map, fus_lexer_t *lexer,
             if(GOT_STR){
                 hexmap_submap_group_t *parent = group;
                 const char *group_name;
-                GET_STR_CACHED(group_name, &prend->name_store)
+                GET_STR(group_name)
                 err = hexmap_get_or_add_submap_group(map, group_name, &group);
                 if(err)return err;
 
@@ -480,7 +480,7 @@ static int _hexmap_parse(hexmap_t *map, fus_lexer_t *lexer,
                 /* We use _fus_lexer_get_str to avoid calling fus_lexer_next until after
                 the call to fus_lexer_init_with_vars is done, to make sure we don't modify
                 lexer->vars first */
-                char *filename;
+                const char *filename;
                 err = _fus_lexer_get_str(lexer, &filename);
                 if(err)return err;
 
@@ -512,7 +512,6 @@ static int _hexmap_parse(hexmap_t *map, fus_lexer_t *lexer,
                 if(err)return err;
 
                 fus_lexer_cleanup(&sublexer);
-                free(filename);
                 free(text);
             }else{
                 err = hexmap_parse_submap(map, lexer, context, group);
@@ -534,7 +533,7 @@ int hexmap_parse(hexmap_t *map, fus_lexer_t *lexer){
 
     GET("name")
     OPEN
-    GET_STR_CACHED(map->name, &prend->name_store)
+    GET_STR(map->name)
     CLOSE
 
     /* parse unit */
@@ -551,7 +550,7 @@ int hexmap_parse(hexmap_t *map, fus_lexer_t *lexer){
     GET("spawn")
     OPEN
     if(fus_lexer_got_str(lexer)){
-        GET_STR_CACHED(spawn_filename, &prend->filename_store)
+        GET_STR(spawn_filename)
     }else{
         GET_VEC(map->space, map->spawn.pos)
     }
@@ -567,7 +566,7 @@ int hexmap_parse(hexmap_t *map, fus_lexer_t *lexer){
         const char *palette_filename;
         GET("palette")
         OPEN
-        GET_STR_CACHED(palette_filename, &prend->filename_store)
+        GET_STR(palette_filename)
         err = prismelrenderer_get_or_create_palette(prend, palette_filename,
             &map->default_palette);
         if(err)return err;
@@ -580,7 +579,7 @@ int hexmap_parse(hexmap_t *map, fus_lexer_t *lexer){
         const char *tileset_filename;
         GET("tileset")
         OPEN
-        GET_STR_CACHED(tileset_filename, &prend->filename_store)
+        GET_STR(tileset_filename)
         err = prismelrenderer_get_or_create_tileset(prend, tileset_filename,
             &map->default_tileset);
         if(err)return err;
@@ -605,7 +604,7 @@ int hexmap_parse(hexmap_t *map, fus_lexer_t *lexer){
         const char *song_name;
         NEXT
         OPEN
-        GET_STR_CACHED(song_name, &prend->name_store)
+        GET_STR(song_name)
         hexgame_audio_callback_t *song = hexgame_songs_get(song_name);
         if(!song){
             fprintf(stderr, "Couldn't find song: %s\n",
@@ -683,7 +682,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
     if(GOT("file")){
         NEXT
         OPEN
-        GET_STR_CACHED(submap_filename, &prend->filename_store)
+        GET_STR(submap_filename)
         CLOSE
     }
 
@@ -806,7 +805,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
         const char *song_name;
         NEXT
         OPEN
-        GET_STR_CACHED(song_name, &prend->name_store)
+        GET_STR(song_name)
         hexgame_audio_callback_t *song = hexgame_songs_get(song_name);
         if(!song){
             fprintf(stderr, "Couldn't find song: %s\n",
@@ -829,7 +828,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
         NEXT
         OPEN
         const char *palette_filename;
-        GET_STR_CACHED(palette_filename, &prend->filename_store)
+        GET_STR(palette_filename)
         err = prismelrenderer_get_or_create_palette(prend, palette_filename,
             &context->palette);
         if(err)return err;
@@ -840,7 +839,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
         NEXT
         OPEN
         const char *tileset_filename;
-        GET_STR_CACHED(tileset_filename, &prend->filename_store)
+        GET_STR(tileset_filename)
         err = prismelrenderer_get_or_create_tileset(prend, tileset_filename,
             &context->tileset);
         if(err)return err;

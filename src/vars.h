@@ -50,7 +50,7 @@ extern val_t val_false;
 typedef unsigned var_props_t;
 
 typedef struct var {
-    char *key;
+    const char *key;
     val_t value;
     var_props_t props; /* Bit array */
 } var_t;
@@ -107,7 +107,7 @@ typedef struct vars {
 
 
 void var_cleanup(var_t *var);
-void var_init(var_t *var, char *key);
+void var_init(var_t *var, const char *key);
 void var_set_prop(var_t *var, unsigned i);
 
 void val_cleanup(val_t *val);
@@ -156,7 +156,7 @@ void vars_init(vars_t *vars);
 void vars_init_with_props(vars_t *vars, const char **prop_names);
 void vars_dump(vars_t *vars);
 void vars_dumpvar(vars_t *vars, const char *key);
-int vars_add(vars_t *vars, char *key, var_t **var_ptr);
+int vars_add(vars_t *vars, const char *key, var_t **var_ptr);
 var_t *vars_get(vars_t *vars, const char *key);
 var_t *vars_get_or_add(vars_t *vars, const char *key);
 int vars_get_prop_i(vars_t *vars, const char *prop_name);

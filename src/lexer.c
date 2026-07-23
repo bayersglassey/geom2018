@@ -71,6 +71,16 @@ static int _fus_lexer_init(fus_lexer_t *lexer, const char *text,
     vars_init(&lexer->_vars);
     lexer->vars = vars;
 
+    /* NOTE: maybe someday we want to allow a stringstore to be passed in.
+    But I don't really forsee a need... currently, in practise our strings
+    are all created once when we're parsing everything at the start of the
+    game, and then we never need to dynamically generate them thereafter.
+    So one global stringstore should be fine.
+    And we don't need to search the stringstore except when parsing, either.
+    So it's not like we need to worry about the efficiency of its search
+    algorithm or whatever. */
+    lexer->stringstore = get_global_stringstore();
+
     lexer->filename = filename;
     lexer->text = text;
     lexer->text_len = strlen(text);
@@ -172,16 +182,6 @@ static void fus_lexer_fprint_frames(FILE *file, fus_lexer_t *lexer){
     )fprintf(file, " %p[%c](%i)", frame, frame->is_block? 'b': ' ',
         frame->indent);
     putc('\n', file);
-}
-
-int fus_lexer_get_pos(fus_lexer_t *lexer){
-    /* "public getter" */
-    return lexer->pos;
-}
-
-void fus_lexer_set_pos(fus_lexer_t *lexer, int pos){
-    /* "public setter" */
-    lexer->pos = pos;
 }
 
 static void fus_lexer_start_token(fus_lexer_t *lexer){
@@ -564,13 +564,13 @@ int fus_lexer_get(fus_lexer_t *lexer, const char *text){
     return fus_lexer_next(lexer);
 }
 
-static int _fus_lexer_extract_name(fus_lexer_t *lexer, char **name){
-    *name = strndup(lexer->token, lexer->token_len);
+static int _fus_lexer_extract_name(fus_lexer_t *lexer, const char **name){
+    *name = stringstore_getn(lexer->stringstore, lexer->token, lexer->token_len);
     if(*name == NULL)return 1;
     return 0;
 }
 
-static int _fus_lexer_extract_str(fus_lexer_t *lexer, char **s){
+static int _fus_lexer_extract_str(fus_lexer_t *lexer, const char **s){
     const char *token = lexer->token;
     int token_len = lexer->token_len;
 
@@ -598,11 +598,12 @@ static int _fus_lexer_extract_str(fus_lexer_t *lexer, char **s){
     }
 
     *ss = '\0';
-    *s = ss0;
+    *s = stringstore_get_donate(lexer->stringstore, ss0);
+    if(*s == NULL)return 1;
     return 0;
 }
 
-static int _fus_lexer_extract_blockstr(fus_lexer_t *lexer, char **s){
+static int _fus_lexer_extract_blockstr(fus_lexer_t *lexer, const char **s){
     const char *token = lexer->token;
     int token_len = lexer->token_len;
 
@@ -612,11 +613,12 @@ static int _fus_lexer_extract_blockstr(fus_lexer_t *lexer, char **s){
     char *ss = strndup(token+2, s_len);
     if(ss == NULL)return 1;
 
-    *s = ss;
+    *s = stringstore_get_donate(lexer->stringstore, ss);
+    if(*s == NULL)return 1;
     return 0;
 }
 
-int _fus_lexer_get_name(fus_lexer_t *lexer, char **name){
+int _fus_lexer_get_name(fus_lexer_t *lexer, const char **name){
     if(lexer->token_type == FUS_LEXER_TOKEN_SYM){
         return _fus_lexer_extract_name(lexer, name);
     }else{
@@ -628,13 +630,13 @@ int _fus_lexer_get_name(fus_lexer_t *lexer, char **name){
     return 0;
 }
 
-int fus_lexer_get_name(fus_lexer_t *lexer, char **name){
+int fus_lexer_get_name(fus_lexer_t *lexer, const char **name){
     int err = _fus_lexer_get_name(lexer, name);
     if(err)return err;
     return fus_lexer_next(lexer);
 }
 
-int _fus_lexer_get_str(fus_lexer_t *lexer, char **s){
+int _fus_lexer_get_str(fus_lexer_t *lexer, const char **s){
     if(lexer->token_type == FUS_LEXER_TOKEN_STR){
         return _fus_lexer_extract_str(lexer, s);
     }else if(lexer->token_type == FUS_LEXER_TOKEN_BLOCKSTR){
@@ -647,13 +649,13 @@ int _fus_lexer_get_str(fus_lexer_t *lexer, char **s){
     return 2;
 }
 
-int fus_lexer_get_str(fus_lexer_t *lexer, char **s){
+int fus_lexer_get_str(fus_lexer_t *lexer, const char **s){
     int err = _fus_lexer_get_str(lexer, s);
     if(err)return err;
     return fus_lexer_next(lexer);
 }
 
-static int _fus_lexer_get_lines(fus_lexer_t *lexer, char **s,
+static int _fus_lexer_get_lines(fus_lexer_t *lexer, const char **s,
     int add_x, int add_y
 ){
     int err;
@@ -668,12 +670,12 @@ static int _fus_lexer_get_lines(fus_lexer_t *lexer, char **s,
     /* Set up an array of strings */
     int max_lines = 16;
     int n_lines = 0;
-    char **lines = malloc(sizeof(*lines) * max_lines);
+    const char **lines = malloc(sizeof(*lines) * max_lines);
     if(!lines)return 1;
 
     /* Parse in a bunch of strings */
     while(!fus_lexer_got(lexer, ")")){
-        char *s2;
+        const char *s2;
 
         /* We are careful to use the "underscored" versions of these
         functions, because we may be called inside of a lexer macro.
@@ -716,7 +718,7 @@ static int _fus_lexer_get_lines(fus_lexer_t *lexer, char **s,
         final_s += 2;
     }
     for(int i = 0; i < n_lines; i++){
-        char *line = lines[i];
+        const char *line = lines[i];
         size_t line_len = strlen(line);
 
         for(int j = 0; j < add_x; j++){
@@ -734,15 +736,13 @@ static int _fus_lexer_get_lines(fus_lexer_t *lexer, char **s,
     final_s[0] = '\0';
 
     /* Cleanup and return */
-    for(int i = 0; i < n_lines; i++){
-        free(lines[i]);
-    }
     free(lines);
-    *s = final_s0;
+    *s = stringstore_get_donate(lexer->stringstore, final_s0);
+    if(*s == NULL)return 1;
     return 0;
 }
 
-int _fus_lexer_get_str_fancy(fus_lexer_t *lexer, char **s){
+int _fus_lexer_get_str_fancy(fus_lexer_t *lexer, const char **s){
 
     /* NOTE: this function is used inside lexer macros!.. e.g. in $SET_STR.
     So we MUST NOT call fus_lexer_next or anything which calls it.
@@ -818,13 +818,13 @@ int _fus_lexer_get_str_fancy(fus_lexer_t *lexer, char **s){
     }
 }
 
-int fus_lexer_get_str_fancy(fus_lexer_t *lexer, char **s){
+int fus_lexer_get_str_fancy(fus_lexer_t *lexer, const char **s){
     int err = _fus_lexer_get_str_fancy(lexer, s);
     if(err)return err;
     return fus_lexer_next(lexer);
 }
 
-int _fus_lexer_get_name_or_str(fus_lexer_t *lexer, char **s){
+int _fus_lexer_get_name_or_str(fus_lexer_t *lexer, const char **s){
     if(lexer->token_type == FUS_LEXER_TOKEN_SYM){
         return _fus_lexer_extract_name(lexer, s);
     }else if(lexer->token_type == FUS_LEXER_TOKEN_STR){
@@ -839,7 +839,7 @@ int _fus_lexer_get_name_or_str(fus_lexer_t *lexer, char **s){
     return 2;
 }
 
-int fus_lexer_get_name_or_str(fus_lexer_t *lexer, char **s){
+int fus_lexer_get_name_or_str(fus_lexer_t *lexer, const char **s){
     int err;
     err = _fus_lexer_get_name_or_str(lexer, s);
     if(err)return err;
@@ -848,7 +848,7 @@ int fus_lexer_get_name_or_str(fus_lexer_t *lexer, char **s){
 
 int fus_lexer_get_chr(fus_lexer_t *lexer, char *c){
     int err;
-    char *s;
+    const char *s;
     err = fus_lexer_get_name_or_str(lexer, &s);
     if(err)return err;
     if(strlen(s) != 1){
@@ -858,7 +858,6 @@ int fus_lexer_get_chr(fus_lexer_t *lexer, char *c){
         return 2;
     }
     *c = s[0];
-    free(s);
     return 0;
 }
 
@@ -1050,7 +1049,7 @@ int fus_lexer_get_attr_int(fus_lexer_t *lexer, const char *attr, int *i,
     return 0;
 }
 
-int fus_lexer_get_attr_str(fus_lexer_t *lexer, const char *attr, char **s,
+int fus_lexer_get_attr_str(fus_lexer_t *lexer, const char *attr, const char **s,
     bool optional
 ){
     int err;
@@ -1306,33 +1305,31 @@ static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
         err = fus_lexer_next(lexer);
         if(err)return err;
 
-        char *name;
+        const char *name;
         err = _fus_lexer_get_name(lexer, &name);
         if(err)return err;
 
         err = vars_set_bool(lexer->vars, name, true);
         if(err)return err;
-        free(name);
     }else if(fus_lexer_got(lexer, "UNSET_BOOL")){
         err = fus_lexer_next(lexer);
         if(err)return err;
 
-        char *name;
+        const char *name;
         err = _fus_lexer_get_name(lexer, &name);
         if(err)return err;
 
         err = vars_set_bool(lexer->vars, name, false);
         if(err)return err;
-        free(name);
     }else if(fus_lexer_got(lexer, "SET_STR")){
         err = fus_lexer_next(lexer);
         if(err)return err;
 
-        char *name;
+        const char *name;
         err = fus_lexer_get_name(lexer, &name);
         if(err)return err;
 
-        char *val;
+        const char *val;
         if(fus_lexer_got_name(lexer)){
             err = _fus_lexer_get_name(lexer, &val);
             if(err)return err;
@@ -1341,14 +1338,13 @@ static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
             if(err)return err;
         }
 
-        err = vars_set_str(lexer->vars, name, val);
+        err = vars_set_const_str(lexer->vars, name, val);
         if(err)return err;
-        free(name);
     }else if(fus_lexer_got(lexer, "SET_INT")){
         err = fus_lexer_next(lexer);
         if(err)return err;
 
-        char *name;
+        const char *name;
         err = fus_lexer_get_name(lexer, &name);
         if(err)return err;
 
@@ -1358,40 +1354,36 @@ static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
 
         err = vars_set_int(lexer->vars, name, val);
         if(err)return err;
-        free(name);
     }else if(fus_lexer_got(lexer, "UNSET")){
         err = fus_lexer_next(lexer);
         if(err)return err;
 
-        char *name;
+        const char *name;
         err = _fus_lexer_get_name(lexer, &name);
         if(err)return err;
 
         err = vars_set_null(lexer->vars, name);
         if(err)return err;
-        free(name);
     }else if(fus_lexer_got(lexer, "PRINT")){
         err = fus_lexer_next(lexer);
         if(err)return err;
 
-        char *s;
+        const char *s;
         err = _fus_lexer_get_str(lexer, &s);
         if(err)return err;
 
         fprintf(stderr, "PRINT: %s\n", s);
-        free(s);
     }else if(fus_lexer_got(lexer, "PRINTVARS")){
         vars_dump(lexer->vars);
     }else if(fus_lexer_got(lexer, "PRINTVAR")){
         err = fus_lexer_next(lexer);
         if(err)return err;
 
-        char *name;
+        const char *name;
         err = _fus_lexer_get_name(lexer, &name);
         if(err)return err;
 
         vars_dumpvar(lexer->vars, name);
-        free(name);
     }else if(fus_lexer_got(lexer, "SKIP")){
         err = fus_lexer_next(lexer);
         if(err)return err;
@@ -1413,14 +1405,13 @@ static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
             not = true;
         }
 
-        char *name;
+        const char *name;
         err = fus_lexer_get_name(lexer, &name);
         if(err)return err;
         err = _fus_lexer_get(lexer, "(");
         if(err)return err;
 
         bool cond = vars_get_bool(lexer->vars, name) ^ not;
-        free(name);
 
         if(!cond){
             /* Eat everything up to & including closing ")" */
@@ -1448,18 +1439,18 @@ static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
         err = fus_lexer_next(lexer);
         if(err)return err;
 
-        char *name;
+        const char *name;
         err = _fus_lexer_get_name(lexer, &name);
         if(err)return err;
 
         /* token, token_type: these are set depending on value of c */
-        char *token;
         fus_lexer_token_type_t token_type;
         if(c == 'N'){
             /* lexer->token == "GET_INT" */
             int val = vars_get_int(lexer->vars, name);
-            token = strdup_of_int(val);
+            char *token = strdup_of_int(val);
             if(!token)return 1;
+            fus_lexer_set_mem_managed_token(lexer, token);
             token_type = FUS_LEXER_TOKEN_INT;
         }else{
             /* lexer->token == "GET_STR" or "GET_SYM" */
@@ -1469,30 +1460,27 @@ static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
             }
             if(c == 'T'){
                 /* lexer->token == "GET_STR" */
-                token = strdup_quoted(val);
+                char *token = strdup_quoted(val);
                 if(!token)return 1;
+                fus_lexer_set_mem_managed_token(lexer, token);
                 token_type = FUS_LEXER_TOKEN_STR;
             }else{
                 /* lexer->token == "GET_SYM" */
-                token = str_dup(val);
-                if(!token)return 1;
+                fus_lexer_set_token(lexer, val);
                 token_type = FUS_LEXER_TOKEN_SYM;
             }
         }
 
-        fus_lexer_set_mem_managed_token(lexer, token);
         lexer->_token_len = lexer->pos - macro_start_pos;
         lexer->token_type = token_type;
         *found_token_ptr = true;
-
-        free(name);
     }else if(fus_lexer_got(lexer, "PREFIX") || fus_lexer_got(lexer, "SUFFIX")){
         bool is_prefix = lexer->token[0] == 'P';
 
         err = fus_lexer_next(lexer);
         if(err)return err;
 
-        char *name;
+        const char *name;
         err = fus_lexer_get_name(lexer, &name);
         if(err)return err;
 
@@ -1501,7 +1489,7 @@ static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
             return fus_lexer_unexpected(lexer, "name of a string variable");
         }
 
-        char *s0;
+        const char *s0;
         /* NOTE: use underscored _fus_lexer_get_name_or_str, regular one calls
         fus_lexer_next before returning, but we want to keep the current lexer->token
         and just update its mem_managed_token */
@@ -1520,14 +1508,11 @@ static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
         fus_lexer_set_mem_managed_token(lexer, s1);
         lexer->_token_len = lexer->pos - macro_start_pos;
         *found_token_ptr = true;
-
-        free(name);
-        free(s0);
     }else if(fus_lexer_got(lexer, "STR")){
         err = fus_lexer_next(lexer);
         if(err)return err;
 
-        char *val;
+        const char *val;
         if(fus_lexer_got_name(lexer)){
             err = _fus_lexer_get_name(lexer, &val);
             if(err)return err;
@@ -1542,7 +1527,6 @@ static int _fus_lexer_parse_macro(fus_lexer_t *lexer, bool *found_token_ptr){
         lexer->_token_len = lexer->pos - macro_start_pos;
         lexer->token_type = FUS_LEXER_TOKEN_STR;
         *found_token_ptr = true;
-        free(val);
     }else{
         return fus_lexer_unexpected(lexer, NULL);
     }

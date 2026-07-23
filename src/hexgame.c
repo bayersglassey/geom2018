@@ -494,7 +494,7 @@ void hexgame_cleanup(hexgame_t *game){
     tileset_cleanup(&game->minimap_tileset);
     vars_cleanup(&game->vars);
     hexgame_audio_data_cleanup(&game->audio_data);
-    ARRAY_FREE_PTR(char*, game->worldmaps, (void))
+    ARRAY_FREE(const char*, game->worldmaps, (void))
     ARRAY_FREE_PTR(hexmap_t*, game->maps, hexmap_cleanup)
     ARRAY_FREE_PTR(stateset_t*, game->statesets, stateset_cleanup)
     ARRAY_FREE_PTR(camera_t*, game->cameras, camera_cleanup)
@@ -576,9 +576,9 @@ int hexgame_load_worldmaps(hexgame_t *game, const char *worldmaps_filename){
     while(1){
         if(GOT(")"))break;
         OPEN
-        char *worldmap;
+        const char *worldmap;
         GET_STR(worldmap)
-        ARRAY_PUSH(char*, game->worldmaps, worldmap)
+        ARRAY_PUSH(const char*, game->worldmaps, worldmap)
         CLOSE
     }
     NEXT

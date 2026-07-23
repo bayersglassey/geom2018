@@ -77,11 +77,11 @@ int hexgame_savelocation_parse(hexgame_savelocation_t *location,
     GET_INT(y)
     GET_INT(rot)
     GET_YN(turn)
-    GET_STR_CACHED(map_filename, filename_store)
+    GET_STR(map_filename)
     if(!DONE){
-        GET_STR_CACHED(stateset_filename, filename_store)
+        GET_STR(stateset_filename)
         if(!DONE){
-            GET_STR_CACHED(state_name, name_store)
+            GET_STR(state_name)
         }
     }
 

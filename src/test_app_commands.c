@@ -154,7 +154,7 @@ static int _test_app_command_edit_player(test_app_t *app, fus_lexer_t *lexer, bo
 
     const char *stateset_filename = app->stateset_filename;
     if(!DONE){
-        GET_STR_CACHED(stateset_filename, &app->prend.filename_store)
+        GET_STR(stateset_filename)
     }
 
     hexgame_t *game = &app->hexgame;
@@ -202,7 +202,7 @@ lexer_err:
 
 static int _test_app_command_save(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
     int err;
-    char *filename = NULL;
+    const char *filename = NULL;
 
     if(!fus_lexer_done(lexer)){
         err = fus_lexer_get_str(lexer, &filename);
@@ -216,11 +216,9 @@ static int _test_app_command_save(test_app_t *app, fus_lexer_t *lexer, bool *lex
         err = prismelrenderer_save(&app->prend, filename);
         if(err)return err;
     }
-    free(filename);
     return 0;
 
 lexer_err:
-    free(filename);
     *lexer_err_ptr = true;
     return 0;
 }
@@ -231,10 +229,10 @@ static int _test_app_command_map(test_app_t *app, fus_lexer_t *lexer, bool *lexe
     const char *mapper_name;
     const char *mapped_rgraph_name;
     const char *resulting_rgraph_name = NULL;
-    GET_STR_CACHED(mapper_name, &app->prend.name_store)
-    GET_STR_CACHED(mapped_rgraph_name, &app->prend.name_store)
+    GET_STR(mapper_name)
+    GET_STR(mapped_rgraph_name)
     if(!DONE){
-        GET_STR_CACHED(resulting_rgraph_name, &app->prend.name_store)
+        GET_STR(resulting_rgraph_name)
     }
 
     prismelmapper_t *mapper = prismelrenderer_get_mapper(
@@ -264,7 +262,7 @@ static int _test_app_command_get_shape(test_app_t *app, fus_lexer_t *lexer, bool
     INIT
 
     const char *name;
-    GET_STR_CACHED(name, &app->prend.name_store)
+    GET_STR(name)
     int rgraph_i = prismelrenderer_get_rgraph_i(
         &app->prend, name);
     if(rgraph_i < 0){
@@ -309,7 +307,7 @@ static int _test_app_command_visit_all(test_app_t *app, fus_lexer_t *lexer, bool
 static int _test_app_command_save_recording_filename(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
     int err;
     const char *filename;
-    GET_STR_CACHED(filename, &app->prend.filename_store)
+    GET_STR(filename)
     app->save_recording_filename = filename;
     return 0;
 }
@@ -317,7 +315,7 @@ static int _test_app_command_save_recording_filename(test_app_t *app, fus_lexer_
 static int _test_app_command_load_recording_filename(test_app_t *app, fus_lexer_t *lexer, bool *lexer_err_ptr){
     int err;
     const char *filename;
-    GET_STR_CACHED(filename, &app->prend.filename_store)
+    GET_STR(filename)
     app->load_recording_filename = filename;
     return 0;
 }

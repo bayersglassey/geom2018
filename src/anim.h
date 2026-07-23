@@ -80,12 +80,12 @@ typedef struct collmsg_handler {
     /* When colliding with another body who is "sending" the given collmsg,
     goto the associated state (old behaviour) or apply the associated
     effects (new behaviour) */
-    char *msg;
+    const char *msg;
     ARRAY_DECL(struct state_effect*, effects)
 } collmsg_handler_t;
 
 void collmsg_handler_cleanup(collmsg_handler_t *handler);
-void collmsg_handler_init(collmsg_handler_t *handler, char *msg);
+void collmsg_handler_init(collmsg_handler_t *handler, const char *msg);
 struct state_effect_goto;
 
 
@@ -142,7 +142,7 @@ void state_context_collmap_entry_cleanup(state_context_collmap_entry_t *entry);
 
 typedef struct state_context {
     /* Stuff which can be used by states within a stateset */
-    ARRAY_DECL(char*, collmsgs)
+    ARRAY_DECL(const char*, collmsgs)
     ARRAY_DECL(struct collmsg_handler, collmsg_handlers)
     ARRAY_DECL(struct stateset_proc, procs)
     ARRAY_DECL(state_context_collmap_entry_t*, collmaps)

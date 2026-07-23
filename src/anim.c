@@ -95,7 +95,7 @@ static int _parse_collmap(state_context_t *context, fus_lexer_t *lexer,
         NEXT
         OPEN
         const char *name;
-        GET_STR_CACHED(name, &prend->name_store)
+        GET_STR(name)
 
         hexcollmap_t *found_collmap = state_context_get_collmap(
             context, name);
@@ -143,7 +143,7 @@ static int _parse_collmsg_handler(state_context_t *context, fus_lexer_t *lexer,
 ){
     INIT
 
-    char *msg;
+    const char *msg;
     GET_STR(msg)
 
     collmsg_handler_init(handler, msg);
@@ -203,7 +203,7 @@ static int _parse_stateset_proc(state_context_t *context, fus_lexer_t *lexer,
     }
 
     const char *name;
-    GET_STR_CACHED(name, &prend->name_store)
+    GET_STR(name)
 
     stateset_proc_t *found_proc = state_context_get_proc(context, name);
     if(found_proc){
@@ -232,11 +232,10 @@ static int _parse_stateset_proc(state_context_t *context, fus_lexer_t *lexer,
 ******************/
 
 void collmsg_handler_cleanup(collmsg_handler_t *handler){
-    free(handler->msg);
     ARRAY_FREE_PTR(state_effect_t*, handler->effects, state_effect_cleanup)
 }
 
-void collmsg_handler_init(collmsg_handler_t *handler, char *msg){
+void collmsg_handler_init(collmsg_handler_t *handler, const char *msg){
     handler->msg = msg;
     ARRAY_INIT(handler->effects)
 }
@@ -270,7 +269,7 @@ void state_context_collmap_entry_cleanup(state_context_collmap_entry_t *entry){
 }
 
 void state_context_cleanup(state_context_t *context){
-    ARRAY_FREE_PTR(char*, context->collmsgs, (void))
+    ARRAY_FREE(const char*, context->collmsgs, (void))
     ARRAY_FREE(collmsg_handler_t, context->collmsg_handlers,
         collmsg_handler_cleanup)
     ARRAY_FREE(stateset_proc_t, context->procs,
@@ -701,7 +700,7 @@ int state_effect_parse(state_effect_t *effect,
         OPEN
 
         const char *goto_name;
-        GET_STR_CACHED(goto_name, &prend->name_store)
+        GET_STR(goto_name)
 
         effect->type = STATE_EFFECT_TYPE_GOTO;
         effect->u.gotto.name = goto_name;
@@ -720,7 +719,7 @@ int state_effect_parse(state_effect_t *effect,
         }
         OPEN
         const char *name;
-        GET_STR_CACHED(name, &prend->name_store)
+        GET_STR(name)
         effect->u.call.name = name;
         valexpr_vars_init(&effect->u.call.valexpr_vars);
         int arg_i = 0;
@@ -742,7 +741,7 @@ int state_effect_parse(state_effect_t *effect,
             OPEN
             while(!GOT(")")){
                 const char *name;
-                GET_STR_CACHED(name, &prend->name_store)
+                GET_STR(name)
                 OPEN
                 valexpr_t *valexpr;
                 err = valexpr_vars_add(&effect->u.call.valexpr_vars, name, &valexpr);
@@ -987,7 +986,7 @@ int state_effect_parse(state_effect_t *effect,
         OPEN
 
         const char *play_filename;
-        GET_STR_CACHED(play_filename, &prend->filename_store)
+        GET_STR(play_filename)
 
         effect->type = STATE_EFFECT_TYPE_PLAY;
         effect->u.play_filename = play_filename;
@@ -1049,7 +1048,7 @@ static int _state_parse_rule(state_t *state, fus_lexer_t *lexer,
 
     const char *name = NULL;
     if(GOT_STR){
-        GET_STR_CACHED(name, &prend->name_store)
+        GET_STR(name)
         for(int i = 0; i < state->rules_len; i++){
             state_rule_t *rule = state->rules[i];
             if(rule->name != NULL && !strcmp(rule->name, name)){
@@ -1103,7 +1102,7 @@ static int parse_rgraph_reference(fus_lexer_t *lexer,
 
         /* Get tileset */
         const char *tileset_name;
-        GET_STR_CACHED(tileset_name, &prend->name_store)
+        GET_STR(tileset_name)
         tileset_t *tileset;
         err = prismelrenderer_get_or_create_tileset(prend, tileset_name,
             &tileset);
@@ -1138,7 +1137,7 @@ static int parse_rgraph_reference(fus_lexer_t *lexer,
         hexcollmap_cleanup(collmap);
     }else{
         const char *rgraph_name;
-        GET_STR_CACHED(rgraph_name, &prend->name_store)
+        GET_STR(rgraph_name)
         rgraph = prismelrenderer_get_rendergraph(prend, rgraph_name);
         if(rgraph == NULL){
             fus_lexer_err_info(lexer);
@@ -1197,9 +1196,9 @@ static int _state_parse(state_t *state, fus_lexer_t *lexer,
             NEXT
             OPEN
             while(!GOT(")")){
-                char *msg;
+                const char *msg;
                 GET_STR(msg)
-                ARRAY_PUSH(char*, state->context->collmsgs, msg)
+                ARRAY_PUSH(const char*, state->context->collmsgs, msg)
             }
             NEXT
             continue;
@@ -1242,7 +1241,7 @@ static int _state_parse(state_t *state, fus_lexer_t *lexer,
             /* We use _fus_lexer_get_str to avoid calling fus_lexer_next until after
             the call to fus_lexer_init_with_vars is done, to make sure we don't modify
             lexer->vars first */
-            char *filename;
+            const char *filename;
             err = _fus_lexer_get_str(lexer, &filename);
             if(err)return err;
 
@@ -1269,7 +1268,6 @@ static int _state_parse(state_t *state, fus_lexer_t *lexer,
             if(err)return err;
 
             fus_lexer_cleanup(&sublexer);
-            free(filename);
             free(text);
             continue;
         }
@@ -1300,9 +1298,9 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             NEXT
             OPEN
             while(!GOT(")")){
-                char *msg;
+                const char *msg;
                 GET_STR(msg)
-                ARRAY_PUSH(char*, context->collmsgs, msg)
+                ARRAY_PUSH(const char*, context->collmsgs, msg)
             }
             NEXT
             continue;
@@ -1336,7 +1334,7 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
         if(GOT("collmap")){
             NEXT
             const char *name;
-            GET_STR_CACHED(name, &prend->name_store)
+            GET_STR(name)
             OPEN
 
             hexcollmap_t *collmap;
@@ -1344,7 +1342,7 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                 NEXT
                 OPEN
                 const char *name;
-                GET_STR_CACHED(name, &prend->name_store)
+                GET_STR(name)
 
                 hexcollmap_t *found_collmap = state_context_get_collmap(
                     context, name);
@@ -1393,7 +1391,7 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             /* We use _fus_lexer_get_str to avoid calling fus_lexer_next until after
             the call to fus_lexer_init_with_vars is done, to make sure we don't modify
             lexer->vars first */
-            char *filename;
+            const char *filename;
             err = _fus_lexer_get_str(lexer, &filename);
             if(err)return err;
 
@@ -1433,14 +1431,13 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
             if(err)return err;
 
             fus_lexer_cleanup(&sublexer);
-            free(filename);
             free(text);
             continue;
         }
         if(GOT("state")){
             NEXT
             const char *name;
-            GET_STR_CACHED(name, &prend->name_store)
+            GET_STR(name)
             OPEN
 
             ARRAY_PUSH_NEW(state_context_t*, stateset->contexts, sub_context)

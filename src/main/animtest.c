@@ -204,7 +204,7 @@ static int test_suite_load(test_suite_t *suite, const char *filename,
     while(!GOT(")")){
         const char *name = NULL;
         if(GOT_STR){
-            GET_STR_CACHED(name, &prend->name_store)
+            GET_STR(name)
             if(test_suite_get_case(suite, name)){
                 fprintf(stderr, "Duplicate case name: \"%s\"\n", name);
                 return 2;
@@ -221,7 +221,7 @@ static int test_suite_load(test_suite_t *suite, const char *filename,
             NEXT
             OPEN
             const char *stateset_filename;
-            GET_STR_CACHED(stateset_filename, &prend->filename_store)
+            GET_STR(stateset_filename)
 
             stateset_t *stateset = calloc(1, sizeof(*stateset));
             if(stateset == NULL)return 1;
@@ -239,7 +239,7 @@ static int test_suite_load(test_suite_t *suite, const char *filename,
         if(GOT("state")){
             NEXT
             OPEN
-            GET_STR_CACHED(test_case->state_name, &prend->name_store)
+            GET_STR(test_case->state_name)
             CLOSE
         }
         if(GOT("collmap")){

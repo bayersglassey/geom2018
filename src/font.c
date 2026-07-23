@@ -140,7 +140,7 @@ int font_parse(font_t *font, fus_lexer_t *lexer){
         if(err)return err;
 
         for(int y = 0; y < char_h; y++){
-            char *line;
+            const char *line;
             err = fus_lexer_get_str(lexer, &line);
             if(err)return err;
             int line_w = strlen(line);
@@ -159,8 +159,6 @@ int font_parse(font_t *font, fus_lexer_t *lexer){
                 }
                 char_data[y * char_w + x] = value;
             }
-
-            free(line);
         }
 
         err = fus_lexer_get(lexer, ")");

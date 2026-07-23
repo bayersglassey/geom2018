@@ -154,10 +154,8 @@ static int recording_parse(recording_t *rec,
     GET_ATTR_YESNO("reacts", rec->reacts, true)
     GET_ATTR_YESNO("loop", rec->loop, true)
     GET_ATTR_YESNO("resets_position", rec->resets_position, true)
-    GET_ATTR_STR_CACHED("anim", rec->stateset_name, false,
-        &prend->name_store)
-    GET_ATTR_STR_CACHED("state", rec->state_name, false,
-        &prend->name_store)
+    GET_ATTR_STR("anim", rec->stateset_name, false)
+    GET_ATTR_STR("state", rec->state_name, false)
 
     GET("pos")
     OPEN
@@ -187,11 +185,10 @@ static int recording_parse(recording_t *rec,
         NEXT
         OPEN
         if(GOT_STR){
-            char *data;
+            const char *data;
             GET_STR(data)
             err = _recording_parse_nodes_from_str(rec, data);
             if(err)return err;
-            free(data);
         }else{
             err = _recording_parse_nodes_from_lexer(rec, lexer);
             if(err)return err;

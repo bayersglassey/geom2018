@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "vars.h"
+#include "stringstore.h"
 #include "util.h"
 
 /*
@@ -62,6 +63,8 @@ typedef struct fus_lexer {
     vars_t _vars;
     vars_t *vars;
 
+    stringstore_t *stringstore;
+
     const char *filename;
 
     int text_len;
@@ -88,7 +91,13 @@ typedef struct fus_lexer {
     fus_lexer_token_type_t token_type;
 
     /* mem_managed_token: when a token is constructed dynamically, e.g. by the
-    $PREFIX macro, it is stored in mem_managed_token and token is set to that. */
+    $PREFIX macro, it is stored in mem_managed_token and token is set to that.
+    NOTE: the lexer manages this dynamically-generated token's memory,
+    instead of giving it to lexer->stringstore, because we don't expect
+    this particular token to ever be used outside of the lexer.
+    We have constructed it as the result of a macro, and its purpose is
+    to be *parsed*, e.g. as an int, not returned as a string outside of
+    the lexer. */
     char *mem_managed_token;
 
     int pos;
@@ -114,8 +123,6 @@ void fus_lexer_get_info(fus_lexer_t *lexer,
     const char **filename_ptr,
     int *row_ptr, int *col_ptr, int *pos_ptr);
 void fus_lexer_err_info(fus_lexer_t *lexer);
-int fus_lexer_get_pos(fus_lexer_t *lexer);
-void fus_lexer_set_pos(fus_lexer_t *lexer, int pos);
 int fus_lexer_next(fus_lexer_t *lexer);
 bool fus_lexer_done(fus_lexer_t *lexer);
 bool fus_lexer_got(fus_lexer_t *lexer, const char *text);
@@ -126,14 +133,14 @@ bool fus_lexer_got_int(fus_lexer_t *lexer);
 void fus_lexer_show(fus_lexer_t *lexer, FILE *f);
 int _fus_lexer_get(fus_lexer_t *lexer, const char *text);
 int fus_lexer_get(fus_lexer_t *lexer, const char *text);
-int _fus_lexer_get_name(fus_lexer_t *lexer, char **name);
-int fus_lexer_get_name(fus_lexer_t *lexer, char **name);
-int _fus_lexer_get_str(fus_lexer_t *lexer, char **s);
-int fus_lexer_get_str(fus_lexer_t *lexer, char **s);
-int _fus_lexer_get_str_fancy(fus_lexer_t *lexer, char **s);
-int fus_lexer_get_str_fancy(fus_lexer_t *lexer, char **s);
-int _fus_lexer_get_name_or_str(fus_lexer_t *lexer, char **s);
-int fus_lexer_get_name_or_str(fus_lexer_t *lexer, char **s);
+int _fus_lexer_get_name(fus_lexer_t *lexer, const char **name);
+int fus_lexer_get_name(fus_lexer_t *lexer, const char **name);
+int _fus_lexer_get_str(fus_lexer_t *lexer, const char **s);
+int fus_lexer_get_str(fus_lexer_t *lexer, const char **s);
+int _fus_lexer_get_str_fancy(fus_lexer_t *lexer, const char **s);
+int fus_lexer_get_str_fancy(fus_lexer_t *lexer, const char **s);
+int _fus_lexer_get_name_or_str(fus_lexer_t *lexer, const char **s);
+int fus_lexer_get_name_or_str(fus_lexer_t *lexer, const char **s);
 int fus_lexer_get_chr(fus_lexer_t *lexer, char *c);
 int _fus_lexer_get_int(fus_lexer_t *lexer, int *i);
 int fus_lexer_get_int(fus_lexer_t *lexer, int *i);
@@ -145,7 +152,7 @@ int fus_lexer_get_int_range(fus_lexer_t *lexer, int min_i, int max_len,
     int *i_ptr, int *len_ptr);
 int fus_lexer_get_attr_int(fus_lexer_t *lexer, const char *attr, int *i,
     bool optional);
-int fus_lexer_get_attr_str(fus_lexer_t *lexer, const char *attr, char **s,
+int fus_lexer_get_attr_str(fus_lexer_t *lexer, const char *attr, const char **s,
     bool optional);
 int fus_lexer_get_attr_yn(fus_lexer_t *lexer, const char *attr, bool *b,
     bool optional);

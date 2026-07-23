@@ -260,7 +260,7 @@ int hexgame_load(hexgame_t *game, const char *filename,
     OPEN
     while(!GOT(")")){
         const char *name;
-        GET_STR_CACHED(name, &prend->name_store)
+        GET_STR(name)
 
         hexmap_t *map;
         err = hexgame_get_or_load_map(game, name, &map);
@@ -278,7 +278,7 @@ int hexgame_load(hexgame_t *game, const char *filename,
             OPEN
             while(!GOT(")")){
                 const char *name;
-                GET_STR_CACHED(name, &prend->name_store)
+                GET_STR(name)
 
                 hexmap_submap_group_t *group = hexmap_get_submap_group(
                     map, name);

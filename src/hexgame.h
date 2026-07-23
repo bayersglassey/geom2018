@@ -420,7 +420,7 @@ typedef struct hexgame {
 
     vars_t vars;
 
-    ARRAY_DECL(char*, worldmaps)
+    ARRAY_DECL(const char*, worldmaps)
     ARRAY_DECL(hexmap_t*, maps)
     ARRAY_DECL(stateset_t*, statesets)
     ARRAY_DECL(camera_t*, cameras)
@@ -439,10 +439,14 @@ typedef struct hexgame {
     bool have_audio;
     hexgame_audio_data_t audio_data;
 
-    /* Weakrefs: */
+    /* Weakrefs if hexgame_init was used, owned if hexgame_init_for_tooling
+    was used. O_o
+    TODO: that's dumb, fix it. */
     prismelrenderer_t *prend;
     prismelrenderer_t *minimap_prend;
         /* May use a different space than prend, e.g. vec4_alt instead of vec4 */
+
+    /* Weakrefs: */
     vecspace_t *space;
         /* should always be hexspace!
         NOT the same as prend->space! */

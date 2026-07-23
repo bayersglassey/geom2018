@@ -32,20 +32,3 @@
 /* NOTE: the following require #include "geom_lexer_utils.h" */
 #define GET_VEC(SPACE, VEC) DO(fus_lexer_get_vec(lexer, SPACE, VEC))
 #define GET_TRF(SPACE, TRF) DO(fus_lexer_get_trf(lexer, SPACE, &(TRF)))
-
-
-#define _GET_CACHED(P, _GET_EXPR, STORE) { \
-    char *__str; \
-    _GET_EXPR /* Assigns to __str */ \
-    const char *__const_str = stringstore_get_donate((STORE), __str); \
-    if(!__const_str)return 1; \
-    (P) = __const_str; \
-}
-#define GET_STR_CACHED(P, STORE) \
-    _GET_CACHED(P, GET_STR        (__str), STORE)
-#define GET_NAME_CACHED(P, STORE) \
-    _GET_CACHED(P, GET_NAME       (__str), STORE)
-#define GET_NAME_OR_STR_CACHED(P, STORE) \
-    _GET_CACHED(P, GET_NAME_OR_STR(__str), STORE)
-#define GET_ATTR_STR_CACHED(ATTR, P, OPT, STORE) \
-    _GET_CACHED(P, GET_ATTR_STR(ATTR, __str, OPT), STORE)
