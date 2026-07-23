@@ -305,16 +305,13 @@ void hexcollmap_write(hexcollmap_t *collmap, FILE *f,
     hexcollmap_write_options_t *opts);
 int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
     vecspace_t *space, const char *filename, bool just_coll,
-    hexcollmap_part_t ***parts_ptr, int *parts_len_ptr,
-    stringstore_t *name_store, stringstore_t *filename_store);
+    hexcollmap_part_t ***parts_ptr, int *parts_len_ptr);
 int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
-    vecspace_t *space, const char *filename, bool just_coll,
-    stringstore_t *name_store, stringstore_t *filename_store);
+    vecspace_t *space, const char *filename, bool just_coll);
 int hexcollmap_clone(hexcollmap_t *collmap,
     hexcollmap_t *collmap_from, rot_t rot);
 int hexcollmap_load(hexcollmap_t *collmap, vecspace_t *space,
-    const char *filename, vars_t *vars,
-    stringstore_t *name_store, stringstore_t *filename_store);
+    const char *filename, vars_t *vars);
 hexcollmap_tile_t *hexcollmap_get_tile_xy(hexcollmap_t *collmap,
     int x, int y);
 hexcollmap_tile_t *hexcollmap_get_tile(hexcollmap_t *collmap, trf_t *index);

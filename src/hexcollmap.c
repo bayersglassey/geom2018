@@ -332,8 +332,7 @@ void hexcollmap_dump(hexcollmap_t *collmap, FILE *f){
 }
 
 int hexcollmap_load(hexcollmap_t *collmap, vecspace_t *space,
-    const char *filename, vars_t *vars,
-    stringstore_t *name_store, stringstore_t *filename_store
+    const char *filename, vars_t *vars
 ){
     int err;
     fus_lexer_t lexer;
@@ -344,8 +343,7 @@ int hexcollmap_load(hexcollmap_t *collmap, vecspace_t *space,
     err = fus_lexer_init_with_vars(&lexer, text, filename, vars);
     if(err)return err;
 
-    err = hexcollmap_parse(collmap, &lexer, space, filename, false,
-        name_store, filename_store);
+    err = hexcollmap_parse(collmap, &lexer, space, filename, false);
     if(err)return err;
 
     fus_lexer_cleanup(&lexer);

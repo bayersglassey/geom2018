@@ -62,7 +62,7 @@ void hexgame_savelocation_write(hexgame_savelocation_t *location, FILE *file){
 }
 
 int hexgame_savelocation_parse(hexgame_savelocation_t *location,
-    fus_lexer_t *lexer, stringstore_t *filename_store, stringstore_t *name_store
+    fus_lexer_t *lexer
 ){
     INIT
 

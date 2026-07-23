@@ -126,8 +126,7 @@ static int _parse_collmap(state_context_t *context, fus_lexer_t *lexer,
         own_collmap = calloc(1, sizeof(*collmap));
         if(own_collmap == NULL)return 1;
         err = hexcollmap_parse(own_collmap, lexer, space,
-            lexer->filename, true,
-            &prend->name_store, &prend->filename_store);
+            lexer->filename, true);
         if(err)return err;
         collmap = own_collmap;
     }
@@ -1112,8 +1111,7 @@ static int parse_rgraph_reference(fus_lexer_t *lexer,
         OPEN
         err = hexcollmap_parse(collmap, lexer, space,
             "<inline>" /* filename */,
-            true /* just_coll */,
-            &prend->name_store, &prend->filename_store);
+            true /* just_coll */);
         if(err)return err;
         CLOSE
 
@@ -1367,8 +1365,7 @@ static int _stateset_parse(stateset_t *stateset, fus_lexer_t *lexer,
                 collmap = calloc(1, sizeof(*collmap));
                 if(!collmap)return 1;
                 err = hexcollmap_parse(collmap, lexer, space,
-                    lexer->filename, true,
-                    &prend->name_store, &prend->filename_store);
+                    lexer->filename, true);
                 if(err)return err;
             }
             CLOSE

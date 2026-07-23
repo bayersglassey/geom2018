@@ -14,8 +14,7 @@
 
 static hexcollmap_t *load_collmap(FILE *file, const char *filename,
     bool just_coll,
-    hexcollmap_part_t ***parts_ptr, int *parts_len_ptr,
-    stringstore_t *name_store, stringstore_t *filename_store
+    hexcollmap_part_t ***parts_ptr, int *parts_len_ptr
 ){
     int err;
 
@@ -45,8 +44,7 @@ static hexcollmap_t *load_collmap(FILE *file, const char *filename,
 
         err = hexcollmap_parse_with_parts(collmap, &lexer,
             &hexspace, filename, just_coll,
-            parts_ptr, parts_len_ptr,
-            name_store, filename_store);
+            parts_ptr, parts_len_ptr);
         if(err)return NULL;
 
         fus_lexer_cleanup(&lexer);
@@ -141,11 +139,6 @@ int main(int n_args, char **args){
         collmap_filename = args[arg_i];
     }
 
-    stringstore_t name_store;
-    stringstore_t filename_store;
-    stringstore_init(&name_store);
-    stringstore_init(&filename_store);
-
     hexcollmap_part_t **parts = NULL;
     int parts_len = 0;
 
@@ -183,8 +176,7 @@ int main(int n_args, char **args){
         }else{
             collmap = load_collmap(collmap_file,
                 collmap_filename, opts.just_coll,
-                &parts, &parts_len,
-                &name_store, &filename_store);
+                &parts, &parts_len);
             if(!collmap)return 2;
 
             if(collmap_file != stdin){
@@ -232,9 +224,6 @@ int main(int n_args, char **args){
     if(parts)free(parts);
     hexcollmap_cleanup(collmap);
     free(collmap);
-
-    stringstore_cleanup(&name_store);
-    stringstore_cleanup(&filename_store);
 
     return 0;
 }

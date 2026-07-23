@@ -716,7 +716,7 @@ int fus_lexer_get_rendergraph(fus_lexer_t *lexer,
         if(!name){
             char *_name = generate_indexed_name("shape", prend->rendergraphs_len);
             if(!_name)return 1;
-            name = stringstore_get_donate(&prend->name_store, _name);
+            name = stringstore_get_donate(prend->stringstore, _name);
             if(!name)return 1;
         }
         err = rendergraph_init(rgraph, name, prend, NULL,
@@ -881,7 +881,7 @@ int fus_lexer_get_mapper(fus_lexer_t *lexer,
         if(!name){
             char *_name = generate_indexed_name("mapper", prend->mappers_len);
             if(!_name)return 1;
-            name = stringstore_get_donate(&prend->name_store, _name);
+            name = stringstore_get_donate(prend->stringstore, _name);
             if(!name)return 1;
         }
         err = prismelmapper_init(mapper, name, prend->space, solid);

@@ -421,7 +421,7 @@ int hexmap_submap_create_rgraph_minimap(hexmap_submap_t *submap){
     {
         char *_name = strdupcat("minimap:", submap->filename);
         if(!_name)return 1;
-        name = stringstore_get_donate(&prend->name_store, _name);
+        name = stringstore_get_donate(prend->stringstore, _name);
         if(!name)return 1;
     }
 

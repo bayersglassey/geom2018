@@ -716,11 +716,11 @@ prismelrenderer_localdata_label_t *prismelrenderer_localdata_get_label(
 int prismelrenderer_init(prismelrenderer_t *prend, vecspace_t *space){
     prend->cache_bitmaps = true;
     prend->space = space;
-
-    stringstore_init(&prend->filename_store);
-    stringstore_init(&prend->name_store);
-
     prend->loaded = false;
+
+    /* Maybe one day we want to pass in a stringstore... but for now, just
+    use the global one, same as fus_lexer_init does. */
+    prend->stringstore = get_global_stringstore();
 
     ARRAY_INIT(prend->fonts)
     ARRAY_INIT(prend->geomfonts)
@@ -735,9 +735,6 @@ int prismelrenderer_init(prismelrenderer_t *prend, vecspace_t *space){
 }
 
 void prismelrenderer_cleanup(prismelrenderer_t *prend){
-    stringstore_cleanup(&prend->filename_store);
-    stringstore_cleanup(&prend->name_store);
-
     ARRAY_FREE_PTR(font_t*, prend->fonts, font_cleanup)
     ARRAY_FREE_PTR(geomfont_t*, prend->geomfonts, geomfont_cleanup)
     ARRAY_FREE_PTR(prismel_t*, prend->prismels, prismel_cleanup)
@@ -860,10 +857,8 @@ void prismelrenderer_dump_stats(prismelrenderer_t *prend, FILE *f){
 }
 
 void prismelrenderer_dump_stringstores(prismelrenderer_t *prend, FILE *f){
-    fprintf(f, "* NAME STORE:\n");
-    stringstore_dump(&prend->name_store, f);
-    fprintf(f, "* FILENAME STORE:\n");
-    stringstore_dump(&prend->filename_store, f);
+    fprintf(f, "* STRINGSTORE:\n");
+    stringstore_dump(prend->stringstore, f);
 }
 
 
@@ -876,7 +871,7 @@ int prismelrenderer_push_prismel(prismelrenderer_t *prend, const char *name,
         char *_name = generate_indexed_name("prismel",
             prend->prismels_len - 1);
         if(!name)return 1;
-        name = stringstore_get_donate(&prend->name_store, _name);
+        name = stringstore_get_donate(prend->stringstore, _name);
         if(!name)return 1;
     }
     err = prismel_init(prismel, name, prend->space);
@@ -965,7 +960,7 @@ int prismelrenderer_get_or_create_solid_palettemapper(
     {
         char *_name = generate_indexed_name("solid", color);
         if(!_name)return 1;
-        name = stringstore_get_donate(&prend->name_store, _name);
+        name = stringstore_get_donate(prend->stringstore, _name);
         if(!name)return 1;
     }
     palettemapper_t *palmapper = prismelrenderer_get_palmapper(
@@ -1304,7 +1299,7 @@ int prismelmapper_apply_to_rendergraph(prismelmapper_t *mapper,
         char *_name = generate_mapped_name(mapper->name,
             mapped_rgraph->name);
         if(!_name)return 1;
-        name = stringstore_get_donate(&prend->name_store, _name);
+        name = stringstore_get_donate(prend->stringstore, _name);
         if(!name)return 1;
     }
 
@@ -1481,7 +1476,7 @@ int prismelmapper_apply_to_mapper(prismelmapper_t *mapper,
         char *_name = generate_mapped_name(mapper->name,
             mapped_mapper->name);
         if(!_name)return 1;
-        name = stringstore_get_donate(&prend->name_store, _name);
+        name = stringstore_get_donate(prend->stringstore, _name);
         if(!name)return 1;
     }
 
@@ -1505,7 +1500,7 @@ int prismelmapper_apply_to_mapper(prismelmapper_t *mapper,
             char *_name = generate_mapped_name(mapper->name,
                 entry->rendergraph->name);
             if(!_name)return 1;
-            name = stringstore_get_donate(&prend->name_store, _name);
+            name = stringstore_get_donate(prend->stringstore, _name);
             if(!name)return 1;
         }
 
@@ -1664,7 +1659,7 @@ int palettemapper_apply_to_rendergraph(palettemapper_t *mapper,
         char *_name = generate_palmapped_name(mapper->name,
             mapped_rgraph->name);
         if(!_name)return 1;
-        name = stringstore_get_donate(&prend->name_store, _name);
+        name = stringstore_get_donate(prend->stringstore, _name);
         if(!name)return 1;
     }
 
@@ -1732,7 +1727,7 @@ int palettemapper_apply_to_palettemapper(palettemapper_t *palmapper,
         char *_name = generate_mapped_name(palmapper->name,
             mapped_palmapper->name);
         if(!_name)return 1;
-        name = stringstore_get_donate(&prend->name_store, _name);
+        name = stringstore_get_donate(prend->stringstore, _name);
         if(!name)return 1;
     }
 

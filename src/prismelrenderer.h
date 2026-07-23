@@ -158,10 +158,8 @@ typedef struct prismelrenderer {
         prend->loaded is true, e.g. it allows "redefinition" of shapes
         (i.e. rendergraphs). */
 
-    stringstore_t filename_store;
-    stringstore_t name_store;
-
     /* Weakrefs */
+    stringstore_t *stringstore;
     vecspace_t *space;
 } prismelrenderer_t;
 

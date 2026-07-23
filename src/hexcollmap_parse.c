@@ -316,8 +316,7 @@ static int hexcollmap_draw(hexcollmap_t *collmap1, hexcollmap_t *collmap2,
 }
 
 static int hexcollmap_draw_part(hexcollmap_t *collmap,
-    hexcollmap_part_t *part, trf_t *trf, int draw_z,
-    stringstore_t *name_store, stringstore_t *filename_store
+    hexcollmap_part_t *part, trf_t *trf, int draw_z
 ){
     int err;
     vecspace_t *space = collmap->space;
@@ -334,7 +333,7 @@ static int hexcollmap_draw_part(hexcollmap_t *collmap,
 
         hexcollmap_t part_collmap;
         err = hexcollmap_load(&part_collmap, collmap->space,
-            part->filename, NULL, name_store, filename_store);
+            part->filename, NULL);
         if(err)return err;
         err = hexcollmap_draw(collmap, &part_collmap,
             &trf2, draw_z);
@@ -466,8 +465,7 @@ static int _hexcollmap_parse_lines_hexbox(
 static int _hexcollmap_parse_lines_tiles(hexcollmap_t *collmap,
     const char **lines, int lines_len, hexcollmap_part_t **parts, int parts_len,
     char default_vert_c, char default_edge_c, char default_face_c,
-    int ox, int oy, bool parsing_part_references,
-    stringstore_t *name_store, stringstore_t *filename_store
+    int ox, int oy, bool parsing_part_references
 ){
     /* If !parsing_part_references, we parse regular tile data.
     If parsing_part_references, we parse "part references", that is,
@@ -669,8 +667,7 @@ static int _hexcollmap_parse_lines_tiles(hexcollmap_t *collmap,
                                 if(part->part_c != c2)continue;
                                 found = true;
                                 err = hexcollmap_draw_part(collmap,
-                                    part, &trf, draw_z,
-                                    name_store, filename_store);
+                                    part, &trf, draw_z);
                                 if(err)return err;
                             }
                             if(!found){
@@ -698,8 +695,7 @@ static int _hexcollmap_parse_lines_tiles(hexcollmap_t *collmap,
 
 static int hexcollmap_parse_lines(hexcollmap_t *collmap,
     const char **lines, int lines_len, hexcollmap_part_t **parts, int parts_len,
-    char default_vert_c, char default_edge_c, char default_face_c,
-    stringstore_t *name_store, stringstore_t *filename_store
+    char default_vert_c, char default_edge_c, char default_face_c
 ){
     int err;
 
@@ -723,8 +719,7 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
         err = _hexcollmap_parse_lines_tiles(
             collmap, lines, lines_len, parts, parts_len,
             default_vert_c, default_edge_c, default_face_c,
-            ox, oy, parsing_part_references,
-            name_store, filename_store);
+            ox, oy, parsing_part_references);
         if(err)return err;
     }
 
@@ -733,8 +728,7 @@ static int hexcollmap_parse_lines(hexcollmap_t *collmap,
 }
 
 static int _hexcollmap_parse_part(hexcollmap_t *collmap,
-    hexcollmap_part_t *part, fus_lexer_t *lexer,
-    stringstore_t *name_store, stringstore_t *filename_store
+    hexcollmap_part_t *part, fus_lexer_t *lexer
 ){
     /* Parses part data from lexer and initializes part if successful. */
     int err;
@@ -840,8 +834,7 @@ static int _hexcollmap_parse_part(hexcollmap_t *collmap,
 static int _hexcollmap_parse_with_parts(hexcollmap_t *collmap,
     fus_lexer_t *lexer,
     char default_vert_c, char default_edge_c, char default_face_c,
-    hexcollmap_part_t **parts, int parts_len,
-    stringstore_t *name_store, stringstore_t *filename_store
+    hexcollmap_part_t **parts, int parts_len
 ){
     int err;
 
@@ -875,8 +868,7 @@ static int _hexcollmap_parse_with_parts(hexcollmap_t *collmap,
     /* parse lines */
     err = hexcollmap_parse_lines(collmap,
         collmap_lines, collmap_lines_len, parts, parts_len,
-        default_vert_c, default_edge_c, default_face_c,
-        name_store, filename_store);
+        default_vert_c, default_edge_c, default_face_c);
     if(err){
         fus_lexer_err_info(lexer);
         fprintf(stderr, "Couldn't parse hexcollmap lines\n");
@@ -888,8 +880,7 @@ static int _hexcollmap_parse_with_parts(hexcollmap_t *collmap,
 
 int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
     vecspace_t *space, const char *filename, bool just_coll,
-    hexcollmap_part_t ***parts_ptr, int *parts_len_ptr,
-    stringstore_t *name_store, stringstore_t *filename_store
+    hexcollmap_part_t ***parts_ptr, int *parts_len_ptr
 ){
     int err;
 
@@ -905,7 +896,7 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
     if(just_coll){
         err = _hexcollmap_parse_with_parts(collmap, lexer,
             default_vert_c, default_edge_c, default_face_c,
-            parts, parts_len, name_store, filename_store);
+            parts, parts_len);
         if(err)return err;
     }else{
         if(GOT("spawn")){
@@ -930,8 +921,7 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
             OPEN
             while(!GOT(")")){
                 ARRAY_PUSH_NEW(hexcollmap_part_t*, parts, part)
-                err = _hexcollmap_parse_part(collmap, part, lexer,
-                    name_store, filename_store);
+                err = _hexcollmap_parse_part(collmap, part, lexer);
                 if(err)return err;
             }
             NEXT
@@ -978,7 +968,7 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
 
             err = _hexcollmap_parse_with_parts(collmap, &sublexer,
                 default_vert_c, default_edge_c, default_face_c,
-                parts, parts_len, name_store, filename_store);
+                parts, parts_len);
             if(err){
                 fus_lexer_err_info(lexer);
                 fprintf(stderr, "...while importing here.\n");
@@ -1004,7 +994,7 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
             OPEN
             err = _hexcollmap_parse_with_parts(collmap, lexer,
                 default_vert_c, default_edge_c, default_face_c,
-                parts, parts_len, name_store, filename_store);
+                parts, parts_len);
             if(err)return err;
             CLOSE
         }
@@ -1033,8 +1023,7 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
                     if(part->part_c != part_c)continue;
                     found = true;
                     err = hexcollmap_draw_part(collmap,
-                        part, &trf, draw_z,
-                        name_store, filename_store);
+                        part, &trf, draw_z);
                     if(err)return err;
                 }
                 if(!found){
@@ -1056,8 +1045,7 @@ int hexcollmap_parse_with_parts(hexcollmap_t *collmap, fus_lexer_t *lexer,
 
 
 int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
-    vecspace_t *space, const char *filename, bool just_coll,
-    stringstore_t *name_store, stringstore_t *filename_store
+    vecspace_t *space, const char *filename, bool just_coll
 ){
     int err;
 
@@ -1066,7 +1054,7 @@ int hexcollmap_parse(hexcollmap_t *collmap, fus_lexer_t *lexer,
     hexcollmap_parse_with_parts on successful return */
     err = hexcollmap_parse_with_parts(collmap, lexer,
         space, filename, just_coll,
-        &parts, &parts_len, name_store, filename_store);
+        &parts, &parts_len);
     if(err)return err;
     ARRAY_FREE_PTR(hexcollmap_part_t*, parts, hexcollmap_part_cleanup)
 

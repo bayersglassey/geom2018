@@ -185,7 +185,7 @@ static int _save_recording(test_app_t *app){
         app->save_recording_filename = NULL;
 
         const char *recording_filename = stringstore_get(
-            &app->prend.filename_store, _recording_filename);
+            app->prend.stringstore, _recording_filename);
         if(!recording_filename)return 1;
 
         /* So that the next time we play a recording with F10,
@@ -233,7 +233,7 @@ static int _load_recording(test_app_t *app, bool shift){
             "Maybe you need to record your first one with F9?\n");
     }else{
         const char *recording_filename = stringstore_get(
-            &app->prend.filename_store, _recording_filename);
+            app->prend.stringstore, _recording_filename);
         if(!recording_filename)return 1;
         fprintf(stderr, "Playing back from file: %s\n",
             recording_filename);

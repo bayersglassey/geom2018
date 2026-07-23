@@ -863,8 +863,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
             hexcollmap_t *collmap = calloc(1, sizeof(*collmap));
             if(!collmap)return 1;
             err = hexcollmap_load(collmap, map->space,
-                submap_filename, lexer->vars,
-                &prend->name_store, &prend->filename_store);
+                submap_filename, lexer->vars);
             if(err)return err;
 
             hexcollmap_init_clone(&submap->collmap, collmap, submap_filename);
@@ -876,8 +875,7 @@ int hexmap_parse_submap(hexmap_t *map, fus_lexer_t *lexer,
         }else{
             /* load collmap */
             err = hexcollmap_load(&submap->collmap, map->space,
-                submap_filename, lexer->vars,
-                &prend->name_store, &prend->filename_store);
+                submap_filename, lexer->vars);
             if(err)return err;
         }
 

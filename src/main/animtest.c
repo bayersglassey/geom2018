@@ -248,8 +248,7 @@ static int test_suite_load(test_suite_t *suite, const char *filename,
             hexcollmap_t *collmap = calloc(1, sizeof(*collmap));
             if(collmap == NULL)return 1;
             err = hexcollmap_parse(collmap, lexer, space,
-                lexer->filename, true,
-                &prend->name_store, &prend->filename_store);
+                lexer->filename, true);
             if(err)return err;
             test_case->collmap = collmap;
             CLOSE

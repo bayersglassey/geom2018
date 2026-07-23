@@ -213,8 +213,7 @@ int hexgame_load(hexgame_t *game, const char *filename,
         GET("spawn")
         OPEN
         hexgame_savelocation_t spawn_location;
-        err = hexgame_savelocation_parse(&spawn_location, lexer,
-            &prend->filename_store, &prend->name_store);
+        err = hexgame_savelocation_parse(&spawn_location, lexer);
         if(err)return err;
         CLOSE
 

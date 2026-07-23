@@ -86,7 +86,7 @@ int geomfont_init_chars_from_sq_prismel(geomfont_t *geomfont,
             char *_rgraph_name = generate_char_name(prismel->name,
                 "_char", i);
             if(!_rgraph_name)return 1;
-            rgraph_name = stringstore_get_donate(&prend->name_store,
+            rgraph_name = stringstore_get_donate(prend->stringstore,
                 _rgraph_name);
             if(!rgraph_name)return 1;
         }
