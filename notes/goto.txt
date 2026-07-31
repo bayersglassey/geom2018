@@ -1,0 +1,73 @@
+
+How does "goto" work in our anim scripting language, i.e. src/anim.[ch] and
+src/hexgame_state.[ch]?..
+
+First of all, what are the top-level places where scripting language stuff is
+kicked off?.. let's assume we can find that by finding all places where
+state_effect_apply is called:
+
+    state_effect_apply:
+        parse_and_execute_effects
+            NOTE: this is the -e|--effect CLI option
+        _test_app_command_apply_effect
+        body_execute_procs:
+            body_step:
+                body_execute_procs(body, STATESET_PROC_TYPE_FRAME_START)
+                body_execute_procs(body, STATESET_PROC_TYPE_FRAME_END)
+            body_move_to_map:
+                body_execute_procs(body, STATESET_PROC_TYPE_MAP_CHANGE)
+            body_set_stateset:
+                body_execute_procs(body, STATESET_PROC_TYPE_STATESET_CHANGE)
+            hexgame_load:
+                body_execute_procs(body, STATESET_PROC_TYPE_STATESET_CHANGE)
+            body_play_recording:
+                body_execute_procs(body, STATESET_PROC_TYPE_STATESET_CHANGE)
+            hexmap_load_hexmap_recording:
+                body_execute_procs(body, STATESET_PROC_TYPE_STATESET_CHANGE)
+        state_cond_match:
+            state_cond_match (cycle)
+            state_effect_apply (cycle)
+            state_rule_match:
+                state_handle_rules (see below)
+        state_effect_apply (cycle)
+        _call_proc:
+            state_cond_match (see above)
+            state_effect_apply (cycle)
+        _apply_sub_effects:
+            state_effect_apply (cycle)
+        collmsg_handler_apply:
+            body_collide_against_body:
+                hexmap_step
+        state_rule_apply:
+            state_handle_rules:
+                body_handle_rules:
+                    body_step
+                    collmsg_handler_apply (see above)
+                        body_handle_rules called after state_effect_goto_apply_to_body
+                    _apply_sub_effects (see above)
+                        body_handle_rules called after state_effect_goto_apply_to_body
+                    _test_app_command_apply_effect
+                        body_handle_rules called after state_effect_goto_apply_to_body
+                actor_handle_rules:
+                    actor_step
+                    collmsg_handler_apply (see above)
+                        actor_handle_rules called after state_effect_goto_apply_to_actor
+
+The effects of state_effect_goto_apply_to_body are:
+* Set body->state
+* Possibly update body->cooldown (for "goto delay")
+
+The effects of state_effect_goto_apply_to_actor are:
+* Set actor->state
+* Possibly update actor->wait (for "goto delay")
+
+And what about "goto immediate"?.. by the way, this is the goto structure:
+
+    typedef struct state_effect_goto {
+        const char *name;
+        bool immediate;
+        bool delay;
+        int add_delay;
+    } state_effect_goto_t;
+
+
