@@ -1721,3 +1721,17 @@ Jul 21, 2026:
     plus the dict of hitboxes; and then we pass a hitbox_set_t when parsing
     statesets, and in practise we use game->hitbox_set for that (except in
     e.g. animtool).
+
+
+Jul 28, 2026:
+-------------
+
+[ ] As stickyspider, when standing on dots, you should be able to crouch, but
+    not crawl!
+    And if you're also rollerspider, you should be able to roll when crouching
+    on dots.
+
+[ ] In data/maps/tutorial2/start4.fus, when you get the coin on that little
+    jutting thing in bottom-right, if you're standing on it, you crash and
+    then keep crashing repeatedly!..
+    But what should happen is that you should land.
